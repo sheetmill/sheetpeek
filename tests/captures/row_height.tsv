@@ -1,0 +1,60 @@
+# suite: row_height (capture.row_height); Excel 16.114 for Mac, en_US
+# one workbook per record: the Normal style set to the font, a number in A1, and <sheetFormatPr> with exactly the attributes given (none: no element)
+# captured: 2026-10-29; method: row height (AppleScript)
+# cell: what A1 holds (CELLS in capture/row_height.py); applied: the font Excel applied to A1; row1: A1's row; row2: no row element; row3: a row element with an empty cell element; row5: an empty row element; row100: no row element, far below; standard: the worksheet's standard height
+family	size	sheet_format	cell	applied	row1	row2	row3	row5	row100	standard
+Calibri	9	none	number	Calibri 9	12	16	12	12	16	16
+Calibri	10	none	number	Calibri 10	14	16	14	14	16	16
+Calibri	11	none	number	Calibri 11	15	16	15	15	16	16
+Calibri	12	none	number	Calibri 12	16	16	16	16	16	16
+Calibri	14	none	number	Calibri 14	19	16	19	19	16	16
+Calibri	16	none	number	Calibri 16	21	16	21	21	16	16
+Aptos Narrow	9	none	number	Aptos Narrow 9	13	16	13	13	16	16
+Aptos Narrow	10	none	number	Aptos Narrow 10	14	16	14	14	16	16
+Aptos Narrow	11	none	number	Aptos Narrow 11	15	16	15	15	16	16
+Aptos Narrow	12	none	number	Aptos Narrow 12	16	16	16	16	16	16
+Aptos Narrow	14	none	number	Aptos Narrow 14	19	16	19	19	16	16
+Aptos Narrow	16	none	number	Aptos Narrow 16	22	16	22	22	16	16
+Calibri	9	baseColWidth="8" defaultRowHeight="15"	number	Calibri 9	12	12	12	12	12	12
+Calibri	10	baseColWidth="8" defaultRowHeight="15"	number	Calibri 10	14	14	14	14	14	14
+Calibri	11	baseColWidth="8" defaultRowHeight="15"	number	Calibri 11	15	15	15	15	15	15
+Calibri	12	baseColWidth="8" defaultRowHeight="15"	number	Calibri 12	16	16	16	16	16	16
+Calibri	14	baseColWidth="8" defaultRowHeight="15"	number	Calibri 14	19	19	19	19	19	19
+Calibri	16	baseColWidth="8" defaultRowHeight="15"	number	Calibri 16	21	21	21	21	21	21
+Aptos Narrow	9	baseColWidth="8" defaultRowHeight="15"	number	Aptos Narrow 9	13	13	13	13	13	13
+Aptos Narrow	10	baseColWidth="8" defaultRowHeight="15"	number	Aptos Narrow 10	14	14	14	14	14	14
+Aptos Narrow	11	baseColWidth="8" defaultRowHeight="15"	number	Aptos Narrow 11	15	15	15	15	15	15
+Aptos Narrow	12	baseColWidth="8" defaultRowHeight="15"	number	Aptos Narrow 12	16	16	16	16	16	16
+Aptos Narrow	14	baseColWidth="8" defaultRowHeight="15"	number	Aptos Narrow 14	19	19	19	19	19	19
+Aptos Narrow	16	baseColWidth="8" defaultRowHeight="15"	number	Aptos Narrow 16	22	22	22	22	22	22
+Calibri	11	baseColWidth="8" defaultRowHeight="15" customHeight="1"	number	Calibri 11	15	15	15	15	15	15
+Calibri	11	baseColWidth="8" defaultRowHeight="20" customHeight="1"	number	Calibri 11	20	20	20	20	20	20
+Calibri	11	baseColWidth="8" defaultRowHeight="30" customHeight="1"	number	Calibri 11	30	30	30	30	30	30
+Calibri	11	baseColWidth="8" defaultRowHeight="12.75" customHeight="1"	number	Calibri 11	12.75	12.75	12.75	12.75	12.75	12.75
+Calibri	11	baseColWidth="8" defaultRowHeight="20"	number	Calibri 11	15	15	15	15	15	15
+Calibri	11	baseColWidth="8" defaultRowHeight="30"	number	Calibri 11	15	15	15	15	15	15
+Calibri	11	baseColWidth="8" defaultRowHeight="15" zeroHeight="1"	number	Calibri 11	15	0	15	15	0	0
+Calibri	11	baseColWidth="8" defaultRowHeight="20" customHeight="1" zeroHeight="1"	number	Calibri 11	15	0	15	15	0	0
+Calibri	11	baseColWidth="8" defaultRowHeight="15" thickTop="1"	number	Calibri 11	15	16	15	15	16	16
+Calibri	11	baseColWidth="8" defaultRowHeight="15" thickBottom="1"	number	Calibri 11	15	16	15	15	16	16
+Calibri	11	baseColWidth="8" defaultRowHeight="15" thickTop="1" thickBottom="1"	number	Calibri 11	15	17	15	15	17	17
+Calibri	14	baseColWidth="8" defaultRowHeight="15" customHeight="1"	number	Calibri 14	15	15	15	15	15	15
+Calibri	14	baseColWidth="8" defaultRowHeight="20" customHeight="1"	number	Calibri 14	20	20	20	20	20	20
+Calibri	14	baseColWidth="8" defaultRowHeight="30" customHeight="1"	number	Calibri 14	30	30	30	30	30	30
+Calibri	14	baseColWidth="8" defaultRowHeight="12.75" customHeight="1"	number	Calibri 14	12.75	12.75	12.75	12.75	12.75	12.75
+Calibri	14	baseColWidth="8" defaultRowHeight="20"	number	Calibri 14	19	19	19	19	19	19
+Calibri	14	baseColWidth="8" defaultRowHeight="30"	number	Calibri 14	19	19	19	19	19	19
+Calibri	14	baseColWidth="8" defaultRowHeight="15" zeroHeight="1"	number	Calibri 14	19	0	19	19	0	0
+Calibri	14	baseColWidth="8" defaultRowHeight="20" customHeight="1" zeroHeight="1"	number	Calibri 14	19	0	19	19	0	0
+Calibri	14	baseColWidth="8" defaultRowHeight="15" thickTop="1"	number	Calibri 14	19	20	19	19	20	20
+Calibri	14	baseColWidth="8" defaultRowHeight="15" thickBottom="1"	number	Calibri 14	19	20	19	19	20	20
+Calibri	14	baseColWidth="8" defaultRowHeight="15" thickTop="1" thickBottom="1"	number	Calibri 14	19	21	19	19	21	21
+Calibri	11	baseColWidth="8" defaultRowHeight="15"	font 14	Calibri 14	19	15	15	15	15	15
+Calibri	11	baseColWidth="8" defaultRowHeight="15"	font 14 bold	Calibri 14	19	15	15	15	15	15
+Calibri	11	baseColWidth="8" defaultRowHeight="15"	font 9	Calibri 9	15	15	15	15	15	15
+Calibri	11	baseColWidth="8" defaultRowHeight="15"	font 14, empty	Calibri 14	19	15	15	15	15	15
+Calibri	11	baseColWidth="8" defaultRowHeight="15"	wrap, two lines	Calibri 11	48	15	15	15	15	15
+Calibri	11	baseColWidth="8" defaultRowHeight="15"	wrap, long text	Calibri 11	96	15	15	15	15	15
+Calibri	11	baseColWidth="8" defaultRowHeight="15"	font 14, row ht 15	Calibri 14	15	15	15	15	15	15
+Calibri	11	baseColWidth="8" defaultRowHeight="15"	font 14, merged A1:C1	Calibri 14	19	15	15	15	15	15
+Calibri	11	baseColWidth="8" defaultRowHeight="15"	wrap, two lines, merged A1:C1	Calibri 11	15	15	15	15	15	15

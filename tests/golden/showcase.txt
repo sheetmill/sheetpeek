@@ -1,0 +1,11 @@
+Quarterly report, all regions
+Region       Sales    Change   Updated  Note
+North        ########    12.5% ######## on target
+South        ########    -4.3% ########
+East         ########     0.0% ######## a note long enough to spill
+West         ########
+Total        ########   TRUE   | pipes, commas
+Wrapped note
+in a narrow
+column       ed spill                   hidden row below
+Underlined        centered across

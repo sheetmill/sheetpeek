@@ -1,0 +1,10 @@
+| Quarterly report, all regions |  |  |  |  |
+| --- | --- | --- | --- | --- |
+| Region | Sales | Change | Updated | Note |
+| North | 1,234,567.89 | 12.5% | 2026-10-01 09:30 | on target |
+| South | 98,765.40 | -4.3% | 2026-10-02 17:05 |  |
+| East | -4,321.50 | 0.0% | 2026-10-03 00:00 | a note long enough to spill |
+| West | 123,456,789,012.00 |  |  |  |
+| Total | 123,457,928,994 | TRUE | \| pipes, commas |  |
+| Wrapped note in a narrow column | right aligned spill |  |  | hidden row below |
+| Underlined | centered across |  |  |  |

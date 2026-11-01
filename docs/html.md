@@ -1,0 +1,79 @@
+# HTML
+
+The `html` backend ({class}`sheetpeek.backends.HTMLBackend`) draws a sheet laid out in `excel`
+mode as static HTML: no script, and nothing read from the viewer's system. Column widths, row
+heights, where each text starts and where it is cut, fills and gridlines come from Excel's own
+layout; spilled text lies over its neighbors' fills, as Excel draws it.
+
+```python
+>>> import tempfile, pathlib, openpyxl, sheetpeek
+>>> from sheetpeek.backends import HTMLBackend
+>>> path = pathlib.Path(tempfile.mkdtemp()) / "notes.xlsx"
+>>> wb = openpyxl.Workbook()
+>>> wb.active["A1"] = "A note long enough to spill"
+>>> wb.active["B2"] = 42
+>>> wb.save(path)
+>>> sheet = sheetpeek.read(path)
+>>> page = sheetpeek.render(sheet, "html")
+>>> page.splitlines()[0]
+'<!doctype html>'
+>>> part = sheetpeek.render(sheet, HTMLBackend(fragment=True, row_headings=True))
+>>> part.startswith("<style>")
+True
+>>> '<th class="sp-rowhead" scope="row">2</th>' in part
+True
+```
+
+## Options
+
+- `fragment=True` writes the stylesheet and a `<div class="sheetpeek">` to place in a page of
+  your own, instead of a whole document.
+- `column_headings=True` and `row_headings=True` add Excel's column letters and row numbers.
+- `color_scheme="light"` (the default) or `"dark"` colors the headings. Excel for Mac keeps its
+  cells white in dark mode and changes only the headings, so the cells stay white either way.
+  The scheme is never read from the viewer's system.
+
+## Restyling
+
+The colors are CSS custom properties on `.sheetpeek`, and every element the backend writes has
+a stable class name, so a stylesheet of your own can restyle a page and the output stays
+static. **These names are public interface:** a change to them is listed in the changelog like
+an API change.
+
+| custom property | what it colors | default |
+|---|---|---|
+| `--sheetpeek-paper` | the cells | `#ffffff` |
+| `--sheetpeek-ink` | text in the automatic color | `#000000` |
+| `--sheetpeek-grid` | gridlines | `#d4d4d4` |
+| `--sheetpeek-heading-paper` | the headings' background | `#f3f3f3`, dark `#2b2b2b` |
+| `--sheetpeek-heading-ink` | the headings' text | `#444444`, dark `#cccccc` |
+| `--sheetpeek-heading-grid` | the headings' lines | `#c8c8c8`, dark `#3d3d3d` |
+
+| class | element |
+|---|---|
+| `sheetpeek` | the wrapper `<div>`, with `data-color-scheme` |
+| `sp-nogrid` | on the wrapper of a sheet that hides its gridlines |
+| `sp-crossed` | a cell whose left gridline text or a merge crosses |
+| `sp-clip` | a text's clip window |
+| `sp-run` | a text |
+| `sp-center` | a centered text |
+| `sp-colhead`, `sp-rowhead`, `sp-corner` | the headings |
+
+```css
+/* Dark cells: the file's own fills and font colors are inline styles and stay as they are,
+   so text the file colors black stays black. */
+.sheetpeek { --sheetpeek-paper: #1e1e1e; --sheetpeek-ink: #e6e6e6; --sheetpeek-grid: #3a3a3a; }
+```
+
+## Fonts
+
+Excel for Mac draws each glyph on whole points, so its text is wider than a browser draws the
+same font. Text in Calibri is spaced to Excel's widths with a table of Carlito's advance widths
+(Carlito is metric-compatible with Calibri, under the SIL Open Font License); the package holds
+the numbers only, no font. That text uses a font face whose only sources are a Calibri or
+Carlito installed on the viewer's system, then a local Arial or Helvetica scaled to Calibri's
+widths. Every text is anchored where Excel anchors it, by its start, its end or its center, so a
+different font changes only the far end of a text, and the clip windows cut where Excel cuts.
+
+The gridline and heading colors, the heading sizes, and the text's insets and baseline come
+from Excel's print layout and are provisional until they are measured on screen.

@@ -1,0 +1,118 @@
+# sheetpeek
+
+sheetpeek shows an Excel workbook the way Excel shows it: as HTML, Markdown, terminal output
+or plain text. It is pure Python, needs no office suite, and gives programs access to the
+rendered cells. Number formats are applied by
+[xlformat](https://github.com/sheetmill/xlformat), whose output is tested against text captured
+from Excel 16 for Mac.
+
+**Status: in development, not released; 0.1.0 is being prepared.** The API may change until
+then.
+
+## Reading a sheet
+
+`read` returns a `Sheet`: the cached values, number formats, styles, column widths, row
+heights and merged ranges of one worksheet. Dates stay the serial numbers Excel stores.
+
+```python
+>>> import tempfile, pathlib, openpyxl, sheetpeek
+>>> path = pathlib.Path(tempfile.mkdtemp()) / "example.xlsx"
+>>> wb = openpyxl.Workbook()
+>>> wb.active["A1"] = 1234.5
+>>> wb.active["A1"].number_format = "#,##0.00"
+>>> wb.active.merge_cells("B1:C1")
+>>> wb.save(path)
+>>> sheet = sheetpeek.read(path)
+>>> cell = sheet.cell(1, 1)
+>>> cell.value, cell.kind, cell.number_format
+(1234.5, 'number', '#,##0.00')
+>>> [str(m) for m in sheet.merges]
+['B1:C1']
+```
+
+## Showing a sheet
+
+`sheetpeek.render` draws a sheet with a backend. Each shows what Excel shows, as far as its
+format can: number formats, `#` for a number too wide for its column, text spilling into empty
+neighbors.
+
+```python
+>>> path = pathlib.Path(tempfile.mkdtemp()) / "sales.xlsx"
+>>> wb = openpyxl.Workbook()
+>>> ws = wb.active
+>>> ws.append(["Region", "Sales", "Change"])
+>>> ws.append(["North", 1234.5, 0.125])
+>>> ws.append(["South", -98765.4, -0.0425])
+>>> ws.append(["A note long enough to spill"])
+>>> for row in (2, 3):
+...     ws.cell(row, 2).number_format = "#,##0.00;[Red]-#,##0.00"
+...     ws.cell(row, 3).number_format = "0.0%"
+>>> wb.save(path)
+>>> sales = sheetpeek.read(path)
+>>> print(sheetpeek.render(sales, "text"), end="")
+Region   Sales    Change
+North    1,234.50    12.5%
+South    ########    -4.3%
+A note long enough to spill
+>>> print(sheetpeek.render(sales, "markdown"), end="")
+| Region | Sales | Change |
+| --- | ---: | ---: |
+| North | 1,234.50 | 12.5% |
+| South | -98,765.40 | -4.3% |
+| A note long enough to spill |  |  |
+>>> print(sheetpeek.render(sales, "csv"), end="")
+Region,Sales,Change
+North,"1,234.50",12.5%
+South,"-98,765.40",-4.3%
+A note long enough to spill,,
+>>> page = sheetpeek.render(sales, "html")  # a static page in Excel's own geometry
+>>> page.startswith("<!doctype html>")
+True
+```
+
+Fixed-width text gives every column its width in characters; Markdown and CSV have no widths,
+so they show every value in full. HTML is drawn in points from Excel's layout: column widths,
+row heights, each text's position and clip window, the `#` runs in the section's color (the
+negative is red), and fills. `sheetpeek.render(sales, "rich")`, or `rich.print(sales)`, draws
+the fixed-width layout in a terminal with fonts, colors and fills (the optional `rich` extra).
+
+From the command line:
+
+```bash
+sheetpeek view sales.xlsx                 # rich on a terminal, plain text when piped
+sheetpeek view sales.xlsx -t html > sales.html
+sheetpeek serve reports/                  # every workbook under reports/ as HTML pages
+```
+
+`Sheet.layout` gives the layout itself, the data every backend draws from: in `excel` mode each
+column's position and width and each text's position in points, in `characters` mode the
+characters each column draws. The documentation's usage page has examples.
+
+Cells are read with openpyxl's read-only mode, so memory does not grow with the file while it is
+read. The parts read-only mode leaves out, such as merges, widths and the used range, come from a
+separate scan of the sheet's XML. `ref="A1:H40"` reads part of a sheet, and `sheetpeek.open`
+reads several sheets with one load.
+
+## Installation
+
+Not yet on PyPI. Python 3.11 or later. Depends on `openpyxl` and `xlformat`; the optional `rich`
+extra adds terminal output.
+
+## Related packages
+
+sheetpeek is part of the [sheetmill](https://github.com/sheetmill) project, with
+[xlformat](https://github.com/sheetmill/xlformat), which applies Excel number formats. A third
+package, a formula engine, is in development.
+
+## Development
+
+`uv sync --group docs` then `uv run pytest`; `CONTRIBUTING.md` has the pip route, the full set of
+checks and the commit conventions. `ARCHITECTURE.md` describes the design and the measurements
+behind it.
+
+Most of the code is written with Claude Code, reviewed before each commit and tested against
+output captured from Excel; see `CONTRIBUTING.md`.
+
+## License
+
+MIT.

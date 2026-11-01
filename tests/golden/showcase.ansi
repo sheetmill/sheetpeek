@@ -1,0 +1,12 @@
+[2m   [0m[2m     A      [0m[2m [0m[2m   B    [0m[2m [0m[2m   C    [0m[2m [0m[2m   D    [0m[2m [0m[2m      E       [0m[2m [0m[2m   G    [0m[2m [0m[2m   H    [0m
+[2m 1 [0m[1mQuarterly re[0m[1mp[0m[1mort, all[0m[1m [0m[1mregions [0m[1m [0m                                         
+[2m 2 [0m[1;48;2;221;235;247mRegion      [0m[48;2;221;235;247m [0m[1;48;2;221;235;247mSales   [0m[48;2;221;235;247m [0m[1;48;2;221;235;247mChange  [0m[48;2;221;235;247m [0m[1;48;2;221;235;247mUpdated [0m[48;2;221;235;247m [0m[1;48;2;221;235;247mNote          [0m                  
+[2m 3 [0mNorth        ########    12.5% ######## on target                       
+[2m 4 [0mSouth        ########    -4.3% ########                                 
+[2m 5 [0mEast         [38;2;255;0;0m########[0m     0.0% ######## a note long enough to spill     
+[2m 6 [0mWest         ########                                                   
+[2m 7 [0m[1;3mTotal       [0m ########   TRUE   | pipes, commas                          
+[2m 8 [0mWrapped note          [48;2;255;255;0m        [0m                                          
+[2m   [0min a narrow           [48;2;255;255;0m        [0m                                          
+[2m   [0mcolumn       ed spill [48;2;255;255;0m        [0m          hidden row below                
+[2m10 [0m[4;38;2;0;112;192mUnderlined  [0m      centered across                                       

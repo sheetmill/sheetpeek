@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Report</title>
+<style>
+@font-face { font-family: "sheetpeek-calibri"; src: local("Calibri"), local("Calibri-Regular"), local("Carlito"), local("Carlito-Regular"); font-weight: 400; font-style: normal; }
+@font-face { font-family: "sheetpeek-calibri-fallback"; src: local("Arial"), local("Arial-Regular"), local("Helvetica"), local("Helvetica-Regular"), local("Liberation Sans"), local("Liberation Sans-Regular"); font-weight: 400; font-style: normal; size-adjust: 91.6%; ascent-override: 103.93%; descent-override: 29.37%; line-gap-override: 0%; }
+@font-face { font-family: "sheetpeek-calibri"; src: local("Calibri Bold"), local("Calibri-Bold"), local("Carlito Bold"), local("Carlito-Bold"); font-weight: 700; font-style: normal; }
+@font-face { font-family: "sheetpeek-calibri-fallback"; src: local("Arial Bold"), local("Arial-Bold"), local("Helvetica Bold"), local("Helvetica-Bold"), local("Liberation Sans Bold"), local("Liberation Sans-Bold"); font-weight: 700; font-style: normal; size-adjust: 90.2%; ascent-override: 105.54%; descent-override: 29.82%; line-gap-override: 0%; }
+@font-face { font-family: "sheetpeek-calibri"; src: local("Calibri Italic"), local("Calibri-Italic"), local("Calibri Oblique"), local("Calibri-Oblique"), local("Carlito Italic"), local("Carlito-Italic"), local("Carlito Oblique"), local("Carlito-Oblique"); font-weight: 400; font-style: italic; }
+@font-face { font-family: "sheetpeek-calibri-fallback"; src: local("Arial Italic"), local("Arial-Italic"), local("Arial Oblique"), local("Arial-Oblique"), local("Helvetica Italic"), local("Helvetica-Italic"), local("Helvetica Oblique"), local("Helvetica-Oblique"), local("Liberation Sans Italic"), local("Liberation Sans-Italic"), local("Liberation Sans Oblique"), local("Liberation Sans-Oblique"); font-weight: 400; font-style: italic; size-adjust: 91.4%; ascent-override: 104.16%; descent-override: 29.43%; line-gap-override: 0%; }
+@font-face { font-family: "sheetpeek-calibri"; src: local("Calibri Bold Italic"), local("Calibri-BoldItalic"), local("Calibri Bold Oblique"), local("Carlito Bold Italic"), local("Carlito-BoldItalic"), local("Carlito Bold Oblique"); font-weight: 700; font-style: italic; }
+@font-face { font-family: "sheetpeek-calibri-fallback"; src: local("Arial Bold Italic"), local("Arial-BoldItalic"), local("Arial Bold Oblique"), local("Helvetica Bold Italic"), local("Helvetica-BoldItalic"), local("Helvetica Bold Oblique"), local("Liberation Sans Bold Italic"), local("Liberation Sans-BoldItalic"), local("Liberation Sans Bold Oblique"); font-weight: 700; font-style: italic; size-adjust: 90.0%; ascent-override: 105.78%; descent-override: 29.89%; line-gap-override: 0%; }
+.sheetpeek {
+  --sheetpeek-paper: #ffffff;
+  --sheetpeek-ink: #000000;
+  --sheetpeek-grid: #d4d4d4;
+  --sheetpeek-heading-paper: #f3f3f3;
+  --sheetpeek-heading-ink: #444444;
+  --sheetpeek-heading-grid: #c8c8c8;
+  position: relative; display: inline-block; vertical-align: top;
+  background: var(--sheetpeek-paper); color-scheme: light;
+}
+.sheetpeek[data-color-scheme="dark"] {
+  --sheetpeek-heading-paper: #2b2b2b;
+  --sheetpeek-heading-ink: #cccccc;
+  --sheetpeek-heading-grid: #3d3d3d;
+}
+.sheetpeek.sp-nogrid { --sheetpeek-grid: transparent; }
+.sheetpeek table {
+  table-layout: fixed; border-collapse: separate; border-spacing: 0;
+  border-right: 1px solid var(--sheetpeek-grid); border-bottom: 1px solid var(--sheetpeek-grid);
+  color: var(--sheetpeek-ink);
+}
+.sheetpeek td {
+  padding: 0; box-sizing: border-box;
+  border-left: 1px solid var(--sheetpeek-grid); border-top: 1px solid var(--sheetpeek-grid);
+}
+.sheetpeek th {
+  padding: 0; box-sizing: border-box; overflow: hidden; white-space: nowrap;
+  font-size: 9pt; font-weight: normal; text-align: center; vertical-align: middle;
+  background: var(--sheetpeek-heading-paper); color: var(--sheetpeek-heading-ink);
+  border-left: 1px solid var(--sheetpeek-heading-grid);
+  border-top: 1px solid var(--sheetpeek-heading-grid);
+}
+.sheetpeek .sp-crossed { border-left-color: transparent; }
+.sheetpeek .sp-clip { position: absolute; overflow: hidden; }
+.sheetpeek .sp-run {
+  position: absolute; white-space: pre; line-height: 1;
+  font-kerning: none; font-variant-ligatures: none;
+}
+.sheetpeek .sp-center { transform: translateX(-50%); }
+body { margin: 8px; background: #ffffff; }
+</style>
+</head>
+<body>
+<div class="sheetpeek" data-color-scheme="light"><table style="width:534px;font:11pt 'sheetpeek-calibri', 'sheetpeek-calibri-fallback', sans-serif">
+<colgroup><col style="width:32px"><col style="width:101px"><col style="width:71px"><col style="width:71px"><col style="width:70px"><col style="width:118px"><col style="width:70px"></colgroup>
+<thead><tr style="height:21px"><th class="sp-corner"></th><th class="sp-colhead" scope="col">A</th><th class="sp-colhead" scope="col">B</th><th class="sp-colhead" scope="col">C</th><th class="sp-colhead" scope="col">D</th><th class="sp-colhead" scope="col">E</th><th class="sp-colhead" scope="col">G</th></tr></thead>
+<tbody>
+<tr style="height:26px"><th class="sp-rowhead" scope="row">1</th><td colspan="4"><span class="sp-run" style="left:36px;top:25.286px;font:bold 14pt 'sheetpeek-calibri', 'sheetpeek-calibri-fallback', sans-serif;letter-spacing:0.087pt">Quarterly report, all regions</span></td><td></td><td></td></tr>
+<tr style="height:20px"><th class="sp-rowhead" scope="row">2</th><td style="background:#DDEBF7;border-color:#DDEBF7"><span class="sp-run" style="left:36px;top:50.654px;font:bold 11pt 'sheetpeek-calibri', 'sheetpeek-calibri-fallback', sans-serif;letter-spacing:0.089pt">Region</span></td><td style="background:#DDEBF7;border-color:#DDEBF7"><span class="sp-run" style="left:137px;top:50.654px;font:bold 11pt 'sheetpeek-calibri', 'sheetpeek-calibri-fallback', sans-serif;letter-spacing:-0.051pt">Sales</span></td><td style="background:#DDEBF7;border-color:#DDEBF7"><span class="sp-run" style="left:208px;top:50.654px;font:bold 11pt 'sheetpeek-calibri', 'sheetpeek-calibri-fallback', sans-serif;letter-spacing:0.031pt">Change</span></td><td style="background:#DDEBF7;border-color:#DDEBF7"><span class="sp-run" style="left:279px;top:50.654px;font:bold 11pt 'sheetpeek-calibri', 'sheetpeek-calibri-fallback', sans-serif;letter-spacing:0.047pt">Updated</span></td><td style="background:#DDEBF7;border-color:#DDEBF7"><span class="sp-run" style="left:349px;top:50.654px;font:bold 11pt 'sheetpeek-calibri', 'sheetpeek-calibri-fallback', sans-serif;letter-spacing:0.122pt">Note</span></td><td style="border-left-color:#DDEBF7"></td></tr>
+<tr style="height:20px"><th class="sp-rowhead" scope="row">3</th><td style="border-top-color:#DDEBF7"><span class="sp-run" style="left:36px;top:70.654px;letter-spacing:0.16pt">North</span></td><td style="border-top-color:#DDEBF7"><span class="sp-run sp-center" style="left:170px;top:70.654px;letter-spacing:-0.479pt">#########</span></td><td style="border-top-color:#DDEBF7"><span class="sp-run" style="right:262px;top:70.654px;letter-spacing:0.327pt">12.5%</span></td><td style="border-top-color:#DDEBF7"><span class="sp-run sp-center" style="left:311px;top:70.654px;letter-spacing:-0.479pt">#########</span></td><td style="border-top-color:#DDEBF7"><span class="sp-run" style="left:349px;top:70.654px;letter-spacing:-0.021pt">on target</span></td><td></td></tr>
+<tr style="height:20px"><th class="sp-rowhead" scope="row">4</th><td><span class="sp-run" style="left:36px;top:90.654px;letter-spacing:0.18pt">South</span></td><td><span class="sp-run" style="right:333px;top:90.654px;letter-spacing:0.384pt">98,765.40</span></td><td><span class="sp-run" style="right:262px;top:90.654px;letter-spacing:0.168pt">-4.3%</span></td><td><span class="sp-run sp-center" style="left:311px;top:90.654px;letter-spacing:-0.479pt">#########</span></td><td></td><td></td></tr>
+<tr style="height:20px"><th class="sp-rowhead" scope="row">5</th><td><span class="sp-run" style="left:36px;top:110.654px;letter-spacing:-0.157pt">East</span></td><td><span class="sp-run" style="right:333px;top:110.654px;color:#FF0000;letter-spacing:0.296pt">-4,321.50</span></td><td><span class="sp-run" style="right:262px;top:110.654px;letter-spacing:0.302pt">0.0%</span></td><td><span class="sp-run sp-center" style="left:311px;top:110.654px;letter-spacing:-0.479pt">#########</span></td><td><span class="sp-run" style="left:349px;top:110.654px;letter-spacing:0.013pt">a note long enough to spill</span></td><td class="sp-crossed"></td></tr>
+<tr style="height:20px"><th class="sp-rowhead" scope="row">6</th><td><span class="sp-run" style="left:36px;top:130.654px;letter-spacing:-0.062pt">West</span></td><td><span class="sp-run sp-center" style="left:170px;top:130.654px;letter-spacing:-0.479pt">#########</span></td><td></td><td></td><td></td><td></td></tr>
+<tr style="height:20px"><th class="sp-rowhead" scope="row">7</th><td><span class="sp-run" style="left:36px;top:150.654px;font:italic bold 11pt 'sheetpeek-calibri', 'sheetpeek-calibri-fallback', sans-serif;letter-spacing:0.086pt">Total</span></td><td><span class="sp-run sp-center" style="left:170px;top:150.654px;letter-spacing:-0.479pt">#########</span></td><td><span class="sp-run sp-center" style="left:240.5px;top:150.654px;letter-spacing:-0.19pt">TRUE</span></td><td><span class="sp-run" style="left:279px;top:150.654px;letter-spacing:-0.016pt">| pipes, commas</span></td><td class="sp-crossed"></td><td></td></tr>
+<tr style="height:64px"><th class="sp-rowhead" scope="row">8</th><td><span class="sp-clip" style="left:33px;top:168px;width:100px;height:63px"><span class="sp-run" style="left:3px;top:0.654px;letter-spacing:0.006pt">Wrapped note</span></span><span class="sp-run" style="left:36px;top:190.654px;letter-spacing:0.006pt">in a narrow</span><span class="sp-run" style="left:36px;top:211.654px;letter-spacing:0.28pt">column</span></td><td><span class="sp-clip" style="left:135px;top:168px;width:69px;height:63px"><span class="sp-run" style="right:3px;top:46.654px;letter-spacing:0.097pt">right aligned spill</span></span></td><td style="background:#FFFF00;border-color:#FFFF00"></td><td style="border-left-color:#FFFF00"></td><td><span class="sp-run" style="left:349px;top:214.654px;letter-spacing:0.061pt">hidden row below</span></td><td></td></tr>
+<tr style="height:20px"><th class="sp-rowhead" scope="row">10</th><td><span class="sp-run" style="left:36px;top:234.654px;text-decoration:underline;color:#0070C0;letter-spacing:0.1pt">Underlined</span></td><td><span class="sp-run sp-center" style="left:240px;top:234.654px;letter-spacing:-0.053pt">centered across</span></td><td class="sp-crossed" style="border-top-color:#FFFF00"></td><td class="sp-crossed"></td><td></td><td></td></tr>
+</tbody></table></div>
+</body>
+</html>

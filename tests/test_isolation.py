@@ -1,0 +1,36 @@
+"""The reader is the only module that knows openpyxl, so it can be replaced on its own."""
+
+import ast
+from pathlib import Path
+
+PACKAGE = Path(__file__).resolve().parents[1] / "src" / "sheetpeek"
+READER = PACKAGE / "_read.py"
+
+
+def imported_modules(path: Path) -> set[str]:
+    names = set()
+    for node in ast.walk(ast.parse(path.read_text())):
+        if isinstance(node, ast.Import):
+            names.update(alias.name for alias in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.module:
+            names.add(node.module)
+    return names
+
+
+def test_only_the_reader_imports_openpyxl():
+    importers = {
+        path.relative_to(PACKAGE).as_posix()
+        for path in PACKAGE.rglob("*.py")
+        if any(name.split(".")[0] == "openpyxl" for name in imported_modules(path))
+    }
+    assert importers == {"_read.py"}
+
+
+def test_nothing_but_the_package_entry_points_import_the_reader():
+    importers = {
+        path.relative_to(PACKAGE).as_posix()
+        for path in PACKAGE.rglob("*.py")
+        if "sheetpeek._read" in imported_modules(path)
+    }
+    # the entry points: the public API, the command line, render(), and the server
+    assert importers <= {"__init__.py", "cli.py", "backends/__init__.py", "_serve.py"}

@@ -1,0 +1,91 @@
+# Contributing
+
+## Issues and bug reports
+
+Bug reports are welcome. The most useful report includes a small workbook that shows the
+problem, along with what Excel shows (a screenshot helps), what sheetpeek shows, and your Excel
+version and platform.
+
+## Pull requests
+
+The project is just getting started, so pull requests aren't being accepted yet while
+the test-capture workflow, release process and review practices settle. This will be
+revisited after the first releases. In the meantime, if you have a change in mind,
+please open an issue describing it.
+
+When pull requests open, these rules will apply:
+
+- AI-assisted contributions must be disclosed in the pull request description.
+- The contributor must understand every line of the change and be able to explain it when asked.
+- Undisclosed or unexplained AI-generated pull requests may be closed without review.
+
+## Setting up
+
+Python 3.11 or later. Either route installs the package in editable mode with the development
+and documentation tools:
+
+```bash
+uv sync --group docs
+```
+
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -e ".[rich]" --group dev --group docs      # needs pip 25.1 or later
+```
+
+`uv.lock` pins the versions CI tests with, and `uv sync` installs exactly those versions.
+pip and other tools ignore it and resolve the latest versions the dependency groups in
+`pyproject.toml` allow, which is normally fine but is not what CI runs.
+
+## Regenerating the Carlito table
+
+`src/sheetpeek/_carlito.py` holds Carlito's advance widths, which the HTML backend uses to space
+Calibri text as Excel does. It is generated from Carlito's four font files (SIL Open Font
+License 1.1, from https://github.com/googlefonts/carlito), which are never committed:
+
+```bash
+uv run --with fonttools python tools/carlito_widths.py \
+    --regular Carlito-Regular.ttf --bold Carlito-Bold.ttf \
+    --italic Carlito-Italic.ttf --bold-italic Carlito-BoldItalic.ttf
+```
+
+## Checks to run before proposing a change
+
+All of these must pass. CI runs the same set on Python 3.11 to 3.14, plus a run without the
+optional `rich` extra and a run against the newest openpyxl release. Prefix each with `uv run`
+on the uv route.
+
+```bash
+pytest                                   # unit tests and the doc examples
+ruff check .
+ruff format --check .
+mypy
+sphinx-build -n -W docs docs/_build/html # the strict documentation build
+```
+
+The examples in `README.md` and `docs/*.md` run as doctests, so a change of behavior shows up
+there too.
+
+## Expected outputs
+
+Where a behavior is Excel's layout (how far text spills, when a value shows `####`, what a merge
+shows), the expected output is captured from Excel for Mac by the scripts in `capture/`, never
+written from memory; `CAPTURING.md` describes the methods. Captured files are never edited by
+hand. A capture that changes any expected output is reviewed as a change of evidence.
+
+## Commit messages
+
+A commit made with the help of an AI tool ends with the trailer
+
+```
+Assisted-by: <tool>:<model ID>
+```
+
+as its last line, after a blank line, naming the tool and the exact model, for example
+`Assisted-by: Claude Code:claude-opus-5-5`. One trailer per tool and model used.
+
+## How this project's own commits are made
+
+Most of the code is written with Claude Code, reviewed before each commit and tested against
+expected values captured from real Excel. Every such commit carries the git trailer
+`Assisted-by: Claude Code:<model ID>`, so the history records which model took part.

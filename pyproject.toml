@@ -1,0 +1,126 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sheetpeek"
+dynamic = ["version"]
+description = "Render Excel workbooks as HTML, Markdown and terminal text, showing what Excel shows."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Ethan Post" }]
+requires-python = ">=3.11"
+dependencies = [
+  "openpyxl>=3.1",
+  "xlformat>=0.2,<1",
+]
+keywords = ["excel", "xlsx", "openpyxl", "spreadsheet", "html", "markdown", "terminal"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Office/Business :: Financial :: Spreadsheet",
+  "Typing :: Typed",
+]
+
+[project.scripts]
+sheetpeek = "sheetpeek.cli:main"
+
+[project.optional-dependencies]
+rich = ["rich>=13"]
+
+[project.urls]
+Homepage = "https://github.com/sheetmill/sheetpeek"
+Documentation = "https://sheetpeek.readthedocs.io"
+Source = "https://github.com/sheetmill/sheetpeek"
+Changelog = "https://github.com/sheetmill/sheetpeek/blob/main/CHANGELOG.md"
+Issues = "https://github.com/sheetmill/sheetpeek/issues"
+
+[dependency-groups]
+dev = [
+  "pytest>=8",
+  "ruff>=0.8",
+  "mypy>=1.13",
+  "rich>=13",
+]
+# Capture tooling only (capture/): reading text positions from Excel's PDF export.
+capture = [
+  "openpyxl>=3.1",
+  "pdfminer-six>=20250506",
+]
+docs = [
+    "furo>=2025.12.19",
+    "myst-parser>=5.1.0",
+    "sphinx>=9.0.4",
+    "sphinx-autodoc-typehints>=3.6.1",
+]
+
+[tool.hatch.version]
+path = "src/sheetpeek/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sheetpeek"]
+
+[tool.hatch.build.targets.sdist]
+# Source, tests (with the small workbooks under tests/files), the capture tooling, the
+# documentation sources and the project documents. Never capture workbooks or build output.
+include = [
+  "src/sheetpeek",
+  "tests",
+  "capture",
+  "tools",
+  "docs",
+  "README.md",
+  "CHANGELOG.md",
+  "ARCHITECTURE.md",
+  "CAPTURING.md",
+  "CONTRIBUTING.md",
+  "LICENSE",
+  "pagefind.yml",
+]
+exclude = ["capture/build", "docs/_build", "capture/**/*.xlsx", "**/__pycache__"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests", "capture", "bench", "tools"]
+extend-exclude = ["*.md"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "A", "C4", "SIM", "RUF", "D", "ANN", "PT", "N", "PERF"]
+ignore = ["D105", "D107", "D203", "D213", "ANN401"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D", "ANN", "S101"]
+"capture/**" = ["D"]
+"bench/**" = ["D"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unreachable = true
+packages = ["sheetpeek"]
+mypy_path = "src"
+
+[[tool.mypy.overrides]]
+module = ["openpyxl", "openpyxl.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra --strict-markers"
+markers = ["excel: rows captured from Excel"]
