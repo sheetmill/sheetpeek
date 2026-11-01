@@ -6,8 +6,7 @@ rendered cells. Number formats are applied by
 [xlformat](https://github.com/sheetmill/xlformat), whose output is tested against text captured
 from Excel 16 for Mac.
 
-**Status: in development, not released; 0.1.0 is being prepared.** The API may change until
-then.
+Documentation: <https://sheetpeek.readthedocs.io>.
 
 ## Reading a sheet
 
@@ -95,8 +94,12 @@ reads several sheets with one load.
 
 ## Installation
 
-Not yet on PyPI. Python 3.11 or later. Depends on `openpyxl` and `xlformat`; the optional `rich`
-extra adds terminal output.
+```bash
+pip install sheetpeek
+pip install "sheetpeek[rich]"   # with styled terminal output
+```
+
+Python 3.11 or later. Depends on `openpyxl` and `xlformat`.
 
 ## Related packages
 

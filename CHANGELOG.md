@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-The first release, 0.1.0, is being prepared.
+## [0.1.0] - 2026-10-31
+
+First release.
 
 ### Added
 - **Reading.** `read` and `open` read a worksheet into a `Sheet`: cached values (dates as the
@@ -57,4 +59,5 @@ The first release, 0.1.0, is being prepared.
 - Borders, conditional formatting, charts, images and comments are not shown; rich text within
   a cell takes the cell's font.
 
-[Unreleased]: https://github.com/sheetmill/sheetpeek/commits/main
+[Unreleased]: https://github.com/sheetmill/sheetpeek/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/sheetmill/sheetpeek/releases/tag/v0.1.0

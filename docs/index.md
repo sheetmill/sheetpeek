@@ -4,9 +4,10 @@ sheetpeek shows an Excel workbook the way Excel shows it: as HTML, Markdown, ter
 or plain text. It is pure Python, needs no office suite, and gives programs access to the
 rendered cells. Number formats are applied by `xlformat`.
 
-**Status: in development, not released; 0.1.0 is being prepared.** Reading, layout in
-Excel's own geometry and in fixed-width characters, the text, `rich`, HTML, Markdown and CSV
-backends, `sheetpeek view` and `sheetpeek serve` work.
+```bash
+pip install sheetpeek
+pip install "sheetpeek[rich]"   # with styled terminal output
+```
 
 Python 3.11 or later. The source is at <https://github.com/sheetmill/sheetpeek>.
 

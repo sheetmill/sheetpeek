@@ -1,7 +1,7 @@
 # Release: `gh release create vX.Y.Z --target main` creates the tag on GitHub and starts this
 # workflow; the tag must match `__version__`. The workflow runs CI, checks the tag against the
 # package version, builds once, publishes to TestPyPI, installs that release from TestPyPI and
-# imports it, then publishes the same files to PyPI.
+# renders a small workbook with it, then publishes the same files to PyPI.
 #
 # Publishing uses trusted publishing (OpenID Connect), so no token is stored. Configure on
 # test.pypi.org and pypi.org a trusted publisher for owner `sheetmill`, repository
@@ -59,18 +59,34 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: astral-sh/setup-uv@v5
-      - name: Install the release from TestPyPI and import it
+      - name: Install the release from TestPyPI and render a workbook
         run: |
           version="${GITHUB_REF_NAME#v}"
           uv venv /tmp/env
-          # The dependencies come from PyPI; only sheetpeek itself is taken from TestPyPI.
-          uv pip install -p /tmp/env openpyxl "xlformat>=0.1,<1"
+          # Only sheetpeek itself is taken from TestPyPI; its dependencies, as its own metadata
+          # declares them, come from PyPI.
           # TestPyPI's index can lag the upload by a minute.
           for attempt in 1 2 3 4 5 6; do
             uv pip install -p /tmp/env --no-cache --no-deps --index-url https://test.pypi.org/simple/ "sheetpeek==${version}" && break
             sleep 20
           done
-          /tmp/env/bin/python -I -c "import sheetpeek; assert sheetpeek.__version__ == '${version}'; print(sheetpeek.__version__)"
+          /tmp/env/bin/python -I -c "from importlib.metadata import requires; print('\n'.join(r for r in requires('sheetpeek') if 'extra ==' not in r))" > /tmp/requirements.txt
+          cat /tmp/requirements.txt
+          uv pip install -p /tmp/env -r /tmp/requirements.txt
+          SHEETPEEK_VERSION="${version}" /tmp/env/bin/python -I - <<'PY'
+          import os, pathlib, tempfile
+          import openpyxl, sheetpeek
+          assert sheetpeek.__version__ == os.environ["SHEETPEEK_VERSION"]
+          path = pathlib.Path(tempfile.mkdtemp()) / "check.xlsx"
+          wb = openpyxl.Workbook()
+          wb.active["A1"] = 1234.5
+          wb.active["A1"].number_format = "#,##0.00"
+          wb.save(path)
+          text = sheetpeek.render(path, "text")
+          assert text == "1,234.50\n", repr(text)
+          assert sheetpeek.render(path, "html").startswith("<!doctype html>")
+          print(sheetpeek.__version__, text, end="")
+          PY
 
   pypi:
     needs: verify-testpypi
