@@ -111,6 +111,11 @@ and `[::1]`, which keeps web pages in your browser from reading the folder's she
 anyone who can reach the address can read every workbook in the folder. It reads two workbooks at
 a time and answers 503 to more.
 
+**`serve` is not for production.** It is built on Python's `http.server`, which Python's
+documentation does not recommend for production, and its safeguards do not make it a production
+server. For a production service, call sheetpeek's Python API from a web framework and pass
+`limits=`: the library's defaults are not memory-safe for untrusted files (see below).
+
 ## Files from people you do not trust
 
 A workbook is a zip of XML, and a small one can ask for a great deal. Before anything parses a

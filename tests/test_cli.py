@@ -110,7 +110,9 @@ def test_view_refused_layout(book, tmp_path):
     assert err.startswith("sheetpeek: cannot show")
 
 
-def test_serve_help_says_there_is_no_authentication(capsys):
+def test_serve_help_says_what_it_is_not(capsys):
     with pytest.raises(SystemExit):
         cli.main(["serve", "--help"])
-    assert "no authentication" in " ".join(capsys.readouterr().out.split())
+    text = " ".join(capsys.readouterr().out.split())
+    assert "no authentication" in text
+    assert "Not for production" in text

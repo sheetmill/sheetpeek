@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `.xlsb` files keep their advice to convert them, recognized by their content, then their name.
 - `sheetpeek serve` has lower limits, refusing for example a sheet of more than 1,048,576 cells
   unless `?ref=` asks for less. A refused file is a 422.
+- The documentation and `sheetpeek serve --help` say that `serve` is not for production.
 - `sheetpeek serve` reads two workbooks at a time, and answers 503 with `Retry-After` when no slot
   frees up within 2 seconds.
 - Layout no longer formats the empty columns it may add for spilled text, so a long text in a sheet

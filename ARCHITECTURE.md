@@ -1025,7 +1025,8 @@ sheetpeek already use openpyxl.
   A request names a workbook only if, after resolving `..` and symbolic links, it is a regular
   `.xlsx` file inside DIR whose path has no part starting with a dot; anything else is a 404. A
   refused or unreadable file is a 422, a request with another host name a 403 and one that gets no
-  read slot a 503 (§5.5). There is no authentication.
+  read slot a 503 (§5.5). There is no authentication, and it is not for production: `http.server`
+  is not recommended for it, and a production service calls the Python API with `limits=`.
   Pages carry `Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'`, since
   they have no script.
 

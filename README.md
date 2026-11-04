@@ -101,7 +101,10 @@ pip install "sheetpeek[rich]"   # with styled terminal output
 
 A file from someone you do not trust is checked before anything parses it, and `limits=` sets what
 a read may cost; the documentation's usage page has the details. `sheetpeek serve` has no
-authentication: with `--host`, anyone who can reach the address can read the folder.
+authentication: with `--host`, anyone who can reach the address can read the folder. It is not for
+production: it is built on Python's `http.server`, which Python's documentation does not recommend
+for production. For a production service, call the Python API from a web framework and pass
+`limits=`, since the library's defaults are not memory-safe for untrusted files.
 
 Python 3.11 or later. Depends on `openpyxl` and `xlformat`.
 

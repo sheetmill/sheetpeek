@@ -61,7 +61,10 @@ def _parser() -> argparse.ArgumentParser:
         description="Serve the .xlsx files under a folder as HTML pages, read-only. Binds to "
         "127.0.0.1 unless --host says otherwise, and reads only .xlsx files inside the folder. "
         "There is no authentication: with --host, anyone who can reach the address can read "
-        "every workbook in the folder.",
+        "every workbook in the folder. Not for production: it is built on Python's http.server, "
+        "which Python's documentation does not recommend for production. For a production "
+        "service, call the Python API from a web framework and pass limits=, since the library's "
+        "defaults are not memory-safe for untrusted files.",
     )
     serve.add_argument("folder", help="the folder of workbooks")
     serve.add_argument("--host", default="127.0.0.1", help="address to bind (default: 127.0.0.1)")
