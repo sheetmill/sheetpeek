@@ -432,6 +432,12 @@ def test_the_suffix_is_not_required(book, tmp_path):
     assert sheetpeek.read(named).cell(1, 1).value == 111
 
 
+@pytest.mark.parametrize("name", ["book.xlsb", "book.xls"])
+def test_the_content_decides_before_the_suffix(book, tmp_path, name):
+    named = book.rename(tmp_path / name)
+    assert sheetpeek.read(named).cell(1, 1).value == 111
+
+
 def test_a_refusal_closes_the_file(book, recwarn):
     replace_part(book, SHEET1, (DTD + BODY).encode())
     with pytest.raises(PackageError):

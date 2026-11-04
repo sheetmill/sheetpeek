@@ -111,7 +111,7 @@ def open_package(handle: IO[bytes], limits: ReadLimits, name: str | None = None)
             raise PackageError(_XLSB) from error
         raise PackageError(f"not an xlsx file: {error}") from error
     try:
-        if "xl/workbook.bin" in archive.NameToInfo or suffix == ".xlsb":
+        if "xl/workbook.bin" in archive.NameToInfo:
             raise PackageError(_XLSB)
         check_package(archive, handle, limits)
     except BaseException:
