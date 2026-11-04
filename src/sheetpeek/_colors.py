@@ -8,6 +8,7 @@ on a scale of 240 (``ColorRGBToHLS``), the lightness truncated, which reproduces
 
 from __future__ import annotations
 
+import re
 import xml.etree.ElementTree as ET
 from collections.abc import Sequence
 
@@ -22,6 +23,9 @@ _THEME_ORDER = (1, 0, 3, 2, 4, 5, 6, 7, 8, 9, 10, 11)
 _AUTOMATIC_INDEX = (64, 65)  # system foreground and background
 _HLS = 240  # Windows' HLSMAX
 _RGB = 255
+
+
+_HEX = re.compile("[0-9A-F]{6}")
 
 
 def theme_colors(theme_xml: bytes | str | None) -> tuple[str, ...]:
@@ -50,6 +54,9 @@ def theme_colors(theme_xml: bytes | str | None) -> tuple[str, ...]:
         elif system is not None:
             found[name] = system.get("lastClr", "000000").upper()
         else:
+            return ()
+        # The theme's text reaches CSS as it stands, so nothing but a color may leave here.
+        if not _HEX.fullmatch(found[name]):
             return ()
     return tuple(found[_SCHEME[i]] for i in _THEME_ORDER)
 
@@ -85,6 +92,8 @@ def resolve(
             return None
         base = theme[value]
     else:
+        return None
+    if not _HEX.fullmatch(base):
         return None
     return apply_tint(base, tint) if tint else base
 

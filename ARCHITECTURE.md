@@ -157,7 +157,8 @@ on `type`.
 - `indexed`: the workbook's custom palette if `styles.xml` has one, else the default 64-entry
   palette (`openpyxl.styles.colors.COLOR_INDEX`). Index 64 is the system foreground color, which
   means automatic.
-- `theme`: the `clrScheme` of the theme part (`wb.loaded_theme`, raw XML), then `tint` applied
+- `theme`: the `clrScheme` of the theme part (`wb.loaded_theme`, raw XML), six hex digits or the
+  theme is treated as unreadable, since its text would reach CSS as it stands, then `tint` applied
   as ECMA-376 §18.8.19 describes. **Captured** (suite `theme_colors`: theme indices 0 to 11 with
   tints from −0.5 to +0.8 as fills and font colors, 96 cells read back through AppleScript's
   `color of interior object` and `color of font object`): Excel's indices swap the first two

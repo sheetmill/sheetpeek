@@ -45,6 +45,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   keeps them.
 
 ### Security
+- A theme color is used only if it is one. Any text in a crafted theme's `srgbClr` or `sysClr` went
+  into the HTML as it stood, inside a `style` attribute, so a workbook could put markup and scripts
+  in the page, and it crashed the `rich` backend.
 - `sheetpeek serve`, bound to a loopback address, answers only to `localhost`, `127.0.0.1`, `[::1]`
   and that address, with 403 otherwise. Any host name was answered, so DNS rebinding could let a web
   page read the folder's sheets.
