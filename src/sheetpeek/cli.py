@@ -9,6 +9,7 @@ import sys
 from collections.abc import Sequence
 from typing import TextIO
 
+from sheetpeek._model import one_line
 from sheetpeek._package import SERVE_LIMITS, PackageError, ReadLimits
 from sheetpeek._read import open as open_book
 from sheetpeek.backends import (
@@ -111,10 +112,10 @@ def _serve(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
     try:
         server = make_server(args.folder, args.host, args.port, limits=_limits(args))
     except (NotADirectoryError, OSError) as error:
-        err.write(f"sheetpeek: {error}\n")
+        _say(err, f"sheetpeek: {error}")
         return 1
     host, port = str(server.server_address[0]), server.server_address[1]
-    out.write(f"sheetpeek: serving {args.folder} at http://{host}:{port}/ (Ctrl-C to stop)\n")
+    _say(out, f"sheetpeek: serving {args.folder} at http://{host}:{port}/ (Ctrl-C to stop)")
     out.flush()
     try:
         server.serve_forever()
@@ -130,32 +131,37 @@ def _view(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
         with open_book(args.file, limits=_limits(args)) as book:
             if args.list:
                 for name in book.sheet_names:
-                    out.write(name + "\n")
+                    _say(out, name)
                 return 0
             sheet = book.sheet(args.sheet, ref=args.ref)
     except FileNotFoundError:
-        err.write(f"sheetpeek: no such file: {args.file}\n")
+        _say(err, f"sheetpeek: no such file: {args.file}")
         return 1
     except PackageError as error:
-        err.write(f"sheetpeek: cannot read {args.file}: {error}\n")
+        _say(err, f"sheetpeek: cannot read {args.file}: {error}")
         return 1
     except (KeyError, ValueError) as error:
         message = error.args[0] if error.args else str(error)
-        err.write(f"sheetpeek: {message}\n")
+        _say(err, f"sheetpeek: {message}")
         return 1
     except Exception as error:  # an unreadable file: openpyxl and zipfile raise many kinds
-        err.write(f"sheetpeek: cannot read {args.file}: {error}\n")
+        _say(err, f"sheetpeek: cannot read {args.file}: {error}")
         return 1
     backend = _backend(args, out)
     try:
         rendered = sheet.layout(backend.mode, show_hidden=args.hidden)
     except PackageError as error:
-        err.write(f"sheetpeek: cannot show {args.file}: {error}\n")
+        _say(err, f"sheetpeek: cannot show {args.file}: {error}")
         return 1
     for warning in rendered.warnings:
-        err.write(f"sheetpeek: warning: {warning}\n")
+        _say(err, f"sheetpeek: warning: {warning}")
     backend.render(rendered, out)
     return 0
+
+
+def _say(stream: TextIO, line: str) -> None:
+    """One line for a person. It can quote a sheet, a part or a file, so it may not be trusted."""
+    stream.write(one_line(line) + "\n")
 
 
 def _backend(args: argparse.Namespace, out: TextIO) -> Backend:

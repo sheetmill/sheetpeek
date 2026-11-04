@@ -26,7 +26,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, quote, unquote, urlsplit
 
-from sheetpeek._model import CellRange
+from sheetpeek._model import CellRange, one_line
 from sheetpeek._package import SERVE_LIMITS, PackageError, ReadLimits
 from sheetpeek._read import open as open_book
 from sheetpeek.backends.html import CSS, HTMLBackend
@@ -180,7 +180,7 @@ class _Handler(BaseHTTPRequestHandler):
             message = error.args[0] if error.args else str(error)
             return HTTPStatus.NOT_FOUND, self.error(str(message))
         except Exception as error:  # nothing about it is for the client: it can name local paths
-            sys.stderr.write(f"sheetpeek: {name}: {error}\n")
+            sys.stderr.write(one_line(f"sheetpeek: {name}: {error}") + "\n")
             return HTTPStatus.UNPROCESSABLE_ENTITY, self.error("Cannot read this file.")
         out = io.StringIO()
         HTMLBackend(fragment=True, column_headings=True, row_headings=True).render(rendered, out)
@@ -203,7 +203,8 @@ class _Handler(BaseHTTPRequestHandler):
         return _page("sheetpeek", f'{bar}<div class="sp-error">{html.escape(message)}</div>\n')
 
     def log_message(self, format: str, *args: Any) -> None:  # noqa: A002 - http.server's name
-        sys.stderr.write(f"sheetpeek: {self.address_string()} {format % args}\n")
+        # http.server's own log_message escapes control characters; a request line is anyone's.
+        sys.stderr.write(one_line(f"sheetpeek: {self.address_string()} {format % args}") + "\n")
 
 
 def make_server(

@@ -18,7 +18,7 @@ import html
 from typing import Literal, TextIO
 
 from sheetpeek._carlito import ADVANCES, FIRST, UNITS_PER_EM
-from sheetpeek._model import CellRange, Font
+from sheetpeek._model import CellRange, Font, one_line
 from sheetpeek._rendered import Mode, RenderedCell, RenderedSheet, TextRun
 
 ColorScheme = Literal["light", "dark"]
@@ -154,7 +154,7 @@ class HTMLBackend:
     def render(self, sheet: RenderedSheet, out: TextIO, /) -> None:
         """Write the page or the fragment to ``out``."""
         if not self.fragment:
-            title = html.escape(sheet.sheet.name)
+            title = html.escape(one_line(sheet.sheet.name))
             background = "#1e1e1e" if self.color_scheme == "dark" else "#ffffff"
             out.write(
                 '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
@@ -365,7 +365,7 @@ def _font(font: Font) -> str:
 
 
 def _quoted(name: str) -> str:
-    return html.escape(name.replace("\\", "\\\\").replace("'", "\\'"))
+    return html.escape(one_line(name).replace("\\", "\\\\").replace("'", "\\'"))
 
 
 def _decoration(font: Font) -> str:

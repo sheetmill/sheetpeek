@@ -51,6 +51,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `sheetpeek serve`, bound to a loopback address, answers only to `localhost`, `127.0.0.1`, `[::1]`
   and that address, with 403 otherwise. Any host name was answered, so DNS rebinding could let a web
   page read the folder's sheets.
+- The command line prints no control characters or line breaks from a workbook, a file name or a
+  client: sheet names from `--list`, messages and warnings, the sheet and font names in HTML, and
+  `sheetpeek serve`'s log lines, which any HTTP client could write to. `Book.sheet_names` and
+  `--sheet` keep the name as the file has it.
 - `sheetpeek serve` no longer shows absolute paths: the index shows the folder's name, and errors
   from openpyxl, which name the full path, drop the folder.
 - A crafted file or `?ref=` could use memory without bound; see the limits above. In particular a

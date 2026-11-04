@@ -1,12 +1,14 @@
 import io
+import re
 import subprocess
 import sys
 
 import openpyxl
 import pytest
 
+import sheetpeek
 from sheetpeek import cli
-from tests.workbooks import save
+from tests.workbooks import replace_part, rewrite, save
 
 
 @pytest.fixture
@@ -116,3 +118,109 @@ def test_serve_help_says_what_it_is_not(capsys):
     text = " ".join(capsys.readouterr().out.split())
     assert "no authentication" in text
     assert "Not for production" in text
+
+
+# --- what reaches a terminal: ESC is 0x1b, and U+009B is the one-character form of ESC [
+
+CONTROL = re.compile("[\\x00-\\x09\\x0b-\\x1f\\x7f-\\x9f]")
+
+
+@pytest.fixture
+def c1_name(tmp_path):
+    # XML can hold U+009B, by reference; it cannot hold ESC at all.
+    wb = openpyxl.Workbook()
+    wb.active["A1"] = "cell"
+    path = save(wb, tmp_path / "c1.xlsx")
+    rewrite(path, "xl/workbook.xml", lambda t: t.replace('name="Sheet"', 'name="a&#155;[31mb"'))
+    return path
+
+
+def test_list_prints_no_control_character(c1_name):
+    status, out, _ = run(c1_name, "--list")
+    assert status == 0
+    assert out == "a[31mb\n"
+
+
+def test_list_with_esc_in_a_name(book, monkeypatch):
+    # Not from XML, which cannot hold it; the rule does not depend on that.
+    class Stub:
+        def __init__(self):
+            self.sheet_names = ["a\x1b[31mb\x9b[2Jc\nforged"]
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            pass
+
+    monkeypatch.setattr(cli, "open_book", lambda *a, **k: Stub())
+    assert run(book, "--list")[1] == "a[31mb[2Jcforged\n"
+
+
+def test_the_model_and_sheet_keep_the_original_name(c1_name):
+    with sheetpeek.open(c1_name) as opened:
+        assert opened.sheet_names == ["a\x9b[31mb"]
+    status, out, _ = run(c1_name, "--sheet", "a\x9b[31mb")
+    assert status == 0
+    assert "cell" in out
+    # What --list shows is not the name, and the error says what the name is, in repr's escapes.
+    status, _, err = run(c1_name, "--sheet", "a[31mb")
+    assert status == 1
+    assert "\\x9b" in err
+    assert not CONTROL.search(err)
+
+
+def test_html_on_stdout_has_no_control_character(c1_name):
+    assert "<title>a[31mb</title>" in run(c1_name, "-t", "html")[1]
+    assert not CONTROL.search(run(c1_name, "-t", "html")[1])
+
+
+def test_a_font_name_in_html_has_no_control_character(tmp_path):
+    wb = openpyxl.Workbook()
+    wb.active["A1"] = "x"
+    wb.active["A1"].font = openpyxl.styles.Font(name="Zed")
+    path = save(wb, tmp_path / "font.xlsx")
+    rewrite(path, "xl/styles.xml", lambda t: t.replace('val="Zed"', 'val="Z&#155;ed"'))
+    status, out, err = run(path, "-t", "html")
+    assert status == 0
+    assert "Zed" in out
+    assert not CONTROL.search(out)
+    assert not CONTROL.search(err)
+
+
+def test_a_warning_has_no_control_character(tmp_path):
+    wb = openpyxl.Workbook()
+    wb.active["A1"] = 1
+    wb.active["A1"].number_format = "0.00E"
+    path = save(wb, tmp_path / "format.xlsx")
+    rewrite(path, "xl/styles.xml", lambda t: t.replace("0.00E", "0.00E&#155;"))
+    status, _, err = run(path)
+    assert status == 0
+    assert "warning" in err
+    assert not CONTROL.search(err)
+
+
+def test_a_part_name_in_a_refusal_has_no_control_character(book):
+    replace_part(book, "xl/\x1b[31m\x9bevil.xml", b"<!DOCTYPE x><x/>")
+    status, _, err = run(book)
+    assert status == 1
+    assert "[31mevil.xml: declares a DTD" in err
+    assert not CONTROL.search(err)
+
+
+def test_a_file_name_has_no_control_character(tmp_path):
+    (tmp_path / "a\x1b[31m.xlsx").write_text("not a workbook")
+    status, _, err = run(tmp_path / "a\x1b[31m.xlsx")
+    assert status == 1
+    assert not CONTROL.search(err)
+    status, _, err = run(tmp_path / "b\x1b[31m.xlsx")  # no such file
+    assert status == 1
+    assert not CONTROL.search(err)
+
+
+def test_serve_says_nothing_with_a_control_character(tmp_path):
+    out, err = io.StringIO(), io.StringIO()
+    args = cli._parser().parse_args(["serve", str(tmp_path / "no\x1b[31m")])
+    assert cli._serve(args, out, err) == 1
+    assert "no[31m" in err.getvalue()
+    assert not CONTROL.search(err.getvalue())

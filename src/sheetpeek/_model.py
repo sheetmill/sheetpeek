@@ -24,6 +24,18 @@ VerticalAlignment: TypeAlias = Literal["top", "center", "bottom", "justify", "di
 SheetState: TypeAlias = Literal["visible", "hidden", "very_hidden"]
 
 
+_NOT_ON_A_LINE = re.compile("[\x00-\x1f\x7f-\x9f\ud800-\udfff]")
+
+
+def one_line(text: str) -> str:
+    """Text from a workbook, a file name or a client, safe to print on one line of a terminal.
+
+    No control character, C0 or C1, which a terminal would take as a command, and no line break,
+    which could forge a line of output. Lone surrogates go too, since they cannot be encoded.
+    """
+    return _NOT_ON_A_LINE.sub("", text)
+
+
 CellValue: TypeAlias = bool | int | float | str | ExcelError | None
 """A cached cell value. Dates are serial numbers; an error is an :class:`xlformat.ExcelError`, a
 ``str`` enum that equals its text (compare errors with ``==``, not ``is``)."""

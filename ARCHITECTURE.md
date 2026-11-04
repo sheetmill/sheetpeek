@@ -701,6 +701,15 @@ sheets. Only the name is compared, as Django's `ALLOWED_HOSTS` and Vite's `serve
 do, because a tunnel brings its own port. Bound to anything else it answers to any name and anyone
 who can reach it can read the folder; it has no authentication.
 
+**What reaches a terminal.** A control character in output is a command to the terminal: ESC, and
+U+009B, the one-character form of `ESC [`, which XML can hold. Cells lose them in the layout (§4.1).
+Everything else the command line prints that a workbook, a file name or a client can influence
+goes through `_model.one_line`, which also drops line breaks, so a name cannot forge a line: every
+message on standard output and error, sheet names from `--list`, the sheet name and font names in
+HTML, and `serve`'s log lines, since a request line is anyone's and overriding
+`log_message` gives up `http.server`'s own escaping. The model keeps the original, so `--sheet`
+matches the name as the file has it. In `serve`, sheet names in pages are only escaped for HTML.
+
 **One open file.** `Book` opens a path once, for the check and for every read after it, so a path
 swapped after the check is not what gets read. A file overwritten in place during a read still
 could be, and `Book` is for one thread at a time. openpyxl's check of the file's extension is

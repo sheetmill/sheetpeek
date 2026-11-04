@@ -2,6 +2,8 @@
 
 import http.client
 import os
+import re
+import socket
 import threading
 
 import openpyxl
@@ -285,3 +287,32 @@ def test_a_read_past_the_layout_limit_is_refused(folder, tmp_path):
     finally:
         server.shutdown()
         server.server_close()
+
+
+@pytest.mark.parametrize(
+    "request_bytes",
+    [
+        b"GET /\x1b[31mred\x9b HTTP/1.1\r\nHost: localhost\r\n\r\n",
+        b"BAD\x1b[2J\x9b\r\n\r\n",
+        b"GET /view/\x1b[31m.xlsx HTTP/1.1\r\nHost: evil\x1b[2J.example\r\n\r\n",
+    ],
+)
+def test_a_request_line_reaches_the_log_without_control_characters(server, capfd, request_bytes):
+    with socket.create_connection(server.server_address[:2], timeout=5) as connection:
+        connection.sendall(request_bytes)
+        assert connection.recv(65536)  # the line is logged before the answer goes out
+    log = capfd.readouterr().err
+    assert log.startswith("sheetpeek: 127.0.0.1")
+    assert "[" in log
+    assert not re.search("[\x00-\x09\x0b-\x1f\x7f-\x9f]", log)
+
+
+def test_an_internal_error_is_logged_without_control_characters(server, folder, capfd, monkeypatch):
+    def fail(*args, **kwargs):
+        raise RuntimeError("bad \x1b[31m\x9b thing")
+
+    monkeypatch.setattr(_serve, "open_book", fail)
+    assert get(server, "/view/book.xlsx")[0] == 422
+    log = capfd.readouterr().err
+    assert "bad [31m thing" in log
+    assert not re.search("[\x00-\x09\x0b-\x1f\x7f-\x9f]", log)
