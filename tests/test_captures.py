@@ -266,14 +266,6 @@ def test_overflow_color_and_alignment(rendered, row):
 PDF_X = 18.0  # the PDF x of column A's left gridline
 PRINT_PITCH = 14.0  # rows 15 pt in the file print 14 pt apart
 CAPTURE_COLUMNS = 14  # visible columns in the capture's print area: A to J, L, M, N, P
-# xlformat measures W as 10.1 pt; Excel draws it 10 pt apart, so twelve Ws end 1.2 pt early.
-_W = "xlformat's fractional W against Excel's drawn whole points"
-EXCEL_KNOWN_ENDS = {
-    "spill left text='WWWWWWWWWWWW'": _W,
-    "spill center text='WWWWWWWWWWWW'": _W,
-}
-
-
 KNOWN_BOUNDARIES = {
     # Rows 180 and 184 draw the same 49.79 pt text; only the one holding a line feed spills, so a
     # line feed adds to the width that decides spill. Rows 195 and 197 show it adds under 2 pt.
@@ -337,14 +329,13 @@ def test_excel_runs_match_excel(excel):
             for run in same[:1]:
                 compared += 1
                 end = run.x + run.width + PDF_X
-                if text == run.text and abs(end - x1) > 1 and case not in EXCEL_KNOWN_ENDS:
+                if text == run.text and abs(end - x1) > 1:
                     deviations[f"{case}: end of {text!r}"] = (end, x1)
                 if (run.color or "000000") != color:
                     deviations[f"{case}: color of {text!r}"] = (run.color, color)
     REPORT["excel runs"] = (
         f"excel: {starts} run starts and {compared} runs compared with Excel, "
-        f"{len(EXCEL_KNOWN_ENDS)} known deviations: "
-        + "; ".join(f"{case} ({why})" for case, why in EXCEL_KNOWN_ENDS.items())
+        f"{len(deviations)} deviations"
     )
     assert starts >= 150
     assert deviations == {}

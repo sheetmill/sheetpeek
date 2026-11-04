@@ -252,10 +252,11 @@ text outside is cut through a glyph), `align` (the point a different font keeps 
   line sits 3 pt above the block's bottom gridline, a top-aligned one 11 pt below its top, a
   centered one at `floor((H − n × line) / 2) + 11`. Lines that do not fit the block start at the
   top, so a custom-height row shows its first line (captured, rows 161 to 168).
-- **Glyphs** sit at `x` plus the running sum of `xlformat.glyph_widths`. Excel draws them on
-  whole points; xlformat's advances are fractional where its fit measurements needed it (`W` is
-  10.1 pt, drawn 10 apart), so glyphs inside a long run can be a point or two off. Layout
-  decisions (fit, spill, placement) use `text_width` and match the capture.
+- **Glyphs** sit at `x` plus the running sum of `xlformat.glyph_widths`, in whole points, as Excel
+  draws them: outside the competing spills, all 3,480 glyphs of 185 `layout` runs are within
+  0.02 pt of the PDF's. (The other 35 runs have nothing to compare: lines a fixed row height hides,
+  and clipped text the PDF interleaves with a neighbor's.) Layout decisions (fit, spill, placement)
+  use `text_width` and match the capture.
 - **Spill** (§4.1) is a run whose clip reaches past its own column; the origin cell's `spill`
   counts the columns. **Competing spills** are both recorded, with overlapping clips (decided),
   as Excel draws both; `characters` mode keeps first-wins.
@@ -269,9 +270,8 @@ text outside is cut through a glyph), `align` (the point a different font keeps 
 - `scale` and `max_width` raise `ValueError` in `excel` mode.
 
 `tests/test_captures.py` lays the `layout` workbook out in `excel` mode too: every row's crossed
-and fill-covered boundaries against the missing gridlines (no deviation), every captured run's
-start (exact) and end (within a point; twelve `W`s are 1.2 pt off, a known deviation), color and
-baseline.
+and fill-covered boundaries against the missing gridlines, every captured run's start (exact) and
+end (within a point), color and baseline.
 
 ## 4. Excel layout rules the model reproduces
 
