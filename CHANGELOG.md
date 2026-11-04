@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `.xlsb` files keep their advice to convert them, recognized by their content, then their name.
 - `sheetpeek serve` has lower limits, refusing for example a sheet of more than 1,048,576 cells
   unless `?ref=` asks for less. A refused file is a 422.
+- The documentation names the formula engine, `xlrecalc`, now that it is published.
 - The documentation and `sheetpeek serve --help` say that `serve` is not for production.
 - `sheetpeek serve` reads two workbooks at a time, and answers 503 with `Retry-After` when no slot
   frees up within 2 seconds.
@@ -37,7 +38,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   of many rows costs much less.
 
 ### Fixed
-- The documentation names the formula engine, `xlrecalc`, now that it is published.
 - OOXML's `_xHHHH_` escapes in text are decoded, as Excel decodes them: `a_x000D_b` holds a carriage
   return, not the literal text. Two known deviations come from openpyxl, in shared strings:
   `_x005F_x0041_` shows `A` where Excel shows `_x0041_`, and whitespace without `xml:space` stays.
