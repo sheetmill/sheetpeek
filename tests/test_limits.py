@@ -18,6 +18,7 @@ from sheetpeek import LimitError, PackageError, ReadLimits
 from tests.workbooks import (
     NS,
     SHEET1,
+    replace_once,
     replace_part,
     replace_sheet_data,
     rewrite,
@@ -312,6 +313,58 @@ def test_a_row_past_excel_cannot_ask_for_a_huge_grid(book):
     rewrite(book, SHEET1, replace_sheet_data(data))
     with pytest.raises(LimitError):
         sheetpeek.read(book)
+
+
+def test_a_huge_merge_costs_nothing_past_the_range_read(book):
+    # The layout's map of merges walked the whole merge, 17 billion positions.
+    data = (
+        '<sheetData><row r="1"><c r="A1"><v>1</v></c></row></sheetData>'
+        '<mergeCells count="1"><mergeCell ref="A1:XFD1048576"/></mergeCells>'
+    )
+    rewrite(book, SHEET1, replace_sheet_data(data))
+    for mode in ("excel", "characters", "none"):
+        rendered = sheetpeek.read(book, ref="A1:B2").layout(mode)
+        assert rendered.cell(1, 1).merge == sheetpeek.CellRange(1, 1, 1048576, 16384)
+
+
+@pytest.mark.parametrize("value", ["99999999999", "1e30", "-inf", "-0.5"])
+def test_a_column_width_excel_was_not_shown_is_still_bounded(book, value):
+    # Not captured: the nearest captured behavior, so that no mode allocates by it.
+    col = f'<cols><col min="1" max="1" width="{value}" customWidth="1"/></cols><sheetData>'
+    rewrite(book, SHEET1, lambda text: text.replace("<sheetData>", col, 1))
+    sheet = sheetpeek.read(book)
+    assert sheet.columns[0].width in (0.0, 10_922.0)
+    for mode in ("excel", "characters", "none"):
+        sheet.layout(mode)
+
+
+@pytest.mark.parametrize(
+    "edit",
+    [
+        pytest.param(('baseColWidth="8"', 'baseColWidth="99999999999"'), id="base width"),
+        pytest.param(('baseColWidth="8"', 'baseColWidth="-1"'), id="negative base width"),
+        pytest.param(("<sheetFormatPr ", '<sheetFormatPr defaultColWidth="1e30" '), id="width"),
+        pytest.param(
+            ('defaultRowHeight="15"', 'defaultRowHeight="-1" customHeight="1"'), id="height"
+        ),
+    ],
+)
+def test_a_sheet_default_excel_was_not_shown_is_still_bounded(book, edit):
+    rewrite(book, SHEET1, replace_once(*edit))
+    sheet = sheetpeek.read(book)
+    for mode in ("excel", "characters", "none"):
+        sheet.layout(mode)
+
+
+@pytest.mark.parametrize("size", ["-0.5", "0.5", "inf", "1e400"])
+def test_a_font_size_excel_was_not_shown_gives_no_raw_error(book, size):
+    rewrite(book, "xl/styles.xml", lambda text: text.replace('<sz val="11"', f'<sz val="{size}"'))
+    try:
+        sheet = sheetpeek.read(book)
+    except PackageError:
+        return
+    for mode in ("excel", "characters", "none"):
+        sheet.layout(mode)
 
 
 def test_a_huge_ref_on_an_ordinary_file_is_refused(book):

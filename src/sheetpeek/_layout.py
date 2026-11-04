@@ -325,10 +325,15 @@ class _Grid:
         self.units: Callable[[list[int]], float | None] | None = None
         self.merge_of: dict[tuple[int, int], CellRange] = {}
         ref = sheet.ref
-        for merge in sheet.merges:
-            for row in range(merge.min_row, merge.max_row + 1):
-                for col in range(merge.min_col, merge.max_col + 1):
-                    if ref is not None and (row, col) in ref:
+        if ref is not None:
+            # Only inside the range read: a merge in the file can be as large as the sheet.
+            for merge in sheet.merges:
+                for row in range(
+                    max(merge.min_row, ref.min_row), min(merge.max_row, ref.max_row) + 1
+                ):
+                    for col in range(
+                        max(merge.min_col, ref.min_col), min(merge.max_col, ref.max_col) + 1
+                    ):
                         self.merge_of[(row, col)] = merge
 
     def cell(self, i: int, p: int) -> Cell:

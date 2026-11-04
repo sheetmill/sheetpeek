@@ -654,6 +654,24 @@ bzip2 or LZMA part, a name used twice and all three kinds of false size give err
 off, between two controls that open. So a refusal never turns away a file Excel opens without a
 repair. A DTD stays refused whatever Excel does.
 
+**Numbers no column, row or font can have** (suite `package`) reach no arithmetic. `_structure.py`
+and `_read._font_size` take them as Excel does, or refuse what Excel refuses:
+
+| in the file | NaN, infinity | -1 | 1e308 |
+|---|---|---|---|
+| `<col width>` | 0, a hidden column | 10921 units | 0 |
+| `<row ht>` | ignored | 1 pt | 0, a hidden row |
+| font `sz` | refused (NaN) | size 1 | refused |
+| `defaultColWidth` | ignored (NaN) | refused | **unverified**: ignored |
+| `defaultRowHeight` | refused (NaN) | ignored without `customHeight` | **unverified**: refused |
+
+**Unverified**, and bounded so that no mode allocates by them: other negative numbers take the -1
+column; a width past 10,922 units is 0, since `99999999999` would otherwise have `characters` mode
+build 100 GB of spaces; a height or font size past 1e30 is treated like 1e308; a `baseColWidth`
+outside 0 to 255 is 8; a font size under 1 is 1. Known deviation: a row of font size 1 is 4 pt in
+Excel, and sizes under 9 are outside the row-height table (§4.7). A very wide column in
+`characters` mode still costs its width in every row, up to the 10,922 units above.
+
 **`ReadLimits`** has `max_parts`, `max_part_bytes`, `max_total_bytes` and `max_cells`:
 
 | limit | library, `view` | `serve` |
@@ -671,6 +689,7 @@ scan, never `<dimension>`. Without it, a 4.6 KB file with a merge `A1:XFD1048576
 one 32,767-character string, which Excel allows, spills over 3,710 columns, so `A1:A1000` of that
 sheet is 3.7 million rendered cells, 2.3 GB. Empty columns past the range are therefore neither
 formatted nor counted until the layout knows which ones spilled text reaches.
+The layout's map of merges is clipped to the range read, because a merge can cover the sheet.
 
 **What the limits leave.** Parts are not equally expensive, and the costs are proportional to
 what the limits allow:

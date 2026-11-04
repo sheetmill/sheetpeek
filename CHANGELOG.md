@@ -38,6 +38,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   of many rows costs much less.
 
 ### Fixed
+- A file's impossible numbers are taken as Excel takes them, or refused where Excel refuses them,
+  where they gave a raw `ValueError`, `OverflowError` or `ZeroDivisionError`: a width or height of
+  NaN, infinity or a negative or enormous number, and a font size of NaN or 1e308.
 - OOXML's `_xHHHH_` escapes in text are decoded, as Excel decodes them: `a_x000D_b` holds a carriage
   return, not the literal text. Two known deviations come from openpyxl, in shared strings:
   `_x005F_x0041_` shows `A` where Excel shows `_x0041_`, and whitespace without `xml:space` stays.
@@ -60,6 +63,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `--sheet` keep the name as the file has it.
 - `sheetpeek serve` no longer shows absolute paths: the index shows the folder's name, and errors
   from openpyxl, which name the full path, drop the folder.
+- A column width such as `99999999999` made `characters` mode allocate its width in spaces, and a
+  merge as large as the sheet made any layout of the sheet walk 17 billion positions, whatever range
+  was read.
 - A crafted file or `?ref=` could use memory without bound; see the limits above. In particular a
   small file could ask for a dense grid of 17 billion cells, `ZipFile.read` could decompress 2 GB
   or more from a part stating 1,000 bytes, and a large entity could expand within expat's limit.

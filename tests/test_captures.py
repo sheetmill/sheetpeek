@@ -9,11 +9,14 @@ reported, never skipped silently. The other captured facts are checked row by ro
 and alignment of the overflow rows, hidden and width-0 columns, fills, clipping cases.
 """
 
+import io
 import re
 from pathlib import Path
 
 import openpyxl
 import pytest
+import xlformat
+from capture import package_probe
 from capture.layout import build
 
 import sheetpeek
@@ -549,3 +552,62 @@ def test_escapes_decode_as_excel_shows_them(excel):
 def test_control_characters_are_not_drawn(excel):
     for number in (198, 199, 200):
         assert [r.text for r in excel_runs(excel, number)] == ["ab"]
+
+
+# packages ------------------------------------------------------------------------------------
+
+PACKAGE_CAPTURE = Path(__file__).with_name("captures") / "package.tsv"
+PACKAGE_DEVIATIONS = {
+    # Excel gives a row of font size 1 a height of 4 pt; sizes under 9 are outside the row-height
+    # table (ARCHITECTURE.md §4.7).
+    "font_size_negative": "a font size outside the row-height table",
+}
+
+
+def package_rows():
+    for line in PACKAGE_CAPTURE.read_text(encoding="utf-8").splitlines():
+        if not line.startswith(("#", "case\t")):
+            name, outcome, *sizes = line.split("\t")
+            yield name, outcome, sizes
+
+
+@pytest.mark.excel
+def test_every_package_case_is_captured():
+    assert [name for name, _, _ in package_rows()] == [name for name, _ in package_probe.CASES]
+
+
+@pytest.mark.excel
+@pytest.mark.parametrize(
+    ("name", "outcome", "sizes"), list(package_rows()), ids=lambda v: str(v)[:30]
+)
+def test_a_package_is_taken_as_excel_takes_it(name, outcome, sizes):
+    case = dict(package_probe.CASES)[name]
+    data = io.BytesIO(case(package_probe.base()))
+    if outcome == "refused":
+        with pytest.raises(sheetpeek.PackageError):
+            sheetpeek.read(data)
+        return
+    sheet = sheetpeek.read(data)
+    rendered = sheet.layout("excel", show_hidden=True)
+    sheetpeek.render(rendered, "html")
+    sheet.layout("characters")
+    sheet.layout("none")
+    _, _, width, height, _, _, font_size = sizes
+    assert sheet.cell(1, 1).value == 111
+    assert sheet.cell(1, 1).style.font.size == float(font_size)
+    points = rendered.columns[0].width_pt
+    normal = sheet.normal_font
+    expected = (
+        xlformat.column_metrics(float(width), xlformat.Font(normal.name, normal.size)).points
+        if float(width)
+        else 0.0
+    )
+    # AppleScript gives the widest column to five figures, 10921.
+    assert abs(points - expected) <= (6 if float(width) > 255 else 0), (points, expected)
+    if name not in PACKAGE_DEVIATIONS:
+        assert rendered.rows[0].height_pt == float(height)
+    REPORT["package"] = (
+        f"package: {len(package_probe.CASES)} cases compared with Excel, "
+        f"{len(PACKAGE_DEVIATIONS)} known deviations: "
+        + "; ".join(f"{case} ({why})" for case, why in PACKAGE_DEVIATIONS.items())
+    )

@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import datetime as dt
 import io
+import math
 import os
 import re
 import zipfile
@@ -55,6 +56,7 @@ DATE_FALLBACK_WARNING = (
     "(1900-02-29) shows as 1900-02-28"
 )
 _FALLBACK_FONT = Font("Calibri", 11.0)
+_LARGEST_FONT = 1e30  # 1e308 is captured as refused; sizes between 409 and it are unverified
 _HORIZONTAL: dict[str | None, HorizontalAlignment] = {
     None: "general",
     "general": "general",
@@ -241,6 +243,8 @@ class Book:
         try:
             with self._archive.open(part) as handle:
                 structure = scan(handle, relationships(self._archive, part))
+        except PackageError:
+            raise
         except Exception as error:
             raise self._unreadable(error) from error
         if ref is None:
@@ -251,6 +255,8 @@ class Book:
         warnings: list[str] = []
         try:
             cells = self._read_cells(worksheet, ref, structure, warnings) if ref else ()
+        except PackageError:
+            raise
         except Exception as error:
             raise self._unreadable(error) from error
         if structure.uncached_formulas:
@@ -391,7 +397,7 @@ class Book:
             color = None
         return Font(
             name=font.name or normal.name,
-            size=float(font.sz) if font.sz else normal.size,
+            size=_font_size(font.sz) if font.sz else normal.size,
             bold=bool(font.b),
             italic=bool(font.i),
             underline=font.u or None,
@@ -470,6 +476,14 @@ def read(
     """
     with Book(source, limits=limits) as book:
         return book.sheet(sheet, ref=ref)
+
+
+def _font_size(value: float) -> float:
+    """A font size as Excel takes it: it refuses NaN and 1e308 and makes -1 size 1 (captured)."""
+    size = float(value)
+    if not math.isfinite(size) or size > _LARGEST_FONT:
+        raise PackageError(f"a font size of {value}, which Excel refuses")
+    return size if size >= 1 else 1.0
 
 
 def _columns(structure: Structure, ref: CellRange | None) -> tuple[Column, ...]:

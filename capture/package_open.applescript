@@ -1,5 +1,6 @@
--- Open one workbook (argument 1), read A1 of its first sheet and the number of sheets, close it
--- without saving. Returns "opened<TAB>A1<TAB>sheets", or "refused<TAB>error number". A workbook
+-- Open one workbook (argument 1), read A1 of its first sheet, the number of sheets, the widths of
+-- columns A and B, the heights of rows 1 and 2 and A1's font size, close it without saving.
+-- Returns "opened" and those, tab-separated, or "refused<TAB>error number". A workbook
 -- that Excel opens under another name (a repaired copy) is reported and closed too: it is this
 -- script's own. Non-interactive: alerts are off while it runs and restored on every exit path.
 -- Touches no other open workbook; uses no clipboard.
@@ -32,7 +33,13 @@ on run argv
 			set xlWb to workbook (item 1 of opened)
 			set xlValue to value of range "A1" of worksheet 1 of xlWb
 			set xlSheets to count of worksheets of xlWb
-			set answer to "opened" & tabChar & (xlValue as text) & tabChar & (xlSheets as text) & tabChar & (item 1 of opened)
+			set xlRange to range "A1" of worksheet 1 of xlWb
+			set xlWidth to column width of xlRange
+			set xlHeight to row height of xlRange
+			set xlWidthB to column width of range "B1" of worksheet 1 of xlWb
+			set xlHeight2 to row height of range "A2" of worksheet 1 of xlWb
+			set xlFont to font size of font object of xlRange
+			set answer to "opened" & tabChar & (xlValue as text) & tabChar & (xlSheets as text) & tabChar & (xlWidth as text) & tabChar & (xlHeight as text) & tabChar & (xlWidthB as text) & tabChar & (xlHeight2 as text) & tabChar & (xlFont as text)
 			close xlWb saving no
 			my closeNew(priorNames)
 			set display alerts to true

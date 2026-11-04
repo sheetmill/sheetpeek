@@ -9,11 +9,13 @@ writers omit it or get it wrong.
 
 from __future__ import annotations
 
+import math
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from typing import IO
 
 from sheetpeek._model import CellRange
+from sheetpeek._package import PackageError
 
 _NS = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
 _REL_ID = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id"
@@ -27,6 +29,12 @@ _MERGE = f"{_NS}mergeCell"
 _HYPERLINK = f"{_NS}hyperlink"
 _SHEET_VIEW = f"{_NS}sheetView"
 _SHEET_FORMAT = f"{_NS}sheetFormatPr"
+# The numbers a file can give a column or a row, as Excel takes them (ARCHITECTURE.md §5.5). Only
+# some are captured: the rest are the nearest captured behavior, bounded, and unverified.
+_WIDEST = 10_921.0  # dialog units, what Excel makes of a width of -1 (captured)
+_WIDEST_FILE_WIDTH = _WIDEST + 1  # a file width past this is one Excel makes 0 (1e308 captured)
+_TALLEST = 1e30  # a height past this is one Excel makes 0 (1e308 captured)
+_MAX_BASE_WIDTH = 255
 
 
 @dataclass(frozen=True, slots=True)
@@ -133,7 +141,7 @@ def scan(source: IO[bytes], rels: dict[str, tuple[str, bool]] | None = None) -> 
             height = element.get("ht")
             hidden = _flag(element.get("hidden"))
             if height is not None or hidden:
-                rows[row_index] = (float(height) if height is not None else None, hidden)
+                rows[row_index] = (_row_height(height) if height is not None else None, hidden)
             if sheet_data is not None:
                 sheet_data.clear()  # the row and its cells are done
         elif tag == _COL:
@@ -142,7 +150,7 @@ def scan(source: IO[bytes], rels: dict[str, tuple[str, bool]] | None = None) -> 
                 ColumnSpec(
                     int(element.get("min", "1")),
                     int(element.get("max", element.get("min", "1"))),
-                    float(width) if width is not None else None,
+                    _column_width(width) if width is not None else None,
                     _flag(element.get("hidden")),
                 )
             )
@@ -161,11 +169,11 @@ def scan(source: IO[bytes], rels: dict[str, tuple[str, bool]] | None = None) -> 
         elif tag == _SHEET_FORMAT:
             sheet_format = dict(element.attrib)
             if (value := element.get("defaultColWidth")) is not None:
-                default_column_width = float(value)
+                default_column_width = _default_width(value)
             if (value := element.get("baseColWidth")) is not None:
-                base_column_width = int(value)
+                base_column_width = _base_width(value)
             if (value := element.get("defaultRowHeight")) is not None:
-                default_row_height = float(value)
+                default_row_height = _default_height(value)
 
     # A merged range occupies its cells even where the file has no <c> for them.
     for merge in merges:
@@ -192,6 +200,48 @@ def scan(source: IO[bytes], rels: dict[str, tuple[str, bool]] | None = None) -> 
         thick_top=_flag((sheet_format or {}).get("thickTop")),
         thick_bottom=_flag((sheet_format or {}).get("thickBottom")),
     )
+
+
+def _column_width(text: str) -> float:
+    """A ``<col width>`` as Excel takes it: a nonsense width makes a column of width 0."""
+    width = float(text)
+    if not math.isfinite(width) or width > _WIDEST_FILE_WIDTH:
+        return 0.0  # NaN, infinity and 1e308 are captured
+    if width < 0:
+        return _WIDEST_FILE_WIDTH  # -1 is captured: Excel shows 10921
+    return width
+
+
+def _row_height(text: str) -> float | None:
+    """A ``<row ht>`` as Excel takes it, or ``None`` when it ignores it."""
+    height = float(text)
+    if math.isnan(height) or math.isinf(height):
+        return None  # captured: the row is as if it stored no height
+    if height < 0:
+        return 1.0  # -1 is captured
+    return 0.0 if height > _TALLEST else height  # 1e308 is captured
+
+
+def _default_width(text: str) -> float | None:
+    """``defaultColWidth``: Excel ignores NaN (captured) and refuses a negative one (captured)."""
+    width = float(text)
+    if width < 0:
+        raise PackageError(f"defaultColWidth of {text}, which Excel refuses")
+    return width if math.isfinite(width) and width <= _WIDEST_FILE_WIDTH else None
+
+
+def _base_width(text: str) -> int:
+    """``baseColWidth``: past what Excel's own width allows, the default of 8 (unverified)."""
+    width = int(text)
+    return width if 0 <= width <= _MAX_BASE_WIDTH else 8
+
+
+def _default_height(text: str) -> float:
+    """``defaultRowHeight``: Excel refuses NaN (captured); it ignores a negative one (captured)."""
+    height = float(text)
+    if not math.isfinite(height) or height > _TALLEST:
+        raise PackageError(f"defaultRowHeight of {text}, which Excel refuses")
+    return max(height, 0.0)
 
 
 def _column_extent(row: ET.Element) -> tuple[int, int]:

@@ -5,9 +5,10 @@
 
 Each case is one small workbook holding 111 in A1 of its only sheet, with one thing changed in
 its worksheet part: a minimal ``<!DOCTYPE>``, with no entity and no external reference; another
-compression method; the part stored twice under one name (the second holding 222); or sizes in
-the central directory that are not the part's. ``package_open.applescript`` opens each one in its
-own run, under a time limit, and reads A1 back. A control opens first and last: an outcome counts
+compression method; the part stored twice under one name (the second holding 222); sizes in
+the central directory that are not the part's; or a number no column, row or font can have.
+``package_open.applescript`` opens each one in its own run, under a time limit, and reads A1, the
+sizes of columns and rows and the font size back. A control opens first and last: an outcome counts
 only between two that open. The output is ``tests/captures/package.tsv``. New cases go before the
 last control.
 """
@@ -136,6 +137,44 @@ def false_prefix(data: bytes) -> bytes:
     return _directory_sizes(padded, size=len(xml), crc=zlib.crc32(xml))
 
 
+def _edit(part: str, old: str, new: str) -> Callable[[bytes], bytes]:
+    """A case changing one piece of one part's XML."""
+
+    def case(data: bytes) -> bytes:
+        out = io.BytesIO()
+        with (
+            zipfile.ZipFile(io.BytesIO(data)) as source,
+            zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as target,
+        ):
+            for info in source.infolist():
+                body = source.read(info.filename)
+                if info.filename == part:
+                    text = body.decode()
+                    assert old in text, old
+                    body = text.replace(old, new, 1).encode()
+                target.writestr(info.filename, body)
+        return out.getvalue()
+
+    return case
+
+
+def _width(value: str) -> Callable[[bytes], bytes]:
+    col = f'<cols><col min="1" max="1" width="{value}" customWidth="1"/></cols><sheetData>'
+    return _edit(SHEET, "<sheetData>", col)
+
+
+def _height(value: str) -> Callable[[bytes], bytes]:
+    return _edit(SHEET, '<row r="1"', f'<row r="1" ht="{value}" customHeight="1"')
+
+
+def _sheet_format(attribute: str, value: str) -> Callable[[bytes], bytes]:
+    return _edit(SHEET, "<sheetFormatPr ", f'<sheetFormatPr {attribute}="{value}" ')
+
+
+def _font_size(value: str) -> Callable[[bytes], bytes]:
+    return _edit("xl/styles.xml", '<sz val="11"', f'<sz val="{value}"')
+
+
 CASES: tuple[tuple[str, Callable[[bytes], bytes]], ...] = (
     ("control", control),
     ("doctype", doctype),
@@ -145,6 +184,25 @@ CASES: tuple[tuple[str, Callable[[bytes], bytes]], ...] = (
     ("size_smaller", false_smaller),
     ("size_larger", false_larger),
     ("size_prefix", false_prefix),
+    ("width_nan", _width("nan")),
+    ("width_NaN", _width("NaN")),
+    ("width_inf", _width("inf")),
+    ("width_INF", _width("INF")),
+    ("width_negative", _width("-1")),
+    ("width_1e308", _width("1e308")),
+    ("height_nan", _height("nan")),
+    ("height_NaN", _height("NaN")),
+    ("height_inf", _height("inf")),
+    ("height_INF", _height("INF")),
+    ("height_negative", _height("-1")),
+    ("height_1e308", _height("1e308")),
+    ("font_size_1e308", _font_size("1e308")),
+    ("font_size_nan", _font_size("nan")),
+    ("font_size_negative", _font_size("-1")),
+    ("default_width_nan", _sheet_format("defaultColWidth", "nan")),
+    ("default_width_negative", _sheet_format("defaultColWidth", "-1")),
+    ("default_height_nan", _edit(SHEET, 'defaultRowHeight="15"', 'defaultRowHeight="nan"')),
+    ("default_height_negative", _edit(SHEET, 'defaultRowHeight="15"', 'defaultRowHeight="-1"')),
     ("control_again", control),
 )
 
@@ -163,7 +221,15 @@ def build() -> list[Path]:
 
 def _version() -> str:
     result = subprocess.run(
-        ["gtimeout", "20", "osascript", "-e", 'tell application "Microsoft Excel" to get version'],
+        [
+            "gtimeout",
+            "-k",
+            "5",
+            "20",
+            "osascript",
+            "-e",
+            'tell application "Microsoft Excel" to get version',
+        ],
         capture_output=True,
         text=True,
         check=False,
@@ -174,15 +240,16 @@ def _version() -> str:
 def _open(path: Path) -> str:
     """One case in its own ``osascript``; alerts are restored even when the limit stops it."""
     script = Path(__file__).with_name("package_open.applescript")
+    # -k: osascript waiting for an answer from Excel does not stop for SIGTERM.
     result = subprocess.run(
-        ["gtimeout", TIME_LIMIT, "osascript", str(script), str(path)],
+        ["gtimeout", "-k", "5", TIME_LIMIT, "osascript", str(script), str(path)],
         capture_output=True,
         text=True,
         check=False,
     )
-    if result.returncode == 124:
+    if result.returncode in (124, 137):
         restore = Path(__file__).with_name("restore_alerts.applescript")
-        subprocess.run(["gtimeout", "20", "osascript", str(restore)], check=False)
+        subprocess.run(["gtimeout", "-k", "5", "20", "osascript", str(restore)], check=False)
         return f"timed out after {TIME_LIMIT} s"
     if result.returncode != 0:
         raise SystemExit(f"{path.name}: {result.stderr.strip()}")
@@ -201,8 +268,9 @@ def run() -> None:
     with OUTPUT.open("w", encoding="utf-8") as out:
         out.write(f"# suite: package (capture.package_probe); Excel {version} for Mac, en_US\n")
         out.write(f"# captured: {dt.date.today().isoformat()}; method: open with alerts off, ")
-        out.write("read A1 (111 unless the case changes it) and the number of sheets\n")
-        out.write("case\toutcome\n")
+        out.write("read A1 (111 unless the case changes it), the number of sheets, the widths of ")
+        out.write("A and B, the heights of rows 1 and 2, and A1's font size\n")
+        out.write("case\toutcome\tA1\tsheets\twidth A\theight 1\twidth B\theight 2\tfont size\n")
         out.writelines(rows)
     print(f"{len(rows)} rows written to {OUTPUT}")
 
