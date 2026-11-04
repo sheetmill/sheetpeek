@@ -147,3 +147,7 @@ anyway: they do not make reading safe on a small machine, because some parts are
 | `max_cells` | 100,000,000 | 1,048,576 |
 
 Both commands take `--max-parts`, `--max-part-bytes`, `--max-total-bytes` and `--max-cells`.
+
+CSV and TSV output keeps a text such as `=1+1` as it is, because it is the cell's text. A
+spreadsheet opening that file may treat it as a formula, so be careful with output made from a file
+you do not trust.
