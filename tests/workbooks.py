@@ -31,7 +31,9 @@ def rewrite(path: Path, part: str, edit: Callable[[str], str]) -> Path:
     with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as archive:
         for info, data in items:
             if info.filename == part:
-                text = data.decode()
+                # lxml, when installed, writes <v/> or <v></v> where the standard library writes
+                # <v />, and the edits name the standard library's form.
+                text = re.sub(r"(?<! )/>", " />", data.decode()).replace("<v></v>", "<v />")
                 changed = edit(text)
                 assert changed != text, f"edit of {part} changed nothing"
                 data = changed.encode()
