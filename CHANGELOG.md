@@ -45,6 +45,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   keeps them.
 
 ### Security
+- Markdown output shows a cell's text literally. Only `\\` and `|` were escaped, so a workbook could
+  put HTML, links and images in the output through a cell such as `<SCRIPT>alert(2)</SCRIPT>` or
+  `[a](javascript:alert(1))`, and a line break of its own into the table.
 - A theme color is used only if it is one. Any text in a crafted theme's `srgbClr` or `sysClr` went
   into the HTML as it stood, inside a `style` attribute, so a workbook could put markup and scripts
   in the page, and it crashed the `rich` backend.

@@ -2,11 +2,18 @@
 
 from __future__ import annotations
 
+import re
 from typing import Literal, TextIO
 
 from sheetpeek._rendered import Mode, RenderedCell, RenderedSheet
 
 _RULE = {"right": "---:", "center": ":---:"}
+# What makes text act as markup inside a table cell, which holds inline content only, so line-start
+# markers such as # and > are inert. $ is GitHub's math, @ its mentions.
+_MARKUP = re.compile(r"[\\`*_\[\]<&~|$@]")
+# GFM's bare autolinks. An email address stays one in cmark-gfm whatever is escaped: the same text,
+# as a mailto: link.
+_AUTOLINK = re.compile(r"(?i)\b(?:(?:https?|ftp|mailto|xmpp)(?=:)|www(?=\.))")
 
 
 class MarkdownBackend:
@@ -52,8 +59,9 @@ class MarkdownBackend:
 
     def cell_text(self, cell: RenderedCell) -> str:
         """A cell's text escaped for a table cell, with emphasis if asked for."""
-        text = cell.lines[0].replace("\\", "\\\\").replace("|", "\\|")
-        text = text.replace("\r\n", "\n").replace("\n", "<br>")
+        # A lone carriage return is no line break in Excel (§4.1), and would end the table's row.
+        text = cell.lines[0].replace("\r\n", "\n").replace("\r", "")
+        text = _escape(text).replace("\n", "<br>")
         if self.emphasis and text.strip() and cell.font is not None:
             if cell.font.italic:
                 text = f"*{text}*"
@@ -64,3 +72,9 @@ class MarkdownBackend:
 
 def _line(cells: list[str]) -> str:
     return "| " + " | ".join(cells) + " |\n"
+
+
+def _escape(text: str) -> str:
+    """Text that a CommonMark or GFM renderer shows literally, whether it allows HTML or not."""
+    escaped = _MARKUP.sub(lambda m: "\\" + m[0], text)
+    return _AUTOLINK.sub(lambda m: f"{m[0]}\\", escaped)

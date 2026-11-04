@@ -710,6 +710,14 @@ HTML, and `serve`'s log lines, since a request line is anyone's and overriding
 `log_message` gives up `http.server`'s own escaping. The model keeps the original, so `--sheet`
 matches the name as the file has it. In `serve`, sheet names in pages are only escaped for HTML.
 
+**What reaches markup.** The HTML backend escapes cell text and sheet and font names; a theme color
+is used only if it is six hex digits, since it goes into a `style` attribute. Markdown escapes what
+acts as markup in a table cell, which holds inline content only: `\\`, `` ` ``, `*`, `_`, `[`, `]`,
+`<`, `&`, `~`, `|`, `$` and `@`, and the first character after a bare link's scheme or `www`, with no
+other change, so numbers stay readable. Checked with cmark-gfm, markdown-it and mistune, with HTML
+allowed. A lone carriage return is dropped, since it would end the row. An email address remains a
+link in cmark-gfm whatever is escaped: the same text, as `mailto:`.
+
 **One open file.** `Book` opens a path once, for the check and for every read after it, so a path
 swapped after the check is not what gets read. A file overwritten in place during a read still
 could be, and `Book` is for one thread at a time. openpyxl's check of the file's extension is

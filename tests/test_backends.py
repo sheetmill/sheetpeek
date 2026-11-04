@@ -186,3 +186,28 @@ def test_separator_must_be_one_character():
         TextBackend(" | ")
     with pytest.raises(ValueError, match="'first' or 'letters'"):
         MarkdownBackend("none")
+
+
+@pytest.mark.parametrize(
+    ("text", "cell"),
+    [
+        ("<SCRIPT>alert(2)</SCRIPT>", r"\<SCRIPT>alert(2)\</SCRIPT>"),
+        ("[a](javascript:x)", r"\[a\](javascript:x)"),
+        ("`c` *e* _f_ ~s~", r"\`c\` \*e\* \_f\_ \~s\~"),
+        ("AT&T &amp;", r"AT\&T \&amp;"),
+        ("a|b\\", r"a\|b\\"),
+        ("$1 @x", r"\$1 \@x"),
+        ("http://x.example www.x.example", r"http\://x.example www\.x.example"),
+        ("first_x000A_<b>", r"first<br>\<b>"),  # the break it generates stays a tag
+        ("a_x000D__x000A_b", "a<br>b"),
+        ("a_x000D_| x |", r"a\| x \|"),  # a lone carriage return would end the row
+        ("-4.3% 1,234.50 # 12:30", "-4.3% 1,234.50 # 12:30"),  # no needless escapes
+    ],
+)
+def test_markdown_shows_text_literally(tmp_path, text, cell):
+    wb = openpyxl.Workbook()
+    wb.active["A1"] = "h"
+    wb.active["A2"] = text
+    path = tmp_path / "book.xlsx"
+    wb.save(path)
+    assert sheetpeek.render(path, "markdown").splitlines()[2] == f"| {cell} |"
