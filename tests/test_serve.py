@@ -7,9 +7,10 @@ import threading
 import openpyxl
 import pytest
 
-from sheetpeek import cli
+from sheetpeek import ReadLimits, _serve, cli
+from sheetpeek._package import SERVE_LIMITS
 from sheetpeek._serve import make_server, resolve
-from tests.workbooks import save
+from tests.workbooks import SHEET1, replace_part, rewrite, save
 
 
 @pytest.fixture
@@ -40,9 +41,10 @@ def server(folder):
     server.server_close()
 
 
-def get(server, path, method="GET"):
+def get(server, path, method="GET", host=None):
     connection = http.client.HTTPConnection(*server.server_address[:2], timeout=5)
-    connection.request(method, path)  # sent as given: no client-side normalization
+    headers = {} if host is None else {"Host": host}
+    connection.request(method, path, headers=headers)  # sent as given: no client normalization
     response = connection.getresponse()
     body = response.read().decode()
     connection.close()
@@ -113,3 +115,173 @@ def test_command_line_defaults(folder, capsys):
     assert (args.host, args.port) == ("127.0.0.1", 8000)
     assert cli.main(["serve", str(folder / "notes.txt")]) == 1
     assert "not a folder" in capsys.readouterr().err
+
+
+# --- what a request may cost, and who may ask
+
+
+@pytest.mark.parametrize(
+    "host",
+    [
+        "localhost",
+        "localhost:8000",
+        "LOCALHOST:9",
+        "127.0.0.1",
+        "127.0.0.1:12345",
+        "[::1]",
+        "[::1]:80",
+    ],
+)
+def test_loopback_names_are_answered(server, host):
+    assert get(server, "/", host=host)[0] == 200
+
+
+@pytest.mark.parametrize(
+    "host",
+    [
+        "evil.example",
+        "evil.example:8000",
+        "localhost.evil.example",
+        "127.0.0.1.evil.example",
+        "localhost:80@evil.example",
+        "sub.localhost",
+        "[::2]",
+        "",
+    ],
+)
+def test_other_names_are_refused(server, host):
+    for path in ("/", "/view/book.xlsx"):
+        status, body, _ = get(server, path, host=host)
+        assert status == 403
+        assert "hello" not in body
+        assert "book.xlsx" not in body
+
+
+def test_a_request_without_one_host_is_refused(server):
+    connection = http.client.HTTPConnection(*server.server_address[:2], timeout=5)
+    connection.putrequest("GET", "/", skip_host=True)
+    connection.endheaders()
+    assert connection.getresponse().status == 403
+    connection.close()
+    connection = http.client.HTTPConnection(*server.server_address[:2], timeout=5)
+    connection.putrequest("GET", "/", skip_host=True)
+    connection.putheader("Host", "localhost")
+    connection.putheader("Host", "evil.example")
+    connection.endheaders()
+    assert connection.getresponse().status == 403
+    connection.close()
+
+
+def test_the_loopback_address_it_is_bound_to_is_answered(folder):
+    try:
+        server = make_server(folder, "127.0.0.2", 0)
+    except OSError:
+        pytest.skip("this system has no 127.0.0.2")
+    thread = threading.Thread(target=server.serve_forever, args=(0.01,), daemon=True)
+    thread.start()
+    try:
+        assert get(server, "/", host=f"127.0.0.2:{server.server_address[1]}")[0] == 200
+        assert get(server, "/", host="evil.example")[0] == 403
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
+def test_any_name_is_answered_when_bound_elsewhere(folder):
+    server = make_server(folder, "0.0.0.0", 0)
+    thread = threading.Thread(target=server.serve_forever, args=(0.01,), daemon=True)
+    thread.start()
+    try:
+        connection = http.client.HTTPConnection("127.0.0.1", server.server_address[1], timeout=5)
+        connection.request("GET", "/", headers={"Host": "reports.example"})
+        assert connection.getresponse().status == 200
+        connection.close()
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
+def test_the_index_does_not_show_where_the_folder_is(server, folder):
+    status, body, _ = get(server, "/")
+    assert status == 200
+    assert folder.name in body
+    assert str(folder.parent) not in body
+
+
+def test_an_error_from_openpyxl_does_not_show_where_the_folder_is(server, folder):
+    # openpyxl's ValueError names the file by its full path.
+    rewrite(
+        folder / "book.xlsx",
+        "xl/workbook.xml",
+        lambda text: text.replace('state="visible"', 'state="bogus"', 1),
+    )
+    status, body, _ = get(server, "/view/book.xlsx")
+    assert status == 422
+    assert "Cannot read this file" in body
+    assert str(folder) not in body
+    assert str(folder.parent) not in body
+
+
+def test_a_refused_file_is_422_not_404(server, folder):
+    replace_part(folder / "book.xlsx", SHEET1, b"<!DOCTYPE x><worksheet/>")
+    status, body, _ = get(server, "/view/book.xlsx")
+    assert status == 422
+    assert "declares a DTD" in body
+
+
+def test_a_huge_ref_is_refused_without_reading_it(server):
+    status, body, _ = get(server, "/view/book.xlsx?ref=A1:XFD1048576")
+    assert status == 422
+    assert "more than the limit of 1048576" in body
+    assert SERVE_LIMITS.max_cells == 1 << 20  # one full column is allowed
+
+
+def test_the_limits_can_be_changed(folder):
+    server = make_server(folder, port=0, limits=ReadLimits(max_parts=1))
+    thread = threading.Thread(target=server.serve_forever, args=(0.01,), daemon=True)
+    thread.start()
+    try:
+        assert get(server, "/view/book.xlsx")[0] == 422
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
+def test_a_read_that_gets_no_slot_is_turned_away(server, monkeypatch):
+    monkeypatch.setattr(_serve, "_SLOT_WAIT", 0.01)
+    slots = server.RequestHandlerClass.slots
+    assert slots.acquire(blocking=False)
+    assert slots.acquire(blocking=False)
+    try:
+        status, body, response = get(server, "/view/book.xlsx")
+        assert status == 503
+        assert response.getheader("Retry-After") == "5"
+        assert "hello" not in body
+        assert get(server, "/")[0] == 200  # the index reads no workbook
+    finally:
+        slots.release()
+        slots.release()
+    assert get(server, "/view/book.xlsx")[0] == 200
+
+
+def test_a_failed_read_gives_its_slot_back(server):
+    for _ in range(5):
+        assert get(server, "/view/broken.xlsx")[0] == 422
+    assert get(server, "/view/book.xlsx")[0] == 200
+
+
+def test_a_read_past_the_layout_limit_is_refused(folder, tmp_path):
+    wb = openpyxl.Workbook()
+    wb.active["A1"] = "1" * 32_767
+    save(wb, folder / "note.xlsx")
+    server = make_server(folder, port=0)
+    thread = threading.Thread(target=server.serve_forever, args=(0.01,), daemon=True)
+    thread.start()
+    try:
+        status, body, _ = get(server, "/view/note.xlsx?ref=A1:A1000")
+        assert status == 422
+        assert "columns spilled text reaches" in body
+        assert get(server, "/view/note.xlsx")[0] == 200
+    finally:
+        server.shutdown()
+        server.server_close()

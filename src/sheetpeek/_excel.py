@@ -23,6 +23,7 @@ from sheetpeek._layout import (
     _Grid,
     _Origin,
     _Shown,
+    check_area,
 )
 from sheetpeek._model import Column, Row, Sheet
 from sheetpeek._rendered import RenderedCell, RenderedColumn, RenderedRow, RenderedSheet, TextRun
@@ -89,7 +90,10 @@ def lay_out(
         return blocks[key]
 
     grid.units = units
-    heights = [_fitted(grid, i, row, sheet, widths, base, fonts) for i, row in enumerate(rows)]
+    read = [p for p in range(len(every)) if p not in added]
+    heights = [
+        _fitted(grid, i, row, sheet, read, widths, base, fonts) for i, row in enumerate(rows)
+    ]
     layout = _Points(grid, widths, heights, base, fonts)
     rendered_rows, kept = layout.render()
     x0 = layout.xs[kept[0]]
@@ -112,6 +116,7 @@ def _fitted(
     i: int,
     row: Row,
     sheet: Sheet,
+    read: list[int],
     widths: list[float],
     base: xlformat.ColumnMetrics,
     fonts: _Fonts,
@@ -120,9 +125,7 @@ def _fitted(
     height = row_height(row, sheet)
     if not fits_cells(row, sheet):
         return height
-    for p in range(len(grid.columns)):
-        if p in grid.added:
-            continue
+    for p in read:
         cell = grid.cell(i, p)
         height = max(height, font_row_height(cell.font))
         # A merged cell's font counts, its wrapped lines do not (captured).
@@ -196,6 +199,7 @@ class _Points:
         real = [p for p in range(len(grid.columns)) if p not in grid.added]
         reached = [p for low, high in spans for p in (low, high) if p in grid.added]
         kept = list(range(min([*reached, real[0]]), max([*reached, real[-1]]) + 1))
+        check_area(grid.sheet, len(grid.rows), len(kept))
         x0 = self.xs[kept[0]]
         result = []
         for i, row in enumerate(grid.rows):

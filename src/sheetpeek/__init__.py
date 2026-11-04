@@ -20,6 +20,7 @@ from sheetpeek._model import (
     SheetState,
     VerticalAlignment,
 )
+from sheetpeek._package import LimitError, PackageError, ReadLimits
 from sheetpeek._read import Book, open, read  # noqa: A004 - sheetpeek.open, like gzip.open
 from sheetpeek._rendered import (
     Alignment,
@@ -49,7 +50,10 @@ __all__ = [
     "Font",
     "Gap",
     "HorizontalAlignment",
+    "LimitError",
     "Mode",
+    "PackageError",
+    "ReadLimits",
     "RenderedCell",
     "RenderedColumn",
     "RenderedRow",

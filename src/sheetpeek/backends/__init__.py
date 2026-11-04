@@ -14,6 +14,7 @@ from collections.abc import Callable
 from typing import IO, Protocol, TextIO, runtime_checkable
 
 from sheetpeek._model import CellRange, Sheet
+from sheetpeek._package import ReadLimits
 from sheetpeek._rendered import Mode, RenderedSheet
 from sheetpeek.backends.delimited import DelimitedBackend
 from sheetpeek.backends.html import HTMLBackend
@@ -81,6 +82,7 @@ def render(
     sheet: str | None = None,
     ref: str | CellRange | None = None,
     out: TextIO | None = None,
+    limits: ReadLimits | None = None,
 ) -> str | None:
     """Render a sheet with a backend.
 
@@ -93,6 +95,8 @@ def render(
         sheet: The sheet to read, when ``source`` is a workbook.
         ref: The range to read, when ``source`` is a workbook.
         out: A text stream to write to. Without one, the output is returned as a string.
+        limits: What reading may cost, when ``source`` is a workbook. By default,
+            ``ReadLimits()``.
 
     Returns:
         The output, or ``None`` when it was written to ``out``.
@@ -104,7 +108,7 @@ def render(
         if not isinstance(source, Sheet):
             from sheetpeek._read import read
 
-            source = read(source, sheet, ref=ref)
+            source = read(source, sheet, ref=ref, limits=limits)
         rendered = source.layout(backend.mode)
     if out is not None:
         backend.render(rendered, out)

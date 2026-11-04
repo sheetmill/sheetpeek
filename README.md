@@ -99,6 +99,10 @@ pip install sheetpeek
 pip install "sheetpeek[rich]"   # with styled terminal output
 ```
 
+A file from someone you do not trust is checked before anything parses it, and `limits=` sets what
+a read may cost; the documentation's usage page has the details. `sheetpeek serve` has no
+authentication: with `--host`, anyone who can reach the address can read the folder.
+
 Python 3.11 or later. Depends on `openpyxl` and `xlformat`.
 
 ## Related packages

@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `ReadLimits`, and `limits=` on `read`, `open` and `render`: `max_parts`, `max_part_bytes` and
+  `max_total_bytes` for the package, and `max_cells` for the grid area of what is read and laid out.
+  `sheetpeek view` and `serve` take `--max-parts`, `--max-part-bytes`, `--max-total-bytes` and
+  `--max-cells`.
+- `PackageError`, a `ValueError`, and `LimitError`, a `PackageError`.
+- `Sheet.max_cells`, which a layout of the sheet keeps to.
+
+### Changed
+- Every file is checked before anything parses it. These are now refused: a part declaring a DTD,
+  in any encoding, under any part name; a stated size that is not the part's size; a compression
+  method other than stored or deflate; an encrypted part; a part named twice. Excel opens none of
+  those it was tried with (all but encryption).
+- `Book` opens a path once, so a book is for one thread at a time.
+- A file openpyxl cannot read raises `PackageError`, with openpyxl's error as its cause, in place of
+  whatever openpyxl raised: `BadZipFile`, `KeyError`, `OSError`, `ParseError`,
+  `InvalidFileException`. A path that cannot be opened still raises its `OSError`.
+- The file's extension is no longer checked: a valid workbook reads under any name. `.xls` and
+  `.xlsb` files keep their advice to convert them, recognized by their content, then their name.
+- `sheetpeek serve` has lower limits, refusing for example a sheet of more than 1,048,576 cells
+  unless `?ref=` asks for less. A refused file is a 422.
+- `sheetpeek serve` reads two workbooks at a time, and answers 503 with `Retry-After` when no slot
+  frees up within 2 seconds.
+- Layout no longer formats the empty columns it may add for spilled text, so a long text in a sheet
+  of many rows costs much less.
+
+### Security
+- `sheetpeek serve`, bound to a loopback address, answers only to `localhost`, `127.0.0.1`, `[::1]`
+  and that address, with 403 otherwise. Any host name was answered, so DNS rebinding could let a web
+  page read the folder's sheets.
+- `sheetpeek serve` no longer shows absolute paths: the index shows the folder's name, and errors
+  from openpyxl, which name the full path, drop the folder.
+- A crafted file or `?ref=` could use memory without bound; see the limits above. In particular a
+  small file could ask for a dense grid of 17 billion cells, `ZipFile.read` could decompress 2 GB
+  or more from a part stating 1,000 bytes, and a large entity could expand within expat's limit.
+
 ## [0.1.0] - 2026-10-31
 
 First release.

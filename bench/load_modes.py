@@ -1,4 +1,4 @@
-"""Time and peak memory of reading a large workbook in each mode (ARCHITECTURE.md §5.2 and §5.4).
+"""Time and peak memory of reading a large workbook in each mode (ARCHITECTURE.md §5.2, §5.4, §5.5).
 
     uv run python bench/load_modes.py [DIR] [ROWS] [COLUMNS]
 
@@ -31,6 +31,7 @@ MODES = (
     "read-only-styles",
     "read-only-raw-dates",
     "structure-scan",
+    "package-check",
 )
 
 
@@ -69,7 +70,14 @@ def build(path: Path, rows: int, columns: int) -> None:
 def measure(path: Path, mode: str) -> None:
     """Run one mode in this process and print one line."""
     start = time.perf_counter()
-    if mode == "structure-scan":
+    if mode == "package-check":
+        from sheetpeek._package import ReadLimits, open_package
+
+        with path.open("rb") as handle:
+            open_package(handle, ReadLimits(), str(path)).close()
+        loaded = time.perf_counter()
+        cells = 0
+    elif mode == "structure-scan":
         from sheetpeek._package import worksheet_parts
         from sheetpeek._structure import scan
 

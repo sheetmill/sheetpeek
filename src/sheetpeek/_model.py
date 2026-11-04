@@ -248,6 +248,8 @@ class Sheet:
     """``<sheetFormatPr thickBottom>``: unlisted rows are 1 pt taller."""
     show_gridlines: bool = True
     warnings: tuple[str, ...] = field(default=())
+    max_cells: int | None = field(default=None, repr=False, compare=False)
+    """The largest grid its layout may build (:class:`~sheetpeek.ReadLimits`), or ``None``."""
 
     def cell(self, row: int, column: int) -> Cell:
         """The cell at a sheet position inside ``ref``.
@@ -290,6 +292,8 @@ class Sheet:
         Raises:
             ValueError: an unknown mode, a scale that is not positive, or ``scale`` or
                 ``max_width`` in ``excel`` mode.
+            LimitError: The rows times the columns, with those added for spilled text, exceed
+                the ``max_cells`` the sheet was read with.
         """
         from sheetpeek._layout import layout
 

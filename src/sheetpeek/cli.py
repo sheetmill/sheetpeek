@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import importlib.util
 import sys
 from collections.abc import Sequence
 from typing import TextIO
 
+from sheetpeek._package import SERVE_LIMITS, PackageError, ReadLimits
 from sheetpeek._read import open as open_book
 from sheetpeek.backends import (
     Backend,
@@ -52,23 +54,59 @@ def _parser() -> argparse.ArgumentParser:
     view.add_argument("--row-headings", action="store_true", help="show row numbers")
     view.add_argument("--hidden", action="store_true", help="show hidden rows and columns")
     view.add_argument("--list", action="store_true", help="list the sheets and exit")
+    _add_limits(view, ReadLimits())
     serve = commands.add_parser(
         "serve",
         help="serve a folder of workbooks as HTML",
         description="Serve the .xlsx files under a folder as HTML pages, read-only. Binds to "
-        "127.0.0.1 unless --host says otherwise, and reads only .xlsx files inside the folder.",
+        "127.0.0.1 unless --host says otherwise, and reads only .xlsx files inside the folder. "
+        "There is no authentication: with --host, anyone who can reach the address can read "
+        "every workbook in the folder.",
     )
     serve.add_argument("folder", help="the folder of workbooks")
     serve.add_argument("--host", default="127.0.0.1", help="address to bind (default: 127.0.0.1)")
     serve.add_argument("-p", "--port", type=int, default=8000, help="port (default: 8000)")
+    _add_limits(serve, SERVE_LIMITS)
     return parser
+
+
+def _add_limits(command: argparse.ArgumentParser, defaults: ReadLimits) -> None:
+    """The options behind ``ReadLimits``: ``--max-parts`` for ``max_parts``, and so on."""
+    helps = {
+        "max_parts": "parts (files) in the package",
+        "max_part_bytes": "decompressed bytes of any one part",
+        "max_total_bytes": "decompressed bytes of all parts",
+        "max_cells": "rows times columns of a sheet read or laid out",
+    }
+    for field in dataclasses.fields(ReadLimits):
+        default = getattr(defaults, field.name)
+        command.add_argument(
+            "--" + field.name.replace("_", "-"),
+            dest=field.name,
+            type=_count,
+            default=default,
+            metavar="N",
+            help=f"refuse more than this many {helps[field.name]} (default: {default})",
+        )
+
+
+def _count(text: str) -> int:
+    value = int(text)
+    if value < 0:
+        raise argparse.ArgumentTypeError(f"not a count: {text}")
+    return value
+
+
+def _limits(args: argparse.Namespace) -> ReadLimits:
+    values = {field.name: getattr(args, field.name) for field in dataclasses.fields(ReadLimits)}
+    return ReadLimits(**values)
 
 
 def _serve(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
     from sheetpeek._serve import make_server
 
     try:
-        server = make_server(args.folder, args.host, args.port)
+        server = make_server(args.folder, args.host, args.port, limits=_limits(args))
     except (NotADirectoryError, OSError) as error:
         err.write(f"sheetpeek: {error}\n")
         return 1
@@ -86,7 +124,7 @@ def _serve(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
 
 def _view(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
     try:
-        with open_book(args.file) as book:
+        with open_book(args.file, limits=_limits(args)) as book:
             if args.list:
                 for name in book.sheet_names:
                     out.write(name + "\n")
@@ -94,6 +132,9 @@ def _view(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
             sheet = book.sheet(args.sheet, ref=args.ref)
     except FileNotFoundError:
         err.write(f"sheetpeek: no such file: {args.file}\n")
+        return 1
+    except PackageError as error:
+        err.write(f"sheetpeek: cannot read {args.file}: {error}\n")
         return 1
     except (KeyError, ValueError) as error:
         message = error.args[0] if error.args else str(error)
@@ -103,7 +144,11 @@ def _view(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
         err.write(f"sheetpeek: cannot read {args.file}: {error}\n")
         return 1
     backend = _backend(args, out)
-    rendered = sheet.layout(backend.mode, show_hidden=args.hidden)
+    try:
+        rendered = sheet.layout(backend.mode, show_hidden=args.hidden)
+    except PackageError as error:
+        err.write(f"sheetpeek: cannot show {args.file}: {error}\n")
+        return 1
     for warning in rendered.warnings:
         err.write(f"sheetpeek: warning: {warning}\n")
     backend.render(rendered, out)

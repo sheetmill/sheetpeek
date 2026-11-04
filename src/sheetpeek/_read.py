@@ -36,7 +36,14 @@ from sheetpeek._model import (
     SheetState,
     VerticalAlignment,
 )
-from sheetpeek._package import relationships, worksheet_parts
+from sheetpeek._package import (
+    LimitError,
+    PackageError,
+    ReadLimits,
+    open_package,
+    relationships,
+    worksheet_parts,
+)
 from sheetpeek._structure import Structure, scan
 
 Source = str | os.PathLike[str] | IO[bytes]
@@ -93,36 +100,68 @@ def disable_date_conversion(workbook: Any) -> bool:
 
 
 class Book:
-    """An open workbook, for reading several sheets with one load. Use :func:`open`."""
+    """An open workbook, for reading several sheets with one load. Use :func:`open`.
 
-    def __init__(self, source: Source) -> None:
+    Use a book from one thread at a time: its readers share one open file.
+    """
+
+    def __init__(self, source: Source, *, limits: ReadLimits | None = None) -> None:
+        self._limits = limits or ReadLimits()
+        self._path: str | None = None
+        name: str | None
+        handle: IO[bytes]
         if isinstance(source, str | os.PathLike):
-            cells_source: Any = os.fspath(source)
-            parts_source: Any = cells_source
+            # One open file for the check and for every read after it, so that what was checked
+            # is what is read. A missing or unreadable path raises its own OSError here.
+            self._path = name = os.fspath(source)
+            handle = io.open(self._path, "rb")  # noqa: SIM115, UP020 - kept open; open() here is this module's
         else:
-            data = source.read()
-            cells_source, parts_source = io.BytesIO(data), io.BytesIO(data)
-        self._workbook = load_workbook(
-            cells_source, read_only=True, data_only=True, keep_links=False
-        )
+            given = getattr(source, "name", None)
+            name = given if isinstance(given, str) else None
+            handle = io.BytesIO(source.read())
+        self._handle = handle
+        self._workbook: Any = None
+        self._archive: zipfile.ZipFile | None = None
         try:
+            self._archive = open_package(handle, self._limits, name)
+            self._workbook = load_workbook(handle, read_only=True, data_only=True, keep_links=False)
             self._raw_dates = disable_date_conversion(self._workbook)
-            self._archive = zipfile.ZipFile(parts_source)
-        except BaseException:
-            self._workbook.close()
+            self._parts = worksheet_parts(self._archive)
+            self._epoch = self._workbook.epoch
+            self._theme = theme_colors(getattr(self._workbook, "loaded_theme", None))
+            palette = getattr(self._workbook, "_colors", None)
+            self._palette: Sequence[str] = (
+                palette
+                if isinstance(palette, Sequence) and all(isinstance(c, str) for c in palette)
+                else COLOR_INDEX
+            )
+            self._normal_font = self._read_normal_font()
+        except PackageError:
+            self.close()
             raise
-        self._parts = worksheet_parts(self._archive)
-        self._epoch = self._workbook.epoch
-        self._theme = theme_colors(getattr(self._workbook, "loaded_theme", None))
-        palette = getattr(self._workbook, "_colors", None)
-        self._palette: Sequence[str] = (
-            palette
-            if isinstance(palette, Sequence) and all(isinstance(c, str) for c in palette)
-            else COLOR_INDEX
-        )
-        self._normal_font = self._read_normal_font()
+        except Exception as error:  # openpyxl raises many kinds on a file it cannot read
+            self.close()
+            raise self._unreadable(error) from error
+        except BaseException:
+            self.close()
+            raise
         self._default_style = CellStyle("General", self._normal_font)
         self._styles: dict[Any, CellStyle] = {}
+
+    def _unreadable(self, error: Exception) -> PackageError:
+        """The refusal for a failure to read: its reason, without where the file lives."""
+        reason = str(error.__cause__ or error).split("\n")[0]
+        if self._path:
+            reason = reason.replace(self._path, os.path.basename(self._path))
+        return PackageError(f"cannot read this workbook: {reason}")
+
+    def _check_area(self, ref: CellRange) -> None:
+        area = (ref.max_row - ref.min_row + 1) * (ref.max_col - ref.min_col + 1)
+        if area > self._limits.max_cells:
+            raise LimitError(
+                f"{ref} is {area} cells, more than the limit of {self._limits.max_cells}: "
+                "read a smaller range"
+            )
 
     def __enter__(self) -> Book:
         return self
@@ -137,8 +176,11 @@ class Book:
 
     def close(self) -> None:
         """Close the file."""
-        self._workbook.close()
-        self._archive.close()
+        if self._workbook is not None:
+            self._workbook.close()
+        if self._archive is not None:
+            self._archive.close()
+        self._handle.close()
 
     @property
     def sheet_names(self) -> list[str]:
@@ -161,6 +203,8 @@ class Book:
         Raises:
             KeyError: There is no sheet with that name.
             ValueError: The sheet is a chartsheet, or ``ref`` is not a range.
+            LimitError: ``ref``, or else the sheet's used range, is over ``max_cells``.
+            PackageError: The sheet's part cannot be read.
         """
         if name is None:
             name = self._default_sheet_name()
@@ -170,15 +214,26 @@ class Book:
         if not hasattr(worksheet, "iter_rows") or name not in self._parts:
             raise ValueError(f"{name!r} is not a worksheet")
         part = self._parts[name]
-        with self._archive.open(part) as handle:
-            structure = scan(handle, relationships(self._archive, part))
         if isinstance(ref, str):
             ref = CellRange.parse(ref)
+        if ref is not None:
+            self._check_area(ref)
+        assert self._archive is not None
+        try:
+            with self._archive.open(part) as handle:
+                structure = scan(handle, relationships(self._archive, part))
+        except Exception as error:
+            raise self._unreadable(error) from error
         if ref is None:
             ref = structure.used_range
+            if ref is not None:
+                self._check_area(ref)
 
         warnings: list[str] = []
-        cells = self._read_cells(worksheet, ref, structure, warnings) if ref else ()
+        try:
+            cells = self._read_cells(worksheet, ref, structure, warnings) if ref else ()
+        except Exception as error:
+            raise self._unreadable(error) from error
         if structure.uncached_formulas:
             warnings.append(
                 f"{structure.uncached_formulas} formula cell(s) have no cached value and show as "
@@ -206,6 +261,7 @@ class Book:
             thick_bottom=structure.thick_bottom,
             show_gridlines=structure.show_gridlines,
             warnings=tuple(warnings),
+            max_cells=self._limits.max_cells,
         )
 
     def _default_sheet_name(self) -> str:
@@ -349,31 +405,51 @@ class Book:
         return self._font(font, _FALLBACK_FONT)
 
 
-def open(source: Source) -> Book:  # noqa: A001 - the module-level open() of gzip, tarfile, shelve
+def open(  # noqa: A001 - the module-level open() of gzip, tarfile, shelve
+    source: Source, *, limits: ReadLimits | None = None
+) -> Book:
     """Open a workbook to read several sheets with one load.
 
     Args:
         source: A path, or a binary file object (read into memory).
+        limits: What reading may cost. By default, ``ReadLimits()``; lower them for files from
+            people you do not trust.
+
+    Raises:
+        OSError: A path that cannot be opened.
+        LimitError: The file exceeds ``limits``.
+        PackageError: The file is not a readable xlsx workbook, or it is refused.
 
     Example:
         ``with sheetpeek.open("book.xlsx") as book: sheet = book.sheet("Data")``
     """
-    return Book(source)
+    return Book(source, limits=limits)
 
 
-def read(source: Source, sheet: str | None = None, *, ref: str | CellRange | None = None) -> Sheet:
+def read(
+    source: Source,
+    sheet: str | None = None,
+    *,
+    ref: str | CellRange | None = None,
+    limits: ReadLimits | None = None,
+) -> Sheet:
     """Read one sheet of a workbook.
 
     Args:
         source: A path, or a binary file object (read into memory).
         sheet: The sheet's name. By default, the sheet Excel opens on.
         ref: The range to read, such as ``"A1:H40"``. By default, the used range.
+        limits: What reading may cost. By default, ``ReadLimits()``; lower them for files from
+            people you do not trust.
 
     Raises:
+        OSError: A path that cannot be opened.
         KeyError: There is no sheet with that name.
         ValueError: The sheet is a chartsheet, or ``ref`` is not a range.
+        LimitError: The file, or the range, exceeds ``limits``.
+        PackageError: The file is not a readable xlsx workbook, or it is refused.
     """
-    with Book(source) as book:
+    with Book(source, limits=limits) as book:
         return book.sheet(sheet, ref=ref)
 
 

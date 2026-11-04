@@ -11,6 +11,14 @@ Everything below is importable from `sheetpeek`.
    :members: sheet, sheet_names, date1904, close
 ```
 
+## Limits and refusals
+
+```{eval-rst}
+.. autoclass:: sheetpeek.ReadLimits
+.. autoexception:: sheetpeek.PackageError
+.. autoexception:: sheetpeek.LimitError
+```
+
 ## The sheet model
 
 ```{eval-rst}

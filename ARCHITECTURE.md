@@ -23,6 +23,8 @@ CLI views a file and serves a folder of workbooks as HTML.
 - **Degrade, never fail.** A backend that cannot show a feature ignores it, as Markdown does
   with merges and delimited text with widths. A number format Excel would refuse falls back to
   `General`. A Normal font without glyph tables is approximated, with a warning.
+  The exception is a package refused as unsafe or a request over a limit (§5.5): those raise
+  `PackageError` or `LimitError`, since nothing can be shown of a file that may not be read.
 - **Excel is the reference.** Correct means what Excel 16 for Mac shows. ECMA-376 is secondary;
   LibreOffice is a lower-trust secondary reference.
 - Out of scope: conditional formatting, charts, images, comments, editing, any interactive UI.
@@ -592,6 +594,115 @@ A preview doesn't need this yet. A test reads
 files whose `<dimension>` is missing, too small and too large, and checks the used range and that
 no cell is dropped. The read-only iterator is given the scan's bounds explicitly.
 
+### 5.5 Untrusted files
+
+**Refusals come before anything parses the file**, in `_package.open_package`, which `Book` calls
+before `load_workbook`. openpyxl opens its own `ZipFile`, reads most parts whole and offers no
+hook, so guards around sheetpeek's own reads would not cover it. It does use the same `zipfile`
+on the same bytes, so a check of every entry covers whatever it reads, including what it reads
+lazily and whichever part it decides is the workbook.
+
+**The check**, `_package.check_package`:
+1. From the central directory, with nothing decompressed: the number of parts, each part's size
+   and the total against `ReadLimits`; a name used twice; a method other than stored or deflate;
+   encryption.
+2. One streaming pass over every entry, whatever its name: inflate it through `zlib` from its
+   local header and refuse it unless it produces exactly the stated size; hand its first bytes to
+   `_package._Prolog`.
+
+**Why the sizes must be made true.** `zipfile` stops its output at the central directory's size,
+on Python 3.11 to 3.14 and for all four methods, and a CRC of the prefix makes that read succeed.
+But `ZipFile.read` decompresses first and cuts afterward: a 1 MB deflated part stating 1,000 bytes
+peaks at 2.07 GB in 0.3 s, up to the 2 GiB `ZipExtFile.MAX_N` allows, and bzip2 and LZMA, which
+take no output limit at all, do the same without that bound. `ZipFile.open` with a bounded read
+stays at 18 MB, but openpyxl calls `read` for most parts. Measured with `bench/load_modes.py` on
+the workbook of §5.2 (108.7 MB of XML), the whole check takes 0.08 s at 31 MB peak, against 4.3 s
+for a preview. Once it has passed, every later read, openpyxl's included, can rely on the sizes.
+
+**A DTD is refused, in every part, under any name.** expat itself reads the prolog
+(`StartDoctypeDeclHandler`, stopping at the first start element, within 1 MiB), so a comment
+before the DTD, UTF-16 and any other encoding the parsers accept are seen as the parsers will see
+them; a part's name decides nothing, because `[Content_Types].xml` and the relationships name the
+parts. Without a DTD there are no entities, which removes:
+- expat's own defense as a dependency. Amplification limits exist only from expat 2.4: under
+  2.2.8 a billion-laughs part was still growing when stopped at 4 GB after 60 s. The parser also
+  differs by what is installed, since openpyxl switches to lxml or defusedxml when they are
+  present;
+- what that defense allows. It is a ratio, not a cap: a 36 KB file with one large entity used 90
+  times expands to a 3 GiB string, 5.9 GB peak.
+
+External entities were never fetched (file and HTTP, general, parameter and external subset, with
+and without lxml and defusedxml), and a refused DTD keeps it so. A part expat cannot read at all,
+such as an image, passes: no parser that would expand an entity accepts it (lxml reads UTF-32,
+which expat cannot, and leaves its entities unexpanded). An encoding expat refuses by name is
+refused here too, because lxml may accept it.
+
+**What Excel does** (suite `package`, `CAPTURING.md`): it opens none of these. A `<!DOCTYPE>`, a
+bzip2 or LZMA part, a name used twice and all three kinds of false size give error -50 with alerts
+off, between two controls that open. So a refusal never turns away a file Excel opens without a
+repair. A DTD stays refused whatever Excel does.
+
+**`ReadLimits`** has `max_parts`, `max_part_bytes`, `max_total_bytes` and `max_cells`:
+
+| limit | library, `view` | `serve` |
+|---|---|---|
+| `max_parts` | 100,000 | 10,000 |
+| `max_part_bytes` | 4 GiB | 256 MiB |
+| `max_total_bytes` | 16 GiB | 1 GiB |
+| `max_cells` | 100,000,000 | 1,048,576 (one full column) |
+
+**`max_cells` is a grid area**, not a count of populated cells. It is enforced before anything is
+allocated, on what is actually read: `ref` when given, otherwise the used range from the structure
+scan, never `<dimension>`. Without it, a 4.6 KB file with a merge `A1:XFD1048576`, a cell at
+`XFD1048576` or a row past Excel's last one reaches 6 GB in 30 s, and so does
+`?ref=A1:XFD1048576` on an ordinary file. It applies again to the layout, through `Sheet.max_cells`:
+one 32,767-character string, which Excel allows, spills over 3,710 columns, so `A1:A1000` of that
+sheet is 3.7 million rendered cells, 2.3 GB. Empty columns past the range are therefore neither
+formatted nor counted until the layout knows which ones spilled text reaches.
+
+**What the limits leave.** Parts are not equally expensive, and the costs are proportional to
+what the limits allow:
+
+| part, sizes honestly declared | on disk | time | peak |
+|---|---|---|---|
+| `sharedStrings`, 256 MiB of 24-byte entries | 0.6 MiB | 33 s | 2.5 GB |
+| `sharedStrings`, 1 GiB of 24-byte entries | 2.5 MiB | 131 s | 7.2 GB |
+| `sharedStrings`, one 1 GiB string | 1.0 MiB | 1.9 s | 2.4 GB |
+| styles or theme, 256 MiB of elements, parsed whole | 0.3 MiB | 29 s, 10 s | 6.5 GB |
+| worksheet, 1 GiB of one-cell rows | 3.0 MiB | 169 s | 2.6 GB |
+
+A lower limit only for parts parsed whole was ruled out: which parts those are is openpyxl's
+internal detail (chartsheets and drawings among them), and it finds the workbook part differently
+from sheetpeek, so a split could be evaded. The library's defaults stop what could hardly be read
+anyway and do not make it safe on a small machine: 100 million rendered cells take tens of GB. A
+service lowers them, as `serve` does.
+
+**Who reaches `serve`.** It has no upload and answers only GET and HEAD. A crafted file arrives
+through whoever can write to the folder, or a file the operator saved there; the 6.5 GB above
+needs that. Any HTTP client chooses the file, `sheet` and `ref`, with no authentication, and is
+stopped by the cell limit: a full column of one number costs 6.6 s and about 1 GB. Two reads run at
+once, each holding its slot through layout and rendering. A request that gets no slot within 2 s
+is answered 503 with `Retry-After`, not queued, since blocked threads would be unbounded too. Bound
+to a loopback address, the server answers only to `localhost`, `127.0.0.1`, `[::1]` and that
+address, with 403 otherwise: without this, DNS rebinding would let any web page read the folder's
+sheets. Only the name is compared, as Django's `ALLOWED_HOSTS` and Vite's `server.allowedHosts`
+do, because a tunnel brings its own port. Bound to anything else it answers to any name and anyone
+who can reach it can read the folder; it has no authentication.
+
+**One open file.** `Book` opens a path once, for the check and for every read after it, so a path
+swapped after the check is not what gets read. A file overwritten in place during a read still
+could be, and `Book` is for one thread at a time. openpyxl's check of the file's extension is
+therefore not reached; `_package.open_package` gives the same advice for `.xls` and `.xlsb`,
+looking at the content first and the name second.
+
+**Errors.** `PackageError` is a `ValueError`, and `LimitError` a `PackageError`, as in xlrecalc;
+the classes are separate, since xlrecalc is optional. Whatever openpyxl raises on a file it cannot
+read becomes a `PackageError` with the original as its cause, and its message drops the file's
+folder, since openpyxl's own names the full path and `serve` shows messages to clients. A path
+that cannot be opened keeps its `OSError`. **Measured for no false refusals:** 15,935 workbooks in
+two public corpora all pass the check, at about 1 ms each; `sheetpeek.open` and openpyxl agree on
+every one (2 files openpyxl cannot read, for a print title of `#N/A`).
+
 ## 6. The xlformat seam
 
 ### 6.1 The call
@@ -816,7 +927,7 @@ src/sheetpeek/
   __init__.py        public names, __version__
   _model.py          Sheet, Cell, CellStyle, Column, Row, CellRange, Font
   _rendered.py       RenderedSheet, RenderedRow, RenderedCell, RenderedColumn, Gap
-  _package.py        sheet name → worksheet part, from workbook.xml and its relationships
+  _package.py        ReadLimits, the check before reading (§5.5), sheet name → worksheet part
   _structure.py      the structure scan (§5.4)
   _read.py           the reader: openpyxl read-only, date conversion off; builds a Sheet
   _colors.py         theme parsing, tint, indexed palette
@@ -858,6 +969,9 @@ rich.print(sheet)
 
 with sheetpeek.open("book.xlsx") as book:                         # several sheets, one load
     for name in book.sheet_names: ...
+
+limits = sheetpeek.ReadLimits(max_part_bytes=2**28, max_cells=10**6)
+sheetpeek.read(upload, limits=limits)                             # a file from someone else (§5.5)
 ```
 
 **Functions, not methods (decided).** Methods such as `rs.to_html()` can be added later; they
@@ -868,17 +982,22 @@ attribute of `<dimension>`, `<mergeCell>` and `<autoFilter>` in the file format.
 sheetpeek already use openpyxl.
 
 **CLI.**
-- `sheetpeek view book.xlsx [--sheet NAME] [--ref A1:H40] [--to rich|text|markdown|csv|tsv]
-  [--headings] [--hidden] [--list]`. The default is `rich` on a terminal and `text` when piped or
-  when `rich` is not installed. Warnings go to standard error, and an unreadable file, an unknown
-  sheet or a bad range exits with status 1 and one line of explanation.
-- `sheetpeek serve DIR [--host 127.0.0.1] [--port 8000]` (`_serve.py`): a standard-library
-  `ThreadingHTTPServer`. `/` lists the `.xlsx` files under DIR, `/view/<path>` shows a
-  workbook's default sheet through the HTML backend (a fragment with headings inside the
-  server's page, with links to the other sheets), and `?sheet=` and `?ref=` choose a sheet and a
-  range. It binds to 127.0.0.1 by default and is read-only with no state: GET and HEAD only.
+- `sheetpeek view book.xlsx [--sheet NAME] [--ref A1:H40]
+  [--to rich|text|html|markdown|csv|tsv] [--column-headings] [--row-headings] [--hidden] [--list]
+  [--max-parts N] [--max-part-bytes N] [--max-total-bytes N] [--max-cells N]`. The default is
+  `rich` on a terminal and `text` when piped or when `rich` is not installed. Warnings go to
+  standard error, and an unreadable or refused file, an unknown sheet or a bad range exits with
+  status 1 and one line of explanation.
+- `sheetpeek serve DIR [--host 127.0.0.1] [--port 8000]`, with the same `--max-*` options and its
+  own defaults (§5.5) (`_serve.py`): a standard-library `ThreadingHTTPServer`. `/` lists the
+  `.xlsx` files under DIR, under the folder's name and not its path, `/view/<path>` shows a
+  workbook's default sheet through the HTML backend (a fragment with headings inside the server's
+  page, with links to the other sheets), and `?sheet=` and `?ref=` choose a sheet and a range. It
+  binds to 127.0.0.1 by default and is read-only with no state: GET and HEAD only.
   A request names a workbook only if, after resolving `..` and symbolic links, it is a regular
-  `.xlsx` file inside DIR whose path has no part starting with a dot; anything else is a 404.
+  `.xlsx` file inside DIR whose path has no part starting with a dot; anything else is a 404. A
+  refused or unreadable file is a 422, a request with another host name a 403 and one that gets no
+  read slot a 503 (§5.5). There is no authentication.
   Pages carry `Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'`, since
   they have no script.
 
@@ -1088,7 +1207,9 @@ are read.
   - each backend's output for one workbook that exercises the layout, compared with golden
     files in `tests/golden/` (regenerated on purpose with `SHEETPEEK_UPDATE_GOLDEN=1`, then read
     before committing);
-  - the command line, and that only the reader imports openpyxl.
+  - the command line, and that only the reader imports openpyxl;
+  - crafted packages (`tests/test_limits.py`), built in the test and never committed, and the
+    forms a real package may take: zip64, data descriptors, a prefixed archive, stored parts.
 - **Captures** (`tests/captures/*.tsv`, marker `excel`, in the default run): `layout.tsv` from
   route B, against which `tests/test_captures.py` checks the reach of every captured spill of
   digits in `characters` mode, with the rows where characters and points must differ listed as
@@ -1113,7 +1234,8 @@ are read.
    - a glyph-spacing correction for Aptos Narrow, for which no free metric-compatible font is
      known;
    - whether to offer the HTML fitting script (§9).
-3. **After 1.0:** a PDF backend drawing from the `excel` mode geometry (§2.1), possibly as an
+3. **A later 0.x minor:** live recalculation through `xlrecalc`, an optional sibling.
+4. **After 1.0:** a PDF backend drawing from the `excel` mode geometry (§2.1), possibly as an
    optional extra.
 
 ## 12. Prior art

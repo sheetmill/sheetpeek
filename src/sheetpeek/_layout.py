@@ -17,6 +17,7 @@ from typing import Any
 import xlformat
 
 from sheetpeek._model import Cell, CellRange, CellStyle, Column, Font, Row, Sheet
+from sheetpeek._package import LimitError
 from sheetpeek._rendered import (
     Alignment,
     Gap,
@@ -100,6 +101,15 @@ def layout(
         for p in kept
     )
     return RenderedSheet(sheet, mode, rendered_columns, rendered_rows, gap, tuple(warnings))
+
+
+def check_area(sheet: Sheet, rows: int, columns: int) -> None:
+    """Refuse a layout whose grid, with the columns added for spilled text, is over the limit."""
+    if sheet.max_cells is not None and rows * columns > sheet.max_cells:
+        raise LimitError(
+            f"{rows} rows by {columns} columns, with the columns spilled text reaches, is more "
+            f"than the limit of {sheet.max_cells} cells: read a smaller range"
+        )
 
 
 def _edge_columns(sheet: Sheet, default: int) -> tuple[list[Column], list[Column]]:
@@ -343,9 +353,11 @@ class _Grid:
         origins: list[_Origin] = []
         done_merges: set[CellRange] = set()
         covered_runs: set[tuple[int, int]] = set()
+        # Added columns are empty by definition, and there can be thousands of them in every row.
+        read = [p for p in range(len(self.columns)) if p not in self.added]
         for i, row in enumerate(self.rows):
-            for p, column in enumerate(self.columns):
-                position = (row.index, column.index)
+            for p in read:
+                position = (row.index, self.columns[p].index)
                 merge = self.merge_of.get(position)
                 cell = self.cell(i, p)
                 if merge is not None:
@@ -423,6 +435,7 @@ class _Grid:
         low = min([*reached, real[0]])
         high = max([*reached, real[-1]])
         kept = list(range(low, high + 1))
+        check_area(self.sheet, len(self.rows), len(kept))
         return canvas.rows(origins, shown, kept), kept
 
     def render_none(

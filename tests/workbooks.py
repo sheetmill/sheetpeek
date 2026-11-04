@@ -7,6 +7,7 @@ correct ``<dimension>``; the tests that need those edit the written XML directly
 from __future__ import annotations
 
 import re
+import struct
 import zipfile
 from collections.abc import Callable
 from pathlib import Path
@@ -80,3 +81,32 @@ def raw_sheet(path: Path, body: str) -> Path:
     save(wb, path)
     xml = f'<?xml version="1.0" encoding="UTF-8"?><worksheet {NS} {R_NS}>{body}</worksheet>'
     return rewrite(path, SHEET1, lambda _: xml)
+
+
+def replace_part(path: Path, part: str, data: bytes, method: int = zipfile.ZIP_DEFLATED) -> Path:
+    """Replace one part with ``data`` as it stands, in any encoding, under the given method."""
+    with zipfile.ZipFile(path) as archive:
+        items = [(i.filename, archive.read(i.filename)) for i in archive.infolist()]
+    with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as archive:
+        for name, body in items:
+            if name != part:
+                archive.writestr(name, body)
+        archive.writestr(part, data, compress_type=method)
+    return path
+
+
+def state_size(path: Path, part: str, size: int, crc: int | None = None) -> Path:
+    """Change a part's size, and its CRC, in the central directory alone."""
+    data = bytearray(path.read_bytes())
+    with zipfile.ZipFile(path) as archive:
+        position = archive.start_dir
+    while data[position : position + 4] == b"PK\x01\x02":
+        name_length, extra_length, comment_length = struct.unpack_from("<HHH", data, position + 28)
+        if bytes(data[position + 46 : position + 46 + name_length]) == part.encode():
+            struct.pack_into("<I", data, position + 24, size)
+            if crc is not None:
+                struct.pack_into("<I", data, position + 16, crc)
+            path.write_bytes(data)
+            return path
+        position += 46 + name_length + extra_length + comment_length
+    raise KeyError(part)

@@ -105,3 +105,40 @@ sheetpeek serve reports/                  # every workbook under reports/ as HTM
 `sheetpeek serve` is a small read-only web server, from the standard library: an index of the
 `.xlsx` files under the folder, and one page per sheet. It binds to 127.0.0.1 unless `--host`
 says otherwise, and it reads only `.xlsx` files inside the folder.
+
+**`serve` has no authentication.** Bound to 127.0.0.1, it answers only to `localhost`, `127.0.0.1`
+and `[::1]`, which keeps web pages in your browser from reading the folder's sheets. With `--host`,
+anyone who can reach the address can read every workbook in the folder. It reads two workbooks at
+a time and answers 503 to more.
+
+## Files from people you do not trust
+
+A workbook is a zip of XML, and a small one can ask for a great deal. Before anything parses a
+file, sheetpeek refuses a part that declares a DTD, sizes in the archive that are not the parts'
+sizes, compression methods and encryption an xlsx package does not use, and a part named twice, all
+with {class}`sheetpeek.PackageError`. {class}`sheetpeek.ReadLimits` sets
+what a read may cost, and going over it raises {class}`sheetpeek.LimitError`, a kind of
+`PackageError`, which is a `ValueError`.
+
+```python
+>>> limits = sheetpeek.ReadLimits(max_cells=4)
+>>> sheetpeek.read(path, ref="A1:B3", limits=limits)
+Traceback (most recent call last):
+sheetpeek...LimitError: A1:B3 is 6 cells, more than the limit of 4: read a smaller range
+```
+
+`max_cells` is the area of the grid read, rows times columns, whether the cells hold anything or
+not. It applies to `ref` when one is given and otherwise to the sheet's used range, and again to
+the layout, which adds columns for spilled text. The defaults refuse only what could hardly be read
+anyway: they do not make reading safe on a small machine, because some parts are held in memory
+(a part of markup read whole can take about 25 times its size). A service should lower them, as
+`sheetpeek serve` does:
+
+| limit | `read`, `open`, `view` | `serve` |
+|---|---|---|
+| `max_parts` | 100,000 | 10,000 |
+| `max_part_bytes` | 4 GiB | 256 MiB |
+| `max_total_bytes` | 16 GiB | 1 GiB |
+| `max_cells` | 100,000,000 | 1,048,576 |
+
+Both commands take `--max-parts`, `--max-part-bytes`, `--max-total-bytes` and `--max-cells`.

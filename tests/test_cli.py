@@ -81,3 +81,36 @@ def test_module_entry_point(book):
         check=True,
     )
     assert result.stdout == "1234.5\n"
+
+
+def test_view_limits(book):
+    status, _, err = run(book, "--max-parts", "1")
+    assert status == 1
+    assert "parts, more than the limit of 1" in err
+    status, _, err = run(book, "--max-cells", "1")
+    assert status == 1
+    assert "more than the limit of 1" in err
+    assert str(book.parent) not in err.replace(str(book), "")
+
+
+def test_limit_options_must_be_counts(book):
+    with pytest.raises(SystemExit):
+        run(book, "--max-parts", "-1")
+    with pytest.raises(SystemExit):
+        run(book, "--max-parts", "many")
+
+
+def test_view_refused_layout(book, tmp_path):
+    wb = openpyxl.Workbook()
+    wb.active["A1"] = "1" * 300
+    long = tmp_path / "long.xlsx"
+    wb.save(long)
+    status, _, err = run(long, "--max-cells", "2", "--ref", "A1:A2")
+    assert status == 1
+    assert err.startswith("sheetpeek: cannot show")
+
+
+def test_serve_help_says_there_is_no_authentication(capsys):
+    with pytest.raises(SystemExit):
+        cli.main(["serve", "--help"])
+    assert "no authentication" in " ".join(capsys.readouterr().out.split())
