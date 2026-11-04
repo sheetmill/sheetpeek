@@ -13,7 +13,7 @@ authors = [{ name = "Ethan Post" }]
 requires-python = ">=3.11"
 dependencies = [
   "openpyxl>=3.1",
-  "xlformat>=0.2,<1",
+  "xlformat>=0.3,<1",
 ]
 keywords = ["excel", "xlsx", "openpyxl", "spreadsheet", "html", "markdown", "terminal"]
 classifiers = [
@@ -124,3 +124,4 @@ testpaths = ["tests"]
 pythonpath = ["."]
 addopts = "-ra --strict-markers"
 markers = ["excel: rows captured from Excel"]
+filterwarnings = ["error:font is deprecated:DeprecationWarning"]

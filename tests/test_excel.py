@@ -6,7 +6,6 @@ import xlformat
 from openpyxl.styles import Alignment, Font
 
 import sheetpeek
-from sheetpeek._excel import dialog_units
 from sheetpeek._rows import row_height
 from tests.workbooks import SHEET1, raw_sheet, replace_once, rewrite, save
 
@@ -75,13 +74,6 @@ def test_merged_width_formats_the_anchor(tmp_path):
     assert merged.text == "123,456,789.00"
     assert merged.clip[:3:2] == (1, 159)
     assert rendered.rows[1].crossed == (True, True)
-
-
-def test_dialog_units_invert_column_points():
-    # Provisional (decided): the merged width in points goes back to dialog units for xlformat.
-    font = xlformat.Font("Calibri", 11)
-    for points in range(1, 400):
-        assert xlformat.column_metrics(dialog_units(points, 6.0), font).points == points
 
 
 def test_indent_wrap_and_vertical_clip(tmp_path):

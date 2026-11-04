@@ -259,9 +259,9 @@ text outside is cut through a glyph), `align` (the point a different font keeps 
 - **Spill** (§4.1) is a run whose clip reaches past its own column; the origin cell's `spill`
   counts the columns. **Competing spills** are both recorded, with overlapping clips (decided),
   as Excel draws both; `characters` mode keeps first-wins.
-- **Merges:** the anchor is formatted at the merged width, the sum of the visible columns'
-  points converted back to dialog units (`_excel.dialog_units`, provisional until xlformat takes
-  points), and its runs clip to the merged interior.
+- **Merges:** the anchor is formatted at the merged width, one column of the sum of the visible
+  columns' points (`xlformat.column_metrics_from_points`), and its runs clip to the merged
+  interior.
 - **Wrapped, `justify` and `distributed` text** is broken at spaces by `text_width`, one run per
   line; `justify` spreads every line but the last, `distributed` every line, a lone word centered
   between the insets (row 162). `fill` repeats whole copies of the text that fit between the
@@ -752,7 +752,7 @@ xlformat.format_cell(value, number_format, font=cell_font,
 - `cell_font` and `normal_font` are `xlformat.Font(name, size, bold, italic)`, from the cell's
   font and the Normal style's, built once per distinct font. `characters` and `none` modes count
   characters, so there the fonts change nothing yet; they are passed so every mode makes the
-  same call. `file_column_metrics` takes the Normal font as `font=`.
+  same call. `file_column_metrics` takes the Normal font as `normal_font=`.
 - `NumberFormat.parse` is cached by xlformat, so a repeated format costs nothing extra.
 
 ### 6.2 Failures
@@ -788,7 +788,8 @@ sheetpeek itself.
 |---|---|
 | `format_cell(value, format, width= or column_width=, font=, normal_font=, date1904=)` → `FormattedCell` | every cell's text, overflow and section color in every mode (`_layout._Formatter`); `FormattedCell.align` is the default alignment (§4.3) |
 | `Font(name, size, bold, italic)` and `measured_fonts()` | the cell font and the Normal font passed to xlformat, built once per font; a family xlformat does not measure becomes Calibri, with a warning (§6.2) |
-| `file_column_metrics(file_width, base_col_width=, default_col_width=, font=Normal font)` → `ColumnMetrics` | column widths: characters from `width` (§2.2), points from `points` (§3.6); `left_inset`, `right_inset` and `digit_width` place text, indent it and convert a merged width back to dialog units (§3.6) |
+| `file_column_metrics(file_width, base_col_width=, default_col_width=, normal_font=)` → `ColumnMetrics` | column widths: characters from `width` (§2.2), points from `points` (§3.6); `left_inset`, `right_inset` and `digit_width` place text and indent it |
+| `column_metrics_from_points(points, normal_font=)` → `ColumnMetrics` | a merged cell's width: its `width` is the `column_width` of the merge's sum of points (§3.6) |
 | `text_width(text, font=)` | `excel` mode: spill, placement, wrapping, `distributed` spacing, `fill` copies and `TextRun.width` (§3.6) |
 | `glyph_widths(text, font=)` | where the glyphs of a `TextRun` sit, as the model documents it (§3.6); the layout itself measures whole texts |
 | `ExcelError` | cached error values, formatted like any value (§6.3) |
@@ -1031,7 +1032,7 @@ sheetpeek already use openpyxl.
 ### 8.3 Dependencies
 
 - `openpyxl>=3.1`, no upper bound (§5.3).
-- `xlformat>=0.2,<1` (§6.4), imported normally: it is required.
+- `xlformat>=0.3,<1` (§6.4), imported normally: it is required.
 - Extra `sheetpeek[rich]`: `rich>=13`.
 
 ## 9. Planned options

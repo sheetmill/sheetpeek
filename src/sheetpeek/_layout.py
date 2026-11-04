@@ -159,7 +159,7 @@ def _characters(
         column.width,
         base_col_width=sheet.base_column_width,
         default_col_width=sheet.default_column_width,
-        font=normal_font,  # the Normal font: xlformat names it font= here, unlike format_cell
+        normal_font=normal_font,
     )
     chars = max(1, round(metrics.width * scale))
     return min(chars, max_width) if max_width else chars

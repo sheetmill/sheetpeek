@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   in any encoding, under any part name; a stated size that is not the part's size; a compression
   method other than stored or deflate; an encrypted part; a part named twice. Excel opens none of
   those it was tried with (all but encryption).
+- Requires xlformat 0.3. Merged widths come from `column_metrics_from_points`, and text widths are
+  whole points, as Excel draws them.
 - `Book` opens a path once, so a book is for one thread at a time.
 - A file openpyxl cannot read raises `PackageError`, with openpyxl's error as its cause, in place of
   whatever openpyxl raised: `BadZipFile`, `KeyError`, `OSError`, `ParseError`,

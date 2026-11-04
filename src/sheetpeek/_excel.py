@@ -36,19 +36,6 @@ from sheetpeek._rows import (
     wrapped_height,
 )
 
-_COLUMN_PADDING = 5.0  # points of a column not counted in its dialog units (xlformat)
-
-
-def dialog_units(points: float, digit_width: float) -> float:
-    """The Column Width dialog number of a column ``points`` wide, for a merged width.
-
-    Provisional: inverts xlformat's ``column_points`` (``round(MDW * w + 5)``, below one unit
-    ``round(w * (MDW + 5))``) until xlformat accepts widths in points.
-    """
-    if points < digit_width + _COLUMN_PADDING:
-        return points / (digit_width + _COLUMN_PADDING)
-    return (points - _COLUMN_PADDING) / digit_width
-
 
 def lay_out(
     sheet: Sheet, columns: list[Column], rows: list[Row], warnings: list[str], fonts: _Fonts
@@ -61,7 +48,7 @@ def lay_out(
             column.width,
             base_col_width=sheet.base_column_width,
             default_col_width=sheet.default_column_width,
-            font=normal,  # the Normal font: xlformat names it font= here, unlike format_cell
+            normal_font=normal,
         )
 
     base = metrics(Column(1))
@@ -86,7 +73,11 @@ def lay_out(
         key = (cols[0], cols[-1])
         if key not in blocks:
             total = sum(widths[p] for p in cols)
-            blocks[key] = dialog_units(total, base.digit_width) if total > 0 else None
+            blocks[key] = (
+                xlformat.column_metrics_from_points(total, normal_font=normal).width
+                if total > 0
+                else None
+            )
         return blocks[key]
 
     grid.units = units
