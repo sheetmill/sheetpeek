@@ -12,8 +12,8 @@ pip install "sheetpeek[rich]"   # with styled terminal output
 Python 3.11 or later. The source is at <https://github.com/sheetmill/sheetpeek>.
 
 sheetpeek is part of the [sheetmill](https://github.com/sheetmill) project, with
-[xlformat](https://github.com/sheetmill/xlformat), which applies Excel number formats. A third
-package, a formula engine, is in development.
+[xlformat](https://github.com/sheetmill/xlformat), which applies Excel number formats, and
+[xlrecalc](https://github.com/sheetmill/xlrecalc), a formula engine.
 
 ```{toctree}
 :maxdepth: 2

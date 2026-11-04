@@ -17,7 +17,7 @@ CLI views a file and serves a folder of workbooks as HTML.
   cell shows, where it is aligned, how far text spills, which cells a merge covers.
 - **Cached values.** sheetpeek shows the values stored in the file. A formula without a cached value
   (a file written by openpyxl and never opened in Excel) shows as empty and is counted in the
-  sheet's warnings. Recalculation through a formula engine, now in development, is planned.
+  sheet's warnings. Recalculation through `xlrecalc`, an optional sibling, is planned.
 - **Excel's number formats through xlformat**, a required dependency. It is pure Python with no
   dependencies of its own, and the package's purpose is showing what Excel shows.
 - **Degrade, never fail.** A backend that cannot show a feature ignores it, as Markdown does

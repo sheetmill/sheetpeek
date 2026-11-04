@@ -36,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   of many rows costs much less.
 
 ### Fixed
+- The documentation names the formula engine, `xlrecalc`, now that it is published.
 - OOXML's `_xHHHH_` escapes in text are decoded, as Excel decodes them: `a_x000D_b` holds a carriage
   return, not the literal text. Two known deviations come from openpyxl, in shared strings:
   `_x005F_x0041_` shows `A` where Excel shows `_x0041_`, and whitespace without `xml:space` stays.
