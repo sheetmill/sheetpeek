@@ -11,6 +11,7 @@ from __future__ import annotations
 import datetime as dt
 import io
 import os
+import re
 import zipfile
 from collections.abc import Sequence
 from types import TracebackType
@@ -79,6 +80,24 @@ _STATES: dict[str, SheetState] = {
     "veryHidden": "very_hidden",
 }
 _DATE_TYPES = (dt.datetime, dt.date, dt.time, dt.timedelta)
+_ESCAPE = re.compile(r"_x([0-9A-Fa-f]{4})_")
+_SURROGATE = re.compile("[\ud800-\udfff]")
+
+
+def unescape(text: str) -> str:
+    """Decode OOXML's ``_xHHHH_`` escapes, as Excel does; openpyxl leaves them (§5.6).
+
+    ``_x000D_`` is a carriage return and ``_x005F_x0041_`` the text ``_x0041_``: the first escape
+    is consumed whole, so the rest is not read as another. Escaped UTF-16 surrogates become the
+    character they spell, and a lone one the replacement character, since text holding one
+    cannot be encoded for output.
+    """
+    if "_x" not in text:
+        return text
+    decoded = _ESCAPE.sub(lambda m: chr(int(m[1], 16)), text)
+    if _SURROGATE.search(decoded):
+        return decoded.encode("utf-16", "surrogatepass").decode("utf-16", "replace")
+    return decoded
 
 
 def disable_date_conversion(workbook: Any) -> bool:
@@ -330,7 +349,7 @@ class Book:
         if isinstance(value, int | float):
             return value, "number", False
         if isinstance(value, str):
-            return value, "text", False
+            return unescape(value), "text", False
         if isinstance(value, _DATE_TYPES):
             # ISO 8601 cells (t="d") always arrive as dates; other date cells only when the
             # conversion could not be switched off.

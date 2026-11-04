@@ -9,6 +9,7 @@ differ from Excel, the comments say so.
 
 from __future__ import annotations
 
+import re
 import textwrap
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -44,6 +45,9 @@ _EXPLICIT: dict[str, Alignment] = {
 }
 _NOBODY = -1
 _MAX_COLUMN = 16_384
+# Excel draws no control character, and these must never reach a terminal. Line breaks stay: the
+# wrapping decides what they do (§4.1).
+_UNDRAWN = re.compile("[\x00-\x09\x0b\x0c\x0e-\x1f\x7f-\x9f]")
 
 
 def layout(
@@ -228,9 +232,10 @@ class _Formatter:
         measured = column_width is not None
         font = self._fonts.get(cell.font, measured=measured)
         normal = self._fonts.get(self._sheet.normal_font, measured=measured)
+        value = _UNDRAWN.sub("", str(cell.value)) if cell.kind == "text" else cell.value
         try:
             try:
-                formatted = self._format(cell.value, fmt, width, column_width, font, normal)
+                formatted = self._format(value, fmt, width, column_width, font, normal)
             except xlformat.FormatError:
                 if fmt not in self._refused:
                     self._refused.add(fmt)
@@ -238,7 +243,7 @@ class _Formatter:
                         f"number format {fmt!r} is one Excel refuses to open; shown as General"
                     )
                 fmt = "General"
-                formatted = self._format(cell.value, fmt, width, column_width, font, normal)
+                formatted = self._format(value, fmt, width, column_width, font, normal)
         except (ValueError, TypeError) as error:
             # A value xlformat cannot format (an infinite number from a malformed file).
             if fmt not in self._unformattable:
@@ -247,7 +252,7 @@ class _Formatter:
                     f"number format {fmt!r} cannot show the value {cell.value!r} "
                     f"(first: {cell.coordinate}; {error}); shown as its text"
                 )
-            text = str(cell.value)
+            text = str(value)
             return _Shown(text, text, False, explicit or "left")
         align: Alignment = explicit or formatted.align
         color = xlformat.DEFAULT_PALETTE.get(formatted.color) if formatted.color else None

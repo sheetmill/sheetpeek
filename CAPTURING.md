@@ -130,7 +130,7 @@ spaces following, all give -50.
 
 | suite | rows | what it covers |
 |---|---|---|
-| `layout` | 179 | spill reach by alignment (digits 6 to 40), centered placement, glyph text, clipping, competing spills, hidden and width-0 columns, `#` color, numbers under `@`, indent, merged text placement and fill, `fill`, `justify`, `distributed` and wrapped cells, line breaks, fills under spill, merged and center-across text wider than its area |
+| `layout` | 200 | spill reach by alignment (digits 6 to 40), centered placement, glyph text, clipping, competing spills, hidden and width-0 columns, `#` color, numbers under `@`, indent, merged text placement and fill, `fill`, `justify`, `distributed` and wrapped cells, line breaks, fills under spill, merged and center-across text wider than its area, `_xHHHH_` escapes, line feeds and control characters |
 | `theme_colors` | 96 | theme indices 0 to 11 with eight tints, as fill and font color, read with AppleScript per cell |
 | `merge_width` | 150 | numbers in merges of one to four columns, one with a hidden column, at six widths, read with `string value` |
 | `error_width` | 56 | seven error values at eight widths, read with `string value` |

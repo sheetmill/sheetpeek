@@ -1,6 +1,6 @@
-# suite: layout (capture.layout); Excel 16.114 for Mac, en_US
+# suite: layout (capture.layout); Excel 16.114.3 for Mac, en_US
 # font: Calibri 11 (openpyxl default); columns A-H default width (53 pt), K hidden, N width 3.7109375 in the file (22 pt), O width 0 in the file; rows 15 pt in the file, 14 pt apart in the PDF
-# captured: 2026-10-29; method: PDF export, pdfminer.six
+# captured: 2026-11-04; method: PDF export, pdfminer.six
 # missing: boundaries without a gridline in the row, 1 = between the first and second visible columns (A|B); runs: text@x0-x1#RRGGBB in PDF points; fills: x0-x1#RRGGBB of filled areas other than white; baselines: per run, points from the top edge of the row's top gridline down to the baseline
 row	case	missing	runs	fills	baselines
 1	spill left zeros=6		'000000'@21.00-56.58#000000		11.00
@@ -182,3 +182,24 @@ row	case	missing	runs	fills	baselines
 177	merge C:D right, text wider, B empty	3	'spilled text that is much wider than one column'@13.00-227.78#000000		11.00
 178	merge C:D centered, text wider, B and E empty	3	'spilled text that is much wider than one column'@70.00-284.78#000000		11.00
 179	center across A:B, text wider, C empty	1,2,3	'spilled text that is much wider than one column'@-36.00-178.78#000000		11.00
+180	escaped CR without wrap		'firstsecond'@21.00-70.79#000000		11.00
+181	spacer after escaped CR without wrap				
+182	escaped CR with wrap		'firstsecon'@21.00-64.78#000000		11.00
+183	spacer after escaped CR with wrap				
+184	escaped CR LF without wrap	1	'firstsecond'@21.00-70.79#000000		11.00
+185	spacer after escaped CR LF without wrap				
+186	escaped CR LF with wrap		'first'@21.00-38.69#000000		11.00
+187	spacer after escaped CR LF with wrap				
+188	escaped LF with wrap		'first'@21.00-38.69#000000		11.00
+189	spacer after escaped LF with wrap				
+190	escaped letter		'A'@21.00-27.37#000000		11.00
+191	escaped underscore		'_x0041_'@21.00-60.48#000000		11.00
+192	escape with lowercase hex		'J'@21.00-24.51#000000		11.00
+193	not an escape, three digits		'_x041_'@21.00-54.48#000000		11.00
+194	eight digits		'00000000'@21.00-68.58#000000		11.00
+195	eight digits and escaped LF		'00000000'@21.00-68.58#000000		11.00
+196	eight digits and escaped CR		'00000000'@21.00-68.58#000000		11.00
+197	eight digits, escaped LF inside		'00000000'@21.00-68.58#000000		11.00
+198	escaped ESC		'ab'@21.00-31.77#000000		11.00
+199	escaped tab		'ab'@21.00-31.77#000000		11.00
+200	escaped BEL		'ab'@21.00-31.77#000000		11.00

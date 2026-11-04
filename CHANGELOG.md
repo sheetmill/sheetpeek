@@ -33,6 +33,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Layout no longer formats the empty columns it may add for spilled text, so a long text in a sheet
   of many rows costs much less.
 
+### Fixed
+- OOXML's `_xHHHH_` escapes in text are decoded, as Excel decodes them: `a_x000D_b` holds a carriage
+  return, not the literal text. Two known deviations come from openpyxl, in shared strings:
+  `_x005F_x0041_` shows `A` where Excel shows `_x0041_`, and whitespace without `xml:space` stays.
+- Control characters are not drawn, as in Excel, and do not count toward a text's width. `Cell.value`
+  keeps them.
+
 ### Security
 - `sheetpeek serve`, bound to a loopback address, answers only to `localhost`, `127.0.0.1`, `[::1]`
   and that address, with 403 otherwise. Any host name was answered, so DNS rebinding could let a web

@@ -283,7 +283,7 @@ Three sources of evidence, all Excel 16 for Mac with Calibri 11 (openpyxl's defa
   `colspan`, hidden rows and columns, each cell's displayed text. It does not record left spill or
   what is painted, and its clip points are simplified.
 - **Checked by eye** (the route A workbook open in Excel, 2026-10-28).
-- **Route B** (`capture/layout.py`, suite `layout`, 179 rows; a second run reproduced the earlier
+- **Route B** (`capture/layout.py`, suite `layout`, 200 rows; later runs reproduced the earlier
   rows exactly): Excel's PDF export,
   read with pdfminer.six. Excel prints each gridline as a 1 pt rectangle and leaves a vertical
   one out wherever text crosses it, so the missing gridlines of a row show exactly which
@@ -348,6 +348,17 @@ character.
   own column** (rows 174 and 175; checked by eye earlier).
 - A filled cell hides the gridlines on its edges, so a missing gridline next to a fill is not
   evidence of spill.
+
+**Captured** (`layout` rows 180 to 200): **OOXML's `_xHHHH_` escapes are text** (§5.6), and:
+- **A lone carriage return is not a line break.** It draws nothing, in wrapped text too, where
+  `first_x000D_second` wraps as the one word `firstsecond`, broken by width (row 182). A line feed
+  breaks a wrapped line, with or without a carriage return before it (rows 186, 188).
+- **No control character is drawn**: ESC, tab and BEL between two letters leave `ab` (rows 198
+  to 200). The layout removes them, and the C1 controls, from what a cell shows; `Cell.value` keeps
+  them. They must not reach a terminal, where they would be commands.
+- **Known deviation:** a line feed adds a little to the width that decides spill. Rows 180 and 184
+  draw the same 49.79 pt text, and only the one holding a line feed spills; rows 195 and 197 show
+  the addition is under 2 pt. The layout drops the line feed without measuring it.
 
 **Captured** (`layout` rows 176 to 179): **merged text does not spill**, left, right or centered;
 it is cut at the merge's edge. **A center-across run spills like centered text**, from the run's
@@ -702,6 +713,22 @@ folder, since openpyxl's own names the full path and `serve` shows messages to c
 that cannot be opened keeps its `OSError`. **Measured for no false refusals:** 15,935 workbooks in
 two public corpora all pass the check, at about 1 ms each; `sheetpeek.open` and openpyxl agree on
 every one (2 files openpyxl cannot read, for a print title of `#N/A`).
+
+### 5.6 Text as openpyxl returns it
+
+openpyxl's read-only mode leaves OOXML's `_xHHHH_` escapes undecoded in cell text, inline strings
+and cached text results. Excel decodes them (`layout` rows 190 to 193, and xlrecalc's capture of
+the same rule): `_x0041_` is `A`, hex digits in either case, `_x005F_x0041_` the text `_x0041_`, and
+three digits no escape. `_read.unescape` decodes every text value as `Cell.value` takes it.
+
+Two deviations, reported by count in pytest's "captures" summary and pinned by a test, come from
+what openpyxl has already done. Both are rare, and reading the shared strings without openpyxl
+would fix both:
+- **`x005F_` in shared strings.** Its shared-string reader removes `x005F_` wherever it occurs, so
+  `_x005F_x0041_` arrives as `_x0041_` and decodes to `A` where Excel shows `_x0041_`, and
+  `x005F_keep` shows as `keep`. Inline strings keep it (row 191).
+- **Whitespace without `xml:space="preserve"`.** Excel drops leading and trailing whitespace there
+  (xlrecalc's capture `whitespace`). openpyxl keeps it and does not say what the element said.
 
 ## 6. The xlformat seam
 

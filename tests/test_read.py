@@ -1,6 +1,7 @@
 """Reading cells, styles and geometry into a Sheet."""
 
 import io
+import re
 from pathlib import Path
 
 import openpyxl
@@ -15,9 +16,11 @@ import sheetpeek._read
 from sheetpeek import CellRange
 from sheetpeek._read import DATE_FALLBACK_WARNING, disable_date_conversion
 from tests.workbooks import (
+    NS,
     SHEET1,
     raw_sheet,
     replace_once,
+    replace_part,
     replace_sheet_data,
     rewrite,
     save,
@@ -357,3 +360,67 @@ def test_a_workbook_saved_by_excel():
     ]
     assert sheet.warnings == ()
     assert sheet.layout("none").cell(9, 1).text == "1900-02-29"
+
+
+@pytest.mark.parametrize(
+    ("text", "value"),
+    [
+        ("a_x000D_b", "a\rb"),
+        ("a_x000d_b", "a\rb"),
+        ("_x0041__x0042_", "AB"),
+        ("_x005F_x0041_", "_x0041_"),
+        ("_x041_", "_x041_"),
+        ("_xZZZZ_", "_xZZZZ_"),
+        ("no escape", "no escape"),
+        ("_xD83D__xDE00_", "\U0001f600"),
+        ("a_xD800_b", "a\ufffdb"),
+    ],
+)
+def test_inline_text_is_decoded(tmp_path, text, value):
+    path = save(openpyxl.Workbook(), tmp_path / "text.xlsx")
+    cell = f'<c r="A1" t="inlineStr"><is><t>{text}</t></is></c>'
+    rewrite(path, SHEET1, replace_sheet_data(f'<sheetData><row r="1">{cell}</row></sheetData>'))
+    assert sheetpeek.read(path).cell(1, 1).value == value
+
+
+def test_a_cached_text_result_is_decoded(tmp_path):
+    path = save(openpyxl.Workbook(), tmp_path / "text.xlsx")
+    cell = '<c r="A1" t="str"><f>1</f><v>a_x000D_b</v></c>'
+    rewrite(path, SHEET1, replace_sheet_data(f'<sheetData><row r="1">{cell}</row></sheetData>'))
+    assert sheetpeek.read(path).cell(1, 1).value == "a\rb"
+
+
+def test_a_shared_string_is_decoded(tmp_path):
+    wb = openpyxl.Workbook()
+    wb.active["A1"] = "x"
+    path = save(wb, tmp_path / "text.xlsx")
+    rewrite(
+        path,
+        "[Content_Types].xml",
+        replace_once(
+            "</Types>",
+            '<Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.'
+            'openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/></Types>',
+        ),
+    )
+    replace_part(
+        path, "xl/sharedStrings.xml", f"<sst {NS}><si><t>a_x000D_b</t></si></sst>".encode()
+    )
+    cell = '<c r="A1" t="s"><v>0</v></c>'
+    rewrite(path, SHEET1, replace_sheet_data(f'<sheetData><row r="1">{cell}</row></sheetData>'))
+    assert sheetpeek.read(path).cell(1, 1).value == "a\rb"
+
+
+@pytest.mark.parametrize("to", ["text", "rich", "html", "markdown", "csv", "tsv"])
+def test_control_characters_reach_no_output(tmp_path, to):
+    if to == "rich":
+        pytest.importorskip("rich")
+    path = save(openpyxl.Workbook(), tmp_path / "text.xlsx")
+    cell = '<c r="A1" t="inlineStr"><is><t>a_x001B_[31m_xD800__x0007__x009B_b</t></is></c>'
+    rewrite(path, SHEET1, replace_sheet_data(f'<sheetData><row r="1">{cell}</row></sheetData>'))
+    sheet = sheetpeek.read(path)
+    assert "\x1b" in sheet.cell(1, 1).value  # the model keeps what the file says
+    output = sheetpeek.render(sheet, to)
+    assert "[31m" in output
+    assert not re.search("[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]", output)
+    output.encode("utf-8")

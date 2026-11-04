@@ -162,6 +162,30 @@ def cases() -> list[Case]:
         merge="C:D")  # fmt: skip
     add("center across A:B, text wider, C empty", ("A", LONG, {"horizontal": "centerContinuous"}),
         ("B", None, {"horizontal": "centerContinuous"}))  # fmt: skip
+    # 6. OOXML's escapes in text: a carriage return, a line feed, both, and an escaped underscore.
+    add("escaped CR without wrap", ("A", "first_x000D_second", {}))
+    add("spacer after escaped CR without wrap")
+    add("escaped CR with wrap", ("A", "first_x000D_second", {"wrap": True}))
+    add("spacer after escaped CR with wrap")
+    add("escaped CR LF without wrap", ("A", "first_x000D__x000A_second", {}))
+    add("spacer after escaped CR LF without wrap")
+    add("escaped CR LF with wrap", ("A", "first_x000D__x000A_second", {"wrap": True}))
+    add("spacer after escaped CR LF with wrap")
+    add("escaped LF with wrap", ("A", "first_x000A_second", {"wrap": True}))
+    add("spacer after escaped LF with wrap")
+    add("escaped letter", ("A", "_x0041_", {}))
+    add("escaped underscore", ("A", "_x005F_x0041_", {}))
+    add("escape with lowercase hex", ("A", "_x004a_", {}))
+    add("not an escape, three digits", ("A", "_x041_", {}))
+    # Rows 194 on: does a line feed, or a carriage return, count toward the width that decides
+    # spill? Eight digits end 3 pt before the gridline. And what control characters draw.
+    add("eight digits", ("A", "00000000", {}))
+    add("eight digits and escaped LF", ("A", "00000000_x000A_", {}))
+    add("eight digits and escaped CR", ("A", "00000000_x000D_", {}))
+    add("eight digits, escaped LF inside", ("A", "0000_x000A_0000", {}))
+    add("escaped ESC", ("A", "a_x001B_b", {}))
+    add("escaped tab", ("A", "a_x0009_b", {}))
+    add("escaped BEL", ("A", "a_x0007_b", {}))
     return result
 
 
