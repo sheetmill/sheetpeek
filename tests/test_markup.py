@@ -2,7 +2,8 @@
 
 Every source below puts the same payload in one string a file controls. Every output is parsed,
 never searched: HTML with ``html.parser``, Markdown through a CommonMark renderer that allows HTML
-and then ``html.parser``. What the parser finds must be only what sheetpeek writes itself.
+and then ``html.parser``. What the parser finds must be only what sheetpeek writes itself. The
+renderer is a development dependency: without it the Markdown tests skip, and the others run.
 """
 
 import http.client
@@ -15,7 +16,6 @@ from xml.sax.saxutils import escape, quoteattr
 
 import openpyxl
 import pytest
-from markdown_it import MarkdownIt
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.styles.colors import Color
 
@@ -60,6 +60,13 @@ STYLE_PROPERTIES = {
     "border-left-color", "border-top-color", "letter-spacing", "text-decoration",
 }  # fmt: skip
 MARKDOWN_TAGS = {"table", "thead", "tbody", "tr", "th", "td", "br", "p", "strong", "em"}
+
+
+def markdown_renderer():
+    """A CommonMark renderer with tables and bare links, that allows HTML; or the test skips."""
+    markdown_it = pytest.importorskip("markdown_it")
+    pytest.importorskip("linkify_it")  # rich brings markdown_it without it
+    return markdown_it.MarkdownIt("gfm-like", {"html": True, "linkify": True})
 
 
 @dataclass
@@ -467,11 +474,11 @@ def test_html_holds_no_markup_from_the_file(source, backend, layout):
 @pytest.mark.parametrize("layout", LAYOUTS.values(), ids=LAYOUTS.keys())
 @pytest.mark.parametrize("backend", MARKDOWN.values(), ids=MARKDOWN.keys())
 def test_markdown_holds_no_markup_from_the_file(source, backend, layout):
+    renderer = markdown_renderer()
     sheet = read_or_refused(source)
     if sheet is None:
         return
     rendered = sheetpeek.render(layout(sheet), backend)
-    renderer = MarkdownIt("gfm-like", {"html": True, "linkify": True})
     found = parse(renderer.render(rendered))
     assert set(found.tags) <= MARKDOWN_TAGS, set(found.tags) - MARKDOWN_TAGS
     assert all(
@@ -486,35 +493,39 @@ def sheet_lines(rendered):
 
 
 @pytest.mark.parametrize("layout", LAYOUTS.values(), ids=LAYOUTS.keys())
-def test_a_cell_is_shown_as_its_literal_text(tmp_path, layout):
+def test_a_cell_is_shown_as_its_literal_text_in_html(tmp_path, layout):
     # The other half of correct escaping: nothing is lost, in the text the reader sees.
     sheet = read_or_refused(inline(tmp_path))
     page = assert_html_is_ours(sheetpeek.render(layout(sheet), HTMLBackend()))
     assert PAYLOAD in "".join(page.text)
+
+
+@pytest.mark.parametrize("layout", LAYOUTS.values(), ids=LAYOUTS.keys())
+def test_a_cell_is_shown_as_its_literal_text_in_markdown(tmp_path, layout):
+    renderer = markdown_renderer()
+    sheet = read_or_refused(inline(tmp_path))
     rendered = sheetpeek.render(layout(sheet), "markdown")
-    text = "".join(
-        parse(MarkdownIt("gfm-like", {"html": True, "linkify": True}).render(rendered)).text
-    )
-    assert PAYLOAD in text
+    assert PAYLOAD in "".join(parse(renderer.render(rendered)).text)
 
 
-def test_the_payload_would_be_markup_if_it_were_not_escaped():
+def test_the_payload_would_be_markup_in_html_if_it_were_not_escaped():
     # So that the tests above can fail. The closers matter: a parser, like a browser, reads what
     # follows <title> as text until the element is closed.
     assert MARK.lower() in parse(f"<title>{PAYLOAD}</title>").tags
     found = parse(f"<td>{PAYLOAD}</td>")
     assert MARK.lower() in found.tags
     assert "script" in found.tags
-    rendered = MarkdownIt("gfm-like", {"html": True, "linkify": True}).render(
-        f"| h |\n| --- |\n| {PAYLOAD} |\n"
-    )
-    assert set(parse(rendered).tags) - MARKDOWN_TAGS
     with pytest.raises(AssertionError):
         assert_html_is_ours(f"<td>{PAYLOAD}</td>")
     with pytest.raises(AssertionError):
         assert_html_is_ours('<td style="background:url(x)"></td>')
     with pytest.raises(AssertionError):
         assert_html_is_ours("<td style=\"font:11pt 'a'; x:y\"></td>")
+
+
+def test_the_payload_would_be_markup_in_markdown_if_it_were_not_escaped():
+    rendered = markdown_renderer().render(f"| h |\n| --- |\n| {PAYLOAD} |\n")
+    assert set(parse(rendered).tags) - MARKDOWN_TAGS
 
 
 # --- serve, as a client sees it
