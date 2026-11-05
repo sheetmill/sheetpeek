@@ -1307,17 +1307,18 @@ are read.
 
 ## 11. Roadmap
 
-1. **By 1.0:** automated screen capture of the test sheets, checked against the PDF route on a
+1. **The next 0.x minors:** live recalculation through `xlrecalc`, an optional sibling.
+2. **By 1.0:** automated screen capture of the test sheets, checked against the PDF route on a
    sample (§4). Planned options (§9) as they are asked for.
-2. **Later: a cross-platform phase.** Refinements that stop paying on the Mac are logged here:
+3. **After 1.0:** a PDF backend drawing from the `excel` mode geometry (§2.1), possibly as an
+   optional extra.
+4. **Last: a cross-platform phase**, which waits on having those machines and browsers to measure
+   on. Refinements that stop paying on the Mac are logged here:
    - Windows Excel: column widths, row heights and glyph tables (xlformat measures the Mac only);
    - Linux viewers, and Chrome and Firefox for the HTML technique (only WebKit is measured);
    - a glyph-spacing correction for Aptos Narrow, for which no free metric-compatible font is
      known;
    - whether to offer the HTML fitting script (§9).
-3. **A later 0.x minor:** live recalculation through `xlrecalc`, an optional sibling.
-4. **After 1.0:** a PDF backend drawing from the `excel` mode geometry (§2.1), possibly as an
-   optional extra.
 
 ## 12. Prior art
 
