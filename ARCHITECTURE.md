@@ -1182,9 +1182,9 @@ header, and each column's alignment comes from the first body row.
 - *Alternatives:* column letters as the header (`header="letters"`); alignment from the majority of a column.
 - *Scope leaning:* document.
 
-**Column and row headings**.
-`column_headings` (letters) and `row_headings` (numbers) are separate options, both off by
-default. They exist in every backend that can show them (HTML, rich, text).
+**Column and row headings** (backend options). `column_headings` (letters) and `row_headings`
+(numbers) are separate options, both off by default. They exist in every backend that can show them
+(HTML, rich, text).
 - *Scope:* document (backend).
 
 **Light or dark** (`color_scheme`, in the HTML backend). An explicit argument, default light, never read from
