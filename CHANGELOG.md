@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-04
+
 ### Added
 - `ReadLimits`, and `limits=` on `read`, `open` and `render`: `max_parts`, `max_part_bytes` and
   `max_total_bytes` for the package, and `max_cells` for the grid area of what is read and laid out.
@@ -136,5 +138,6 @@ First release.
 - Borders, conditional formatting, charts, images and comments are not shown; rich text within
   a cell takes the cell's font.
 
-[Unreleased]: https://github.com/sheetmill/sheetpeek/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/sheetmill/sheetpeek/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/sheetmill/sheetpeek/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/sheetmill/sheetpeek/releases/tag/v0.1.0
