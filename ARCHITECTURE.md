@@ -69,8 +69,8 @@ A terminal column holds whole characters. Excel's width is in units of one digit
 font, the number its Column Width dialog shows. xlformat's `file_column_metrics` turns the file's
 `<col width>` into that number for Excel for Mac, given the Normal font: a column without `<col>`
 takes `defaultColWidth` as a file width, and without that it is `baseColWidth` units (8, 53 pt at
-Calibri 11), not 8.43. A column gets `round(units × scale)` characters, minimum 1, capped by
-`max_width` (`Sheet.layout` takes both). At Calibri 11:
+Calibri 11), not 8.43. A column gets `round(units × scale)` characters, minimum 1 and at most 255, Excel's own limit,
+capped by `max_width` (`Sheet.layout` takes both). At Calibri 11:
 
 | file width | dialog units | points | characters |
 |---|---|---|---|
@@ -675,6 +675,12 @@ repair. A DTD stays refused whatever Excel does.
 between 1e30 and 1e308; the edges at 255 to 300 (`defaultColWidth`, `baseColWidth`) and 409 to 410
 (font size); and whether a font size below -1 is its magnitude, as -1 is. Known deviation: a row of
 font size 1 is 4 pt in Excel, and sizes under 9 are outside the row-height table (§4.7).
+
+**A column in `characters` mode is at most 255 characters**, Excel's own limit, whatever its width
+in points. Each character costs about 10 bytes in every row while the rows are built (the canvas),
+so without the cap a tiny file with a width of -1 needed 1.1 GB per 10,000 rows, and about 111 GB
+for a full column; with it, a full column peaks at 3.6 GB. `excel` mode keeps Excel's width, which
+costs nothing per point.
 
 **`ReadLimits`** has `max_parts`, `max_part_bytes`, `max_total_bytes` and `max_cells`:
 

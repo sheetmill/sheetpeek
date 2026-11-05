@@ -390,6 +390,17 @@ def test_a_font_size_excel_refuses_is_refused(book, size):
         sheetpeek.read(book)
 
 
+@pytest.mark.parametrize("value", ["-1", "1e4", "1e6", "256", "255"])
+@bounded
+def test_a_column_is_at_most_255_characters(book, value):
+    col = f'<cols><col min="1" max="1" width="{value}"/></cols><sheetData>'
+    rewrite(book, SHEET1, lambda text: text.replace("<sheetData>", col, 1))
+    rendered = sheetpeek.read(book, ref="A1:A2000").layout("characters")
+    assert rendered.columns[0].width <= 255
+    assert rendered.columns[0].width == 255 or value == "255"
+    assert sheetpeek.read(book, ref="A1").layout("characters", scale=9).columns[0].width == 255
+
+
 @bounded
 def test_a_huge_ref_on_an_ordinary_file_is_refused(book):
     with pytest.raises(LimitError, match="A1:XFD1048576"):

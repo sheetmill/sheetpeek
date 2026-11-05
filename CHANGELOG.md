@@ -42,6 +42,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   where they gave a raw `ValueError`, `OverflowError` or `ZeroDivisionError`: a column width, row
   height, font size, `defaultColWidth`, `baseColWidth` or `defaultRowHeight` of NaN, infinity, or a
   negative or enormous number. A font size outside 1 to 409, 0 included, is refused.
+- A column in `characters` mode is at most 255 characters, Excel's own limit. A width of -1, which
+  Excel opens as 10,921 units, cost 1.1 GB per 10,000 rows.
 - OOXML's `_xHHHH_` escapes in text are decoded, as Excel decodes them: `a_x000D_b` holds a carriage
   return, not the literal text. Two known deviations come from openpyxl, in shared strings:
   `_x005F_x0041_` shows `A` where Excel shows `_x0041_`, and whitespace without `xml:space` stays.

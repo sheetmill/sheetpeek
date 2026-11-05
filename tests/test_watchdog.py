@@ -1,6 +1,7 @@
 """The watchdog itself: a run past its limit is stopped, quickly, and said to be."""
 
 import sys
+import time
 
 import pytest
 
@@ -10,6 +11,7 @@ from tests.watchdog import GIB, bounded, in_child, run
 def allocate(gib):
     data = bytearray(int(gib * GIB))
     data[::4096] = b"x" * len(data[::4096])  # touched, so it is really resident
+    time.sleep(60)  # held: a process that frees it again can finish between two samples
     return len(data)
 
 
@@ -22,7 +24,8 @@ def fails():
 
 
 def test_a_command_past_the_limit_is_killed():
-    code = "b = bytearray(1 << 30); b[::4096] = b'x' * len(b[::4096]); print('done')"
+    touch = "b = bytearray(1 << 30); b[::4096] = b'x' * len(b[::4096])"
+    code = f"import time; {touch}; time.sleep(60); print('done')"
     result = run([sys.executable, "-c", code], limit=GIB // 8)
     assert result.killed.startswith("used")
     assert "done" not in result.output

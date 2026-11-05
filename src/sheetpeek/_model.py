@@ -294,6 +294,7 @@ class Sheet:
                 widths (Markdown, CSV), where every cell shows its full text.
             show_hidden: Keep hidden rows and columns.
             scale: Multiplies every column's width in characters (``characters`` mode only).
+                A column is never wider than 255 characters, Excel's own limit.
             max_width: Caps every column's width in characters (``characters`` mode only).
             spill_edge: What text spilling past the edge of the range does. ``"extend"`` (the
                 default, as Excel shows it) adds empty columns at the default width past the

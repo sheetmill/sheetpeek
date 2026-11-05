@@ -45,6 +45,7 @@ _EXPLICIT: dict[str, Alignment] = {
 }
 _NOBODY = -1
 _MAX_COLUMN = 16_384
+_WIDEST_CHARACTERS = 255  # Excel's own limit; every character costs about 10 bytes in every row
 # Excel draws no control character, and these must never reach a terminal. Line breaks stay: the
 # wrapping decides what they do (§4.1).
 _UNDRAWN = re.compile("[\x00-\x09\x0b\x0c\x0e-\x1f\x7f-\x9f]")
@@ -161,7 +162,7 @@ def _characters(
         default_col_width=sheet.default_column_width,
         normal_font=normal_font,
     )
-    chars = max(1, round(metrics.width * scale))
+    chars = min(max(1, round(metrics.width * scale)), _WIDEST_CHARACTERS)
     return min(chars, max_width) if max_width else chars
 
 
