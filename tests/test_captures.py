@@ -21,6 +21,7 @@ from capture.layout import build
 
 import sheetpeek
 from tests.capture_report import REPORT
+from tests.watchdog import in_child
 from tests.workbooks import NS, SHEET1, replace_once, replace_part, replace_sheet_data, rewrite
 
 CAPTURE = Path(__file__).with_name("captures") / "layout.tsv"
@@ -571,43 +572,56 @@ def package_rows():
             yield name, outcome, sizes
 
 
+def _points(width, font):
+    return xlformat.column_metrics(float(width), font).points if float(width) else 0.0
+
+
+def compare_packages():
+    """Every case against the capture, in a child: some of them would be bombs without a guard."""
+    deviations = {}
+    for name, outcome, sizes in package_rows():
+        data = io.BytesIO(dict(package_probe.CASES)[name](package_probe.base()))
+        try:
+            sheet = sheetpeek.read(data, ref="A1:B2")
+        except sheetpeek.PackageError as error:
+            if outcome != "refused":
+                deviations[name] = f"refused, where Excel opens it: {error}"
+            continue
+        if outcome == "refused":
+            deviations[name] = "read, where Excel refuses it"
+            continue
+        rendered = sheet.layout("excel", show_hidden=True)
+        sheetpeek.render(rendered, "html")
+        sheet.layout("characters")
+        sheet.layout("none")
+        _, _, width_a, height_1, width_b, height_2, font_size = sizes
+        font = xlformat.Font(sheet.normal_font.name, sheet.normal_font.size)
+        ours = (
+            sheet.cell(1, 1).value,
+            sheet.cell(1, 1).style.font.size,
+            rendered.columns[0].width_pt,
+            rendered.columns[1].width_pt,
+        )
+        expected = (111, float(font_size), _points(width_a, font), _points(width_b, font))
+        if ours != expected:
+            deviations[name] = (ours, expected)
+        heights = (rendered.rows[0].height_pt, rendered.rows[1].height_pt)
+        if heights != (float(height_1), float(height_2)) and name not in PACKAGE_DEVIATIONS:
+            deviations[name] = (heights, (height_1, height_2))
+    return deviations
+
+
 @pytest.mark.excel
 def test_every_package_case_is_captured():
     assert [name for name, _, _ in package_rows()] == [name for name, _ in package_probe.CASES]
 
 
 @pytest.mark.excel
-@pytest.mark.parametrize(
-    ("name", "outcome", "sizes"), list(package_rows()), ids=lambda v: str(v)[:30]
-)
-def test_a_package_is_taken_as_excel_takes_it(name, outcome, sizes):
-    case = dict(package_probe.CASES)[name]
-    data = io.BytesIO(case(package_probe.base()))
-    if outcome == "refused":
-        with pytest.raises(sheetpeek.PackageError):
-            sheetpeek.read(data)
-        return
-    sheet = sheetpeek.read(data)
-    rendered = sheet.layout("excel", show_hidden=True)
-    sheetpeek.render(rendered, "html")
-    sheet.layout("characters")
-    sheet.layout("none")
-    _, _, width, height, _, _, font_size = sizes
-    assert sheet.cell(1, 1).value == 111
-    assert sheet.cell(1, 1).style.font.size == float(font_size)
-    points = rendered.columns[0].width_pt
-    normal = sheet.normal_font
-    expected = (
-        xlformat.column_metrics(float(width), xlformat.Font(normal.name, normal.size)).points
-        if float(width)
-        else 0.0
-    )
-    # AppleScript gives the widest column to five figures, 10921.
-    assert abs(points - expected) <= (6 if float(width) > 255 else 0), (points, expected)
-    if name not in PACKAGE_DEVIATIONS:
-        assert rendered.rows[0].height_pt == float(height)
+def test_a_package_is_taken_as_excel_takes_it():
+    deviations = in_child(compare_packages)
     REPORT["package"] = (
         f"package: {len(package_probe.CASES)} cases compared with Excel, "
         f"{len(PACKAGE_DEVIATIONS)} known deviations: "
         + "; ".join(f"{case} ({why})" for case, why in PACKAGE_DEVIATIONS.items())
     )
+    assert deviations == {}

@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import datetime as dt
 import io
-import math
 import os
 import re
 import zipfile
@@ -56,7 +55,8 @@ DATE_FALLBACK_WARNING = (
     "(1900-02-29) shows as 1900-02-28"
 )
 _FALLBACK_FONT = Font("Calibri", 11.0)
-_LARGEST_FONT = 1e30  # 1e308 is captured as refused; sizes between 409 and it are unverified
+_SMALLEST_FONT = 1.0
+_LARGEST_FONT = 409.5  # 410 is refused
 _HORIZONTAL: dict[str | None, HorizontalAlignment] = {
     None: "general",
     "general": "general",
@@ -397,7 +397,7 @@ class Book:
             color = None
         return Font(
             name=font.name or normal.name,
-            size=_font_size(font.sz) if font.sz else normal.size,
+            size=_font_size(font.sz) if font.sz is not None else normal.size,
             bold=bool(font.b),
             italic=bool(font.i),
             underline=font.u or None,
@@ -479,11 +479,11 @@ def read(
 
 
 def _font_size(value: float) -> float:
-    """A font size as Excel takes it: it refuses NaN and 1e308 and makes -1 size 1 (captured)."""
-    size = float(value)
-    if not math.isfinite(size) or size > _LARGEST_FONT:
+    """A font size as Excel takes it: its magnitude, from 1 to 409, or refused (captured)."""
+    size = abs(float(value))
+    if not _SMALLEST_FONT <= size <= _LARGEST_FONT:  # NaN compares false
         raise PackageError(f"a font size of {value}, which Excel refuses")
-    return size if size >= 1 else 1.0
+    return size
 
 
 def _columns(structure: Structure, ref: CellRange | None) -> tuple[Column, ...]:
@@ -493,7 +493,9 @@ def _columns(structure: Structure, ref: CellRange | None) -> tuple[Column, ...]:
     for spec in structure.columns:
         for index in range(max(spec.min, ref.min_col), min(spec.max, ref.max_col) + 1):
             found[index] = Column(index, spec.width, spec.hidden)
-    return tuple(found.get(i, Column(i)) for i in range(ref.min_col, ref.max_col + 1))
+    # A default width of 0 hides every column without a width of its own (captured).
+    width = 0.0 if structure.default_column_width == 0 else None
+    return tuple(found.get(i, Column(i, width)) for i in range(ref.min_col, ref.max_col + 1))
 
 
 def _rows(structure: Structure, ref: CellRange | None) -> tuple[Row, ...]:

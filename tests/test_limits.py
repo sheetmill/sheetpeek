@@ -20,7 +20,6 @@ from tests.watchdog import bounded
 from tests.workbooks import (
     NS,
     SHEET1,
-    replace_once,
     replace_part,
     replace_sheet_data,
     rewrite,
@@ -333,47 +332,62 @@ def test_a_huge_merge_costs_nothing_past_the_range_read(book):
         assert rendered.cell(1, 1).merge == sheetpeek.CellRange(1, 1, 1048576, 16384)
 
 
-@pytest.mark.parametrize("value", ["99999999999", "1e30", "-inf", "-0.5"])
+ODD_NUMBERS = [
+    "nan",
+    "inf",
+    "-inf",
+    "-1",
+    "-0.5",
+    "0",
+    "1e4",
+    "1e6",
+    "99999999999",
+    "1e30",
+    "1e308",
+]
+ODD_FIELDS = {
+    "width": ("<sheetData>", '<cols><col min="1" max="1" width="{}"/></cols><sheetData>'),
+    "height": ('<row r="1"', '<row r="1" ht="{}" customHeight="1"'),
+    "default width": ("<sheetFormatPr ", '<sheetFormatPr defaultColWidth="{}" '),
+    "default height": ('defaultRowHeight="15"', 'defaultRowHeight="{}" customHeight="1"'),
+}
+
+
+@pytest.mark.parametrize("field", ODD_FIELDS)
+@pytest.mark.parametrize("value", ODD_NUMBERS)
 @bounded
-def test_a_column_width_excel_was_not_shown_is_still_bounded(book, value):
-    # Not captured: the nearest captured behavior, so that no mode allocates by it.
-    col = f'<cols><col min="1" max="1" width="{value}" customWidth="1"/></cols><sheetData>'
-    rewrite(book, SHEET1, lambda text: text.replace("<sheetData>", col, 1))
-    sheet = sheetpeek.read(book)
-    assert sheet.columns[0].width in (0.0, 10_922.0)
+def test_no_mode_allocates_or_fails_by_an_odd_number(book, field, value):
+    # What Excel does with each is compared in test_captures.py; here, none costs anything.
+    old, new = ODD_FIELDS[field]
+    rewrite(book, SHEET1, lambda text: text.replace(old, new.format(value), 1))
+    try:
+        sheet = sheetpeek.read(book)
+    except PackageError:
+        return
     for mode in ("excel", "characters", "none"):
-        sheet.layout(mode)
+        sheetpeek.render(
+            sheet.layout(mode), {"excel": "html", "characters": "text"}.get(mode, "csv")
+        )
 
 
-@pytest.mark.parametrize(
-    "edit",
-    [
-        pytest.param(('baseColWidth="8"', 'baseColWidth="99999999999"'), id="base width"),
-        pytest.param(('baseColWidth="8"', 'baseColWidth="-1"'), id="negative base width"),
-        pytest.param(("<sheetFormatPr ", '<sheetFormatPr defaultColWidth="1e30" '), id="width"),
-        pytest.param(
-            ('defaultRowHeight="15"', 'defaultRowHeight="-1" customHeight="1"'), id="height"
-        ),
-    ],
-)
+@pytest.mark.parametrize("value", ["300", "99999999999", "-1"])
 @bounded
-def test_a_sheet_default_excel_was_not_shown_is_still_bounded(book, edit):
-    rewrite(book, SHEET1, replace_once(*edit))
-    sheet = sheetpeek.read(book)
-    for mode in ("excel", "characters", "none"):
-        sheet.layout(mode)
-
-
-@pytest.mark.parametrize("size", ["-0.5", "0.5", "inf", "1e400"])
-@bounded
-def test_a_font_size_excel_was_not_shown_gives_no_raw_error(book, size):
-    rewrite(book, "xl/styles.xml", lambda text: text.replace('<sz val="11"', f'<sz val="{size}"'))
+def test_no_mode_allocates_or_fails_by_a_base_width(book, value):
+    rewrite(book, SHEET1, lambda text: text.replace('baseColWidth="8"', f'baseColWidth="{value}"'))
     try:
         sheet = sheetpeek.read(book)
     except PackageError:
         return
     for mode in ("excel", "characters", "none"):
         sheet.layout(mode)
+
+
+@pytest.mark.parametrize("size", ["0", "0.5", "-0.5", "410", "inf", "nan", "1e400"])
+@bounded
+def test_a_font_size_excel_refuses_is_refused(book, size):
+    rewrite(book, "xl/styles.xml", lambda text: text.replace('<sz val="11"', f'<sz val="{size}"'))
+    with pytest.raises(PackageError, match="font size"):
+        sheetpeek.read(book)
 
 
 @bounded

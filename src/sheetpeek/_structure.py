@@ -29,12 +29,18 @@ _MERGE = f"{_NS}mergeCell"
 _HYPERLINK = f"{_NS}hyperlink"
 _SHEET_VIEW = f"{_NS}sheetView"
 _SHEET_FORMAT = f"{_NS}sheetFormatPr"
-# The numbers a file can give a column or a row, as Excel takes them (ARCHITECTURE.md §5.5). Only
-# some are captured: the rest are the nearest captured behavior, bounded, and unverified.
-_WIDEST = 10_921.0  # dialog units, what Excel makes of a width of -1 (captured)
-_WIDEST_FILE_WIDTH = _WIDEST + 1  # a file width past this is one Excel makes 0 (1e308 captured)
-_TALLEST = 1e30  # a height past this is one Excel makes 0 (1e308 captured)
-_MAX_BASE_WIDTH = 255
+# The numbers a file can give a column or a row, as Excel takes them (ARCHITECTURE.md §5.5).
+_DIGIT_POINTS = 6  # at Calibri 11, the only font this was captured with
+_WIDTH_WRAP = 65_536  # points: Excel keeps a column's width in 16 bits
+_WIDEST_FILE_WIDTH = 10_922.0  # the widest that does not wrap
+_ONE_POINT_WIDTH = 0.1  # a file width of one point: what Excel makes of 1e9 to 1e30
+_INT_RANGE = 2**31
+_ENORMOUS = 1e30  # past this, a width or a height is 0; 1e30 and 1e308 are captured
+_TALLEST = 409.5
+_TWIPS = 20
+_HEIGHT_WRAP = 65_536  # twips
+_WIDEST_DEFAULT = 255.0  # 300 is refused; between them is not captured
+_WIDEST_BASE = 255
 
 
 @dataclass(frozen=True, slots=True)
@@ -180,6 +186,11 @@ def scan(source: IO[bytes], rels: dict[str, tuple[str, bool]] | None = None) -> 
         min_row, max_row = min(min_row, merge.min_row), max(max_row, merge.max_row)
         min_col, max_col = min(min_col, merge.min_col), max(max_col, merge.max_col)
     used = CellRange(min_row, min_col, max_row, max_col) if max_row else None
+    custom_height = _flag((sheet_format or {}).get("customHeight"))
+    zero_height = _flag((sheet_format or {}).get("zeroHeight"))
+    if custom_height and default_row_height == 0.0:
+        # An enormous default acts as zeroHeight: a row with an element keeps its height (captured).
+        custom_height, zero_height = False, True
     return Structure(
         used_range=used,
         merges=tuple(merges),
@@ -195,53 +206,68 @@ def scan(source: IO[bytes], rels: dict[str, tuple[str, bool]] | None = None) -> 
         empty_strings=frozenset(empty_strings),
         listed_rows=frozenset(listed),
         has_sheet_format=sheet_format is not None,
-        custom_row_height=_flag((sheet_format or {}).get("customHeight")),
-        zero_row_height=_flag((sheet_format or {}).get("zeroHeight")),
+        custom_row_height=custom_height,
+        zero_row_height=zero_height,
         thick_top=_flag((sheet_format or {}).get("thickTop")),
         thick_bottom=_flag((sheet_format or {}).get("thickBottom")),
     )
 
 
 def _column_width(text: str) -> float:
-    """A ``<col width>`` as Excel takes it: a nonsense width makes a column of width 0."""
+    """A ``<col width>`` as Excel takes it, in points modulo 65,536 (captured)."""
     width = float(text)
-    if not math.isfinite(width) or width > _WIDEST_FILE_WIDTH:
-        return 0.0  # NaN, infinity and 1e308 are captured
-    if width < 0:
-        return _WIDEST_FILE_WIDTH  # -1 is captured: Excel shows 10921
-    return width
+    if not math.isfinite(width) or abs(width) > _ENORMOUS:
+        return 0.0
+    if 0 <= width <= _WIDEST_FILE_WIDTH:
+        return width
+    points = width * _DIGIT_POINTS
+    if abs(points) >= _INT_RANGE:
+        return _ONE_POINT_WIDTH
+    wrapped = math.fmod(points, _WIDTH_WRAP) % _WIDTH_WRAP
+    return (wrapped + (1 if width < 0 else 0)) / _DIGIT_POINTS
 
 
 def _row_height(text: str) -> float | None:
-    """A ``<row ht>`` as Excel takes it, or ``None`` when it ignores it."""
-    height = float(text)
-    if math.isnan(height) or math.isinf(height):
-        return None  # captured: the row is as if it stored no height
-    if height < 0:
-        return 1.0  # -1 is captured
-    return 0.0 if height > _TALLEST else height  # 1e308 is captured
+    """A ``<row ht>`` as Excel takes it, or ``None`` when it ignores it (captured)."""
+    height = abs(float(text))
+    if not math.isfinite(height):
+        return None
+    if height > _ENORMOUS:
+        return 0.0
+    if height <= _TALLEST:
+        return height
+    twips = height * _TWIPS
+    if twips >= _INT_RANGE:
+        return _TALLEST
+    return min(_TALLEST, math.floor((twips % _HEIGHT_WRAP) / _TWIPS * 4) / 4)
 
 
 def _default_width(text: str) -> float | None:
-    """``defaultColWidth``: Excel ignores NaN (captured) and refuses a negative one (captured)."""
+    """``defaultColWidth`` as Excel takes it, or ``None`` when it ignores it (captured)."""
     width = float(text)
-    if width < 0:
+    if math.isnan(width) or width == math.inf:
+        return None
+    if width < 0 or _ENORMOUS >= width > _WIDEST_DEFAULT:
         raise PackageError(f"defaultColWidth of {text}, which Excel refuses")
-    return width if math.isfinite(width) and width <= _WIDEST_FILE_WIDTH else None
+    return 0.0 if width > _ENORMOUS else width
 
 
 def _base_width(text: str) -> int:
-    """``baseColWidth``: past what Excel's own width allows, the default of 8 (unverified)."""
+    """``baseColWidth`` as Excel takes it (captured): out of an int's range or negative, ignored."""
     width = int(text)
-    return width if 0 <= width <= _MAX_BASE_WIDTH else 8
+    if width < 0 or width >= _INT_RANGE:
+        return 8
+    if width > _WIDEST_BASE:
+        raise PackageError(f"baseColWidth of {text}, which Excel refuses")
+    return width
 
 
 def _default_height(text: str) -> float:
-    """``defaultRowHeight``: Excel refuses NaN (captured); it ignores a negative one (captured)."""
-    height = float(text)
-    if not math.isfinite(height) or height > _TALLEST:
+    """``defaultRowHeight``: Excel refuses NaN and infinity (captured)."""
+    height = _row_height(text)
+    if height is None:
         raise PackageError(f"defaultRowHeight of {text}, which Excel refuses")
-    return max(height, 0.0)
+    return height
 
 
 def _column_extent(row: ET.Element) -> tuple[int, int]:

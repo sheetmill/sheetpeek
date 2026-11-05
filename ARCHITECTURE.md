@@ -654,23 +654,27 @@ bzip2 or LZMA part, a name used twice and all three kinds of false size give err
 off, between two controls that open. So a refusal never turns away a file Excel opens without a
 repair. A DTD stays refused whatever Excel does.
 
-**Numbers no column, row or font can have** (suite `package`) reach no arithmetic. `_structure.py`
-and `_read._font_size` take them as Excel does, or refuse what Excel refuses:
+**Numbers no column, row or font can have** (suite `package`, 68 cases) reach no arithmetic.
+`_structure.py` and `_read._font_size` take them as Excel does, and refuse what Excel refuses:
 
-| in the file | NaN, infinity | -1 | 1e308 |
-|---|---|---|---|
-| `<col width>` | 0, a hidden column | 10921 units | 0 |
-| `<row ht>` | ignored | 1 pt | 0, a hidden row |
-| font `sz` | refused (NaN) | size 1 | refused |
-| `defaultColWidth` | ignored (NaN) | refused | **unverified**: ignored |
-| `defaultRowHeight` | refused (NaN) | ignored without `customHeight` | **unverified**: refused |
+- **`<col width>`** is kept in points modulo 65,536, at 6 pt a digit: 256 and 1e4 are as usual,
+  1e6 is 6036.5 units, -1 is 10921, -100 is 10822 (a negative one with one more point). From 1e9 to
+  1e30 it is one point (0.09 units). NaN, either infinity and 1e308 are 0, a hidden column.
+- **`<row ht>`** is its magnitude: -0.5 is 0.5, -100 is 100. Past 409.5 it wraps in twips modulo
+  65,536 and is capped there: 410, 1e6, 1e9 and 1e30 are 409.5, and 1e4 is 169.5. NaN and either
+  infinity are ignored, and 1e308 is 0.
+- **Font size** is its magnitude from 1 to 409: -1 is size 1. 0, 0.5, -0.5, 410, 1e6, 1e30, 1e308,
+  NaN and infinity are refused.
+- **`defaultColWidth`:** NaN and infinity are ignored, and 1e308 makes every column 0. Negative
+  numbers, 300, 1e30 and `99999999999` are refused.
+- **`baseColWidth`:** 300 is refused; -1 and `99999999999` are ignored.
+- **`defaultRowHeight`:** NaN and infinity are refused. Without `customHeight` a number is ignored,
+  as ever (§4.7). With it, -1 is 1 pt, and 1e308 acts as `zeroHeight`.
 
-**Unverified**, and bounded so that no mode allocates by them: other negative numbers take the -1
-column; a width past 10,922 units is 0, since `99999999999` would otherwise have `characters` mode
-build 100 GB of spaces; a height or font size past 1e30 is treated like 1e308; a `baseColWidth`
-outside 0 to 255 is 8; a font size under 1 is 1. Known deviation: a row of font size 1 is 4 pt in
-Excel, and sizes under 9 are outside the row-height table (§4.7). A very wide column in
-`characters` mode still costs its width in every row, up to the 10,922 units above.
+**Unverified:** the 6 pt digit, since every case has Calibri 11 as its Normal font; where 0 starts
+between 1e30 and 1e308; the edges at 255 to 300 (`defaultColWidth`, `baseColWidth`) and 409 to 410
+(font size); and whether a font size below -1 is its magnitude, as -1 is. Known deviation: a row of
+font size 1 is 4 pt in Excel, and sizes under 9 are outside the row-height table (§4.7).
 
 **`ReadLimits`** has `max_parts`, `max_part_bytes`, `max_total_bytes` and `max_cells`:
 

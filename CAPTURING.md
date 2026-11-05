@@ -135,11 +135,9 @@ central-directory size that is too small, too large, or that of the part's XML w
 spaces following, all give -50.
 
 The same run holds the numbers no column, row or font can have, read back with `column width`,
-`row height` and `font size`. A `<col width>` of NaN, infinity or 1e308 opens as 0, and -1 as 10921
-(about 65,531 pt, which looks like 16-bit wraparound). A `<row ht>` of NaN or infinity is ignored,
--1 gives 1 pt and 1e308 gives 0. A font size of 1e308 or NaN gives -50, and -1 opens as size 1, in
-4 pt rows. A `defaultColWidth` of NaN is ignored and -1 gives -50; a `defaultRowHeight` of NaN gives
--50 and -1 is ignored.
+`row height` and `font size`, for columns A and B and rows 1 and 2; `ARCHITECTURE.md` §5.5 has what
+Excel makes of them. A case that hangs ends the run and nothing is written. The 16.114.3 run of 68
+cases had none: a Mac out of memory had paused Excel during an earlier one, which looked like a hang.
 
 ## Suites
 
@@ -150,4 +148,4 @@ The same run holds the numbers no column, row or font can have, read back with `
 | `merge_width` | 150 | numbers in merges of one to four columns, one with a hidden column, at six widths, read with `string value` |
 | `error_width` | 56 | seven error values at eight widths, read with `string value` |
 | `row_height` | 55 | row heights of rows without `ht`, per Normal font and size (Calibri and Aptos Narrow at 9 to 16 pt), without `<sheetFormatPr>`, with openpyxl's, and with `customHeight`, other stored heights, `zeroHeight`, `thickTop` and `thickBottom`; rows fitted to a cell font, a styled empty cell, wrapped text and merges |
-| `package` | 28 | a control, a minimal `<!DOCTYPE>`, bzip2 and LZMA parts, a part named twice, three kinds of false size, widths, heights, font sizes and sheet defaults no sheet can have, a control |
+| `package` | 68 | a control, a minimal `<!DOCTYPE>`, bzip2 and LZMA parts, a part named twice, three kinds of false size, widths, heights, font sizes and sheet defaults no sheet can have, a control |

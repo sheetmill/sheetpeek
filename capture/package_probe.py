@@ -203,6 +203,58 @@ CASES: tuple[tuple[str, Callable[[bytes], bytes]], ...] = (
     ("default_width_negative", _sheet_format("defaultColWidth", "-1")),
     ("default_height_nan", _edit(SHEET, 'defaultRowHeight="15"', 'defaultRowHeight="nan"')),
     ("default_height_negative", _edit(SHEET, 'defaultRowHeight="15"', 'defaultRowHeight="-1"')),
+    ("width_256", _width("256")),
+    ("width_1e4", _width("1e4")),
+    ("width_10922", _width("10922")),
+    ("width_1e6", _width("1e6")),
+    ("width_1e9", _width("1e9")),
+    ("width_99999999999", _width("99999999999")),
+    ("width_1e30", _width("1e30")),
+    ("width_minus_0.5", _width("-0.5")),
+    ("width_minus_2", _width("-2")),
+    ("width_minus_100", _width("-100")),
+    ("width_minus_inf", _width("-inf")),
+    ("height_410", _height("410")),
+    ("height_1e4", _height("1e4")),
+    ("height_1e6", _height("1e6")),
+    ("height_1e9", _height("1e9")),
+    ("height_1e30", _height("1e30")),
+    ("height_minus_0.5", _height("-0.5")),
+    ("height_minus_100", _height("-100")),
+    ("height_minus_inf", _height("-inf")),
+    ("font_size_inf", _font_size("inf")),
+    ("font_size_0", _font_size("0")),
+    ("font_size_0.5", _font_size("0.5")),
+    ("font_size_410", _font_size("410")),
+    ("font_size_1e6", _font_size("1e6")),
+    ("font_size_1e30", _font_size("1e30")),
+    ("font_size_minus_0.5", _font_size("-0.5")),
+    ("default_width_inf", _sheet_format("defaultColWidth", "inf")),
+    ("default_width_300", _sheet_format("defaultColWidth", "300")),
+    ("default_width_1e30", _sheet_format("defaultColWidth", "1e30")),
+    ("default_width_1e308", _sheet_format("defaultColWidth", "1e308")),
+    ("default_width_99999999999", _sheet_format("defaultColWidth", "99999999999")),
+    ("base_width_300", _edit(SHEET, 'baseColWidth="8"', 'baseColWidth="300"')),
+    ("base_width_99999999999", _edit(SHEET, 'baseColWidth="8"', 'baseColWidth="99999999999"')),
+    ("base_width_minus_1", _edit(SHEET, 'baseColWidth="8"', 'baseColWidth="-1"')),
+    ("default_height_inf", _edit(SHEET, 'defaultRowHeight="15"', 'defaultRowHeight="inf"')),
+    ("default_height_1e308", _edit(SHEET, 'defaultRowHeight="15"', 'defaultRowHeight="1e308"')),
+    (
+        "custom_default_height_nan",
+        _edit(SHEET, 'defaultRowHeight="15"', 'defaultRowHeight="nan" customHeight="1"'),
+    ),
+    (
+        "custom_default_height_negative",
+        _edit(SHEET, 'defaultRowHeight="15"', 'defaultRowHeight="-1" customHeight="1"'),
+    ),
+    (
+        "custom_default_height_1e308",
+        _edit(SHEET, 'defaultRowHeight="15"', 'defaultRowHeight="1e308" customHeight="1"'),
+    ),
+    (
+        "custom_default_height_20",
+        _edit(SHEET, 'defaultRowHeight="15"', 'defaultRowHeight="20" customHeight="1"'),
+    ),
     ("control_again", control),
 )
 
@@ -257,14 +309,20 @@ def _open(path: Path) -> str:
 
 
 def run() -> None:
-    """Open every case, print the outcome and write the TSV."""
+    """Open every case, print the outcome and write the TSV. A case that hangs ends the run."""
     paths = build()
     version = _version()
     rows = []
+    finished = True
     for (name, _), path in zip(CASES, paths, strict=True):
         outcome = _open(path)
-        print(f"{name}\t{outcome}")
+        print(f"{name}\t{outcome}", flush=True)
         rows.append(f"{name}\t{outcome}\n")
+        if outcome.startswith("timed out"):
+            finished = False
+            break
+    if not finished:
+        sys.exit("a case hung: stopped, and nothing written. Look into it before running again.")
     with OUTPUT.open("w", encoding="utf-8") as out:
         out.write(f"# suite: package (capture.package_probe); Excel {version} for Mac, en_US\n")
         out.write(f"# captured: {dt.date.today().isoformat()}; method: open with alerts off, ")

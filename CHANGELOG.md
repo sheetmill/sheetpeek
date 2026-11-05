@@ -39,8 +39,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - A file's impossible numbers are taken as Excel takes them, or refused where Excel refuses them,
-  where they gave a raw `ValueError`, `OverflowError` or `ZeroDivisionError`: a width or height of
-  NaN, infinity or a negative or enormous number, and a font size of NaN or 1e308.
+  where they gave a raw `ValueError`, `OverflowError` or `ZeroDivisionError`: a column width, row
+  height, font size, `defaultColWidth`, `baseColWidth` or `defaultRowHeight` of NaN, infinity, or a
+  negative or enormous number. A font size outside 1 to 409, 0 included, is refused.
 - OOXML's `_xHHHH_` escapes in text are decoded, as Excel decodes them: `a_x000D_b` holds a carriage
   return, not the literal text. Two known deviations come from openpyxl, in shared strings:
   `_x005F_x0041_` shows `A` where Excel shows `_x0041_`, and whitespace without `xml:space` stays.
