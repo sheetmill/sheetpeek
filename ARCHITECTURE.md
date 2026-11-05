@@ -1276,6 +1276,9 @@ are read.
   - the command line, and that only the reader imports openpyxl;
   - crafted packages (`tests/test_limits.py`), built in the test and never committed, and the
     forms a real package may take: zip64, data descriptors, a prefixed archive, stored parts;
+  - that a guard's regression costs a failed test and not the machine's memory
+    (`tests/watchdog.py`): a crafted case that could fail into a huge allocation runs in a child
+    under a limit of 1 GiB, and the whole run under 4 GiB;
   - that no string a file controls becomes markup (`tests/test_markup.py`): one payload in each
     string, through every HTML and Markdown configuration in every layout mode and through `serve`,
     with the output parsed, Markdown through a CommonMark renderer that allows HTML.

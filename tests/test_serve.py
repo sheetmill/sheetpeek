@@ -1,5 +1,6 @@
 """``sheetpeek serve``: an index, one page per sheet, and nothing outside the folder."""
 
+import contextlib
 import http.client
 import os
 import re
@@ -12,6 +13,7 @@ import pytest
 from sheetpeek import ReadLimits, _serve, cli
 from sheetpeek._package import SERVE_LIMITS
 from sheetpeek._serve import make_server, resolve
+from tests.watchdog import bounded
 from tests.workbooks import SHEET1, replace_part, rewrite, save
 
 
@@ -41,6 +43,19 @@ def server(folder):
     yield server
     server.shutdown()
     server.server_close()
+
+
+@contextlib.contextmanager
+def serving(folder):
+    """A server inside a test that runs in a child process, where a fixture's would not be."""
+    server = make_server(folder, port=0)
+    thread = threading.Thread(target=server.serve_forever, args=(0.01,), daemon=True)
+    thread.start()
+    try:
+        yield server
+    finally:
+        server.shutdown()
+        server.server_close()
 
 
 def get(server, path, method="GET", host=None):
@@ -231,8 +246,10 @@ def test_a_refused_file_is_422_not_404(server, folder):
     assert "declares a DTD" in body
 
 
-def test_a_huge_ref_is_refused_without_reading_it(server):
-    status, body, _ = get(server, "/view/book.xlsx?ref=A1:XFD1048576")
+@bounded
+def test_a_huge_ref_is_refused_without_reading_it(folder):
+    with serving(folder) as server:
+        status, body, _ = get(server, "/view/book.xlsx?ref=A1:XFD1048576")
     assert status == 422
     assert "more than the limit of 1048576" in body
     assert SERVE_LIMITS.max_cells == 1 << 20  # one full column is allowed
@@ -272,21 +289,16 @@ def test_a_failed_read_gives_its_slot_back(server):
     assert get(server, "/view/book.xlsx")[0] == 200
 
 
-def test_a_read_past_the_layout_limit_is_refused(folder, tmp_path):
+@bounded
+def test_a_read_past_the_layout_limit_is_refused(folder):
     wb = openpyxl.Workbook()
     wb.active["A1"] = "1" * 32_767
     save(wb, folder / "note.xlsx")
-    server = make_server(folder, port=0)
-    thread = threading.Thread(target=server.serve_forever, args=(0.01,), daemon=True)
-    thread.start()
-    try:
+    with serving(folder) as server:
         status, body, _ = get(server, "/view/note.xlsx?ref=A1:A1000")
         assert status == 422
         assert "columns spilled text reaches" in body
         assert get(server, "/view/note.xlsx")[0] == 200
-    finally:
-        server.shutdown()
-        server.server_close()
 
 
 @pytest.mark.parametrize(

@@ -18,6 +18,14 @@ project captures layout: spill, alignment, merges, overflow, indent.
   copy instead of the file just built. It never touches another open workbook, and never runs an application-wide command such
   as `calculate`.
 - Two captures never run at once.
+- No sweep of crafted or extreme input runs during a capture. Before a capture, check that Excel
+  answers and that no sweep is still running: a machine out of memory pauses Excel, which then looks
+  like a hang.
+- A case that hangs ends the run. It is reported and looked into, not retried.
+- Anything that feeds crafted or extreme input to the package runs in a child process under a memory
+  watchdog that samples its size and kills it at 4 GB (`tests/watchdog.py`). A time limit alone does
+  not count, and `ulimit -v` is not a limit on macOS. A killed run, a missing result or an exit status
+  of 137 means stop and find out why, not run it again.
 - The page setup a capture needs (orientation, scale, gridlines, margins) is written into the
   workbook by openpyxl, not set through AppleScript.
 

@@ -1,7 +1,8 @@
 """Untrusted files: what is refused before anything parses them, and what must still be read.
 
 Excel's own behavior with these packages is in ``tests/captures/package.tsv`` (ARCHITECTURE.md
-§5.5). The crafted files are built here, small, and never committed.
+§5.5). The crafted files are built here, small, and never committed. A test whose guard could fail
+into a huge allocation is ``bounded``: if it regresses, the test fails and the machine is fine.
 """
 
 import io
@@ -15,6 +16,7 @@ import pytest
 
 import sheetpeek
 from sheetpeek import LimitError, PackageError, ReadLimits
+from tests.watchdog import bounded
 from tests.workbooks import (
     NS,
     SHEET1,
@@ -282,6 +284,7 @@ def cells_limit(n):
     return ReadLimits(max_cells=n)
 
 
+@bounded
 def test_max_cells_counts_the_area_not_what_is_populated(book):
     # A1:B1 holds two values; A1:T5 holds the same two values in a hundred positions.
     assert sheetpeek.read(book, ref="A1:T5", limits=cells_limit(100)).cell(1, 1).value == 111
@@ -298,6 +301,7 @@ def test_max_cells_counts_the_area_not_what_is_populated(book):
         pytest.param("", id="stray cell"),
     ],
 )
+@bounded
 def test_a_tiny_file_cannot_ask_for_a_huge_grid(book, tail):
     stray = "" if tail else '<row r="1048576"><c r="XFD1048576"><v>1</v></c></row>'
     data = f'<sheetData><row r="1"><c r="A1"><v>1</v></c></row>{stray}</sheetData>{tail}'
@@ -308,6 +312,7 @@ def test_a_tiny_file_cannot_ask_for_a_huge_grid(book, tail):
     assert sheetpeek.read(book, ref="A1:B2").cell(1, 1).value == 1
 
 
+@bounded
 def test_a_row_past_excel_cannot_ask_for_a_huge_grid(book):
     data = '<sheetData><row r="99999999999"><c r="A99999999999"><v>1</v></c></row></sheetData>'
     rewrite(book, SHEET1, replace_sheet_data(data))
@@ -315,6 +320,7 @@ def test_a_row_past_excel_cannot_ask_for_a_huge_grid(book):
         sheetpeek.read(book)
 
 
+@bounded
 def test_a_huge_merge_costs_nothing_past_the_range_read(book):
     # The layout's map of merges walked the whole merge, 17 billion positions.
     data = (
@@ -328,6 +334,7 @@ def test_a_huge_merge_costs_nothing_past_the_range_read(book):
 
 
 @pytest.mark.parametrize("value", ["99999999999", "1e30", "-inf", "-0.5"])
+@bounded
 def test_a_column_width_excel_was_not_shown_is_still_bounded(book, value):
     # Not captured: the nearest captured behavior, so that no mode allocates by it.
     col = f'<cols><col min="1" max="1" width="{value}" customWidth="1"/></cols><sheetData>'
@@ -349,6 +356,7 @@ def test_a_column_width_excel_was_not_shown_is_still_bounded(book, value):
         ),
     ],
 )
+@bounded
 def test_a_sheet_default_excel_was_not_shown_is_still_bounded(book, edit):
     rewrite(book, SHEET1, replace_once(*edit))
     sheet = sheetpeek.read(book)
@@ -357,6 +365,7 @@ def test_a_sheet_default_excel_was_not_shown_is_still_bounded(book, edit):
 
 
 @pytest.mark.parametrize("size", ["-0.5", "0.5", "inf", "1e400"])
+@bounded
 def test_a_font_size_excel_was_not_shown_gives_no_raw_error(book, size):
     rewrite(book, "xl/styles.xml", lambda text: text.replace('<sz val="11"', f'<sz val="{size}"'))
     try:
@@ -367,11 +376,13 @@ def test_a_font_size_excel_was_not_shown_gives_no_raw_error(book, size):
         sheet.layout(mode)
 
 
+@bounded
 def test_a_huge_ref_on_an_ordinary_file_is_refused(book):
     with pytest.raises(LimitError, match="A1:XFD1048576"):
         sheetpeek.read(book, ref="A1:XFD1048576")
 
 
+@bounded
 def test_max_cells_never_uses_dimension(book):
     # A false <dimension> says one cell; the cells say otherwise.
     data = (
@@ -388,6 +399,7 @@ def test_max_cells_never_uses_dimension(book):
 
 
 @pytest.mark.parametrize("mode", ["excel", "characters"])
+@bounded
 def test_columns_added_for_spill_count_against_max_cells(tmp_path, mode):
     # 300 digits in characters mode reach 34 columns. The read is 100 cells; the layout is not.
     wb = openpyxl.Workbook()
