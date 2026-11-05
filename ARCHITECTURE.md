@@ -500,9 +500,8 @@ keeps (§5.3).
 
 ### 4.9 Captures
 
-Captured so far: `theme_colors` (§3.3), `merge_width` and `error_width` (§4.2, §4.4, no deviation), merged
-text wider than its merge (§4.1), and row autofit on open (§4.7, suite `row_height`). What
-waits for the screen capture: the gridline and heading colors, the heading sizes, the text insets
+Captured so far: `layout` (§3.6, §4.1 to §4.7), `theme_colors` (§3.3), `merge_width` and `error_width`
+(§4.2, §4.4, no deviation), `row_height` (§4.7) and `package` (§5.5). What waits for the screen capture: the gridline and heading colors, the heading sizes, the text insets
 and baselines, which come from print, and the 15 pt rows that print 14 pt apart.
 
 ## 5. openpyxl facts that constrain the design
