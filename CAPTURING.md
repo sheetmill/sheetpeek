@@ -136,8 +136,7 @@ spaces following, all give -50.
 
 The same run holds the numbers no column, row or font can have, read back with `column width`,
 `row height` and `font size`, for columns A and B and rows 1 and 2; `ARCHITECTURE.md` §5.5 has what
-Excel makes of them. A case that hangs ends the run and nothing is written. The 16.114.3 run of 68
-cases had none: a Mac out of memory had paused Excel during an earlier one, which looked like a hang.
+Excel makes of them. A case that hangs ends the run and nothing is written.
 
 ## Suites
 
