@@ -28,22 +28,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `InvalidFileException`. A path that cannot be opened still raises its `OSError`.
 - The file's extension is no longer checked: a valid workbook reads under any name. `.xls` and
   `.xlsb` files keep their advice to convert them, recognized by their content, then their name.
-- `sheetpeek serve` has lower limits, refusing for example a sheet of more than 1,048,576 cells
-  unless `?ref=` asks for less. A refused file is a 422.
+- `sheetpeek serve` has limits, lower than the library's, where it had none: it refuses for example
+  a sheet of more than 1,048,576 cells unless `?ref=` asks for less. A file it refuses or cannot read
+  is a 422; some of those were a 404.
 - The documentation names the formula engine, `xlrecalc`, now that it is published.
 - The documentation and `sheetpeek serve --help` say that `serve` is not for production.
 - `sheetpeek serve` reads two workbooks at a time, and answers 503 with `Retry-After` when no slot
   frees up within 2 seconds.
-- Layout no longer formats the empty columns it may add for spilled text, so a long text in a sheet
-  of many rows costs much less.
+- Numbers 0.1.0 took as given follow Excel: a negative row height is its magnitude, and a font size
+  of -1 is size 1. A font size of 0 or 410, a `baseColWidth` of 300 and a `defaultRowHeight` of NaN or
+  infinity are refused, as Excel refuses them.
+- Layout no longer formats the empty columns it may add for spilled text: 300 rows with one long text
+  take 2.2 s and 293 MB in `excel` mode, from 5.0 s and 793 MB, and a little less in `characters` mode.
 
 ### Fixed
-- A file's impossible numbers are taken as Excel takes them, or refused where Excel refuses them,
-  where they gave a raw `ValueError`, `OverflowError` or `ZeroDivisionError`: a column width, row
-  height, font size, `defaultColWidth`, `baseColWidth` or `defaultRowHeight` of NaN, infinity, or a
-  negative or enormous number. A font size outside 1 to 409, 0 included, is refused.
-- A column in `characters` mode is at most 255 characters, Excel's own limit. A width of -1, which
-  Excel opens as 10,921 units, cost 1.1 GB per 10,000 rows.
+- A number no column, row or font can have no longer raises a raw `ValueError`, `OverflowError` or
+  `ZeroDivisionError` from the layout: a column width or `defaultColWidth` of NaN, infinity, or a
+  negative or enormous number; a row height, or a `defaultRowHeight` with `customHeight`, of NaN,
+  infinity or an enormous number; a font size of NaN, infinity, an enormous number, or a fraction such
+  as 0.5 or -0.5. Each is taken as Excel takes it, or refused where Excel refuses it.
+- A column in `characters` mode is at most 255 characters, Excel's own limit. A width of 1e4 made a
+  column of 9,999 characters, which cost 936 MB at 10,000 rows.
 - OOXML's `_xHHHH_` escapes in text are decoded, as Excel decodes them: `a_x000D_b` holds a carriage
   return, not the literal text. Two known deviations come from openpyxl, in shared strings:
   `_x005F_x0041_` shows `A` where Excel shows `_x0041_`, and whitespace without `xml:space` stays.
@@ -51,6 +56,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   keeps them.
 
 ### Security
+- A cell's text could put control characters into the output of every backend: DEL and the C1 controls
+  (U+0080 to U+009F, among them U+009B, the one-character form of `ESC [`), which XML can hold. They
+  are removed from what a cell shows. ESC and the other C0 controls, apart from tab and line breaks,
+  could not get there: XML cannot hold them, and `_x001B_` stayed literal text. Decoding such an
+  escape makes them reachable, and they are removed too.
 - Markdown output shows a cell's text literally. Only `\\` and `|` were escaped, so a workbook could
   put HTML, links and images in the output through a cell such as `<SCRIPT>alert(2)</SCRIPT>` or
   `[a](javascript:alert(1))`, and a line break of its own into the table.
@@ -61,17 +71,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and that address, with 403 otherwise. Any host name was answered, so DNS rebinding could let a web
   page read the folder's sheets.
 - The command line prints no control characters or line breaks from a workbook, a file name or a
-  client: sheet names from `--list`, messages and warnings, the sheet and font names in HTML, and
+  client: sheet names from `--list`, file names in messages, the sheet and font names in HTML, and
   `sheetpeek serve`'s log lines, which any HTTP client could write to. `Book.sheet_names` and
   `--sheet` keep the name as the file has it.
 - `sheetpeek serve` no longer shows absolute paths: the index shows the folder's name, and errors
   from openpyxl, which name the full path, drop the folder.
-- A column width such as `99999999999` made `characters` mode allocate its width in spaces, and a
-  merge as large as the sheet made any layout of the sheet walk 17 billion positions, whatever range
+- A width such as `99999999999`, on a column or as `baseColWidth`, made `characters` mode allocate
+  its width in spaces, and a merge as large as the sheet made any layout of the sheet walk 17 billion positions, whatever range
   was read.
 - A crafted file or `?ref=` could use memory without bound; see the limits above. In particular a
-  small file could ask for a dense grid of 17 billion cells, `ZipFile.read` could decompress 2 GB
-  or more from a part stating 1,000 bytes, and a large entity could expand within expat's limit.
+  small file could ask for a dense grid of 17 billion cells, a 1 MB part stating a far smaller size
+  could take over 2 GB as `ZipFile.read` decompressed it, and a large entity could expand within
+  expat's limit: a 12 KB file gave one cell a string of 755 million characters.
 
 ## [0.1.0] - 2026-10-31
 
