@@ -158,6 +158,7 @@ for _code, _name, _level in (
     ("row.height", "row heights", "sheet"),
     ("gridlines.hidden", "hidden gridlines", "sheet"),
     ("headings.hidden", "hidden row and column headings", "sheet"),
+    ("outline", "outline symbols", "sheet"),
 ):
     _register(_code, _name, _level, "census")
 
@@ -188,7 +189,7 @@ for _code, _name, _level in (
     ("view.page_layout", "page layout and page break views", "sheet"),
     ("view.panes", "frozen and split panes", "sheet"),
     ("grid.color", "gridline colors", "sheet"),
-    ("outline", "outline symbols", "sheet"),
+    ("outline.level", "outline levels outside 0 to 7", "sheet"),
     ("cf", "conditional formatting", "sheet"),
     ("filter.buttons", "filter buttons", "sheet"),
     ("table", "tables", "sheet"),
@@ -225,6 +226,7 @@ for _code, _name, _level in (
     ("align.vertical_justify", "vertically justified and distributed text", "cells"),
     ("rows.hidden_shown", "hidden rows", "sheet"),
     ("columns.hidden_shown", "hidden columns", "sheet"),
+    ("outline.cut", "outline groups cut by the range", "sheet"),
 ):
     _register(_code, _name, _level, "layout")
 

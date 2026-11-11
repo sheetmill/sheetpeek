@@ -350,6 +350,11 @@ ODD_FIELDS = {
     "height": ('<row r="1"', '<row r="1" ht="{}" customHeight="1"'),
     "default width": ("<sheetFormatPr ", '<sheetFormatPr defaultColWidth="{}" '),
     "default height": ('defaultRowHeight="15"', 'defaultRowHeight="{}" customHeight="1"'),
+    "row outline level": ('<row r="1"', '<row r="1" outlineLevel="{}"'),
+    "column outline level": (
+        "<sheetData>",
+        '<cols><col min="1" max="16384" outlineLevel="{}"/></cols><sheetData>',
+    ),
 }
 
 
@@ -368,6 +373,29 @@ def test_no_mode_allocates_or_fails_by_an_odd_number(book, field, value):
         sheetpeek.render(
             sheet.layout(mode), {"excel": "html", "characters": "text"}.get(mode, "csv")
         )
+
+
+@pytest.mark.parametrize("value", ["9" * 5000, "0x7", " 3", "", "1.5"])
+@bounded
+def test_an_odd_outline_level_is_read_as_a_level(book, value):
+    rewrite(
+        book, SHEET1, lambda text: text.replace('<row r="1"', f'<row r="1" outlineLevel="{value}"')
+    )
+    sheet = sheetpeek.read(book)
+    assert 0 <= sheet.rows[0].outline_level <= 7
+    for name in ("html", "text", "csv"):
+        sheetpeek.render(sheet, name, on_notice="ignore")
+
+
+@bounded
+def test_a_grouped_column_run_costs_only_the_range_read(book):
+    cols = '<cols><col min="1" max="2147483647" outlineLevel="1" collapsed="1"/></cols><sheetData>'
+    rewrite(book, SHEET1, lambda text: text.replace("<sheetData>", cols, 1))
+    sheet = sheetpeek.read(book)
+    assert [c.outline_level for c in sheet.columns] == [1, 1]
+    assert sheet.outline is not None
+    assert sheet.outline.columns_beyond == (0, 1)
+    sheetpeek.render(sheet, "html", on_notice="ignore")
 
 
 @pytest.mark.parametrize("value", ["300", "99999999999", "-1"])

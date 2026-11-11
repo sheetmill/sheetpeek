@@ -19,7 +19,23 @@ def _headings(drawn: bool) -> Support:
     return SHOWN
 
 
-def html(*, headings: bool) -> dict[str, Support]:
+def _outline_html(buttons: str, level_buttons: bool) -> Support:
+    if buttons == "none":
+        return _omit("option", "buttons='none' leaves the outline gutter out")
+    if not level_buttons:
+        return _approx("the level buttons are drawn only beside both headings", "option")
+    return SHOWN
+
+
+def _outline_characters(buttons: str) -> Support:
+    if buttons == "none":
+        return _omit("option", "buttons='none' leaves the outline gutter out")
+    return _approx("a gutter of characters: bars, - and + buttons, dots; no level buttons")
+
+
+def html(
+    *, headings: bool, buttons: str = "static", level_buttons: bool = False
+) -> dict[str, Support]:
     """The HTML output (``excel`` mode)."""
     return {
         "font.name": SHOWN,
@@ -44,6 +60,7 @@ def html(*, headings: bool) -> dict[str, Support]:
         "row.height": SHOWN,
         "gridlines.hidden": SHOWN,
         "headings.hidden": _headings(headings),
+        "outline": _outline_html(buttons, level_buttons),
     }
 
 
@@ -62,7 +79,7 @@ def _characters(*, headings: bool) -> dict[str, Support]:
     }
 
 
-def rich(*, headings: bool) -> dict[str, Support]:
+def rich(*, headings: bool, buttons: str = "static") -> dict[str, Support]:
     """The ``rich`` terminal output."""
     terminal = _approx("in the terminal's colors")
     return {
@@ -80,10 +97,11 @@ def rich(*, headings: bool) -> dict[str, Support]:
         "link.internal": _omit(why="a terminal has no place in the sheet to go to"),
         "link.elsewhere": _omit(why="a terminal has no place in the workbook to go to"),
         **_characters(headings=headings),
+        "outline": _outline_characters(buttons),
     }
 
 
-def text(*, headings: bool) -> dict[str, Support]:
+def text(*, headings: bool, buttons: str = "static") -> dict[str, Support]:
     """Plain fixed-width text."""
     plain = _omit()
     return {
@@ -101,6 +119,7 @@ def text(*, headings: bool) -> dict[str, Support]:
         "link.internal": plain,
         "link.elsewhere": plain,
         **_characters(headings=headings),
+        "outline": _outline_characters(buttons),
     }
 
 
@@ -131,6 +150,7 @@ def markdown(*, emphasis: bool, letters: bool) -> dict[str, Support]:
         "row.height": plain,
         "gridlines.hidden": plain,
         "headings.hidden": _headings(letters),
+        "outline": plain,
     }
 
 
@@ -160,4 +180,5 @@ def delimited() -> dict[str, Support]:
         "row.height": plain,
         "gridlines.hidden": plain,
         "headings.hidden": SHOWN,
+        "outline": plain,
     }

@@ -26,19 +26,19 @@ def offsets(sheet: RenderedSheet, backend: HTMLBackend) -> tuple[float, float]:
 def write_column(page: Page, out: TextIO) -> None:
     """The ``<col>`` of the row headings."""
     if page.backend.row_headings:
-        out.write(f'<col style="width:{page.x(0)}px">')
+        out.write(f'<col style="width:{page.x(0) - page.gx}px">')
 
 
-def write_header(page: Page, out: TextIO) -> None:
-    """The row of column letters."""
+def write_header(page: Page, out: TextIO, lead: str = "") -> None:
+    """The row of column letters, after ``lead``, the cells of the gutter before them."""
     if not page.backend.column_headings:
         return
-    out.write(f'<thead><tr style="height:{page.y(0)}px">')
+    out.write(f'<tr style="height:{page.y(0) - page.gy}px">{lead}')
     if page.backend.row_headings:
         out.write('<th class="sp-corner"></th>')
     for c in page.sheet.columns:
         out.write(f'<th class="sp-colhead" scope="col">{c.letter}</th>')
-    out.write("</tr></thead>\n")
+    out.write("</tr>")
 
 
 def write_row(page: Page, row: RenderedRow, out: TextIO) -> None:

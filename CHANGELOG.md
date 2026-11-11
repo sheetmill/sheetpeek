@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reported when a file uses them: borders, pattern and gradient fills, superscript and subscript,
   theme fonts whose stored name differs, rotated, stacked and shrunk text, reading order, rich-text
   runs, phonetic guides, row and column formats, sheet views (hidden zeros, right to left,
-  formulas, page layout, panes, grid color), outlines, conditional formatting, filter buttons,
+  formulas, page layout, panes, grid color), conditional formatting, filter buttons,
   tables, sparklines, slicers, timelines, pictures, charts, shapes, embedded objects, form
   controls, background pictures, notes and threaded comments, print areas, print titles, manual
   page breaks, tab colors, dialog sheets, macro sheets, and any sheet element or extension sheetpeek
@@ -45,11 +45,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   hyperlink element and a `HYPERLINK()` formula takes the element's (`link.conflict`). A link on
   an empty cell is reported (`link.empty_cell`), and so is a link to another sheet or a defined
   name, which HTML shows as a link that goes nowhere (`link.elsewhere`).
+- Outlines (grouped rows and columns). `Row` and `Column` carry `outline_level` and `collapsed`,
+  and `Sheet.outline` an `Outline` (summaries below or above, right or left, whether the file
+  shows the symbols, the depths). The layout derives the groups and gives
+  `RenderedSheet.outline`, the bars, ticks, dots and buttons of each row and column
+  (`RenderedOutline`, `OutlineMark`). The HTML backend draws Excel's outline gutter beside the
+  headings, at Excel's screen sizes in CSS pixels, with level buttons when both headings are
+  drawn; `rich` and plain text draw it in characters; Markdown, CSV and TSV report it as not
+  shown. A range that cuts a group reports the button it leaves out (`outline.cut`), and a level
+  above 7 is read as 7 and reported (`outline.level`).
+- `buttons="static" | "none"` on `HTMLBackend`, `RichBackend` and `TextBackend`: whether to draw
+  Excel's buttons, which do nothing in a static output; for now the outline gutter. New CSS custom
+  properties `--sheetpeek-outline-paper`, `--sheetpeek-outline-ink`,
+  `--sheetpeek-outline-button`, `--sheetpeek-outline-button-paper`, and classes `sp-ol`,
+  `sp-olbutton`, `sp-ollevel`.
 
 ### Changed
 - `Cell.hyperlink` is a `Hyperlink` (`target`, `location`, `tooltip`, `display`, `source`), or
   `None`, in place of a string that joined the target and the location with `#`. `Hyperlink` is
   exported from `sheetpeek`.
+- A sheet with grouped rows or columns whose file shows outline symbols starts with the outline
+  gutter in HTML, `rich` and plain text output; `buttons="none"` leaves it out.
 - `sheetpeek view` reports on standard error after the output, one line per kind with its code
   first (`sheetpeek: border: borders not shown (3 cells): not implemented yet`), in place of
   `sheetpeek: warning: ...` lines before it.

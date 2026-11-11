@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, Any
 from sheetpeek._hyperlink import classify
 from sheetpeek._model import CellRange
 from sheetpeek._notices import FEATURES, CellSet, Notice, Outcome, Reason, Support, describe
+from sheetpeek._pass_outline import presence as outline_presence
 
 if TYPE_CHECKING:
     from sheetpeek._rendered import RenderedSheet
@@ -98,6 +99,7 @@ def census(rendered: RenderedSheet) -> dict[str, Presence]:
         "row.height": sum(1 for r in rendered.rows if r.source.height is not None),
         "gridlines.hidden": 0 if sheet.show_gridlines else 1,
         "headings.hidden": 0 if sheet.show_headings else 1,
+        "outline": outline_presence(rendered),
     }
     for code, count in sheet_level.items():
         if count:

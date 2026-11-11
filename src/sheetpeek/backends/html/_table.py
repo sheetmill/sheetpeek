@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, TextIO
 
 from sheetpeek._model import CellRange
 from sheetpeek._rendered import RenderedCell, RenderedSheet, TextRun
-from sheetpeek.backends.html import _headings, _links, _text
+from sheetpeek.backends.html import _headings, _links, _outline, _text
 
 if TYPE_CHECKING:
     from sheetpeek.backends.html import HTMLBackend
@@ -26,14 +26,16 @@ class Page:
         self.sheet = sheet
         self.backend = backend
         self.ox, self.oy = _headings.offsets(sheet, backend)
+        self.gx, self.gy = _outline.offsets(sheet, backend)  # px, the outline gutters
+        self.outline_rows = _outline.row_marks(sheet, backend)
         self.normal = sheet.sheet.normal_font
         self.width = self.x(sheet.width_pt) + 1  # px, the wrapper's width: the table's
 
     def x(self, points: float) -> int:
-        return _px(self.ox + points)
+        return self.gx + _px(self.ox + points)
 
     def y(self, points: float) -> int:
-        return _px(self.oy + points)
+        return self.gy + _px(self.oy + points)
 
     def write(self, out: TextIO) -> None:
         sheet = self.sheet
@@ -43,12 +45,17 @@ class Page:
             f'<table style="width:{self.width}px;font:{_text._font(self.normal)}">\n'
         )
         out.write("<colgroup>")
+        _outline.write_column(self, out)
         _headings.write_column(self, out)
         for c in sheet.columns:
             width = self.x((c.x_pt or 0) + (c.width_pt or 0)) - self.x(c.x_pt or 0)
             out.write(f'<col style="width:{width}px">')
         out.write("</colgroup>\n")
-        _headings.write_header(self, out)
+        if self.gy or self.backend.column_headings:
+            out.write("<thead>")
+            _outline.write_header(self, out)
+            _headings.write_header(self, out, _outline.lead(self))
+            out.write("</thead>\n")
         out.write("<tbody>\n")
         self.write_rows(out)
         out.write("</tbody></table></div>\n")
@@ -81,6 +88,7 @@ class Page:
         for i, row in enumerate(sheet.rows):
             y0, y1 = row.y_pt or 0, (row.y_pt or 0) + (row.height_pt or 0)
             out.write(f'<tr style="height:{self.y(y1) - self.y(y0)}px">')
+            _outline.write_row(self, row, out)
             _headings.write_row(self, row, out)
             for p, cell in enumerate(row.cells):
                 colspan = rowspan = 1

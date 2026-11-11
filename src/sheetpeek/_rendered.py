@@ -15,6 +15,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Literal, TypeAlias
 
 from sheetpeek._model import Cell, CellRange, Font, Row, column_letter
+from sheetpeek._outline_model import RenderedOutline
 
 if TYPE_CHECKING:
     from sheetpeek._census import Presence
@@ -182,6 +183,8 @@ class RenderedSheet:
     notices: tuple[Notice, ...]
     """The sheet's notices on the cells laid out, followed by the layout's. What a particular
     output leaves out is added by :func:`sheetpeek.notices`."""
+    outline: RenderedOutline | None = None
+    """The outline symbols, when the sheet has an outline whose symbols the file shows."""
 
     @property
     def warnings(self) -> tuple[str, ...]:

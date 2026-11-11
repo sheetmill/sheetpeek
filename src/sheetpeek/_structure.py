@@ -99,10 +99,6 @@ class Structure:
     """Cells whose string has rich-text runs."""
     phonetic: CellSet = field(default_factory=CellSet)
     """Cells that show a phonetic guide their string has."""
-    outline_rows: int = 0
-    """Rows with an outline level."""
-    outline_columns: int = 0
-    """Columns with an outline level."""
     row_styles: tuple[tuple[int, int], ...] = ()
     """(row, style index) of rows with a format of their own (``customFormat``)."""
     column_styles: tuple[tuple[int, int, int], ...] = ()
@@ -148,7 +144,6 @@ class Scan:
         self.show_headings = True
         self.root = "worksheet"
         self.children: list[ET.Element] = []
-        self.outline_rows = self.outline_columns = 0
         self.row_styles: list[tuple[int, int]] = []
         self.column_styles: list[tuple[int, int, int]] = []
         self.empty_strings: set[tuple[int, int]] = set()
@@ -200,8 +195,6 @@ class Scan:
             uncached=self.uncached,
             runs=self.runs,
             phonetic=self.phonetic,
-            outline_rows=self.outline_rows,
-            outline_columns=self.outline_columns,
             row_styles=tuple(self.row_styles),
             column_styles=tuple(self.column_styles),
             extra=dict(self.extra),
@@ -258,8 +251,6 @@ def _row(state: Scan, element: ET.Element) -> None:
         state.min_col = min(state.min_col, first_col)
         state.max_col = max(state.max_col, last_col)
         _cells(state, element, row_index)
-    if _level(element):
-        state.outline_rows += 1
     if _flag(element.get("customFormat")) and (style := _style(element.get("s"))):
         state.row_styles.append((row_index, style))
     height = element.get("ht")
@@ -304,12 +295,10 @@ def _cells(state: Scan, row: ET.Element, row_index: int) -> None:
 
 @handler(_COL)
 def _col(state: Scan, element: ET.Element) -> None:
-    """A run of columns: width, hidden flag, outline level, style."""
+    """A run of columns: width, hidden flag, style."""
     first = int(element.get("min", "1"))
     last = int(element.get("max", element.get("min", "1")))
     width = element.get("width")
-    if _level(element):
-        state.outline_columns += 1
     if style := _style(element.get("style")):
         state.column_styles.append((first, last, style))
     state.columns.append(
@@ -434,12 +423,6 @@ def _position(ref: str) -> tuple[int, int]:
         elif char != "$":
             return int(ref[i:].replace("$", "")), col
     raise ValueError(f"not a cell reference: {ref!r}")
-
-
-def _level(element: ET.Element) -> bool:
-    """Whether a ``<row>`` or ``<col>`` has an outline level above 0."""
-    value = element.get("outlineLevel")
-    return value is not None and value.strip() not in ("0", "")
 
 
 def _style(value: str | None) -> int:

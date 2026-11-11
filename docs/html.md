@@ -34,6 +34,24 @@ True
   The scheme is never read from the viewer's system.
 - `new_tab=True` opens links to web pages and e-mail addresses in a new tab
   (`target="_blank"`). It is off by default.
+- `buttons="static"` (the default) or `"none"`: whether to draw Excel's buttons, which do nothing
+  on a static page. For now this is the outline of grouped rows and columns: a gutter before the
+  row headings and above the column headings, with its bars, dots and − and + buttons, drawn at
+  Excel's screen sizes in CSS pixels, and the level buttons when both headings are drawn. A sheet's
+  outline is drawn only when the file shows outline symbols.
+
+```python
+>>> wb = openpyxl.Workbook()
+>>> for row in range(1, 5):
+...     wb.active.cell(row, 1).value = row
+>>> for row in (2, 3):
+...     wb.active.row_dimensions[row].outlineLevel = 1
+>>> wb.save(path)
+>>> '<td class="sp-ol">' in sheetpeek.render(path, "html", on_notice="ignore")
+True
+>>> "sp-ol" in sheetpeek.render(path, HTMLBackend(buttons="none"), on_notice="ignore")
+False
+```
 
 ## Restyling
 
@@ -50,6 +68,10 @@ an API change.
 | `--sheetpeek-heading-paper` | the headings' background | `#f3f3f3`, dark `#2b2b2b` |
 | `--sheetpeek-heading-ink` | the headings' text | `#444444`, dark `#cccccc` |
 | `--sheetpeek-heading-grid` | the headings' lines | `#c8c8c8`, dark `#3d3d3d` |
+| `--sheetpeek-outline-paper` | the outline gutter | `#eeeeee`, dark `#555555` |
+| `--sheetpeek-outline-ink` | the outline's bars and dots | `#a6a6a6`, dark `#999999` |
+| `--sheetpeek-outline-button` | the outline buttons' borders and strokes | `#808080`, dark `#333333` |
+| `--sheetpeek-outline-button-paper` | the outline buttons' background | `#ffffff` |
 
 | class | element |
 |---|---|
@@ -60,6 +82,7 @@ an API change.
 | `sp-run` | a text |
 | `sp-center` | a centered text |
 | `sp-colhead`, `sp-rowhead`, `sp-corner` | the headings |
+| `sp-ol`, `sp-olbutton`, `sp-ollevel` | the outline gutter's cells, its − and + buttons, its level buttons |
 
 A cell that a link on the page goes to has the id `sp-` and its coordinate, such as `sp-C2`.
 
@@ -114,5 +137,6 @@ Carlito installed on the viewer's system, then a local Arial or Helvetica scaled
 widths. Every text is anchored where Excel anchors it, by its start, its end or its center, so a
 different font changes only the far end of a text, and the clip windows cut where Excel cuts.
 
-The gridline and heading colors, the heading sizes, and the text's insets and baseline come
+The outline gutter's colors in the light scheme are placeholders; its dark colors and its sizes
+come from Excel's screen. The gridline and heading colors, the heading sizes, and the text's insets and baseline come
 from Excel's print layout and are provisional until they are measured on screen.

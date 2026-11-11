@@ -6,15 +6,18 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
-from typing import TYPE_CHECKING, Any, TextIO
+from typing import TYPE_CHECKING, Any, Literal, TextIO
 
 from sheetpeek._hyperlink import external_url
 from sheetpeek._notices import Support
 from sheetpeek._rendered import Mode, RenderedSheet
 from sheetpeek.backends import _support
+from sheetpeek.backends._outline_text import Gutter
 
 if TYPE_CHECKING:
     from sheetpeek._model import Font
+
+Buttons = Literal["none", "static"]
 
 
 class RichBackend:
@@ -29,6 +32,10 @@ class RichBackend:
         separator: One character drawn between two columns where no text crosses.
         column_headings: Add Excel's column letters above the sheet.
         row_headings: Add Excel's row numbers before each row.
+        buttons: ``"static"`` (the default) draws the outline gutter in characters before
+            the row headings and above the column headings, as Excel draws it beside its
+            headings; ``"none"`` leaves it out. A sheet's outline is drawn only when the file
+            shows outline symbols.
         color_system: Passed to ``rich.console.Console`` (``"auto"``, ``"truecolor"``, ...).
         force_terminal: Passed to ``rich.console.Console``; ``None`` detects.
     """
@@ -42,6 +49,7 @@ class RichBackend:
         *,
         column_headings: bool = False,
         row_headings: bool = False,
+        buttons: Buttons = "static",
         color_system: str | None = "auto",
         force_terminal: bool | None = None,
     ) -> None:
@@ -50,13 +58,18 @@ class RichBackend:
         self.separator = separator
         self.column_headings = column_headings
         self.row_headings = row_headings
+        if buttons not in ("none", "static"):
+            raise ValueError(f"buttons must be 'none' or 'static', not {buttons!r}")
+        self.buttons = buttons
         self.color_system = color_system
         self.force_terminal = force_terminal
 
     @property
     def support(self) -> dict[str, Support]:
         """What this output shows of each feature the census finds (``backends/_support.py``)."""
-        return _support.rich(headings=self.column_headings or self.row_headings)
+        return _support.rich(
+            headings=self.column_headings or self.row_headings, buttons=self.buttons
+        )
 
     def render(self, sheet: RenderedSheet, out: TextIO, /) -> None:
         """Print the sheet to ``out``, cropped to the terminal's width when ``out`` is one."""
@@ -82,8 +95,12 @@ class RichBackend:
         links = _Links(sheet)
         label = max((len(str(row.index)) for row in sheet.rows), default=1)
         dim = "dim"
+        gutter = Gutter(sheet.outline if self.buttons != "none" else None)
+        prefix = " " * gutter.width + (" " * label + self.separator if self.row_headings else "")
+        if sheet.columns:
+            for band in gutter.column_lines(sheet.columns, self.separator):
+                yield Text(prefix + band, style=dim, end="\n")
         if self.column_headings and sheet.columns:
-            prefix = " " * label + self.separator if self.row_headings else ""
             heading = Text(prefix, style=dim, end="\n")
             for p, column in enumerate(sheet.columns):
                 width = column.width or 0
@@ -94,6 +111,8 @@ class RichBackend:
         for row in sheet.rows:
             for line in range(row.height):
                 text = Text(no_wrap=True, end="\n")
+                if gutter.width:
+                    text.append(gutter.row(row.index, line, row.height), style=dim)
                 if self.row_headings:
                     number = str(row.index) if line == 0 else ""
                     text.append(number.rjust(label) + self.separator, style=dim)

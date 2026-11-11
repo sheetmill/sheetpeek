@@ -36,6 +36,8 @@ Everything below is importable from `sheetpeek`.
    :members:
 .. autoclass:: sheetpeek.Row
    :members:
+.. autoclass:: sheetpeek.Outline
+   :members:
 .. autoclass:: sheetpeek.CellRange
    :members: parse, rows, columns, intersects
 ```
@@ -57,6 +59,14 @@ Everything below is importable from `sheetpeek`.
    :members:
 .. autoclass:: sheetpeek.Gap
    :members:
+.. autoclass:: sheetpeek.RenderedOutline
+   :members:
+.. autoclass:: sheetpeek.OutlineMark
+   :members:
+.. py:data:: sheetpeek.OutlineMarkKind
+
+   What an :class:`OutlineMark` draws: ``"start"``, ``"bar"``, ``"open"``, ``"closed"`` or
+   ``"dot"``.
 ```
 
 ## Rendering

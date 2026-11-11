@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, Any, Literal, TypeAlias
 from xlformat import ExcelError
 
 from sheetpeek._hyperlink import Hyperlink
+from sheetpeek._outline_model import Outline
 
 if TYPE_CHECKING:
     from sheetpeek._notices import Notice
@@ -219,6 +220,10 @@ class Column:
     index: int
     width: float | None = None
     hidden: bool = False
+    outline_level: int = 0
+    """The column's outline level, 0 (not grouped) to 7."""
+    collapsed: bool = False
+    """The file marks it as the summary column of a collapsed group."""
 
     @property
     def letter(self) -> str:
@@ -236,6 +241,10 @@ class Row:
     listed: bool = False
     """Whether the file has a ``<row>`` element for it, which decides its default height in some
     sheet formats (``ARCHITECTURE.md`` §4.7)."""
+    outline_level: int = 0
+    """The row's outline level, 0 (not grouped) to 7."""
+    collapsed: bool = False
+    """The file marks it as the summary row of a collapsed group."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -276,6 +285,8 @@ class Sheet:
     show_gridlines: bool = True
     show_headings: bool = True
     """The file's ``showRowColHeaders``: whether Excel shows row and column headings."""
+    outline: Outline | None = None
+    """The outline's settings when any row or column has an outline level, else ``None``."""
     notices: tuple[Notice, ...] = field(default=())
     """What the file uses that sheetpeek does not read yet (:class:`~sheetpeek.Notice`)."""
     max_cells: int | None = field(default=None, repr=False, compare=False)

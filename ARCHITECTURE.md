@@ -134,8 +134,9 @@ are flattened to the cell's font.
 | `used_range` | the structure scan: bounding box of every `<c>` element, from `<row r>` and `<c r>` (positions inferred when `r` is omitted, as the schema allows), widened to cover every merged range, since a merge occupies its cells even where the file has no `<c>` for them; `<dimension>` is never trusted |
 | `ref` | the requested range, or `used_range` |
 | `merges` | scan: `<mergeCells>` |
-| `columns`: per column `width`, `hidden` | scan: `<cols>` (each `<col>` covers `min` to `max`) |
-| `rows`: per row `height` in points, `hidden` | scan: `ht`, `hidden` of `<row>` |
+| `columns`: per column `width`, `hidden`, `outline_level`, `collapsed` | scan: `<cols>` (each `<col>` covers `min` to `max`) |
+| `rows`: per row `height` in points, `hidden`, `outline_level`, `collapsed` | scan: `ht`, `hidden`, `outlineLevel`, `collapsed` of `<row>` |
+| `outline` (`Outline`, or `None` when no row or column has a level) | scan: `<outlinePr summaryBelow summaryRight>`, `showOutlineSymbols` of the first `<sheetView>`, else of `<outlinePr>`; the deepest row and column levels in the sheet; the levels of the rows and columns just outside `ref` (§4.11) |
 | `default_column_width`, `default_row_height` | scan: `<sheetFormatPr>` (`defaultColWidth`, `baseColWidth`, `defaultRowHeight`) |
 | `show_gridlines` | scan: `<sheetView showGridLines>` |
 | `normal_font` | the `Normal` entry of `wb._named_styles`, else `wb._fonts[0]`; both are present in read-only mode |
@@ -190,6 +191,7 @@ palette recolors those in Excel. sheetpeek ignores that and documents it.
 | row heights | `height` on `<tr>` | lines as wrapped text needs | as rich | no | no |
 | headings (row numbers, column letters) | `column_headings`, `row_headings` | the same | the same | `header="letters"` | no |
 | hyperlinks (§4.10) | `<a>` around the cell's runs; links to shown cells go to their id | terminal hyperlinks (OSC 8), external targets only | text only | `[text](url)`, external targets only | text only |
+| outline symbols (§4.11) | gutter cells beside the headings, `buttons` | a gutter of characters, `buttons` | as rich | no | no |
 
 Spill in HTML is computed in the model, not left to the browser, and the browser's font must not
 draw past it. Whatever the technique, the HTML backend shows the same spill as every other
@@ -290,14 +292,16 @@ Three producers, one for each stage:
 1. **The reader** (`Sheet.notices`, `_detect.py`) reports what the file uses that the model does
    not carry. Styles are checked once per style, by each aspect in `_style/` (borders, pattern
    and gradient fills, superscript and subscript, scheme fonts against the theme's typefaces,
-   rotation, shrink, reading order); the
-   structure scan marks rich-text and phonetic cells, uncached formulas, outline levels and row and
-   column styles, and links no output can follow (§4.10); the sheet's other children, its drawing, VML, comments and threaded comments
-   parts, and the workbook's sheet kinds and print names give the rest. Notices on cells a layout
+   rotation, shrink, reading order); the structure scan marks rich-text and phonetic cells,
+   uncached formulas, outline levels outside 0 to 7, row and column styles, and links no
+   output can follow (§4.10); the sheet's other children, its drawing, VML, comments and
+   threaded comments parts, and the workbook's sheet kinds and print names give the rest.
+   Notices on cells a layout
    hides are dropped there (`_notices.visible`).
 2. **The layout** (`RenderedSheet.notices`) adds what every output approximates: fonts without
    glyph tables, refused formats, unshowable values, vertically justified text in `excel` mode,
-   hidden rows and columns kept by `show_hidden`.
+   hidden rows and columns kept by `show_hidden`, and outline groups whose summary the range cuts
+   off (§4.11).
 3. **Each output**: the layout's census (`RenderedSheet.features`, `_census.py`) records the
    features the model carries that the laid-out cells use; each backend declares a `Support` per
    census code (`backends/_support.py`, the six tables side by side), and its notices are the
@@ -317,7 +321,7 @@ element states something Excel draws differently from its default:
 - window state that only chooses which part of the sheet is seen (zoom, `topLeftCell`, the
   selection, the active tab) is not reported: a page shows the whole range;
 - `autoFilter` counts with a `ref`, `conditionalFormatting` with a `cfRule`, `tableParts` with a
-  `tablePart`, page breaks only manual ones, outline levels only while outline symbols are shown,
+  `tablePart`, page breaks only manual ones, outline symbols only while the file shows them,
   a pane when frozen or split, a grid color other than automatic (`colorId` 64), a tab color other
   than automatic; drawings, embedded objects and controls are not reported under
   `workbookPr showObjects="none"`;
@@ -575,7 +579,8 @@ keeps (§5.3).
 ### 4.9 Captures
 
 Captured so far: `layout` (§3.6, §4.1 to §4.7), `theme_colors` (§3.3), `merge_width` and `error_width`
-(§4.2, §4.4, no deviation), `row_height` (§4.7) and `package` (§5.5). What waits for the screen capture: the gridline and heading colors, the heading sizes, the text insets
+(§4.2, §4.4, no deviation), `row_height` (§4.7) and `package` (§5.5). The outline rules (§4.11)
+rest on captures on Excel 16.114 that are not yet in `tests/captures/`. What waits for the screen capture: the gridline and heading colors, the heading sizes, the text insets
 and baselines, which come from print, and the 15 pt rows that print 14 pt apart.
 
 ### 4.10 Hyperlinks
@@ -614,6 +619,69 @@ What sheetpeek decides (not Excel's behavior):
   is an anchor that goes nowhere (`link.elsewhere`, approximated). Defined names are not resolved.
 - **The census** (§3.7) counts `link` (an allowed URL), `link.internal` and `link.elsewhere` on
   cells that show text; each output declares what it does with them (`backends/_support.py`).
+
+### 4.11 Outlines
+
+**Captures** (Excel 16 for Mac, Office Home & Business 2021, dark appearance; one run
+of a sheet with rows 4 to 17 grouped up to level 3 and columns D to J up to level 2, at zoom 100
+and 200, and one with summary columns on the left). Every rule here stays **unverified until it
+is recaptured after the move to Microsoft 365**; the tests that rest on them say so.
+
+**Groups from levels** (`_pass_outline.py`). For each level `L` from 1 to the deepest, a group is
+a maximal run of rows whose `outline_level` is at least `L`; its summary row is the row after the
+run (`summaryBelow`, the default) or the row before it. Its button is − while any of its detail
+rows is visible, and + when all are hidden or the summary row has `collapsed` (captured: rows 11
+and 17 show only a +, rows 7, 8 and 12 a −). Hidden detail rows draw nothing. Each visible
+detail row gets a dot in the lane after its own level, unless a button is there (captured: rows 4,
+5 and 6). Columns follow the same rule with `summaryRight` (captured mirrored for summaries on the
+left: the button on the summary column, the tick at the far end of the last detail column).
+Summary rows above are taken as mirrored the same way (unverified). The result is
+`RenderedSheet.outline`, a `RenderedOutline` of `OutlineMark`s (index, lane, kind) for the rows
+and columns laid out.
+
+**What the reader takes from the file.** `outlineLevel` and `collapsed` of `<row>` and `<col>`;
+`summaryBelow` and `summaryRight` of `<outlinePr>`; `showOutlineSymbols` of the first
+`<sheetView>`, which wins over `<outlinePr>`'s. **The depth is the deepest level found in the
+whole sheet** (captured: without `outlineLevelRow` Excel draws the same gutter as with it), so the
+declared `outlineLevelRow` and `outlineLevelCol` are not read. Office allows levels 0 to 7; a
+deeper level is read as 7, and a level that is not a whole number from 0 up as 0, reported as
+`outline.level` (what Excel does with them is not captured). With `showOutlineSymbols="0"` nothing
+is drawn and nothing is reported (taken as given, unverified).
+
+**A range that cuts a group** still draws the bars of its rows inside the range. The model keeps
+the levels of the row and column just outside the range (`Outline.rows_beyond`,
+`columns_beyond`), so a run that continues past the edge draws no tick there, and a summary just
+inside the edge gets its button. A group whose summary is outside the range draws no button,
+reported as `outline.cut` (decided).
+
+**Geometry** (captured; drawn by the HTML backend, `backends/html/_outline.py`). **Every size is
+screen-fixed**: identical at zoom 100 and 200, so one screen point is one CSS pixel at any page
+scale (decided), like the gridlines.
+- The row gutter is left of the row headings, `2 + 12 × (depth + 1) + 3` px wide (53 at depth 3);
+  the column gutter is above the column headings, by the same rule (41 at depth 2). Lane `n`
+  starts at `2 + 12 × (n − 1)`.
+- A bar is 2 px wide, 3 px into its lane, and starts 2 px below the first detail row's top (or
+  past the first detail column's left edge), at any row height, with a 6 × 2 px tick toward the
+  headings; it runs into the summary's button. With summaries above or left, it ends 2 px short
+  of the last detail row's far edge, where the tick is.
+- − and + buttons are 12 × 12 px, filling the lane, rounded, white, with a 1 px border; their
+  strokes are 6 px long and 1 px thick. **A button is centered on its row**, its top at
+  `1 + ⌈(h − 1 − 12) / 2⌉` for a row `h` px high (2 in 15, 10 in 30, 25 in 60), so it does not
+  follow the row height.
+- A dot is 2 × 2 px, centered on its row at the bar's x.
+- The level buttons are 12 × 12 px, one per lane: the row levels across the column-heading band,
+  centered in its height; the column levels down the row-heading column, centered in its width.
+- Colors in the dark appearance: gutter 85, bars 153, button border 51 (gray levels). The light
+  appearance is not captured.
+
+Not captured: the light appearance's colors, the exact end of the tick on the column side, the
+gutter with the headings off, and summaries above.
+
+**Other outputs.** `rich` and plain text draw a gutter of characters, one per lane before each
+row and one line per lane above the columns: `│` and `─` for bars, `┌`, `└` or `┐` for a bar's
+tick end, `-` and `+` for the buttons, `·` for dots; no level buttons (approximated). Their
+`buttons="none"` leaves it out, as in HTML. Markdown, CSV and TSV report the outline as not
+shown.
 
 ## 5. openpyxl facts that constrain the design
 
@@ -1075,12 +1143,22 @@ points.
   `color_scheme="light" | "dark"` (default light, never read from the system) changes only the
   headings, as in Excel. A sheet without gridlines gets `sp-nogrid`. The heading sizes and
   colors and the gridline color are placeholders until the screen capture.
+- **The outline gutter** (§4.11) is cells of the table, so it scrolls with it: a `<col>` and a
+  `<td class="sp-ol">` before the row headings, and a row of them above the column headings.
+  Each holds absolutely positioned segments (`<i>`), buttons (`sp-olbutton`, strokes as `<i>`, no
+  glyph) and level buttons (`sp-ollevel`), sized in CSS px, not points; the column gutter is the
+  row gutter's geometry transposed. The level buttons sit in the headings' bands, so they are
+  drawn only with both headings. `buttons="none"` leaves the gutter out; `"static"`, the
+  default, draws it, and leaves room for working buttons later. Its stylesheet is written only on
+  a page that draws a gutter. The dark colors are captured; the light ones are placeholders.
 - **The CSS surface is public interface**, changed only with a changelog entry: the custom
   properties `--sheetpeek-paper`, `--sheetpeek-ink`, `--sheetpeek-grid`,
-  `--sheetpeek-heading-paper`, `--sheetpeek-heading-ink`, `--sheetpeek-heading-grid`, and the
-  classes `sheetpeek`, `sp-crossed`, `sp-clip`, `sp-run`, `sp-center`, `sp-colhead`,
-  `sp-rowhead`, `sp-corner`, `sp-nogrid`, and the ids `sp-<cell>` of cells a link goes to.
-  Explicit colors from the file (fills, font and section
+  `--sheetpeek-heading-paper`, `--sheetpeek-heading-ink`, `--sheetpeek-heading-grid`,
+  `--sheetpeek-outline-paper`, `--sheetpeek-outline-ink`, `--sheetpeek-outline-button`,
+  `--sheetpeek-outline-button-paper`, the classes `sheetpeek`, `sp-crossed`, `sp-clip`,
+  `sp-run`, `sp-center`, `sp-colhead`, `sp-rowhead`, `sp-corner`, `sp-nogrid`, `sp-ol`,
+  `sp-olbutton`, `sp-ollevel`, and the ids `sp-<cell>` of cells a link goes to. Explicit
+  colors from the file (fills, font and section
   colors) are inline styles, so restyled dark paper keeps a cell's explicit dark text (§9).
 - **Links** (§4.10): a linked cell's runs sit inside one `<a>`, so spilled text stays
   clickable; the anchor inherits color and decoration (`.sheetpeek a`), since the cell's format
@@ -1120,10 +1198,12 @@ src/sheetpeek/
   __init__.py        public names, __version__
   _model.py          Sheet, Cell, CellStyle, Column, Row, CellRange, Font
   _hyperlink.py      Hyperlink; the scheme check and place lookup every output shares (§4.10)
+  _outline_model.py  Outline, OutlineMark, RenderedOutline (§4.11)
   _rendered.py       RenderedSheet, RenderedRow, RenderedCell, RenderedColumn, Gap
   _package.py        ReadLimits, the check before reading (§5.5), sheet name → worksheet part
   _structure.py      the structure scan (§5.4): one handler per element
   _scan_links.py     the scan's hyperlink handlers, and the reader's link notices (§4.10)
+  _scan_outline.py   the outline's scan handlers, and its rows, columns and settings
   _read.py           the reader: openpyxl read-only, date conversion off; builds a Sheet
   _style/            a cell's style, one module per aspect: border, fill, font, alignment
   _detect.py         what a file uses that the model does not carry: one rule per sheet child
@@ -1132,14 +1212,16 @@ src/sheetpeek/
   _colors.py         theme parsing, tint, indexed palette
   _layout.py         width modes, the xlformat seam, alignment, spill, merges, wrapping;
                      the ordered layout passes
+  _pass_outline.py   the outline pass: groups, buttons and dots (§4.11)
   _excel.py          excel mode: geometry in points, text runs, clips
   _rows.py           row heights (§4.7) and baselines
   backends/
     __init__.py      Backend protocol, registry, render(), notices()
     _support.py      what each output shows of each feature (§3.7)
+    _outline_text.py the outline gutter in characters, for rich and text
     text.py  rich.py  markdown.py  delimited.py
     html/            __init__ (backend, page), _css, _table (grid, fills, gridlines),
-                     _text (runs), _headings, _links (anchors, ids), _notices
+                     _text (runs), _headings, _links (anchors, ids), _outline (the gutter), _notices
   cli.py             `sheetpeek view`, `sheetpeek serve`
   _serve.py          the server behind `sheetpeek serve`
   _carlito.py        Carlito's advance widths, generated by tools/carlito_widths.py

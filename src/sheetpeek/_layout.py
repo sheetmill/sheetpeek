@@ -20,6 +20,7 @@ import xlformat
 from sheetpeek._model import Cell, CellRange, CellStyle, Column, Font, Row, Sheet
 from sheetpeek._notices import Collector, Notice, visible
 from sheetpeek._package import LimitError
+from sheetpeek._pass_outline import outline_pass
 from sheetpeek._rendered import (
     Alignment,
     Gap,
@@ -92,6 +93,7 @@ def layout(
         draft.rows,
         draft.gap,
         finish(sheet, notes, draft.kept_rows, draft.kept_columns),
+        outline=draft.extra.get("outline"),
     )
 
 
@@ -184,7 +186,7 @@ def _vertical_justify(draft: Draft) -> None:
                 )
 
 
-PASSES: list[Pass] = [_cells, _vertical_justify]
+PASSES: list[Pass] = [_cells, _vertical_justify, outline_pass]
 """The layout's passes, in order. A feature adds its own here: borders after the cells (they
 depend on spill), chrome such as outline symbols after the geometry."""
 

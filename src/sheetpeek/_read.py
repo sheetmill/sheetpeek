@@ -59,6 +59,7 @@ from sheetpeek._package import (
 )
 from sheetpeek._scan_links import cell_links
 from sheetpeek._scan_links import report as report_links
+from sheetpeek._scan_outline import read_outline
 from sheetpeek._structure import Structure, scan
 from sheetpeek._style import Code
 from sheetpeek._style import font as font_aspect
@@ -270,14 +271,17 @@ class Book:
         except Exception as error:
             raise self._unreadable(error) from error
         self._report_structure(notes, structure, ref)
+        rows, columns, outline = read_outline(
+            structure, ref, _rows(structure, ref), _columns(structure, ref), notes
+        )
         return Sheet(
             name=name,
             state=_STATES.get(worksheet.sheet_state, "visible"),
             ref=ref,
             used_range=structure.used_range,
             cells=cells,
-            columns=_columns(structure, ref),
-            rows=_rows(structure, ref),
+            columns=columns,
+            rows=rows,
             merges=tuple(m for m in structure.merges if ref and m.intersects(ref)),
             normal_font=self._normal_font,
             date1904=self.date1904,
@@ -291,6 +295,7 @@ class Book:
             thick_bottom=structure.thick_bottom,
             show_gridlines=structure.show_gridlines,
             show_headings=structure.show_headings,
+            outline=outline,
             notices=notes.notices(),
             max_cells=self._limits.max_cells,
         )

@@ -23,9 +23,11 @@ from sheetpeek._rendered import Mode, RenderedSheet
 from sheetpeek.backends import _support
 from sheetpeek.backends.html._css import CSS
 from sheetpeek.backends.html._notices import write_notices
+from sheetpeek.backends.html._outline import css as outline_css
 from sheetpeek.backends.html._table import Page
 
 ColorScheme = Literal["light", "dark"]
+Buttons = Literal["none", "static"]
 
 
 class HTMLBackend:
@@ -47,6 +49,11 @@ class HTMLBackend:
             (``<details class="sp-notices">``).
         new_tab: Open links to web pages and e-mail addresses in a new tab
             (``target="_blank"``). Links within the page are not affected.
+        buttons: Whether to draw Excel's buttons, which do nothing on a static page. For now
+            this is the outline: ``"static"`` (the default) draws the outline gutter beside the
+            headings as Excel shows it, with its bars, dots, minus and plus buttons, and the level
+            buttons where the headings are drawn; ``"none"`` leaves the gutter out. A sheet's
+            outline is drawn only when the file shows outline symbols.
     """
 
     name = "html"
@@ -61,6 +68,7 @@ class HTMLBackend:
         color_scheme: ColorScheme = "light",
         notices: bool = False,
         new_tab: bool = False,
+        buttons: Buttons = "static",
     ) -> None:
         if color_scheme not in ("light", "dark"):
             raise ValueError(f"color_scheme must be 'light' or 'dark', not {color_scheme!r}")
@@ -70,11 +78,18 @@ class HTMLBackend:
         self.color_scheme = color_scheme
         self.notices = notices
         self.new_tab = new_tab
+        if buttons not in ("none", "static"):
+            raise ValueError(f"buttons must be 'none' or 'static', not {buttons!r}")
+        self.buttons = buttons
 
     @property
     def support(self) -> dict[str, Support]:
         """What this output shows of each feature the census finds (``backends/_support.py``)."""
-        return _support.html(headings=self.column_headings or self.row_headings)
+        return _support.html(
+            headings=self.column_headings or self.row_headings,
+            buttons=self.buttons,
+            level_buttons=self.column_headings and self.row_headings,
+        )
 
     def render(self, sheet: RenderedSheet, out: TextIO, /) -> None:
         """Write the page or the fragment to ``out``."""
@@ -85,11 +100,12 @@ class HTMLBackend:
                 '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
                 '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
                 f"<title>{title}</title>\n"
-                f"<style>\n{CSS}body {{ margin: 8px; background: {background}; }}\n</style>\n"
+                f"<style>\n{CSS}{outline_css(sheet, self)}"
+                f"body {{ margin: 8px; background: {background}; }}\n</style>\n"
                 "</head>\n<body>\n"
             )
         else:
-            out.write(f"<style>\n{CSS}</style>\n")
+            out.write(f"<style>\n{CSS}{outline_css(sheet, self)}</style>\n")
         Page(sheet, self).write(out)
         if self.notices:
             write_notices(sheet, self, out)
@@ -97,4 +113,4 @@ class HTMLBackend:
             out.write("</body>\n</html>\n")
 
 
-__all__ = ["CSS", "ColorScheme", "HTMLBackend"]
+__all__ = ["CSS", "Buttons", "ColorScheme", "HTMLBackend"]

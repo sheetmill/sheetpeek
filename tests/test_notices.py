@@ -38,6 +38,7 @@ ELSEWHERE = {
     "tests/test_read.py",
     "format.refused": "tests/test_layout.py and tests/test_cli.py",
     "value.unshowable": "tests/test_layout.py",
+    "outline.cut": "only with a range that cuts a group; tests/test_outline.py",
 }
 
 DRAWING = (
@@ -155,6 +156,7 @@ def build_every_feature(path: Path) -> Path:
     ws.sheet_view.colorId = 10
     ws.freeze_panes = "B2"
     ws.row_dimensions[5].outlineLevel = 1
+    ws.column_dimensions["Z"].outlineLevel = 9  # past Excel's 7
     ws.conditional_formatting.add(
         "A1:A3", CellIsRule(operator="equal", formula=["1"], fill=PatternFill("solid", "FF0000"))
     )
@@ -363,8 +365,8 @@ def test_a_removed_declaration_is_reported(every, monkeypatch):
     # The mutation the completeness test guards against: an output forgets a feature.
     original = _support.text
 
-    def without_fill(*, headings):
-        table = original(headings=headings)
+    def without_fill(**options):
+        table = original(**options)
         del table["fill"]
         return table
 

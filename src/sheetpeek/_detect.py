@@ -59,7 +59,6 @@ CODES: dict[str, tuple[Outcome, Reason, str]] = {
     "view.page_layout": ("approximated", "not_implemented", "drawn as the Normal view"),
     "view.panes": ("omitted", "not_implemented", ""),
     "grid.color": ("approximated", "not_implemented", "drawn in the default gray"),
-    "outline": ("omitted", "not_implemented", ""),
     "cf": ("omitted", "not_implemented", ""),
     "filter.buttons": ("omitted", "not_implemented", ""),
     "table": ("omitted", "not_implemented", "table styles and buttons not drawn"),
@@ -288,8 +287,6 @@ class SheetContext:
     rels: dict[str, tuple[str, str, bool]]
     objects: bool
     """Whether the workbook shows objects (``showObjects`` is not ``none``)."""
-    symbols: bool | None = None
-    """``showOutlineSymbols`` when the file states it."""
 
 
 Rule = Callable[[SheetContext, ET.Element], None]
@@ -345,12 +342,6 @@ def sheet_notices(
             _report(
                 collector, "sheet.unknown_element", detail=f"<{local}>", context={"element": local}
             )
-    if (structure.outline_rows or structure.outline_columns) and context.symbols is not False:
-        _report(
-            collector,
-            "outline",
-            context={"rows": structure.outline_rows, "columns": structure.outline_columns},
-        )
     if name in info.print_areas:
         _report(collector, "print.area")
     if name in info.print_titles:
@@ -363,17 +354,12 @@ def _sheet_properties(context: SheetContext, child: ET.Element) -> None:
     tab = child.find(f"{{{_MAIN}}}tabColor")
     if tab is not None and not _true(tab.get("auto")) and tab.attrib:
         _report(context.collector, "sheet.tab_color")
-    outline = child.find(f"{{{_MAIN}}}outlinePr")
-    if outline is not None and context.symbols is None and outline.get("showOutlineSymbols"):
-        context.symbols = _true(outline.get("showOutlineSymbols"))
 
 
 @rule("sheetViews")
 def _sheet_views(context: SheetContext, child: ET.Element) -> None:
     view = child.find(f"{{{_MAIN}}}sheetView")
     if view is not None:
-        if view.get("showOutlineSymbols") is not None:
-            context.symbols = _true(view.get("showOutlineSymbols"))
         _view(context.collector, view)
 
 

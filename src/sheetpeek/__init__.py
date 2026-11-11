@@ -32,6 +32,7 @@ from sheetpeek._notices import (
     Reason,
     Support,
 )
+from sheetpeek._outline_model import Outline, OutlineMark, OutlineMarkKind, RenderedOutline
 from sheetpeek._package import LimitError, PackageError, ReadLimits
 from sheetpeek._read import Book, open, read  # noqa: A004 - sheetpeek.open, like gzip.open
 from sheetpeek._rendered import (
@@ -72,12 +73,16 @@ __all__ = [
     "NotShownWarning",
     "Notice",
     "Outcome",
+    "Outline",
+    "OutlineMark",
+    "OutlineMarkKind",
     "PackageError",
     "Presence",
     "ReadLimits",
     "Reason",
     "RenderedCell",
     "RenderedColumn",
+    "RenderedOutline",
     "RenderedRow",
     "RenderedSheet",
     "Row",
