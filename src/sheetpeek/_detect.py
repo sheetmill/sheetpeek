@@ -14,7 +14,7 @@ from __future__ import annotations
 import re
 import xml.etree.ElementTree as ET
 import zipfile
-from collections.abc import Iterable, Iterator
+from collections.abc import Callable, Iterable, Iterator
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -22,6 +22,7 @@ from sheetpeek._model import CellRange
 from sheetpeek._notices import Collector, Outcome, Reason
 from sheetpeek._package import related, workbook_part
 from sheetpeek._structure import PHONETIC, RICH, Structure
+from sheetpeek._style import Code
 
 _MAIN = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
 _REL = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
@@ -257,60 +258,6 @@ def theme_fonts(theme: bytes | None) -> dict[str, str]:
     return result
 
 
-Code = tuple[str, str, tuple[tuple[str, str], ...]]
-"""A style's finding: code, detail, context."""
-
-
-def style_codes(source: Any, fonts: dict[str, str]) -> tuple[tuple[Code, ...], tuple[Code, ...]]:
-    """What a cell's style uses that is not read: (for any cell, for cells with a value)."""
-    every: list[Code] = []
-    text: list[Code] = []
-    border = getattr(source, "border", None)
-    if border is not None:
-        sides = [getattr(border, side, None) for side in ("left", "right", "top", "bottom")]
-        sides += [getattr(border, side, None) for side in ("start", "end")]
-        if any(getattr(side, "style", None) for side in sides):
-            every.append(("border", "", ()))
-        diagonal = getattr(border, "diagonal", None)
-        if getattr(diagonal, "style", None) and (border.diagonalUp or border.diagonalDown):
-            every.append(("border.diagonal", "", ()))
-    fill = getattr(source, "fill", None)
-    tag = getattr(fill, "tagname", None)
-    if tag == "gradientFill":
-        every.append(("fill.gradient", "", ()))
-    elif tag == "patternFill" and (pattern := getattr(fill, "fill_type", None)) not in (
-        None,
-        "none",
-        "solid",
-    ):
-        every.append(("fill.pattern", "", (("pattern", str(pattern)),)))
-    font = getattr(source, "font", None)
-    if font is not None:
-        if font.vertAlign in ("superscript", "subscript"):
-            text.append(("font.vert_align", "", ()))
-        theme = fonts.get(font.scheme or "")
-        if theme and font.name and font.name.lower() != theme.lower():
-            text.append(
-                (
-                    "font.scheme",
-                    f"drawn in {font.name!r}; Excel draws the theme's {theme!r}",
-                    (("font", str(font.name)), ("theme", theme)),
-                )
-            )
-    alignment = getattr(source, "alignment", None)
-    if alignment is not None:
-        rotation = int(alignment.textRotation or 0)
-        if rotation == 255:
-            text.append(("text.stacked", "", ()))
-        elif rotation:
-            text.append(("text.rotation", "", ()))
-        if alignment.shrinkToFit:
-            text.append(("text.shrink", "", ()))
-        if alignment.readingOrder in (1, 2):
-            text.append(("text.reading_order", "", ()))
-    return tuple(every), tuple(text)
-
-
 def visible_style(workbook: Any, index: int) -> bool:
     """Whether a row or column style draws on empty cells: a fill or a border side."""
     styles = getattr(workbook, "_cell_styles", None)
@@ -332,6 +279,38 @@ def visible_style(workbook: Any, index: int) -> bool:
     )
 
 
+@dataclass(slots=True)
+class SheetContext:
+    """What a sheet's rules need besides the element: the package and what was found so far."""
+
+    collector: Collector
+    archive: zipfile.ZipFile
+    rels: dict[str, tuple[str, str, bool]]
+    objects: bool
+    """Whether the workbook shows objects (``showObjects`` is not ``none``)."""
+    symbols: bool | None = None
+    """``showOutlineSymbols`` when the file states it."""
+
+
+Rule = Callable[[SheetContext, ET.Element], None]
+"""Reports what one child of the sheet uses."""
+
+RULES: dict[str, Rule] = {}
+"""Rules by a sheet child's local name (in the main namespace). A child with no rule, and not
+silent or read, is reported as unrecognized. A feature that comes to be drawn replaces its rule."""
+
+
+def rule(*names: str) -> Callable[[Rule], Rule]:
+    """Register a rule for sheet children with these local names."""
+
+    def register(function: Rule) -> Rule:
+        for name in names:
+            RULES[name] = function
+        return function
+
+    return register
+
+
 def sheet_notices(
     collector: Collector,
     archive: zipfile.ZipFile,
@@ -345,12 +324,12 @@ def sheet_notices(
     kind = info.kinds.get(name, "worksheet")
     if kind in ("dialogsheet", "macrosheet"):
         _report(collector, f"sheet.{kind}")
-    rels = {
-        rid: (rel_type, target, external)
-        for rid, rel_type, target, external in related(archive, part)
-    }
-    objects = info.show_objects != "none"
-    symbols: bool | None = None
+    context = SheetContext(
+        collector,
+        archive,
+        {rid: (kind, target, external) for rid, kind, target, external in related(archive, part)},
+        info.show_objects != "none",
+    )
     for child in _children(structure.children):
         local, namespace = _local(child)
         if namespace != _MAIN:
@@ -360,66 +339,13 @@ def sheet_notices(
                 detail=f"<{local}>",
                 context={"element": child.tag},
             )
-        elif local in _SILENT:
-            continue
-        elif local == "sheetPr":
-            tab = child.find(f"{{{_MAIN}}}tabColor")
-            if tab is not None and not _true(tab.get("auto")) and tab.attrib:
-                _report(collector, "sheet.tab_color")
-            outline = child.find(f"{{{_MAIN}}}outlinePr")
-            if outline is not None and symbols is None and outline.get("showOutlineSymbols"):
-                symbols = _true(outline.get("showOutlineSymbols"))
-        elif local == "sheetViews":
-            view = child.find(f"{{{_MAIN}}}sheetView")
-            if view is not None:
-                if view.get("showOutlineSymbols") is not None:
-                    symbols = _true(view.get("showOutlineSymbols"))
-                _view(collector, view)
-        elif local in _READ:
-            continue
-        elif local == "conditionalFormatting":
-            rules = sum(1 for _ in child.iter(f"{{{_MAIN}}}cfRule"))
-            if rules:
-                _report(collector, "cf", count=rules)
-        elif local == "autoFilter":
-            if child.get("ref"):
-                _report(collector, "filter.buttons")
-        elif local == "tableParts":
-            tables = sum(1 for _ in child.iter(f"{{{_MAIN}}}tablePart"))
-            if tables:
-                _report(collector, "table", count=tables)
-        elif local == "drawing":
-            if objects:
-                target = rels.get(child.get(f"{{{_REL}}}id", ""))
-                if target is not None and not target[2]:
-                    _drawing(collector, archive, target[1])
-        elif local == "legacyDrawing":
-            if objects:
-                target = rels.get(child.get(f"{{{_REL}}}id", ""))
-                if target is not None and not target[2]:
-                    _vml(collector, archive, target[1])
-        elif local == "picture":
-            if child.get(f"{{{_REL}}}id"):
-                _report(collector, "picture.background")
-        elif local == "oleObjects":
-            count = sum(1 for e in child.iter() if _local(e)[0] == "oleObject")
-            if count and objects:
-                _report(collector, "drawing.ole", count=count)
-        elif local == "controls":
-            count = sum(1 for e in child.iter() if _local(e)[0] == "control")
-            if count and objects:
-                _report(collector, "control", count=count)
-        elif local in ("rowBreaks", "colBreaks"):
-            manual = sum(1 for b in child.iter(f"{{{_MAIN}}}brk") if _true(b.get("man")))
-            if manual:
-                _report(collector, "print.breaks", count=manual)
-        elif local == "extLst":
-            _extensions(collector, child)
-        else:
+        elif local in RULES:
+            RULES[local](context, child)
+        elif local not in _SILENT and local not in _READ:
             _report(
                 collector, "sheet.unknown_element", detail=f"<{local}>", context={"element": local}
             )
-    if (structure.outline_rows or structure.outline_columns) and symbols is not False:
+    if (structure.outline_rows or structure.outline_columns) and context.symbols is not False:
         _report(
             collector,
             "outline",
@@ -429,7 +355,83 @@ def sheet_notices(
         _report(collector, "print.area")
     if name in info.print_titles:
         _report(collector, "print.titles")
-    _comments(collector, archive, rels, ref)
+    _comments(collector, archive, context.rels, ref)
+
+
+@rule("sheetPr")
+def _sheet_properties(context: SheetContext, child: ET.Element) -> None:
+    tab = child.find(f"{{{_MAIN}}}tabColor")
+    if tab is not None and not _true(tab.get("auto")) and tab.attrib:
+        _report(context.collector, "sheet.tab_color")
+    outline = child.find(f"{{{_MAIN}}}outlinePr")
+    if outline is not None and context.symbols is None and outline.get("showOutlineSymbols"):
+        context.symbols = _true(outline.get("showOutlineSymbols"))
+
+
+@rule("sheetViews")
+def _sheet_views(context: SheetContext, child: ET.Element) -> None:
+    view = child.find(f"{{{_MAIN}}}sheetView")
+    if view is not None:
+        if view.get("showOutlineSymbols") is not None:
+            context.symbols = _true(view.get("showOutlineSymbols"))
+        _view(context.collector, view)
+
+
+@rule("conditionalFormatting")
+def _conditional(context: SheetContext, child: ET.Element) -> None:
+    if rules := sum(1 for _ in child.iter(f"{{{_MAIN}}}cfRule")):
+        _report(context.collector, "cf", count=rules)
+
+
+@rule("autoFilter")
+def _filter(context: SheetContext, child: ET.Element) -> None:
+    if child.get("ref"):
+        _report(context.collector, "filter.buttons")
+
+
+@rule("tableParts")
+def _tables(context: SheetContext, child: ET.Element) -> None:
+    if tables := sum(1 for _ in child.iter(f"{{{_MAIN}}}tablePart")):
+        _report(context.collector, "table", count=tables)
+
+
+@rule("drawing", "legacyDrawing")
+def _drawings(context: SheetContext, child: ET.Element) -> None:
+    if not context.objects:
+        return
+    target = context.rels.get(child.get(f"{{{_REL}}}id", ""))
+    if target is None or target[2]:
+        return
+    if _local(child)[0] == "drawing":
+        _drawing(context.collector, context.archive, target[1])
+    else:
+        _vml(context.collector, context.archive, target[1])
+
+
+@rule("picture")
+def _background(context: SheetContext, child: ET.Element) -> None:
+    if child.get(f"{{{_REL}}}id"):
+        _report(context.collector, "picture.background")
+
+
+@rule("oleObjects", "controls")
+def _embedded(context: SheetContext, child: ET.Element) -> None:
+    local = _local(child)[0]
+    item, code = ("oleObject", "drawing.ole") if local == "oleObjects" else ("control", "control")
+    count = sum(1 for e in child.iter() if _local(e)[0] == item)
+    if count and context.objects:
+        _report(context.collector, code, count=count)
+
+
+@rule("rowBreaks", "colBreaks")
+def _breaks(context: SheetContext, child: ET.Element) -> None:
+    if manual := sum(1 for b in child.iter(f"{{{_MAIN}}}brk") if _true(b.get("man"))):
+        _report(context.collector, "print.breaks", count=manual)
+
+
+@rule("extLst")
+def _extension_list(context: SheetContext, child: ET.Element) -> None:
+    _extensions(context.collector, child)
 
 
 def _report(

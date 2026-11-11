@@ -68,31 +68,78 @@ def layout(
         raise ValueError("scale must be positive")
     if spill_edge != "extend":
         raise ValueError(f"unknown spill_edge {spill_edge!r}; only 'extend' is available")
+    if mode == "excel" and (scale != 1.0 or max_width is not None):
+        raise ValueError("scale and max_width apply to characters mode only")
     notes = Collector(sheet.name)
-    fonts = _Fonts(notes)
-    columns = [c for c in sheet.columns if show_hidden or not _column_hidden(c)]
-    rows = [r for r in sheet.rows if show_hidden or not _row_hidden(r, sheet)]
+    draft = Draft(
+        sheet,
+        mode,
+        [c for c in sheet.columns if show_hidden or not _column_hidden(c)],
+        [r for r in sheet.rows if show_hidden or not _row_hidden(r, sheet)],
+        notes,
+        _Fonts(notes),
+        scale,
+        max_width,
+    )
     if show_hidden:
         _report_shown_hidden(sheet, notes)
-    if mode == "excel":
-        if scale != 1.0 or max_width is not None:
-            raise ValueError("scale and max_width apply to characters mode only")
+    for step in PASSES:
+        step(draft)
+    return RenderedSheet(
+        sheet,
+        mode,
+        draft.columns,
+        draft.rows,
+        draft.gap,
+        finish(sheet, notes, draft.kept_rows, draft.kept_columns),
+    )
+
+
+@dataclass(slots=True)
+class Draft:
+    """A layout in progress: what each pass reads and adds to."""
+
+    sheet: Sheet
+    mode: Mode
+    kept_columns: list[Column]
+    """The columns laid out: all of them with ``show_hidden``, else the visible ones."""
+    kept_rows: list[Row]
+    notes: Collector
+    fonts: _Fonts
+    scale: float = 1.0
+    max_width: int | None = None
+    columns: tuple[RenderedColumn, ...] = ()
+    rows: tuple[RenderedRow, ...] = ()
+    gap: int = 0
+    extra: dict[str, Any] = field(default_factory=dict)
+    """What features' own passes add, by feature."""
+
+
+Pass = Callable[[Draft], None]
+
+
+def _cells(draft: Draft) -> None:
+    """Values through their formats, alignment, spill, merges; geometry in ``excel`` mode."""
+    if draft.mode == "excel":
         from sheetpeek._excel import lay_out
 
-        return lay_out(sheet, columns, rows, notes, fonts)
-    characters = mode == "characters"
-    gap = 1 if characters else 0
-
-    normal_font = fonts.get(sheet.normal_font) if characters else None
+        draft.columns, draft.rows = lay_out(draft)
+        return
+    sheet, columns, rows = draft.sheet, draft.kept_columns, draft.kept_rows
+    characters = draft.mode == "characters"
+    draft.gap = gap = 1 if characters else 0
+    normal_font = draft.fonts.get(sheet.normal_font) if characters else None
 
     def width_of(column: Column) -> int | None:
         if normal_font is None:
             return None
-        return _characters(column, sheet, normal_font, scale, max_width)
+        return _characters(column, sheet, normal_font, draft.scale, draft.max_width)
 
     if sheet.ref is None or not columns or not rows:
-        rendered = tuple(RenderedColumn(c.index, width_of(c), _column_hidden(c)) for c in columns)
-        return RenderedSheet(sheet, mode, rendered, (), gap, finish(sheet, notes, rows, columns))
+        draft.columns = tuple(
+            RenderedColumn(c.index, width_of(c), _column_hidden(c)) for c in columns
+        )
+        return
     before: list[Column] = []
     after: list[Column] = []
     if characters:
@@ -101,16 +148,45 @@ def layout(
     widths = [width_of(c) for c in every]
     added = set(range(len(before))) | set(range(len(before) + len(columns), len(every)))
     grid = _Grid(
-        sheet, rows, every, widths, added, gap, characters, _Formatter(sheet, notes, fonts)
+        sheet,
+        rows,
+        every,
+        widths,
+        added,
+        gap,
+        characters,
+        _Formatter(sheet, draft.notes, draft.fonts),
     )
-    rendered_rows, kept = grid.render()
-    rendered_columns = tuple(
+    draft.rows, kept = grid.render()
+    draft.columns = tuple(
         RenderedColumn(every[p].index, widths[p], _column_hidden(every[p]), p in added)
         for p in kept
     )
-    return RenderedSheet(
-        sheet, mode, rendered_columns, rendered_rows, gap, finish(sheet, notes, rows, columns)
-    )
+
+
+def _vertical_justify(draft: Draft) -> None:
+    """In ``excel`` mode, vertically justified and distributed text is placed as top."""
+    if draft.mode != "excel":
+        return
+    for rendered_row in draft.rows:
+        for rendered_cell in rendered_row.cells:
+            if rendered_cell.text and rendered_cell.cell.style.v_align in (
+                "justify",
+                "distributed",
+            ):
+                draft.notes.add(
+                    "align.vertical_justify",
+                    "approximated",
+                    "not_implemented",
+                    row=rendered_cell.cell.row,
+                    column=rendered_cell.cell.column,
+                    detail="placed as top",
+                )
+
+
+PASSES: list[Pass] = [_cells, _vertical_justify]
+"""The layout's passes, in order. A feature adds its own here: borders after the cells (they
+depend on spill), chrome such as outline symbols after the geometry."""
 
 
 def finish(

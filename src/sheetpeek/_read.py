@@ -24,15 +24,14 @@ from openpyxl import load_workbook
 from openpyxl.styles.colors import COLOR_INDEX
 from openpyxl.utils.datetime import CALENDAR_MAC_1904, to_excel
 
+from sheetpeek import _style as styles
 from sheetpeek._colors import resolve, theme_colors
 from sheetpeek._detect import (
-    Code,
     book_notices,
     report_cells,
     report_style,
     sheet_notices,
     string_marks,
-    style_codes,
     theme_fonts,
     visible_style,
     workbook_info,
@@ -45,11 +44,9 @@ from sheetpeek._model import (
     CellValue,
     Column,
     Font,
-    HorizontalAlignment,
     Row,
     Sheet,
     SheetState,
-    VerticalAlignment,
 )
 from sheetpeek._notices import Collector, Notice
 from sheetpeek._package import (
@@ -61,6 +58,8 @@ from sheetpeek._package import (
     worksheet_parts,
 )
 from sheetpeek._structure import Structure, scan
+from sheetpeek._style import Code
+from sheetpeek._style import font as font_aspect
 
 Source = str | os.PathLike[str] | IO[bytes]
 
@@ -69,28 +68,6 @@ DATE_FALLBACK_WARNING = (
     "allow switching it off: times may be off by up to a millisecond, and serial 60 "
     "(1900-02-29) shows as 1900-02-28"
 )
-_FALLBACK_FONT = Font("Calibri", 11.0)
-_SMALLEST_FONT = 1.0
-_LARGEST_FONT = 409.5  # 410 is refused
-_HORIZONTAL: dict[str | None, HorizontalAlignment] = {
-    None: "general",
-    "general": "general",
-    "left": "left",
-    "center": "center",
-    "right": "right",
-    "fill": "fill",
-    "justify": "justify",
-    "distributed": "distributed",
-    "centerContinuous": "center_across",
-}
-_VERTICAL: dict[str | None, VerticalAlignment] = {
-    None: "bottom",
-    "bottom": "bottom",
-    "top": "top",
-    "center": "center",
-    "justify": "justify",
-    "distributed": "distributed",
-}
 _STATES: dict[str, SheetState] = {
     "visible": "visible",
     "hidden": "hidden",
@@ -174,7 +151,11 @@ class Book:
             self._normal_font = self._read_normal_font()
             self._info = workbook_info(self._archive)
             self._marks = string_marks(self._archive, self._info.strings_part)
-            self._theme_fonts = theme_fonts(getattr(self._workbook, "loaded_theme", None))
+            self._context = styles.Context(
+                self._color,
+                self._normal_font,
+                theme_fonts(getattr(self._workbook, "loaded_theme", None)),
+            )
         except PackageError:
             self.close()
             raise
@@ -447,43 +428,8 @@ class Book:
             return self._default_style, (), ()
         found = self._styles.get(style_array)
         if found is None:
-            every, text = style_codes(source, self._theme_fonts)
-            found = (self._resolve_style(source), every, text)
-            self._styles[style_array] = found
+            found = self._styles[style_array] = styles.resolve(source, self._context)
         return found
-
-    def _resolve_style(self, source: Any) -> CellStyle:
-        alignment = source.alignment
-        fill = source.fill
-        fill_color = None
-        if getattr(fill, "tagname", None) == "patternFill" and fill.fill_type not in (None, "none"):
-            fill_color = self._color(fill.fgColor)
-        return CellStyle(
-            number_format=source.number_format or "General",
-            font=self._font(source.font),
-            fill=fill_color,
-            h_align=_HORIZONTAL.get(alignment.horizontal, "general"),
-            v_align=_VERTICAL.get(alignment.vertical, "bottom"),
-            wrap=bool(alignment.wrap_text),
-            indent=int(alignment.indent or 0),
-        )
-
-    def _font(self, font: Any, normal: Font | None = None) -> Font:
-        normal = normal or self._normal_font
-        color = font.color
-        # Theme color 1 ("Text 1") is what Excel's own default font uses for ordinary text, so
-        # untinted it means the default foreground, like an automatic color.
-        if getattr(color, "type", None) == "theme" and color.theme == 1 and not color.tint:
-            color = None
-        return Font(
-            name=font.name or normal.name,
-            size=_font_size(font.sz) if font.sz is not None else normal.size,
-            bold=bool(font.b),
-            italic=bool(font.i),
-            underline=font.u or None,
-            strike=bool(font.strike),
-            color=self._color(color),
-        )
 
     def _color(self, color: Any) -> str | None:
         """An openpyxl ``Color`` as ``RRGGBB`` or ``None``."""
@@ -506,8 +452,8 @@ class Book:
             fonts = getattr(workbook, "_fonts", None)
             font = fonts[0] if fonts else None
         if font is None:
-            return _FALLBACK_FONT
-        return self._font(font, _FALLBACK_FONT)
+            return font_aspect.FALLBACK
+        return font_aspect.to_font(font, font_aspect.FALLBACK, self._color)
 
 
 @contextmanager
@@ -575,14 +521,6 @@ def read(
     """
     with Book(source, limits=limits) as book:
         return book.sheet(sheet, ref=ref)
-
-
-def _font_size(value: float) -> float:
-    """A font size as Excel takes it: its magnitude, from 1 to 409, or refused (captured)."""
-    size = abs(float(value))
-    if not _SMALLEST_FONT <= size <= _LARGEST_FONT:  # NaN compares false
-        raise PackageError(f"a font size of {value}, which Excel refuses")
-    return size
 
 
 def _columns(structure: Structure, ref: CellRange | None) -> tuple[Column, ...]:

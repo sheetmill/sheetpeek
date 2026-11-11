@@ -1,0 +1,96 @@
+"""HTML: a static page drawn from ``excel`` mode's geometry (``ARCHITECTURE.md`` §7.3).
+
+A fixed-layout table carries the cells, their fills and their gridlines. Each text is an
+absolutely positioned span inside its origin cell, placed in sheet coordinates against the
+wrapper, with its clip window around it; the cells themselves are not positioned, so the
+browser paints every background first and every text over it, as Excel paints spilled text
+over a neighbor's fill. Every position is a whole CSS pixel rounded from its exact point, and
+every size the difference of two rounded positions, so nothing drifts on large sheets. Calibri
+runs are spaced from Carlito's widths to Excel's whole-point glyphs. The output has no script.
+
+The custom properties ``--sheetpeek-*`` and the class names ``sheetpeek`` and ``sp-*`` are a
+public interface for callers' stylesheets.
+"""
+
+from __future__ import annotations
+
+import html
+from typing import Literal, TextIO
+
+from sheetpeek._model import one_line
+from sheetpeek._notices import Support
+from sheetpeek._rendered import Mode, RenderedSheet
+from sheetpeek.backends import _support
+from sheetpeek.backends.html._css import CSS
+from sheetpeek.backends.html._notices import write_notices
+from sheetpeek.backends.html._table import Page
+
+ColorScheme = Literal["light", "dark"]
+
+
+class HTMLBackend:
+    """A static HTML page, or a fragment, in ``excel`` mode.
+
+    Excel draws white cells in its light and dark appearance alike, so the paper is white and
+    the automatic ink black; ``color_scheme`` changes only the headings, as in Excel. Colors
+    are CSS custom properties on ``.sheetpeek`` (``--sheetpeek-paper``, ``-ink``, ``-grid``,
+    ``-heading-paper``, ``-heading-ink``, ``-heading-grid``), which a caller's stylesheet can
+    set.
+
+    Args:
+        fragment: Write only the sheet (its stylesheet and a ``<div class="sheetpeek">``), for
+            embedding, instead of a whole page.
+        column_headings: Add Excel's column letters above the sheet.
+        row_headings: Add Excel's row numbers before each row.
+        color_scheme: ``"light"`` or ``"dark"``, for the headings; never read from the system.
+        notices: Add, after the sheet, a collapsed list of what the page does not show
+            (``<details class="sp-notices">``).
+    """
+
+    name = "html"
+    mode: Mode = "excel"
+
+    def __init__(
+        self,
+        *,
+        fragment: bool = False,
+        column_headings: bool = False,
+        row_headings: bool = False,
+        color_scheme: ColorScheme = "light",
+        notices: bool = False,
+    ) -> None:
+        if color_scheme not in ("light", "dark"):
+            raise ValueError(f"color_scheme must be 'light' or 'dark', not {color_scheme!r}")
+        self.fragment = fragment
+        self.column_headings = column_headings
+        self.row_headings = row_headings
+        self.color_scheme = color_scheme
+        self.notices = notices
+
+    @property
+    def support(self) -> dict[str, Support]:
+        """What this output shows of each feature the census finds (``backends/_support.py``)."""
+        return _support.html(headings=self.column_headings or self.row_headings)
+
+    def render(self, sheet: RenderedSheet, out: TextIO, /) -> None:
+        """Write the page or the fragment to ``out``."""
+        if not self.fragment:
+            title = html.escape(one_line(sheet.sheet.name))
+            background = "#1e1e1e" if self.color_scheme == "dark" else "#ffffff"
+            out.write(
+                '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
+                '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
+                f"<title>{title}</title>\n"
+                f"<style>\n{CSS}body {{ margin: 8px; background: {background}; }}\n</style>\n"
+                "</head>\n<body>\n"
+            )
+        else:
+            out.write(f"<style>\n{CSS}</style>\n")
+        Page(sheet, self).write(out)
+        if self.notices:
+            write_notices(sheet, self, out)
+        if not self.fragment:
+            out.write("</body>\n</html>\n")
+
+
+__all__ = ["CSS", "ColorScheme", "HTMLBackend"]
