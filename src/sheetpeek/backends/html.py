@@ -19,7 +19,9 @@ from typing import Literal, TextIO
 
 from sheetpeek._carlito import ADVANCES, FIRST, UNITS_PER_EM
 from sheetpeek._model import CellRange, Font, one_line
+from sheetpeek._notices import Support
 from sheetpeek._rendered import Mode, RenderedCell, RenderedSheet, TextRun
+from sheetpeek.backends import _support
 
 ColorScheme = Literal["light", "dark"]
 
@@ -131,6 +133,8 @@ class HTMLBackend:
         column_headings: Add Excel's column letters above the sheet.
         row_headings: Add Excel's row numbers before each row.
         color_scheme: ``"light"`` or ``"dark"``, for the headings; never read from the system.
+        notices: Add, after the sheet, a collapsed list of what the page does not show
+            (``<details class="sp-notices">``).
     """
 
     name = "html"
@@ -143,6 +147,7 @@ class HTMLBackend:
         column_headings: bool = False,
         row_headings: bool = False,
         color_scheme: ColorScheme = "light",
+        notices: bool = False,
     ) -> None:
         if color_scheme not in ("light", "dark"):
             raise ValueError(f"color_scheme must be 'light' or 'dark', not {color_scheme!r}")
@@ -150,6 +155,12 @@ class HTMLBackend:
         self.column_headings = column_headings
         self.row_headings = row_headings
         self.color_scheme = color_scheme
+        self.notices = notices
+
+    @property
+    def support(self) -> dict[str, Support]:
+        """What this output shows of each feature the census finds (``backends/_support.py``)."""
+        return _support.html(headings=self.column_headings or self.row_headings)
 
     def render(self, sheet: RenderedSheet, out: TextIO, /) -> None:
         """Write the page or the fragment to ``out``."""
@@ -166,8 +177,27 @@ class HTMLBackend:
         else:
             out.write(f"<style>\n{CSS}</style>\n")
         _Page(sheet, self).write(out)
+        if self.notices:
+            _write_notices(sheet, self, out)
         if not self.fragment:
             out.write("</body>\n</html>\n")
+
+
+def _write_notices(sheet: RenderedSheet, backend: HTMLBackend, out: TextIO) -> None:
+    """The collapsed list of what the page does not show; nothing when everything is shown."""
+    from sheetpeek._census import output_notices
+
+    notices = sheet.notices + output_notices(sheet, backend.name, backend.support)
+    if not notices:
+        return
+    out.write(
+        '<details class="sp-notices" style="margin-top:8px;font:12px/1.4 system-ui,sans-serif">'
+        f"<summary>Not shown in this view ({len(notices)})</summary>"
+        "<ul>\n"
+    )
+    for notice in notices:
+        out.write(f"<li>{html.escape(one_line(notice.message))}</li>\n")
+    out.write("</ul></details>\n")
 
 
 def _px(points: float) -> int:

@@ -1,7 +1,9 @@
 """Backends turn a :class:`~sheetpeek.RenderedSheet` into text, and :func:`render` drives them.
 
 A backend is any object with a ``name``, the width ``mode`` it needs, and a
-``render(sheet, out)`` method that writes to a text stream. The built-in ones are registered by
+``render(sheet, out)`` method that writes to a text stream. It may also declare ``support``, a
+mapping from feature code to :class:`~sheetpeek.Support`; a backend without one has every
+feature it is given reported as not shown. The built-in ones are registered by
 name; any other object of that shape can be passed to :func:`render` directly, and
 :func:`register_backend` gives it a name.
 """
@@ -11,9 +13,10 @@ from __future__ import annotations
 import io
 import os
 from collections.abc import Callable
-from typing import IO, Protocol, TextIO, runtime_checkable
+from typing import IO, Literal, Protocol, TextIO, runtime_checkable
 
 from sheetpeek._model import CellRange, Sheet
+from sheetpeek._notices import Notice, deliver
 from sheetpeek._package import ReadLimits
 from sheetpeek._rendered import Mode, RenderedSheet
 from sheetpeek.backends.delimited import DelimitedBackend
@@ -83,8 +86,14 @@ def render(
     ref: str | CellRange | None = None,
     out: TextIO | None = None,
     limits: ReadLimits | None = None,
+    on_notice: Callable[[Notice], object] | Literal["ignore"] | None = None,
 ) -> str | None:
     """Render a sheet with a backend.
+
+    Nothing the sheet uses is dropped silently: what the output leaves out or approximates is
+    reported (:func:`notices`). By default one :class:`~sheetpeek.NotShownWarning` summarizes
+    it; ``on_notice`` takes each :class:`~sheetpeek.Notice` instead, or ``"ignore"`` turns the
+    warning off for this call.
 
     Args:
         source: A workbook (path or binary file object), a :class:`~sheetpeek.Sheet`, or a
@@ -97,25 +106,68 @@ def render(
         out: A text stream to write to. Without one, the output is returned as a string.
         limits: What reading may cost, when ``source`` is a workbook. By default,
             ``ReadLimits()``.
+        on_notice: Called with each notice, ``"ignore"``, or ``None`` for one warning.
 
     Returns:
         The output, or ``None`` when it was written to ``out``.
     """
     backend = get_backend(to)
-    if isinstance(source, RenderedSheet):
-        rendered = source if source.mode == backend.mode else source.sheet.layout(backend.mode)
-    else:
-        if not isinstance(source, Sheet):
-            from sheetpeek._read import read
-
-            source = read(source, sheet, ref=ref, limits=limits)
-        rendered = source.layout(backend.mode)
+    rendered = _laid_out(source, backend, sheet, ref, limits)
     if out is not None:
         backend.render(rendered, out)
-        return None
-    buffer = io.StringIO()
-    backend.render(rendered, buffer)
-    return buffer.getvalue()
+        result = None
+    else:
+        buffer = io.StringIO()
+        backend.render(rendered, buffer)
+        result = buffer.getvalue()
+    deliver(_all_notices(rendered, backend), on_notice, rendered.sheet.name, backend.name, 2)
+    return result
+
+
+def notices(
+    source: str | os.PathLike[str] | IO[bytes] | Sheet | RenderedSheet,
+    to: str | Backend = "text",
+    *,
+    sheet: str | None = None,
+    ref: str | CellRange | None = None,
+    limits: ReadLimits | None = None,
+) -> tuple[Notice, ...]:
+    """What a render of ``source`` to ``to`` would leave out or approximate, without rendering.
+
+    The reader's notices (what sheetpeek does not read yet), the layout's (what every output
+    approximates) and the output's own (what this output cannot show), in that order.
+
+    Args:
+        source: As for :func:`render`.
+        to: A backend name or a backend.
+        sheet: The sheet to read, when ``source`` is a workbook.
+        ref: The range to read, when ``source`` is a workbook.
+        limits: What reading may cost, when ``source`` is a workbook.
+    """
+    backend = get_backend(to)
+    return _all_notices(_laid_out(source, backend, sheet, ref, limits), backend)
+
+
+def _laid_out(
+    source: str | os.PathLike[str] | IO[bytes] | Sheet | RenderedSheet,
+    backend: Backend,
+    sheet: str | None,
+    ref: str | CellRange | None,
+    limits: ReadLimits | None,
+) -> RenderedSheet:
+    if isinstance(source, RenderedSheet):
+        return source if source.mode == backend.mode else source.sheet.layout(backend.mode)
+    if not isinstance(source, Sheet):
+        from sheetpeek._read import read
+
+        source = read(source, sheet, ref=ref, limits=limits)
+    return source.layout(backend.mode)
+
+
+def _all_notices(rendered: RenderedSheet, backend: Backend) -> tuple[Notice, ...]:
+    from sheetpeek._census import declared_support, output_notices
+
+    return rendered.notices + output_notices(rendered, backend.name, declared_support(backend))
 
 
 __all__ = [
@@ -127,6 +179,7 @@ __all__ = [
     "TextBackend",
     "backend_names",
     "get_backend",
+    "notices",
     "register_backend",
     "render",
 ]

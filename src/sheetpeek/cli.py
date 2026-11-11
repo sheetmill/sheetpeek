@@ -19,6 +19,7 @@ from sheetpeek.backends import (
     TextBackend,
     backend_names,
     get_backend,
+    notices,
 )
 
 
@@ -55,6 +56,23 @@ def _parser() -> argparse.ArgumentParser:
     view.add_argument("--row-headings", action="store_true", help="show row numbers")
     view.add_argument("--hidden", action="store_true", help="show hidden rows and columns")
     view.add_argument("--list", action="store_true", help="list the sheets and exit")
+    view.add_argument(
+        "--notices",
+        choices=("summary", "full", "none"),
+        default="summary",
+        help="what to say on standard error about content not shown: one line per kind "
+        "(summary, the default), with the cells (full), or nothing (none)",
+    )
+    view.add_argument(
+        "--strict", action="store_true", help="exit with status 3 when anything is not shown"
+    )
+    view.add_argument(
+        "--suppress",
+        action="append",
+        default=[],
+        metavar="CODE",
+        help="do not report CODE or the codes under it, such as 'font' (repeatable)",
+    )
     _add_limits(view, ReadLimits())
     serve = commands.add_parser(
         "serve",
@@ -130,8 +148,10 @@ def _view(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
     try:
         with open_book(args.file, limits=_limits(args)) as book:
             if args.list:
+                unshown = {str(n.context.get("sheet")): n for n in book.notices}
                 for name in book.sheet_names:
-                    _say(out, name)
+                    notice = unshown.get(name)
+                    _say(out, f"{name}  ({notice.code}: not shown)" if notice else name)
                 return 0
             sheet = book.sheet(args.sheet, ref=args.ref)
     except FileNotFoundError:
@@ -153,10 +173,15 @@ def _view(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
     except PackageError as error:
         _say(err, f"sheetpeek: cannot show {args.file}: {error}")
         return 1
-    for warning in rendered.warnings:
-        _say(err, f"sheetpeek: warning: {warning}")
     backend.render(rendered, out)
-    return 0
+    found = [n for n in notices(rendered, backend) if not any(n.matches(c) for c in args.suppress)]
+    if args.notices != "none":
+        for notice in found:
+            _say(err, f"sheetpeek: {notice.code}: {notice.message}")
+            if args.notices == "full" and notice.cells:
+                more = " ..." if notice.context.get("truncated") else ""
+                _say(err, "  cells: " + " ".join(str(r) for r in notice.cells) + more)
+    return 3 if args.strict and found else 0
 
 
 def _say(stream: TextIO, line: str) -> None:

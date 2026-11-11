@@ -17,7 +17,9 @@ from typing import TYPE_CHECKING, Any, Literal, TypeAlias
 from sheetpeek._model import Cell, CellRange, Font, Row, column_letter
 
 if TYPE_CHECKING:
+    from sheetpeek._census import Presence
     from sheetpeek._model import Sheet
+    from sheetpeek._notices import Notice
 
 Mode: TypeAlias = Literal["excel", "characters", "none"]
 SpillEdge: TypeAlias = Literal["extend"]
@@ -177,8 +179,30 @@ class RenderedSheet:
     rows: tuple[RenderedRow, ...]
     gap: int
     """Characters between two columns in ``characters`` mode; 0 in ``none`` mode."""
-    warnings: tuple[str, ...]
-    """The sheet's warnings followed by the layout's."""
+    notices: tuple[Notice, ...]
+    """The sheet's notices on the cells laid out, followed by the layout's. What a particular
+    output leaves out is added by :func:`sheetpeek.notices`."""
+
+    @property
+    def warnings(self) -> tuple[str, ...]:
+        """The messages of the notices that were warnings before notices existed.
+
+        Deprecated: use :attr:`notices`.
+        """
+        from sheetpeek._notices import LEGACY
+
+        return tuple(n.message for n in self.notices if n.code in LEGACY)
+
+    @property
+    def features(self) -> dict[str, Presence]:
+        """The census the outputs report from, by feature code.
+
+        Each entry says how many cells (or things) use the feature, and for cell-level
+        features which cells.
+        """
+        from sheetpeek._census import census
+
+        return census(self)
 
     def cell(self, row: int, column: int) -> RenderedCell:
         """The visible cell at a sheet position.

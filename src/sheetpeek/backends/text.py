@@ -5,7 +5,9 @@ from __future__ import annotations
 from collections.abc import Iterator
 from typing import TextIO
 
+from sheetpeek._notices import Support
 from sheetpeek._rendered import Mode, RenderedSheet
+from sheetpeek.backends import _support
 
 
 class TextBackend:
@@ -31,6 +33,11 @@ class TextBackend:
         self.separator = separator
         self.column_headings = column_headings
         self.row_headings = row_headings
+
+    @property
+    def support(self) -> dict[str, Support]:
+        """What this output shows of each feature the census finds (``backends/_support.py``)."""
+        return _support.text(headings=self.column_headings or self.row_headings)
 
     def render(self, sheet: RenderedSheet, out: TextIO, /) -> None:
         """Write the sheet to ``out``, one line per line of each row."""

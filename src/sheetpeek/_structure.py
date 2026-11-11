@@ -11,10 +11,11 @@ from __future__ import annotations
 
 import math
 import xml.etree.ElementTree as ET
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import IO
 
 from sheetpeek._model import CellRange
+from sheetpeek._notices import CellSet
 from sheetpeek._package import PackageError
 
 _NS = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
@@ -29,6 +30,12 @@ _MERGE = f"{_NS}mergeCell"
 _HYPERLINK = f"{_NS}hyperlink"
 _SHEET_VIEW = f"{_NS}sheetView"
 _SHEET_FORMAT = f"{_NS}sheetFormatPr"
+_INLINE = f"{_NS}is"
+_RUN = f"{_NS}r"
+RICH = 1
+"""A shared string's mark: it has runs."""
+PHONETIC = 2
+"""A shared string's mark: it has a phonetic guide."""
 # The numbers a file can give a column or a row, as Excel takes them (ARCHITECTURE.md §5.5).
 _DIGIT_POINTS = 6  # at Calibri 11, the only font this was captured with
 _WIDTH_WRAP = 65_536  # points: Excel keeps a column's width in 16 bits
@@ -82,14 +89,40 @@ class Structure:
     """``<sheetFormatPr zeroHeight>``: rows without a ``<row>`` element are hidden."""
     thick_top: bool = False
     thick_bottom: bool = False
+    show_headings: bool = True
+    """The first ``<sheetView>``'s ``showRowColHeaders``."""
+    root: str = "worksheet"
+    """The part's root element, without namespace: ``worksheet``, ``dialogsheet``, ..."""
+    children: tuple[ET.Element, ...] = ()
+    """The root's children other than ``<sheetData>``, for the reader's detectors."""
+    uncached: CellSet = field(default_factory=CellSet)
+    """Formula cells without a cached value."""
+    runs: CellSet = field(default_factory=CellSet)
+    """Cells whose string has rich-text runs."""
+    phonetic: CellSet = field(default_factory=CellSet)
+    """Cells that show a phonetic guide their string has."""
+    outline_rows: int = 0
+    """Rows with an outline level."""
+    outline_columns: int = 0
+    """Columns with an outline level."""
+    row_styles: tuple[tuple[int, int], ...] = ()
+    """(row, style index) of rows with a format of their own (``customFormat``)."""
+    column_styles: tuple[tuple[int, int, int], ...] = ()
+    """(first, last, style index) of ``<col>`` elements with a style."""
 
 
-def scan(source: IO[bytes], rels: dict[str, tuple[str, bool]] | None = None) -> Structure:
+def scan(
+    source: IO[bytes],
+    rels: dict[str, tuple[str, bool]] | None = None,
+    marks: bytes | None = None,
+) -> Structure:
     """Scan one worksheet part.
 
     Args:
         source: The worksheet part, opened for reading.
         rels: The part's relationships (id → target, external), for hyperlink targets.
+        marks: Per shared string, :data:`RICH` and :data:`PHONETIC` bits, or ``None`` when no
+            shared string has either.
     """
     rels = rels or {}
     min_row = min_col = 1 << 30
@@ -99,8 +132,17 @@ def scan(source: IO[bytes], rels: dict[str, tuple[str, bool]] | None = None) -> 
     columns: list[ColumnSpec] = []
     merges: list[CellRange] = []
     hyperlinks: list[tuple[CellRange, str]] = []
-    uncached = 0
+    uncached = CellSet()
     first_uncached: str | None = None
+    runs = CellSet()
+    phonetic = CellSet()
+    show_headings = True
+    root = "worksheet"
+    children: list[ET.Element] = []
+    depth = 0
+    outline_rows = outline_columns = 0
+    row_styles: list[tuple[int, int]] = []
+    column_styles: list[tuple[int, int, int]] = []
     empty_strings: set[tuple[int, int]] = set()
     default_column_width: float | None = None
     base_column_width = 8
@@ -116,9 +158,15 @@ def scan(source: IO[bytes], rels: dict[str, tuple[str, bool]] | None = None) -> 
         if tag in (_CELL, _VALUE):
             continue  # cells are handled at the end of their row
         if event == "start":
-            if tag == _SHEET_DATA:
+            depth += 1
+            if depth == 1:
+                root = tag.rpartition("}")[2]
+            elif tag == _SHEET_DATA:
                 sheet_data = element
             continue
+        depth -= 1
+        if depth == 1 and tag != _SHEET_DATA:
+            children.append(element)
         if tag == _ROW:
             r = element.get("r")
             row_index = int(r) if r else row_index + 1
@@ -129,21 +177,41 @@ def scan(source: IO[bytes], rels: dict[str, tuple[str, bool]] | None = None) -> 
                 max_row = max(max_row, row_index)
                 min_col = min(min_col, first_col)
                 max_col = max(max_col, last_col)
+                column = 0
                 for cell in element:
+                    ref = cell.get("r")
+                    column = _position(ref)[1] if ref else column + 1
+                    kind = cell.get("t")
                     # The common cell is one <v>; only others can be formulas without a value.
                     if (len(cell) != 1 or cell[0].tag == _FORMULA) and (
                         cell.find(_FORMULA) is not None and not cell.findtext(_VALUE)
                     ):
-                        ref = cell.get("r")
-                        if cell.get("t") == "str":
+                        if kind == "str":
                             # A formula whose cached result is the empty string. openpyxl reads
                             # it as an empty cell, but it is not empty: it stops spilled text.
                             if ref:
                                 empty_strings.add(_position(ref))
                         else:
-                            uncached += 1
+                            uncached.add(row_index, column)
                             if first_uncached is None:
                                 first_uncached = ref or f"row {row_index}"
+                    elif kind == "s" and marks is not None:
+                        index = cell.findtext(_VALUE) or ""
+                        mark = (
+                            marks[int(index)] if index.isdigit() and int(index) < len(marks) else 0
+                        )
+                        if mark & RICH:
+                            runs.add(row_index, column)
+                        if mark & PHONETIC and _flag(cell.get("ph")):
+                            phonetic.add(row_index, column)
+                    elif kind == "inlineStr":
+                        inline = cell.find(_INLINE)
+                        if inline is not None and inline.find(_RUN) is not None:
+                            runs.add(row_index, column)
+            if _level(element):
+                outline_rows += 1
+            if _flag(element.get("customFormat")) and (style := _style(element.get("s"))):
+                row_styles.append((row_index, style))
             height = element.get("ht")
             hidden = _flag(element.get("hidden"))
             if height is not None or hidden:
@@ -152,6 +220,16 @@ def scan(source: IO[bytes], rels: dict[str, tuple[str, bool]] | None = None) -> 
                 sheet_data.clear()  # the row and its cells are done
         elif tag == _COL:
             width = element.get("width")
+            if _level(element):
+                outline_columns += 1
+            if style := _style(element.get("style")):
+                column_styles.append(
+                    (
+                        int(element.get("min", "1")),
+                        int(element.get("max", element.get("min", "1"))),
+                        style,
+                    )
+                )
             columns.append(
                 ColumnSpec(
                     int(element.get("min", "1")),
@@ -172,6 +250,7 @@ def scan(source: IO[bytes], rels: dict[str, tuple[str, bool]] | None = None) -> 
         elif tag == _SHEET_VIEW and not seen_view:
             seen_view = True
             show_gridlines = _flag(element.get("showGridLines"), default=True)
+            show_headings = _flag(element.get("showRowColHeaders"), default=True)
         elif tag == _SHEET_FORMAT:
             sheet_format = dict(element.attrib)
             if (value := element.get("defaultColWidth")) is not None:
@@ -201,7 +280,7 @@ def scan(source: IO[bytes], rels: dict[str, tuple[str, bool]] | None = None) -> 
         default_row_height=default_row_height,
         show_gridlines=show_gridlines,
         hyperlinks=tuple(hyperlinks),
-        uncached_formulas=uncached,
+        uncached_formulas=uncached.count,
         first_uncached_formula=first_uncached,
         empty_strings=frozenset(empty_strings),
         listed_rows=frozenset(listed),
@@ -210,6 +289,16 @@ def scan(source: IO[bytes], rels: dict[str, tuple[str, bool]] | None = None) -> 
         zero_row_height=zero_height,
         thick_top=_flag((sheet_format or {}).get("thickTop")),
         thick_bottom=_flag((sheet_format or {}).get("thickBottom")),
+        show_headings=show_headings,
+        root=root,
+        children=tuple(children),
+        uncached=uncached,
+        runs=runs,
+        phonetic=phonetic,
+        outline_rows=outline_rows,
+        outline_columns=outline_columns,
+        row_styles=tuple(row_styles),
+        column_styles=tuple(column_styles),
     )
 
 
@@ -297,6 +386,17 @@ def _position(ref: str) -> tuple[int, int]:
         elif char != "$":
             return int(ref[i:].replace("$", "")), col
     raise ValueError(f"not a cell reference: {ref!r}")
+
+
+def _level(element: ET.Element) -> bool:
+    """Whether a ``<row>`` or ``<col>`` has an outline level above 0."""
+    value = element.get("outlineLevel")
+    return value is not None and value.strip() not in ("0", "")
+
+
+def _style(value: str | None) -> int:
+    """A style index, or 0 when absent or not a number."""
+    return int(value) if value and value.isdigit() else 0
 
 
 def _flag(value: str | None, *, default: bool = False) -> bool:

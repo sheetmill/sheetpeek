@@ -11,6 +11,7 @@ from openpyxl.styles import Alignment, Font, PatternFill
 
 import sheetpeek
 from sheetpeek._layout import _Fonts
+from sheetpeek._notices import Collector
 from tests.workbooks import SHEET1, raw_sheet, replace_once, rewrite, save, set_cached
 
 LONG = "a long text value"  # 17 characters; default columns are 8 wide
@@ -496,19 +497,19 @@ def test_layout_rejects_unknown_modes(tmp_path):
 def test_fonts_for_xlformat():
     # Decided (ARCHITECTURE.md §6.2): a family without a glyph table is measured as Calibri at
     # the same size and style, with one warning per family, only where the font is measured.
-    warnings: list[str] = []
-    fonts = _Fonts(warnings)
+    notes = Collector("Sheet")
+    fonts = _Fonts(notes)
     bold = sheetpeek.Font("Calibri", 11.0, bold=True, color="FF0000")
     assert fonts.get(bold) == xlformat.Font("Calibri", 11.0, bold=True)
     assert fonts.get(bold) is fonts.get(bold)
     assert fonts.get(sheetpeek.Font("aptos narrow", 10.0)) == xlformat.Font("aptos narrow", 10.0)
-    assert warnings == []
+    assert notes.notices() == ()
     arial = sheetpeek.Font("Arial", 10.0, italic=True)
     assert fonts.get(arial, measured=False) == xlformat.Font("Calibri", 10.0, italic=True)
-    assert warnings == []
+    assert notes.notices() == ()
     fonts.get(arial)
     fonts.get(sheetpeek.Font("Arial", 12.0))
-    assert warnings == [
+    assert [n.message for n in notes.notices()] == [
         "font 'Arial' has no glyph table in xlformat; measured as Calibri at the same size"
     ]
 

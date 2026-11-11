@@ -23,6 +23,18 @@ from openpyxl.styles.colors import COLOR_INDEX
 from openpyxl.utils.datetime import CALENDAR_MAC_1904, to_excel
 
 from sheetpeek._colors import resolve, theme_colors
+from sheetpeek._detect import (
+    Code,
+    book_notices,
+    report_cells,
+    report_style,
+    sheet_notices,
+    string_marks,
+    style_codes,
+    theme_fonts,
+    visible_style,
+    workbook_info,
+)
 from sheetpeek._model import (
     Cell,
     CellKind,
@@ -37,6 +49,7 @@ from sheetpeek._model import (
     SheetState,
     VerticalAlignment,
 )
+from sheetpeek._notices import Collector, Notice
 from sheetpeek._package import (
     LimitError,
     PackageError,
@@ -157,6 +170,9 @@ class Book:
                 else COLOR_INDEX
             )
             self._normal_font = self._read_normal_font()
+            self._info = workbook_info(self._archive)
+            self._marks = string_marks(self._archive, self._info.strings_part)
+            self._theme_fonts = theme_fonts(getattr(self._workbook, "loaded_theme", None))
         except PackageError:
             self.close()
             raise
@@ -167,7 +183,7 @@ class Book:
             self.close()
             raise
         self._default_style = CellStyle("General", self._normal_font)
-        self._styles: dict[Any, CellStyle] = {}
+        self._styles: dict[Any, tuple[CellStyle, tuple[Code, ...], tuple[Code, ...]]] = {}
 
     def _unreadable(self, error: Exception) -> PackageError:
         """The refusal for a failure to read: its reason, without where the file lives."""
@@ -209,6 +225,13 @@ class Book:
         return list(self._workbook.sheetnames)
 
     @property
+    def notices(self) -> tuple[Notice, ...]:
+        """Workbook-level notices: the sheets that cannot be shown, such as chartsheets."""
+        collector = Collector(None)
+        book_notices(collector, self._info)
+        return collector.notices()
+
+    @property
     def date1904(self) -> bool:
         """Whether the workbook uses the 1904 date system."""
         return bool(self._epoch == CALENDAR_MAC_1904)
@@ -242,7 +265,7 @@ class Book:
         assert self._archive is not None
         try:
             with self._archive.open(part) as handle:
-                structure = scan(handle, relationships(self._archive, part))
+                structure = scan(handle, relationships(self._archive, part), self._marks)
         except PackageError:
             raise
         except Exception as error:
@@ -252,19 +275,15 @@ class Book:
             if ref is not None:
                 self._check_area(ref)
 
-        warnings: list[str] = []
+        notes = Collector(name)
         try:
-            cells = self._read_cells(worksheet, ref, structure, warnings) if ref else ()
+            sheet_notices(notes, self._archive, part, structure, self._info, name, ref)
+            cells = self._read_cells(worksheet, ref, structure, notes) if ref else ()
         except PackageError:
             raise
         except Exception as error:
             raise self._unreadable(error) from error
-        if structure.uncached_formulas:
-            warnings.append(
-                f"{structure.uncached_formulas} formula cell(s) have no cached value and show as "
-                f"empty (first: {structure.first_uncached_formula}); a file saved by Excel stores "
-                "the values"
-            )
+        self._report_structure(notes, structure, ref)
         return Sheet(
             name=name,
             state=_STATES.get(worksheet.sheet_state, "visible"),
@@ -285,9 +304,58 @@ class Book:
             thick_top=structure.thick_top,
             thick_bottom=structure.thick_bottom,
             show_gridlines=structure.show_gridlines,
-            warnings=tuple(warnings),
+            show_headings=structure.show_headings,
+            notices=notes.notices(),
             max_cells=self._limits.max_cells,
         )
+
+    def _report_structure(
+        self, notes: Collector, structure: Structure, ref: CellRange | None
+    ) -> None:
+        """Notices from what the structure scan found: uncached formulas, runs, row styles."""
+        if structure.uncached_formulas:
+            ranges, truncated = structure.uncached.ranges()
+            notes.extend(
+                [
+                    Notice(
+                        "value.no_cached_value",
+                        "omitted",
+                        "not_implemented",
+                        f"{structure.uncached_formulas} formula cell(s) have no cached value and "
+                        f"show as empty (first: {structure.first_uncached_formula}); a file "
+                        "saved by Excel stores the values",
+                        notes.sheet,
+                        ranges,
+                        structure.uncached_formulas,
+                        context={"truncated": 1} if truncated else {},
+                    )
+                ]
+            )
+        if ref is None:
+            return
+        for code, found in (("text.runs", structure.runs), ("text.phonetic", structure.phonetic)):
+            ranges, _ = found.ranges()
+            report_cells(notes, code, (r for r in map(ref.intersection, ranges) if r))
+        rows = sum(
+            1
+            for row, style in structure.row_styles
+            if ref.min_row <= row <= ref.max_row and visible_style(self._workbook, style)
+        )
+        columns = sum(
+            max(0, min(last, ref.max_col) - max(first, ref.min_col) + 1)
+            for first, last, style in structure.column_styles
+            if visible_style(self._workbook, style)
+        )
+        if rows or columns:
+            notes.add(
+                "style.row_column",
+                "omitted",
+                "not_implemented",
+                count=rows + columns,
+                detail="fills and borders of whole rows and columns, on cells the file has no "
+                "element for",
+                context={"rows": rows, "columns": columns},
+            )
 
     def _default_sheet_name(self) -> str:
         active = self._workbook.active
@@ -299,7 +367,7 @@ class Book:
         return str(self._workbook.sheetnames[0])
 
     def _read_cells(
-        self, worksheet: Any, ref: CellRange, structure: Structure, warnings: list[str]
+        self, worksheet: Any, ref: CellRange, structure: Structure, notes: Collector
     ) -> tuple[tuple[Cell, ...], ...]:
         links = _hyperlinks(structure, ref)
         converted_dates = False
@@ -315,14 +383,15 @@ class Book:
                 converted_dates |= from_date
                 if value is None and (row_index, col_index) in structure.empty_strings:
                     value, kind = "", "text"
+                style, every, text = self._style(source)
+                for code in every:
+                    report_style(notes, code, row_index, col_index)
+                if text and value is not None:
+                    for code in text:
+                        report_style(notes, code, row_index, col_index)
                 row.append(
                     Cell(
-                        row_index,
-                        col_index,
-                        value,
-                        kind,
-                        self._style(source),
-                        links.get((row_index, col_index)),
+                        row_index, col_index, value, kind, style, links.get((row_index, col_index))
                     )
                 )
             row.extend(self._empty(row_index, c) for c in range(col_index + 1, ref.max_col + 1))
@@ -334,7 +403,13 @@ class Book:
             for index in range(row_index, ref.max_row + 1)
         )
         if converted_dates and not self._raw_dates:
-            warnings.append(DATE_FALLBACK_WARNING)
+            notes.add(
+                "value.date_converted",
+                "approximated",
+                "needs_dependency",
+                message=DATE_FALLBACK_WARNING,
+                dependency="openpyxl",
+            )
         return tuple(grid)
 
     def _empty(self, row: int, column: int) -> Cell:
@@ -362,15 +437,17 @@ class Book:
             return to_excel(value, self._epoch), "number", True
         return str(value), "text", False
 
-    def _style(self, source: Any) -> CellStyle:
+    def _style(self, source: Any) -> tuple[CellStyle, tuple[Code, ...], tuple[Code, ...]]:
+        """The cell's style, and what it uses that is not read: (for any cell, for values)."""
         style_array = getattr(source, "style_array", None)
         if style_array is None:  # an EmptyCell: no <c> element at this position
-            return self._default_style
-        style = self._styles.get(style_array)
-        if style is None:
-            style = self._resolve_style(source)
-            self._styles[style_array] = style
-        return style
+            return self._default_style, (), ()
+        found = self._styles.get(style_array)
+        if found is None:
+            every, text = style_codes(source, self._theme_fonts)
+            found = (self._resolve_style(source), every, text)
+            self._styles[style_array] = found
+        return found
 
     def _resolve_style(self, source: Any) -> CellStyle:
         alignment = source.alignment

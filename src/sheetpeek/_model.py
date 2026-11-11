@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, Any, Literal, TypeAlias
 from xlformat import ExcelError
 
 if TYPE_CHECKING:
+    from sheetpeek._notices import Notice
     from sheetpeek._rendered import Mode, RenderedSheet, SpillEdge
 
 CellKind: TypeAlias = Literal["empty", "number", "text", "bool", "error"]
@@ -102,6 +103,17 @@ class CellRange:
             or other.min_row > self.max_row
             or other.max_col < self.min_col
             or other.min_col > self.max_col
+        )
+
+    def intersection(self, other: CellRange) -> CellRange | None:
+        """The cells the two ranges share, or ``None``."""
+        if not self.intersects(other):
+            return None
+        return CellRange(
+            max(self.min_row, other.min_row),
+            max(self.min_col, other.min_col),
+            min(self.max_row, other.max_row),
+            min(self.max_col, other.max_col),
         )
 
 
@@ -259,9 +271,22 @@ class Sheet:
     thick_bottom: bool = False
     """``<sheetFormatPr thickBottom>``: unlisted rows are 1 pt taller."""
     show_gridlines: bool = True
-    warnings: tuple[str, ...] = field(default=())
+    show_headings: bool = True
+    """The file's ``showRowColHeaders``: whether Excel shows row and column headings."""
+    notices: tuple[Notice, ...] = field(default=())
+    """What the file uses that sheetpeek does not read yet (:class:`~sheetpeek.Notice`)."""
     max_cells: int | None = field(default=None, repr=False, compare=False)
     """The largest grid its layout may build (:class:`~sheetpeek.ReadLimits`), or ``None``."""
+
+    @property
+    def warnings(self) -> tuple[str, ...]:
+        """The messages of the notices that were warnings before notices existed.
+
+        Deprecated: use :attr:`notices`.
+        """
+        from sheetpeek._notices import LEGACY
+
+        return tuple(n.message for n in self.notices if n.code in LEGACY)
 
     def cell(self, row: int, column: int) -> Cell:
         """The cell at a sheet position inside ``ref``.

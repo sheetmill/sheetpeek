@@ -5,7 +5,9 @@ from __future__ import annotations
 import csv
 from typing import TextIO
 
+from sheetpeek._notices import Support
 from sheetpeek._rendered import Mode, RenderedSheet
+from sheetpeek.backends import _support
 
 
 class DelimitedBackend:
@@ -22,6 +24,11 @@ class DelimitedBackend:
     def __init__(self, delimiter: str = ",") -> None:
         self.delimiter = delimiter
         self.name = {",": "csv", "\t": "tsv"}.get(delimiter, "delimited")
+
+    @property
+    def support(self) -> dict[str, Support]:
+        """What this output shows of each feature the census finds (``backends/_support.py``)."""
+        return _support.delimited()
 
     def render(self, sheet: RenderedSheet, out: TextIO, /) -> None:
         """Write one record per visible row."""

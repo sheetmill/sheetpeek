@@ -146,6 +146,7 @@ def test_list_with_esc_in_a_name(book, monkeypatch):
     class Stub:
         def __init__(self):
             self.sheet_names = ["a\x1b[31mb\x9b[2Jc\nforged"]
+            self.notices = ()
 
         def __enter__(self):
             return self
@@ -196,7 +197,7 @@ def test_a_warning_has_no_control_character(tmp_path):
     rewrite(path, "xl/styles.xml", lambda t: t.replace("0.00E", "0.00E&#155;"))
     status, _, err = run(path)
     assert status == 0
-    assert "warning" in err
+    assert "format.refused" in err
     assert not CONTROL.search(err)
 
 

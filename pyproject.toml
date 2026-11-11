@@ -50,6 +50,7 @@ dev = [
   "mypy>=1.13",
   "rich>=13",
   "markdown-it-py[linkify]>=3",  # renders the Markdown backend's output in tests/test_markup.py
+  "xlsxwriter>=3",
 ]
 # Capture tooling only (capture/): reading text positions from Excel's PDF export.
 capture = [
@@ -125,4 +126,8 @@ testpaths = ["tests"]
 pythonpath = ["."]
 addopts = "-ra --strict-markers"
 markers = ["excel: rows captured from Excel"]
-filterwarnings = ["error:font is deprecated:DeprecationWarning"]
+filterwarnings = [
+  "error:font is deprecated:DeprecationWarning",
+  # render() reports what an output leaves out; tests/test_notices.py asserts it.
+  "ignore::sheetpeek.NotShownWarning",
+]

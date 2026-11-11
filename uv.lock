@@ -1130,6 +1130,7 @@ dev = [
     { name = "pytest" },
     { name = "rich" },
     { name = "ruff" },
+    { name = "xlsxwriter" },
 ]
 docs = [
     { name = "furo" },
@@ -1160,6 +1161,7 @@ dev = [
     { name = "pytest", specifier = ">=8" },
     { name = "rich", specifier = ">=13" },
     { name = "ruff", specifier = ">=0.8" },
+    { name = "xlsxwriter", specifier = ">=3" },
 ]
 docs = [
     { name = "furo", specifier = ">=2025.12.19" },
@@ -1427,4 +1429,13 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/39/52/5f96045c4934c3d1ef399c2f32ace1c4d7b242f7543417ebe5e04cc67475/xlformat-0.3.0.tar.gz", hash = "sha256:af157124d75835d7d190593182ee8e1bc0c4c3210c5fc7a3b847ff43152cb45e", size = 3667318, upload-time = "2026-11-04T06:46:46.028Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/bd/8a/c92c7f81651b1440ea9431382a4c1458e0d900d47a06174aecfd474ad55d/xlformat-0.3.0-py3-none-any.whl", hash = "sha256:c5b5b1780f1fef1ebf806bb3f6e4c79c1f46e1a7530a2df48d8dd4694a493cca", size = 55121, upload-time = "2026-11-04T06:46:44.568Z" },
+]
+
+[[package]]
+name = "xlsxwriter"
+version = "3.3.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/9c/fb/31bdbf3737222d92ef7d2db4d50089b2253dbbb63ceb6d20a4447f6b7ed0/xlsxwriter-3.3.1.tar.gz", hash = "sha256:0867761912cceac76f97ffa76eeda18c623ae9217f601be8512f55b1af4bdb6e", size = 223040, upload-time = "2026-10-28T22:52:46.592Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/88/eb/1e6af9959a567901a7e7c7cef2e75883e487df223ed67f9a8977ff863bd8/xlsxwriter-3.3.1-py3-none-any.whl", hash = "sha256:8e2c89e59d733fe59e112317218c64fbbc276d90a8c144ebd6f7fa15e7ab184a", size = 180583, upload-time = "2026-10-28T22:52:45.048Z" },
 ]

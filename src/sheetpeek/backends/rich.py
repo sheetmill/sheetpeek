@@ -8,7 +8,9 @@ from __future__ import annotations
 from collections.abc import Iterator
 from typing import TYPE_CHECKING, Any, TextIO
 
+from sheetpeek._notices import Support
 from sheetpeek._rendered import Mode, RenderedSheet
+from sheetpeek.backends import _support
 
 if TYPE_CHECKING:
     from sheetpeek._model import Font
@@ -48,6 +50,11 @@ class RichBackend:
         self.row_headings = row_headings
         self.color_system = color_system
         self.force_terminal = force_terminal
+
+    @property
+    def support(self) -> dict[str, Support]:
+        """What this output shows of each feature the census finds (``backends/_support.py``)."""
+        return _support.rich(headings=self.column_headings or self.row_headings)
 
     def render(self, sheet: RenderedSheet, out: TextIO, /) -> None:
         """Print the sheet to ``out``, cropped to the terminal's width when ``out`` is one."""

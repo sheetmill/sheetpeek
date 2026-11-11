@@ -24,8 +24,10 @@ from sheetpeek._layout import (
     _Origin,
     _Shown,
     check_area,
+    finish,
 )
 from sheetpeek._model import Column, Row, Sheet
+from sheetpeek._notices import Collector
 from sheetpeek._rendered import RenderedCell, RenderedColumn, RenderedRow, RenderedSheet, TextRun
 from sheetpeek._rows import (
     WRAPPED_LEADING,
@@ -38,7 +40,7 @@ from sheetpeek._rows import (
 
 
 def lay_out(
-    sheet: Sheet, columns: list[Column], rows: list[Row], warnings: list[str], fonts: _Fonts
+    sheet: Sheet, columns: list[Column], rows: list[Row], notes: Collector, fonts: _Fonts
 ) -> RenderedSheet:
     """Lay out the visible ``columns`` and ``rows`` of a sheet in points."""
     normal = fonts.get(sheet.normal_font)
@@ -57,14 +59,16 @@ def lay_out(
             RenderedColumn(c.index, None, _column_hidden(c), False, 0.0, _points(c, metrics))
             for c in columns
         )
-        return RenderedSheet(sheet, "excel", _placed(rendered), (), 0, tuple(warnings))
+        return RenderedSheet(
+            sheet, "excel", _placed(rendered), (), 0, finish(sheet, notes, rows, columns)
+        )
     # Added columns are at the default width; a text spills at most twice a digit per character.
     before, after = _edge_columns(sheet, max(1, int(base.points // (2 * base.digit_width))))
     every = before + columns + after
     widths = [_points(c, metrics) for c in every]
     added = set(range(len(before))) | set(range(len(before) + len(columns), len(every)))
     grid = _Grid(
-        sheet, rows, every, [0] * len(every), added, 0, False, _Formatter(sheet, warnings, fonts)
+        sheet, rows, every, [0] * len(every), added, 0, False, _Formatter(sheet, notes, fonts)
     )
 
     blocks: dict[tuple[int, int], float | None] = {}
@@ -99,7 +103,23 @@ def lay_out(
         )
         for p in kept
     )
-    return RenderedSheet(sheet, "excel", rendered_columns, rendered_rows, 0, tuple(warnings))
+    for rendered_row in rendered_rows:
+        for rendered_cell in rendered_row.cells:
+            if rendered_cell.text and rendered_cell.cell.style.v_align in (
+                "justify",
+                "distributed",
+            ):
+                notes.add(
+                    "align.vertical_justify",
+                    "approximated",
+                    "not_implemented",
+                    row=rendered_cell.cell.row,
+                    column=rendered_cell.cell.column,
+                    detail="placed as top",
+                )
+    return RenderedSheet(
+        sheet, "excel", rendered_columns, rendered_rows, 0, finish(sheet, notes, rows, columns)
+    )
 
 
 def _fitted(

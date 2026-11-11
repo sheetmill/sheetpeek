@@ -92,6 +92,53 @@ The `html` backend draws that geometry as a static page, or as a fragment to emb
 '<!doctype html>'
 ```
 
+## What is not shown
+
+sheetpeek never drops silently what a workbook uses. Whatever a rendering leaves out or
+approximates is reported as a {class}`~sheetpeek.Notice`, with a code, an outcome (`omitted` or
+`approximated`), a reason, the cells, and the output that decided it. The reasons are
+`not_implemented` (sheetpeek does not draw it yet), `not_representable` (this output cannot),
+`needs_dependency`, `option` (an option you gave), `unsafe` (refused on purpose, such as a linked
+picture, which Excel fetches and sheetpeek never does) and `file`. {func}`sheetpeek.notices` lists
+them without rendering:
+
+```python
+>>> from openpyxl.styles import Border, Font, Side
+>>> wb = openpyxl.Workbook()
+>>> wb.active["A1"] = "Total"
+>>> wb.active["A1"].font = Font(bold=True)
+>>> wb.active["A1"].border = Border(bottom=Side("thin"))
+>>> wb.save(path)
+>>> for notice in sheetpeek.notices(path, "csv"):
+...     print(notice.code, "|", notice.message)
+border | borders not shown (1 cell): not implemented yet
+font.bold | bold text not shown in csv (1 cell): csv cannot show it
+>>> [notice.code for notice in sheetpeek.notices(path, "html")]
+['border']
+```
+
+A file is reported for what it **uses**, not what it contains: page margins, page setup,
+protection, validation and the like draw nothing on the sheet and are never reported, and a plain
+workbook gives no notice at all. Anything a sheet holds that sheetpeek does not recognize is
+reported as `sheet.unknown_element` or `sheet.unknown_extension`.
+
+{func}`sheetpeek.render` issues one {class}`~sheetpeek.NotShownWarning` per call when there is
+something to report. Filter it as any warning (`warnings.simplefilter("error",
+sheetpeek.NotShownWarning)` makes it an error), or pass `on_notice`: a callable that receives each
+notice instead, or `"ignore"`.
+
+```python
+>>> found = []
+>>> output = sheetpeek.render(path, "csv", on_notice=found.append)
+>>> [notice.matches("font") for notice in found]
+[False, True]
+```
+
+Codes are dotted, and {meth}`~sheetpeek.Notice.matches` takes a code or the area above it
+(`"font"` matches `"font.bold"`). {data}`sheetpeek.FEATURES` lists every code. A backend of your
+own declares what it shows in a `support` mapping from code to {class}`~sheetpeek.Support`; one
+without it has every feature reported as not shown.
+
 ## From the command line
 
 ```bash
@@ -99,8 +146,15 @@ sheetpeek view sales.xlsx                 # rich on a terminal, plain text when 
 sheetpeek view sales.xlsx --column-headings --row-headings   # letters and numbers
 sheetpeek view sales.xlsx -t markdown     # or html, csv, tsv, text, rich
 sheetpeek view sales.xlsx --list          # the sheet names
+sheetpeek view sales.xlsx -t csv --notices full     # what is not shown, with its cells
+sheetpeek view sales.xlsx --strict --suppress font  # exit status 3 if anything else is not shown
 sheetpeek serve reports/                  # every workbook under reports/ as HTML pages
 ```
+
+`sheetpeek view` writes what the output does not show to standard error, one line per kind, the
+code first: `--notices summary` (the default), `full` (with the cells) or `none`. `--suppress
+CODE` leaves out a code and the codes under it, and `--strict` exits with status 3 when anything
+is left to report. `sheetpeek serve` lists it at the foot of each page.
 
 `sheetpeek serve` is a small read-only web server, from the standard library: an index of the
 `.xlsx` files under the folder, and one page per sheet. It binds to 127.0.0.1 unless `--host`

@@ -41,7 +41,7 @@ PAYLOAD = (
 )
 HTML_TAGS = {
     "html", "head", "meta", "title", "style", "body", "div", "table", "colgroup", "col", "thead",
-    "tbody", "tr", "td", "th", "span",
+    "tbody", "tr", "td", "th", "span", "details", "summary", "ul", "li",
 }  # fmt: skip
 HTML_ATTRIBUTES = {
     "data-color-scheme",
@@ -57,7 +57,7 @@ HTML_ATTRIBUTES = {
 }
 STYLE_PROPERTIES = {
     "width", "height", "left", "right", "top", "font", "color", "background", "border-color",
-    "border-left-color", "border-top-color", "letter-spacing", "text-decoration",
+    "margin-top", "border-left-color", "border-top-color", "letter-spacing", "text-decoration",
 }  # fmt: skip
 MARKDOWN_TAGS = {"table", "thead", "tbody", "tr", "th", "td", "br", "p", "strong", "em"}
 

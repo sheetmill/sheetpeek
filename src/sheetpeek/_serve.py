@@ -183,7 +183,9 @@ class _Handler(BaseHTTPRequestHandler):
             sys.stderr.write(one_line(f"sheetpeek: {name}: {error}") + "\n")
             return HTTPStatus.UNPROCESSABLE_ENTITY, self.error("Cannot read this file.")
         out = io.StringIO()
-        HTMLBackend(fragment=True, column_headings=True, row_headings=True).render(rendered, out)
+        HTMLBackend(fragment=True, column_headings=True, row_headings=True, notices=True).render(
+            rendered, out
+        )
         fragment = out.getvalue().split("</style>\n", 1)[1]  # the page carries the stylesheet
         tabs = "".join(
             f'<span class="sp-current">{html.escape(n)}</span>'

@@ -18,6 +18,7 @@ from typing import Any
 import xlformat
 
 from sheetpeek._model import Cell, CellRange, CellStyle, Column, Font, Row, Sheet
+from sheetpeek._notices import Collector, Notice, visible
 from sheetpeek._package import LimitError
 from sheetpeek._rendered import (
     Alignment,
@@ -67,16 +68,18 @@ def layout(
         raise ValueError("scale must be positive")
     if spill_edge != "extend":
         raise ValueError(f"unknown spill_edge {spill_edge!r}; only 'extend' is available")
-    warnings = list(sheet.warnings)
-    fonts = _Fonts(warnings)
+    notes = Collector(sheet.name)
+    fonts = _Fonts(notes)
     columns = [c for c in sheet.columns if show_hidden or not _column_hidden(c)]
     rows = [r for r in sheet.rows if show_hidden or not _row_hidden(r, sheet)]
+    if show_hidden:
+        _report_shown_hidden(sheet, notes)
     if mode == "excel":
         if scale != 1.0 or max_width is not None:
             raise ValueError("scale and max_width apply to characters mode only")
         from sheetpeek._excel import lay_out
 
-        return lay_out(sheet, columns, rows, warnings, fonts)
+        return lay_out(sheet, columns, rows, notes, fonts)
     characters = mode == "characters"
     gap = 1 if characters else 0
 
@@ -89,7 +92,7 @@ def layout(
 
     if sheet.ref is None or not columns or not rows:
         rendered = tuple(RenderedColumn(c.index, width_of(c), _column_hidden(c)) for c in columns)
-        return RenderedSheet(sheet, mode, rendered, (), gap, tuple(warnings))
+        return RenderedSheet(sheet, mode, rendered, (), gap, finish(sheet, notes, rows, columns))
     before: list[Column] = []
     after: list[Column] = []
     if characters:
@@ -98,14 +101,43 @@ def layout(
     widths = [width_of(c) for c in every]
     added = set(range(len(before))) | set(range(len(before) + len(columns), len(every)))
     grid = _Grid(
-        sheet, rows, every, widths, added, gap, characters, _Formatter(sheet, warnings, fonts)
+        sheet, rows, every, widths, added, gap, characters, _Formatter(sheet, notes, fonts)
     )
     rendered_rows, kept = grid.render()
     rendered_columns = tuple(
         RenderedColumn(every[p].index, widths[p], _column_hidden(every[p]), p in added)
         for p in kept
     )
-    return RenderedSheet(sheet, mode, rendered_columns, rendered_rows, gap, tuple(warnings))
+    return RenderedSheet(
+        sheet, mode, rendered_columns, rendered_rows, gap, finish(sheet, notes, rows, columns)
+    )
+
+
+def finish(
+    sheet: Sheet, notes: Collector, rows: list[Row], columns: list[Column]
+) -> tuple[Notice, ...]:
+    """The sheet's notices on the cells laid out, then the layout's own."""
+    kept_rows = {r.index for r in rows}
+    kept_columns = {c.index for c in columns}
+    hidden_rows = {r.index for r in sheet.rows if r.index not in kept_rows}
+    hidden_columns = {c.index for c in sheet.columns if c.index not in kept_columns}
+    return tuple(visible(sheet.notices, hidden_rows, hidden_columns)) + notes.notices()
+
+
+def _report_shown_hidden(sheet: Sheet, notes: Collector) -> None:
+    """Hidden rows and columns kept by ``show_hidden``: shown where Excel hides them."""
+    for code, count in (
+        ("rows.hidden_shown", sum(1 for r in sheet.rows if _row_hidden(r, sheet))),
+        ("columns.hidden_shown", sum(1 for c in sheet.columns if _column_hidden(c))),
+    ):
+        if count:
+            notes.add(
+                code,
+                "approximated",
+                "option",
+                count=count,
+                detail="shown, because show_hidden is set; Excel hides them",
+            )
 
 
 def check_area(sheet: Sheet, rows: int, columns: int) -> None:
@@ -185,8 +217,8 @@ class _Fonts:
     measured.
     """
 
-    def __init__(self, warnings: list[str]) -> None:
-        self._warnings = warnings
+    def __init__(self, notes: Collector) -> None:
+        self._notes = notes
         self._measured = {name.lower() for name in xlformat.measured_fonts()}
         self._fonts: dict[Font, xlformat.Font] = {}
         self._warned: set[str] = set()
@@ -196,9 +228,13 @@ class _Fonts:
         known = font.name.lower() in self._measured
         if measured and not known and font.name not in self._warned:
             self._warned.add(font.name)
-            self._warnings.append(
-                f"font {font.name!r} has no glyph table in xlformat; measured as Calibri "
-                "at the same size"
+            self._notes.add(
+                "font.no_metrics",
+                "approximated",
+                "not_implemented",
+                context={"font": font.name},
+                message=f"font {font.name!r} has no glyph table in xlformat; measured as "
+                "Calibri at the same size",
             )
         found = self._fonts.get(font)
         if found is None:
@@ -210,11 +246,9 @@ class _Fonts:
 class _Formatter:
     """Formats cells through xlformat; warns once per refused format and per failing format."""
 
-    def __init__(self, sheet: Sheet, warnings: list[str], fonts: _Fonts) -> None:
+    def __init__(self, sheet: Sheet, notes: Collector, fonts: _Fonts) -> None:
         self._date1904 = sheet.date1904
-        self._warnings = warnings
-        self._refused: set[str] = set()
-        self._unformattable: set[str] = set()
+        self._notes = notes
         self._fonts = fonts
         self._sheet = sheet
 
@@ -238,21 +272,29 @@ class _Formatter:
             try:
                 formatted = self._format(value, fmt, width, column_width, font, normal)
             except xlformat.FormatError:
-                if fmt not in self._refused:
-                    self._refused.add(fmt)
-                    self._warnings.append(
-                        f"number format {fmt!r} is one Excel refuses to open; shown as General"
-                    )
+                self._notes.add(
+                    "format.refused",
+                    "approximated",
+                    "file",
+                    row=cell.row,
+                    column=cell.column,
+                    context={"format": fmt},
+                    message=f"number format {fmt!r} is one Excel refuses to open; shown as General",
+                )
                 fmt = "General"
                 formatted = self._format(value, fmt, width, column_width, font, normal)
         except (ValueError, TypeError) as error:
             # A value xlformat cannot format (an infinite number from a malformed file).
-            if fmt not in self._unformattable:
-                self._unformattable.add(fmt)
-                self._warnings.append(
-                    f"number format {fmt!r} cannot show the value {cell.value!r} "
-                    f"(first: {cell.coordinate}; {error}); shown as its text"
-                )
+            self._notes.add(
+                "value.unshowable",
+                "approximated",
+                "file",
+                row=cell.row,
+                column=cell.column,
+                context={"format": fmt},
+                message=f"number format {fmt!r} cannot show the value {cell.value!r} "
+                f"(first: {cell.coordinate}; {error}); shown as its text",
+            )
             text = str(value)
             return _Shown(text, text, False, explicit or "left")
         align: Alignment = explicit or formatted.align

@@ -5,7 +5,9 @@ from __future__ import annotations
 import re
 from typing import Literal, TextIO
 
+from sheetpeek._notices import Support
 from sheetpeek._rendered import Mode, RenderedCell, RenderedSheet
+from sheetpeek.backends import _support
 
 _RULE = {"right": "---:", "center": ":---:"}
 # What makes text act as markup inside a table cell, which holds inline content only, so line-start
@@ -39,6 +41,11 @@ class MarkdownBackend:
             raise ValueError("header must be 'first' or 'letters'")
         self.header = header
         self.emphasis = emphasis
+
+    @property
+    def support(self) -> dict[str, Support]:
+        """What this output shows of each feature the census finds (``backends/_support.py``)."""
+        return _support.markdown(emphasis=self.emphasis, letters=self.header == "letters")
 
     def render(self, sheet: RenderedSheet, out: TextIO, /) -> None:
         """Write the table; nothing for a sheet without visible cells."""

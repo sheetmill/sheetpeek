@@ -75,3 +75,34 @@ Everything below is importable from `sheetpeek`.
 .. autoclass:: sheetpeek.backends.HTMLBackend
    :members: render
 ```
+
+## What is not shown
+
+```{eval-rst}
+.. autofunction:: sheetpeek.notices
+.. autoclass:: sheetpeek.Notice
+   :members:
+.. autoclass:: sheetpeek.Support
+   :members:
+.. py:data:: sheetpeek.SHOWN
+
+   The :class:`Support` of a feature an output shows as Excel does.
+
+.. py:data:: sheetpeek.FEATURES
+
+   Every notice code, mapped to its :class:`Feature`.
+
+.. autoclass:: sheetpeek.Feature
+   :members:
+.. autoclass:: sheetpeek.Presence
+   :members:
+.. autoclass:: sheetpeek.NotShownWarning
+.. py:data:: sheetpeek.Outcome
+
+   ``"omitted"`` (nothing of the feature is drawn) or ``"approximated"`` (something else is).
+
+.. py:data:: sheetpeek.Reason
+
+   ``"not_implemented"``, ``"not_representable"``, ``"needs_dependency"``, ``"option"``,
+   ``"unsafe"`` or ``"file"``.
+```

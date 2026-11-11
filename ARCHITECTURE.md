@@ -20,9 +20,10 @@ CLI views a file and serves a folder of workbooks as HTML.
   sheet's warnings. Recalculation through `xlrecalc`, an optional sibling, is planned.
 - **Excel's number formats through xlformat**, a required dependency. It is pure Python with no
   dependencies of its own, and the package's purpose is showing what Excel shows.
-- **Degrade, never fail.** A backend that cannot show a feature ignores it, as Markdown does
-  with merges and delimited text with widths. A number format Excel would refuse falls back to
-  `General`. A Normal font without glyph tables is approximated, with a warning.
+- **Degrade, never fail, never silently.** A backend that cannot show a feature leaves it out or
+  approximates it, as Markdown does with merges and delimited text with widths, and says so: every
+  feature a file uses and an output does not show is reported as a notice (§3.7). A number format
+  Excel would refuse falls back to `General`. A Normal font without glyph tables is approximated.
   The exception is a package refused as unsafe or a request over a limit (§5.5): those raise
   `PackageError` or `LimitError`, since nothing can be shown of a file that may not be read.
 - **Excel is the reference.** Correct means what Excel 16 for Mac shows. ECMA-376 is secondary;
@@ -273,6 +274,77 @@ text outside is cut through a glyph), `align` (the point a different font keeps 
 `tests/test_captures.py` lays the `layout` workbook out in `excel` mode too: every row's crossed
 and fill-covered boundaries against the missing gridlines, every captured run's start (exact) and
 end (within a point), color and baseline.
+
+### 3.7 Notices: what is not shown
+
+Nothing a workbook uses is dropped silently. What a rendering leaves out or approximates is a
+`Notice` (`_notices.py`): a dotted code registered in `FEATURES`, an outcome (`omitted` or
+`approximated`), a reason (`not_implemented`, `not_representable`, `needs_dependency`, `option`,
+`unsafe`, `file`), the sheet (or `None` for the workbook), the cells as at most 1,000 coalesced
+ranges with an exact count, the output that decided it (or `None` for the model), and a context
+mapping holding the message's values. Notices are aggregated: one per code, sheet, output, outcome,
+reason and context, never one per cell.
+
+Three producers, one for each stage:
+1. **The reader** (`Sheet.notices`, `_detect.py`) reports what the file uses that the model does
+   not carry. Styles are checked once per style (borders, pattern and gradient fills, superscript
+   and subscript, scheme fonts against the theme's typefaces, rotation, shrink, reading order); the
+   structure scan marks rich-text and phonetic cells, uncached formulas, outline levels and row and
+   column styles; the sheet's other children, its drawing, VML, comments and threaded comments
+   parts, and the workbook's sheet kinds and print names give the rest. Notices on cells a layout
+   hides are dropped there (`_notices.visible`).
+2. **The layout** (`RenderedSheet.notices`) adds what every output approximates: fonts without
+   glyph tables, refused formats, unshowable values, vertically justified text in `excel` mode,
+   hidden rows and columns kept by `show_hidden`.
+3. **Each output**: the layout's census (`RenderedSheet.features`, `_census.py`) records the
+   features the model carries that the laid-out cells use; each backend declares a `Support` per
+   census code (`backends/_support.py`, the six tables side by side), and its notices are the
+   census filtered through that table. A code a backend does not declare is reported as omitted,
+   so a third-party backend without a table reports everything.
+
+**A file is reported for what it uses, not what it contains.** A detector fires only when the
+element states something Excel draws differently from its default:
+- a style counts only through a cell that uses it, and only for what differs from the default
+  (a border with a side style; a diagonal only with its flags; a row or column style only with a
+  fill or a border);
+- children that draw nothing on the sheet are never reported: `dimension`, `sheetCalcPr`,
+  `sheetProtection`, `protectedRanges`, `scenarios`, `sortState`, `dataConsolidate`,
+  `customSheetViews`, `phoneticPr`, `dataValidations`, `printOptions`, `pageMargins`, `pageSetup`,
+  `headerFooter`, `customProperties`, `cellWatches`, `ignoredErrors`, `smartTags`,
+  `webPublishItems`, `legacyDrawingHF`, `drawingHF`;
+- window state that only chooses which part of the sheet is seen (zoom, `topLeftCell`, the
+  selection, the active tab) is not reported: a page shows the whole range;
+- `autoFilter` counts with a `ref`, `conditionalFormatting` with a `cfRule`, `tableParts` with a
+  `tablePart`, page breaks only manual ones, outline levels only while outline symbols are shown,
+  a pane when frozen or split, a grid color other than automatic (`colorId` 64), a tab color other
+  than automatic; drawings, embedded objects and controls are not reported under
+  `workbookPr showObjects="none"`;
+- a linked picture (`r:link` without `r:embed`) is reported as `unsafe`: Excel fetches the linked
+  file on open, and sheetpeek never fetches;
+- sheet extension URIs are compared as Excel compares them, exactly. For conditional formatting
+  this is captured: Excel reads the extension only under `{78C0D931-6437-407d-A8EE-F0AAD7539E65}`
+  and ignores the upper-case form printed in [MS-XLSX], so that form is not reported. The other
+  known URIs (sparklines, slicers, timelines; and validation, protected ranges, ignored errors and
+  web extensions, which are not reported) are matched ignoring case until captured (unverified),
+  so that none is missed;
+- anything else among a sheet's children, or an unknown extension URI, is reported as
+  `sheet.unknown_element` or `sheet.unknown_extension`;
+- dialog sheets, which openpyxl loads as worksheets, and macro sheets are told apart by their
+  relationship type from the workbook and reported.
+
+`tests/test_notices.py` holds a workbook using every registered feature and checks that each
+output shows or reports each one, that every built-in output declares every census code, and that
+plain workbooks from openpyxl, XlsxWriter and Excel give no notice.
+
+**Delivery.** `sheetpeek.notices(source, to=...)` gives the three producers' notices without
+rendering. `render` issues one `NotShownWarning` per call when there is something to report,
+unless `on_notice` takes each notice or is `"ignore"`. The precedents: Python's `warnings`
+categories and filters, docutils' report and halt levels, pandoc's "Not rendering" messages and
+`--fail-if-warnings`, Sphinx's typed warnings and `suppress_warnings`, pydantic's error codes and
+locations, and pandas' `on_bad_lines` callable. `sheetpeek view` writes one line per notice to
+standard error after the output, the code first; `--notices`, `--suppress` and `--strict` (exit
+status 3) control it. `HTMLBackend(notices=True)` lists them in a collapsed
+`<details class="sp-notices">` after the sheet; `serve` turns it on.
 
 ## 4. Excel layout rules the model reproduces
 

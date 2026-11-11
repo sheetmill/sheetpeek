@@ -6,6 +6,7 @@ row heights and merged ranges of one worksheet. See ``ARCHITECTURE.md``.
 
 from __future__ import annotations
 
+from sheetpeek._census import Presence
 from sheetpeek._model import (
     Cell,
     CellKind,
@@ -20,6 +21,16 @@ from sheetpeek._model import (
     SheetState,
     VerticalAlignment,
 )
+from sheetpeek._notices import (
+    FEATURES,
+    SHOWN,
+    Feature,
+    Notice,
+    NotShownWarning,
+    Outcome,
+    Reason,
+    Support,
+)
 from sheetpeek._package import LimitError, PackageError, ReadLimits
 from sheetpeek._read import Book, open, read  # noqa: A004 - sheetpeek.open, like gzip.open
 from sheetpeek._rendered import (
@@ -33,11 +44,13 @@ from sheetpeek._rendered import (
     SpillEdge,
     TextRun,
 )
-from sheetpeek.backends import Backend, register_backend, render
+from sheetpeek.backends import Backend, notices, register_backend, render
 
 __version__ = "0.2.0"
 
 __all__ = [
+    "FEATURES",
+    "SHOWN",
     "Alignment",
     "Backend",
     "Book",
@@ -47,13 +60,19 @@ __all__ = [
     "CellStyle",
     "CellValue",
     "Column",
+    "Feature",
     "Font",
     "Gap",
     "HorizontalAlignment",
     "LimitError",
     "Mode",
+    "NotShownWarning",
+    "Notice",
+    "Outcome",
     "PackageError",
+    "Presence",
     "ReadLimits",
+    "Reason",
     "RenderedCell",
     "RenderedColumn",
     "RenderedRow",
@@ -62,9 +81,11 @@ __all__ = [
     "Sheet",
     "SheetState",
     "SpillEdge",
+    "Support",
     "TextRun",
     "VerticalAlignment",
     "__version__",
+    "notices",
     "open",
     "read",
     "register_backend",

@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Notices: nothing a workbook uses is dropped silently. `Sheet.notices` and
+  `RenderedSheet.notices` hold a `Notice` for each kind of thing the file uses that sheetpeek does
+  not read yet, or that the layout approximates, and `sheetpeek.notices(source, to=...)` adds what
+  that output cannot show, without rendering. A notice has a dotted code (`FEATURES` lists them),
+  an outcome (`omitted` or `approximated`), a reason, the cells and the output.
+- Reported when a file uses them: borders, pattern and gradient fills, superscript and subscript,
+  theme fonts whose stored name differs, rotated, stacked and shrunk text, reading order, rich-text
+  runs, phonetic guides, row and column formats, sheet views (hidden zeros, right to left,
+  formulas, page layout, panes, grid color), outlines, conditional formatting, filter buttons,
+  tables, sparklines, slicers, timelines, pictures, charts, shapes, embedded objects, form
+  controls, background pictures, notes and threaded comments, print areas, print titles, manual
+  page breaks, tab colors, dialog sheets, macro sheets, and any sheet element or extension sheetpeek
+  does not recognize. A file is reported for what it uses, not what it contains: margins, page
+  setup, protection and validation, which draw nothing, are never reported. A linked picture is
+  reported as refused: Excel fetches the linked file, sheetpeek never does.
+- `render(on_notice=...)`: a callable that receives each notice, or `"ignore"`. Without it,
+  `render` issues one `NotShownWarning` when there is something to report.
+- A backend may declare `support`, a mapping from feature code to `Support`; one without it has
+  every feature reported as not shown. `Book.notices` lists chartsheets.
+- `HTMLBackend(notices=True)` lists what the page does not show after the sheet; `sheetpeek serve`
+  turns it on.
+- `sheetpeek view --notices summary|full|none`, `--strict` (exit status 3 when anything is not
+  shown) and `--suppress CODE`. `--list` marks chartsheets as not shown.
+- `CellRange.intersection`.
+
+### Changed
+- `sheetpeek view` reports on standard error after the output, one line per kind with its code
+  first (`sheetpeek: border: borders not shown (3 cells): not implemented yet`), in place of
+  `sheetpeek: warning: ...` lines before it.
+- A dialog sheet is reported (`sheet.dialogsheet`) instead of being shown as a worksheet without
+  comment.
+- `Sheet` and `RenderedSheet` take `notices` in place of their `warnings` field; `warnings` is a
+  read-only property.
+
+### Deprecated
+- `Sheet.warnings` and `RenderedSheet.warnings`, now views of the notices that were warnings
+  before. Use `notices`.
+
 ## [0.2.0] - 2026-11-04
 
 ### Added
