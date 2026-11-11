@@ -50,7 +50,7 @@ dev = [
   "mypy>=1.13",
   "rich>=13",
   "markdown-it-py[linkify]>=3",  # renders the Markdown backend's output in tests/test_markup.py
-  "xlsxwriter>=3",
+  "xlsxwriter>=3",  # a second, independent writer of test workbooks (tests/test_notices.py); dev only
 ]
 # Capture tooling only (capture/): reading text positions from Excel's PDF export.
 capture = [

@@ -25,9 +25,6 @@ from sheetpeek._notices import FEATURES, CellSet, visible
 from sheetpeek.backends import _support, backend_names, get_backend
 from tests.workbooks import replace_once, replace_part, rewrite, save
 
-# openpyxl warns about the parts of the every-feature workbook it does not read.
-pytestmark = pytest.mark.filterwarnings("ignore::UserWarning:openpyxl")
-
 FILES = Path(__file__).parent / "files"
 SHEET1 = "xl/worksheets/sheet1.xml"
 R = 'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"'
@@ -415,7 +412,8 @@ def test_boilerplate_is_not_reported(tmp_path):
             "</worksheet>",
             '<sheetProtection sheet="1" /><autoFilter /><dataValidations count="1">'
             '<dataValidation type="whole" sqref="A1" /></dataValidations>'
-            '<printOptions gridLines="1" /><headerFooter><oddHeader>x</oddHeader></headerFooter>'
+            '<printOptions gridLines="1" />'
+            "<headerFooter><oddHeader>&amp;CPage</oddHeader></headerFooter>"
             '<colBreaks count="1"><brk id="3" /></colBreaks>'
             '<tableParts count="0" /></worksheet>',
         ),
@@ -624,3 +622,24 @@ def test_strict_passes_a_plain_workbook(tmp_path, capsys):
     path = save(wb, tmp_path / "one.xlsx")
     assert cli.main(["view", str(path), "-t", "text", "--strict"]) == 0
     assert capsys.readouterr().err == ""
+
+
+def test_only_notices_are_issued_for_sheet_extensions(tmp_path):
+    # openpyxl warns that it drops these extensions; sheetpeek reports them as notices instead.
+    wb = openpyxl.Workbook()
+    wb.active["A1"] = 1
+    path = save(wb, tmp_path / "extensions.xlsx")
+    uris = (
+        CF_URI,
+        "{05C60535-1F16-4FD2-B633-F4F36F0B64E0}",
+        "{A8765BA9-456A-4DAB-B4F3-ACF838C121DE}",
+        "{11111111-2222-3333-4444-555555555555}",
+    )
+    rewrite(path, SHEET1, replace_once("</worksheet>", extensions(*uris) + "</worksheet>"))
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        sheetpeek.render(path, "html")
+    assert [w.category for w in caught] == [sheetpeek.NotShownWarning]
+    assert {"cf", "sparkline", "slicer", "sheet.unknown_extension"} <= codes(
+        sheetpeek.read(path).notices
+    )

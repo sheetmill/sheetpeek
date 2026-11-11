@@ -41,6 +41,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   comment.
 - `Sheet` and `RenderedSheet` take `notices` in place of their `warnings` field; `warnings` is a
   read-only property.
+- openpyxl's warning that it drops a sheet extension (conditional formatting, sparklines,
+  slicers and others it does not read) is no longer passed on to the caller while sheetpeek reads a
+  sheet; those extensions are reported as notices instead.
 
 ### Deprecated
 - `Sheet.warnings` and `RenderedSheet.warnings`, now views of the notices that were warnings

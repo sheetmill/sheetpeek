@@ -12,8 +12,10 @@ import datetime as dt
 import io
 import os
 import re
+import warnings
 import zipfile
-from collections.abc import Sequence
+from collections.abc import Iterator, Sequence
+from contextlib import contextmanager
 from types import TracebackType
 from typing import IO, Any
 
@@ -278,7 +280,8 @@ class Book:
         notes = Collector(name)
         try:
             sheet_notices(notes, self._archive, part, structure, self._info, name, ref)
-            cells = self._read_cells(worksheet, ref, structure, notes) if ref else ()
+            with _quiet_extensions():
+                cells = self._read_cells(worksheet, ref, structure, notes) if ref else ()
         except PackageError:
             raise
         except Exception as error:
@@ -505,6 +508,25 @@ class Book:
         if font is None:
             return _FALLBACK_FONT
         return self._font(font, _FALLBACK_FONT)
+
+
+@contextmanager
+def _quiet_extensions() -> Iterator[None]:
+    """Silence openpyxl's warning that it drops a sheet extension, while it parses a sheet.
+
+    sheetpeek reports those extensions itself, as notices; openpyxl's warning would tell the
+    caller a second time, about openpyxl. Only that warning, from openpyxl's sheet reader, is
+    silenced. ``catch_warnings`` changes process-wide state: two threads reading at once can
+    let one such warning through, which is harmless.
+    """
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore",
+            message=r".* extension is not supported and will be removed$",
+            category=UserWarning,
+            module=r"openpyxl\.worksheet\._reader$",
+        )
+        yield
 
 
 def open(  # noqa: A001 - the module-level open() of gzip, tarfile, shelve
