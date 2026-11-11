@@ -287,7 +287,7 @@ def test_hyperlinks_reach_cells(tmp_path):
     ws["A1"].hyperlink = "https://example.com/"
     ws["B1"] = "plain"
     sheet = sheetpeek.read(save(wb, tmp_path / "links.xlsx"))
-    assert sheet.cell(1, 1).hyperlink == "https://example.com/"
+    assert sheet.cell(1, 1).hyperlink == sheetpeek.Hyperlink("https://example.com/")
     assert sheet.cell(1, 2).hyperlink is None
 
 

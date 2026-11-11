@@ -87,6 +87,7 @@ CSS = (
   font-kerning: none; font-variant-ligatures: none;
 }
 .sheetpeek .sp-center { transform: translateX(-50%); }
+.sheetpeek a { color: inherit; text-decoration: inherit; }
 """
 )
 """The stylesheet every page and fragment carries."""

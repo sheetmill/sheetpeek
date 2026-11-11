@@ -45,6 +45,8 @@ class HTMLBackend:
         color_scheme: ``"light"`` or ``"dark"``, for the headings; never read from the system.
         notices: Add, after the sheet, a collapsed list of what the page does not show
             (``<details class="sp-notices">``).
+        new_tab: Open links to web pages and e-mail addresses in a new tab
+            (``target="_blank"``). Links within the page are not affected.
     """
 
     name = "html"
@@ -58,6 +60,7 @@ class HTMLBackend:
         row_headings: bool = False,
         color_scheme: ColorScheme = "light",
         notices: bool = False,
+        new_tab: bool = False,
     ) -> None:
         if color_scheme not in ("light", "dark"):
             raise ValueError(f"color_scheme must be 'light' or 'dark', not {color_scheme!r}")
@@ -66,6 +69,7 @@ class HTMLBackend:
         self.row_headings = row_headings
         self.color_scheme = color_scheme
         self.notices = notices
+        self.new_tab = new_tab
 
     @property
     def support(self) -> dict[str, Support]:

@@ -57,6 +57,8 @@ from sheetpeek._package import (
     relationships,
     worksheet_parts,
 )
+from sheetpeek._scan_links import cell_links
+from sheetpeek._scan_links import report as report_links
 from sheetpeek._structure import Structure, scan
 from sheetpeek._style import Code
 from sheetpeek._style import font as font_aspect
@@ -353,7 +355,7 @@ class Book:
     def _read_cells(
         self, worksheet: Any, ref: CellRange, structure: Structure, notes: Collector
     ) -> tuple[tuple[Cell, ...], ...]:
-        links = _hyperlinks(structure, ref)
+        links = cell_links(structure, ref)
         converted_dates = False
         grid: list[tuple[Cell, ...]] = []
         row_index = ref.min_row
@@ -394,6 +396,7 @@ class Book:
                 message=DATE_FALLBACK_WARNING,
                 dependency="openpyxl",
             )
+        report_links(notes, structure, ref, grid)
         return tuple(grid)
 
     def _empty(self, row: int, column: int) -> Cell:
@@ -543,14 +546,3 @@ def _rows(structure: Structure, ref: CellRange | None) -> tuple[Row, ...]:
         height, hidden = structure.rows.get(index, (None, False))
         result.append(Row(index, height, hidden, index in structure.listed_rows))
     return tuple(result)
-
-
-def _hyperlinks(structure: Structure, ref: CellRange) -> dict[tuple[int, int], str]:
-    links: dict[tuple[int, int], str] = {}
-    for area, target in structure.hyperlinks:
-        if not area.intersects(ref):
-            continue
-        for row in range(max(area.min_row, ref.min_row), min(area.max_row, ref.max_row) + 1):
-            for col in range(max(area.min_col, ref.min_col), min(area.max_col, ref.max_col) + 1):
-                links.setdefault((row, col), target)
-    return links

@@ -7,6 +7,7 @@ row heights and merged ranges of one worksheet. See ``ARCHITECTURE.md``.
 from __future__ import annotations
 
 from sheetpeek._census import Presence
+from sheetpeek._hyperlink import Hyperlink, LinkSource
 from sheetpeek._model import (
     Cell,
     CellKind,
@@ -64,7 +65,9 @@ __all__ = [
     "Font",
     "Gap",
     "HorizontalAlignment",
+    "Hyperlink",
     "LimitError",
+    "LinkSource",
     "Mode",
     "NotShownWarning",
     "Notice",

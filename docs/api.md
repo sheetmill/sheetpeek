@@ -30,6 +30,8 @@ Everything below is importable from `sheetpeek`.
    :members:
 .. autoclass:: sheetpeek.Font
    :members:
+.. autoclass:: sheetpeek.Hyperlink
+   :members:
 .. autoclass:: sheetpeek.Column
    :members:
 .. autoclass:: sheetpeek.Row

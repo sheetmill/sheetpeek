@@ -32,6 +32,8 @@ True
 - `color_scheme="light"` (the default) or `"dark"` colors the headings. Excel for Mac keeps its
   cells white in dark mode and changes only the headings, so the cells stay white either way.
   The scheme is never read from the viewer's system.
+- `new_tab=True` opens links to web pages and e-mail addresses in a new tab
+  (`target="_blank"`). It is off by default.
 
 ## Restyling
 
@@ -59,10 +61,47 @@ an API change.
 | `sp-center` | a centered text |
 | `sp-colhead`, `sp-rowhead`, `sp-corner` | the headings |
 
+A cell that a link on the page goes to has the id `sp-` and its coordinate, such as `sp-C2`.
+
 ```css
 /* Dark cells: the file's own fills and font colors are inline styles and stay as they are,
    so text the file colors black stays black. */
 .sheetpeek { --sheetpeek-paper: #1e1e1e; --sheetpeek-ink: #e6e6e6; --sheetpeek-grid: #3a3a3a; }
+```
+
+## Links
+
+A linked cell's text is wrapped in an `<a>`, which holds the text whole, also where it spills
+over its neighbors. The link adds no color or underline of its own: as in Excel, the cell's
+format draws it (the Hyperlink cell style is blue and underlined, a link in the Normal style
+looks like any text). Its `title` is the file's tooltip, if it has one. The text shown is the
+cell's value; the hyperlink's `display` text, which Excel does not show either, is not drawn.
+
+Only `http`, `https` and `mailto` targets become links, with `rel="noopener noreferrer"`. A
+`javascript:`, `data:` or `file:` target, a relative path, a UNC path or anything else is drawn as
+plain text, never echoed into the page, and reported (`link.scheme`). A link to a cell on the
+page goes to that cell; a link to another sheet or a defined name stays an `<a>` without a target
+(`link.elsewhere`).
+
+```python
+>>> from openpyxl.worksheet.hyperlink import Hyperlink
+>>> wb = openpyxl.Workbook()
+>>> wb.active["A1"] = "Example"
+>>> wb.active["A1"].hyperlink = "https://example.com/"
+>>> wb.active["A2"] = "Unsafe"
+>>> wb.active["A2"].hyperlink = "javascript:alert(1)"
+>>> wb.active["A3"] = "Back to the top"
+>>> wb.active["A3"].hyperlink = Hyperlink(ref="A3", location="A1", tooltip="First row")
+>>> wb.save(path)
+>>> page = sheetpeek.render(path, "html", on_notice="ignore")
+>>> '<a href="https://example.com/" rel="noopener noreferrer">' in page
+True
+>>> "javascript" in page
+False
+>>> '<td id="sp-A1">' in page, '<a href="#sp-A1" title="First row">' in page
+(True, True)
+>>> [n.code for n in sheetpeek.notices(path, "html")]
+['link.scheme']
 ```
 
 ## Fonts

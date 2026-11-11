@@ -128,22 +128,6 @@ def test_formulas_without_cached_values():
     assert found.first_uncached_formula == "B1"
 
 
-def test_hyperlinks():
-    found = scan_xml(
-        "<sheetData/><hyperlinks>"
-        '<hyperlink ref="A1" r:id="rId1"/>'
-        '<hyperlink ref="B2:B3" location="Other!A1"/>'
-        '<hyperlink ref="C1" r:id="rId9"/>'
-        "</hyperlinks>",
-        {"rId1": ("https://example.com/", True)},
-    )
-    # An unknown relationship id and no location: no link.
-    assert found.hyperlinks == (
-        (CellRange.parse("A1"), "https://example.com/"),
-        (CellRange.parse("B2:B3"), "#Other!A1"),
-    )
-
-
 def test_first_sheet_view_wins():
     found = scan_xml(
         '<sheetViews><sheetView showGridLines="0" workbookViewId="0"/>'

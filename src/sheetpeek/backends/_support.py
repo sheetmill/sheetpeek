@@ -36,7 +36,9 @@ def html(*, headings: bool) -> dict[str, Support]:
         "align.vertical": SHOWN,
         "align.wrap": SHOWN,
         "align.indent": SHOWN,
-        "link": _omit("not_implemented"),
+        "link": SHOWN,
+        "link.internal": SHOWN,
+        "link.elsewhere": _approx("a link that goes nowhere: its target is not on this page"),
         "merge": SHOWN,
         "column.width": SHOWN,
         "row.height": SHOWN,
@@ -74,7 +76,9 @@ def rich(*, headings: bool) -> dict[str, Support]:
         "font.color": terminal,
         "format.color": terminal,
         "fill": terminal,
-        "link": _omit("not_implemented"),
+        "link": SHOWN,  # a terminal hyperlink (OSC 8), plain text where a terminal has none
+        "link.internal": _omit(why="a terminal has no place in the sheet to go to"),
+        "link.elsewhere": _omit(why="a terminal has no place in the workbook to go to"),
         **_characters(headings=headings),
     }
 
@@ -94,6 +98,8 @@ def text(*, headings: bool) -> dict[str, Support]:
         "format.color": plain,
         "fill": plain,
         "link": plain,
+        "link.internal": plain,
+        "link.elsewhere": plain,
         **_characters(headings=headings),
     }
 
@@ -117,7 +123,9 @@ def markdown(*, emphasis: bool, letters: bool) -> dict[str, Support]:
         "align.vertical": plain,
         "align.wrap": plain,
         "align.indent": plain,
-        "link": _omit("not_implemented"),
+        "link": SHOWN,
+        "link.internal": _omit(why="a Markdown table has no anchors to link to"),
+        "link.elsewhere": _omit(why="a Markdown table has no anchors to link to"),
         "merge": _approx("the anchor's text in its cell, the covered cells empty"),
         "column.width": plain,
         "row.height": plain,
@@ -145,6 +153,8 @@ def delimited() -> dict[str, Support]:
         "align.wrap": plain,
         "align.indent": plain,
         "link": plain,
+        "link.internal": plain,
+        "link.elsewhere": plain,
         "merge": _approx("the anchor's text in its cell, the covered cells empty"),
         "column.width": plain,
         "row.height": plain,

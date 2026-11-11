@@ -12,6 +12,7 @@ import threading
 from dataclasses import dataclass, field
 from html.parser import HTMLParser
 from pathlib import Path
+from urllib.parse import urlsplit
 from xml.sax.saxutils import escape, quoteattr
 
 import openpyxl
@@ -25,6 +26,7 @@ from sheetpeek._serve import make_server
 from sheetpeek.backends import HTMLBackend, MarkdownBackend
 from tests.workbooks import (
     NS,
+    R_NS,
     SHEET1,
     replace_once,
     replace_part,
@@ -41,7 +43,7 @@ PAYLOAD = (
 )
 HTML_TAGS = {
     "html", "head", "meta", "title", "style", "body", "div", "table", "colgroup", "col", "thead",
-    "tbody", "tr", "td", "th", "span", "details", "summary", "ul", "li",
+    "tbody", "tr", "td", "th", "span", "details", "summary", "ul", "li", "a",
 }  # fmt: skip
 HTML_ATTRIBUTES = {
     "data-color-scheme",
@@ -54,12 +56,24 @@ HTML_ATTRIBUTES = {
     "colspan",
     "rowspan",
     "scope",
+    "href",
+    "rel",
+    "title",
+    "id",
 }
 STYLE_PROPERTIES = {
     "width", "height", "left", "right", "top", "font", "color", "background", "border-color",
     "margin-top", "border-left-color", "border-top-color", "letter-spacing", "text-decoration",
 }  # fmt: skip
-MARKDOWN_TAGS = {"table", "thead", "tbody", "tr", "th", "td", "br", "p", "strong", "em"}
+MARKDOWN_TAGS = {"table", "thead", "tbody", "tr", "th", "td", "br", "p", "strong", "em", "a"}
+LINK_SCHEMES = ("http", "https", "mailto")
+
+
+def safe_href(value: str) -> bool:
+    """Whether a link goes somewhere sheetpeek allows: a page of serve, a cell, or a URL."""
+    if value.startswith(("/", "#sp-")):
+        return value.startswith("/") or re.fullmatch(r"#sp-[A-Z]+[0-9]+", value) is not None
+    return urlsplit(value).scheme.lower() in LINK_SCHEMES
 
 
 def markdown_renderer():
@@ -156,8 +170,13 @@ def assert_html_is_ours(
         elif name == "class":
             assert re.fullmatch(r"[a-z -]+", value), value
         elif name == "href":
-            assert value.startswith("/"), value
+            assert safe_href(value), value
+        elif name == "rel":
+            assert value == "noopener noreferrer", value
+        elif name == "id":
+            assert re.fullmatch(r"sp-[A-Z]+[0-9]+", value), value
         elif name not in (
+            "title",  # a tooltip from the file, which the parser shows is only an attribute
             "content",
             "charset",
             "lang",
@@ -375,6 +394,52 @@ def hyperlink(tmp_path):
     return rewrite(path, SHEET1, replace_once("</sheetData>", "</sheetData>" + link))
 
 
+def _linked(tmp_path, target, **attributes):
+    """A2 linked to an external ``target`` through a relationship, with other attributes."""
+    path = xml_text(tmp_path, A2="x")
+    extra = "".join(f" {name}={quoteattr(value)}" for name, value in attributes.items())
+    link = f'<hyperlinks><hyperlink ref="A2" r:id="rIdL"{extra}/></hyperlinks>'
+    rewrite(
+        path,
+        SHEET1,
+        lambda t: t.replace("</sheetData>", "</sheetData>" + link, 1).replace(
+            "<worksheet ", f"<worksheet {R_NS} ", 1
+        ),
+    )
+    rels = (
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+        '<Relationship Id="rIdL" Type="http://schemas.openxmlformats.org/officeDocument/2006/'
+        f'relationships/hyperlink" Target={quoteattr(target)} TargetMode="External"/>'
+        "</Relationships>"
+    )
+    return replace_part(path, "xl/worksheets/_rels/sheet1.xml.rels", rels.encode())
+
+
+def hyperlink_target(tmp_path):
+    return _linked(tmp_path, "https://example.com/" + PAYLOAD)
+
+
+def hyperlink_mailto(tmp_path):
+    return _linked(tmp_path, "mailto:" + PAYLOAD)
+
+
+def hyperlink_refused(tmp_path):
+    return _linked(tmp_path, "javascript:" + PAYLOAD, tooltip="t")
+
+
+def hyperlink_tab(tmp_path):
+    return _linked(tmp_path, f"java\tscript:{MARK}", location=PAYLOAD)
+
+
+def hyperlink_tooltip(tmp_path):
+    return _linked(tmp_path, "https://example.com/", tooltip=PAYLOAD, display=PAYLOAD)
+
+
+def hyperlink_formula(tmp_path):
+    target = escape("https://example.com/" + PAYLOAD.replace('"', '""'))
+    return cell_xml(tmp_path, f'<c r="A2" t="str"><f>HYPERLINK("{target}")</f><v>x</v></c>')
+
+
 def properties(tmp_path):
     path = xml_text(tmp_path, A2="x")
     return rewrite(path, "docProps/core.xml", replace_once("openpyxl", escape(PAYLOAD)))
@@ -390,8 +455,9 @@ SOURCES = [
     inline, cached, error_text, error_shaped, date_text, shared, escaped_in_file, line_breaks,
     wrapped, filled_alignment, justified, spilled_left, merged, hidden, format_quoted,
     format_text_section, format_escaped, format_currency, format_refused, sheet_name, font_name,
-    normal_font_name, theme_srgb, theme_system, style_rgb, palette, hyperlink, properties,
-    defined_name,
+    normal_font_name, theme_srgb, theme_system, style_rgb, palette, hyperlink, hyperlink_target,
+    hyperlink_mailto, hyperlink_refused, hyperlink_tab, hyperlink_tooltip, hyperlink_formula,
+    properties, defined_name,
 ]  # fmt: skip
 # Whichever of these openpyxl validates, it refuses when it loads the file: nothing is shown.
 BACKENDS = {
@@ -434,9 +500,12 @@ REACHES = {
     "refused": {"date_text", "style_rgb", "palette"},
     "absent": {
         "hidden", "format_refused", "theme_srgb", "theme_system", "hyperlink", "properties",
-        "defined_name",
+        "defined_name", "hyperlink_refused", "hyperlink_tab",
     },
-    "attribute": {"normal_font_name"},
+    "attribute": {
+        "normal_font_name", "hyperlink_target", "hyperlink_mailto", "hyperlink_tooltip",
+        "hyperlink_formula",
+    },
 }  # fmt: skip
 
 
@@ -482,9 +551,10 @@ def test_markdown_holds_no_markup_from_the_file(source, backend, layout):
     found = parse(renderer.render(rendered))
     assert set(found.tags) <= MARKDOWN_TAGS, set(found.tags) - MARKDOWN_TAGS
     assert all(
-        name == "style" and re.fullmatch(r"text-align:\w+", value)
+        (name == "style" and re.fullmatch(r"text-align:\w+", value))
+        or (name == "href" and safe_href(value))
         for name, value in found.attributes
-    )
+    ), found.attributes
     assert rendered.count("\n") == sheet_lines(rendered), rendered
 
 
@@ -538,7 +608,10 @@ FILE_NAME = f"\"'><{MARK} a=b>.xlsx"
 def served(tmp_path):
     folder = tmp_path / f"<{MARK}>folder"
     folder.mkdir()
-    for build in (inline, sheet_name, font_name, format_quoted, theme_srgb, palette, merged):
+    for build in (
+        inline, sheet_name, font_name, format_quoted, theme_srgb, palette, merged,
+        hyperlink_target, hyperlink_tooltip, hyperlink_refused,
+    ):  # fmt: skip
         place = tmp_path / build.__name__
         place.mkdir()
         (folder / f"{build.__name__}.xlsx").write_bytes(build(place).read_bytes())
@@ -584,6 +657,9 @@ REQUESTS = [
     "/view/theme_srgb.xlsx",
     "/view/palette.xlsx",
     "/view/merged.xlsx",
+    "/view/hyperlink_target.xlsx",
+    "/view/hyperlink_tooltip.xlsx",
+    "/view/hyperlink_refused.xlsx",
 ]
 
 

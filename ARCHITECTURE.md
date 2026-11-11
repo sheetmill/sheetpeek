@@ -108,7 +108,7 @@ layout fields marked *layout*. The style fields (`number_format` to `indent`) li
 | `v_align` | `"top" \| "center" \| "bottom" \| "justify" \| "distributed"` | `cell.alignment.vertical`, default `bottom` | |
 | `wrap` | `bool` | `cell.alignment.wrap_text` | |
 | `indent` | `int` | `cell.alignment.indent` | one indent level is one digit's width, 6 pt at Calibri 11 (§4.6) |
-| `hyperlink` | `str \| None` | the structure scan's `<hyperlinks>` (§5.4) | target or location |
+| `hyperlink` | `Hyperlink \| None` | the structure scan's `<hyperlinks>` and `HYPERLINK()` formulas (§4.10) | `target`, `location`, `tooltip`, `display` (never drawn), `source` (`element` or `formula`) |
 | *layout* `text` | `str` | xlformat `FormattedCell.text` at the mode's width | what the cell itself shows: `####`, reduced `General`, `*` fills applied; never clipped or spilled |
 | *layout* `full_text` | `str` | `FormattedCell.full_text` | width-less; what copy and paste gives |
 | *layout* `overflow` | `bool` | `FormattedCell.overflow` | `text` is a run of `#` |
@@ -189,6 +189,7 @@ palette recolors those in Excel. sheetpeek ignores that and documents it.
 | hidden rows and columns | omitted (option to show) | omitted | omitted | omitted | omitted |
 | row heights | `height` on `<tr>` | lines as wrapped text needs | as rich | no | no |
 | headings (row numbers, column letters) | `column_headings`, `row_headings` | the same | the same | `header="letters"` | no |
+| hyperlinks (§4.10) | `<a>` around the cell's runs; links to shown cells go to their id | terminal hyperlinks (OSC 8), external targets only | text only | `[text](url)`, external targets only | text only |
 
 Spill in HTML is computed in the model, not left to the browser, and the browser's font must not
 draw past it. Whatever the technique, the HTML backend shows the same spill as every other
@@ -291,7 +292,7 @@ Three producers, one for each stage:
    and gradient fills, superscript and subscript, scheme fonts against the theme's typefaces,
    rotation, shrink, reading order); the
    structure scan marks rich-text and phonetic cells, uncached formulas, outline levels and row and
-   column styles; the sheet's other children, its drawing, VML, comments and threaded comments
+   column styles, and links no output can follow (§4.10); the sheet's other children, its drawing, VML, comments and threaded comments
    parts, and the workbook's sheet kinds and print names give the rest. Notices on cells a layout
    hides are dropped there (`_notices.visible`).
 2. **The layout** (`RenderedSheet.notices`) adds what every output approximates: fonts without
@@ -577,6 +578,43 @@ Captured so far: `layout` (§3.6, §4.1 to §4.7), `theme_colors` (§3.3), `merg
 (§4.2, §4.4, no deviation), `row_height` (§4.7) and `package` (§5.5). What waits for the screen capture: the gridline and heading colors, the heading sizes, the text insets
 and baselines, which come from print, and the 15 pt rows that print 14 pt apart.
 
+### 4.10 Hyperlinks
+
+**Unverified until recaptured on Microsoft 365.** The rules below were captured once, on Excel 16
+for Mac with Office 2021, before the switch to Microsoft 365; they are marked unverified until
+that capture is repeated.
+
+- **A link has no look of its own.** A linked cell in the Normal style is drawn as plain text;
+  one in the Hyperlink or Followed Hyperlink cell style takes that style's font color (the file's
+  theme `hlink` or `folHlink`) and single underline. A cell in the Hyperlink style without a
+  link looks the same. So the cell's format draws a link, and every output adds nothing for it.
+- **The text is the cell's value.** `display` is not drawn, and an empty linked cell shows
+  nothing; it gets no anchor and is reported (`link.empty_cell`). A merge's covered cells are not.
+- **`HYPERLINK()` from a file** is drawn as its cached value, in the cell's own format: Excel adds
+  no style when it loads a file.
+
+What sheetpeek decides (not Excel's behavior):
+- **Reading.** A `<hyperlink>` gives its `ref` range, the target of its relationship, `location`,
+  `tooltip` and `display`; a relationship that is not `External` points into the package and is
+  refused (`link.scheme`). A `HYPERLINK()` cell is linked only when the formula is one call whose
+  first argument is a string literal (doubled quotes undone); a computed target, a shared or an
+  array formula is reported (`link.computed`). An element and a formula on one cell: the element
+  wins and the conflict is reported (`link.conflict`); which one Excel follows is unverified.
+- **Schemes:** an allow-list, `http`, `https` and `mailto`, compared lower-cased after what a
+  browser drops (C0 controls and spaces at the ends, tabs and line breaks anywhere, so
+  `java\tscript:` is `javascript:`), with `urllib.parse.urlsplit`. Anything else (`javascript:`,
+  `data:`, `vbscript:`, `file:`, UNC and relative paths, unparseable text) is drawn as plain text
+  and reported once by the reader (`link.scheme`, `unsafe`), never per output, and the refused
+  target is never written into any output. Controls left in an allowed URL are percent-encoded,
+  so none reaches a terminal.
+- **Places in the workbook.** `location` names a cell (`A1`, `Sheet!A1`, `'My sheet'!B2:C3`,
+  first cell taken; sheet names compared ignoring case) or a defined name. A reference without a
+  sheet is taken as the link's own sheet (unverified). A link to a cell that is laid out goes
+  there in HTML (`link.internal`); a link to another sheet, a defined name or a cell not laid out
+  is an anchor that goes nowhere (`link.elsewhere`, approximated). Defined names are not resolved.
+- **The census** (§3.7) counts `link` (an allowed URL), `link.internal` and `link.elsewhere` on
+  cells that show text; each output declares what it does with them (`backends/_support.py`).
+
 ## 5. openpyxl facts that constrain the design
 
 All measured with openpyxl 3.1.5 (`bench/`).
@@ -657,7 +695,9 @@ The scan is one pass of `xml.etree.ElementTree.iterparse` over the worksheet par
 - `<cols>`;
 - each `<row>`'s `r`, `ht` and `hidden`;
 - each `<c>`'s `r`, for the used range;
-- `<mergeCells>` and `<hyperlinks>`.
+- `<mergeCells>`;
+- through features' own handlers, `<hyperlinks>` and the formulas that call `HYPERLINK()`
+  (`_scan_links.py`, §4.10).
 
 Cells are handled at the end of their row, after which the row is cleared. A row's column extent
 comes from its first and last cell, since the schema orders cells by column; each cell is
@@ -1039,8 +1079,14 @@ points.
   properties `--sheetpeek-paper`, `--sheetpeek-ink`, `--sheetpeek-grid`,
   `--sheetpeek-heading-paper`, `--sheetpeek-heading-ink`, `--sheetpeek-heading-grid`, and the
   classes `sheetpeek`, `sp-crossed`, `sp-clip`, `sp-run`, `sp-center`, `sp-colhead`,
-  `sp-rowhead`, `sp-corner`, `sp-nogrid`. Explicit colors from the file (fills, font and section
+  `sp-rowhead`, `sp-corner`, `sp-nogrid`, and the ids `sp-<cell>` of cells a link goes to.
+  Explicit colors from the file (fills, font and section
   colors) are inline styles, so restyled dark paper keeps a cell's explicit dark text (§9).
+- **Links** (§4.10): a linked cell's runs sit inside one `<a>`, so spilled text stays
+  clickable; the anchor inherits color and decoration (`.sheetpeek a`), since the cell's format
+  draws a link. `href` only for an allowed URL (with `rel="noopener noreferrer"`, and
+  `target="_blank"` with `new_tab=True`) or a cell on the page (`#sp-C2`, the id on the cell
+  that draws it, a merge's first visible cell); `title` is the tooltip alone.
 - **Page or fragment:** a page is a standalone document titled with the sheet's name; a
   fragment is the stylesheet and the `<div class="sheetpeek">`, for a host page.
 - **Size** (`bench/html_size.py`, 5,000 rows × 20 columns, 100,000 cells and 97,144 runs, Apple
@@ -1073,9 +1119,11 @@ points.
 src/sheetpeek/
   __init__.py        public names, __version__
   _model.py          Sheet, Cell, CellStyle, Column, Row, CellRange, Font
+  _hyperlink.py      Hyperlink; the scheme check and place lookup every output shares (§4.10)
   _rendered.py       RenderedSheet, RenderedRow, RenderedCell, RenderedColumn, Gap
   _package.py        ReadLimits, the check before reading (§5.5), sheet name → worksheet part
   _structure.py      the structure scan (§5.4): one handler per element
+  _scan_links.py     the scan's hyperlink handlers, and the reader's link notices (§4.10)
   _read.py           the reader: openpyxl read-only, date conversion off; builds a Sheet
   _style/            a cell's style, one module per aspect: border, fill, font, alignment
   _detect.py         what a file uses that the model does not carry: one rule per sheet child
@@ -1091,7 +1139,7 @@ src/sheetpeek/
     _support.py      what each output shows of each feature (§3.7)
     text.py  rich.py  markdown.py  delimited.py
     html/            __init__ (backend, page), _css, _table (grid, fills, gridlines),
-                     _text (runs), _headings, _notices
+                     _text (runs), _headings, _links (anchors, ids), _notices
   cli.py             `sheetpeek view`, `sheetpeek serve`
   _serve.py          the server behind `sheetpeek serve`
   _carlito.py        Carlito's advance widths, generated by tools/carlito_widths.py

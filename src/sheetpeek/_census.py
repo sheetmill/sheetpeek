@@ -7,10 +7,11 @@ backend writes no reporting code. A feature an output does not declare is report
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
+from sheetpeek._hyperlink import classify
 from sheetpeek._model import CellRange
 from sheetpeek._notices import FEATURES, CellSet, Notice, Outcome, Reason, Support, describe
 
@@ -35,6 +36,7 @@ def census(rendered: RenderedSheet) -> dict[str, Presence]:
     sheet = rendered.sheet
     normal = sheet.normal_font
     sets: dict[str, CellSet] = {}
+    shown = shown_cells(rendered)
 
     def add(code: str, row: int, column: int) -> None:
         found = sets.get(code)
@@ -49,10 +51,12 @@ def census(rendered: RenderedSheet) -> dict[str, Presence]:
             row, column = cell.row, cell.column
             if style.fill is not None:
                 add("fill", row, column)
-            if cell.hyperlink:
-                add("link", row, column)
             if cell.kind == "empty":
                 continue
+            if cell.hyperlink is not None and cell.value != "":
+                kind = classify(cell.hyperlink, sheet.name, shown)[0]
+                if kind != "refused":  # the reader reports it, once for every output
+                    add(_LINKS[kind], row, column)
             font = style.font
             if font.name != normal.name:
                 add("font.name", row, column)
@@ -100,6 +104,22 @@ def census(rendered: RenderedSheet) -> dict[str, Presence]:
             found[code] = Presence(count)
     order = list(FEATURES)
     return dict(sorted(found.items(), key=lambda item: order.index(item[0])))
+
+
+_LINKS = {"url": "link", "internal": "link.internal", "elsewhere": "link.elsewhere"}
+
+
+def shown_cells(rendered: RenderedSheet) -> Callable[[int, int], bool]:
+    """Whether a cell is in the rendered rows and columns, worked out when first asked."""
+    found: list[tuple[set[int], set[int]]] = []
+
+    def shown(row: int, column: int) -> bool:
+        if not found:
+            found.append(({r.index for r in rendered.rows}, {c.index for c in rendered.columns}))
+        rows, columns = found[0]
+        return row in rows and column in columns
+
+    return shown
 
 
 def output_notices(

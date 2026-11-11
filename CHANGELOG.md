@@ -32,8 +32,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `sheetpeek view --notices summary|full|none`, `--strict` (exit status 3 when anything is not
   shown) and `--suppress CODE`. `--list` marks chartsheets as not shown.
 - `CellRange.intersection`.
+- Hyperlinks are drawn. HTML wraps a linked cell's text in an anchor, which adds no color or
+  underline of its own, since the cell's format draws a link as in Excel; its `title` is the
+  file's tooltip. A link to a cell on the page goes to that cell (the cell gets the id `sp-` and
+  its coordinate). `HTMLBackend(new_tab=True)` opens external links in a new tab. `rich` draws
+  terminal hyperlinks, and Markdown `[text](url)` links; plain text, CSV and TSV keep the text.
+- Only `http`, `https` and `mailto` targets become links. Any other target (`javascript:`,
+  `data:`, `file:`, relative and UNC paths, and others) is drawn as plain text, is never written
+  into the output, and is reported (`link.scheme`).
+- A `HYPERLINK()` formula whose first argument is a string links its cell. One with a computed
+  target, or in a shared or array formula, is reported (`link.computed`); a cell with both a
+  hyperlink element and a `HYPERLINK()` formula takes the element's (`link.conflict`). A link on
+  an empty cell is reported (`link.empty_cell`), and so is a link to another sheet or a defined
+  name, which HTML shows as a link that goes nowhere (`link.elsewhere`).
 
 ### Changed
+- `Cell.hyperlink` is a `Hyperlink` (`target`, `location`, `tooltip`, `display`, `source`), or
+  `None`, in place of a string that joined the target and the location with `#`. `Hyperlink` is
+  exported from `sheetpeek`.
 - `sheetpeek view` reports on standard error after the output, one line per kind with its code
   first (`sheetpeek: border: borders not shown (3 cells): not implemented yet`), in place of
   `sheetpeek: warning: ...` lines before it.

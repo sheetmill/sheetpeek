@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, TextIO
 
 from sheetpeek._model import CellRange
 from sheetpeek._rendered import RenderedCell, RenderedSheet, TextRun
-from sheetpeek.backends.html import _headings, _text
+from sheetpeek.backends.html import _headings, _links, _text
 
 if TYPE_CHECKING:
     from sheetpeek.backends.html import HTMLBackend
@@ -73,6 +73,7 @@ class Page:
                     holder.setdefault(anchor, (top, left))
                 else:
                     holder[(cell.row, cell.column)] = (i, p)
+        self.links = _links.Links(self, holder)
         runs: dict[tuple[int, int], list[TextRun]] = {}
         for i, row in enumerate(sheet.rows):
             for run in row.runs:
@@ -113,6 +114,8 @@ class Page:
             if above:
                 style.append(f"border-top-color:#{above}")
         attrs = ""
+        if (i, p) in self.links.ids:
+            attrs += f' id="{self.links.ids[(i, p)]}"'
         if p and rows[i].crossed[p - 1]:
             attrs += ' class="sp-crossed"'
         if style:
@@ -121,4 +124,21 @@ class Page:
             attrs += f' colspan="{colspan}"'
         if rowspan > 1:
             attrs += f' rowspan="{rowspan}"'
-        return f"<td{attrs}>{''.join(_text.run(self, run) for run in runs)}</td>"
+        return f"<td{attrs}>{self.text(runs)}</td>"
+
+    def text(self, runs: list[TextRun] | tuple[()]) -> str:
+        """A cell's runs, each linked cell's inside its anchor."""
+        opening = self.links.opening
+        parts = []
+        source = None
+        for run in runs:
+            if run.source != source:
+                if source in opening:
+                    parts.append("</a>")
+                source = run.source
+                if source in opening:
+                    parts.append(opening[source])
+            parts.append(_text.run(self, run))
+        if source in opening:
+            parts.append("</a>")
+        return "".join(parts)

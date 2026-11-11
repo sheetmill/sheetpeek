@@ -44,6 +44,12 @@ Markdown and CSV have no column widths, so every cell shows its full text. Text 
 the last used column runs on into empty columns added for it, as it does in Excel; the layout
 marks them as added.
 
+A cell's hyperlink is a {class}`~sheetpeek.Hyperlink` in `Cell.hyperlink`, from a `<hyperlink>`
+element or from a `HYPERLINK()` formula whose target is a string. HTML makes it an anchor,
+`rich` a terminal hyperlink and Markdown a `[text](url)` link; plain text, CSV and TSV keep the
+text without the target. Only `http`, `https` and `mailto` targets become links in any output;
+others are reported, as the HTML page describes.
+
 ## The rendered cells
 
 {meth}`sheetpeek.Sheet.layout` gives the layout itself, the same data every backend draws from.

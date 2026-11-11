@@ -8,6 +8,7 @@ from __future__ import annotations
 from collections.abc import Iterator
 from typing import TYPE_CHECKING, Any, TextIO
 
+from sheetpeek._hyperlink import external_url
 from sheetpeek._notices import Support
 from sheetpeek._rendered import Mode, RenderedSheet
 from sheetpeek.backends import _support
@@ -21,7 +22,8 @@ class RichBackend:
 
     Each column is drawn on its own cell's fill, and the text in it takes the font and color of
     the cell it comes from, so text spilled over a filled neighbor shows that neighbor's fill,
-    as in Excel.
+    as in Excel. A link to a web page or an e-mail address is a terminal hyperlink, which a
+    terminal without them shows as plain text.
 
     Args:
         separator: One character drawn between two columns where no text crosses.
@@ -77,6 +79,7 @@ class RichBackend:
         """One ``rich.text.Text`` per output line, each ending in a newline."""
         from rich.text import Text
 
+        links = _Links(sheet)
         label = max((len(str(row.index)) for row in sheet.rows), default=1)
         dim = "dim"
         if self.column_headings and sheet.columns:
@@ -95,15 +98,53 @@ class RichBackend:
                     number = str(row.index) if line == 0 else ""
                     text.append(number.rjust(label) + self.separator, style=dim)
                 for p, cell in enumerate(row.cells):
-                    text.append(cell.lines[line], style=_style(cell.font, cell.color, cell.fill))
+                    style = _style(cell.font, cell.color, cell.fill)
+                    links.append(text, cell.lines[line], style, cell.source)
                     if p < len(row.gaps):
                         gap = row.gaps[p]
                         crossing = gap.lines[line]
                         if crossing is not None:
-                            text.append(crossing, style=_style(gap.font, gap.color, gap.fill))
+                            # Text crossing a gap comes from the cell both neighbors show.
+                            after = row.cells[p + 1].source if p + 1 < len(row.cells) else None
+                            style = _style(gap.font, gap.color, gap.fill)
+                            links.append(
+                                text, crossing, style, cell.source if after == cell.source else None
+                            )
                         else:
                             text.append(self.separator, style=_style(None, None, gap.fill))
                 yield text
+
+
+class _Links:
+    """Each linked cell's ``link`` style, one per URL so that a terminal sees one link."""
+
+    def __init__(self, sheet: RenderedSheet) -> None:
+        from rich.style import Style
+
+        self.styles: dict[tuple[int, int], Any] = {}
+        by_url: dict[str, Any] = {}
+        for row in sheet.rows:
+            for rendered in row.cells:
+                cell = rendered.cell
+                if cell.hyperlink is None or cell.kind == "empty" or cell.value == "":
+                    continue
+                url = external_url(cell.hyperlink)
+                if url is not None:
+                    style = by_url.setdefault(url, Style(link=url))
+                    self.styles[(cell.row, cell.column)] = style
+
+    def append(self, text: Any, chars: str, style: Any, source: tuple[int, int] | None) -> None:
+        """Add ``chars`` to ``text``, the part that is not padding linked if its source is."""
+        link = self.styles.get(source) if source is not None else None
+        core = chars.strip(" ")
+        if link is None or not core:
+            text.append(chars, style=style)
+            return
+        start = chars.index(core)
+        end = start + len(core)
+        text.append(chars[:start], style=style)
+        text.append(core, style=style + link)
+        text.append(chars[end:], style=style)
 
 
 def _style(font: Font | None, color: str | None, fill: str | None) -> Any:

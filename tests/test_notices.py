@@ -16,6 +16,7 @@ from openpyxl.cell.text import InlineFont
 from openpyxl.comments import Comment
 from openpyxl.formatting.rule import CellIsRule
 from openpyxl.styles import Alignment, Border, Font, GradientFill, PatternFill, Side
+from openpyxl.worksheet.hyperlink import Hyperlink
 from openpyxl.worksheet.pagebreak import Break
 from openpyxl.worksheet.table import Table
 
@@ -104,6 +105,16 @@ def build_every_feature(path: Path) -> Path:
     ws["A5"].alignment = Alignment(horizontal="center", vertical="top", wrap_text=True, indent=1)
     ws["A6"] = "link"
     ws["A6"].hyperlink = "https://example.com/"
+    ws["A7"] = "here"
+    ws["A7"].hyperlink = Hyperlink(ref="A7", location="'All'!C1")
+    ws["A8"] = "elsewhere"
+    ws["A8"].hyperlink = Hyperlink(ref="A8", location="Dialog!A1")
+    # What the reader reports of links.
+    ws["A9"] = "refused"
+    ws["A9"].hyperlink = "javascript:alert(1)"
+    ws["A11"] = '=HYPERLINK(B1&"x")'
+    ws["A12"] = '=HYPERLINK("https://example.org/")'
+    ws["A12"].hyperlink = "https://example.com/"
     ws["C1"] = "merged"
     ws.merge_cells("C1:D1")
     ws.column_dimensions["B"].width = 20
@@ -192,6 +203,16 @@ def build_every_feature(path: Path) -> Path:
             flags=re.S,
         ),
     )
+    # The two HYPERLINK() cells with cached values, as Excel saves them.
+    rewrite(
+        path,
+        SHEET1,
+        lambda t: re.sub(
+            r'<c r="(A1[12])"[^>]*>(<f>.*?</f>).*?</c>',
+            r'<c r="\1" t="str">\2<v>shown</v></c>',
+            t,
+        ).replace('<hyperlink ref="A7"', '<hyperlink ref="A10" location="A1"/><hyperlink ref="A7"'),
+    )  # and a link on the empty A10, which openpyxl does not write
     rels = "xl/worksheets/_rels/sheet1.xml.rels"
     rewrite(
         path,

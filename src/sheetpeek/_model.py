@@ -13,6 +13,8 @@ from typing import TYPE_CHECKING, Any, Literal, TypeAlias
 
 from xlformat import ExcelError
 
+from sheetpeek._hyperlink import Hyperlink
+
 if TYPE_CHECKING:
     from sheetpeek._notices import Notice
     from sheetpeek._rendered import Mode, RenderedSheet, SpillEdge
@@ -182,7 +184,8 @@ class Cell:
     value: CellValue
     kind: CellKind
     style: CellStyle
-    hyperlink: str | None = None
+    hyperlink: Hyperlink | None = None
+    """The cell's link, from a ``<hyperlink>`` element or a ``HYPERLINK()`` formula."""
 
     @property
     def number_format(self) -> str:

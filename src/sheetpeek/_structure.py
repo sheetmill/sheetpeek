@@ -1,7 +1,7 @@
 """The structure scan: what openpyxl's read-only mode does not expose, read from the sheet XML.
 
 One ``iterparse`` pass over a worksheet part records the sheet view, the sheet format, column
-widths, row heights and hidden flags, merged ranges, hyperlinks, and the bounds of every ``<c>``
+widths, row heights and hidden flags, merged ranges, and the bounds of every ``<c>``
 element, which with the merged ranges give the used range. Cell contents are not read, apart
 from noticing a formula without a cached value. The ``<dimension>`` element is ignored: some
 writers omit it or get it wrong.
@@ -20,7 +20,6 @@ from sheetpeek._notices import CellSet
 from sheetpeek._package import PackageError
 
 _NS = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
-_REL_ID = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id"
 _SHEET_DATA = f"{_NS}sheetData"
 _ROW = f"{_NS}row"
 _CELL = f"{_NS}c"
@@ -28,7 +27,6 @@ _FORMULA = f"{_NS}f"
 _VALUE = f"{_NS}v"
 _COL = f"{_NS}col"
 _MERGE = f"{_NS}mergeCell"
-_HYPERLINK = f"{_NS}hyperlink"
 _SHEET_VIEW = f"{_NS}sheetView"
 _SHEET_FORMAT = f"{_NS}sheetFormatPr"
 _INLINE = f"{_NS}is"
@@ -74,7 +72,6 @@ class Structure:
     base_column_width: int
     default_row_height: float | None
     show_gridlines: bool
-    hyperlinks: tuple[tuple[CellRange, str], ...]
     uncached_formulas: int
     """Formula cells without a cached value (a file written by a library, never opened by Excel)."""
     first_uncached_formula: str | None
@@ -144,7 +141,6 @@ class Scan:
         self.rows: dict[int, tuple[float | None, bool]] = {}
         self.columns: list[ColumnSpec] = []
         self.merges: list[CellRange] = []
-        self.hyperlinks: list[tuple[CellRange, str]] = []
         self.uncached = CellSet()
         self.first_uncached: str | None = None
         self.runs = CellSet()
@@ -189,7 +185,6 @@ class Scan:
             base_column_width=self.base_column_width,
             default_row_height=self.default_row_height,
             show_gridlines=self.show_gridlines,
-            hyperlinks=tuple(self.hyperlinks),
             uncached_formulas=self.uncached.count,
             first_uncached_formula=self.first_uncached,
             empty_strings=frozenset(self.empty_strings),
@@ -334,14 +329,6 @@ def _merge(state: Scan, element: ET.Element) -> None:
         state.merges.append(CellRange.parse(ref))
 
 
-@handler(_HYPERLINK)
-def _link(state: Scan, element: ET.Element) -> None:
-    link = _hyperlink(element, state.rels)
-    ref = element.get("ref")
-    if link and ref:
-        state.hyperlinks.append((CellRange.parse(ref), link))
-
-
 @handler(_SHEET_VIEW)
 def _view(state: Scan, element: ET.Element) -> None:
     """The first sheet view only: the main window's."""
@@ -464,14 +451,3 @@ def _flag(value: str | None, *, default: bool = False) -> bool:
     if value is None:
         return default
     return value in ("1", "true")
-
-
-def _hyperlink(element: ET.Element, rels: dict[str, tuple[str, bool]]) -> str | None:
-    target = ""
-    rel_id = element.get(_REL_ID)
-    if rel_id and rel_id in rels:
-        target = rels[rel_id][0]
-    location = element.get("location")
-    if location:
-        target = f"{target}#{location}"
-    return target or None
