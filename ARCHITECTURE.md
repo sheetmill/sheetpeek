@@ -766,7 +766,7 @@ direction; Excel draws nothing otherwise.
   thin, dashed ones as short blocks; text and the line both show.
 
 **The layout** (`excel` mode only) resolves one side per edge of the laid-out grid into
-`RenderedSheet.extra["borders"]`, a `RenderedBorders` of horizontal and vertical lines and the
+`RenderedSheet.borders`, a `RenderedBorders` of horizontal and vertical lines and the
 diagonals; no output compares two cells' sides. A range read cuts off the sides of the cells
 beyond it (not read).
 

@@ -97,7 +97,8 @@ def layout(
         draft.gap,
         finish(sheet, notes, draft.kept_rows, draft.kept_columns),
         outline=draft.extra.get("outline"),
-        extra=draft.extra,
+        borders=draft.extra.get("borders"),
+        extra={k: v for k, v in draft.extra.items() if k not in _TYPED},
     )
 
 
@@ -169,6 +170,9 @@ def _cells(draft: Draft) -> None:
         for p in kept
     )
 
+
+_TYPED = frozenset({"outline", "borders"})
+"""Pass results that have a typed field of their own on ``RenderedSheet``."""
 
 PASSES: list[Pass] = [
     _cells,

@@ -235,7 +235,7 @@ def test_only_excel_mode_resolves_borders(tmp_path):
     sheet = sheetpeek.read(path)
     assert rendered_borders(sheet.layout("characters")) is None
     plain = bordered(tmp_path, {"A1": ("x", None)}, name="plain.xlsx")
-    assert "borders" not in sheetpeek.read(plain).layout("excel").extra
+    assert sheetpeek.read(plain).layout("excel").borders is None
 
 
 # --- the outputs

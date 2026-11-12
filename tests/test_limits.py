@@ -419,55 +419,62 @@ def styled(tmp_path_factory):
 
 
 @pytest.mark.parametrize("field", ODD_STYLE_FIELDS)
-@pytest.mark.parametrize("value", ODD_NUMBERS)
 @bounded
-def test_no_mode_allocates_or_fails_by_an_odd_style_number(styled, tmp_path, field, value):
-    book = tmp_path / "styled.xlsx"
-    book.write_bytes(styled)
+def test_no_mode_allocates_or_fails_by_an_odd_style_number(styled, tmp_path, field):
+    # One bounded child for each field, trying every odd number: a child for each pair cost
+    # most of the suite's time, and the memory bound holds for the whole loop.
     old = ODD_STYLE_FIELDS[field]
     # The number replaces the first one in the attribute (an index or a tint, by field).
     attribute = re.findall(r'(\w+)="[^"]*"$', old)[0]
-    new = re.sub(rf'{attribute}="[^"]*"$', f'{attribute}="{value}"', old)
-    rewrite(book, STYLES, lambda text: text.replace(old, new, 1))
-    try:
-        sheet = sheetpeek.read(book)
-    except PackageError:
-        return
-    for mode in ("excel", "characters", "none"):
-        page = sheetpeek.render(
-            sheet.layout(mode),
-            {"excel": "html", "characters": "text"}.get(mode, "csv"),
-            on_notice="ignore",
-        )
-        assert "nan" not in page.lower().replace("sans", "")
+    for value in ODD_NUMBERS:
+        book = tmp_path / "styled.xlsx"
+        book.write_bytes(styled)
+        new = re.sub(rf'{attribute}="[^"]*"$', f'{attribute}="{value}"', old)
+        rewrite(book, STYLES, lambda text, new=new: text.replace(old, new, 1))
+        try:
+            sheet = sheetpeek.read(book)
+        except PackageError:
+            continue
+        for mode in ("excel", "characters", "none"):
+            page = sheetpeek.render(
+                sheet.layout(mode),
+                {"excel": "html", "characters": "text"}.get(mode, "csv"),
+                on_notice="ignore",
+            )
+            assert "nan" not in page.lower().replace("sans", ""), (field, value, mode)
 
 
 ODD_ALIGNMENT_FIELDS = ("readingOrder", "indent")
 
 
 @pytest.mark.parametrize("field", ODD_ALIGNMENT_FIELDS)
-@pytest.mark.parametrize("value", ODD_NUMBERS)
 @bounded
-def test_no_mode_allocates_or_fails_by_an_odd_alignment_number(tmp_path, field, value):
+def test_no_mode_allocates_or_fails_by_an_odd_alignment_number(tmp_path, field):
+    # One bounded child for each field, trying every odd number (as above).
     wb = openpyxl.Workbook()
     wb.active["A1"] = "text that is too long for its cell"
     wb.active["A1"].alignment = Alignment(
         readingOrder=1, indent=1, horizontal="distributed", shrink_to_fit=True
     )
     wb.active["B2"] = 1
-    path = save(wb, tmp_path / "odd.xlsx")
-    rewrite(path, STYLES, lambda text: text.replace(f'{field}="1"', f'{field}="{value}"', 1))
-    try:
-        sheet = sheetpeek.read(path)
-    except PackageError:
-        return
-    assert sheet.cell(1, 1).style.reading_order in (0, 1, 2)
-    for mode in ("excel", "characters", "none"):
-        sheetpeek.render(
-            sheet.layout(mode),
-            {"excel": "html", "characters": "text"}.get(mode, "csv"),
-            on_notice="ignore",
+    plain = save(wb, tmp_path / "plain.xlsx").read_bytes()
+    for value in ODD_NUMBERS:
+        path = tmp_path / "odd.xlsx"
+        path.write_bytes(plain)
+        rewrite(
+            path, STYLES, lambda text, v=value: text.replace(f'{field}="1"', f'{field}="{v}"', 1)
         )
+        try:
+            sheet = sheetpeek.read(path)
+        except PackageError:
+            continue
+        assert sheet.cell(1, 1).style.reading_order in (0, 1, 2), (field, value)
+        for mode in ("excel", "characters", "none"):
+            sheetpeek.render(
+                sheet.layout(mode),
+                {"excel": "html", "characters": "text"}.get(mode, "csv"),
+                on_notice="ignore",
+            )
 
 
 @pytest.mark.parametrize("value", ["9" * 5000, "0x7", " 3", "", "1.5"])

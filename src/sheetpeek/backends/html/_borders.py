@@ -1,6 +1,6 @@
 """Borders: one layer of lines in sheet coordinates, over the fills and gridlines, under the text.
 
-The layout resolves one side per edge (``RenderedSheet.extra["borders"]``, ``_pass_borders.py``);
+The layout resolves one side per edge (``RenderedSheet.borders``, ``_pass_borders.py``);
 this layer draws each run of equal sides along a line as one box. Widths, dashes and the place of
 a line on its gridline are Excel's in screen points, which are CSS px at any page scale
 (``ARCHITECTURE.md`` §4.12, captures on Excel 16.114):

@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
 
 def borders_pass(draft: Draft) -> None:
-    """Resolve the sheet's borders into ``draft.extra["borders"]``, when any cell has one."""
+    """Resolve the sheet's borders into ``draft.extra["borders"]`` (``RenderedSheet.borders``)."""
     if draft.mode != "excel":
         return
     rows = draft.rows
@@ -107,5 +107,4 @@ def _diagonals(draft: Draft) -> tuple[Diagonal, ...]:
 
 def rendered_borders(sheet: RenderedSheet) -> RenderedBorders | None:
     """The borders the layout resolved, or ``None`` (no border, or not ``excel`` mode)."""
-    found = sheet.extra.get("borders")
-    return found if isinstance(found, RenderedBorders) else None
+    return sheet.borders

@@ -14,6 +14,7 @@ from collections.abc import Iterator
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Literal, TypeAlias
 
+from sheetpeek._fill_border_model import RenderedBorders
 from sheetpeek._model import Cell, CellRange, Font, Row, column_letter
 from sheetpeek._outline_model import RenderedOutline
 from sheetpeek._text_model import TextDirection, TextRule
@@ -194,6 +195,9 @@ class RenderedSheet:
     output leaves out is added by :func:`sheetpeek.notices`."""
     outline: RenderedOutline | None = None
     """The outline symbols, when the sheet has an outline whose symbols the file shows."""
+    borders: RenderedBorders | None = None
+    """In ``excel`` mode, the borders resolved to one side per edge (§4.12), or ``None`` when no
+    laid-out cell has one. Every output reads these, never two cells' own sides."""
     extra: dict[str, Any] = field(default_factory=dict, compare=False)
     """What features' own layout passes add, by feature (``Draft.extra``), for features that
     keep their result here rather than in a field of their own."""
