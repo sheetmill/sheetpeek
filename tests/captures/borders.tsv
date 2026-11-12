@@ -1,0 +1,363 @@
+# excel: 16.115
+# build: 16.115.26110837
+# edition: Microsoft 365
+# channel: Current
+# macos: 26.5.1
+# appearance: dark
+# date: 2026-11-12
+# zooms: 100,200
+# colors: captures converted to sRGB (sips --matchTo sRGB Profile.icc)
+# suite: borders
+zoom	style	cell	edge	offset	pattern	first_on	ink	gaps
+100	none	C4	bottom	0	solid	6	D4D4D4	
+100	none	C4	bottom	0.5	solid	6	D4D4D4	
+100	none	C4	right	0	solid	6	D4D4D4	
+100	none	C4	right	0.5	solid	6	D4D4D4	
+100	none	C4	top	0	solid	6	D4D4D4	
+100	none	C4	top	0.5	solid	6	D4D4D4	
+100	none	C4	left	0	solid	6	D4D4D4	
+100	none	C4	left	0.5	solid	6	D4D4D4	
+100	thin	E4	bottom	0	solid	6	000000	
+100	thin	E4	bottom	0.5	solid	6	000000	
+100	thin	E4	right	0	solid	6	000000	
+100	thin	E4	right	0.5	solid	6	000000	
+100	thin	E4	top	0	solid	6	000000	
+100	thin	E4	top	0.5	solid	6	000000	
+100	thin	E4	left	0	solid	6	000000	
+100	thin	E4	left	0.5	solid	6	000000	
+100	medium	G4	bottom	-1	solid	6	000000	
+100	medium	G4	bottom	-0.5	solid	6	000000	
+100	medium	G4	bottom	0	solid	6	000000	
+100	medium	G4	bottom	0.5	solid	6	000000	
+100	medium	G4	right	-1	solid	6	000000	
+100	medium	G4	right	-0.5	solid	6	000000	
+100	medium	G4	right	0	solid	6	000000	
+100	medium	G4	right	0.5	solid	6	000000	
+100	medium	G4	top	-1	solid	6	000000	
+100	medium	G4	top	-0.5	solid	6	000000	
+100	medium	G4	top	0	solid	6	000000	
+100	medium	G4	top	0.5	solid	6	000000	
+100	medium	G4	left	-1	solid	6	000000	
+100	medium	G4	left	-0.5	solid	6	000000	
+100	medium	G4	left	0	solid	6	000000	
+100	medium	G4	left	0.5	solid	6	000000	
+100	thick	I4	bottom	-1	solid	6	000000	
+100	thick	I4	bottom	-0.5	solid	6	000000	
+100	thick	I4	bottom	0	solid	6	000000	
+100	thick	I4	bottom	0.5	solid	6	000000	
+100	thick	I4	bottom	1	solid	6	000000	
+100	thick	I4	bottom	1.5	solid	6	000000	
+100	thick	I4	right	-1	solid	6	000000	
+100	thick	I4	right	-0.5	solid	6	000000	
+100	thick	I4	right	0	solid	6	000000	
+100	thick	I4	right	0.5	solid	6	000000	
+100	thick	I4	right	1	solid	6	000000	
+100	thick	I4	right	1.5	solid	6	000000	
+100	thick	I4	top	-1	solid	6	000000	
+100	thick	I4	top	-0.5	solid	6	000000	
+100	thick	I4	top	0	solid	6	000000	
+100	thick	I4	top	0.5	solid	6	000000	
+100	thick	I4	top	1	solid	6	000000	
+100	thick	I4	top	1.5	solid	6	000000	
+100	thick	I4	left	-1	solid	6	000000	
+100	thick	I4	left	-0.5	solid	6	000000	
+100	thick	I4	left	0	solid	6	000000	
+100	thick	I4	left	0.5	solid	6	000000	
+100	thick	I4	left	1	solid	6	000000	
+100	thick	I4	left	1.5	solid	6	000000	
+100	double	C6	bottom	-1	solid	6	000000	
+100	double	C6	bottom	-0.5	solid	6	000000	
+100	double	C6	bottom	1	solid	6	000000	
+100	double	C6	bottom	1.5	solid	6	000000	
+100	double	C6	right	-1	solid	6	000000	
+100	double	C6	right	-0.5	solid	6	000000	
+100	double	C6	right	1	solid	6	000000	
+100	double	C6	right	1.5	solid	6	000000	
+100	double	C6	top	-1	solid	6	000000	
+100	double	C6	top	-0.5	solid	6	000000	
+100	double	C6	top	1	solid	6	000000	
+100	double	C6	top	1.5	solid	6	000000	
+100	double	C6	left	-1	solid	6	000000	
+100	double	C6	left	-0.5	solid	6	000000	
+100	double	C6	left	1	solid	6	000000	
+100	double	C6	left	1.5	solid	6	000000	
+100	hair	E6	bottom	0	on 1 off 1	7	000000	white
+100	hair	E6	bottom	0.5	on 1 off 1	7	000000	white
+100	hair	E6	right	0	on 1 off 1	7	000000	white
+100	hair	E6	right	0.5	on 1 off 1	7	000000	white
+100	hair	E6	top	0	on 1 off 1	7	000000	white
+100	hair	E6	top	0.5	on 1 off 1	7	000000	white
+100	hair	E6	left	0	on 1 off 1	7	000000	white
+100	hair	E6	left	0.5	on 1 off 1	7	000000	white
+100	dotted	G6	bottom	0	on 2 off 2	6	000000	white
+100	dotted	G6	bottom	0.5	on 2 off 2	6	000000	white
+100	dotted	G6	right	0	on 2 off 2	6	000000	white
+100	dotted	G6	right	0.5	on 2 off 2	6	000000	white
+100	dotted	G6	top	0	on 2 off 2	6	000000	white
+100	dotted	G6	top	0.5	on 2 off 2	6	000000	white
+100	dotted	G6	left	0	on 2 off 2	6	000000	white
+100	dotted	G6	left	0.5	on 2 off 2	6	000000	white
+100	dashed	I6	bottom	0	on 3 off 1	6	000000	white
+100	dashed	I6	bottom	0.5	on 3 off 1	6	000000	white
+100	dashed	I6	right	0	on 3 off 1	6	000000	white
+100	dashed	I6	right	0.5	on 3 off 1	6	000000	white
+100	dashed	I6	top	0	on 3 off 1	6	000000	white
+100	dashed	I6	top	0.5	on 3 off 1	6	000000	white
+100	dashed	I6	left	0	on 3 off 1	6	000000	white
+100	dashed	I6	left	0.5	on 3 off 1	6	000000	white
+100	dashDot	C8	bottom	0	on 3 off 3 on 9 off 3	6	000000	white
+100	dashDot	C8	bottom	0.5	on 3 off 3 on 9 off 3	6	000000	white
+100	dashDot	C8	right	0	irregular: on 3 off 3 on 9 off 3 on 3 off 3	8	000000	white
+100	dashDot	C8	right	0.5	irregular: on 3 off 3 on 9 off 3 on 3 off 3	8	000000	white
+100	dashDot	C8	top	0	on 3 off 3 on 9 off 3	6	000000	white
+100	dashDot	C8	top	0.5	on 3 off 3 on 9 off 3	6	000000	white
+100	dashDot	C8	left	0	irregular: on 3 off 3 on 9 off 3 on 3 off 3	8	000000	white
+100	dashDot	C8	left	0.5	irregular: on 3 off 3 on 9 off 3 on 3 off 3	8	000000	white
+100	dashDotDot	E8	bottom	0	on 3 off 3 on 3 off 3 on 9 off 3	6	000000	white
+100	dashDotDot	E8	bottom	0.5	on 3 off 3 on 3 off 3 on 9 off 3	6	000000	white
+100	dashDotDot	E8	right	0	on 3 off 3	6	000000	white
+100	dashDotDot	E8	right	0.5	on 3 off 3	6	000000	white
+100	dashDotDot	E8	top	0	on 3 off 3 on 3 off 3 on 9 off 3	6	000000	white
+100	dashDotDot	E8	top	0.5	on 3 off 3 on 3 off 3 on 9 off 3	6	000000	white
+100	dashDotDot	E8	left	0	on 3 off 3	6	000000	white
+100	dashDotDot	E8	left	0.5	on 3 off 3	6	000000	white
+100	mediumDashed	G8	bottom	-1	on 9 off 3	6	000000	white
+100	mediumDashed	G8	bottom	-0.5	on 9 off 3	6	000000	white
+100	mediumDashed	G8	bottom	0	on 9 off 3	6	000000	white
+100	mediumDashed	G8	bottom	0.5	on 9 off 3	6	000000	white
+100	mediumDashed	G8	right	-1	irregular: off 3 on 9 off 3	6	000000	white
+100	mediumDashed	G8	right	-0.5	irregular: off 3 on 9 off 3	6	000000	white
+100	mediumDashed	G8	right	0	irregular: off 3 on 9 off 3	6	000000	white
+100	mediumDashed	G8	right	0.5	irregular: off 3 on 9 off 3	6	000000	white
+100	mediumDashed	G8	top	-1	on 9 off 3	6	000000	white
+100	mediumDashed	G8	top	-0.5	on 9 off 3	6	000000	white
+100	mediumDashed	G8	top	0	on 9 off 3	6	000000	white
+100	mediumDashed	G8	top	0.5	on 9 off 3	6	000000	white
+100	mediumDashed	G8	left	-1	irregular: off 3 on 9 off 3	6	000000	white
+100	mediumDashed	G8	left	-0.5	irregular: off 3 on 9 off 3	6	000000	white
+100	mediumDashed	G8	left	0	irregular: off 3 on 9 off 3	6	000000	white
+100	mediumDashed	G8	left	0.5	irregular: off 3 on 9 off 3	6	000000	white
+100	mediumDashDot	I8	bottom	-1	on 3 off 3 on 9 off 3	6	000000	white
+100	mediumDashDot	I8	bottom	-0.5	on 3 off 3 on 9 off 3	6	000000	white
+100	mediumDashDot	I8	bottom	0	on 3 off 3 on 9 off 3	6	000000	white
+100	mediumDashDot	I8	bottom	0.5	on 3 off 3 on 9 off 3	6	000000	white
+100	mediumDashDot	I8	right	-1	irregular: on 3 off 3 on 9 off 3 on 3 off 3	8	000000	white
+100	mediumDashDot	I8	right	-0.5	irregular: on 3 off 3 on 9 off 3 on 3 off 3	8	000000	white
+100	mediumDashDot	I8	right	0	irregular: on 3 off 3 on 9 off 3 on 3 off 3	8	000000	white
+100	mediumDashDot	I8	right	0.5	irregular: on 3 off 3 on 9 off 3 on 3 off 3	8	000000	white
+100	mediumDashDot	I8	top	-1	on 3 off 3 on 9 off 3	6	000000	white
+100	mediumDashDot	I8	top	-0.5	on 3 off 3 on 9 off 3	6	000000	white
+100	mediumDashDot	I8	top	0	on 3 off 3 on 9 off 3	6	000000	white
+100	mediumDashDot	I8	top	0.5	on 3 off 3 on 9 off 3	6	000000	white
+100	mediumDashDot	I8	left	-1	irregular: on 3 off 3 on 9 off 3 on 3 off 3	8	000000	white
+100	mediumDashDot	I8	left	-0.5	irregular: on 3 off 3 on 9 off 3 on 3 off 3	8	000000	white
+100	mediumDashDot	I8	left	0	irregular: on 3 off 3 on 9 off 3 on 3 off 3	8	000000	white
+100	mediumDashDot	I8	left	0.5	irregular: on 3 off 3 on 9 off 3 on 3 off 3	8	000000	white
+100	mediumDashDotDot	C10	bottom	-1	on 3 off 3 on 9 off 3 on 3 off 3	6	000000	white
+100	mediumDashDotDot	C10	bottom	-0.5	on 3 off 3 on 9 off 3 on 3 off 3	6	000000	white
+100	mediumDashDotDot	C10	bottom	0	on 3 off 3 on 9 off 3 on 3 off 3	6	000000	white
+100	mediumDashDotDot	C10	bottom	0.5	on 3 off 3 on 9 off 3 on 3 off 3	6	000000	white
+100	mediumDashDotDot	C10	right	-1	irregular: off 3 on 3 off 3 on 3 off 3 on 9	6	000000	white
+100	mediumDashDotDot	C10	right	-0.5	irregular: off 3 on 3 off 3 on 3 off 3 on 9	6	000000	white
+100	mediumDashDotDot	C10	right	0	irregular: off 3 on 3 off 3 on 3 off 3 on 9	6	000000	white
+100	mediumDashDotDot	C10	right	0.5	irregular: off 3 on 3 off 3 on 3 off 3 on 9	6	000000	white
+100	mediumDashDotDot	C10	top	-1	on 3 off 3 on 9 off 3 on 3 off 3	6	000000	white
+100	mediumDashDotDot	C10	top	-0.5	on 3 off 3 on 9 off 3 on 3 off 3	6	000000	white
+100	mediumDashDotDot	C10	top	0	on 3 off 3 on 9 off 3 on 3 off 3	6	000000	white
+100	mediumDashDotDot	C10	top	0.5	on 3 off 3 on 9 off 3 on 3 off 3	6	000000	white
+100	mediumDashDotDot	C10	left	-1	irregular: off 3 on 3 off 3 on 3 off 3 on 9	6	000000	white
+100	mediumDashDotDot	C10	left	-0.5	irregular: off 3 on 3 off 3 on 3 off 3 on 9	6	000000	white
+100	mediumDashDotDot	C10	left	0	irregular: off 3 on 3 off 3 on 3 off 3 on 9	6	000000	white
+100	mediumDashDotDot	C10	left	0.5	irregular: off 3 on 3 off 3 on 3 off 3 on 9	6	000000	white
+100	slantDashDot	E10	bottom	-1	solid	6	000000	
+100	slantDashDot	E10	bottom	-0.5	solid	6	000000	
+100	slantDashDot	E10	bottom	0	solid	6	000000	
+100	slantDashDot	E10	bottom	0.5	solid	6	000000	
+100	slantDashDot	E10	right	-1	solid	6	000000	
+100	slantDashDot	E10	right	-0.5	solid	6	000000	
+100	slantDashDot	E10	right	0	solid	6	000000	
+100	slantDashDot	E10	right	0.5	solid	6	000000	
+100	slantDashDot	E10	top	-1	solid	6	000000	
+100	slantDashDot	E10	top	-0.5	solid	6	000000	
+100	slantDashDot	E10	top	0	solid	6	000000	
+100	slantDashDot	E10	top	0.5	solid	6	000000	
+100	slantDashDot	E10	left	-1	solid	6	000000	
+100	slantDashDot	E10	left	-0.5	solid	6	000000	
+100	slantDashDot	E10	left	0	solid	6	000000	
+100	slantDashDot	E10	left	0.5	solid	6	000000	
+200	none	C4	bottom	0	solid	3	D4D4D4	
+200	none	C4	bottom	0.25	solid	3	D4D4D4	
+200	none	C4	right	0	solid	3	D4D4D4	
+200	none	C4	right	0.25	solid	3	D4D4D4	
+200	none	C4	top	0	solid	3	D4D4D4	
+200	none	C4	top	0.25	solid	3	D4D4D4	
+200	none	C4	left	0	solid	3	D4D4D4	
+200	none	C4	left	0.25	solid	3	D4D4D4	
+200	thin	E4	bottom	0	solid	3	000000	
+200	thin	E4	bottom	0.25	solid	3	000000	
+200	thin	E4	right	0	solid	3	000000	
+200	thin	E4	right	0.25	solid	3	000000	
+200	thin	E4	top	0	solid	3	000000	
+200	thin	E4	top	0.25	solid	3	000000	
+200	thin	E4	left	0	solid	3	000000	
+200	thin	E4	left	0.25	solid	3	000000	
+200	medium	G4	bottom	-0.5	solid	3	000000	
+200	medium	G4	bottom	-0.25	solid	3	000000	
+200	medium	G4	bottom	0	solid	3	000000	
+200	medium	G4	bottom	0.25	solid	3	000000	
+200	medium	G4	right	-0.5	solid	3	000000	
+200	medium	G4	right	-0.25	solid	3	000000	
+200	medium	G4	right	0	solid	3	000000	
+200	medium	G4	right	0.25	solid	3	000000	
+200	medium	G4	top	-0.5	solid	3	000000	
+200	medium	G4	top	-0.25	solid	3	000000	
+200	medium	G4	top	0	solid	3	000000	
+200	medium	G4	top	0.25	solid	3	000000	
+200	medium	G4	left	-0.5	solid	3	000000	
+200	medium	G4	left	-0.25	solid	3	000000	
+200	medium	G4	left	0	solid	3	000000	
+200	medium	G4	left	0.25	solid	3	000000	
+200	thick	I4	bottom	-0.5	solid	3	000000	
+200	thick	I4	bottom	-0.25	solid	3	000000	
+200	thick	I4	bottom	0	solid	3	000000	
+200	thick	I4	bottom	0.25	solid	3	000000	
+200	thick	I4	bottom	0.5	solid	3	000000	
+200	thick	I4	bottom	0.75	solid	3	000000	
+200	thick	I4	right	-0.5	solid	3	000000	
+200	thick	I4	right	-0.25	solid	3	000000	
+200	thick	I4	right	0	solid	3	000000	
+200	thick	I4	right	0.25	solid	3	000000	
+200	thick	I4	right	0.5	solid	3	000000	
+200	thick	I4	right	0.75	solid	3	000000	
+200	thick	I4	top	-0.5	solid	3	000000	
+200	thick	I4	top	-0.25	solid	3	000000	
+200	thick	I4	top	0	solid	3	000000	
+200	thick	I4	top	0.25	solid	3	000000	
+200	thick	I4	top	0.5	solid	3	000000	
+200	thick	I4	top	0.75	solid	3	000000	
+200	thick	I4	left	-0.5	solid	3	000000	
+200	thick	I4	left	-0.25	solid	3	000000	
+200	thick	I4	left	0	solid	3	000000	
+200	thick	I4	left	0.25	solid	3	000000	
+200	thick	I4	left	0.5	solid	3	000000	
+200	thick	I4	left	0.75	solid	3	000000	
+200	double	C6	bottom	-0.5	solid	3	000000	
+200	double	C6	bottom	-0.25	solid	3	000000	
+200	double	C6	bottom	0.5	solid	3	000000	
+200	double	C6	bottom	0.75	solid	3	000000	
+200	double	C6	right	-0.5	solid	3	000000	
+200	double	C6	right	-0.25	solid	3	000000	
+200	double	C6	right	0.5	solid	3	000000	
+200	double	C6	right	0.75	solid	3	000000	
+200	double	C6	top	-0.5	solid	3	000000	
+200	double	C6	top	-0.25	solid	3	000000	
+200	double	C6	top	0.5	solid	3	000000	
+200	double	C6	top	0.75	solid	3	000000	
+200	double	C6	left	-0.5	solid	3	000000	
+200	double	C6	left	-0.25	solid	3	000000	
+200	double	C6	left	0.5	solid	3	000000	
+200	double	C6	left	0.75	solid	3	000000	
+200	hair	E6	bottom	0	on 0.5 off 0.5	3	000000	white
+200	hair	E6	bottom	0.25	on 0.5 off 0.5	3	000000	white
+200	hair	E6	right	0	on 0.5 off 0.5	3	000000	white
+200	hair	E6	right	0.25	on 0.5 off 0.5	3	000000	white
+200	hair	E6	top	0	on 0.5 off 0.5	3	000000	white
+200	hair	E6	top	0.25	on 0.5 off 0.5	3	000000	white
+200	hair	E6	left	0	on 0.5 off 0.5	3	000000	white
+200	hair	E6	left	0.25	on 0.5 off 0.5	3	000000	white
+200	dotted	G6	bottom	0	on 1 off 1	3	000000	white
+200	dotted	G6	bottom	0.25	on 1 off 1	3	000000	white
+200	dotted	G6	right	0	on 1 off 1	3	000000	white
+200	dotted	G6	right	0.25	on 1 off 1	3	000000	white
+200	dotted	G6	top	0	on 1 off 1	3	000000	white
+200	dotted	G6	top	0.25	on 1 off 1	3	000000	white
+200	dotted	G6	left	0	on 1 off 1	3	000000	white
+200	dotted	G6	left	0.25	on 1 off 1	3	000000	white
+200	dashed	I6	bottom	0	on 1.5 off 0.5	3	000000	white
+200	dashed	I6	bottom	0.25	on 1.5 off 0.5	3	000000	white
+200	dashed	I6	right	0	on 1.5 off 0.5	3	000000	white
+200	dashed	I6	right	0.25	on 1.5 off 0.5	3	000000	white
+200	dashed	I6	top	0	on 1.5 off 0.5	3	000000	white
+200	dashed	I6	top	0.25	on 1.5 off 0.5	3	000000	white
+200	dashed	I6	left	0	on 1.5 off 0.5	3	000000	white
+200	dashed	I6	left	0.25	on 1.5 off 0.5	3	000000	white
+200	dashDot	C8	bottom	0	on 1.5 off 1.5 on 4.5 off 1.5	3.5	000000	white
+200	dashDot	C8	bottom	0.25	on 1.5 off 1.5 on 4.5 off 1.5	3.5	000000	white
+200	dashDot	C8	right	0	on 1.5 off 1.5 on 4.5 off 1.5	3.5	000000	white
+200	dashDot	C8	right	0.25	on 1.5 off 1.5 on 4.5 off 1.5	3.5	000000	white
+200	dashDot	C8	top	0	on 1.5 off 1.5 on 4.5 off 1.5	3.5	000000	white
+200	dashDot	C8	top	0.25	on 1.5 off 1.5 on 4.5 off 1.5	3.5	000000	white
+200	dashDot	C8	left	0	on 1.5 off 1.5 on 4.5 off 1.5	3.5	000000	white
+200	dashDot	C8	left	0.25	on 1.5 off 1.5 on 4.5 off 1.5	3.5	000000	white
+200	dashDotDot	E8	bottom	0	on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5	3.5	000000	white
+200	dashDotDot	E8	bottom	0.25	on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5	3.5	000000	white
+200	dashDotDot	E8	right	0	on 4.5 off 1.5 on 1.5 off 1.5 on 1.5 off 1.5	3.5	000000	white
+200	dashDotDot	E8	right	0.25	on 4.5 off 1.5 on 1.5 off 1.5 on 1.5 off 1.5	3.5	000000	white
+200	dashDotDot	E8	top	0	on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5	3.5	000000	white
+200	dashDotDot	E8	top	0.25	on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5	3.5	000000	white
+200	dashDotDot	E8	left	0	on 4.5 off 1.5 on 1.5 off 1.5 on 1.5 off 1.5	3.5	000000	white
+200	dashDotDot	E8	left	0.25	on 4.5 off 1.5 on 1.5 off 1.5 on 1.5 off 1.5	3.5	000000	white
+200	mediumDashed	G8	bottom	-0.5	on 4.5 off 1.5	3	000000	white
+200	mediumDashed	G8	bottom	-0.25	on 4.5 off 1.5	3	000000	white
+200	mediumDashed	G8	bottom	0	on 4.5 off 1.5	3	000000	white
+200	mediumDashed	G8	bottom	0.25	on 4.5 off 1.5	3	000000	white
+200	mediumDashed	G8	right	-0.5	on 4.5 off 1.5	3.5	000000	white
+200	mediumDashed	G8	right	-0.25	on 4.5 off 1.5	3.5	000000	white
+200	mediumDashed	G8	right	0	on 4.5 off 1.5	3.5	000000	white
+200	mediumDashed	G8	right	0.25	on 4.5 off 1.5	3.5	000000	white
+200	mediumDashed	G8	top	-0.5	on 4.5 off 1.5	3	000000	white
+200	mediumDashed	G8	top	-0.25	on 4.5 off 1.5	3	000000	white
+200	mediumDashed	G8	top	0	on 4.5 off 1.5	3	000000	white
+200	mediumDashed	G8	top	0.25	on 4.5 off 1.5	3	000000	white
+200	mediumDashed	G8	left	-0.5	on 4.5 off 1.5	3.5	000000	white
+200	mediumDashed	G8	left	-0.25	on 4.5 off 1.5	3.5	000000	white
+200	mediumDashed	G8	left	0	on 4.5 off 1.5	3.5	000000	white
+200	mediumDashed	G8	left	0.25	on 4.5 off 1.5	3.5	000000	white
+200	mediumDashDot	I8	bottom	-0.5	on 1.5 off 1.5 on 4.5 off 1.5	3.5	000000	white
+200	mediumDashDot	I8	bottom	-0.25	on 1.5 off 1.5 on 4.5 off 1.5	3.5	000000	white
+200	mediumDashDot	I8	bottom	0	on 1.5 off 1.5 on 4.5 off 1.5	3.5	000000	white
+200	mediumDashDot	I8	bottom	0.25	on 1.5 off 1.5 on 4.5 off 1.5	3.5	000000	white
+200	mediumDashDot	I8	right	-0.5	on 1.5 off 1.5 on 4.5 off 1.5	3.5	000000	white
+200	mediumDashDot	I8	right	-0.25	on 1.5 off 1.5 on 4.5 off 1.5	3.5	000000	white
+200	mediumDashDot	I8	right	0	on 1.5 off 1.5 on 4.5 off 1.5	3.5	000000	white
+200	mediumDashDot	I8	right	0.25	on 1.5 off 1.5 on 4.5 off 1.5	3.5	000000	white
+200	mediumDashDot	I8	top	-0.5	on 1.5 off 1.5 on 4.5 off 1.5	3.5	000000	white
+200	mediumDashDot	I8	top	-0.25	on 1.5 off 1.5 on 4.5 off 1.5	3.5	000000	white
+200	mediumDashDot	I8	top	0	on 1.5 off 1.5 on 4.5 off 1.5	3.5	000000	white
+200	mediumDashDot	I8	top	0.25	on 1.5 off 1.5 on 4.5 off 1.5	3.5	000000	white
+200	mediumDashDot	I8	left	-0.5	on 1.5 off 1.5 on 4.5 off 1.5	3.5	000000	white
+200	mediumDashDot	I8	left	-0.25	on 1.5 off 1.5 on 4.5 off 1.5	3.5	000000	white
+200	mediumDashDot	I8	left	0	on 1.5 off 1.5 on 4.5 off 1.5	3.5	000000	white
+200	mediumDashDot	I8	left	0.25	on 1.5 off 1.5 on 4.5 off 1.5	3.5	000000	white
+200	mediumDashDotDot	C10	bottom	-0.5	on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5	3	000000	white
+200	mediumDashDotDot	C10	bottom	-0.25	on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5	3	000000	white
+200	mediumDashDotDot	C10	bottom	0	on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5	3	000000	white
+200	mediumDashDotDot	C10	bottom	0.25	on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5	3	000000	white
+200	mediumDashDotDot	C10	right	-0.5	on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5	3	000000	white
+200	mediumDashDotDot	C10	right	-0.25	on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5	3	000000	white
+200	mediumDashDotDot	C10	right	0	on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5	3	000000	white
+200	mediumDashDotDot	C10	right	0.25	on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5	3	000000	white
+200	mediumDashDotDot	C10	top	-0.5	on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5	3	000000	white
+200	mediumDashDotDot	C10	top	-0.25	on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5	3	000000	white
+200	mediumDashDotDot	C10	top	0	on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5	3	000000	white
+200	mediumDashDotDot	C10	top	0.25	on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5	3	000000	white
+200	mediumDashDotDot	C10	left	-0.5	on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5	3	000000	white
+200	mediumDashDotDot	C10	left	-0.25	on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5	3	000000	white
+200	mediumDashDotDot	C10	left	0	on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5	3	000000	white
+200	mediumDashDotDot	C10	left	0.25	on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5	3	000000	white
+200	slantDashDot	E10	bottom	-0.5	solid	3	000000	
+200	slantDashDot	E10	bottom	-0.25	solid	3	000000	
+200	slantDashDot	E10	bottom	0	solid	3	000000	
+200	slantDashDot	E10	bottom	0.25	solid	3	000000	
+200	slantDashDot	E10	right	-0.5	solid	3	000000	
+200	slantDashDot	E10	right	-0.25	solid	3	000000	
+200	slantDashDot	E10	right	0	solid	3	000000	
+200	slantDashDot	E10	right	0.25	solid	3	000000	
+200	slantDashDot	E10	top	-0.5	solid	3	000000	
+200	slantDashDot	E10	top	-0.25	solid	3	000000	
+200	slantDashDot	E10	top	0	solid	3	000000	
+200	slantDashDot	E10	top	0.25	solid	3	000000	
+200	slantDashDot	E10	left	-0.5	solid	3	000000	
+200	slantDashDot	E10	left	-0.25	solid	3	000000	
+200	slantDashDot	E10	left	0	solid	3	000000	
+200	slantDashDot	E10	left	0.25	solid	3	000000	

@@ -1,8 +1,8 @@
-# suite: theme_colors (capture.theme_colors); Excel 16.114 for Mac, en_US
+# suite: theme_colors (capture.theme_colors); Excel 16.115 (16.115.26110837, Microsoft 365, Current channel) for Mac, en_US
 # openpyxl's default theme; each cell's solid fill and font color are the theme
 # index and tint given; fill and font: the RRGGBB Excel resolves (color of
 # interior object, color of font object)
-# captured: 2026-10-29; method: AppleScript, per cell
+# captured: 2026-11-12; method: AppleScript, per cell
 cell	theme	tint	fill	font
 A1	0	-0.5	808080	808080
 B1	0	-0.25	BFBFBF	BFBFBF

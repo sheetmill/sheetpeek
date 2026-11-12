@@ -1,6 +1,6 @@
-# suite: row_height (capture.row_height); Excel 16.114 for Mac, en_US
+# suite: row_height (capture.row_height); Excel 16.115 (16.115.26110837, Microsoft 365, Current channel) for Mac, en_US
 # one workbook per record: the Normal style set to the font, a number in A1, and <sheetFormatPr> with exactly the attributes given (none: no element)
-# captured: 2026-10-29; method: row height (AppleScript)
+# captured: 2026-11-12; method: row height (AppleScript)
 # cell: what A1 holds (CELLS in capture/row_height.py); applied: the font Excel applied to A1; row1: A1's row; row2: no row element; row3: a row element with an empty cell element; row5: an empty row element; row100: no row element, far below; standard: the worksheet's standard height
 family	size	sheet_format	cell	applied	row1	row2	row3	row5	row100	standard
 Calibri	9	none	number	Calibri 9	12	16	12	12	16	16

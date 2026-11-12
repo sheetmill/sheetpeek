@@ -1,6 +1,6 @@
-# suite: layout (capture.layout); Excel 16.114.3 for Mac, en_US
+# suite: layout (capture.layout); Excel 16.115 (16.115.26110837, Microsoft 365, Current channel) for Mac, en_US
 # font: Calibri 11 (openpyxl default); columns A-H default width (53 pt), K hidden, N width 3.7109375 in the file (22 pt), O width 0 in the file; rows 15 pt in the file, 14 pt apart in the PDF
-# captured: 2026-11-04; method: PDF export, pdfminer.six
+# captured: 2026-11-12; method: PDF export, pdfminer.six
 # missing: boundaries without a gridline in the row, 1 = between the first and second visible columns (A|B); runs: text@x0-x1#RRGGBB in PDF points; fills: x0-x1#RRGGBB of filled areas other than white; baselines: per run, points from the top edge of the row's top gridline down to the baseline
 row	case	missing	runs	fills	baselines
 1	spill left zeros=6		'000000'@21.00-56.58#000000		11.00
@@ -164,7 +164,7 @@ row	case	missing	runs	fills	baselines
 159	fill short		'abababab'@21.00-64.77#000000		11.00
 160	fill long, B empty		'spilled text that is much wider than one column'@21.00-235.78#000000		11.00
 161	justify long, B empty		'spilled '@21.00-53.49#000000		11.00
-162	distributed long, B empty		'spilled '@30.00-62.49#000000		11.00
+162	distributed long, B empty		'spilled'@21.00-50.77#000000		11.00
 163	wrapped long, B empty		'spilled '@21.00-53.49#000000		11.00
 164	spacer after wrapped				
 165	line break without wrap	1	'first linesecond line'@21.00-109.49#000000		11.00

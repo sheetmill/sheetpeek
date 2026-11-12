@@ -1,7 +1,7 @@
-# suite: merge_width (capture.cell_text); Excel 16.114 for Mac, en_US
+# suite: merge_width (capture.cell_text); Excel 16.115 (16.115.26110837, Microsoft 365, Current channel) for Mac, en_US
 # A holds the value, alone or merged; every column of a sheet has the file
 # width given; shown: string value of A
-# captured: 2026-10-29; method: string value (AppleScript, bulk)
+# captured: 2026-11-12; method: string value (AppleScript, bulk)
 file_width	merge	value	format	shown
 2.7109375	single	123456789	#,##0.00	##
 2.7109375	single	1234567.891	#,##0.00	##

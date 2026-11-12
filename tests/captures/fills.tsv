@@ -1,0 +1,93 @@
+# excel: 16.115
+# build: 16.115.26110837
+# edition: Microsoft 365
+# channel: Current
+# macos: 26.5.1
+# appearance: dark
+# date: 2026-11-12
+# zooms: 100,200
+# colors: captures converted to sRGB (sips --matchTo sRGB Profile.icc)
+# suite: fills
+zoom	pattern	colors	cell	fg_share	unclassified	period_x	period_y	whole_points	snap_px	tile_unit	tile_sheet	tile_cell	fill_left	fill_right	fill_top	fill_bottom	gridline_pixels	display_pattern	display_fill
+100	none	bw	C4	0	0						uniform	uniform							
+100	none	color	C6	0	1						uniform	uniform						pattern none	255,255,255
+100	solid	bw	E4	1	0						uniform	uniform							
+100	solid	color	E6	1	0						uniform	uniform	0	1	0	1		pattern solid	0,0,255
+100	mediumGray	bw	G4	0.5	0	2	2	yes	0,0	screen_pt	#./.#	.#/#.							
+100	mediumGray	color	G6	0.5	0	2	2	yes	0,0	screen_pt	#./.#	#./.#	0	1	0	1		pattern gray 50	255,255,0
+100	darkGray	bw	I4	0.75	0	4	2	yes	0,0	screen_pt	#.##/###.	#.##/###.							
+100	darkGray	color	I6	0.75	0	4	2	yes	0,0	screen_pt	#.##/###.	###./#.##	0	1	0	1		pattern gray 75	255,255,0
+100	lightGray	bw	K4	0.25	0	4	2	yes	0,0	screen_pt	..#./#...	..#./#...							
+100	lightGray	color	K6	0.25	0	4	2	yes	0,0	screen_pt	..#./#...	#.../..#.	0	1	0	1		pattern gray 25	255,255,0
+100	darkHorizontal	bw	C8	0.5	0	0.5	4	yes	0,0	screen_pt	././#/#	#/././#							
+100	darkHorizontal	color	C10	0.5	0	0.5	4	yes	0,0	screen_pt	././#/#	#/#/./.	0	1	0	1		pattern horizontal	255,255,0
+100	darkVertical	bw	E8	0.5	0	4	0.5	yes	0,0	screen_pt	..##	##..							
+100	darkVertical	color	E10	0.5	0	4	0.5	yes	0,0	screen_pt	..##	##..	0	1	0	1		pattern vertical	255,255,0
+100	darkDown	bw	G8	0.5	0	4	4	yes	0,0	screen_pt	##../.##./..##/#..#	.##./..##/#..#/##..							
+100	darkDown	color	G10	0.5	0	4	4	yes	0,0	screen_pt	##../.##./..##/#..#	##../.##./..##/#..#	0	1	0	1		pattern down	255,255,0
+100	darkUp	bw	I8	0.5	0	4	4	yes	0,0	screen_pt	..##/.##./##../#..#	.##./##../#..#/..##							
+100	darkUp	color	I10	0.5	0	4	4	yes	0,0	screen_pt	..##/.##./##../#..#	..##/.##./##../#..#	0	1	0	1		pattern up	255,255,0
+100	darkGrid	bw	K8	0.5	0	4	4	yes	0,0	screen_pt	#..#/.##./.##./#..#	.##./.##./#..#/#..#							
+100	darkGrid	color	K10	0.5	0	4	4	yes	0,0	screen_pt	#..#/.##./.##./#..#	#..#/.##./.##./#..#	0	1	0	1		pattern checker	255,255,0
+100	darkTrellis	bw	C12	0.75	0	4	4	yes	0,0	screen_pt	####/.##./####/#..#	#..#/####/.##./####							
+100	darkTrellis	color	C14	0.75	0	4	4	yes	0,0	screen_pt	####/.##./####/#..#	####/#..#/####/.##.	0	1	0	1		pattern semi gray 75	255,255,0
+100	lightHorizontal	bw	E12	0.25	0	0.5	4	yes	0,0	screen_pt	././#/.	./#/./.							
+100	lightHorizontal	color	E14	0.25	0	0.5	4	yes	0,0	screen_pt	././#/.	././#/.	0	1	0	1		pattern light horizontal	255,255,0
+100	lightVertical	bw	G12	0.25	0	4	0.5	yes	0,0	screen_pt	..#.	#...							
+100	lightVertical	color	G14	0.25	0	4	0.5	yes	0,0	screen_pt	..#.	#...	0	1	0	1		pattern light vertical	255,255,0
+100	lightDown	bw	I12	0.25	0	4	4	yes	0,0	screen_pt	#.../.#../..#./...#	...#/#.../.#../..#.							
+100	lightDown	color	I14	0.25	0	4	4	yes	0,0	screen_pt	#.../.#../..#./...#	..#./...#/#.../.#..	0	1	0	1		pattern light down	255,255,0
+100	lightUp	bw	K12	0.25	0	4	4	yes	0,0	screen_pt	...#/..#./.#../#...	#.../...#/..#./.#..							
+100	lightUp	color	K14	0.25	0	4	4	yes	0,0	screen_pt	...#/..#./.#../#...	.#../#.../...#/..#.	0	1	0	1		pattern light up	255,255,0
+100	lightGrid	bw	C16	0.4375	0	4	4	yes	0,0	screen_pt	..#./..#./####/..#.	#.../#.../#.../####							
+100	lightGrid	color	C18	0.4375	0	4	4	yes	0,0	screen_pt	..#./..#./####/..#.	####/#.../#.../#...	0	1	0	1		pattern grid	255,255,0
+100	lightTrellis	bw	E16	0.375	0	4	4	yes	0,0	screen_pt	#.../.#.#/..#./.#.#	.#.#/..#./.#.#/#...							
+100	lightTrellis	color	E18	0.375	0	4	4	yes	0,0	screen_pt	#.../.#.#/..#./.#.#	#.../.#.#/..#./.#.#	0	1	0	1		pattern criss cross	255,255,0
+100	gray125	bw	G16	0.125	0	4	4	yes	0,0	screen_pt	#.../..../..#./....	..../..#./..../#...							
+100	gray125	color	G18	0.125	0	4	4	yes	0,0	screen_pt	#.../..../..#./....	#.../..../..#./....	0	1	0	1		pattern gray 16	255,255,0
+100	gray0625	bw	I16	0.0625	0	8	4	yes	0,0	screen_pt	..#...../......../......#./........	......../....#.../......../#.......							
+100	gray0625	color	I18	0.0625	0	8	4	yes	0,0	screen_pt	..#...../......../......#./........	#......./......../....#.../........	0	1	0	1		pattern gray 8	255,255,0
+100	darkUp	anchor	C20	0.5	0	4	4	yes	0,0	screen_pt	..##/.##./##../#..#	#..#/..##/.##./##..					0		
+100	darkUp	anchor	D20	0.5	0	4	4	yes	0,0	screen_pt	..##/.##./##../#..#	#..#/..##/.##./##..					0		
+100	darkUp	anchor	E20	0.5	0	4	4	yes	0,0	screen_pt	..##/.##./##../#..#	#..#/..##/.##./##..					0		
+200	none	bw	C4	0	0						uniform	uniform							
+200	none	color	C6	0	1						uniform	uniform						pattern none	255,255,255
+200	solid	bw	E4	1	0						uniform	uniform							
+200	solid	color	E6	1	0						uniform	uniform	0	0.5	0	0.5		pattern solid	0,0,255
+200	mediumGray	bw	G4	0.5	0	1	1	yes	0,0	screen_pt	#./.#	#./.#							
+200	mediumGray	color	G6	0.5	0	1	1	yes	0,0	screen_pt	#./.#	#./.#	0	0.5	0	0.5		pattern gray 50	255,255,0
+200	darkGray	bw	I4	0.75	0	2	1	yes	0,0	screen_pt	#.##/###.	#.##/###.							
+200	darkGray	color	I6	0.75	0	2	1	yes	0,0	screen_pt	#.##/###.	#.##/###.	0	0.5	0	0.5		pattern gray 75	255,255,0
+200	lightGray	bw	K4	0.25	0	2	1	yes	0,0	screen_pt	..#./#...	..#./#...							
+200	lightGray	color	K6	0.25	0	2	1	yes	0,0	screen_pt	..#./#...	..#./#...	0	0.5	0	0.5		pattern gray 25	255,255,0
+200	darkHorizontal	bw	C8	0.5	0	0.25	2	yes	0,0	screen_pt	././#/#	#/#/./.							
+200	darkHorizontal	color	C10	0.5	0	0.25	2	yes	0,0	screen_pt	././#/#	././#/#	0	0.5	0	0.5		pattern horizontal	255,255,0
+200	darkVertical	bw	E8	0.5	0	2	0.25	yes	0,0	screen_pt	..##	..##							
+200	darkVertical	color	E10	0.5	0	2	0.25	yes	0,0	screen_pt	..##	..##	0	0.5	0	0.5		pattern vertical	255,255,0
+200	darkDown	bw	G8	0.5	0	2	2	yes	0,0	screen_pt	##../.##./..##/#..#	..##/#..#/##../.##.							
+200	darkDown	color	G10	0.5	0	2	2	yes	0,0	screen_pt	##../.##./..##/#..#	##../.##./..##/#..#	0	0.5	0	0.5		pattern down	255,255,0
+200	darkUp	bw	I8	0.5	0	2	2	yes	0,0	screen_pt	..##/.##./##../#..#	##../#..#/..##/.##.							
+200	darkUp	color	I10	0.5	0	2	2	yes	0,0	screen_pt	..##/.##./##../#..#	..##/.##./##../#..#	0	0.5	0	0.5		pattern up	255,255,0
+200	darkGrid	bw	K8	0.5	0	2	2	yes	0,0	screen_pt	#..#/.##./.##./#..#	.##./#..#/#..#/.##.							
+200	darkGrid	color	K10	0.5	0	2	2	yes	0,0	screen_pt	#..#/.##./.##./#..#	#..#/.##./.##./#..#	0	0.5	0	0.5		pattern checker	255,255,0
+200	darkTrellis	bw	C12	0.75	0	2	2	yes	0,0	screen_pt	####/.##./####/#..#	####/#..#/####/.##.							
+200	darkTrellis	color	C14	0.75	0	2	2	yes	0,0	screen_pt	####/.##./####/#..#	####/.##./####/#..#	0	0.5	0	0.5		pattern semi gray 75	255,255,0
+200	lightHorizontal	bw	E12	0.25	0	0.25	2	yes	0,0	screen_pt	././#/.	#/././.							
+200	lightHorizontal	color	E14	0.25	0	0.25	2	yes	0,0	screen_pt	././#/.	././#/.	0	0.5	0	0.5		pattern light horizontal	255,255,0
+200	lightVertical	bw	G12	0.25	0	2	0.25	yes	0,0	screen_pt	..#.	..#.							
+200	lightVertical	color	G14	0.25	0	2	0.25	yes	0,0	screen_pt	..#.	..#.	0	0.5	0	0.5		pattern light vertical	255,255,0
+200	lightDown	bw	I12	0.25	0	2	2	yes	0,0	screen_pt	#.../.#../..#./...#	..#./...#/#.../.#..							
+200	lightDown	color	I14	0.25	0	2	2	yes	0,0	screen_pt	#.../.#../..#./...#	#.../.#../..#./...#	0	0.5	0	0.5		pattern light down	255,255,0
+200	lightUp	bw	K12	0.25	0	2	2	yes	0,0	screen_pt	...#/..#./.#../#...	.#../#.../...#/..#.							
+200	lightUp	color	K14	0.25	0	2	2	yes	0,0	screen_pt	...#/..#./.#../#...	...#/..#./.#../#...	0	0.5	0	0.5		pattern light up	255,255,0
+200	lightGrid	bw	C16	0.4375	0	2	2	yes	0,0	screen_pt	..#./..#./####/..#.	####/..#./..#./..#.							
+200	lightGrid	color	C18	0.4375	0	2	2	yes	0,0	screen_pt	..#./..#./####/..#.	..#./..#./####/..#.	0	0.5	0	0.5		pattern grid	255,255,0
+200	lightTrellis	bw	E16	0.375	0	2	2	yes	0,0	screen_pt	#.../.#.#/..#./.#.#	..#./.#.#/#.../.#.#							
+200	lightTrellis	color	E18	0.375	0	2	2	yes	0,0	screen_pt	#.../.#.#/..#./.#.#	#.../.#.#/..#./.#.#	0	0.5	0	0.5		pattern criss cross	255,255,0
+200	gray125	bw	G16	0.125	0	2	2	yes	0,0	screen_pt	#.../..../..#./....	..#./..../#.../....							
+200	gray125	color	G18	0.125	0	2	2	yes	0,0	screen_pt	#.../..../..#./....	#.../..../..#./....	0	0.5	0	0.5		pattern gray 16	255,255,0
+200	gray0625	bw	I16	0.0625	0	4	2	yes	0,0	screen_pt	..#...../......../......#./........	..#...../......../......#./........							
+200	gray0625	color	I18	0.0625	0	4	2	yes	0,0	screen_pt	..#...../......../......#./........	......#./......../..#...../........	0	0.5	0	0.5		pattern gray 8	255,255,0
+200	darkUp	anchor	C20	0.5	0	2	2	yes	0,0	screen_pt	..##/.##./##../#..#	##../#..#/..##/.##.					0		
+200	darkUp	anchor	D20	0.5	0	2	2	yes	0,0	screen_pt	..##/.##./##../#..#	##../#..#/..##/.##.					0		
+200	darkUp	anchor	E20	0.5	0	2	2	yes	0,0	screen_pt	..##/.##./##../#..#	##../#..#/..##/.##.					0		

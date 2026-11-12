@@ -1,0 +1,106 @@
+# excel: 16.115
+# build: 16.115.26110837
+# edition: Microsoft 365
+# channel: Current
+# macos: 26.5.1
+# appearance: dark
+# date: 2026-11-12
+# zooms: 100
+# colors: captures converted to sRGB (sips --matchTo sRGB Profile.icc)
+# suite: rotation
+group	name	cell	rotation	row_height	ink_left	ink_right	ink_top	ink_bottom	border_left_25	border_right_25	border_left_75	border_right_75	orientation	text
+slant	15 lrtb	E4	15	38.0	57	79.5	9	33.5	108.5	165	36	92.5	15	Rotated text here
+slant	15 lr	E6	15	38.0	57	79.5	9	33.5	108.5	165	36	92.5	15	Rotated text here
+slant	15 tb	E8	15	38.0	57	79.5	9	33.5					15	Rotated text here
+slant	15 fill	E10	15	38.0	5	27.5	9	33.5	76	80	5	24	15	Rotated text here
+slant	45 lrtb	E12	45	69.0	17	22.5	8	65.5	52	106.5	17	71.5	45	Rotated text here
+slant	45 lr	E4	45	69.0	17	22.5	8	65.5	52	106.5	17	71.5	45	Rotated text here
+slant	45 tb	E6	45	69.0	17	22.5	8	65.5					45	Rotated text here
+slant	45 fill	E8	45	69.0	6	11.5	8	65.5	53	58.5	15	23.5	45	Rotated text here
+slant	-45 lrtb	E10	135	69.0	-23.5	-19	7	65.5	-52.5	2	-17.5	37	-45	Rotated text here
+slant	-45 lr	E12	135	69.0	-23.5	-19	7	65.5	-52.5	2	-17.5	37	-45	Rotated text here
+slant	-45 tb	E4	135	69.0	-23.5	-19	7	65.5					-45	Rotated text here
+slant	-45 fill	E6	135	69.0	-12.5	-8	7	65.5	-7	0.5	29	34.5	-45	Rotated text here
+slant	90 lrtb	E8	90	85.0	38.5	-7	5	82	0	54	0	54	orientation upward	Rotated text here
+slant	90 lr	E10	90	85.0	38.5	-7	5	82	0	54	0	54	orientation upward	Rotated text here
+slant	90 tb	E12	90	85.0	38.5	-7	5	82					orientation upward	Rotated text here
+slant	90 fill	E4	90	85.0	38.5	-7	5	82	41	42	40.5	46	orientation upward	Rotated text here
+anchor	30	E6	30	55.0	5.5	22	9	51					30	Rotated text here
+anchor	60	E8	60	80.0	6.5	-3	6.5	75					60	Rotated text here
+anchor	75	E10	75	84.0	6.5	-20.5	5.5	80.5					75	Rotated text here
+anchor	80	E12	80	84.0	6	-27	4.5	81					80	Rotated text here
+anchor	85	E4	85	84.0	6	-33.5	4	81					85	Rotated text here
+anchor	89	E6	89	83.0	6	-38.5	3.5	80.5					89	Rotated text here
+anchor	-15	E8	105	38.0	-26.5	-4.5	7	33.5					-15	Rotated text here
+anchor	-30	E10	120	55.0	-21	-5.5	7	51					-30	Rotated text here
+anchor	-60	E12	150	80.0	2	-9	5.5	75					-60	Rotated text here
+anchor	-75	E4	165	84.0	19.5	-9	5.5	81.5					-75	Rotated text here
+anchor	-85	E6	175	84.0	32	-8.5	4	81					-85	Rotated text here
+anchor	-89	E8	179	83.0	38	-6.5	4	81.5					-89	Rotated text here
+align	fill	E10	45	69.0	6	2	14.5	65.5					45	Rotated text here
+align	justify	E12	45	15.0	6	211.5	3.5	11.5					45	Rotated text here
+align	distributed	E4	45	15.0	6	211.5	3.5	11.5					45	Rotated text here
+align	indent left	E6	45	69.0	18	23.5	8	65.5					45	Rotated text here
+align	indent right	E8	45	69.0	-24	-18.5	8	65.5					45	Rotated text here
+align	top	E10	45	90.0	6	11.5	8	65.5					45	Rotated text here
+align	center	E12	45	90.0	6	11.5	18	75.5					45	Rotated text here
+other	number 45	E4	45	62.0	6.5	3	9.5	58					45	12345678901
+other	number 90	E6	90	73.0	39	-7	6	70					orientation upward	12345678901
+other	wrapped	E8	45	15.0	6.5	211.5	3.5	11.5					45	two lines of text
+height	15 short 9	E4	15	18.0									15	Rot
+height	15 medium 9	E6	15	31.0									15	Rotated text here
+height	15 long 9	E8	15	45.0									15	Rotated text here, and more of it
+height	45 short 9	E10	45	21.0									45	Rot
+height	45 medium 9	E12	45	56.0									45	Rotated text here
+height	45 long 9	E14	45	96.0									45	Rotated text here, and more of it
+height	75 short 9	E16	75	21.0									75	Rot
+height	75 medium 9	E18	75	69.0									75	Rotated text here
+height	75 long 9	E20	75	123.0									75	Rotated text here, and more of it
+height	90 short 9	E22	90	20.0									orientation upward	Rot
+height	90 medium 9	E24	90	70.0									orientation upward	Rotated text here
+height	90 long 9	E26	90	127.0									orientation upward	Rotated text here, and more of it
+height	15 short 11	E28	15	22.0									15	Rot
+height	15 medium 11	E30	15	38.0									15	Rotated text here
+height	15 long 11	E32	15	55.0									15	Rotated text here, and more of it
+height	45 short 11	E34	45	25.0									45	Rot
+height	45 medium 11	E36	45	69.0									45	Rotated text here
+height	45 long 11	E38	45	117.0									45	Rotated text here, and more of it
+height	75 short 11	E40	75	24.0									75	Rot
+height	75 medium 11	E42	75	84.0									75	Rotated text here
+height	75 long 11	E44	75	150.0									75	Rotated text here, and more of it
+height	90 short 11	E46	90	23.0									orientation upward	Rot
+height	90 medium 11	E48	90	85.0									orientation upward	Rotated text here
+height	90 long 11	E50	90	155.0									orientation upward	Rotated text here, and more of it
+height	15 short 14	E52	15	27.0									15	Rot
+height	15 medium 14	E54	15	47.0									15	Rotated text here
+height	15 long 14	E56	15	69.0									15	Rotated text here, and more of it
+height	45 short 14	E58	45	31.0									45	Rot
+height	45 medium 14	E60	45	88.0									45	Rotated text here
+height	45 long 14	E62	45	148.0									45	Rotated text here, and more of it
+height	75 short 14	E64	75	29.0									75	Rot
+height	75 medium 14	E66	75	107.0									75	Rotated text here
+height	75 long 14	E68	75	190.0									75	Rotated text here, and more of it
+height	90 short 14	E70	90	27.0									orientation upward	Rot
+height	90 medium 14	E72	90	109.0									orientation upward	Rotated text here
+height	90 long 14	E74	90	197.0									orientation upward	Rotated text here, and more of it
+height	15 short 20	E76	15	36.0									15	Rot
+height	15 medium 20	E78	15	66.0									15	Rotated text here
+height	15 long 20	E80	15	100.0									15	Rotated text here, and more of it
+height	45 short 20	E82	45	44.0									45	Rot
+height	45 medium 20	E84	45	128.0									45	Rotated text here
+height	45 long 20	E86	45	220.0									45	Rotated text here, and more of it
+height	75 short 20	E88	75	42.0									75	Rot
+height	75 medium 20	E90	75	157.0									75	Rotated text here
+height	75 long 20	E92	75	282.0									75	Rotated text here, and more of it
+height	90 short 20	E94	90	38.0									orientation upward	Rot
+height	90 medium 20	E96	90	159.0									orientation upward	Rotated text here
+height	90 long 20	E98	90	294.0									orientation upward	Rotated text here, and more of it
+height	stacked Abc 9	E100	255	38.0									orientation vertical	Abc
+height	stacked Stack 9	E102	255	62.0									orientation vertical	Stack
+height	stacked Stacked! 9	E104	255	98.0									orientation vertical	Stacked!
+height	stacked Abc 14	E106	255	59.0									orientation vertical	Abc
+height	stacked Stack 14	E108	255	97.0									orientation vertical	Stack
+height	stacked Stacked! 14	E110	255	154.0									orientation vertical	Stacked!
+height	stacked Abc 20	E112	255	80.0									orientation vertical	Abc
+height	stacked Stack 20	E114	255	132.0									orientation vertical	Stack
+height	stacked Stacked! 20	E116	255	210.0									orientation vertical	Stacked!

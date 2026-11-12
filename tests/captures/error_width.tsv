@@ -1,6 +1,6 @@
-# suite: error_width (capture.cell_text); Excel 16.114 for Mac, en_US
+# suite: error_width (capture.cell_text); Excel 16.115 (16.115.26110837, Microsoft 365, Current channel) for Mac, en_US
 # each error value in columns of the file width given; shown: string value
-# captured: 2026-10-29; method: string value (AppleScript, bulk)
+# captured: 2026-11-12; method: string value (AppleScript, bulk)
 error	file_width	shown
 #NULL!	1.7109375	#
 #NULL!	2.7109375	##

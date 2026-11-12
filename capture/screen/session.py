@@ -58,6 +58,8 @@ def excel_windows() -> list[dict[str, object]]:
         raise ExcelError(result.stderr.strip()[:400])
     windows: list[dict[str, object]] = []
     for line in result.stdout.splitlines():
+        if not line.strip():  # no window prints an empty line
+            continue
         number, x, y, w, h, title = [*line.split("\t"), ""][:6]
         windows.append(
             {"id": int(number), "x": float(x), "y": float(y), "w": float(w), "h": float(h),
