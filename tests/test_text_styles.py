@@ -163,7 +163,8 @@ def test_underline_offsets(tmp_path):
         (3, 2),
     ]
     # Single and double span the text.
-    assert (single.rules[0].x0, single.rules[0].x1) == (single.x, single.x + single.width)
+    # Excel 16.115 runs a single or double underline 1 pt past the text (text_style suite).
+    assert (single.rules[0].x0, single.rules[0].x1) == (single.x, single.x + single.width + 1)
 
 
 def test_accounting_underlines_span_text_cells_and_numbers(tmp_path):
@@ -216,9 +217,9 @@ def test_rules_are_one_pixel_at_whole_pixels_in_html(tmp_path):
     assert "text-decoration:underline" not in page
     assert "line-through" not in page
     # Baseline 12 pt is 16 px; the double underline's top is at the baseline, the strike's top
-    # 3 pt (4 px) above it.
+    # 3 pt (4 px) above it. The underline runs 1 pt (1 px here) past the text, the strike not.
     assert (
-        '<i class="sp-rule sp-double" style="left:4px;top:16px;width:28px;color:#FF0000">' in page
+        '<i class="sp-rule sp-double" style="left:4px;top:16px;width:29px;color:#FF0000">' in page
     )
     assert '<i class="sp-rule" style="left:4px;top:12px;width:28px;color:#FF0000">' in page
     assert ".sheetpeek .sp-rule { position: absolute; height: 1px;" in page

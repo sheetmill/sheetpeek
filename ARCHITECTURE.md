@@ -831,7 +831,9 @@ outline symbols are: one CSS pixel at any page scale (decided), at whole-pixel p
 model gives each run its `TextRule`s (`TextRun.rules`): where a line starts and ends and the top
 of the first line, in points, offset from the run's baseline by the 11 pt captures scaled with
 the drawn size (unverified at other sizes). A second line is 2 screen pt below the first.
-- Single: 1 pt below the baseline; double: 0 pt, and a second line. Both span the text.
+- Single: 1 pt below the baseline; double: 0 pt, and a second line. Both run from the text's
+  start to 1 pt past its end (Excel 16.115, screen suite `text_style`, Calibri 11; 16.114 ended
+  them with the text). Accounting underlines and strikethrough end as below.
 - Single accounting: 3 pt below the baseline; double accounting a second line. **On text they
   span the cell**, from 3 pt after its left gridline to 2 pt before the next one, even under
   two letters in a 213 pt cell; a merge spans the merge, wrapped text gets one line per line,

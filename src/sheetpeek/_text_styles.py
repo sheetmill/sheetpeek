@@ -28,6 +28,9 @@ ACCOUNTING_EXTRA = 3.0
 """Points an accounting underline adds under the text: a fitted row is 18 pt instead of 15, and
 a bottom-aligned baseline sits 6 pt above the cell's bottom instead of 3."""
 ACCOUNTING_INSETS = (3.0, 2.0)
+UNDERLINE_OVERRUN = 1.0
+"""Points a single or double underline runs past its text's end (Excel 16.115, screen suite
+``text_style``, Calibri 11; accounting underlines and strikethrough end with the text)."""
 """An accounting underline under text spans the cell, less these from its left and right
 gridlines (from the left gridline, and before the next one)."""
 
@@ -142,6 +145,8 @@ def rules(
         x0, x1 = span
         if cell is not None and kind in ("singleAccounting", "doubleAccounting"):
             x0, x1 = cell[0] + ACCOUNTING_INSETS[0], cell[1] - ACCOUNTING_INSETS[1]
+        elif kind in ("single", "double") and x1 > x0:
+            x1 += UNDERLINE_OVERRUN
         lines: Literal[1, 2] = 2 if kind in ("double", "doubleAccounting") else 1
         y = baseline + round(_UNDERLINE_OFFSET[kind] * factor)
         if x1 > x0:

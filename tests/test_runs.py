@@ -301,7 +301,8 @@ def test_underlines_and_strikethrough_follow_their_runs(tmp_path):
     (line,) = runs_of(rendered, 1)
     under, struck = line.rules
     first, _ = line.spans
-    assert (under.kind, under.x0, under.x1) == ("underline", line.x, line.x + first.width)
+    # 1 pt past the run's text (Excel 16.115, text_style suite)
+    assert (under.kind, under.x0, under.x1) == ("underline", line.x, line.x + first.width + 1)
     assert (struck.kind, struck.x0) == ("strike", line.x + first.width)
     assert struck.x1 == pytest.approx(line.x + line.width)
     page = sheetpeek.render(rendered, "html")
