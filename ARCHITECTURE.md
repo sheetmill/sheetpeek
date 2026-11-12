@@ -868,8 +868,9 @@ with one line.
 **Horizontal distributed** spreads the words between the insets, a single word centered
 (§3.6), and wraps. **Indent moves both ends in** (captured: 12 pt for indent 2). `justifyLastLine`
 is read (`CellStyle.justify_last_line`) and changes nothing: distributed already spreads the last
-line (captured). The row fitted for distributed text (48 pt for two drawn lines) is not
-reproduced: fitting counts wrapped cells only (open).
+line (captured). A row Excel fits grows to the lines distributed text draws, with the wrap flag
+or without it: two lines of Calibri 11 take 32 pt (Excel 16.115, screen suite `text_style`;
+16.114 gave 48). Justify and the vertical spreads do not count in fitting (unverified).
 
 **Indent** is 6 pt a level (§4.6) on the side the alignment resolves to, `general` included:
 right-aligned text and numbers end `2 + 6n` pt before the next gridline (captured as ink 3, 9

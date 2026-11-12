@@ -160,7 +160,10 @@ def _fitted(
         if cell.kind != "empty" and (cell.style.rotation or cell.style.stacked) and not merged:
             height = max(height, _turned_height(grid, cell, p, fonts))
             continue
-        if cell.kind == "text" and cell.style.wrap and widths[p] and not merged:
+        # Horizontally distributed text wraps when drawn, and Excel 16.115 fits the row to the
+        # lines drawn (captured, text_style); justify and the vertical spreads are not fitted.
+        wraps = cell.style.wrap or cell.style.h_align == "distributed"
+        if cell.kind == "text" and wraps and widths[p] and not merged:
             budget = widths[p] - base.left_inset - base.right_inset
             if spans:
                 text = Text.of_spans(spans, fonts.get, breaks=True)

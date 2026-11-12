@@ -462,3 +462,18 @@ def test_what_each_output_reports(tmp_path):
         "font.underline_accounting": "omitted",
         "text.reading_order": "omitted",
     }
+
+
+def test_a_row_fits_the_lines_of_distributed_text(tmp_path):
+    # Excel 16.115 fits the row to the lines distributed text draws, wrap flag or not: two lines
+    # of Calibri 11 are 32 pt (screen suite text_style, G14; 16.114 gave 48).
+    wb = openpyxl.Workbook()
+    wb.active["A1"] = "spilled text that is much wider than one column"
+    wb.active["A1"].alignment = Alignment(horizontal="distributed")
+    wb.active.row_dimensions[1]  # listed, so Excel fits it
+    path = tmp_path / "distributed.xlsx"
+    wb.save(path)
+    rendered = sheetpeek.read(path).layout("excel")
+    lines = {round(run.y) for run in rendered.rows[0].runs}
+    assert rendered.rows[0].height_pt == 16.0 * len(lines)
+    assert len(lines) > 1
