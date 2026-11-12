@@ -22,6 +22,8 @@ from pathlib import Path
 import openpyxl
 from openpyxl.utils import get_column_letter
 
+from capture.edition import excel_description
+
 ROOT = Path(__file__).resolve().parents[1]
 CAPTURES = ROOT / "tests" / "captures"
 CONTAINER_DIR = (
@@ -108,13 +110,9 @@ def run() -> None:
         spec, position, text = line.split("\t", 2)
         r, c = (int(v) for v in position.split(","))
         shown[(spec, r, c)] = text
-    version = subprocess.run(
-        ["osascript", "-e", 'tell application "Microsoft Excel" to get version'],
-        capture_output=True, text=True, check=True,
-    ).stdout.strip()  # fmt: skip
     today = dt.date.today().isoformat()
     with (CAPTURES / "merge_width.tsv").open("w", encoding="utf-8", newline="\n") as out:
-        out.write(f"# suite: merge_width (capture.cell_text); Excel {version} for Mac, en_US\n")
+        out.write(f"# suite: merge_width (capture.cell_text); {excel_description()}, en_US\n")
         out.write("# A holds the value, alone or merged; every column of a sheet has the file\n")
         out.write("# width given; shown: string value of A\n")
         out.write(f"# captured: {today}; method: string value (AppleScript, bulk)\n")
@@ -130,7 +128,7 @@ def run() -> None:
                 text = shown[(f"h{width!r}!A1:A{len(MERGE_VALUES)}", k, 1)]
                 out.write(f"{width!r}\tA:C, B hidden\t{value!r}\t{fmt}\t{text}\n")
     with (CAPTURES / "error_width.tsv").open("w", encoding="utf-8", newline="\n") as out:
-        out.write(f"# suite: error_width (capture.cell_text); Excel {version} for Mac, en_US\n")
+        out.write(f"# suite: error_width (capture.cell_text); {excel_description()}, en_US\n")
         out.write("# each error value in columns of the file width given; shown: string value\n")
         out.write(f"# captured: {today}; method: string value (AppleScript, bulk)\n")
         out.write("error\tfile_width\tshown\n")

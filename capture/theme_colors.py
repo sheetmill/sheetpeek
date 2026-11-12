@@ -20,6 +20,8 @@ from openpyxl.styles import Font, PatternFill
 from openpyxl.styles.colors import Color
 from openpyxl.utils import get_column_letter
 
+from capture.edition import excel_description
+
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "tests" / "captures" / "theme_colors.tsv"
 CONTAINER_DIR = (
@@ -69,12 +71,8 @@ def run() -> None:
     expected = cases()
     if len(lines) != len(expected):
         sys.exit(f"expected {len(expected)} cells, got {len(lines)}: {result.stdout!r}")
-    version = subprocess.run(
-        ["osascript", "-e", 'tell application "Microsoft Excel" to get version'],
-        capture_output=True, text=True, check=True,
-    ).stdout.strip()  # fmt: skip
     with OUTPUT.open("w", encoding="utf-8", newline="\n") as out:
-        out.write(f"# suite: theme_colors (capture.theme_colors); Excel {version} for Mac, en_US\n")
+        out.write(f"# suite: theme_colors (capture.theme_colors); {excel_description()}, en_US\n")
         out.write(
             "# openpyxl's default theme; each cell's solid fill and font color are the theme\n"
         )

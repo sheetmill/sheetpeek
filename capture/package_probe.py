@@ -28,6 +28,8 @@ from pathlib import Path
 
 import openpyxl
 
+from capture.edition import excel_description
+
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "tests" / "captures" / "package.tsv"
 CONTAINER_DIR = (
@@ -271,24 +273,6 @@ def build() -> list[Path]:
     return paths
 
 
-def _version() -> str:
-    result = subprocess.run(
-        [
-            "gtimeout",
-            "-k",
-            "5",
-            "20",
-            "osascript",
-            "-e",
-            'tell application "Microsoft Excel" to get version',
-        ],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    return result.stdout.strip() or "unknown"
-
-
 def _open(path: Path) -> str:
     """One case in its own ``osascript``; alerts are restored even when the limit stops it."""
     script = Path(__file__).with_name("package_open.applescript")
@@ -311,7 +295,6 @@ def _open(path: Path) -> str:
 def run() -> None:
     """Open every case, print the outcome and write the TSV. A case that hangs ends the run."""
     paths = build()
-    version = _version()
     rows = []
     finished = True
     for (name, _), path in zip(CASES, paths, strict=True):
@@ -324,7 +307,7 @@ def run() -> None:
     if not finished:
         sys.exit("a case hung: stopped, and nothing written. Look into it before running again.")
     with OUTPUT.open("w", encoding="utf-8") as out:
-        out.write(f"# suite: package (capture.package_probe); Excel {version} for Mac, en_US\n")
+        out.write(f"# suite: package (capture.package_probe); {excel_description()}, en_US\n")
         out.write(f"# captured: {dt.date.today().isoformat()}; method: open with alerts off, ")
         out.write("read A1 (111 unless the case changes it), the number of sheets, the widths of ")
         out.write("A and B, the heights of rows 1 and 2, and A1's font size\n")

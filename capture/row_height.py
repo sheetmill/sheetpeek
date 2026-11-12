@@ -36,6 +36,8 @@ import openpyxl
 from openpyxl.styles import Alignment, Font
 from openpyxl.utils.indexed_list import IndexedList
 
+from capture.edition import excel_description
+
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "tests" / "captures" / "row_height.tsv"
 CONTAINER_DIR = (
@@ -155,15 +157,9 @@ def run() -> None:
     lines = result.stdout.strip().split("\n")
     if len(lines) != len(CASES):
         sys.exit(f"expected {len(CASES)} lines from Excel, got {len(lines)}: {result.stdout!r}")
-    version = subprocess.run(
-        ["osascript", "-e", 'tell application "Microsoft Excel" to get version'],
-        capture_output=True,
-        text=True,
-        check=True,
-    ).stdout.strip()
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     with OUTPUT.open("w", encoding="utf-8", newline="\n") as out:
-        out.write(f"# suite: row_height (capture.row_height); Excel {version} for Mac, en_US\n")
+        out.write(f"# suite: row_height (capture.row_height); {excel_description()}, en_US\n")
         out.write(
             "# one workbook per record: the Normal style set to the font, a number in A1, and "
             "<sheetFormatPr> with exactly the attributes given (none: no element)\n"

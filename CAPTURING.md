@@ -108,17 +108,46 @@ reproduced every common row. Facts from it (Excel 16.114):
   (three lines 48, six lines 96); in a merge over A:C the 14 pt font still counts, the wrapped
   lines do not; a stored `ht` of 15 stays 15.
 
-## The screen
+## Route C: the screen
 
-The PDF is Excel's print layout. For Excel-faithful output the truth is the screen, and print and
-screen differ in places: a row 15 pt high in the file prints 14 pt apart. The next step is an
-automated screen capture of the test sheets, a window capture at 100 % zoom with pixel analysis of
-the gridlines and text extents, checked against the PDF route on a sample.
+The PDF is Excel's print layout; the screen is the truth, and the two differ in places (a row 15
+pt high in the file prints 14 pt apart). `capture/screen/` captures Excel's window:
 
-The first screen suite's workbook is already built: `capture/rotation.py` (angled and stacked
-text: which borders slant, where general text is anchored, fitted heights over lengths and font
-sizes; `python -m capture.rotation build PATH`, no Excel). Its `run` and `read` come with the
-screen tool, which measures each case as its `measure` field says.
+- **Requests** go through `capture/screen/excel.applescript`, one request a call (count, open,
+  close, view, save, read), so each call does one visible thing and can be inspected on its own.
+  A request past its time limit is killed (`osascript` waiting on Excel ignores SIGTERM) and
+  evidence is saved: a `sample` of Excel and whether it still answers.
+- **Safeguards:** a screen suite starts only when Excel answers, holds no workbook and shows no
+  window of its own, since any other window spoils a window capture (the older suites only refuse
+  a workbook of their own name). It opens only the workbook it built, inside Excel's sandbox
+  container, keeps the display awake, and on every exit path closes it without saving, turns
+  display alerts back on and deletes it.
+- **The window** is found through CoreGraphics by its title (`capture/screen/windows.js`) and
+  captured with `screencapture -l` at the display's scale (2 px a point on a 2x display), again
+  every second until two shots are identical: Excel may still be redrawing after a zoom change.
+- **Colors:** each capture is converted from the display's profile to sRGB (`sips --matchTo`),
+  so pixel colors compare with the file's.
+- **Markers:** two cells (B2 and one below and right of the cases) are filled magenta; their pixel
+  boxes, against Excel's own `left position`, `top`, `width` and `height` of the cells, give the
+  origin and the scale per axis. A marker must be a cell's full height, which keeps out the
+  floating Copilot button of Microsoft 365 (a 15 × 10 px magenta-ish disk, when it is on).
+- **Reads:** for every cell measured, its display format (with conditional formatting and table
+  styles), its own format, its own borders and its geometry, each property in its own `try`.
+- **Headers** record Excel's version and build, the edition (stated in `EXCEL_EDITION`, which
+  Excel's dictionary does not give), the update channel, macOS, the appearance, the zoom, the
+  color conversion, the date and the suite. The older suites' headers record version, build,
+  edition and channel too.
+
+Units: lengths are reported in sheet points at the capture's zoom (image pixels divided by the
+scale), with image pixels beside them where a suite keeps them. Lines, dashes, pattern tiles and
+outline symbols are fixed in screen units, so they are reported in screen points.
+
+`python -m capture.screen run SUITE ...` runs suites one at a time (one Excel, never two
+captures at once); `read SUITE ...` measures saved captures again from `capture/build/<suite>/`
+without Excel. Each suite writes `tests/captures/<suite>.tsv`. The suites: `rotation` (angled
+and stacked text: which borders slant, where general text is anchored, fitted heights over
+lengths and sizes; cases measured by row height alone are read without a capture), and the
+cell-style suites `borders`, `fills` and `text_style`.
 
 ## Saving a copy
 

@@ -31,6 +31,8 @@ import openpyxl
 from openpyxl.styles import Alignment, PatternFill
 from openpyxl.utils import column_index_from_string, get_column_letter
 
+from capture.edition import excel_description
+
 ROOT = Path(__file__).resolve().parents[1]
 BUILD_DIR = ROOT / "capture" / "build" / "layout"
 OUTPUT = ROOT / "tests" / "captures" / "layout.tsv"
@@ -364,7 +366,7 @@ def write(version: str, captured: str | None = None) -> None:
         sys.exit(f"found {len(rows)} rows in the PDF, expected {len(named)}")
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     with OUTPUT.open("w", encoding="utf-8") as out:
-        out.write(f"# suite: layout (capture.layout); Excel {version} for Mac, en_US\n")
+        out.write(f"# suite: layout (capture.layout); {excel_description()}, en_US\n")
         out.write("# font: Calibri 11 (openpyxl default); columns A-H default width (53 pt), ")
         out.write("K hidden, N width 3.7109375 in the file (22 pt), O width 0 in the file; rows ")
         out.write("15 pt in the file, 14 pt apart in the PDF\n")
