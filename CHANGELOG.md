@@ -121,7 +121,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Angled text is one line turned about the start of its baseline, placed in the cell by its
   turned box (general text left for positive angles below 90 and at -90, right otherwise),
   spilled into empty neighbors in the direction it runs, clipped at a custom-height row, with
-  fitted rows grown to it. Stacked text draws one character a line, centered. `rich`, plain
+  fitted rows grown to it; an angled value shows in full, never `#` or shortened. Stacked text
+  draws one character a line, centered. `rich`, plain
   text, Markdown and CSV draw both horizontally and report them. Wrapped angled text is drawn on
   one line and reported (`text.rotation_wrapped`); an angled cell with borders, which Excel
   slants with the text, is drawn with upright borders and reported (`border.slanted`).

@@ -1130,45 +1130,56 @@ openpyxl drops them in every mode.
 
 `textRotation` is 0 to 90 degrees counterclockwise, 91 to 180 for −1 to −90 (stored as
 90 − angle), and 255 for stacked text (ECMA-376 §18.8.1). It is read into `CellStyle.rotation`
-(−90 to 90) and `CellStyle.stacked`. The rules come from a capture on Excel 16.114,
-repeated on 16.115 (Calibri 11, zoom 100, "Rotated text here" 77 pt wide upright, a 53 pt
-column); sheetpeek's own capture of them comes with the screen suites.
+(−90 to 90) and `CellStyle.stacked`. The rules are captured by the screen suite `rotation`
+(`tests/captures/rotation.tsv`, Excel 16.115; Calibri 11 unless a case sets a size, zoom 100,
+"Rotated text here" 77 pt wide upright, 53 pt columns).
 
 **Angled text** is one line turned about the start of its baseline (`TextRun.angle`). Excel's ink
 boxes match a rigid rotation of the upright box (captured: 45°, 58.5 × 57.5 pt against 59.7 ×
 59.7 computed).
 - **Placement:** the line's box (its width, from the descent to the ascent of the line metrics of
   §3.6), turned, is placed by its upright bounding box. General text goes left for 1 to 89
-  degrees and −90, and right for −1 to −89 and 90 (captured at 15, 45, −45, 90 and −90; where it
-  switches near ±90 is **unverified**). Left and right use insets of 3 and 4 pt, fitted to the
-  capture: every captured ink edge is within 1.1 pt. Center centers the box on the cell (captured
-  at 45°); right puts it against the right inset (captured at 45°). Fill and justify are placed
-  as left, distributed as center, and indents move the box in (**unverified**).
+  degrees and −90, and right for −1 to −89 and 90 (captured at 15, 30, 45, 60, 75, 80, 85, 89 and
+  their negatives, 90 and −90: the switch is exactly at ±90). Left and right use insets of 3 and 4
+  pt, fitted to the capture: every captured ink edge is within 1.1 pt. Center centers the box on
+  the cell (captured at 45°); right puts it against the right inset (captured at 45°). An indent
+  moves the box in by 6 pt a level (captured: 12 pt for 2, left and right). Fill is placed as
+  left (captured).
 - **Vertical:** bottom puts the box's lowest corner on the cell's bottom, top its highest on the
-  top, center centers it (**unverified** except bottom, the default). A box taller than its row
+  top, center centers it (captured in a 90 pt row at 45°). A box taller than its row
   stays bottom-aligned and is clipped at the row; nothing is drawn in the row above (captured,
   a 15 pt row at 45° and 90°).
 - **Spill:** angled text spills into empty neighbors as horizontal text does (§4.1), by its box's
   extent: right for positive angles, left for negative ones, both when centered (captured).
 - **Fitted rows:** a row Excel fits grows to `W·|sin θ| + S·|cos θ| + 7` pt, to the nearest
-  point, with `W` the text's width and `S` its font size (fitted to 38, 69 and 85 pt at 15°, 45°
-  and 90°: within 1 pt; **unverified** at other sizes and lengths). A merge does not count, as for
-  wrapped text.
-- **Wrapped angled text** is drawn on one line and reported (`text.rotation_wrapped`): how Excel
-  wraps it is not captured. A number too wide for its column shows `#` as upright text would
-  (**unverified**).
+  point, with `W` the text's width and `S` its font size. Captured over three lengths, four angles
+  and four sizes: within 2 pt at 9 and 11 pt (at 90° Excel's row is exactly `W + 7`), but Excel
+  measures larger angled text wider than xlformat's widths, by about 0.13 pt a character at 14 pt
+  and 0.5 at 20 pt, so long text at 20 pt fits rows up to 19 pt taller (a known gap). A merge does
+  not count, as for wrapped text.
+- **Wrapped angled text** (wrap, justify or distributed) wraps along the turned direction: a line
+  holds what fits between the row's top and bottom along the text, and the lines step
+  perpendicular to it; the row is not fitted. At 45° in a 15 pt row every line holds one
+  character, so the characters stand about 21 pt apart across the row and beyond the cell
+  (captured). sheetpeek draws such text on one line and reports it (`text.rotation_wrapped`).
+- **Values show in full:** an angled number is neither `#` nor General shortened to the column
+  (captured: 12345678901 at 45° and 90° in a 53 pt column); the layout formats an angled cell
+  without its column's width.
 
 **Stacked text** draws one upright character a line, a font line apart (captured: 15 pt at
 Calibri 11), centered for general text (captured); left and right sit at the insets
 (**unverified**). The lines are placed by the vertical alignment as wrapped lines are, clipped at
-the cell. A fitted row grows to a line a character plus 2 pt (captured: 77 pt for five letters).
+the cell. A fitted row grows to a line a character plus 2 pt (captured: nine cases of 3 to 8
+characters at 9, 14 and 20 pt, all exact).
 
-**Borders of angled text slant.** With all four borders, Excel slants the left and right borders
-at the text's angle into a parallelogram whose bottom edge is the cell's, and places the text
-inside it (captured); 90°, −90° and stacked text stay upright. Which sides trigger it, and where
-the text goes, are open (a capture is planned). Until then borders are drawn upright, the text
-placed as without borders, and every angled cell with a side border is reported
-(`border.slanted`, approximated).
+**Borders of angled text slant.** Excel slants the left and right borders at the text's angle
+into a parallelogram whose bottom edge is the cell's: at a height `y` above the bottom, a border
+lies `y·cot θ` right of its upright place (captured at 15°, 45° and −45°, at 25 % and 75 % of the
+row; 90° and −90° stay upright). Any side border makes the text move as with all four, top and
+bottom alone included; a fill alone does not (captured). The text moves right by about
+`15·cot θ − 4` pt toward the slant (captured: 52.5 pt at 15°, 11 at 45°, −11 at −45°; the rule
+is fitted to three angles). sheetpeek draws borders upright, places the text as without borders,
+and reports every angled cell with a side border (`border.slanted`, approximated).
 
 **HTML** turns the run with `transform: rotate()` about the start of its baseline, and its
 underlines and strikethrough with it; the clip window stays upright. Measured in WebKit with neither

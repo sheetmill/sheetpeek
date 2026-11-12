@@ -242,3 +242,15 @@ def test_the_capture_workbook_reads_back_as_built(tmp_path):
         if case.borders == "lr":
             assert style.borders.left is not None
             assert style.borders.top is None
+
+
+@pytest.mark.parametrize("rotation", [45, 90])
+def test_an_angled_number_shows_in_full_never_hashes(tmp_path, rotation):
+    # Captured (rotation suite, "number 45" and "number 90"): Excel shows 12345678901 in a
+    # default column, where upright it would show #.
+    path = _book(tmp_path, [("B2", 12345678901, Alignment(textRotation=rotation), {})])
+    rendered = sheetpeek.read(path).layout("excel")
+    (run,) = _row(rendered, 2).runs
+    assert run.text == "12345678901"
+    assert rendered.cell(2, 2).text == "12345678901"
+    assert not rendered.cell(2, 2).overflow

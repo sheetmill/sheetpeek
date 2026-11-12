@@ -479,6 +479,10 @@ class _Grid:
 
     def show(self, cell: Cell, cols: list[int]) -> _Shown:
         """What a cell shows across visible column positions ``cols``, in the grid's mode."""
+        if self.units is not None and cell.style.rotation:
+            # Excel shows angled values in full: no # and no General shortened to the column
+            # (captured, rotation suite, numbers at 45 and 90 degrees).
+            return self.formatter.show(cell)
         if self.characters:
             return self.formatter.show(cell, width=self.block_width(cols))
         if self.units is not None:
