@@ -758,8 +758,9 @@ for automatic, which is black), and a diagonal with its `diagonal_up` and `diago
 direction; Excel draws nothing otherwise.
 - **Lines are fixed in screen points**, the same at every zoom (CSS px in HTML): thin 1 on the
   gridline; medium 2 from 1 before it; thick 3 from 1 before it; double 1, a white 1, 1, from 1
-  before it; hair a 1-device-pixel checkerboard on the thin band; dotted 1 on 1 off, the two
-  device rows staggered; dashed 1.5 on 0.5 off; dashDot 9, 3, 3, 3; dashDotDot 9, 3, 3, 3, 3, 3;
+  before it; hair 1 on 1 off; dotted 2 on 2 off; dashed 3 on 1 off, all in whole screen points
+  with no stagger between device rows (Excel 16.115, screen suite `borders`; 16.114 drew hair as a
+  device-pixel checkerboard, dotted 1/1 staggered and dashed 1.5/0.5); dashDot 9, 3, 3, 3; dashDotDot 9, 3, 3, 3, 3, 3;
   the medium dashes the same at 2 wide; slantDashDot 2 wide, 11, 1, 5, 1 with slanted
   antialiased gaps. **Every gap is white**, also over a fill: no gridline shows under any border.
   Sides of one cell meet square.

@@ -340,12 +340,13 @@ def test_dashes_are_tiles_with_white_gaps(tmp_path):
     bodies = list(rules(page).values())
     dashed = next(b for b in bodies if "FF0000" in b)
     assert dashed.startswith("background:#FFFFFF url(")
-    assert "background-size:2px 1px" in dashed  # 4 x 2 device px
+    assert "background-size:4px 1px" in dashed  # 8 x 2 device px
     assert "fill='%23FFFFFF'" in dashed
-    # The two device rows: on 3 off 1, the second shifted by one.
-    assert "M0 0h1v1h-1zM1 0h1v1h-1zM2 0h1v1h-1zM0 1h1v1h-1zM1 1h1v1h-1zM3 1h1v1h-1z" in dashed
+    # Excel 16.115 (screen suite borders): on 3 off 1 screen point, both device rows alike.
+    on = "".join(f"M{x} {y}h1v1h-1z" for y in (0, 1) for x in range(6))
+    assert on in dashed
     dotted = next(b for b in bodies if "FF0000" not in b)
-    assert "background-size:1px 2px" in dotted  # turned upright
+    assert "background-size:1px 4px" in dotted  # 2 on 2 off, turned upright
 
 
 def test_a_diagonal_is_a_line_from_corner_to_corner(tmp_path):

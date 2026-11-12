@@ -3,12 +3,13 @@
 The layout resolves one side per edge (``RenderedSheet.borders``, ``_pass_borders.py``);
 this layer draws each run of equal sides along a line as one box. Widths, dashes and the place of
 a line on its gridline are Excel's in screen points, which are CSS px at any page scale
-(``ARCHITECTURE.md`` §4.12, captures on Excel 16.114):
+(``ARCHITECTURE.md`` §4.12; the screen suite ``borders``):
 
 - thin 1 px on the gridline; medium 2 px from 1 before it; thick 3 px from 1 before it; double
   two 1 px lines around a 1 px gap, from 1 before it;
-- dashed, dotted, hair and the dash-dot styles as tiles in device pixels, two to a CSS px, their
-  gaps white: no gridline shows under any border;
+- dashed, dotted, hair and the dash-dot styles as tiles in device pixels, two to a CSS px, in
+  whole screen points (hair 1 on 1 off, dotted 2/2, dashed 3/1), their gaps white: no gridline
+  shows under any border;
 - slantDashDot as mediumDashDot, its gaps square (reported);
 - where two lines meet, each reaches over the other's band, so corners are square.
 
@@ -59,9 +60,9 @@ _TILES: dict[str, tuple[str, ...] | None] = {
     "medium": None,
     "thick": None,
     "double": (_D, _D, _G, _G, _D, _D),
-    "hair": ("#.", ".#"),
-    "dotted": ("##..", "..##"),
-    "dashed": ("###.", "##.#"),
+    "hair": (_dashes(2, 2),) * 2,
+    "dotted": (_dashes(4, 4),) * 2,
+    "dashed": (_dashes(6, 2),) * 2,
     "dashDot": (_DASH_DOT,) * 2,
     "dashDotDot": (_DASH_DOT_DOT,) * 2,
     "mediumDashed": (_dashes(18, 6),) * 4,
