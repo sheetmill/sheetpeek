@@ -5,9 +5,9 @@ this layer, written before the table's text, so text lies over it: the cell and 
 gridlines, ``[x, x + width + 1)``, unless the neighbor to the right or below has a fill of its
 own, which Excel paints over that gridline (``ARCHITECTURE.md`` §4.12, captures on Excel 16.114).
 
-- **Patterns** are the captured tiles in device pixels, two to a CSS pixel, as SVG images drawn
-  with ``image-rendering: pixelated`` and anchored at the sheet's origin. Excel keeps them in
-  screen pixels at any zoom, so they stay in CSS px at any page scale.
+- **Patterns** are the captured tiles, one character a screen point and so a CSS pixel, as SVG
+  images drawn with ``image-rendering: pixelated`` and anchored at the sheet's origin. Excel
+  keeps them in screen points at any zoom, so they stay in CSS px at any page scale.
 - **Linear gradients** are CSS ``linear-gradient`` at ``90° + atan2(w sin d, h cos d)``, Excel's
   angle being taken in the unit cell; the corners take the end stops in both.
 - **Path gradients** are an SVG of four bands around the first stop's rectangle.
@@ -138,8 +138,8 @@ class Fills:
         style = f"left:{left}px;top:{top}px;width:{width}px;height:{height}px"
         if isinstance(spec, Pattern):
             tile = TILES[spec.kind]
-            # Tiles are in device pixels, two to a CSS pixel, anchored at the sheet's origin.
-            tile_w, tile_h = len(tile[0]) / 2, len(tile) / 2
+            # Tiles are in screen points, one to a CSS pixel, anchored at the sheet's origin.
+            tile_w, tile_h = len(tile[0]), len(tile)
             name = self.classes.name(
                 f"background-image:{svg_uri(tile_svg(tile, spec.foreground, spec.background))};"
                 f"background-size:{tile_w:g}px {tile_h:g}px"

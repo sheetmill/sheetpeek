@@ -255,10 +255,10 @@ def test_a_pattern_is_drawn_from_its_tile_anchored_at_the_sheet(tmp_path):
     # B1: x 71 px (53 pt), 71 px wide to C's gridline plus the far gridline; 20 px plus one.
     assert style == "left:71px;top:0px;width:71px;height:21px;background-position:1px 0px"
     body = rule(page, name)
-    assert "background-size:4px 2px" in body  # 8 x 4 device px, two to a CSS px
+    assert "background-size:8px 4px" in body  # 8 x 4 screen points, one to a CSS px
     assert "fill='%230000FF'" in body
     assert "fill='%23FFFF00'" in body
-    assert "M4 0h1v1h-1zM0 2h1v1h-1z" in body  # the two dots of the captured tile
+    assert "M2 0h1v1h-1zM6 2h1v1h-1z" in body  # the two dots of the captured tile (16.115)
     assert "image-rendering: pixelated" in page
     # The cell itself draws no background: the layer does.
     assert "<td style=" not in page.split("<tbody>")[1].split("</tr>")[0]

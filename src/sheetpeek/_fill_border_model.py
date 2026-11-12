@@ -51,26 +51,27 @@ BorderStyle: TypeAlias = Literal[
 ]
 """A border side's style, as the file names it."""
 
-# Captured tiles in device pixels at 2 a screen point, rows top to bottom; '#' is the pattern
-# (foreground) color, '.' the background (capture on Excel 16.114).
+# Captured tiles, one character a screen point, rows top to bottom, anchored at the sheet's
+# origin; '#' is the pattern (foreground) color, '.' the background (screen suite fills,
+# Excel 16.115, which draws a tile pixel as a whole screen point at any zoom).
 TILES: dict[str, tuple[str, ...]] = {
     "mediumGray": ("#.", ".#"),
-    "darkGray": ("###.", "#.##"),
-    "lightGray": ("#...", "..#."),
-    "darkHorizontal": ("#", "#", ".", "."),
-    "lightHorizontal": ("#", ".", ".", "."),
-    "darkVertical": ("##..",),
-    "lightVertical": ("#...",),
+    "darkGray": ("#.##", "###."),
+    "lightGray": ("..#.", "#..."),
+    "darkHorizontal": (".", ".", "#", "#"),
+    "lightHorizontal": (".", ".", "#", "."),
+    "darkVertical": ("..##",),
+    "lightVertical": ("..#.",),
     "darkDown": ("##..", ".##.", "..##", "#..#"),
     "darkUp": ("..##", ".##.", "##..", "#..#"),
     "lightDown": ("#...", ".#..", "..#.", "...#"),
     "lightUp": ("...#", "..#.", ".#..", "#..."),
     "darkGrid": ("#..#", ".##.", ".##.", "#..#"),
     "darkTrellis": ("####", ".##.", "####", "#..#"),
-    "lightGrid": ("####", "#...", "#...", "#..."),
+    "lightGrid": ("..#.", "..#.", "####", "..#."),
     "lightTrellis": ("#...", ".#.#", "..#.", ".#.#"),
     "gray125": ("#...", "....", "..#.", "...."),
-    "gray0625": ("....#...", "........", "#.......", "........"),
+    "gray0625": ("..#.....", "........", "......#.", "........"),
 }
 
 STYLES: tuple[BorderStyle, ...] = (

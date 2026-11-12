@@ -724,9 +724,10 @@ screen of Excel 16 for Mac with Office 2021 at zoom 100 and 200, before the swit
 `bg`) or a `Gradient`; `CellStyle.fill` stays one representative color for outputs that show
 one.
 - Each pattern is a bitmap tile in two colors only: `fgColor` draws the set pixels, `bgColor` the
-  rest (`TILES`, in device pixels at two to a screen point; `gray0625` is 8 × 4 with two set
-  pixels). The tiles are fixed in screen pixels, the same at zoom 100 and 200, and anchored at the
-  sheet's origin, not at each cell.
+  rest (`TILES`, one tile pixel a whole screen point; `gray0625` is 8 × 4 with two set pixels).
+  The tiles are fixed in screen points, the same at zoom 100 and 200, and anchored at the sheet's
+  origin, not at each cell (Excel 16.115, screen suite `fills`; 16.114 drew a tile pixel as one
+  device pixel, half a screen point).
 - Colors: `solid` draws `fgColor`; a missing `fgColor` is black, so `solid` with only `bgColor`
   draws black; a pattern without colors, with automatic ones, or with indexed 64 and 65, is black
   on white; one color given, the other takes its default (fg black, bg white). A `solid` fill in
@@ -794,8 +795,8 @@ coordinates: the fill layer (`sp-fills`: SVG tiles drawn `pixelated` and anchore
 origin, CSS linear gradients, SVG path gradients in four bands) and the border layer
 (`sp-borders`: one box per run of equal sides along a line, reaching over the bands of the lines
 across its ends; dashes as SVG tiles on white; diagonals as SVG lines). Both stay in CSS px at any
-page scale. Tiles and staggered dashes are exact at 2 device pixels a CSS px; a 1× display rounds
-them (decided). Where Excel starts a dash period is not captured; a run starts its own.
+page scale. Tiles and dashes are in whole screen points, one to a CSS px, so a 1× display draws
+them exactly too. Where Excel starts a dash period is not captured; a run starts its own.
 **slantDashDot is drawn as mediumDashDot with square gaps** and reported
 (`border.slant_dash_dot`).
 
