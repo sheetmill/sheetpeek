@@ -1,7 +1,9 @@
 """Text runs: each an absolutely positioned span, anchored as Excel anchors it, clipped.
 
 A run's underlines and strikethrough are rules beside it in its clip window, one CSS pixel thick
-at whole-pixel positions, as Excel draws them one screen point thick at any zoom (§4.13).
+at whole-pixel positions, as Excel draws them one screen point thick at any zoom (§4.13). An
+angled run and its rules are turned with ``transform: rotate()`` about the start of its baseline
+(§4.17).
 """
 
 from __future__ import annotations
@@ -29,7 +31,8 @@ def run(page: Page, run: TextRun) -> str:
     spacing = _spacing(run.font, run.text, run.width, run.scale)
     # A Calibri run spaced to Excel's width that lies inside its clip window needs no clip.
     inside = (
-        run.font.name.lower() == "calibri"
+        not run.angle
+        and run.font.name.lower() == "calibri"
         and not run.text.strip(_PRINTABLE)  # spaced from the Carlito table
         and left <= run.x
         and run.x + run.width <= right
@@ -62,8 +65,10 @@ def run(page: Page, run: TextRun) -> str:
         style.append(f"color:#{run.color}")
     if spacing:
         style.append(f"letter-spacing:{_number(spacing)}pt")
+    if run.angle:
+        style.append(_turn(run.angle, 0, _BASELINE * size * 4 / 3))
     span = f'<span class="{classes}" style="{";".join(style)}">{html.escape(run.text)}</span>'
-    span += "".join(_rule(page, rule, run.color, x0, y0) for rule in run.rules)
+    span += "".join(_rule(page, rule, run.color, x0, y0, run) for rule in run.rules)
     if inside:
         return span
     return (
@@ -102,18 +107,32 @@ def _quoted(name: str) -> str:
     return html.escape(one_line(name).replace("\\", "\\\\").replace("'", "\\'"))
 
 
-def _rule(page: Page, rule: TextRule, color: str | None, x0: int, y0: int) -> str:
-    """An underline or strikethrough: 1 px thick, a double one 1 px lines 2 px apart."""
+def _rule(
+    page: Page, rule: TextRule, color: str | None, x0: int, y0: int, run: TextRun | None = None
+) -> str:
+    """An underline or strikethrough: 1 px thick, a double one 1 px lines 2 px apart.
+
+    The rule of an angled run turns with it, about the start of the run's baseline.
+    """
     left = page.x(rule.x0)
     width = page.x(rule.x1) - left
     if width <= 0:
         return ""
     classes = "sp-rule sp-double" if rule.lines == 2 else "sp-rule"
     tint = f";color:#{color}" if color else ""
+    top = page.y(rule.y)
+    turn = ""
+    if run is not None and run.angle:
+        turn = ";" + _turn(run.angle, page.x(run.x) - left, page.y(run.y) - top)
     return (
-        f'<i class="{classes}" style="left:{left - x0}px;top:{page.y(rule.y) - y0}px;'
-        f'width:{width}px{tint}"></i>'
+        f'<i class="{classes}" style="left:{left - x0}px;top:{top - y0}px;'
+        f'width:{width}px{tint}{turn}"></i>'
     )
+
+
+def _turn(angle: float, x: float, y: float) -> str:
+    """CSS turning an element ``angle`` degrees counterclockwise about ``(x, y)`` in its box."""
+    return f"transform:rotate({_number(-angle)}deg);transform-origin:{_number(x)}px {_number(y)}px"
 
 
 def _spacing(font: Font, text: str, width: float, scale: float) -> float:
@@ -159,8 +178,10 @@ def _spanned(page: Page, run: TextRun) -> str:
     style = [anchor, f"top:{_number(baseline)}px", f"font:{_font(*face)}"]
     if run.direction == "rtl":
         style.append("direction:rtl")
+    if run.angle:
+        style.append(_turn(run.angle, 0, _BASELINE * face[1] * 4 / 3))
     inner = "".join(_span(span, face) for span in run.spans)
-    rules = "".join(_rule(page, r, _rule_color(run, r), x0, y0) for r in run.rules)
+    rules = "".join(_rule(page, r, _rule_color(run, r), x0, y0, run) for r in run.rules)
     return (
         f'<span class="sp-clip" style="left:{x0}px;top:{y0}px;width:{x1 - x0}px;'
         f'height:{y1 - y0}px"><span class="{classes}" style="{";".join(style)}">{inner}</span>'

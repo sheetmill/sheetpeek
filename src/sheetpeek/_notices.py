@@ -147,6 +147,8 @@ for _code, _name, _level in (
     ("font.vert_align", "superscript and subscript", "cells"),
     ("text.shrink", "shrink to fit", "cells"),
     ("text.reading_order", "reading order", "cells"),
+    ("text.rotation", "rotated text", "cells"),
+    ("text.stacked", "stacked text", "cells"),
     ("font.color", "font colors", "cells"),
     ("grid.color", "gridline colors", "sheet"),
     ("format.color", "number-format colors", "cells"),
@@ -156,6 +158,7 @@ for _code, _name, _level in (
     ("border", "borders", "cells"),
     ("border.diagonal", "diagonal borders", "cells"),
     ("border.slant_dash_dot", "slanted dash-dot borders", "cells"),
+    ("border.slanted", "borders of angled text", "cells"),
     ("align.horizontal", "horizontal alignment", "cells"),
     ("align.vertical", "vertical alignment", "cells"),
     ("align.wrap", "wrapped text", "cells"),
@@ -178,8 +181,6 @@ for _code, _name, _level in (
     ("value.no_cached_value", "formulas without a cached value", "cells"),
     ("value.date_converted", "dates read through openpyxl's conversion", "sheet"),
     ("format.palette", "number-format colors from the workbook palette", "cells"),
-    ("text.rotation", "rotated text", "cells"),
-    ("text.stacked", "stacked text", "cells"),
     ("text.runs_lost", "rich-text runs in inline strings", "cells"),
     ("text.phonetic", "phonetic guides", "cells"),
     ("link.scheme", "link targets", "cells"),
@@ -230,6 +231,7 @@ for _code, _name, _level in (
     ("rows.hidden_shown", "hidden rows", "sheet"),
     ("columns.hidden_shown", "hidden columns", "sheet"),
     ("outline.cut", "outline groups cut by the range", "sheet"),
+    ("text.rotation_wrapped", "wrapped rotated text", "cells"),
 ):
     _register(_code, _name, _level, "layout")
 

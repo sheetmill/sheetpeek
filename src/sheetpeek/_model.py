@@ -196,6 +196,11 @@ class CellStyle:
     """The file's ``readingOrder``, 0 from the text (context), 1 left to right, 2 right to left."""
     justify_last_line: bool = False
     """``justifyLastLine`` of distributed text; Excel draws no difference (§4.13)."""
+    rotation: int = 0
+    """Degrees counterclockwise from -90 to 90, read from the file's ``textRotation``, which
+    stores -1 to -90 as 91 to 180 (§4.17). 0 for horizontal and for stacked text."""
+    stacked: bool = False
+    """Whether the text is stacked, one character a line (``textRotation`` 255, §4.17)."""
 
 
 @dataclass(frozen=True, slots=True)

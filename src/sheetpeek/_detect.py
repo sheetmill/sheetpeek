@@ -33,8 +33,6 @@ _CHUNK = 1 << 20
 # What each reader code reports: outcome, reason, and what is drawn instead (or why not).
 CODES: dict[str, tuple[Outcome, Reason, str]] = {
     "format.palette": ("approximated", "not_implemented", ""),
-    "text.rotation": ("approximated", "not_implemented", "drawn horizontally"),
-    "text.stacked": ("approximated", "not_implemented", "drawn horizontally"),
     "text.runs_lost": (
         "approximated",
         "not_implemented",

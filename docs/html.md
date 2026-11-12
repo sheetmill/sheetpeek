@@ -24,6 +24,21 @@ True
 True
 ```
 
+Angled text is turned with CSS's `transform: rotate()` about the start of its baseline, as
+Excel turns it, and spills by the box it turns into; stacked text draws a character a line. The
+render model carries the angle on each run ({attr}`sheetpeek.TextRun.angle`).
+
+```python
+>>> from openpyxl.styles import Alignment
+>>> wb.active["A1"].alignment = Alignment(textRotation=45)
+>>> wb.save(path)
+>>> rendered = sheetpeek.read(path).layout("excel")
+>>> rendered.rows[0].runs[0].angle
+45.0
+>>> "transform:rotate(-45deg)" in sheetpeek.render(rendered, "html")
+True
+```
+
 ## Options
 
 - `fragment=True` writes the stylesheet and a `<div class="sheetpeek">` to place in a page of

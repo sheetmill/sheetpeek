@@ -159,6 +159,9 @@ class TextRun:
     """The run's text in rich-text runs, each with its own font, width, size and baseline shift,
     for a cell with :attr:`~sheetpeek.Cell.runs` (§4.16); empty for text in one font. With
     spans, ``scale`` is the step of shrink to fit alone; each span carries its drawn size."""
+    angle: float = 0.0
+    """Degrees counterclockwise the run is turned about the start of its baseline, ``(x, y)``
+    (§4.17). ``clip`` stays an upright rectangle, and ``align`` is ``"left"``."""
 
 
 @dataclass(frozen=True, slots=True)

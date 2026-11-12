@@ -1,4 +1,4 @@
-"""Alignment: everything but rotation is read; rotated and stacked text are reported."""
+"""Alignment: horizontal and vertical, wrap, indent, shrink, reading order and rotation."""
 
 from __future__ import annotations
 
@@ -42,7 +42,23 @@ def read(part: Any, context: Context) -> dict[str, Any]:
         "shrink": bool(part.shrinkToFit),
         "reading_order": _reading_order(part.readingOrder),
         "justify_last_line": bool(part.justifyLastLine),
+        "rotation": _rotation(part.textRotation),
+        "stacked": part.textRotation == 255,
     }
+
+
+def _rotation(value: Any) -> int:
+    """Degrees counterclockwise: 0 to 90 as stored, 91 to 180 for -1 to -90 (§4.17).
+
+    255 (stacked) is 0. openpyxl refuses a workbook with any other value (measured), so the
+    last branch only guards the reader move.
+    """
+    angle = int(value or 0)
+    if 0 <= angle <= 90:
+        return angle
+    if 90 < angle <= 180:
+        return 90 - angle
+    return 0
 
 
 def _reading_order(value: Any) -> ReadingOrder:
@@ -55,11 +71,5 @@ def _reading_order(value: Any) -> ReadingOrder:
 
 
 def unread(part: Any, context: Context) -> Found:
-    """Rotation and stacking, for cells with a value."""
-    found: Found = ([], [])
-    rotation = int(part.textRotation or 0)
-    if rotation == 255:
-        found[1].append(("text.stacked", "", ()))
-    elif rotation:
-        found[1].append(("text.rotation", "", ()))
-    return found
+    """Nothing: every alignment field is read."""
+    return [], []

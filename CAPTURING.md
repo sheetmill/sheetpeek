@@ -115,6 +115,11 @@ screen differ in places: a row 15 pt high in the file prints 14 pt apart. The ne
 automated screen capture of the test sheets, a window capture at 100 % zoom with pixel analysis of
 the gridlines and text extents, checked against the PDF route on a sample.
 
+The first screen suite's workbook is already built: `capture/rotation.py` (angled and stacked
+text: which borders slant, where general text is anchored, fitted heights over lengths and font
+sizes; `python -m capture.rotation build PATH`, no Excel). Its `run` and `read` come with the
+screen tool, which measures each case as its `measure` field says.
+
 ## Saving a copy
 
 `capture/excel_saved.py` with `capture/save_copy.applescript` has Excel open a workbook of

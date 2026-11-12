@@ -141,7 +141,7 @@ def build_every_feature(path: Path) -> Path:
     ws["B7"].font = Font(name="Arial", scheme="minor")
     for row, alignment in enumerate(
         (
-            Alignment(textRotation=45),
+            Alignment(textRotation=45, wrap_text=True),  # drawn on one line
             Alignment(textRotation=255),
             Alignment(shrink_to_fit=True),
             Alignment(readingOrder=2),
@@ -150,6 +150,7 @@ def build_every_feature(path: Path) -> Path:
         8,
     ):
         ws.cell(row, 2, "text").alignment = alignment
+    ws["B8"].border = Border(top=Side("thin"))  # Excel slants it with the text
     ws["B13"] = CellRichText([TextBlock(InlineFont(b=True), "rich"), " text"])
     ws["B14"] = "=1+1"
     # A [ColorN] the workbook palette recolors (index 17, [Color10]).

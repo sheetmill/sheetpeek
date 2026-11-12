@@ -118,6 +118,7 @@ layout fields marked *layout*. The style fields (`number_format` to `indent`) li
 | `wrap` | `bool` | `cell.alignment.wrap_text` | |
 | `indent` | `int` | `cell.alignment.indent` | one indent level is one digit's width, 6 pt at Calibri 11 (§4.6) |
 | `shrink`, `reading_order`, `justify_last_line` | `bool`, `0 \| 1 \| 2`, `bool` | `cell.alignment.shrinkToFit`, `readingOrder` (anything but 1 or 2 is 0), `justifyLastLine` | §4.13 |
+| `rotation`, `stacked` | `int` (−90 to 90), `bool` | `cell.alignment.textRotation`: 0 to 90 as stored, 91 to 180 as 90 − value, 255 stacked | §4.17 |
 | `font.vert_align` | `"superscript" \| "subscript" \| None` | `cell.font.vertAlign` | drawn at 2/3 size, raised or lowered (§4.13) |
 | `runs` | `tuple[TextSpan, ...] \| None` | the shared string's runs (§4.16) | each run's text and resolved `Font`; `None` without runs or when every run is in the cell's font; `value` is their text joined |
 | `hyperlink` | `Hyperlink \| None` | the structure scan's `<hyperlinks>` and `HYPERLINK()` formulas (§4.10) | `target`, `location`, `tooltip`, `display` (never drawn), `source` (`element` or `formula`) |
@@ -268,6 +269,8 @@ A **`TextRun`** is one line of a cell's text: `text`, `x` (the first glyph's adv
 **baseline**), `width` (`xlformat.text_width`), `clip` (left, top, right, bottom of what shows;
 text outside is cut through a glyph), `align` (the point a different font keeps fixed: `left`,
 `center` or `right`), `source`, `font` and `color` (the section color, else the font color).
+An angled run has an `angle` (degrees counterclockwise) and is turned about `(x, y)`, the start
+of its baseline, with its rules; its `clip` stays upright (§4.17).
 
 - **Baselines** (provisional, from print at Calibri 11; `layout` baselines): a line box is the
   font's row height (15 pt at Calibri 11) with its baseline 11 pt below its top. A bottom-aligned
@@ -1122,6 +1125,57 @@ bold reports a bold run too.
 
 **Phonetic guides** (`rPh`, `phoneticPr`) stay out of scope and reported (`text.phonetic`):
 openpyxl drops them in every mode.
+
+### 4.17 Rotated and stacked text
+
+`textRotation` is 0 to 90 degrees counterclockwise, 91 to 180 for −1 to −90 (stored as
+90 − angle), and 255 for stacked text (ECMA-376 §18.8.1). It is read into `CellStyle.rotation`
+(−90 to 90) and `CellStyle.stacked`. The rules come from a capture on Excel 16.114,
+repeated on 16.115 (Calibri 11, zoom 100, "Rotated text here" 77 pt wide upright, a 53 pt
+column); sheetpeek's own capture of them comes with the screen suites.
+
+**Angled text** is one line turned about the start of its baseline (`TextRun.angle`). Excel's ink
+boxes match a rigid rotation of the upright box (captured: 45°, 58.5 × 57.5 pt against 59.7 ×
+59.7 computed).
+- **Placement:** the line's box (its width, from the descent to the ascent of the line metrics of
+  §3.6), turned, is placed by its upright bounding box. General text goes left for 1 to 89
+  degrees and −90, and right for −1 to −89 and 90 (captured at 15, 45, −45, 90 and −90; where it
+  switches near ±90 is **unverified**). Left and right use insets of 3 and 4 pt, fitted to the
+  capture: every captured ink edge is within 1.1 pt. Center centers the box on the cell (captured
+  at 45°); right puts it against the right inset (captured at 45°). Fill and justify are placed
+  as left, distributed as center, and indents move the box in (**unverified**).
+- **Vertical:** bottom puts the box's lowest corner on the cell's bottom, top its highest on the
+  top, center centers it (**unverified** except bottom, the default). A box taller than its row
+  stays bottom-aligned and is clipped at the row; nothing is drawn in the row above (captured,
+  a 15 pt row at 45° and 90°).
+- **Spill:** angled text spills into empty neighbors as horizontal text does (§4.1), by its box's
+  extent: right for positive angles, left for negative ones, both when centered (captured).
+- **Fitted rows:** a row Excel fits grows to `W·|sin θ| + S·|cos θ| + 7` pt, to the nearest
+  point, with `W` the text's width and `S` its font size (fitted to 38, 69 and 85 pt at 15°, 45°
+  and 90°: within 1 pt; **unverified** at other sizes and lengths). A merge does not count, as for
+  wrapped text.
+- **Wrapped angled text** is drawn on one line and reported (`text.rotation_wrapped`): how Excel
+  wraps it is not captured. A number too wide for its column shows `#` as upright text would
+  (**unverified**).
+
+**Stacked text** draws one upright character a line, a font line apart (captured: 15 pt at
+Calibri 11), centered for general text (captured); left and right sit at the insets
+(**unverified**). The lines are placed by the vertical alignment as wrapped lines are, clipped at
+the cell. A fitted row grows to a line a character plus 2 pt (captured: 77 pt for five letters).
+
+**Borders of angled text slant.** With all four borders, Excel slants the left and right borders
+at the text's angle into a parallelogram whose bottom edge is the cell's, and places the text
+inside it (captured); 90°, −90° and stacked text stay upright. Which sides trigger it, and where
+the text goes, are open (a capture is planned). Until then borders are drawn upright, the text
+placed as without borders, and every angled cell with a side border is reported
+(`border.slanted`, approximated).
+
+**HTML** turns the run with `transform: rotate()` about the start of its baseline, and its
+underlines and strikethrough with it; the clip window stays upright. Measured in WebKit with neither
+Calibri nor Carlito installed, the captured cases' ink lies within 2.5 pt of Excel's at both
+ends; the larger differences are at the far end, where the fallback font's width differs (§7.3). **Other outputs** draw
+angled and stacked text horizontally (`text.rotation`, `text.stacked`, approximated in `rich` and
+text, omitted in Markdown and CSV, which show the full text).
 
 ## 5. openpyxl facts that constrain the design
 

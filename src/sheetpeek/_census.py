@@ -81,6 +81,12 @@ def census(
                 add("text.shrink", row, column)
             if style.reading_order:
                 add("text.reading_order", row, column)
+            if style.stacked:
+                add("text.stacked", row, column)
+            elif style.rotation:
+                add("text.rotation", row, column)
+                if style.rotation not in (90, -90) and _boxed(style.borders):
+                    add("border.slanted", row, column)
             if rendered_cell.format_color is not None:
                 add("format.color", row, column)
             if style.h_align != "general":
@@ -116,6 +122,19 @@ def census(
 
 
 @lru_cache(maxsize=1024)
+def _boxed(borders: Any) -> bool:
+    """Whether a cell has a side border, which Excel slants with angled text (§4.17).
+
+    Excel slants all four together (captured); which sides alone trigger it is unverified, so
+    any side counts.
+    """
+    if borders is None:
+        return False
+    return any(
+        side is not None for side in (borders.left, borders.right, borders.top, borders.bottom)
+    )
+
+
 def _font_codes(normal: Font, font: Font) -> tuple[str, ...]:
     """The font features ``font`` uses, in registry order."""
     found = []

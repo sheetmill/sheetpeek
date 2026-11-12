@@ -445,7 +445,7 @@ def test_no_mode_allocates_or_fails_by_an_odd_style_number(styled, tmp_path, fie
             assert "nan" not in page.lower().replace("sans", ""), (field, value, mode)
 
 
-ODD_ALIGNMENT_FIELDS = ("readingOrder", "indent")
+ODD_ALIGNMENT_FIELDS = ("readingOrder", "indent", "textRotation")
 
 
 @pytest.mark.parametrize("field", ODD_ALIGNMENT_FIELDS)
@@ -455,7 +455,7 @@ def test_no_mode_allocates_or_fails_by_an_odd_alignment_number(tmp_path, field):
     wb = openpyxl.Workbook()
     wb.active["A1"] = "text that is too long for its cell"
     wb.active["A1"].alignment = Alignment(
-        readingOrder=1, indent=1, horizontal="distributed", shrink_to_fit=True
+        readingOrder=1, indent=1, horizontal="distributed", shrink_to_fit=True, textRotation=1
     )
     wb.active["B2"] = 1
     plain = save(wb, tmp_path / "plain.xlsx").read_bytes()
@@ -469,7 +469,9 @@ def test_no_mode_allocates_or_fails_by_an_odd_alignment_number(tmp_path, field):
             sheet = sheetpeek.read(path)
         except PackageError:
             continue
-        assert sheet.cell(1, 1).style.reading_order in (0, 1, 2), (field, value)
+        style = sheet.cell(1, 1).style
+        assert style.reading_order in (0, 1, 2), (field, value)
+        assert -90 <= style.rotation <= 90, (field, value)
         for mode in ("excel", "characters", "none"):
             sheetpeek.render(
                 sheet.layout(mode),

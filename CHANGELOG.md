@@ -13,8 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   not read yet, or that the layout approximates, and `sheetpeek.notices(source, to=...)` adds what
   that output cannot show, without rendering. A notice has a dotted code (`FEATURES` lists them),
   an outcome (`omitted` or `approximated`), a reason, the cells and the output.
-- Reported when a file uses them, until they are drawn: rotated and stacked text, phonetic
-  guides, rich-text runs in inline strings (which openpyxl does not keep), row and column formats, sheet views (hidden zeros, right to left, formulas,
+- Reported when a file uses them, until they are drawn: phonetic guides, rich-text runs in inline strings (which openpyxl does not keep), row and column formats, sheet views (hidden zeros, right to left, formulas,
   page layout, panes), conditional formatting, filter buttons,
   tables, sparklines, slicers, timelines, pictures, charts, shapes, embedded objects, form
   controls, background pictures, notes and threaded comments, print areas, print titles, manual
@@ -118,6 +117,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `emphasis=True`. A cell with runs is also counted under each font feature its runs use.
 - Reader code `text.runs_lost`: the runs of inline strings (what openpyxl writes), which
   openpyxl's read-only reader drops; they are drawn in the cell's font.
+- Rotated and stacked text are drawn in HTML (`excel` mode), from captures of Excel for Mac.
+  Angled text is one line turned about the start of its baseline, placed in the cell by its
+  turned box (general text left for positive angles below 90 and at -90, right otherwise),
+  spilled into empty neighbors in the direction it runs, clipped at a custom-height row, with
+  fitted rows grown to it. Stacked text draws one character a line, centered. `rich`, plain
+  text, Markdown and CSV draw both horizontally and report them. Wrapped angled text is drawn on
+  one line and reported (`text.rotation_wrapped`); an angled cell with borders, which Excel
+  slants with the text, is drawn with upright borders and reported (`border.slanted`).
+- `CellStyle.rotation` and `CellStyle.stacked`; `TextRun.angle`.
+- Census codes `text.rotation`, `text.stacked` and `border.slanted`, which every output declares.
 - `Book.sheets`: every sheet in workbook order as a `SheetInfo` (name, kind, state, tab color).
   Kinds come from the workbook's relationship types: `worksheet`, `chartsheet`, `dialogsheet`,
   `macrosheet`. Tab colors are `RRGGBB` through the palette and theme; `auto` is `None`.

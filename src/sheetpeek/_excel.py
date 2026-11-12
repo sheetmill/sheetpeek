@@ -54,6 +54,12 @@ from sheetpeek._text_styles import (
 
 _SPREAD = ("justify", "distributed")
 _WORD = re.compile(r"\S+")
+ROTATED_INSETS = (3.0, 4.0)
+"""Left and right insets of angled text's box, fitted to the rotation capture (§4.17)."""
+ROTATED_EXTRA = 7.0
+"""Points a row fitted to angled text adds to its footprint, fitted the same way (§4.17)."""
+STACKED_EXTRA = 2.0
+"""Points a row fitted to stacked text adds to its lines (captured, §4.17)."""
 
 
 def lay_out(draft: Draft) -> tuple[tuple[RenderedColumn, ...], tuple[RenderedRow, ...]]:
@@ -109,7 +115,7 @@ def lay_out(draft: Draft) -> tuple[tuple[RenderedColumn, ...], tuple[RenderedRow
     heights = [
         _fitted(grid, i, row, sheet, read, widths, base, fonts) for i, row in enumerate(rows)
     ]
-    layout = _Points(grid, widths, heights, base, fonts)
+    layout = _Points(grid, widths, heights, base, fonts, notes)
     rendered_rows, kept = layout.render()
     x0 = layout.xs[kept[0]]
     rendered_columns = tuple(
@@ -151,6 +157,9 @@ def _fitted(
             styled += [f for f in own if f.vert_align or accounting(f)]
         # A merged cell's font counts, its wrapped lines do not (captured).
         merged = (row.index, grid.columns[p].index) in grid.merge_of
+        if cell.kind != "empty" and (cell.style.rotation or cell.style.stacked) and not merged:
+            height = max(height, _turned_height(grid, cell, p, fonts))
+            continue
         if cell.kind == "text" and cell.style.wrap and widths[p] and not merged:
             budget = widths[p] - base.left_inset - base.right_inset
             if spans:
@@ -164,6 +173,30 @@ def _fitted(
     for font, extra in row_extras(styled):
         height = max(height, font_row_height(font) + extra)
     return height
+
+
+def _turned_height(grid: _Grid, cell: Any, p: int, fonts: _Fonts) -> float:
+    """The row height Excel fits to angled or stacked text (§4.17), at least the font's.
+
+    Angled: the text's width times the sine of its angle, its size times the cosine, and
+    ``ROTATED_EXTRA``, to the nearest point (unverified beyond Calibri 11 at 15, 45 and 90
+    degrees). Stacked: a font line a character and ``STACKED_EXTRA``.
+    """
+    shown = grid.show(cell, [p])
+    content = _UNDRAWN.sub("", (shown.full_text or shown.text).replace("\n", ""))
+    spans = drawn_spans(cell, content) if cell.runs else None
+    own = [span.font for span in spans] if spans else [cell.font]
+    line = max(map(font_row_height, own))
+    if cell.style.stacked:
+        return max(line, len(content) * line + STACKED_EXTRA)
+    if spans:
+        width = Text.of_spans(spans, fonts.get, breaks=False).width(0, len(content))
+    else:
+        width = xlformat.text_width(content, font=fonts.get(cell.font))
+    size = max(font.size for font in own)
+    angle = math.radians(cell.style.rotation)
+    turned = width * abs(math.sin(angle)) + size * abs(math.cos(angle)) + ROTATED_EXTRA
+    return max(line, float(round(turned)))
 
 
 def _points(column: Column, metrics: Any) -> float:
@@ -189,8 +222,10 @@ class _Points:
         heights: list[float],
         base: xlformat.ColumnMetrics,
         fonts: _Fonts,
+        notes: Any = None,
     ) -> None:
         self.grid = grid
+        self.notes = notes
         self.widths = widths
         self.heights = heights
         self.left_inset = base.left_inset
@@ -277,6 +312,10 @@ class _Points:
         first, last = origin.cols[0], origin.cols[-1]
         if not shown.text:
             return [], first, last, 0
+        if cell.style.stacked:
+            return self.place_stacked(origin)
+        if cell.style.rotation:
+            return self.place_turned(origin)
         x0, x1 = self.xs[first], self.xs[last] + self.widths[last]
         top = self.ys[origin.rows[0]]
         bottom = self.ys[origin.rows[-1]] + self.heights[origin.rows[-1]]
@@ -394,6 +433,164 @@ class _Points:
             )
         return runs, low, high, n
 
+    def _one_line(self, origin: _Origin) -> tuple[Text, tuple[TextSpan, ...] | None]:
+        """The origin's text as one line: line breaks are not drawn, and wrapping is reported."""
+        cell, shown = origin.cell, origin.shown
+        style = cell.style
+        wraps = cell.kind == "text" and (
+            style.wrap or shown.align in _SPREAD or style.v_align in _SPREAD
+        )
+        if wraps and self.notes is not None:
+            self.notes.add(
+                "text.rotation_wrapped",
+                "approximated",
+                "not_implemented",
+                row=cell.row,
+                column=cell.column,
+                detail="drawn on one line",
+            )
+        spans = drawn_spans(cell, shown.text)
+        if spans:
+            return Text.of_spans(spans, self.fonts.get, breaks=False), spans
+        content = shown.text.replace("\r", "").replace("\n", "")
+        return Text.plain(content, cell.font, self.fonts.get(cell.font)), None
+
+    def place_turned(self, origin: _Origin) -> tuple[list[TextRun], int, int, int]:
+        """Angled text: one line turned about its baseline's start, its box placed (§4.17).
+
+        The line's box, from its descent to its ascent and along its width, turned, is placed
+        in the cell by its upright bounding box: general text by its angle's sign, left for 0 to
+        89 degrees and -90, right for -1 to -89 and 90 (captured at 15, 45, -45, 90 and -90;
+        the switch between is unverified); bottom, top or center by the vertical alignment. A
+        box taller than its row stays bottom-aligned and is clipped at the row (captured).
+        """
+        cell, shown = origin.cell, origin.shown
+        style = cell.style
+        first, last = origin.cols[0], origin.cols[-1]
+        x0, x1 = self.xs[first], self.xs[last] + self.widths[last]
+        top = self.ys[origin.rows[0]]
+        bottom = self.ys[origin.rows[-1]] + self.heights[origin.rows[-1]]
+        text, spans = self._one_line(origin)
+        end = len(text.text)
+        width = text.width(0, end)
+        _, above, below = line_metrics(text.fonts(0, end) if spans else [cell.font], 1)
+        angle = style.rotation
+        cos, sin = math.cos(math.radians(angle)), math.sin(math.radians(angle))
+        corners = [
+            (s * cos - t * sin, -s * sin - t * cos) for s in (0, width) for t in (-below, above)
+        ]
+        lo, hi = min(x for x, _ in corners), max(x for x, _ in corners)
+        y_lo, y_hi = min(y for _, y in corners), max(y for _, y in corners)
+        align = _turned_align(style.h_align, shown.align, angle)
+        indent = style.indent * self.digit
+        left_inset, right_inset = ROTATED_INSETS
+        if align == "left":
+            x = x0 + left_inset + indent - lo
+        elif align == "right":
+            x = x1 - right_inset - indent - hi
+        else:
+            x = (x0 + x1) / 2 - (lo + hi) / 2
+        if style.v_align == "top" and y_hi - y_lo <= bottom - top:
+            y = top - y_lo
+        elif style.v_align in ("center", "distributed") and y_hi - y_lo <= bottom - top:
+            y = top + math.floor((bottom - top - (y_hi - y_lo)) / 2) - y_lo
+        else:  # bottom; justify as bottom (unverified); a box taller than the row (captured)
+            y = bottom - y_hi
+        shift = 0.0 if spans else vert_shift(cell.font)
+        x, y = x + shift * sin, y + shift * cos  # down in the turned frame
+        low, high = first, last
+        if origin.spills:
+            low, high = self.spill(origin, x + lo, x + hi, align)
+        clip = (self.xs[low] + 1, top + 1, self.xs[high] + self.widths[high], bottom)
+        size = cell.font.size * vert_scale(cell.font)
+        # An accounting underline runs under the text's width, turned with it (unverified).
+        own = (x, x + width) if cell.kind == "text" else None
+        if spans:
+            drawn = _spans(text, 0, end, 1, 1.0, shown.format_color)
+            ruled = _span_rules(drawn, x, y, own)
+            scale = 1.0
+        else:
+            drawn = ()
+            ruled = rules(cell.font, size, y, (x, x + width), own)
+            scale = size / cell.font.size
+        direction: TextDirection = (
+            "rtl" if style.reading_order != 1 and right_to_left(text.text) else "ltr"
+        )
+        run = TextRun(
+            text.text,
+            x,
+            y,
+            width,
+            clip,
+            "left",
+            (cell.row, cell.column),
+            cell.font,
+            shown.format_color or cell.font.color,
+            scale,
+            ruled,
+            direction,
+            drawn,
+            float(angle),
+        )
+        return [run], low, high, 1
+
+    def place_stacked(self, origin: _Origin) -> tuple[list[TextRun], int, int, int]:
+        """Stacked text: one upright character a line, a font line apart (§4.17).
+
+        General text is centered (captured); left and right sit at the insets (unverified). The
+        lines are placed as wrapped lines are by the vertical alignment, clipped at the cell.
+        """
+        cell, shown = origin.cell, origin.shown
+        style = cell.style
+        first, last = origin.cols[0], origin.cols[-1]
+        x0, x1 = self.xs[first], self.xs[last] + self.widths[last]
+        top = self.ys[origin.rows[0]]
+        bottom = self.ys[origin.rows[-1]] + self.heights[origin.rows[-1]]
+        text, spans = self._one_line(origin)
+        n = len(text.text)
+        metrics = [
+            line_metrics(text.fonts(k, k + 1) if spans else [cell.font], 1) for k in range(n)
+        ]
+        baselines = _baselines(metrics, top, bottom, style.v_align)
+        size = cell.font.size * vert_scale(cell.font)
+        shift = 0.0 if spans else vert_shift(cell.font)
+        align = shown.align if style.h_align in ("left", "right") else "center"
+        clip = (x0 + 1, top + 1, x1, bottom)
+        runs = []
+        for k, baseline in enumerate(baselines):
+            char = text.text[k]
+            if not char.strip():
+                continue
+            width = text.width(k, k + 1)
+            if align == "left":
+                x = x0 + self.left_inset
+            elif align == "right":
+                x = x1 - self.right_inset - width
+            else:
+                x = x0 + 1 + math.ceil((x1 - x0 - 1 - width) / 2)
+            baseline += shift
+            drawn = _spans(text, k, k + 1, 1, 1.0, shown.format_color) if spans else ()
+            runs.append(
+                TextRun(
+                    char,
+                    x,
+                    baseline,
+                    width,
+                    clip,
+                    align,  # type: ignore[arg-type]
+                    (cell.row, cell.column),
+                    cell.font,
+                    shown.format_color or cell.font.color,
+                    1.0 if spans else size / cell.font.size,
+                    _span_rules(drawn, x, baseline, None)
+                    if drawn
+                    else rules(cell.font, size, baseline, (x, x + width), None),
+                    "ltr",
+                    drawn,
+                )
+            )
+        return runs, first, last, n
+
     def spread(
         self,
         words: list[tuple[int, int]],
@@ -454,6 +651,19 @@ class _Points:
             left += grow_left
             right += grow_right
         return first - left, last + right
+
+
+def _turned_align(h_align: str, shown: str, angle: int) -> str:
+    """Where angled text's box goes across the cell: left, right or center (§4.17).
+
+    General follows the angle; fill, justify and distributed are placed as left, left and
+    center (unverified).
+    """
+    if h_align == "general":
+        return "left" if 0 < angle < 90 or angle == -90 else "right"
+    if h_align in ("center", "center_across", "distributed"):
+        return "center"
+    return "right" if shown == "right" else "left"
 
 
 def _running(sizes: list[float]) -> list[float]:
