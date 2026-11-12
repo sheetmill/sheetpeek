@@ -33,6 +33,7 @@ from sheetpeek._rendered import (
     SpillEdge,
 )
 from sheetpeek._rows import row_height
+from sheetpeek._text_styles import right_to_left, vert_scale
 
 # Characters per indent level. Captured (ARCHITECTURE.md §4.6): one level is one digit's width,
 # 6 pt at Calibri 11.
@@ -47,6 +48,7 @@ _EXPLICIT: dict[str, Alignment] = {
     "center_across": "center",
 }
 _NOBODY = -1
+_SPREAD = ("justify", "distributed")
 _MAX_COLUMN = 16_384
 _WIDEST_CHARACTERS = 255  # Excel's own limit; every character costs about 10 bytes in every row
 # Excel draws no control character, and these must never reach a terminal. Line breaks stay: the
@@ -168,30 +170,9 @@ def _cells(draft: Draft) -> None:
     )
 
 
-def _vertical_justify(draft: Draft) -> None:
-    """In ``excel`` mode, vertically justified and distributed text is placed as top."""
-    if draft.mode != "excel":
-        return
-    for rendered_row in draft.rows:
-        for rendered_cell in rendered_row.cells:
-            if rendered_cell.text and rendered_cell.cell.style.v_align in (
-                "justify",
-                "distributed",
-            ):
-                draft.notes.add(
-                    "align.vertical_justify",
-                    "approximated",
-                    "not_implemented",
-                    row=rendered_cell.cell.row,
-                    column=rendered_cell.cell.column,
-                    detail="placed as top",
-                )
-
-
 PASSES: list[Pass] = [
     _cells,
     borders_pass,
-    _vertical_justify,
     outline_pass,
 ]
 """The layout's passes, in order. A feature adds its own here: borders after the cells (they
@@ -324,7 +305,9 @@ class _Fonts:
         found = self._fonts.get(font)
         if found is None:
             name = font.name if known else "Calibri"
-            found = self._fonts[font] = xlformat.Font(name, font.size, font.bold, font.italic)
+            # Superscript and subscript are measured at the size they are drawn (§4.13).
+            size = font.size * vert_scale(font)
+            found = self._fonts[font] = xlformat.Font(name, size, font.bold, font.italic)
         return found
 
 
@@ -383,6 +366,8 @@ class _Formatter:
             text = str(value)
             return _Shown(text, text, False, explicit or "left")
         align: Alignment = explicit or formatted.align
+        if explicit is None and cell.kind == "text" and right_to_left(str(value)):
+            align = "right"  # general follows the text's first strong character (§4.13)
         color = xlformat.DEFAULT_PALETTE.get(formatted.color) if formatted.color else None
         return _Shown(formatted.text, formatted.full_text, formatted.overflow, align, color)
 
@@ -528,7 +513,8 @@ class _Grid:
                 if result.text:
                     # A center-across run spills like centered text; a merge does not
                     # (captured, layout rows 176 to 179).
-                    spills = cell.kind == "text"
+                    # Shrunk text never spills (§4.13).
+                    spills = cell.kind == "text" and not cell.style.shrink
                     origins.append(_Origin(cell, result, [i], cols, spills))
         return origins, shown
 
@@ -622,7 +608,9 @@ class _Grid:
         text = origin.shown.text
         width = self.block_width(origin.cols)
         wraps = origin.cell.kind == "text" and (
-            origin.cell.style.wrap or origin.shown.align in ("justify", "distributed")
+            origin.cell.style.wrap
+            or origin.shown.align in ("justify", "distributed")
+            or origin.cell.style.v_align in _SPREAD  # vertical justify wraps (§4.13)
         )
         if not wraps:
             # Captured (ARCHITECTURE.md §4.1): a line break in a cell without wrapping is not drawn.
@@ -670,11 +658,14 @@ class _Grid:
         v_align = origin.cell.style.v_align
         top = (
             0
-            if v_align == "top"
+            if v_align in ("top", "justify") or (v_align == "distributed" and len(lines) > 1)
             else (total - len(lines)) // 2
-            if v_align == "center"
+            if v_align in ("center", "distributed")
             else total - len(lines)
         )
+        # Vertically justified and distributed lines spread from the top to the bottom, in
+        # whole lines here (§4.13).
+        spread = v_align in _SPREAD and 1 < len(lines) < total
         spills = origin.spills and len(lines) == 1 and align in ("left", "right", "center")
         for k, text in enumerate(lines):
             n = len(text)
@@ -719,7 +710,8 @@ class _Grid:
                     # Excel draws no gridlines across the columns a spill takes.
                     span = list(range(first - left, last + right + 1))
                     canvas.claim_gaps(origin.rows, span, number)
-            canvas.put(origin.rows, top + k, x, text, number, low, high)
+            line = k * (total - 1) // (len(lines) - 1) if spread else top + k
+            canvas.put(origin.rows, line, x, text, number, low, high)
         if len(origin.cols) > 1:
             # A merge or a center-across run is one area: no separators inside it.
             canvas.claim_gaps(origin.rows, origin.cols, number)

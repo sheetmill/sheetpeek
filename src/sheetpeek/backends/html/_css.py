@@ -87,6 +87,11 @@ CSS = (
   font-kerning: none; font-variant-ligatures: none;
 }
 .sheetpeek .sp-center { transform: translateX(-50%); }
+.sheetpeek .sp-rule { position: absolute; height: 1px; background: currentColor; }
+.sheetpeek .sp-rule.sp-double {
+  height: 3px; box-sizing: border-box; background: none;
+  border-top: 1px solid; border-bottom: 1px solid;
+}
 .sheetpeek a { color: inherit; text-decoration: inherit; }
 """
 )

@@ -14,6 +14,7 @@ from pathlib import Path
 
 import openpyxl
 import pytest
+from openpyxl.styles import Alignment
 
 import sheetpeek
 from sheetpeek import LimitError, PackageError, ReadLimits
@@ -439,6 +440,34 @@ def test_no_mode_allocates_or_fails_by_an_odd_style_number(styled, tmp_path, fie
             on_notice="ignore",
         )
         assert "nan" not in page.lower().replace("sans", "")
+
+
+ODD_ALIGNMENT_FIELDS = ("readingOrder", "indent")
+
+
+@pytest.mark.parametrize("field", ODD_ALIGNMENT_FIELDS)
+@pytest.mark.parametrize("value", ODD_NUMBERS)
+@bounded
+def test_no_mode_allocates_or_fails_by_an_odd_alignment_number(tmp_path, field, value):
+    wb = openpyxl.Workbook()
+    wb.active["A1"] = "text that is too long for its cell"
+    wb.active["A1"].alignment = Alignment(
+        readingOrder=1, indent=1, horizontal="distributed", shrink_to_fit=True
+    )
+    wb.active["B2"] = 1
+    path = save(wb, tmp_path / "odd.xlsx")
+    rewrite(path, STYLES, lambda text: text.replace(f'{field}="1"', f'{field}="{value}"', 1))
+    try:
+        sheet = sheetpeek.read(path)
+    except PackageError:
+        return
+    assert sheet.cell(1, 1).style.reading_order in (0, 1, 2)
+    for mode in ("excel", "characters", "none"):
+        sheetpeek.render(
+            sheet.layout(mode),
+            {"excel": "html", "characters": "text"}.get(mode, "csv"),
+            on_notice="ignore",
+        )
 
 
 @pytest.mark.parametrize("value", ["9" * 5000, "0x7", " 3", "", "1.5"])

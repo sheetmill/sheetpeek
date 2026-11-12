@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, Any, Literal, TypeAlias
 
 from sheetpeek._model import Cell, CellRange, Font, Row, column_letter
 from sheetpeek._outline_model import RenderedOutline
+from sheetpeek._text_model import TextDirection, TextRule
 
 if TYPE_CHECKING:
     from sheetpeek._census import Presence
@@ -144,6 +145,14 @@ class TextRun:
     font: Font
     color: str | None
     """The number format's section color, else the font color; ``None`` is automatic."""
+    scale: float = 1.0
+    """The drawn size over ``font.size``: 2/3 for superscript and subscript, times the step
+    shrink to fit chose (§4.13). ``width`` and the glyph widths are measured at the drawn size."""
+    rules: tuple[TextRule, ...] = ()
+    """The underlines and strikethrough drawn with the run (§4.13)."""
+    direction: TextDirection = "ltr"
+    """``rtl`` for a right-to-left paragraph: text whose first strong character is
+    right-to-left, unless the cell's reading order is left to right (§4.13)."""
 
 
 @dataclass(frozen=True, slots=True)

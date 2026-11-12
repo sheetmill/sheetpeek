@@ -27,6 +27,8 @@ HorizontalAlignment: TypeAlias = Literal[
 ]
 VerticalAlignment: TypeAlias = Literal["top", "center", "bottom", "justify", "distributed"]
 SheetState: TypeAlias = Literal["visible", "hidden", "very_hidden"]
+VerticalTextPosition: TypeAlias = Literal["superscript", "subscript"]
+ReadingOrder: TypeAlias = Literal[0, 1, 2]
 
 
 _NOT_ON_A_LINE = re.compile("[\x00-\x1f\x7f-\x9f\ud800-\udfff]")
@@ -162,6 +164,9 @@ class Font:
     ``doubleAccounting``."""
     strike: bool = False
     color: str | None = None
+    vert_align: VerticalTextPosition | None = None
+    """``superscript`` or ``subscript``: the whole cell's text drawn at two thirds of the size,
+    raised or lowered (``ARCHITECTURE.md`` §4.13); ``None`` on the baseline."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -179,6 +184,12 @@ class CellStyle:
     v_align: VerticalAlignment = "bottom"
     wrap: bool = False
     indent: int = 0
+    shrink: bool = False
+    """Whether text too wide for the cell is drawn smaller, in steps (shrink to fit, §4.13)."""
+    reading_order: ReadingOrder = 0
+    """The file's ``readingOrder``, 0 from the text (context), 1 left to right, 2 right to left."""
+    justify_last_line: bool = False
+    """``justifyLastLine`` of distributed text; Excel draws no difference (§4.13)."""
 
 
 @dataclass(frozen=True, slots=True)

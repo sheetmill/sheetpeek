@@ -63,6 +63,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   properties `--sheetpeek-outline-paper`, `--sheetpeek-outline-ink`,
   `--sheetpeek-outline-button`, `--sheetpeek-outline-button-paper`, and classes `sp-ol`,
   `sp-olbutton`, `sp-ollevel`.
+- Pattern fills: the 17 patterns are drawn in HTML as Excel draws them, from tiles captured on
+  the screen, anchored at the sheet's origin and fixed in screen pixels.
+- Gradient fills: linear gradients at Excel's angle, which is taken in the unit cell, and path
+  gradients in rectangular bands.
+- Borders: the four sides in all 13 styles and their colors, and diagonals, drawn in HTML as a
+  layer of lines in CSS px. Where two cells' sides meet, the layout keeps the one Excel draws
+  (the stronger style, then the darker color), keeps each cell's own sides around a merge, and
+  drops the vertical sides that spilled text crosses. `slantDashDot` is drawn as
+  `mediumDashDot`, and reported.
+- `CellStyle.fill_spec` (a `Pattern` or a `Gradient`) and `CellStyle.borders` (a `Borders` of
+  `Side`s), and `RenderedSheet.extra["borders"]`, a `RenderedBorders` of the resolved lines in
+  `excel` mode. New public types: `Pattern`, `Gradient`, `Fill`, `PatternKind`, `Borders`, `Side`,
+  `BorderStyle`, `RenderedBorders`, `Diagonal`.
+- Census codes `fill.pattern`, `fill.gradient`, `border`, `border.diagonal` and
+  `border.slant_dash_dot`, declared by every output: `rich` shows a pattern as one blended color
+  and a gradient as its midpoint color; borders are drawn only in HTML so far.
+- The HTML classes `sp-fills` and `sp-borders`.
+- Text styles are drawn in HTML (`excel` mode), from captures of Excel for Mac: superscript and
+  subscript (two thirds of the size, raised or lowered, rows fitted taller); accounting
+  underlines (under text across the cell, under a number across the number, 3 pt lower, rows 3 pt
+  taller); shrink to fit (the largest seventh of the size that fits, in place of `####`; shrunk
+  text never spills); vertical justify and distributed (lines spread from the top to the bottom,
+  text wrapped); indent on horizontally distributed text; reading order (`general` text that
+  starts right-to-left aligns right, and is drawn as a right-to-left paragraph unless the order
+  is left to right).
+- `Font.vert_align`; `CellStyle.shrink`, `CellStyle.reading_order` and
+  `CellStyle.justify_last_line`; `TextRun.scale`, `TextRun.rules` and `TextRun.direction`; and
+  `TextRule`, an underline or strikethrough of a run.
+- The HTML classes `sp-rule` and `sp-double`: underlines and strikethrough.
+- Census codes `font.vert_align`, `text.shrink` and `text.reading_order`, which every output
+  declares: `rich` and plain text clip shrunk text at full size and keep `#` for a number too
+  wide, and draw superscript and subscript at full size (`rich`) or plain (text); Markdown draws
+  them as plain text.
 
 ### Changed
 - Tints stored as 16-bit fractions (0.6 is stored as 0.59999389...) give the colors Excel draws:
@@ -83,6 +116,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - openpyxl's warning that it drops a sheet extension (conditional formatting, sparklines,
   slicers and others it does not read) is no longer passed on to the caller while sheetpeek reads a
   sheet; those extensions are reported as notices instead.
+- `CellStyle.fill` of a pattern fill is the blend of its two colors by the pattern's share,
+  not its foreground: a `gray0625` fill, 6.25 % black dots, was shown as solid black. A
+  gradient's is its midpoint color, where it was no fill.
+- A solid fill in indexed color 64 is no fill, and a fill index past the palette is black, as
+  Excel draws them; an index past the palette was no fill.
+- `border`, `border.diagonal`, `fill.pattern` and `fill.gradient` are no longer reported by the
+  reader for every output; each output reports them from the census.
+- Underlines and strikethrough in HTML are 1 px rules at Excel's offsets, not the browser's text
+  decorations, so they stay one pixel thick at any page scale.
+- Text whose first strong character is right-to-left (Hebrew, Arabic) with `general` alignment
+  is right-aligned in every output, as Excel aligns it.
+- Vertically justified text in `characters` mode is placed at the top, and distributed text
+  centered or spread, instead of at the bottom; both wrap.
+- Superscript, subscript, shrink to fit and reading order are no longer reported by the reader:
+  each output reports what it does with them. The layout notice `align.vertical_justify` is
+  removed, since `excel` mode draws vertical justify and distributed.
 
 ### Deprecated
 - `Sheet.warnings` and `RenderedSheet.warnings`, now views of the notices that were warnings

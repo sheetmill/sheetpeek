@@ -57,6 +57,7 @@ from sheetpeek._rendered import (
     SpillEdge,
     TextRun,
 )
+from sheetpeek._text_model import TextRule
 from sheetpeek.backends import Backend, notices, register_backend, render
 
 __version__ = "0.2.0"
@@ -110,6 +111,7 @@ __all__ = [
     "Side",
     "SpillEdge",
     "Support",
+    "TextRule",
     "TextRun",
     "VerticalAlignment",
     "__version__",

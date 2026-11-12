@@ -11,6 +11,7 @@ draws both.
 from __future__ import annotations
 
 import math
+from dataclasses import replace
 from typing import Any
 
 import xlformat
@@ -36,6 +37,21 @@ from sheetpeek._rows import (
     row_height,
     wrapped_height,
 )
+from sheetpeek._text_model import TextDirection
+from sheetpeek._text_styles import (
+    ACCOUNTING_EXTRA,
+    SHRINK_STEPS,
+    accounting,
+    right_to_left,
+    row_extras,
+    rules,
+    scaled,
+    shrink_step,
+    vert_scale,
+    vert_shift,
+)
+
+_SPREAD = ("justify", "distributed")
 
 
 def lay_out(draft: Draft) -> tuple[tuple[RenderedColumn, ...], tuple[RenderedRow, ...]]:
@@ -122,15 +138,22 @@ def _fitted(
     height = row_height(row, sheet)
     if not fits_cells(row, sheet):
         return height
+    styled = []
     for p in read:
         cell = grid.cell(i, p)
         height = max(height, font_row_height(cell.font))
+        if cell.kind != "empty" and (cell.font.vert_align or accounting(cell.font)):
+            styled.append(cell.font)
         # A merged cell's font counts, its wrapped lines do not (captured).
         merged = (row.index, grid.columns[p].index) in grid.merge_of
         if cell.kind == "text" and cell.style.wrap and widths[p] and not merged:
             budget = widths[p] - base.left_inset - base.right_inset
             lines = _wrap(str(cell.value), budget, fonts.get(cell.font))
             height = max(height, wrapped_height(len(lines), cell.font))
+    # Superscript, subscript and accounting underlines grow the row (§4.13); the row fits the
+    # unshrunk size of shrunk text, so shrink adds nothing.
+    for font, extra in row_extras(styled):
+        height = max(height, font_row_height(font) + extra)
     return height
 
 
@@ -248,42 +271,71 @@ class _Points:
         x0, x1 = self.xs[first], self.xs[last] + self.widths[last]
         top = self.ys[origin.rows[0]]
         bottom = self.ys[origin.rows[-1]] + self.heights[origin.rows[-1]]
-        font = self.fonts.get(cell.font)
+        style = cell.style
+        font = self.fonts.get(cell.font)  # at the drawn size of superscript and subscript
+        size = cell.font.size * vert_scale(cell.font)
         align = shown.align
         budget = (x1 - x0) - self.left_inset - self.right_inset
-        wraps = cell.kind == "text" and (cell.style.wrap or align in ("justify", "distributed"))
+        v_align = style.v_align
+        # Distributed and justified text wraps, horizontally or vertically (§3.6, §4.13).
+        wraps = cell.kind == "text" and (
+            style.wrap or align in ("justify", "distributed") or v_align in _SPREAD
+        )
+        indent = style.indent * self.digit
         text = shown.text
+        single = len(origin.rows) == len(origin.cols) == 1  # a merge is not shrunk (§4.13)
+        if style.shrink and not wraps and single and align in ("left", "right", "center"):
+            # Shrink to fit replaces #### with the value, drawn small enough to fit (§4.13).
+            if shown.overflow:
+                shown.text = text = shown.full_text
+                shown.overflow = False
+            step = shrink_step(text, font, budget - indent)
+            font = scaled(font, step / SHRINK_STEPS)
+            size *= step / SHRINK_STEPS
         # a line break in a cell without wrapping is not drawn
         lines = _wrap(text, budget, font) if wraps else [text.replace("\r", "").replace("\n", "")]
         line, above, below = baseline_offsets(cell.font)
+        if accounting(cell.font):
+            below += ACCOUNTING_EXTRA  # the underline's room under the text
         n = len(lines)
         if n > 1:
             line += WRAPPED_LEADING  # provisional: the pitch of a fitted wrapped row
-        v_align = cell.style.v_align
+        pitch = line
         if n * line > bottom - top:
             # Lines that do not fit start at the top: a custom-height row shows its first line
             # (captured, layout rows 161 to 168; unverified for centered text).
             first_baseline = top + above
-        elif v_align == "center":
+        elif v_align in _SPREAD and n > 1:
+            # From the top position to the bottom one, evenly (§4.13).
+            first_baseline = top + above
+            pitch = (bottom - below - first_baseline) / (n - 1)
+        elif v_align in ("center", "distributed"):
             first_baseline = top + math.floor((bottom - top - n * line) / 2) + above
         elif v_align == "bottom":
             first_baseline = bottom - below - (n - 1) * line
         else:
             first_baseline = top + above
-        indent = cell.style.indent * self.digit
+        first_baseline += vert_shift(cell.font)
         color = shown.format_color or cell.font.color
+        direction: TextDirection = (
+            "rtl" if style.reading_order != 1 and right_to_left(text) else "ltr"
+        )
         source = (cell.row, cell.column)
         low, high = first, last
-        placed: list[tuple[str, float, str, float]] = []  # (text, x, anchor, baseline)
+        own = (x0, x1) if cell.kind == "text" else None  # an accounting underline's span
+        placed: list[tuple[str, float, str, float, bool]] = []  # text, x, anchor, baseline, first
         for k, line_text in enumerate(lines):
-            baseline = first_baseline + k * line
+            baseline = first_baseline + k * pitch
             width = xlformat.text_width(line_text, font=font)
             words = line_text.split()
             if align == "fill":
                 copies = max(1, math.floor(budget / width)) if width else 1
                 pieces = [(line_text * copies, x0 + self.left_inset, "left")]
             elif align == "distributed" or (align == "justify" and k < n - 1 and len(words) > 1):
-                pieces = self.spread(words, x0, x1, font, align == "distributed")
+                distributed = align == "distributed"
+                pieces = self.spread(
+                    words, x0, x1, font, distributed, indent if distributed else 0.0
+                )
             elif align == "right" and not shown.overflow:
                 pieces = [(line_text, x1 - self.right_inset - indent - width, "right")]
             elif align == "center" or shown.overflow:
@@ -295,33 +347,52 @@ class _Points:
             if origin.spills and n == 1 and align in ("left", "right", "center"):
                 x = pieces[0][1]
                 low, high = self.spill(origin, x, x + width, align)
-            placed.extend((piece, x, anchor, baseline) for piece, x, anchor in pieces)
-        clip = (self.xs[low] + 1, top + 1, self.xs[high] + self.widths[high], bottom)
-        runs = [
-            TextRun(
-                piece,
-                x,
-                baseline,
-                xlformat.text_width(piece, font=font),
-                clip,
-                anchor,  # type: ignore[arg-type]
-                source,
-                cell.font,
-                color,
+            placed.extend(
+                (piece, x, anchor, baseline, j == 0) for j, (piece, x, anchor) in enumerate(pieces)
             )
-            for piece, x, anchor, baseline in placed
-            if piece
-        ]
+        clip = (self.xs[low] + 1, top + 1, self.xs[high] + self.widths[high], bottom)
+        scale = size / cell.font.size
+        runs = []
+        for piece, x, anchor, baseline, first_piece in placed:
+            if not piece:
+                continue
+            width = xlformat.text_width(piece, font=font)
+            ruled = rules(cell.font, size, baseline, (x, x + width), own)
+            if own is not None and accounting(cell.font) and not first_piece:
+                # An accounting underline under text spans the cell, once per line.
+                ruled = tuple(r for r in ruled if r.kind != "underline")
+            runs.append(
+                TextRun(
+                    piece,
+                    x,
+                    baseline,
+                    width,
+                    clip,
+                    anchor,  # type: ignore[arg-type]
+                    source,
+                    cell.font,
+                    color,
+                    scale,
+                    ruled,
+                    direction,
+                )
+            )
         return runs, low, high, n
 
     def spread(
-        self, words: list[str], x0: float, x1: float, font: xlformat.Font, distributed: bool
+        self,
+        words: list[str],
+        x0: float,
+        x1: float,
+        font: xlformat.Font,
+        distributed: bool,
+        indent: float = 0.0,
     ) -> list[tuple[str, float, str]]:
-        """Words spread across the cell between its insets.
+        """Words spread across the cell between its insets, less ``indent`` at both ends.
 
         A single word is centered there when ``distributed`` and left-aligned otherwise.
         """
-        lo, hi = x0 + self.left_inset, x1 - self.right_inset
+        lo, hi = x0 + self.left_inset + indent, x1 - self.right_inset - indent
         widths = [xlformat.text_width(w, font=font) for w in words]
         if len(words) == 1:
             if distributed:
@@ -379,10 +450,12 @@ def _shifted(run: TextRun, dx: float) -> TextRun:
     if not dx:
         return run
     left, top, right, bottom = run.clip
-    return TextRun(
-        run.text, run.x - dx, run.y, run.width, (left - dx, top, right - dx, bottom),
-        run.align, run.source, run.font, run.color,
-    )  # fmt: skip
+    return replace(
+        run,
+        x=run.x - dx,
+        clip=(left - dx, top, right - dx, bottom),
+        rules=tuple(replace(r, x0=r.x0 - dx, x1=r.x1 - dx) for r in run.rules),
+    )
 
 
 def _wrap(text: str, budget: float, font: xlformat.Font) -> list[str]:

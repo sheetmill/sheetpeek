@@ -1,11 +1,15 @@
-"""Fonts: name, size, bold, italic, underline, strike and color are read; the rest reported."""
+"""Fonts: name, size, bold, italic, underline, strike, color and superscript or subscript are read.
+
+Outline, shadow, condense and extend are not read: Excel for Mac draws them as plain text
+(``ARCHITECTURE.md`` §4.13). A scheme font whose stored name is not the theme's is reported.
+"""
 
 from __future__ import annotations
 
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
-from sheetpeek._model import Font
+from sheetpeek._model import Font, VerticalTextPosition
 from sheetpeek._package import PackageError
 
 if TYPE_CHECKING:
@@ -38,7 +42,14 @@ def to_font(font: Any, normal: Font, color_of: Callable[[Any], str | None]) -> F
         underline=font.u or None,
         strike=bool(font.strike),
         color=color_of(color),
+        vert_align=_VERT_ALIGN.get(font.vertAlign),
     )
+
+
+_VERT_ALIGN: dict[Any, VerticalTextPosition] = {
+    "superscript": "superscript",
+    "subscript": "subscript",
+}
 
 
 def size(value: float) -> float:
@@ -50,10 +61,8 @@ def size(value: float) -> float:
 
 
 def unread(part: Any, context: Context) -> Found:
-    """Superscript and subscript, and a scheme font whose stored name is not the theme's."""
+    """A scheme font whose stored name is not the theme's."""
     found: Found = ([], [])
-    if part.vertAlign in ("superscript", "subscript"):
-        found[1].append(("font.vert_align", "", ()))
     theme = context.theme_fonts.get(part.scheme or "")
     if theme and part.name and part.name.lower() != theme.lower():
         found[1].append(

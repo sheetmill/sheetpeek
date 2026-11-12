@@ -110,6 +110,8 @@ layout fields marked *layout*. The style fields (`number_format` to `indent`) li
 | `v_align` | `"top" \| "center" \| "bottom" \| "justify" \| "distributed"` | `cell.alignment.vertical`, default `bottom` | |
 | `wrap` | `bool` | `cell.alignment.wrap_text` | |
 | `indent` | `int` | `cell.alignment.indent` | one indent level is one digit's width, 6 pt at Calibri 11 (§4.6) |
+| `shrink`, `reading_order`, `justify_last_line` | `bool`, `0 \| 1 \| 2`, `bool` | `cell.alignment.shrinkToFit`, `readingOrder` (anything but 1 or 2 is 0), `justifyLastLine` | §4.13 |
+| `font.vert_align` | `"superscript" \| "subscript" \| None` | `cell.font.vertAlign` | drawn at 2/3 size, raised or lowered (§4.13) |
 | `hyperlink` | `Hyperlink \| None` | the structure scan's `<hyperlinks>` and `HYPERLINK()` formulas (§4.10) | `target`, `location`, `tooltip`, `display` (never drawn), `source` (`element` or `formula`) |
 | *layout* `text` | `str` | xlformat `FormattedCell.text` at the mode's width | what the cell itself shows: `####`, reduced `General`, `*` fills applied; never clipped or spilled |
 | *layout* `full_text` | `str` | `FormattedCell.full_text` | width-less; what copy and paste gives |
@@ -123,10 +125,9 @@ layout fields marked *layout*. The style fields (`number_format` to `indent`) li
 | *layout* `fill` | `str \| None` | the cell's own fill; the anchor's for a merged cell | the background of this column, also under text spilled into it |
 | *layout* `font`, `color` | | the source cell's font, and its section color else its font color | the style of the text drawn here |
 
-**Borders are not read.** They are cheap to read, but drawing them well differs in every
-backend, and gridlines already give a table its structure. A `borders` field with four
-`(style, color)` sides is the natural shape when they are added. Rich-text runs inside one cell
-are flattened to the cell's font.
+**Borders and fills** are read into `CellStyle.borders` and `CellStyle.fill_spec` (§4.12), and
+text styles into `Font` and `CellStyle` (§4.13). Rich-text runs inside one cell are flattened to
+the cell's font.
 
 ### 3.2 What a sheet carries
 
@@ -196,6 +197,8 @@ palette recolors those in Excel. sheetpeek ignores that and documents it.
 | borders (§4.12) | a layer of lines in CSS px, conflicts resolved in the layout | no | no | no | no |
 | hyperlinks (§4.10) | `<a>` around the cell's runs; links to shown cells go to their id | terminal hyperlinks (OSC 8), external targets only | text only | `[text](url)`, external targets only | text only |
 | outline symbols (§4.11) | gutter cells beside the headings, `buttons` | a gutter of characters, `buttons` | as rich | no | no |
+| superscript, subscript, shrink to fit (§4.13) | drawn | full size, shrunk text clipped | as rich | plain | no |
+| underline kinds, strikethrough (§4.13) | 1 px rules at Excel's offsets | the terminal's underlines | no | no | no |
 
 Spill in HTML is computed in the model, not left to the browser, and the browser's font must not
 draw past it. Whatever the technique, the HTML backend shows the same spill as every other
@@ -276,6 +279,9 @@ text outside is cut through a glyph), `align` (the point a different font keeps 
   line; `justify` spreads every line but the last, `distributed` every line, a lone word centered
   between the insets (row 162). `fill` repeats whole copies of the text that fit between the
   insets (row 159).
+- **Text styles** (§4.13): a run's `scale` is its drawn size over `font.size` (superscript,
+  subscript, shrink to fit), its `rules` its underlines and strikethrough, its `direction` `rtl`
+  for a right-to-left paragraph. Vertically justified and distributed lines are spread.
 - `scale` and `max_width` raise `ValueError` in `excel` mode.
 
 `tests/test_captures.py` lays the `layout` workbook out in `excel` mode too: every row's crossed
@@ -294,16 +300,14 @@ reason and context, never one per cell.
 
 Three producers, one for each stage:
 1. **The reader** (`Sheet.notices`, `_detect.py`) reports what the file uses that the model does
-   not carry. Styles are checked once per style, by each aspect in `_style/` (borders, pattern
-   and gradient fills, superscript and subscript, scheme fonts against the theme's typefaces,
-   rotation, shrink, reading order); the structure scan marks rich-text and phonetic cells,
-   uncached formulas, outline levels outside 0 to 7, row and column styles, and links no
+   not carry. Styles are checked once per style, by each aspect in `_style/` (scheme fonts
+   against the theme's typefaces, rotation); the structure scan marks rich-text and phonetic
+   cells, uncached formulas, outline levels outside 0 to 7, row and column styles, and links no
    output can follow (§4.10); the sheet's other children, its drawing, VML, comments and
    threaded comments parts, and the workbook's sheet kinds and print names give the rest.
-   Notices on cells a layout
-   hides are dropped there (`_notices.visible`).
+   Notices on cells a layout hides are dropped there (`_notices.visible`).
 2. **The layout** (`RenderedSheet.notices`) adds what every output approximates: fonts without
-   glyph tables, refused formats, unshowable values, vertically justified text in `excel` mode,
+   glyph tables, refused formats, unshowable values,
    hidden rows and columns kept by `show_hidden`, and outline groups whose summary the range cuts
    off (§4.11).
 3. **Each output**: the layout's census (`RenderedSheet.features`, `_census.py`) records the
@@ -571,6 +575,9 @@ which rows have a `<row>` element, whether the sheet has `<sheetFormatPr>`, and 
 In `characters` mode the break uses Python's `textwrap` (long words broken), by characters; `excel`
 mode breaks by `text_width` (§3.6).
 
+Superscript, subscript and accounting underlines grow a fitted row, and shrunk text fits it at its
+unshrunk size (§4.13).
+
 ### 4.8 How Excel saves formula results
 
 **Captured** (`capture/excel_saved.py`; the saved file is `tests/files/excel_formulas.xlsx`):
@@ -781,6 +788,95 @@ ending 1 pt short of the right gridline).
 **Other outputs.** `rich` shows a pattern as its blended color and a gradient as its midpoint
 color (approximated) and no borders (`not_implemented`: an option could later draw box lines);
 plain text, Markdown, CSV and TSV show neither fills nor borders.
+
+### 4.13 Text styles
+
+**Captures** (Excel 16 for Mac, Office Home & Business 2021, Calibri 11 at zoom 100
+and 200, measured on the screen image at 2 image pixels a screen point). Every rule here stays
+**unverified until it is recaptured after the move to Microsoft 365**; the tests that rest on
+them (`tests/test_text_styles.py`) say so. Sizes other than those captured are scaled from them,
+unverified. The rules live in `_text_styles.py` and `_excel.py`.
+
+**Superscript and subscript** (`Font.vert_align`). The whole cell's text is drawn at 2/3 of its
+size (cap heights 0.64 to 0.68 of the plain text's at 11 and 24 pt), its baseline raised by
+`round(0.48 × size)` or lowered by `round(0.18 × size)` from the cell's baseline (5 and 2 pt at
+11 pt, 12 and 4 pt at 24 pt). It is measured at the drawn size, for wrapping, `####` and spill
+as for its runs (unverified for `####`). A fitted row grows by 2 pt at 11 pt (17 pt) and 6 pt at
+24 pt (37 pt against 31), linearly between and beyond and never below 0 (unverified); a row
+holding both kinds grows 1 pt more at 11 pt (18 pt), half the one-kind growth at other sizes
+(unverified). `TextRun.scale` carries the drawn size over `font.size`.
+
+**Underlines and strikethrough** are lines **1 screen pt thick at any zoom**, as gridlines and
+outline symbols are: one CSS pixel at any page scale (decided), at whole-pixel positions. The
+model gives each run its `TextRule`s (`TextRun.rules`): where a line starts and ends and the top
+of the first line, in points, offset from the run's baseline by the 11 pt captures scaled with
+the drawn size (unverified at other sizes). A second line is 2 screen pt below the first.
+- Single: 1 pt below the baseline; double: 0 pt, and a second line. Both span the text.
+- Single accounting: 3 pt below the baseline; double accounting a second line. **On text they
+  span the cell**, from 3 pt after its left gridline to 2 pt before the next one, even under
+  two letters in a 213 pt cell; a merge spans the merge, wrapped text gets one line per line,
+  distributed words one line under the whole line (both unverified). **On a number, boolean or
+  error they span the value**, like a single underline (Excel for Windows is said to span
+  numbers too; unverified). They add 3 pt under the text: a fitted row is 18 pt, not 15, and
+  a bottom-aligned baseline sits 6 pt above the cell's bottom, also in a row of fixed height
+  (unverified).
+- Strikethrough: 3 pt above the baseline, the text's width.
+
+**Outline, shadow, condense and extend** are drawn as plain text by Excel for Mac (the same ink
+at both zooms): they are not read, and nothing is reported.
+
+**Shrink to fit** (`CellStyle.shrink`). Text too wide for its cell is drawn at the largest `k/7`
+of its size, `k` from 1 to 7, that fits between the insets, less the indent: a fixed screen step
+(1/14 at zoom 200), so the layout, made at zoom 100, uses sevenths. 18 of the 19 captured lengths
+(4 to 22 Hs in a default column) take Excel's step; ten Hs take 4/7 where Excel draws 5/7 (their
+width at 5/7 measures 50 pt in a 48 pt budget), a known deviation. Captured at Calibri 11 only;
+the step at other sizes is unverified, and when even 1/7 does not fit the text is clipped
+(decided). **It replaces `####`**: a value whose format overflows shows its full text, shrunk
+(`RenderedCell.text` is that text). **Wrap overrides it**, as do horizontal and vertical justify
+and distributed, which wrap. **Shrunk text never spills**, in every mode. **Rows fit the unshrunk
+size** (captured at 20 pt). A merge with the flag on its anchor is not shrunk, clipped at the
+merge's edge (captured once, doubtful). The baseline stays where unshrunk text would sit
+(unverified).
+
+**Vertical justify and distributed** wrap text whose wrap flag is off (captured: the file still
+says it does not wrap). One line sits at the top (justify) or the center (distributed). Several
+lines spread from the top position to the bottom one with an even pitch: the first baseline 11
+pt below the top, the last 3 pt above the bottom at Calibri 11. Lines that do not fit start at the
+top, as other wrapped text. Characters mode spreads them in whole lines, and does what Excel does
+with one line.
+
+**Horizontal distributed** spreads the words between the insets, a single word centered
+(§3.6), and wraps. **Indent moves both ends in** (captured: 12 pt for indent 2). `justifyLastLine`
+is read (`CellStyle.justify_last_line`) and changes nothing: distributed already spreads the last
+line (captured). The row fitted for distributed text (48 pt for two drawn lines) is not
+reproduced: fitting counts wrapped cells only (open).
+
+**Indent** is 6 pt a level (§4.6) on the side the alignment resolves to, `general` included:
+right-aligned text and numbers end `2 + 6n` pt before the next gridline (captured as ink 3, 9
+and 21 pt for indents 0, 1 and 3, and 15 pt for a `general` number with indent 2).
+
+**Reading order** (`CellStyle.reading_order`: 0 context, 1 left to right, 2 right to left).
+**`general` text whose first strong character is right-to-left aligns right whatever the
+order**, in every mode (captured: Hebrew with order 0 and with order 1). Its runs are a
+right-to-left paragraph (`TextRun.direction`, `rtl`), unless the order is 1, which makes the
+paragraph left to right: the "!" after Hebrew moves to the right end (captured). Order 2 on Latin
+text changed nothing (captured once, doubtful), so it is not applied. A file's value other than
+0, 1 or 2 is read as 0.
+
+**Drawn in HTML** (`backends/html/_text.py`): a run's `font` size is `font.size × scale`; its
+rules are `<i class="sp-rule">` elements beside it in its clip window, 1 px high, a double
+underline one `sp-double` element 3 px high with a top and a bottom border; a right-to-left run
+has `direction: rtl`.
+
+**Other outputs** (decided; each declared in `backends/_support.py`):
+
+| feature | `rich` | text | Markdown | CSV, TSV |
+|---|---|---|---|---|
+| superscript, subscript | approximated: full size on the baseline | omitted, as other font styles | approximated: plain text | omitted |
+| accounting underlines | approximated: the terminal's underline | omitted | omitted | omitted |
+| shrink to fit | approximated: text clipped at full size, a number too wide shows `#` | the same | shown: the full text, nothing to shrink | shown |
+| vertical justify, distributed | spread in whole lines (as `align.vertical`) | the same | omitted (as `align.vertical`) | omitted |
+| reading order | approximated: the terminal's own text direction | the same | omitted | omitted |
 
 ## 5. openpyxl facts that constrain the design
 
@@ -1269,6 +1365,10 @@ points.
   draws a link. `href` only for an allowed URL (with `rel="noopener noreferrer"`, and
   `target="_blank"` with `new_tab=True`) or a cell on the page (`#sp-C2`, the id on the cell
   that draws it, a merge's first visible cell); `title` is the tooltip alone.
+- **Text styles** (§4.13): underlines and strikethrough are `<i class="sp-rule">` elements, 1 px
+  at any page scale, a double one `sp-double`; `sp-rule` and `sp-double` join the public classes.
+  Superscript, subscript and shrunk runs take their drawn size; a right-to-left run
+  `direction: rtl`.
 - **Page or fragment:** a page is a standalone document titled with the sheet's name; a
   fragment is the stylesheet and the `<div class="sheetpeek">`, for a host page.
 - **Size** (`bench/html_size.py`, 5,000 rows × 20 columns, 100,000 cells and 97,144 runs, Apple
@@ -1305,6 +1405,7 @@ src/sheetpeek/
   _outline_model.py  Outline, OutlineMark, RenderedOutline (§4.11)
   _fill_border_model.py  Pattern, Gradient, Side, Borders, RenderedBorders; the conflict rule (§4.12)
   _fill_border_census.py fills and borders in the census; the style that draws a cell's fill
+  _text_model.py     TextRule, the lines drawn with text (§4.13)
   _rendered.py       RenderedSheet, RenderedRow, RenderedCell, RenderedColumn, Gap
   _package.py        ReadLimits, the check before reading (§5.5), sheet name → worksheet part
   _structure.py      the structure scan (§5.4): one handler per element
@@ -1322,6 +1423,7 @@ src/sheetpeek/
   _pass_borders.py   the borders pass: one resolved side per edge, the diagonals (§4.12)
   _excel.py          excel mode: geometry in points, text runs, clips
   _rows.py           row heights (§4.7) and baselines
+  _text_styles.py    superscript, subscript, underlines, shrink to fit, direction (§4.13)
   backends/
     __init__.py      Backend protocol, registry, render(), notices()
     _support.py      what each output shows of each feature (§3.7)

@@ -81,6 +81,7 @@ an API change.
 | `sp-clip` | a text's clip window |
 | `sp-run` | a text |
 | `sp-center` | a centered text |
+| `sp-rule`, `sp-double` | an underline or strikethrough, 1 px thick; a double underline |
 | `sp-colhead`, `sp-rowhead`, `sp-corner` | the headings |
 | `sp-ol`, `sp-olbutton`, `sp-ollevel` | the outline gutter's cells, its − and + buttons, its level buttons |
 | `sp-fills`, `sp-borders` | the layers of pattern and gradient fills and of borders, each a box per fill or line; their own classes (`sp-f-…`, `sp-b-…`) are generated per page |

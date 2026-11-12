@@ -76,6 +76,8 @@ Everything below is importable from `sheetpeek`.
    :members:
 .. autoclass:: sheetpeek.TextRun
    :members:
+.. autoclass:: sheetpeek.TextRule
+   :members:
 .. autoclass:: sheetpeek.Gap
    :members:
 .. autoclass:: sheetpeek.RenderedBorders

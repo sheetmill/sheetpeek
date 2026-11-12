@@ -74,6 +74,12 @@ def census(rendered: RenderedSheet) -> dict[str, Presence]:
                 add("font.underline_accounting", row, column)
             if font.strike:
                 add("font.strike", row, column)
+            if font.vert_align is not None:
+                add("font.vert_align", row, column)
+            if style.shrink:
+                add("text.shrink", row, column)
+            if style.reading_order:
+                add("text.reading_order", row, column)
             if font.color is not None:
                 add("font.color", row, column)
             if rendered_cell.format_color is not None:
