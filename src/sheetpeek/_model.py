@@ -20,6 +20,7 @@ from sheetpeek._outline_model import Outline
 if TYPE_CHECKING:
     from sheetpeek._notices import Notice
     from sheetpeek._rendered import Mode, RenderedSheet, SpillEdge
+    from sheetpeek._runs_model import TextSpan
 
 CellKind: TypeAlias = Literal["empty", "number", "text", "bool", "error"]
 HorizontalAlignment: TypeAlias = Literal[
@@ -208,6 +209,9 @@ class Cell:
     style: CellStyle
     hyperlink: Hyperlink | None = None
     """The cell's link, from a ``<hyperlink>`` element or a ``HYPERLINK()`` formula."""
+    runs: tuple[TextSpan, ...] | None = None
+    """The text's rich-text runs, each in its own font, or ``None`` when the text has none or
+    every run is in the cell's font; ``value`` holds their text joined (§4.16)."""
 
     @property
     def number_format(self) -> str:

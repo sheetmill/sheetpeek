@@ -13,8 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   not read yet, or that the layout approximates, and `sheetpeek.notices(source, to=...)` adds what
   that output cannot show, without rendering. A notice has a dotted code (`FEATURES` lists them),
   an outcome (`omitted` or `approximated`), a reason, the cells and the output.
-- Reported when a file uses them, until they are drawn: rotated and stacked text, rich-text runs,
-  phonetic guides, row and column formats, sheet views (hidden zeros, right to left, formulas,
+- Reported when a file uses them, until they are drawn: rotated and stacked text, phonetic
+  guides, rich-text runs in inline strings (which openpyxl does not keep), row and column formats, sheet views (hidden zeros, right to left, formulas,
   page layout, panes), conditional formatting, filter buttons,
   tables, sparklines, slicers, timelines, pictures, charts, shapes, embedded objects, form
   controls, background pictures, notes and threaded comments, print areas, print titles, manual
@@ -105,6 +105,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `rich` draws the column separators in it.
 - `format.palette`: a number format's `[ColorN]` that the workbook's palette recolors is reported,
   since the layout draws section colors from Excel's default palette.
+- Rich-text runs are drawn, from captures of Excel for Mac. A run without properties takes the
+  cell's font, and a run with properties takes nothing from it. In `excel` mode each run is
+  measured in its own font for spill, `####`, wrapping and shrink to fit, and each line takes the
+  height of its largest run. HTML draws a nested span per run on one baseline, superscript and
+  subscript runs raised and lowered; Markdown with `emphasis=True` marks each run's bold and
+  italic.
+- `Cell.runs`, the runs of a cell's text, and `TextRun.spans`, each piece of a line with its
+  font, width, size and baseline shift. New public type: `TextSpan`.
+- Census code `text.runs`, which every output declares: `rich` draws runs in the cell's font,
+  plain text, CSV and TSV leave them out, and Markdown shows bold and italic runs with
+  `emphasis=True`. A cell with runs is also counted under each font feature its runs use.
+- Reader code `text.runs_lost`: the runs of inline strings (what openpyxl writes), which
+  openpyxl's read-only reader drops; they are drawn in the cell's font.
 
 ### Changed
 - Tints stored as 16-bit fractions (0.6 is stored as 0.59999389...) give the colors Excel draws:
@@ -146,6 +159,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   dark `#161616`, `#ffffff` and `#565656`; light `#f7f7f7`, `#5e5e5e` and `#e0dfdd`.
 - A workbook palette replaces the default entry by entry; a `<colors>` element without
   `indexedColors` keeps the default palette instead of drawing indexed colors black.
+- Rich-text runs are no longer reported by the reader as drawn in the cell's font: each output
+  reports what it does with them.
+- A row fitted to a Calibri 20 cell is 26 pt, as Excel fits it, instead of Calibri 16's 21.
 
 ### Deprecated
 - `Sheet.warnings` and `RenderedSheet.warnings`, now views of the notices that were warnings

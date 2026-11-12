@@ -26,6 +26,7 @@ from tests.workbooks import (
     replace_sheet_data,
     rewrite,
     save,
+    shared_strings,
     state_size,
 )
 
@@ -796,3 +797,44 @@ def test_every_committed_workbook_passes():
     for path in files:
         with sheetpeek.open(path) as book:
             assert book.sheet_names
+
+
+# Numbers of rich-text runs, in the shared strings: a run's size, and its color's index and tint.
+ODD_RUN_FIELDS = {
+    "size": '<sz val="{}"/>',
+    "color index": '<color indexed="{}"/>',
+    "color theme": '<color theme="{}"/>',
+    "color tint": '<color theme="4" tint="{}"/>',
+}
+
+
+@pytest.mark.parametrize("field", ODD_RUN_FIELDS)
+@bounded
+def test_no_mode_allocates_or_fails_by_an_odd_run_number(tmp_path, field):
+    # One bounded child for each field, trying every odd number (as above).
+    wb = openpyxl.Workbook()
+    wb.active["A1"] = "x"
+    wb.active["A1"].alignment = Alignment(wrap_text=True, shrink_to_fit=True)
+    wb.active["A2"] = "x"
+    plain = save(wb, tmp_path / "plain.xlsx").read_bytes()
+    for value in ODD_NUMBERS:
+        path = tmp_path / "odd.xlsx"
+        path.write_bytes(plain)
+        properties = ODD_RUN_FIELDS[field].format(value)
+        runs = (
+            f"<r><rPr>{properties}</rPr><t>a run of words long enough to wrap</t></r>"
+            '<r><rPr><vertAlign val="superscript"/></rPr><t>2</t></r>'
+        )
+        shared_strings(path, {"A1": runs, "A2": runs})
+        try:
+            sheet = sheetpeek.read(path)
+        except PackageError:
+            continue
+        for mode in ("excel", "characters", "none"):
+            page = sheetpeek.render(
+                sheet.layout(mode),
+                {"excel": "html", "characters": "text"}.get(mode, "csv"),
+                on_notice="ignore",
+            )
+            assert "nan" not in page.lower().replace("sans", ""), (field, value, mode)
+        sheetpeek.render(sheet, "markdown", on_notice="ignore")

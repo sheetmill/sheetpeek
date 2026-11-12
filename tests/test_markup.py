@@ -33,6 +33,7 @@ from tests.workbooks import (
     replace_sheet_data,
     rewrite,
     save,
+    shared_strings,
 )
 
 MARK = "PWN"
@@ -64,7 +65,7 @@ HTML_ATTRIBUTES = {
 STYLE_PROPERTIES = {
     "width", "height", "left", "right", "top", "font", "color", "background", "border-color",
     "margin-top", "border-left-color", "border-top-color", "letter-spacing", "text-decoration",
-    "background-position",
+    "background-position", "line-height", "position",
 }  # fmt: skip
 MARKDOWN_TAGS = {"table", "thead", "tbody", "tr", "th", "td", "br", "p", "strong", "em", "a"}
 LINK_SCHEMES = ("http", "https", "mailto")
@@ -487,6 +488,49 @@ def hyperlink_formula(tmp_path):
     return cell_xml(tmp_path, f'<c r="A2" t="str"><f>HYPERLINK("{target}")</f><v>x</v></c>')
 
 
+def _rich(tmp_path, runs, **options):
+    """A2 holding a shared string of rich-text runs, as Excel writes them."""
+    path = _styled(tmp_path, **options) if options else xml_text(tmp_path, A2="x")
+    return shared_strings(path, {"A2": runs})
+
+
+_THIRD = len(PAYLOAD) // 3
+RUNS = (
+    f"<r><rPr><b/></rPr><t>{escape(PAYLOAD[:_THIRD])}</t></r>"
+    f'<r><rPr><i/><vertAlign val="superscript"/><sz val="20"/></rPr>'
+    f'<t xml:space="preserve">{escape(PAYLOAD[_THIRD : 2 * _THIRD])}</t></r>'
+    f'<r><rPr><u val="doubleAccounting"/><strike/><color rgb="FF00FF00"/></rPr>'
+    f"<t>{escape(PAYLOAD[2 * _THIRD :])}</t></r>"
+)
+
+
+def runs(tmp_path):
+    return _rich(tmp_path, RUNS)
+
+
+def runs_wrapped(tmp_path):
+    return _rich(tmp_path, RUNS, alignment=Alignment(wrap_text=True))
+
+
+def runs_filled(tmp_path):
+    return _rich(tmp_path, RUNS, alignment=Alignment(horizontal="fill", shrink_to_fit=True))
+
+
+def run_font_name(tmp_path):
+    return _rich(
+        tmp_path, f"<r><rPr><rFont val={quoteattr(PAYLOAD)}/></rPr><t>x</t></r><r><t>y</t></r>"
+    )
+
+
+def run_rgb(tmp_path):
+    return _rich(tmp_path, f"<r><rPr><color rgb={quoteattr(PAYLOAD)}/></rPr><t>x</t></r>")
+
+
+def inline_runs(tmp_path):
+    runs = f"<r><rPr><b/></rPr><t>{escape(PAYLOAD)}</t></r><r><t>y</t></r>"
+    return cell_xml(tmp_path, f'<c r="A2" t="inlineStr"><is>{runs}</is></c>')
+
+
 def properties(tmp_path):
     path = xml_text(tmp_path, A2="x")
     return rewrite(path, "docProps/core.xml", replace_once("openpyxl", escape(PAYLOAD)))
@@ -507,6 +551,8 @@ SOURCES = [
     hyperlink_mailto, hyperlink_refused, hyperlink_tab, hyperlink_tooltip, hyperlink_formula,
     properties, defined_name,
     theme_font_name,
+    runs, runs_wrapped, runs_filled, run_font_name, run_rgb,
+    inline_runs,
 ]  # fmt: skip
 # Whichever of these openpyxl validates, it refuses when it loads the file: nothing is shown.
 BACKENDS = {
@@ -546,14 +592,14 @@ def read_or_refused(path):
 # this table is checked: "refused" raises on load, "absent" is by design never shown (a theme
 # without valid colors, a hidden cell, a refused format's General, what no backend draws).
 REACHES = {
-    "refused": {"date_text", "style_rgb", "palette", "border_rgb", "gradient_rgb"},
+    "refused": {"date_text", "style_rgb", "palette", "border_rgb", "gradient_rgb", "run_rgb"},
     "absent": {
         "hidden", "format_refused", "theme_srgb", "theme_system", "hyperlink", "properties",
         "defined_name", "hyperlink_refused", "hyperlink_tab",
     },
     "attribute": {
         "normal_font_name", "hyperlink_target", "hyperlink_mailto", "hyperlink_tooltip",
-        "hyperlink_formula", "theme_font_name",
+        "hyperlink_formula", "theme_font_name", "run_font_name",
     },
 }  # fmt: skip
 

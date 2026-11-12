@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 import re
+from itertools import groupby
 from typing import Literal, TextIO
 from urllib.parse import quote
 
 from sheetpeek._hyperlink import external_url
 from sheetpeek._notices import Support
 from sheetpeek._rendered import Mode, RenderedCell, RenderedSheet
+from sheetpeek._runs import drawn_spans
+from sheetpeek._runs_model import TextSpan
 from sheetpeek.backends import _support
 
 _RULE = {"right": "---:", "center": ":---:"}
@@ -34,7 +37,8 @@ class MarkdownBackend:
 
     Args:
         header: ``"first"`` (the first row) or ``"letters"`` (column letters).
-        emphasis: Mark bold and italic cells with ``**`` and ``*``.
+        emphasis: Mark bold and italic cells with ``**`` and ``*``, and the bold and italic runs
+            of a cell's rich text.
         local_links: Also link ``file:`` URLs and relative or drive-letter paths, which Excel
             follows. Off by default: such links point into the viewer's own files, and they
             reveal the paths the workbook names.
@@ -81,21 +85,55 @@ class MarkdownBackend:
             out.write(_line([self.cell_text(cell) for cell in row]))
 
     def cell_text(self, cell: RenderedCell) -> str:
-        """A cell's text escaped for a table cell, with emphasis if asked for."""
-        # A lone carriage return is no line break in Excel (§4.1), and would end the table's row.
-        text = cell.lines[0].replace("\r\n", "\n").replace("\r", "")
-        text = _escape(text).replace("\n", "<br>")
+        """A cell's text escaped for a table cell, with emphasis if asked for.
+
+        With emphasis, a cell with rich-text runs marks each run's bold and italic (§4.16).
+        """
+        spans = drawn_spans(cell.cell, cell.lines[0]) if self.emphasis else None
+        text = _runs(spans) if spans else _inline(cell.lines[0])
         link = cell.cell.hyperlink
         if link is not None and text and cell.cell.kind != "empty":
             url = external_url(link, self.local_links)
             if url is not None:
                 text = f"[{text}]({_destination(url)})"
-        if self.emphasis and text.strip() and cell.font is not None:
+        if self.emphasis and not spans and text.strip() and cell.font is not None:
             if cell.font.italic:
                 text = f"*{text}*"
             if cell.font.bold:
                 text = f"**{text}**"
         return text
+
+
+def _inline(text: str) -> str:
+    """Text escaped for a table cell, its line breaks as ``<br>``."""
+    # A lone carriage return is no line break in Excel (§4.1), and would end the table's row.
+    text = text.replace("\r\n", "\n").replace("\r", "")
+    return _escape(text).replace("\n", "<br>")
+
+
+def _runs(spans: tuple[TextSpan, ...]) -> str:
+    """Rich text with each run's bold and italic as emphasis.
+
+    The markers go inside a run's leading and trailing whitespace, where CommonMark would not
+    take them; adjacent runs alike in both are marked together.
+    """
+    result = []
+    for (bold, italic), group in groupby(spans, lambda s: (s.font.bold, s.font.italic)):
+        text = "".join(span.text for span in group)
+        core = text.strip()
+        marker = "*" * (italic + 2 * bold)
+        if not marker or not core:
+            result.append(_inline(text))
+            continue
+        start = text.index(core)
+        result.append(
+            _inline(text[:start])
+            + marker
+            + _inline(core)
+            + marker
+            + _inline(text[start + len(core) :])
+        )
+    return "".join(result)
 
 
 def _line(cells: list[str]) -> str:

@@ -35,7 +35,11 @@ CODES: dict[str, tuple[Outcome, Reason, str]] = {
     "format.palette": ("approximated", "not_implemented", ""),
     "text.rotation": ("approximated", "not_implemented", "drawn horizontally"),
     "text.stacked": ("approximated", "not_implemented", "drawn horizontally"),
-    "text.runs": ("approximated", "not_implemented", "drawn in the cell's font"),
+    "text.runs_lost": (
+        "approximated",
+        "not_implemented",
+        "drawn in the cell's font: runs in inline strings are not read",
+    ),
     "text.phonetic": ("omitted", "not_implemented", ""),
     "style.row_column": (
         "omitted",

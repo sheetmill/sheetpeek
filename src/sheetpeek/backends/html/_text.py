@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING
 from sheetpeek._carlito import ADVANCES, FIRST, UNITS_PER_EM
 from sheetpeek._model import Font, one_line
 from sheetpeek._rendered import TextRun
+from sheetpeek._runs_model import TextSpan
 from sheetpeek._text_model import TextRule
 from sheetpeek.backends.html._css import _ASCENT, _BASELINE, _CALIBRI, _DESCENT
 
@@ -21,9 +22,11 @@ if TYPE_CHECKING:
 
 def run(page: Page, run: TextRun) -> str:
     """One text run, positioned in sheet coordinates inside its clip window."""
+    if run.spans:
+        return _spanned(page, run)
     left, top, right, bottom = run.clip
     size = run.font.size * run.scale
-    spacing = _spacing(run)
+    spacing = _spacing(run.font, run.text, run.width, run.scale)
     # A Calibri run spaced to Excel's width that lies inside its clip window needs no clip.
     inside = (
         run.font.name.lower() == "calibri"
@@ -113,21 +116,84 @@ def _rule(page: Page, rule: TextRule, color: str | None, x0: int, y0: int) -> st
     )
 
 
-def _spacing(run: TextRun) -> float:
+def _spacing(font: Font, text: str, width: float, scale: float) -> float:
     """Points of letter-spacing that make Calibri text as wide as Excel draws it.
 
     Excel for Mac sets glyphs on whole points; a browser draws Calibri's own advances, which
-    Carlito shares. Only Calibri runs of printable ASCII are corrected.
+    Carlito shares. Only Calibri text of printable ASCII is corrected. ``width`` is Excel's
+    width of ``text`` drawn at ``scale`` times the font's size.
     """
-    font = run.font
-    if font.name.lower() != "calibri" or not run.text:
+    if font.name.lower() != "calibri" or not text:
         return 0.0
     table = ADVANCES[_style(font)]
     total = 0
-    for char in run.text:
+    for char in text:
         k = ord(char) - FIRST
         if not 0 <= k < len(table):
             return 0.0
         total += table[k]
-    own = total * font.size * run.scale / UNITS_PER_EM
-    return (run.width - own) / len(run.text)
+    own = total * font.size * scale / UNITS_PER_EM
+    return (width - own) / len(text)
+
+
+def _spanned(page: Page, run: TextRun) -> str:
+    """A run of rich text: a span per run inside the positioned run, all on one baseline (§4.16).
+
+    The positioned run takes the font of its largest span, which sets the line box; each span
+    has ``line-height: 0``, so that none grows the line box and moves the baseline, as a larger
+    run nested in the default way would. Superscript and subscript spans are moved by a relative
+    offset, never ``vertical-align``, which also moves the baseline.
+    """
+    left, top, right, bottom = run.clip
+    x0, x1, y0, y1 = page.x(left), page.x(right), page.y(top), page.y(bottom)
+    if run.align == "left":
+        anchor, classes = f"left:{page.x(run.x) - x0}px", "sp-run"
+    elif run.align == "right":
+        anchor, classes = f"right:{x1 - page.x(run.x + run.width)}px", "sp-run"
+    else:
+        center = (page.x(run.x) + page.x(run.x + run.width)) / 2 - x0
+        anchor, classes = f"left:{center:g}px", "sp-run sp-center"
+    largest = max(run.spans, key=lambda s: s.font.size * s.scale)
+    face = (largest.font, largest.font.size * largest.scale)
+    baseline = page.y(run.y) - y0 - _BASELINE * face[1] * 4 / 3
+    style = [anchor, f"top:{_number(baseline)}px", f"font:{_font(*face)}"]
+    if run.direction == "rtl":
+        style.append("direction:rtl")
+    inner = "".join(_span(span, face) for span in run.spans)
+    rules = "".join(_rule(page, r, _rule_color(run, r), x0, y0) for r in run.rules)
+    return (
+        f'<span class="sp-clip" style="left:{x0}px;top:{y0}px;width:{x1 - x0}px;'
+        f'height:{y1 - y0}px"><span class="{classes}" style="{";".join(style)}">{inner}</span>'
+        f"{rules}</span>"
+    )
+
+
+def _span(span: TextSpan, face: tuple[Font, float]) -> str:
+    """One run of rich text inside its line."""
+    size = span.font.size * span.scale
+    style = ["line-height:0"]
+    if _face(span.font, size) != _face(*face):
+        style.append(f"font:{_font(span.font, size)}")
+    if span.font.color:
+        style.append(f"color:#{span.font.color}")
+    spacing = _spacing(span.font, span.text, span.width, span.scale)
+    if spacing:
+        style.append(f"letter-spacing:{_number(spacing)}pt")
+    if span.shift:
+        style.append(f"position:relative;top:{round(span.shift * 4 / 3)}px")
+    return f'<span style="{";".join(style)}">{html.escape(span.text)}</span>'
+
+
+def _rule_color(run: TextRun, rule: TextRule) -> str | None:
+    """The color of the span a rule belongs to.
+
+    That is the last span with the rule's kind that starts at or before the rule, else the first
+    with that kind.
+    """
+    x, found = run.x, None
+    for span in run.spans:
+        drawn = span.font.strike if rule.kind == "strike" else span.font.underline is not None
+        if drawn and (found is None or x <= rule.x0 + 0.01):
+            found = span
+        x += span.width
+    return found.font.color if found is not None else run.color

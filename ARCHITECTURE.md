@@ -112,6 +112,7 @@ layout fields marked *layout*. The style fields (`number_format` to `indent`) li
 | `indent` | `int` | `cell.alignment.indent` | one indent level is one digit's width, 6 pt at Calibri 11 (§4.6) |
 | `shrink`, `reading_order`, `justify_last_line` | `bool`, `0 \| 1 \| 2`, `bool` | `cell.alignment.shrinkToFit`, `readingOrder` (anything but 1 or 2 is 0), `justifyLastLine` | §4.13 |
 | `font.vert_align` | `"superscript" \| "subscript" \| None` | `cell.font.vertAlign` | drawn at 2/3 size, raised or lowered (§4.13) |
+| `runs` | `tuple[TextSpan, ...] \| None` | the shared string's runs (§4.16) | each run's text and resolved `Font`; `None` without runs or when every run is in the cell's font; `value` is their text joined |
 | `hyperlink` | `Hyperlink \| None` | the structure scan's `<hyperlinks>` and `HYPERLINK()` formulas (§4.10) | `target`, `location`, `tooltip`, `display` (never drawn), `source` (`element` or `formula`) |
 | *layout* `text` | `str` | xlformat `FormattedCell.text` at the mode's width | what the cell itself shows: `####`, reduced `General`, `*` fills applied; never clipped or spilled |
 | *layout* `full_text` | `str` | `FormattedCell.full_text` | width-less; what copy and paste gives |
@@ -126,8 +127,8 @@ layout fields marked *layout*. The style fields (`number_format` to `indent`) li
 | *layout* `font`, `color` | | the source cell's font, and its section color else its font color | the style of the text drawn here |
 
 **Borders and fills** are read into `CellStyle.borders` and `CellStyle.fill_spec` (§4.12), and
-text styles into `Font` and `CellStyle` (§4.13). Rich-text runs inside one cell are flattened to
-the cell's font.
+text styles into `Font` and `CellStyle` (§4.13). Rich-text runs inside one cell are read into
+`Cell.runs` (§4.16).
 
 ### 3.2 What a sheet carries
 
@@ -200,6 +201,7 @@ palette recolors those in Excel; sheetpeek reports each one it changes (`format.
 | outline symbols (§4.11) | gutter cells beside the headings, `buttons` | a gutter of characters, `buttons` | as rich | no | no |
 | superscript, subscript, shrink to fit (§4.13) | drawn | full size, shrunk text clipped | as rich | plain | no |
 | underline kinds, strikethrough (§4.13) | 1 px rules at Excel's offsets | the terminal's underlines | no | no | no |
+| rich-text runs (§4.16) | a nested span per run | the cell's font | no | bold and italic per run, with `emphasis` | no |
 
 Spill in HTML is computed in the model, not left to the browser, and the browser's font must not
 draw past it. Whatever the technique, the HTML backend shows the same spill as every other
@@ -283,6 +285,8 @@ text outside is cut through a glyph), `align` (the point a different font keeps 
 - **Text styles** (§4.13): a run's `scale` is its drawn size over `font.size` (superscript,
   subscript, shrink to fit), its `rules` its underlines and strikethrough, its `direction` `rtl`
   for a right-to-left paragraph. Vertically justified and distributed lines are spread.
+- **Rich text** (§4.16): a cell with runs is measured run by run, and its `TextRun`s carry
+  `spans`, each piece of the line in its own font with its width, size and shift.
 - `scale` and `max_width` raise `ValueError` in `excel` mode.
 
 `tests/test_captures.py` lays the `layout` workbook out in `excel` mode too: every row's crossed
@@ -950,6 +954,82 @@ them in points like the cells (`backends/html/_headings.py`).
 | grid color | approximated: the column separators in the grid color | omitted | omitted | omitted |
 | `[ColorN]` from the workbook palette | reported by the reader (`format.palette`), as for HTML | the same | the same | the same |
 
+### 4.16 Rich-text runs
+
+**Captures** (Excel 16 for Mac, Office Home & Business 2021, Calibri 11, zoom 100,
+measured on the screen image), like §4.13's: every rule here stays **unverified until it is
+recaptured after the move to Microsoft 365**, and the tests that rest on them
+(`tests/test_runs.py`) say so. The code is `_read.py` (reading), `_runs.py` and `_excel.py`
+(layout), `backends/html/_text.py` and `backends/markdown.py`.
+
+**Reading.** A cell's string can hold runs, each with its own font (`<r>` with `<rPr>`). openpyxl
+gives them only with `load_workbook(rich_text=True)`, and in read-only mode only for shared
+strings, which is where Excel writes them: there the value is a `CellRichText`, a run without
+properties a `str` and the others `TextBlock(InlineFont, text)`. Its read-only sheet parser is
+built without `rich_text`, so the runs of an **inline string** (what openpyxl itself writes) are
+lost; the structure scan marks those cells and they are reported as `text.runs_lost`. The reader
+always passes `rich_text=True`: on 300 workbooks drawn at random from a corpus of 15,935 (41 of
+them with runs), reading every cell took 7.13 s against 7.18 s without it, and the summed peak
+of traced memory was 310.6 MB against 307.6 MB (1.0 %; 1.9 % on the files with runs). A shared
+string holding both a `<t>` and runs, which the schema allows and Excel does not write, comes
+back as its `<t>` alone (what Excel shows is unverified).
+
+**The model.** `Cell.runs` holds the runs as `TextSpan`s (text and fully resolved `Font`), and
+`Cell.value` their text joined; escapes (§5.6) are decoded in each run. Adjacent runs in one font
+are joined, empty ones dropped, and a text whose every run is in the cell's font has no runs
+(`None`). **A run without properties takes the cell's font; a run with properties takes nothing
+from it** (captured, R4: in a 16 pt red cell, a run whose properties hold only bold is drawn
+11 pt and black): what its properties leave out is the default, and a missing name or size the
+Normal font's (unverified: the capture's Normal font is Calibri 11, which is also the fixed
+default).
+
+**Layout** (`excel` mode). The text is measured run by run, each in its own font at its drawn
+size, for spill, `####`, wrapping, shrink to fit and alignment:
+- **Widths add per run** (captured, R2: a bold 16 pt run in an 11 pt text ends 15 pt further,
+  166 pt past the cell's right edge against 151, and spills one column more).
+- **Each line takes the height of its largest run** (captured, R1: one 20 pt run in an 11 pt
+  cell fits the row to 26 pt, as a 20 pt cell, and the small runs sit on the large run's
+  baseline). Wrapped lines are each their largest run's row height plus 1 (captured, R3:
+  "aaa" / "BBB" / "ccc ddd" with "BBB" at 20 pt is 16 + 27 + 16 = 59 pt; the 27 for a 20 pt line
+  is inferred from this one capture). Calibri 20's 26 pt joined the row-height table (§4.7) from
+  R1. The baseline at 20 pt follows §3.6's scaled rule, 6 pt above the cell's bottom where the
+  capture shows 5, as it does for a 20 pt cell.
+- A fitted row counts its runs' fonts in place of the cell's (unverified when every run is
+  smaller than the cell's font).
+- **Superscript and subscript runs** follow §4.13 (captured, R5: rows of 17 pt, as whole cells),
+  each run raised or lowered on its own; the cell's own font counts only through the runs that
+  take it.
+- Underlines and strikethrough are drawn per run; an accounting underline under text spans the
+  cell once per line, whichever runs have it.
+- `fill` repeats the runs; justified and distributed words keep the runs they cut.
+- The number format's section color replaces each run's color, as it replaces a cell's
+  (unverified). A text section that adds characters (`@" more"`) shows other text, which is drawn
+  in the cell's font (unverified).
+
+A `TextRun` of a cell with runs carries `spans`: each piece of its line as a `TextSpan` with its
+width, drawn size (`scale`) and baseline shift; the run's own `scale` is then the step of shrink
+to fit alone.
+
+**HTML.** A run with spans is the positioned run of §7.3, in the font of its largest span, with a
+nested span per run. **Each nested span has `line-height: 0`**: measured in WebKit, a 20 pt
+nested span in the default way grows the line box and moves the baseline down 10 px, and with
+`line-height: 0` the baseline stays where §7.3 puts it, which is what Excel draws (R1).
+Superscript and subscript spans are moved by a relative offset in whole pixels, never
+`vertical-align`, which moves the baseline too. The Calibri `letter-spacing` is computed per
+span, from its own font and Excel's width. A rule takes its run's color. A run with spans always
+keeps its clip window.
+
+**Other outputs** (decided; each declared in `backends/_support.py`). The census counts a cell
+with runs as `text.runs` and under each font feature its runs use, so an output that leaves out
+bold reports a bold run too.
+
+| `rich` | text | Markdown | CSV, TSV |
+|---|---|---|---|
+| approximated: drawn in the cell's font, since characters mode keeps one font for each cell's text | omitted | with `emphasis=True` each run's bold and italic as `**` and `*` (shown); otherwise omitted | omitted |
+
+**Phonetic guides** (`rPh`, `phoneticPr`) stay out of scope and reported (`text.phonetic`):
+openpyxl drops them in every mode.
+
 ## 5. openpyxl facts that constrain the design
 
 All measured with openpyxl 3.1.5 (`bench/`).
@@ -1224,6 +1304,9 @@ would fix both:
 - **Whitespace without `xml:space="preserve"`.** Excel drops leading and trailing whitespace there
   (xlrecalc's capture `whitespace`). openpyxl keeps it and does not say what the element said.
 
+Rich text is read with openpyxl's `rich_text=True`, which keeps the runs of shared strings and
+loses those of inline strings (§4.16).
+
 ## 6. The xlformat seam
 
 ### 6.1 The call
@@ -1442,6 +1525,9 @@ points.
   at any page scale, a double one `sp-double`; `sp-rule` and `sp-double` join the public classes.
   Superscript, subscript and shrunk runs take their drawn size; a right-to-left run
   `direction: rtl`.
+- **Rich text** (§4.16): a nested span per run inside the positioned run, each with
+  `line-height: 0`, its own font, color and Calibri spacing; superscript and subscript runs by a
+  relative offset.
 - **Page or fragment:** a page is a standalone document titled with the sheet's name; a
   fragment is the stylesheet and the `<div class="sheetpeek">`, for a host page.
 - **Size** (`bench/html_size.py`, 5,000 rows × 20 columns, 100,000 cells and 97,144 runs, Apple
@@ -1479,6 +1565,7 @@ src/sheetpeek/
   _fill_border_model.py  Pattern, Gradient, Side, Borders, RenderedBorders; the conflict rule (§4.12)
   _fill_border_census.py fills and borders in the census; the style that draws a cell's fill
   _text_model.py     TextRule, the lines drawn with text (§4.13)
+  _runs_model.py     TextSpan, a run of rich text (§4.16)
   _rendered.py       RenderedSheet, RenderedRow, RenderedCell, RenderedColumn, Gap
   _package.py        ReadLimits, the check before reading (§5.5), sheet name → worksheet part
   _structure.py      the structure scan (§5.4): one handler per element
@@ -1498,6 +1585,7 @@ src/sheetpeek/
   _excel.py          excel mode: geometry in points, text runs, clips
   _rows.py           row heights (§4.7) and baselines
   _text_styles.py    superscript, subscript, underlines, shrink to fit, direction (§4.13)
+  _runs.py           rich-text runs in the layout: measured, broken and cut by run (§4.16)
   backends/
     __init__.py      Backend protocol, registry, render(), notices()
     _support.py      what each output shows of each feature (§3.7)

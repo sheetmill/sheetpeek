@@ -112,3 +112,42 @@ def state_size(path: Path, part: str, size: int, crc: int | None = None) -> Path
             return path
         position += 46 + name_length + extra_length + comment_length
     raise KeyError(part)
+
+
+def shared_strings(path: Path, strings: dict[str, str]) -> Path:
+    """Make cells of the first sheet shared strings, as Excel writes them; openpyxl writes inline.
+
+    ``strings`` maps a coordinate to the inner XML of its ``<si>``, such as rich-text runs
+    (``<r><rPr><b/></rPr><t>bold</t></r>``). Each cell must hold an inline string already.
+    """
+    order = list(strings)
+
+    def cells(xml: str) -> str:
+        for index, coordinate in enumerate(order):
+            pattern = rf'<c r="{coordinate}"([^>]*?) t="inlineStr"([^>]*)><is>.*?</is></c>'
+            xml, count = re.subn(pattern, rf'<c r="{coordinate}"\1 t="s"\2><v>{index}</v></c>', xml)
+            assert count == 1, f"{coordinate} holds no inline string"
+        return xml
+
+    rewrite(path, SHEET1, cells)
+    items = "".join(f"<si>{strings[c]}</si>" for c in order)
+    table = f'<sst {NS} count="{len(order)}" uniqueCount="{len(order)}">{items}</sst>'
+    replace_part(path, "xl/sharedStrings.xml", table.encode())
+    rewrite(
+        path,
+        "[Content_Types].xml",
+        replace_once(
+            "</Types>",
+            '<Override PartName="/xl/sharedStrings.xml" ContentType="application/'
+            'vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml" /></Types>',
+        ),
+    )
+    rel = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings"
+    return rewrite(
+        path,
+        "xl/_rels/workbook.xml.rels",
+        replace_once(
+            "</Relationships>",
+            f'<Relationship Id="rIdSst" Type="{rel}" Target="sharedStrings.xml" /></Relationships>',
+        ),
+    )

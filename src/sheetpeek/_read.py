@@ -8,6 +8,7 @@ structure scan in ``_structure.py``. ``ARCHITECTURE.md`` §5 has the measurement
 
 from __future__ import annotations
 
+import dataclasses
 import datetime as dt
 import io
 import os
@@ -56,6 +57,7 @@ from sheetpeek._package import (
     relationships,
     worksheet_parts,
 )
+from sheetpeek._runs_model import TextSpan
 from sheetpeek._scan_links import cell_links
 from sheetpeek._scan_links import report as report_links
 from sheetpeek._scan_outline import read_outline
@@ -139,7 +141,9 @@ class Book:
         self._archive: zipfile.ZipFile | None = None
         try:
             self._archive = open_package(handle, self._limits, name)
-            self._workbook = load_workbook(handle, read_only=True, data_only=True, keep_links=False)
+            self._workbook = load_workbook(
+                handle, read_only=True, data_only=True, keep_links=False, rich_text=True
+            )
             self._raw_dates = disable_date_conversion(self._workbook)
             self._parts = worksheet_parts(self._archive)
             self._epoch = self._workbook.epoch
@@ -166,6 +170,7 @@ class Book:
             raise
         self._default_style = CellStyle("General", self._normal_font)
         self._styles: dict[Any, tuple[CellStyle, tuple[Code, ...], tuple[Code, ...]]] = {}
+        self._run_cache: dict[int, tuple[Any, Font, tuple[TextSpan, ...] | None]] = {}
 
     def _unreadable(self, error: Exception) -> PackageError:
         """The refusal for a failure to read: its reason, without where the file lives."""
@@ -321,9 +326,8 @@ class Book:
             )
         if ref is None:
             return
-        for code, found in (("text.runs", structure.runs), ("text.phonetic", structure.phonetic)):
-            ranges, _ = found.ranges()
-            report_cells(notes, code, (r for r in map(ref.intersection, ranges) if r))
+        ranges, _ = structure.phonetic.ranges()
+        report_cells(notes, "text.phonetic", (r for r in map(ref.intersection, ranges) if r))
         rows = sum(
             1
             for row, style in structure.row_styles
@@ -379,7 +383,13 @@ class Book:
                         report_style(notes, code, row_index, col_index)
                 row.append(
                     Cell(
-                        row_index, col_index, value, kind, style, links.get((row_index, col_index))
+                        row_index,
+                        col_index,
+                        value,
+                        kind,
+                        style,
+                        links.get((row_index, col_index)),
+                        self._runs(getattr(source, "value", None), style.font),
                     )
                 )
             row.extend(self._empty(row_index, c) for c in range(col_index + 1, ref.max_col + 1))
@@ -399,6 +409,7 @@ class Book:
                 dependency="openpyxl",
             )
         report_links(notes, structure, ref, grid)
+        _report_lost_runs(notes, structure, ref)
         return tuple(grid)
 
     def _empty(self, row: int, column: int) -> Cell:
@@ -420,11 +431,44 @@ class Book:
             return value, "number", False
         if isinstance(value, str):
             return unescape(value), "text", False
+        if isinstance(value, list):  # openpyxl's CellRichText: rich-text runs (§4.16)
+            return "".join(text for text, _ in _parts(value)), "text", False
         if isinstance(value, _DATE_TYPES):
             # ISO 8601 cells (t="d") always arrive as dates; other date cells only when the
             # conversion could not be switched off.
             return to_excel(value, self._epoch), "number", True
         return str(value), "text", False
+
+    def _runs(self, value: Any, font: Font) -> tuple[TextSpan, ...] | None:
+        """A rich-text value's runs in their fonts; ``None`` when every run is in ``font``.
+
+        A run without properties takes the cell's font. A run with properties stands alone: what
+        they leave out is the default, not the cell's (Excel 16.114), and a missing name or
+        size the Normal font's (unverified). Adjacent runs in one font are joined.
+        """
+        if not isinstance(value, list):
+            return None
+        cached = self._run_cache.get(id(value))
+        if cached is not None and cached[0] is value and cached[1] == font:
+            return cached[2]
+        spans: list[TextSpan] = []
+        for text, properties in _parts(value):
+            own = (
+                font
+                if properties is None
+                else font_aspect.to_font(
+                    _RunFont(properties), self._normal_font, self._color, self._theme_fonts
+                )
+            )
+            if not text:
+                continue
+            if spans and _drawn(spans[-1].font) == _drawn(own):
+                spans[-1] = TextSpan(spans[-1].text + text, own)
+            else:
+                spans.append(TextSpan(text, own))
+        runs = tuple(spans) if any(_drawn(span.font) != _drawn(font) for span in spans) else None
+        self._run_cache[id(value)] = (value, font, runs)  # the value keeps its id from reuse
+        return runs
 
     def _style(self, source: Any) -> tuple[CellStyle, tuple[Code, ...], tuple[Code, ...]]:
         """The cell's style, and what it uses that is not read: (for any cell, for values)."""
@@ -459,6 +503,44 @@ class Book:
         if font is None:
             return font_aspect.FALLBACK
         return font_aspect.to_font(font, font_aspect.FALLBACK, self._color, self._theme_fonts)
+
+
+def _parts(value: list[Any]) -> Iterator[tuple[str, Any]]:
+    """Each run of openpyxl's ``CellRichText``: its text, escapes decoded, and its properties.
+
+    The properties are an ``InlineFont``, or ``None`` for a run without them.
+    """
+    for part in value:
+        properties = getattr(part, "font", None)
+        text = getattr(part, "text", part) if properties is not None else part
+        yield unescape(str(text)), properties
+
+
+def _drawn(font: Font) -> Font:
+    """A font as drawn: what the file stored for a theme font (scheme, name) does not count."""
+    return dataclasses.replace(font, scheme=None, stored_name=None) if font.scheme else font
+
+
+class _RunFont:
+    """A run's properties as the font reader takes a cell's font: ``rFont`` is its name."""
+
+    __slots__ = ("_properties",)
+
+    def __init__(self, properties: Any) -> None:
+        self._properties = properties
+
+    @property
+    def name(self) -> Any:
+        return self._properties.rFont
+
+    def __getattr__(self, attribute: str) -> Any:
+        return getattr(self._properties, attribute)
+
+
+def _report_lost_runs(notes: Collector, structure: Structure, ref: CellRange) -> None:
+    """Runs in inline strings, which openpyxl's read-only reader drops (§4.16)."""
+    ranges, _ = structure.inline_runs.ranges()
+    report_cells(notes, "text.runs_lost", (r for r in map(ref.intersection, ranges) if r))
 
 
 @contextmanager

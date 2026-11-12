@@ -78,6 +78,8 @@ Everything below is importable from `sheetpeek`.
    :members:
 .. autoclass:: sheetpeek.TextRule
    :members:
+.. autoclass:: sheetpeek.TextSpan
+   :members:
 .. autoclass:: sheetpeek.Gap
    :members:
 .. autoclass:: sheetpeek.RenderedBorders

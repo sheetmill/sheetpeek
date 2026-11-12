@@ -9,11 +9,12 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
+from functools import lru_cache
 from typing import TYPE_CHECKING, Any
 
 from sheetpeek._fill_border_census import fill_border_codes
 from sheetpeek._hyperlink import classify
-from sheetpeek._model import CellRange
+from sheetpeek._model import CellRange, Font
 from sheetpeek._notices import FEATURES, CellSet, Notice, Outcome, Reason, Support, describe
 from sheetpeek._pass_outline import presence as outline_presence
 
@@ -59,29 +60,19 @@ def census(rendered: RenderedSheet) -> dict[str, Presence]:
                 kind = classify(cell.hyperlink, sheet.name, shown)[0]
                 if kind != "refused":  # the reader reports it, once for every output
                     add(_LINKS[kind], row, column)
-            font = style.font
-            if font.name != normal.name:
-                add("font.name", row, column)
-            if font.size != normal.size:
-                add("font.size", row, column)
-            if font.bold:
-                add("font.bold", row, column)
-            if font.italic:
-                add("font.italic", row, column)
-            if font.underline in _PLAIN_UNDERLINES:
-                add("font.underline", row, column)
-            elif font.underline in _ACCOUNTING_UNDERLINES:
-                add("font.underline_accounting", row, column)
-            if font.strike:
-                add("font.strike", row, column)
-            if font.vert_align is not None:
-                add("font.vert_align", row, column)
+            if cell.runs:
+                # A cell with rich-text runs uses its runs' fonts, each feature once (§4.16).
+                used = {c for span in cell.runs for c in _font_codes(normal, span.font)}
+                for code in used:
+                    add(code, row, column)
+                add("text.runs", row, column)
+            else:
+                for code in _font_codes(normal, style.font):
+                    add(code, row, column)
             if style.shrink:
                 add("text.shrink", row, column)
             if style.reading_order:
                 add("text.reading_order", row, column)
-            if font.color is not None:
-                add("font.color", row, column)
             if rendered_cell.format_color is not None:
                 add("format.color", row, column)
             if style.h_align != "general":
@@ -114,6 +105,31 @@ def census(rendered: RenderedSheet) -> dict[str, Presence]:
             found[code] = Presence(count)
     order = list(FEATURES)
     return dict(sorted(found.items(), key=lambda item: order.index(item[0])))
+
+
+@lru_cache(maxsize=1024)
+def _font_codes(normal: Font, font: Font) -> tuple[str, ...]:
+    """The font features ``font`` uses, in registry order."""
+    found = []
+    if font.name != normal.name:
+        found.append("font.name")
+    if font.size != normal.size:
+        found.append("font.size")
+    if font.bold:
+        found.append("font.bold")
+    if font.italic:
+        found.append("font.italic")
+    if font.underline in _PLAIN_UNDERLINES:
+        found.append("font.underline")
+    elif font.underline in _ACCOUNTING_UNDERLINES:
+        found.append("font.underline_accounting")
+    if font.strike:
+        found.append("font.strike")
+    if font.vert_align is not None:
+        found.append("font.vert_align")
+    if font.color is not None:
+        found.append("font.color")
+    return tuple(found)
 
 
 _LINKS = {

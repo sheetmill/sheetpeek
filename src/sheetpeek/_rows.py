@@ -12,8 +12,9 @@ from functools import lru_cache
 from sheetpeek._model import Font, Row, Sheet
 
 # Captured (suite row_height, Excel 16.114): the height of a row without ``ht`` per Normal font.
+# Calibri 20 is a capture on Excel 16.114 of a row fitted to a 20 pt cell (§4.16).
 FONT_ROW_HEIGHTS: dict[str, dict[int, float]] = {
-    "calibri": {9: 12, 10: 14, 11: 15, 12: 16, 14: 19, 16: 21},
+    "calibri": {9: 12, 10: 14, 11: 15, 12: 16, 14: 19, 16: 21, 20: 26},
     "aptos narrow": {9: 13, 10: 14, 11: 15, 12: 16, 14: 19, 16: 22},
 }
 NO_SHEET_FORMAT = 16.0  # an unlisted row of a file without <sheetFormatPr>, every font

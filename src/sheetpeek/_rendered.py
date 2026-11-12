@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING, Any, Literal, TypeAlias
 from sheetpeek._fill_border_model import RenderedBorders
 from sheetpeek._model import Cell, CellRange, Font, Row, column_letter
 from sheetpeek._outline_model import RenderedOutline
+from sheetpeek._runs_model import TextSpan
 from sheetpeek._text_model import TextDirection, TextRule
 
 if TYPE_CHECKING:
@@ -154,6 +155,10 @@ class TextRun:
     direction: TextDirection = "ltr"
     """``rtl`` for a right-to-left paragraph: text whose first strong character is
     right-to-left, unless the cell's reading order is left to right (§4.13)."""
+    spans: tuple[TextSpan, ...] = ()
+    """The run's text in rich-text runs, each with its own font, width, size and baseline shift,
+    for a cell with :attr:`~sheetpeek.Cell.runs` (§4.16); empty for text in one font. With
+    spans, ``scale`` is the step of shrink to fit alone; each span carries its drawn size."""
 
 
 @dataclass(frozen=True, slots=True)
