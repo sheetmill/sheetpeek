@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   page layout, panes), conditional formatting, filter buttons,
   tables, sparklines, slicers, timelines, pictures, charts, shapes, embedded objects, form
   controls, background pictures, notes and threaded comments, print areas, print titles, manual
-  page breaks, tab colors, dialog sheets, macro sheets, and any sheet element or extension sheetpeek
+  page breaks, tab colors (drawn only on the workbook page), dialog sheets, macro sheets, and any sheet element or extension sheetpeek
   does not recognize. A file is reported for what it uses, not what it contains: margins, page
   setup, protection and validation, which draw nothing, are never reported. A linked picture is
   reported as refused: Excel fetches the linked file, sheetpeek never does.
@@ -28,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `HTMLBackend(notices=True)` lists what the page does not show after the sheet; `sheetpeek serve`
   turns it on.
 - `sheetpeek view --notices summary|full|none`, `--strict` (exit status 3 when anything is not
-  shown) and `--suppress CODE`. `--list` marks chartsheets as not shown.
+  shown) and `--suppress CODE`.
 - `CellRange.intersection`.
 - Hyperlinks are drawn. HTML wraps a linked cell's text in an anchor, which adds no color or
   underline of its own, since the cell's format draws a link as in Excel; its `title` is the
@@ -62,7 +62,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `--sheetpeek-outline-button`, `--sheetpeek-outline-button-paper`, and classes `sp-ol`,
   `sp-olbutton`, `sp-ollevel`.
 - Pattern fills: the 17 patterns are drawn in HTML as Excel draws them, from tiles captured on
-  the screen, anchored at the sheet's origin and fixed in screen pixels.
+  the screen, anchored at the sheet's origin, a tile pixel a whole screen point at any zoom.
 - Gradient fills: linear gradients at Excel's angle, which is taken in the unit cell, and path
   gradients in rectangular bands.
 - Borders: the four sides in all 13 styles and their colors, and diagonals, drawn in HTML as a
@@ -156,8 +156,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `sheetpeek view` reports on standard error after the output, one line per kind with its code
   first (`sheetpeek: border: borders not shown (3 cells): not implemented yet`), in place of
   `sheetpeek: warning: ...` lines before it.
-- A dialog sheet is reported (`sheet.dialogsheet`) instead of being shown as a worksheet without
-  comment.
 - `Sheet` and `RenderedSheet` take `notices` in place of their `warnings` field; `warnings` is a
   read-only property.
 - openpyxl's warning that it drops a sheet extension (conditional formatting, sparklines,
@@ -168,33 +166,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   gradient's is its midpoint color, where it was no fill.
 - A solid fill in indexed color 64 is no fill, and a fill index past the palette is black, as
   Excel draws them; an index past the palette was no fill.
-- `border`, `border.diagonal`, `fill.pattern` and `fill.gradient` are no longer reported by the
-  reader for every output; each output reports them from the census.
 - Underlines and strikethrough in HTML are 1 px rules at Excel's offsets, not the browser's text
-  decorations, so they stay one pixel thick at any page scale.
+  decorations, so they stay one pixel thick at any page scale; a single or double underline runs
+  1 pt past its text, as Excel 16.115 draws it.
 - Text whose first strong character is right-to-left (Hebrew, Arabic) with `general` alignment
   is right-aligned in every output, as Excel aligns it.
 - Vertically justified text in `characters` mode is placed at the top, and distributed text
   centered or spread, instead of at the bottom; both wrap.
-- Superscript, subscript, shrink to fit and reading order are no longer reported by the reader:
-  each output reports what it does with them. The layout notice `align.vertical_justify` is
-  removed, since `excel` mode draws vertical justify and distributed.
 - HTML headings take Excel's sizes: the column band 21 pt and the row band 16 pt plus 3 pt a digit
   of the last row, at Calibri 11, growing with the Normal font's size. Their colors are Excel's:
   dark `#161616`, `#ffffff` and `#565656`; light `#f7f7f7`, `#5e5e5e` and `#e0dfdd`.
 - A workbook palette replaces the default entry by entry; a `<colors>` element without
   `indexedColors` keeps the default palette instead of drawing indexed colors black.
-- Rich-text runs are no longer reported by the reader as drawn in the cell's font: each output
-  reports what it does with them.
 - A row fitted to a Calibri 20 cell is 26 pt, as Excel fits it, instead of Calibri 16's 21.
+- A row Excel fits grows to the lines of horizontally distributed text, which wraps when drawn
+  (two lines of Calibri 11 take 32 pt); it was not fitted to them.
 - A dialog sheet is no longer drawn as a blank worksheet: `Book.sheet()` raises
   `NotAWorksheetError` for it, as for a chartsheet, and `sheet.dialogsheet` is a workbook-level
   notice in `Book.notices`.
 - The default sheet skips an active chartsheet or dialog sheet: it is the first visible worksheet
   or macro sheet.
-- `sheet.tab_color` is reported with reason `option`: only the workbook page draws tabs.
 - `sheetpeek view --list` shows each sheet's state and kind when it is not a visible worksheet
-  (`Chart  (chartsheet, not shown)` instead of `Chart  (sheet.chartsheet: not shown)`).
+  (`Chart  (chartsheet, not shown)`, `Data  (hidden)`), where it printed the name alone.
 - `serve` marks a chartsheet or dialog sheet in its sheet list instead of linking to an error.
 
 ### Deprecated
