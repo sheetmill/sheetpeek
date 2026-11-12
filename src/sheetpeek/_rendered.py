@@ -11,7 +11,7 @@ cell it comes from. This is how Excel paints spilled text over a neighbor's fill
 from __future__ import annotations
 
 from collections.abc import Iterator
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Literal, TypeAlias
 
 from sheetpeek._model import Cell, CellRange, Font, Row, column_letter
@@ -185,6 +185,9 @@ class RenderedSheet:
     output leaves out is added by :func:`sheetpeek.notices`."""
     outline: RenderedOutline | None = None
     """The outline symbols, when the sheet has an outline whose symbols the file shows."""
+    extra: dict[str, Any] = field(default_factory=dict, compare=False)
+    """What features' own layout passes add, by feature (``Draft.extra``), for features that
+    keep their result here rather than in a field of their own."""
 
     @property
     def warnings(self) -> tuple[str, ...]:

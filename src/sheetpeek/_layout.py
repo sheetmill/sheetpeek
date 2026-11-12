@@ -94,6 +94,7 @@ def layout(
         draft.gap,
         finish(sheet, notes, draft.kept_rows, draft.kept_columns),
         outline=draft.extra.get("outline"),
+        extra=draft.extra,
     )
 
 
