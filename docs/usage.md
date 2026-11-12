@@ -117,10 +117,10 @@ them without rendering:
 >>> wb.save(path)
 >>> for notice in sheetpeek.notices(path, "csv"):
 ...     print(notice.code, "|", notice.message)
-border | borders not shown (1 cell): not implemented yet
 font.bold | bold text not shown in csv (1 cell): csv cannot show it
+border | borders not shown in csv (1 cell): csv cannot show it
 >>> [notice.code for notice in sheetpeek.notices(path, "html")]
-['border']
+[]
 ```
 
 A file is reported for what it **uses**, not what it contains: page margins, page setup,
@@ -137,7 +137,7 @@ notice instead, or `"ignore"`.
 >>> found = []
 >>> output = sheetpeek.render(path, "csv", on_notice=found.append)
 >>> [notice.matches("font") for notice in found]
-[False, True]
+[True, False]
 ```
 
 Codes are dotted, and {meth}`~sheetpeek.Notice.matches` takes a code or the area above it

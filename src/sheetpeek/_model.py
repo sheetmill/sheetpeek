@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING, Any, Literal, TypeAlias
 
 from xlformat import ExcelError
 
+from sheetpeek._fill_border_model import Borders, Fill
 from sheetpeek._hyperlink import Hyperlink
 from sheetpeek._outline_model import Outline
 
@@ -170,6 +171,10 @@ class CellStyle:
     number_format: str
     font: Font
     fill: str | None = None
+    fill_spec: Fill | None = None
+    """The fill itself (:class:`Pattern` or :class:`Gradient`); ``fill`` is its one color."""
+    borders: Borders | None = None
+    """The cell's border sides and diagonals, as the file states them."""
     h_align: HorizontalAlignment = "general"
     v_align: VerticalAlignment = "bottom"
     wrap: bool = False

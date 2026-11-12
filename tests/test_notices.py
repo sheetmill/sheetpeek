@@ -131,6 +131,7 @@ def build_every_feature(path: Path) -> Path:
     ws["B3"].border = Border(diagonal=Side("thin"), diagonalUp=True)
     ws["B4"].fill = PatternFill("gray125", fgColor="000000")
     ws["B5"].fill = GradientFill(stop=("FFFFFF", "0000FF"))
+    ws["M2"].border = Border(bottom=Side("slantDashDot"))
     ws["B6"] = "superscript"
     ws["B6"].font = Font(vertAlign="superscript")
     ws["B7"] = "scheme"
@@ -499,13 +500,13 @@ def test_cells_hidden_from_view_are_not_reported(tmp_path):
     wb = openpyxl.Workbook()
     ws = wb.active
     for row in (1, 2, 3):
-        ws.cell(row, 1, "x").border = Border(top=Side("thin"))
+        ws.cell(row, 1, "x").comment = Comment("a note", "author")
     ws.row_dimensions[2].hidden = True
-    path = save(wb, tmp_path / "hidden_border.xlsx")
+    path = save(wb, tmp_path / "hidden_note.xlsx")
     sheet = sheetpeek.read(path)
-    (whole,) = [n for n in sheet.notices if n.code == "border"]
+    (whole,) = [n for n in sheet.notices if n.code == "comment"]
     assert whole.count == 3
-    (shown,) = [n for n in sheet.layout("excel").notices if n.code == "border"]
+    (shown,) = [n for n in sheet.layout("excel").notices if n.code == "comment"]
     assert (shown.count, [str(r) for r in shown.cells]) == (2, ["A1", "A3"])
     assert "(2 cells)" in shown.message
 

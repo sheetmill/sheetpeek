@@ -11,6 +11,7 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
+from sheetpeek._fill_border_census import fill_border_codes
 from sheetpeek._hyperlink import classify
 from sheetpeek._model import CellRange
 from sheetpeek._notices import FEATURES, CellSet, Notice, Outcome, Reason, Support, describe
@@ -50,8 +51,8 @@ def census(rendered: RenderedSheet) -> dict[str, Presence]:
             cell = rendered_cell.cell
             style = cell.style
             row, column = cell.row, cell.column
-            if style.fill is not None:
-                add("fill", row, column)
+            for code in fill_border_codes(sheet, rendered_cell):
+                add(code, row, column)
             if cell.kind == "empty":
                 continue
             if cell.hyperlink is not None and cell.value != "":

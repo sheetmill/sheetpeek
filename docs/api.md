@@ -32,6 +32,25 @@ Everything below is importable from `sheetpeek`.
    :members:
 .. autoclass:: sheetpeek.Hyperlink
    :members:
+.. autoclass:: sheetpeek.Pattern
+   :members:
+.. autoclass:: sheetpeek.Gradient
+   :members:
+.. autoclass:: sheetpeek.Borders
+   :members:
+.. autoclass:: sheetpeek.Side
+   :members:
+.. py:data:: sheetpeek.Fill
+
+   A cell's fill: a :class:`Pattern` or a :class:`Gradient`.
+
+.. py:data:: sheetpeek.PatternKind
+
+   A pattern fill's ``patternType``: ``"solid"`` or one of the 17 patterns.
+
+.. py:data:: sheetpeek.BorderStyle
+
+   One of the 13 border styles, as the file names them.
 .. autoclass:: sheetpeek.Column
    :members:
 .. autoclass:: sheetpeek.Row
@@ -58,6 +77,10 @@ Everything below is importable from `sheetpeek`.
 .. autoclass:: sheetpeek.TextRun
    :members:
 .. autoclass:: sheetpeek.Gap
+   :members:
+.. autoclass:: sheetpeek.RenderedBorders
+   :members:
+.. autoclass:: sheetpeek.Diagonal
    :members:
 .. autoclass:: sheetpeek.RenderedOutline
    :members:

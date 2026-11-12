@@ -13,6 +13,10 @@ _approx = Support.approximated
 _omit = Support.omitted
 
 
+def _no_borders() -> Support:
+    return _omit("not_implemented", "borders are drawn only in HTML so far")
+
+
 def _local() -> Support:
     return _omit("option", "file and relative targets are linked only with local_links=True")
 
@@ -56,6 +60,11 @@ def html(
         "font.color": SHOWN,
         "format.color": SHOWN,
         "fill": SHOWN,
+        "fill.pattern": SHOWN,
+        "fill.gradient": SHOWN,
+        "border": SHOWN,
+        "border.diagonal": SHOWN,
+        "border.slant_dash_dot": _approx("as mediumDashDot, gaps square", "not_implemented"),
         "align.horizontal": SHOWN,
         "align.vertical": SHOWN,
         "align.wrap": SHOWN,
@@ -104,6 +113,11 @@ def rich(
         "font.color": terminal,
         "format.color": terminal,
         "fill": terminal,
+        "fill.pattern": _approx("one color, the blend of its two by the pattern's share"),
+        "fill.gradient": _approx("one color, the gradient's at its midpoint"),
+        "border": _no_borders(),
+        "border.diagonal": _no_borders(),
+        "border.slant_dash_dot": _no_borders(),
         "link": SHOWN,  # a terminal hyperlink (OSC 8), plain text where a terminal has none
         "link.internal": _omit(why="a terminal has no place in the sheet to go to"),
         "link.elsewhere": _omit(why="a terminal has no place in the workbook to go to"),
@@ -127,6 +141,11 @@ def text(*, headings: bool, buttons: str = "static") -> dict[str, Support]:
         "font.color": plain,
         "format.color": plain,
         "fill": plain,
+        "fill.pattern": plain,
+        "fill.gradient": plain,
+        "border": _no_borders(),
+        "border.diagonal": _no_borders(),
+        "border.slant_dash_dot": _no_borders(),
         "link": plain,
         "link.internal": plain,
         "link.elsewhere": plain,
@@ -151,6 +170,11 @@ def markdown(*, emphasis: bool, letters: bool, local_links: bool = False) -> dic
         "font.color": plain,
         "format.color": plain,
         "fill": plain,
+        "fill.pattern": plain,
+        "fill.gradient": plain,
+        "border": plain,
+        "border.diagonal": plain,
+        "border.slant_dash_dot": plain,
         "align.horizontal": _approx("one alignment per column, from the first body row"),
         "align.vertical": plain,
         "align.wrap": plain,
@@ -182,6 +206,11 @@ def delimited() -> dict[str, Support]:
         "font.color": plain,
         "format.color": plain,
         "fill": plain,
+        "fill.pattern": plain,
+        "fill.gradient": plain,
+        "border": plain,
+        "border.diagonal": plain,
+        "border.slant_dash_dot": plain,
         "align.horizontal": plain,
         "align.vertical": plain,
         "align.wrap": plain,

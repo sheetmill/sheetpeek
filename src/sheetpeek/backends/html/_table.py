@@ -6,7 +6,14 @@ from typing import TYPE_CHECKING, TextIO
 
 from sheetpeek._model import CellRange
 from sheetpeek._rendered import RenderedCell, RenderedSheet, TextRun
-from sheetpeek.backends.html import _headings, _links, _outline, _text
+from sheetpeek.backends.html import (
+    _borders,
+    _headings,
+    _links,
+    _outline,
+    _patterns,
+    _text,
+)
 
 if TYPE_CHECKING:
     from sheetpeek.backends.html import HTMLBackend
@@ -30,6 +37,12 @@ class Page:
         self.outline_rows = _outline.row_marks(sheet, backend)
         self.normal = sheet.sheet.normal_font
         self.width = self.x(sheet.width_pt) + 1  # px, the wrapper's width: the table's
+        self.fills = _patterns.Fills(self)
+        self.borders = _borders.Borders(self)
+
+    def css(self) -> str:
+        """The page's own stylesheet: the classes its fill and border layers use."""
+        return _patterns.layer_css(self.fills, self.borders.css())
 
     def x(self, points: float) -> int:
         return self.gx + _px(self.ox + points)
@@ -40,10 +53,10 @@ class Page:
     def write(self, out: TextIO) -> None:
         sheet = self.sheet
         classes = "sheetpeek" if sheet.sheet.show_gridlines else "sheetpeek sp-nogrid"
-        out.write(
-            f'<div class="{classes}" data-color-scheme="{self.backend.color_scheme}">'
-            f'<table style="width:{self.width}px;font:{_text._font(self.normal)}">\n'
-        )
+        out.write(f'<div class="{classes}" data-color-scheme="{self.backend.color_scheme}">')
+        self.fills.write(out)
+        self.borders.write(out)
+        out.write(f'<table style="width:{self.width}px;font:{_text._font(self.normal)}">\n')
         out.write("<colgroup>")
         _outline.write_column(self, out)
         _headings.write_column(self, out)
@@ -111,11 +124,12 @@ class Page:
     ) -> str:
         rows = self.sheet.rows
         style = []
-        left = rows[i].cells[p - 1].fill if p else None
-        above = rows[i - 1].cells[p].fill if i else None
-        if cell.fill:
+        left = _patterns.solid(self, rows[i].cells[p - 1]) if p else None
+        above = _patterns.solid(self, rows[i - 1].cells[p]) if i else None
+        fill = _patterns.solid(self, cell)
+        if fill:
             # A fill covers the cell's own gridlines and its far ones (captured).
-            style += [f"background:#{cell.fill}", f"border-color:#{cell.fill}"]
+            style += [f"background:#{fill}", f"border-color:#{fill}"]
         else:
             if left:
                 style.append(f"border-left-color:#{left}")

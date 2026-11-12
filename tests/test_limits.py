@@ -6,6 +6,7 @@ into a huge allocation is ``bounded``: if it regresses, the test fails and the m
 """
 
 import io
+import re
 import warnings
 import zipfile
 import zlib
@@ -373,6 +374,71 @@ def test_no_mode_allocates_or_fails_by_an_odd_number(book, field, value):
         sheetpeek.render(
             sheet.layout(mode), {"excel": "html", "characters": "text"}.get(mode, "csv")
         )
+
+
+# Numbers of fills and borders, in the stylesheet: a gradient's angle, rectangle and stop
+# positions, and the indexes and tints of fill and border colors.
+ODD_STYLE_FIELDS = {
+    "gradient degree": 'degree="45"',
+    "gradient left": 'left="0.25"',
+    "gradient right": 'right="0.75"',
+    "gradient top": 'top="0.125"',
+    "gradient bottom": 'bottom="0.875"',
+    "stop position": '<stop position="1"',
+    "fill index": 'fgColor indexed="10"',
+    "fill tint": 'bgColor theme="4" tint="0.5"',
+    "border index": 'color indexed="12"',
+    "border tint": 'color theme="5" tint="-0.25"',
+}
+
+
+def styled_book(path: Path) -> Path:
+    from openpyxl.styles import Border, Color, GradientFill, PatternFill, Side
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws["A1"] = "x"
+    ws["A1"].fill = GradientFill(
+        "path", 45, 0.25, 0.75, 0.125, 0.875, stop=("FFFFFFFF", "FF0000FF")
+    )
+    ws["B1"].fill = PatternFill(
+        "gray125", fgColor=Color(indexed=10), bgColor=Color(theme=4, tint=0.5)
+    )
+    ws["C1"].border = Border(
+        left=Side("thick", color=Color(indexed=12)),
+        diagonal=Side("thin", color=Color(theme=5, tint=-0.25)),
+        diagonalUp=True,
+    )
+    return save(wb, path)
+
+
+@pytest.fixture(scope="module")
+def styled(tmp_path_factory):
+    return styled_book(tmp_path_factory.mktemp("styled") / "styled.xlsx").read_bytes()
+
+
+@pytest.mark.parametrize("field", ODD_STYLE_FIELDS)
+@pytest.mark.parametrize("value", ODD_NUMBERS)
+@bounded
+def test_no_mode_allocates_or_fails_by_an_odd_style_number(styled, tmp_path, field, value):
+    book = tmp_path / "styled.xlsx"
+    book.write_bytes(styled)
+    old = ODD_STYLE_FIELDS[field]
+    # The number replaces the first one in the attribute (an index or a tint, by field).
+    attribute = re.findall(r'(\w+)="[^"]*"$', old)[0]
+    new = re.sub(rf'{attribute}="[^"]*"$', f'{attribute}="{value}"', old)
+    rewrite(book, STYLES, lambda text: text.replace(old, new, 1))
+    try:
+        sheet = sheetpeek.read(book)
+    except PackageError:
+        return
+    for mode in ("excel", "characters", "none"):
+        page = sheetpeek.render(
+            sheet.layout(mode),
+            {"excel": "html", "characters": "text"}.get(mode, "csv"),
+            on_notice="ignore",
+        )
+        assert "nan" not in page.lower().replace("sans", "")
 
 
 @pytest.mark.parametrize("value", ["9" * 5000, "0x7", " 3", "", "1.5"])

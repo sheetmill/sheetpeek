@@ -104,6 +104,8 @@ layout fields marked *layout*. The style fields (`number_format` to `indent`) li
 | `number_format` | `str` | `cell.number_format` | |
 | `font` | `Font(name, size, bold, italic, underline, strike, color)` | `cell.font`; a missing name or size inherits the Normal style's (openpyxl returns `None` for a font record without them, measured) | `color` is resolved `RRGGBB`, or `None` for automatic (§3.3) |
 | `fill` | `str \| None` | `fgColor` of a `solid` pattern fill, resolved | other patterns map to their foreground color, a documented approximation; gradients are ignored |
+| `fill_spec` | `Pattern \| Gradient \| None` | `cell.fill` (§4.12) | the fill itself: a pattern's kind and two colors, or a gradient's kind, angle, rectangle and stops; `fill` is its one color |
+| `borders` | `Borders \| None` | `cell.border` (§4.12) | four `Side`s (style, color) and the diagonal with its two flags; `start` and `end` read as `left` and `right` |
 | `h_align` | `"general" \| "left" \| "center" \| "right" \| "fill" \| "justify" \| "distributed" \| "center_across"` | `cell.alignment.horizontal` | as stored; `centerContinuous` is `center_across` |
 | `v_align` | `"top" \| "center" \| "bottom" \| "justify" \| "distributed"` | `cell.alignment.vertical`, default `bottom` | |
 | `wrap` | `bool` | `cell.alignment.wrap_text` | |
@@ -190,6 +192,8 @@ palette recolors those in Excel. sheetpeek ignores that and documents it.
 | hidden rows and columns | omitted (option to show) | omitted | omitted | omitted | omitted |
 | row heights | `height` on `<tr>` | lines as wrapped text needs | as rich | no | no |
 | headings (row numbers, column letters) | `column_headings`, `row_headings` | the same | the same | `header="letters"` | no |
+| pattern and gradient fills (§4.12) | SVG tiles and CSS or SVG gradients, in a layer under the text | one color: the pattern's blend, the gradient's midpoint | no | no | no |
+| borders (§4.12) | a layer of lines in CSS px, conflicts resolved in the layout | no | no | no | no |
 | hyperlinks (§4.10) | `<a>` around the cell's runs; links to shown cells go to their id | terminal hyperlinks (OSC 8), external targets only | text only | `[text](url)`, external targets only | text only |
 | outline symbols (§4.11) | gutter cells beside the headings, `buttons` | a gutter of characters, `buttons` | as rich | no | no |
 
@@ -683,6 +687,101 @@ tick end, `-` and `+` for the buttons, `·` for dots; no level buttons (approxim
 `buttons="none"` leaves it out, as in HTML. Markdown, CSV and TSV report the outline as not
 shown.
 
+### 4.12 Fills and borders
+
+**Unverified until recaptured on Microsoft 365.** Every rule below was captured once, on the
+screen of Excel 16 for Mac with Office 2021 at zoom 100 and 200, before the switch to Microsoft
+365; the tests that rest on them say "capture on Excel 16.114". The model is in
+`_fill_border_model.py`, the reading in `_style/fill.py` and `_style/border.py`, the layout in
+`_pass_borders.py`, the drawing in `backends/html/_patterns.py` and `backends/html/_borders.py`.
+
+**Pattern fills.** `CellStyle.fill_spec` is a `Pattern` (`solid` or one of 17 patterns, `fg`,
+`bg`) or a `Gradient`; `CellStyle.fill` stays one representative color for outputs that show
+one.
+- Each pattern is a bitmap tile in two colors only: `fgColor` draws the set pixels, `bgColor` the
+  rest (`TILES`, in device pixels at two to a screen point; `gray0625` is 8 × 4 with two set
+  pixels). The tiles are fixed in screen pixels, the same at zoom 100 and 200, and anchored at the
+  sheet's origin, not at each cell.
+- Colors: `solid` draws `fgColor`; a missing `fgColor` is black, so `solid` with only `bgColor`
+  draws black; a pattern without colors, with automatic ones, or with indexed 64 and 65, is black
+  on white; one color given, the other takes its default (fg black, bg white). A `solid` fill in
+  indexed 64 is no fill; a fill index past the palette (81) is black; `patternType="none"` or none
+  at all draws nothing, whatever its colors. The alpha byte is ignored. openpyxl reads a missing
+  color as `00000000`, so a background of `00000000` is read as missing (white).
+- **The representative color** of a pattern is the blend of its two colors by the foreground's
+  share of the tile (6.25 % for `gray0625`, 43.75 % for `lightGrid`); of a gradient, its color at
+  the midpoint.
+
+**Gradient fills.** `linear` runs along `degree`, clockwise from left to right, **taken in the
+unit cell**: on a `w × h` box the drawn angle is `90° + atan2(w sin d, h cos d)` in CSS terms, and
+the corners take the end stops, as CSS `linear-gradient` normalizes them; colors interpolate
+linearly in sRGB. Past the last stop the last color holds. One case had its first stop at 0.25:
+before it the color ran from the last stop's color at 0 (taken as the rule, unverified). `path`
+draws rectangular bands from the rectangle `left`, `right`, `top`, `bottom` (in the first stop's
+color) out to the cell's edges; all four 0 put the first stop at the top-left corner. A degree
+that is not finite is 0, rectangle values are clamped to 0 to 1, stops are sorted by position,
+and a gradient without stops is no fill (decided, not captured). Duplicate stop positions make
+openpyxl refuse the whole stylesheet, a `PackageError` until the reader move.
+
+**Fills against gridlines.** A pattern or gradient covers its cell and the gridlines after its
+right and bottom edges, like a solid fill (§3.6); the cell to the right or below paints over that
+gridline with its own fill. A pattern shows its pattern on the gridlines it covers.
+
+**Borders.** `CellStyle.borders` is a `Borders` of four `Side`s (13 styles, a color or `None`
+for automatic, which is black), and a diagonal with its `diagonal_up` and `diagonal_down` flags.
+`start` and `end` are read as `left` and `right`. A diagonal is read only with a style and a
+direction; Excel draws nothing otherwise.
+- **Lines are fixed in screen points**, the same at every zoom (CSS px in HTML): thin 1 on the
+  gridline; medium 2 from 1 before it; thick 3 from 1 before it; double 1, a white 1, 1, from 1
+  before it; hair a 1-device-pixel checkerboard on the thin band; dotted 1 on 1 off, the two
+  device rows staggered; dashed 1.5 on 0.5 off; dashDot 9, 3, 3, 3; dashDotDot 9, 3, 3, 3, 3, 3;
+  the medium dashes the same at 2 wide; slantDashDot 2 wide, 11, 1, 5, 1 with slanted
+  antialiased gaps. **Every gap is white**, also over a fill: no gridline shows under any border.
+  Sides of one cell meet square.
+- **Conflicts:** where two cells' sides meet, one is drawn whole, in its own style and color,
+  never both and never mixed. The stronger style wins: **double > thick > medium > mediumDashed >
+  mediumDashDot > slantDashDot > mediumDashDotDot > thin > dashed > dotted > dashDot > dashDotDot >
+  hair** (73 pairs, in both orders and orientations, no contradiction). Of one style, **the darker
+  color wins, by Rec. 601 luma** (11 pairs, both orders; Rec. 709 fits them as well), never the
+  position. Two colors of equal luma: the larger `RRGGBB` (unverified). Colors are compared after
+  resolution to RGB (unverified for theme and indexed colors).
+- **Merges:** borders stay per cell. The merge's outline is the outer sides of its edge cells,
+  each on its own segment, the anchor's only on its own; sides inside the merge are not drawn;
+  a neighbor's side competes with each segment by the rule above. A merge's diagonals are its
+  anchor's, across the whole merge; a covered cell's diagonal is not drawn.
+- **Spilled text removes every vertical border it crosses**, over the whole row height, on
+  either cell, while the horizontal sides of the cells it crosses stay. Where the spill stops at
+  a value, that cell's left side is drawn. So the borders pass runs after the cells and reads
+  `RenderedRow.crossed` (§3.6).
+- **Hidden rows and columns** contribute no sides; the visible neighbors' facing sides meet on
+  the one edge and compete.
+- Diagonals run corner to corner of the cell or merge, antialiased; hair diagonals are drawn as
+  thin, dashed ones as short blocks; text and the line both show.
+
+**The layout** (`excel` mode only) resolves one side per edge of the laid-out grid into
+`RenderedSheet.extra["borders"]`, a `RenderedBorders` of horizontal and vertical lines and the
+diagonals; no output compares two cells' sides. A range read cuts off the sides of the cells
+beyond it (not read).
+
+**HTML** draws two layers of absolutely positioned boxes before the table's text, in sheet
+coordinates: the fill layer (`sp-fills`: SVG tiles drawn `pixelated` and anchored at the sheet's
+origin, CSS linear gradients, SVG path gradients in four bands) and the border layer
+(`sp-borders`: one box per run of equal sides along a line, reaching over the bands of the lines
+across its ends; dashes as SVG tiles on white; diagonals as SVG lines). Both stay in CSS px at any
+page scale. Tiles and staggered dashes are exact at 2 device pixels a CSS px; a 1× display rounds
+them (decided). Where Excel starts a dash period is not captured; a run starts its own.
+**slantDashDot is drawn as mediumDashDot with square gaps** and reported
+(`border.slant_dash_dot`).
+
+Not captured: a dash's phase, the light and dark appearances' effect (none expected), double
+lines meeting at a corner (drawn crossing), what Excel does with a gradient without stops, and
+the zoom-200 oddities (a 3 × 1 merge's diagonal stopping at its middle; two linear gradients
+ending 1 pt short of the right gridline).
+
+**Other outputs.** `rich` shows a pattern as its blended color and a gradient as its midpoint
+color (approximated) and no borders (`not_implemented`: an option could later draw box lines);
+plain text, Markdown, CSV and TSV show neither fills nor borders.
+
 ## 5. openpyxl facts that constrain the design
 
 All measured with openpyxl 3.1.5 (`bench/`).
@@ -1101,6 +1200,11 @@ points.
 - **Fills** paint the cell and its own gridlines, and the right neighbor's left gridline and the
   top gridline of the cell below take the fill's color, as Excel's fill covers them. A crossed
   boundary (`RenderedRow.crossed`) gets the class `sp-crossed`, a transparent gridline.
+- **Pattern and gradient fills, and borders** (§4.12) are two layers of absolutely positioned
+  boxes (`sp-fills`, `sp-borders`) written before the table's text, so text lies over them and
+  they over the cells' backgrounds and gridlines; their sizes are CSS px, not points. Each
+  distinct fill or line is a generated class in the page's stylesheet (`sp-f-` and `sp-b-` and
+  letters, not public interface).
 - **Baseline:** with `line-height: 1`, a run's `top` is its baseline less 0.8418 em, in pixels;
   0.8418 em is where the baseline of Calibri and Carlito sits in a 1 em box (ascent 0.952,
   descent 0.269).
@@ -1199,6 +1303,8 @@ src/sheetpeek/
   _model.py          Sheet, Cell, CellStyle, Column, Row, CellRange, Font
   _hyperlink.py      Hyperlink; the scheme check and place lookup every output shares (§4.10)
   _outline_model.py  Outline, OutlineMark, RenderedOutline (§4.11)
+  _fill_border_model.py  Pattern, Gradient, Side, Borders, RenderedBorders; the conflict rule (§4.12)
+  _fill_border_census.py fills and borders in the census; the style that draws a cell's fill
   _rendered.py       RenderedSheet, RenderedRow, RenderedCell, RenderedColumn, Gap
   _package.py        ReadLimits, the check before reading (§5.5), sheet name → worksheet part
   _structure.py      the structure scan (§5.4): one handler per element
@@ -1213,6 +1319,7 @@ src/sheetpeek/
   _layout.py         width modes, the xlformat seam, alignment, spill, merges, wrapping;
                      the ordered layout passes
   _pass_outline.py   the outline pass: groups, buttons and dots (§4.11)
+  _pass_borders.py   the borders pass: one resolved side per edge, the diagonals (§4.12)
   _excel.py          excel mode: geometry in points, text runs, clips
   _rows.py           row heights (§4.7) and baselines
   backends/
@@ -1222,6 +1329,7 @@ src/sheetpeek/
     text.py  rich.py  markdown.py  delimited.py
     html/            __init__ (backend, page), _css, _table (grid, fills, gridlines),
                      _text (runs), _headings, _links (anchors, ids), _outline (the gutter), _notices
+                     _patterns (the fill layer), _borders (the border layer)
   cli.py             `sheetpeek view`, `sheetpeek serve`
   _serve.py          the server behind `sheetpeek serve`
   _carlito.py        Carlito's advance widths, generated by tools/carlito_widths.py

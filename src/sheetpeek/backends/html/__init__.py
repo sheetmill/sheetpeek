@@ -99,6 +99,7 @@ class HTMLBackend:
 
     def render(self, sheet: RenderedSheet, out: TextIO, /) -> None:
         """Write the page or the fragment to ``out``."""
+        page = Page(sheet, self)
         if not self.fragment:
             title = html.escape(one_line(sheet.sheet.name))
             background = "#1e1e1e" if self.color_scheme == "dark" else "#ffffff"
@@ -106,13 +107,13 @@ class HTMLBackend:
                 '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
                 '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
                 f"<title>{title}</title>\n"
-                f"<style>\n{CSS}{outline_css(sheet, self)}"
+                f"<style>\n{CSS}{outline_css(sheet, self)}{page.css()}"
                 f"body {{ margin: 8px; background: {background}; }}\n</style>\n"
                 "</head>\n<body>\n"
             )
         else:
-            out.write(f"<style>\n{CSS}{outline_css(sheet, self)}</style>\n")
-        Page(sheet, self).write(out)
+            out.write(f"<style>\n{CSS}{outline_css(sheet, self)}{page.css()}</style>\n")
+        page.write(out)
         if self.notices:
             write_notices(sheet, self, out)
         if not self.fragment:

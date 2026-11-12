@@ -17,7 +17,7 @@ from xml.sax.saxutils import escape, quoteattr
 
 import openpyxl
 import pytest
-from openpyxl.styles import Alignment, Font, PatternFill
+from openpyxl.styles import Alignment, Border, Font, GradientFill, PatternFill, Side
 from openpyxl.styles.colors import Color
 
 import sheetpeek
@@ -43,7 +43,7 @@ PAYLOAD = (
 )
 HTML_TAGS = {
     "html", "head", "meta", "title", "style", "body", "div", "table", "colgroup", "col", "thead",
-    "tbody", "tr", "td", "th", "span", "details", "summary", "ul", "li", "a",
+    "tbody", "tr", "td", "th", "span", "details", "summary", "ul", "li", "a", "i",
 }  # fmt: skip
 HTML_ATTRIBUTES = {
     "data-color-scheme",
@@ -64,6 +64,7 @@ HTML_ATTRIBUTES = {
 STYLE_PROPERTIES = {
     "width", "height", "left", "right", "top", "font", "color", "background", "border-color",
     "margin-top", "border-left-color", "border-top-color", "letter-spacing", "text-decoration",
+    "background-position",
 }  # fmt: skip
 MARKDOWN_TAGS = {"table", "thead", "tbody", "tr", "th", "td", "br", "p", "strong", "em", "a"}
 LINK_SCHEMES = ("http", "https", "mailto")
@@ -289,6 +290,33 @@ def merged(tmp_path):
     return save(wb, path)
 
 
+def filled_and_bordered(tmp_path):
+    path = _styled(
+        tmp_path,
+        fill=PatternFill("gray0625", fgColor="FF0000FF"),
+        border=Border(
+            left=Side("thick", color="FFFF0000"),
+            bottom=Side("dashDot"),
+            diagonal=Side("double"),
+            diagonalUp=True,
+        ),
+    )
+    wb = openpyxl.load_workbook(path)
+    wb.active["B2"].fill = GradientFill(degree=30, stop=("FFFFFFFF", "FF0000FF"))
+    wb.active["C3"].fill = GradientFill("path", left=0.2, right=0.8, stop=("FFFFFFFF", "FF0000FF"))
+    return save(wb, path)
+
+
+def border_rgb(tmp_path):
+    path = _styled(tmp_path, border=Border(left=Side("thin", color="00ABCDEF")))
+    return rewrite(path, "xl/styles.xml", lambda t: t.replace('"00ABCDEF"', quoteattr(PAYLOAD)))
+
+
+def gradient_rgb(tmp_path):
+    path = _styled(tmp_path, fill=GradientFill(stop=("00ABCDEF", "FF0000FF")))
+    return rewrite(path, "xl/styles.xml", lambda t: t.replace('"00ABCDEF"', quoteattr(PAYLOAD)))
+
+
 def hidden(tmp_path):
     path = xml_text(tmp_path, A2=PAYLOAD, C2=PAYLOAD)
     wb = openpyxl.load_workbook(path)
@@ -453,7 +481,8 @@ def defined_name(tmp_path):
 
 SOURCES = [
     inline, cached, error_text, error_shaped, date_text, shared, escaped_in_file, line_breaks,
-    wrapped, filled_alignment, justified, spilled_left, merged, hidden, format_quoted,
+    wrapped, filled_alignment, justified, spilled_left, merged, filled_and_bordered, border_rgb,
+    gradient_rgb, hidden, format_quoted,
     format_text_section, format_escaped, format_currency, format_refused, sheet_name, font_name,
     normal_font_name, theme_srgb, theme_system, style_rgb, palette, hyperlink, hyperlink_target,
     hyperlink_mailto, hyperlink_refused, hyperlink_tab, hyperlink_tooltip, hyperlink_formula,
@@ -497,7 +526,7 @@ def read_or_refused(path):
 # this table is checked: "refused" raises on load, "absent" is by design never shown (a theme
 # without valid colors, a hidden cell, a refused format's General, what no backend draws).
 REACHES = {
-    "refused": {"date_text", "style_rgb", "palette"},
+    "refused": {"date_text", "style_rgb", "palette", "border_rgb", "gradient_rgb"},
     "absent": {
         "hidden", "format_refused", "theme_srgb", "theme_system", "hyperlink", "properties",
         "defined_name", "hyperlink_refused", "hyperlink_tab",
