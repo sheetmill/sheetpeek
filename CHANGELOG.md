@@ -13,10 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   not read yet, or that the layout approximates, and `sheetpeek.notices(source, to=...)` adds what
   that output cannot show, without rendering. A notice has a dotted code (`FEATURES` lists them),
   an outcome (`omitted` or `approximated`), a reason, the cells and the output.
-- Reported when a file uses them: borders, pattern and gradient fills, superscript and subscript,
-  theme fonts whose stored name differs, rotated, stacked and shrunk text, reading order, rich-text
-  runs, phonetic guides, row and column formats, sheet views (hidden zeros, right to left,
-  formulas, page layout, panes, grid color), conditional formatting, filter buttons,
+- Reported when a file uses them, until they are drawn: rotated and stacked text, rich-text runs,
+  phonetic guides, row and column formats, sheet views (hidden zeros, right to left, formulas,
+  page layout, panes), conditional formatting, filter buttons,
   tables, sparklines, slicers, timelines, pictures, charts, shapes, embedded objects, form
   controls, background pictures, notes and threaded comments, print areas, print titles, manual
   page breaks, tab colors, dialog sheets, macro sheets, and any sheet element or extension sheetpeek
@@ -96,6 +95,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   declares: `rich` and plain text clip shrunk text at full size and keep `#` for a number too
   wide, and draw superscript and subscript at full size (`rich`) or plain (text); Markdown draws
   them as plain text.
+- Theme fonts: a font of the theme's body or heading scheme is drawn in the theme's typeface,
+  whatever name it stores, as Excel draws it. `Font.name` is that typeface; the new
+  `Font.scheme` and `Font.stored_name` keep what the file says. The Normal font follows the theme
+  too, so column widths take the theme font's digits; a theme typeface xlformat has no glyph
+  table for is measured as Calibri and reported (`font.no_metrics`).
+- The grid color: `Sheet.grid_color` reads `<sheetView defaultGridColor="0" colorId>` through
+  the workbook palette. HTML draws the gridlines in it, one device pixel wide as Excel does;
+  `rich` draws the column separators in it.
+- `format.palette`: a number format's `[ColorN]` that the workbook's palette recolors is reported,
+  since the layout draws section colors from Excel's default palette.
 
 ### Changed
 - Tints stored as 16-bit fractions (0.6 is stored as 0.59999389...) give the colors Excel draws:
@@ -132,6 +141,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Superscript, subscript, shrink to fit and reading order are no longer reported by the reader:
   each output reports what it does with them. The layout notice `align.vertical_justify` is
   removed, since `excel` mode draws vertical justify and distributed.
+- HTML headings take Excel's sizes: the column band 21 pt and the row band 16 pt plus 3 pt a digit
+  of the last row, at Calibri 11, growing with the Normal font's size. Their colors are Excel's:
+  dark `#161616`, `#ffffff` and `#565656`; light `#f7f7f7`, `#5e5e5e` and `#e0dfdd`.
+- A workbook palette replaces the default entry by entry; a `<colors>` element without
+  `indexedColors` keeps the default palette instead of drawing indexed colors black.
 
 ### Deprecated
 - `Sheet.warnings` and `RenderedSheet.warnings`, now views of the notices that were warnings
