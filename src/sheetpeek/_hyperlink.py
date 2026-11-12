@@ -96,6 +96,17 @@ def location_cell(location: str, sheet: str) -> tuple[int, int] | None:
     sheet's cell or text that is neither gives ``None``. A reference without a sheet is taken as
     the link's own sheet (unverified).
     """
+    place = location_place(location, sheet)
+    if place is None or place[0].casefold() != sheet.casefold():
+        return None
+    return place[1], place[2]
+
+
+def location_place(location: str, sheet: str) -> tuple[str, int, int] | None:
+    """The sheet name and cell a ``location`` names, the name as written; ``None`` for no cell.
+
+    As :func:`location_cell`, for any sheet: a reference without a sheet names ``sheet``.
+    """
     text = location.strip()
     if text.startswith("'"):
         name, rest = _quoted(text)
@@ -106,15 +117,13 @@ def location_cell(location: str, sheet: str) -> tuple[int, int] | None:
         name, _, reference = text.partition("!")
     else:
         name, reference = sheet, text
-    if name.casefold() != sheet.casefold():
-        return None
     from sheetpeek._model import CellRange  # the model imports this module
 
     try:
         cells = CellRange.parse(reference)
     except ValueError:
         return None
-    return cells.min_row, cells.min_col
+    return name, cells.min_row, cells.min_col
 
 
 def _quoted(text: str) -> tuple[str | None, str]:

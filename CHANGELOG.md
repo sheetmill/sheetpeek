@@ -118,6 +118,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `emphasis=True`. A cell with runs is also counted under each font feature its runs use.
 - Reader code `text.runs_lost`: the runs of inline strings (what openpyxl writes), which
   openpyxl's read-only reader drops; they are drawn in the cell's font.
+- `Book.sheets`: every sheet in workbook order as a `SheetInfo` (name, kind, state, tab color).
+  Kinds come from the workbook's relationship types: `worksheet`, `chartsheet`, `dialogsheet`,
+  `macrosheet`. Tab colors are `RRGGBB` through the palette and theme; `auto` is `None`.
+- `sheetpeek.render_workbook()`: every sheet on one static HTML page, with Excel's tab strip
+  (visible sheets in file order, tab colors as Excel draws them, hidden sheets with
+  `hidden=True`). Links to a cell of another sheet on the page go there. Chartsheets and dialog
+  sheets get a tab and a line saying they are not shown.
+- `sheetpeek view --all-sheets` writes that page (`-t html` only).
+- `NotAWorksheetError`, a `ValueError`, raised for a chartsheet or a dialog sheet.
+- The notice `sheet.hidden`: hidden sheets the workbook page leaves out.
 
 ### Changed
 - Tints stored as 16-bit fractions (0.6 is stored as 0.59999389...) give the colors Excel draws:
@@ -162,6 +172,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rich-text runs are no longer reported by the reader as drawn in the cell's font: each output
   reports what it does with them.
 - A row fitted to a Calibri 20 cell is 26 pt, as Excel fits it, instead of Calibri 16's 21.
+- A dialog sheet is no longer drawn as a blank worksheet: `Book.sheet()` raises
+  `NotAWorksheetError` for it, as for a chartsheet, and `sheet.dialogsheet` is a workbook-level
+  notice in `Book.notices`.
+- The default sheet skips an active chartsheet or dialog sheet: it is the first visible worksheet
+  or macro sheet.
+- `sheet.tab_color` is reported with reason `option`: only the workbook page draws tabs.
+- `sheetpeek view --list` shows each sheet's state and kind when it is not a visible worksheet
+  (`Chart  (chartsheet, not shown)` instead of `Chart  (sheet.chartsheet: not shown)`).
+- `serve` marks a chartsheet or dialog sheet in its sheet list instead of linking to an error.
 
 ### Deprecated
 - `Sheet.warnings` and `RenderedSheet.warnings`, now views of the notices that were warnings

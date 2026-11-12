@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import dataclasses
 import datetime as dt
+import functools
 import io
 import os
 import re
@@ -61,6 +62,14 @@ from sheetpeek._runs_model import TextSpan
 from sheetpeek._scan_links import cell_links
 from sheetpeek._scan_links import report as report_links
 from sheetpeek._scan_outline import read_outline
+from sheetpeek._sheets import (
+    ListedSheet,
+    NotAWorksheetError,
+    SheetInfo,
+    default_sheet,
+    listed_sheets,
+    tab_color,
+)
 from sheetpeek._structure import Structure, scan
 from sheetpeek._style import Code
 from sheetpeek._style import font as font_aspect
@@ -76,6 +85,10 @@ _STATES: dict[str, SheetState] = {
     "visible": "visible",
     "hidden": "hidden",
     "veryHidden": "very_hidden",
+}
+_NOT_SHOWN = {
+    "chartsheet": "is a chartsheet; charts are not shown",
+    "dialogsheet": "is a dialog sheet (a legacy form); it is not shown",
 }
 _DATE_TYPES = (dt.datetime, dt.date, dt.time, dt.timedelta)
 _ESCAPE = re.compile(r"_x([0-9A-Fa-f]{4})_")
@@ -211,9 +224,45 @@ class Book:
         """Names of all sheets, hidden ones included, in workbook order."""
         return list(self._workbook.sheetnames)
 
+    @functools.cached_property
+    def sheets(self) -> tuple[SheetInfo, ...]:
+        """Every sheet, hidden ones and those sheetpeek does not draw included, in workbook order.
+
+        Each with its kind, state and tab color. A chartsheet or dialog sheet is listed here, and
+        :meth:`sheet` raises :class:`NotAWorksheetError` for it.
+        """
+        assert self._archive is not None
+        return tuple(
+            SheetInfo(
+                listed.name,
+                listed.kind,
+                listed.state,
+                self._color(tab_color(self._archive, listed.part)),
+            )
+            for listed in self._listing[0]
+        )
+
+    @functools.cached_property
+    def _listing(self) -> tuple[list[ListedSheet], ListedSheet | None]:
+        """The sheets openpyxl lists too (the first of a name), and the active one, if listed.
+
+        openpyxl skips a sheet whose part is missing; so does sheetpeek. The active one is
+        ``activeTab``, an index into the workbook part's own list.
+        """
+        assert self._archive is not None
+        listed, active = listed_sheets(self._archive)
+        present = set(self._workbook.sheetnames)
+        kept: dict[str, ListedSheet] = {}
+        for sheet in listed:
+            if sheet.name in present:
+                kept.setdefault(sheet.name, sheet)
+        sheets = list(kept.values())
+        chosen = listed[active] if active is not None and active < len(listed) else None
+        return sheets, chosen if chosen is not None and chosen in sheets else None
+
     @property
     def notices(self) -> tuple[Notice, ...]:
-        """Workbook-level notices: the sheets that cannot be shown, such as chartsheets."""
+        """Workbook-level notices: the sheets that cannot be shown (chartsheets, dialog sheets)."""
         collector = Collector(None)
         book_notices(collector, self._info)
         return collector.notices()
@@ -227,13 +276,15 @@ class Book:
         """Read one sheet.
 
         Args:
-            name: The sheet's name. By default, the sheet Excel opens on: the active sheet,
-                or the first visible sheet when the active one is hidden.
+            name: The sheet's name. By default, the sheet Excel opens on: the active sheet, or
+                the first visible worksheet when the active one is hidden or not a worksheet.
             ref: The range to read, such as ``"A1:H40"``. By default, the used range.
 
         Raises:
             KeyError: There is no sheet with that name.
-            ValueError: The sheet is a chartsheet, or ``ref`` is not a range.
+            NotAWorksheetError: The sheet is a chartsheet or a dialog sheet (a
+                :class:`ValueError`).
+            ValueError: ``ref`` is not a range.
             LimitError: ``ref``, or else the sheet's used range, is over ``max_cells``.
             PackageError: The sheet's part cannot be read.
         """
@@ -241,9 +292,12 @@ class Book:
             name = self._default_sheet_name()
         if name not in self._workbook.sheetnames:
             raise KeyError(f"no sheet named {name!r}; the sheets are {self.sheet_names}")
+        kind = self._info.kinds.get(name, "worksheet")
+        if kind in ("chartsheet", "dialogsheet"):
+            raise NotAWorksheetError(f"{name!r} {_NOT_SHOWN[kind]}")
         worksheet = self._workbook[name]
         if not hasattr(worksheet, "iter_rows") or name not in self._parts:
-            raise ValueError(f"{name!r} is not a worksheet")
+            raise NotAWorksheetError(f"{name!r} is not a worksheet")
         part = self._parts[name]
         if isinstance(ref, str):
             ref = CellRange.parse(ref)
@@ -350,13 +404,10 @@ class Book:
             )
 
     def _default_sheet_name(self) -> str:
-        active = self._workbook.active
-        if active is not None and active.sheet_state == "visible":
-            return str(active.title)
-        for worksheet in self._workbook.worksheets:
-            if worksheet.sheet_state == "visible":
-                return str(worksheet.title)
-        return str(self._workbook.sheetnames[0])
+        found = default_sheet(*self._listing)
+        if found is None:
+            raise NotAWorksheetError("the workbook has no worksheet to show")
+        return found.name
 
     def _read_cells(
         self, worksheet: Any, ref: CellRange, structure: Structure, notes: Collector
@@ -602,7 +653,8 @@ def read(
     Raises:
         OSError: A path that cannot be opened.
         KeyError: There is no sheet with that name.
-        ValueError: The sheet is a chartsheet, or ``ref`` is not a range.
+        NotAWorksheetError: The sheet is a chartsheet or a dialog sheet (a :class:`ValueError`).
+        ValueError: ``ref`` is not a range.
         LimitError: The file, or the range, exceeds ``limits``.
         PackageError: The file is not a readable xlsx workbook, or it is refused.
     """

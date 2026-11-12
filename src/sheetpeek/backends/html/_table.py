@@ -19,6 +19,9 @@ if TYPE_CHECKING:
     from sheetpeek.backends.html import HTMLBackend
 
 
+_Spans = dict[CellRange, tuple[int, int, int, int]]
+
+
 def _px(points: float) -> int:
     """A sheet position in whole CSS pixels."""
     return round(points * 4 / 3)
@@ -40,13 +43,32 @@ def _grid_css(color: str | None) -> str:
 
 
 class Page:
-    """One sheet's markup."""
+    """One sheet's markup.
 
-    def __init__(self, sheet: RenderedSheet, backend: HTMLBackend) -> None:
+    Args:
+        sheet: The sheet, laid out in ``excel`` mode.
+        backend: The backend and its options.
+        scope: What the ids of cells that links go to start with: ``sp``, or on the workbook
+            page the sheet's section id, so that ids stay unique on the page.
+        tag: Letters and a hyphen after the generated class prefixes (``sp-f-``, ``sp-b-``),
+            unique to each sheet on the workbook page; empty for one sheet.
+    """
+
+    def __init__(
+        self, sheet: RenderedSheet, backend: HTMLBackend, *, scope: str = "sp", tag: str = ""
+    ) -> None:
         if sheet.mode != "excel":
             raise ValueError("the HTML backend draws a sheet laid out in excel mode")
         self.sheet = sheet
         self.backend = backend
+        self.scope = scope
+        self.tag = tag
+        self.book: _links.BookLinks | None = None
+        """The workbook page's other sheets, for links to them; ``None`` for one sheet."""
+        self.ids: dict[tuple[int, int], str] = {}
+        """Grid position of a cell a link goes to → its id."""
+        self._grid: tuple[_Spans, dict[tuple[int, int], tuple[int, int]]] | None = None
+        self._links: _links.Links | None = None
         self.ox, self.oy = _headings.offsets(sheet, backend)
         self.gx, self.gy = _outline.offsets(sheet, backend)  # px, the outline gutters
         self.outline_rows = _outline.row_marks(sheet, backend)
@@ -55,11 +77,11 @@ class Page:
         self.fills = _patterns.Fills(self)
         self.borders = _borders.Borders(self)
         model = sheet.sheet
-        self.grid = model.grid_color if model.show_gridlines else None
+        self.grid_color = model.grid_color if model.show_gridlines else None
 
     def css(self) -> str:
         """The page's own stylesheet: the classes its fill, border and grid colors use."""
-        return _patterns.layer_css(self.fills, self.borders.css()) + _grid_css(self.grid)
+        return _patterns.layer_css(self.fills, self.borders.css()) + _grid_css(self.grid_color)
 
     def x(self, points: float) -> int:
         return self.gx + _px(self.ox + points)
@@ -70,8 +92,8 @@ class Page:
     def write(self, out: TextIO) -> None:
         sheet = self.sheet
         classes = "sheetpeek" if sheet.sheet.show_gridlines else "sheetpeek sp-nogrid"
-        if self.grid:
-            classes += f" sp-g-{self.grid}"
+        if self.grid_color:
+            classes += f" sp-g-{self.grid_color}"
         out.write(f'<div class="{classes}" data-color-scheme="{self.backend.color_scheme}">')
         self.fills.write(out)
         self.borders.write(out)
@@ -92,11 +114,13 @@ class Page:
         self.write_rows(out)
         out.write("</tbody></table></div>\n")
 
-    def write_rows(self, out: TextIO) -> None:
-        sheet = self.sheet
-        grid = [row.cells for row in sheet.rows]
+    def grid(self) -> tuple[_Spans, dict[tuple[int, int], tuple[int, int]]]:
+        """Each merge's grid span, and sheet position → grid position of the cell drawing it."""
+        if self._grid is not None:
+            return self._grid
+        grid = [row.cells for row in self.sheet.rows]
         # Each merge is one cell at its first visible position, spanning its visible area.
-        spans: dict[CellRange, tuple[int, int, int, int]] = {}
+        spans: _Spans = {}
         for i, cells in enumerate(grid):
             for p, cell in enumerate(cells):
                 if cell.merge is not None:
@@ -112,7 +136,24 @@ class Page:
                     holder.setdefault(anchor, (top, left))
                 else:
                     holder[(cell.row, cell.column)] = (i, p)
-        self.links = _links.Links(self, holder)
+        self._grid = spans, holder
+        return self._grid
+
+    @property
+    def links(self) -> _links.Links:
+        """The page's links, found when first asked.
+
+        On the workbook page every page's are found before any sheet is written, since a link
+        gives an id to a cell of another sheet.
+        """
+        if self._links is None:
+            self._links = _links.Links(self, self.grid()[1])
+        return self._links
+
+    def write_rows(self, out: TextIO) -> None:
+        sheet = self.sheet
+        spans, holder = self.grid()
+        self.links  # noqa: B018 - found before the cells are written, for their ids
         runs: dict[tuple[int, int], list[TextRun]] = {}
         for i, row in enumerate(sheet.rows):
             for run in row.runs:
@@ -155,8 +196,8 @@ class Page:
             if above:
                 style.append(f"border-top-color:#{above}")
         attrs = ""
-        if (i, p) in self.links.ids:
-            attrs += f' id="{self.links.ids[(i, p)]}"'
+        if (i, p) in self.ids:
+            attrs += f' id="{self.ids[(i, p)]}"'
         if p and rows[i].crossed[p - 1]:
             attrs += ' class="sp-crossed"'
         if style:

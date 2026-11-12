@@ -10,8 +10,11 @@ from collections.abc import Sequence
 from typing import TextIO
 
 from sheetpeek._model import one_line
+from sheetpeek._notices import Notice
 from sheetpeek._package import SERVE_LIMITS, PackageError, ReadLimits
+from sheetpeek._read import Book
 from sheetpeek._read import open as open_book
+from sheetpeek._sheets import SheetInfo
 from sheetpeek.backends import (
     Backend,
     HTMLBackend,
@@ -21,6 +24,7 @@ from sheetpeek.backends import (
     get_backend,
     notices,
 )
+from sheetpeek.backends.html._workbook import render_workbook
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -43,8 +47,9 @@ def _parser() -> argparse.ArgumentParser:
     view = commands.add_parser(
         "view",
         help="show one sheet",
-        description="Show one sheet of a workbook. On a terminal the output is styled with rich "
-        "when it is installed; otherwise, and when piped, it is plain text.",
+        description="Show one sheet of a workbook, or with --all-sheets every sheet as one HTML "
+        "page. On a terminal the output is styled with rich when it is installed; otherwise, and "
+        "when piped, it is plain text.",
     )
     view.add_argument("file", help="the .xlsx workbook")
     view.add_argument("-s", "--sheet", help="sheet name (default: the sheet Excel opens on)")
@@ -55,7 +60,17 @@ def _parser() -> argparse.ArgumentParser:
     view.add_argument("--column-headings", action="store_true", help="show column letters")
     view.add_argument("--row-headings", action="store_true", help="show row numbers")
     view.add_argument("--hidden", action="store_true", help="show hidden rows and columns")
-    view.add_argument("--list", action="store_true", help="list the sheets and exit")
+    view.add_argument(
+        "--list",
+        action="store_true",
+        help="list the sheets and exit; a sheet that is not a visible worksheet says what it is",
+    )
+    view.add_argument(
+        "--all-sheets",
+        action="store_true",
+        help="every sheet on one HTML page, with Excel's tabs (-t html only; with --hidden, "
+        "hidden sheets too)",
+    )
     view.add_argument(
         "--notices",
         choices=("summary", "full", "none"),
@@ -145,14 +160,19 @@ def _serve(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
 
 
 def _view(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
+    if args.all_sheets:
+        refused = _all_sheets_refused(args)
+        if refused:
+            _say(err, f"sheetpeek: --all-sheets {refused}")
+            return 2
     try:
         with open_book(args.file, limits=_limits(args)) as book:
             if args.list:
-                unshown = {str(n.context.get("sheet")): n for n in book.notices}
-                for name in book.sheet_names:
-                    notice = unshown.get(name)
-                    _say(out, f"{name}  ({notice.code}: not shown)" if notice else name)
+                for info in book.sheets:
+                    _say(out, _listed(info))
                 return 0
+            if args.all_sheets:
+                return _all_sheets(args, book, out, err)
             sheet = book.sheet(args.sheet, ref=args.ref)
     except FileNotFoundError:
         _say(err, f"sheetpeek: no such file: {args.file}")
@@ -174,7 +194,12 @@ def _view(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
         _say(err, f"sheetpeek: cannot show {args.file}: {error}")
         return 1
     backend.render(rendered, out)
-    found = [n for n in notices(rendered, backend) if not any(n.matches(c) for c in args.suppress)]
+    return _report(args, list(notices(rendered, backend)), err)
+
+
+def _report(args: argparse.Namespace, notices: list[Notice], err: TextIO) -> int:
+    """Write the notices as ``--notices`` asks; the exit status."""
+    found = [n for n in notices if not any(n.matches(c) for c in args.suppress)]
     if args.notices != "none":
         for notice in found:
             _say(err, f"sheetpeek: {notice.code}: {notice.message}")
@@ -182,6 +207,45 @@ def _view(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
                 more = " ..." if notice.context.get("truncated") else ""
                 _say(err, "  cells: " + " ".join(str(r) for r in notice.cells) + more)
     return 3 if args.strict and found else 0
+
+
+_KIND_LABELS = {
+    "chartsheet": "chartsheet, not shown",
+    "dialogsheet": "dialog sheet, not shown",
+    "macrosheet": "macro sheet",
+}
+_STATE_LABELS = {"hidden": "hidden", "very_hidden": "very hidden"}
+
+
+def _listed(info: SheetInfo) -> str:
+    """A line of ``--list``: the name, and what the sheet is unless a visible worksheet."""
+    notes = [n for n in (_STATE_LABELS.get(info.state), _KIND_LABELS.get(info.kind)) if n]
+    return f"{info.name}  ({', '.join(notes)})" if notes else info.name
+
+
+def _all_sheets_refused(args: argparse.Namespace) -> str:
+    """Why ``--all-sheets`` cannot go with the other options given; empty when it can."""
+    if args.to not in (None, "html"):
+        return f"draws an HTML page; -t {args.to} has no workbook page (use -t html)"
+    if args.sheet is not None or args.ref is not None:
+        return "draws every sheet whole; it takes no --sheet or --ref"
+    if args.list:
+        return "and --list cannot go together"
+    return ""
+
+
+def _all_sheets(args: argparse.Namespace, book: Book, out: TextIO, err: TextIO) -> int:
+    found: list[Notice] = []
+    page = render_workbook(
+        book,
+        hidden=args.hidden,
+        on_notice=found.append,
+        column_headings=args.column_headings,
+        row_headings=args.row_headings,
+    )
+    assert page is not None
+    out.write(page)
+    return _report(args, found, err)
 
 
 def _say(stream: TextIO, line: str) -> None:

@@ -96,7 +96,7 @@ class Borders:
     """The border layer of a page."""
 
     def __init__(self, page: Page) -> None:
-        self.classes = Classes("sp-b-")
+        self.classes = Classes(f"sp-b-{page.tag}")
         self.lines: list[str] = []
         sheet = page.sheet
         resolved = rendered_borders(sheet)

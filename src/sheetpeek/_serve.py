@@ -39,7 +39,7 @@ _HOST = re.compile(r"(\[[^\]]*\]|[^:\[\]]+)(?::\d*)?")
 _PAGE_CSS = """\
 body { margin: 0; font: 13px -apple-system, "Segoe UI", sans-serif; background: #ffffff; }
 .sp-bar { padding: 8px 12px; border-bottom: 1px solid #d4d4d4; background: #f7f7f7; }
-.sp-bar a { margin-right: 12px; }
+.sp-bar a, .sp-bar span { margin-right: 12px; }
 .sp-bar .sp-current { font-weight: 600; margin-right: 12px; }
 .sp-sheet { padding: 12px; }
 .sp-list { padding: 12px 24px; line-height: 1.8; }
@@ -75,6 +75,9 @@ def resolve(root: Path, relative: str) -> Path | None:
     if not candidate.is_relative_to(root) or candidate.suffix.lower() != ".xlsx":
         return None
     return candidate if candidate.is_file() else None
+
+
+_KINDS = {"chartsheet": "chartsheet, not shown", "dialogsheet": "dialog sheet, not shown"}
 
 
 def _page(title: str, body: str) -> bytes:
@@ -171,7 +174,7 @@ class _Handler(BaseHTTPRequestHandler):
         ref = query.get("ref", [None])[0]
         try:
             with open_book(path, limits=self.limits) as book:
-                names = book.sheet_names
+                infos = book.sheets
                 sheet = book.sheet(sheet_name, ref=CellRange.parse(ref) if ref else None)
             rendered = sheet.layout("excel")
         except PackageError as error:
@@ -188,10 +191,12 @@ class _Handler(BaseHTTPRequestHandler):
         )
         fragment = out.getvalue().split("</style>\n", 1)[1]  # the page carries the stylesheet
         tabs = "".join(
-            f'<span class="sp-current">{html.escape(n)}</span>'
-            if n == sheet.name
-            else f'<a href="{_link(name, n)}">{html.escape(n)}</a>'
-            for n in names
+            f'<span class="sp-current">{html.escape(i.name)}</span>'
+            if i.name == sheet.name
+            else f'<a href="{_link(name, i.name)}">{html.escape(i.name)}</a>'
+            if i.readable
+            else f"<span>{html.escape(i.name)} ({_KINDS[i.kind]})</span>"
+            for i in infos
         )
         body = (
             f'<div class="sp-bar"><a href="/">All workbooks</a>'

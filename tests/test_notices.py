@@ -40,6 +40,8 @@ ELSEWHERE = {
     "value.unshowable": "tests/test_layout.py",
     "outline.cut": "only with a range that cuts a group; tests/test_outline.py",
     "grid.color": "only where gridlines are shown, and All hides them; tests/test_theme.py",
+    "sheet.hidden": "only on the workbook page, which leaves hidden sheets out; "
+    "tests/test_workbook.py",
 }
 
 DRAWING = (
@@ -306,7 +308,7 @@ def codes(notices):
 def test_every_reader_code_is_reported(every):
     with sheetpeek.open(every) as book:
         found = codes(book.notices)
-        for name in ("All", "Dialog", "Macro"):
+        for name in ("All", "Macro"):
             found |= codes(book.sheet(name).notices)
     expected = {c for c, f in FEATURES.items() if f.source == "reader"} - set(ELSEWHERE)
     assert expected - found == set()
@@ -488,17 +490,29 @@ def test_objects_hidden_by_the_workbook_are_not_reported(every, tmp_path):
 
 
 def test_a_dialog_sheet_is_reported_not_shown_blank(every):
-    found = sheetpeek.read(every, "Dialog").notices
-    assert [(n.code, n.outcome) for n in found] == [("sheet.dialogsheet", "omitted")]
+    # openpyxl loads a dialog sheet as an empty worksheet; it is not drawn as a blank sheet.
+    with sheetpeek.open(every) as book:
+        found = [n for n in book.notices if n.code == "sheet.dialogsheet"]
+        assert [(n.outcome, n.context["sheet"], n.level) for n in found] == [
+            ("omitted", "Dialog", "workbook")
+        ]
+        with pytest.raises(sheetpeek.NotAWorksheetError, match="dialog sheet"):
+            book.sheet("Dialog")
 
 
-def test_a_chartsheet_is_listed_as_not_shown(every, capsys):
+def test_chartsheets_and_dialog_sheets_are_listed_as_not_shown(every, capsys):
     with sheetpeek.open(every) as book:
         assert [(n.code, n.context["sheet"]) for n in book.notices] == [
-            ("sheet.chartsheet", "Chart")
+            ("sheet.dialogsheet", "Dialog"),
+            ("sheet.chartsheet", "Chart"),
         ]
     assert cli.main(["view", str(every), "--list"]) == 0
-    assert "Chart  (sheet.chartsheet: not shown)" in capsys.readouterr().out
+    assert capsys.readouterr().out.splitlines() == [
+        "All",
+        "Dialog  (dialog sheet, not shown)",
+        "Macro  (macro sheet)",
+        "Chart  (chartsheet, not shown)",
+    ]
 
 
 def test_cells_hidden_from_view_are_not_reported(tmp_path):

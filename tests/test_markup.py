@@ -71,10 +71,14 @@ MARKDOWN_TAGS = {"table", "thead", "tbody", "tr", "th", "td", "br", "p", "strong
 LINK_SCHEMES = ("http", "https", "mailto")
 
 
+# A cell's id on a one-sheet page, and a sheet's or its cell's on the workbook page.
+IDS = r"sp-[A-Z]+[0-9]+|sp-[0-9]+(?:-[A-Z]+[0-9]+)?"
+
+
 def safe_href(value: str) -> bool:
     """Whether a link goes somewhere sheetpeek allows: a page of serve, a cell, or a URL."""
     if value.startswith(("/", "#sp-")):
-        return value.startswith("/") or re.fullmatch(r"#sp-[A-Z]+[0-9]+", value) is not None
+        return value.startswith("/") or re.fullmatch(f"#(?:{IDS})", value) is not None
     return urlsplit(value).scheme.lower() in LINK_SCHEMES
 
 
@@ -176,7 +180,7 @@ def assert_html_is_ours(
         elif name == "rel":
             assert value == "noopener noreferrer", value
         elif name == "id":
-            assert re.fullmatch(r"sp-[A-Z]+[0-9]+", value), value
+            assert re.fullmatch(IDS, value), value
         elif name not in (
             "title",  # a tooltip from the file, which the parser shows is only an attribute
             "content",
@@ -536,6 +540,38 @@ def properties(tmp_path):
     return rewrite(path, "docProps/core.xml", replace_once("openpyxl", escape(PAYLOAD)))
 
 
+def other_sheet_name(tmp_path):
+    """A second sheet, hidden, named by the payload, with a tab color, and a link to it."""
+    wb = openpyxl.Workbook()
+    wb.active["A1"] = "first"
+    wb.active["A2"] = "x"
+    other = wb.create_sheet("Other")
+    other["B2"] = "there"
+    other.sheet_properties.tabColor = "00FF00"
+    path = save(wb, tmp_path / "book.xlsx")
+    quoted = "'" + PAYLOAD.replace("'", "''") + "'!B2"
+    link = f'<hyperlinks><hyperlink ref="A2" location={quoteattr(quoted)}/></hyperlinks>'
+    rewrite(path, SHEET1, replace_once("</sheetData>", "</sheetData>" + link))
+    return rewrite(
+        path,
+        "xl/workbook.xml",
+        replace_once(
+            'name="Other" sheetId="2" state="visible"',
+            f'name={quoteattr(PAYLOAD)} sheetId="2" state="hidden"',
+        ),
+    )
+
+
+def tab_color(tmp_path):
+    path = xml_text(tmp_path, A2="x")
+    color = f"<sheetPr><tabColor rgb={quoteattr(PAYLOAD)}/></sheetPr>"
+    return rewrite(
+        path,
+        SHEET1,
+        lambda t: re.sub(r"<sheetPr>.*?</sheetPr>|(?=<dimension)", color, t, count=1, flags=re.S),
+    )
+
+
 def defined_name(tmp_path):
     path = xml_text(tmp_path, A2="x")
     name = f'<definedNames><definedName name="n">{escape(PAYLOAD)}</definedName></definedNames>'
@@ -553,6 +589,7 @@ SOURCES = [
     theme_font_name,
     runs, runs_wrapped, runs_filled, run_font_name, run_rgb,
     inline_runs,
+    other_sheet_name, tab_color,
 ]  # fmt: skip
 # Whichever of these openpyxl validates, it refuses when it loads the file: nothing is shown.
 BACKENDS = {
@@ -592,10 +629,12 @@ def read_or_refused(path):
 # this table is checked: "refused" raises on load, "absent" is by design never shown (a theme
 # without valid colors, a hidden cell, a refused format's General, what no backend draws).
 REACHES = {
-    "refused": {"date_text", "style_rgb", "palette", "border_rgb", "gradient_rgb", "run_rgb"},
+    "refused": {
+        "date_text", "style_rgb", "palette", "border_rgb", "gradient_rgb", "run_rgb", "tab_color",
+    },
     "absent": {
         "hidden", "format_refused", "theme_srgb", "theme_system", "hyperlink", "properties",
-        "defined_name", "hyperlink_refused", "hyperlink_tab",
+        "defined_name", "hyperlink_refused", "hyperlink_tab", "other_sheet_name",
     },
     "attribute": {
         "normal_font_name", "hyperlink_target", "hyperlink_mailto", "hyperlink_tooltip",
@@ -671,6 +710,44 @@ def test_a_cell_is_shown_as_its_literal_text_in_markdown(tmp_path, layout):
     sheet = read_or_refused(inline(tmp_path))
     rendered = sheetpeek.render(layout(sheet), "markdown")
     assert PAYLOAD in "".join(parse(renderer.render(rendered)).text)
+
+
+WORKBOOK_PAGES = {
+    "page": {},
+    "hidden": {"hidden": True},
+    "fragment, headings, notices": {
+        "fragment": True,
+        "column_headings": True,
+        "row_headings": True,
+        "notices": True,
+        "hidden": True,
+    },
+    "dark": {"color_scheme": "dark", "hidden": True},
+}
+BOOK_TAGS = frozenset({"nav", "section", "p"})
+
+
+@pytest.mark.parametrize("options", WORKBOOK_PAGES.values(), ids=WORKBOOK_PAGES.keys())
+def test_the_workbook_page_holds_no_markup_from_the_file(source, options):
+    try:
+        page = sheetpeek.render_workbook(
+            source, limits=sheetpeek.ReadLimits(max_cells=1_000_000), on_notice="ignore", **options
+        )
+    except PackageError:
+        return
+    assert_html_is_ours(page, extra_tags=BOOK_TAGS)
+
+
+def test_the_workbook_page_shows_sheet_names_as_text(tmp_path):
+    path = other_sheet_name(tmp_path)
+    page = sheetpeek.render_workbook(path, hidden=True, on_notice="ignore")
+    found = assert_html_is_ours(page, extra_tags=BOOK_TAGS)
+    assert PAYLOAD in "".join(found.text)  # the tab's label
+    assert ("href", "#sp-2-B2") in found.attributes  # the link, by the sheet's position
+    assert ("id", "sp-2-B2") in found.attributes
+    assert not any(MARK in value for _, value in found.attributes)
+    hidden = sheetpeek.render_workbook(path, on_notice="ignore")
+    assert MARK not in hidden
 
 
 def test_the_payload_would_be_markup_in_html_if_it_were_not_escaped():

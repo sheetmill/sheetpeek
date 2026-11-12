@@ -98,7 +98,7 @@ class Fills:
 
     def __init__(self, page: Page) -> None:
         self.page = page
-        self.classes = Classes("sp-f-")
+        self.classes = Classes(f"sp-f-{page.tag}")
         self.boxes: list[str] = []
         sheet = page.sheet
         rows, columns = sheet.rows, sheet.columns

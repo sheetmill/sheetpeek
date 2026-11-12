@@ -58,8 +58,10 @@ from sheetpeek._rendered import (
     TextRun,
 )
 from sheetpeek._runs_model import TextSpan
+from sheetpeek._sheets import NotAWorksheetError, SheetInfo
 from sheetpeek._text_model import TextRule
 from sheetpeek.backends import Backend, notices, register_backend, render
+from sheetpeek.backends.html._workbook import render_workbook
 
 __version__ = "0.2.0"
 
@@ -88,6 +90,7 @@ __all__ = [
     "LimitError",
     "LinkSource",
     "Mode",
+    "NotAWorksheetError",
     "NotShownWarning",
     "Notice",
     "Outcome",
@@ -108,6 +111,7 @@ __all__ = [
     "RenderedSheet",
     "Row",
     "Sheet",
+    "SheetInfo",
     "SheetState",
     "Side",
     "SpillEdge",
@@ -122,4 +126,5 @@ __all__ = [
     "read",
     "register_backend",
     "render",
+    "render_workbook",
 ]

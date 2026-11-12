@@ -151,7 +151,8 @@ without it has every feature reported as not shown.
 sheetpeek view sales.xlsx                 # rich on a terminal, plain text when piped
 sheetpeek view sales.xlsx --column-headings --row-headings   # letters and numbers
 sheetpeek view sales.xlsx -t markdown     # or html, csv, tsv, text, rich
-sheetpeek view sales.xlsx --list          # the sheet names
+sheetpeek view sales.xlsx --list          # the sheet names, and what each is
+sheetpeek view sales.xlsx --all-sheets > sales.html   # every sheet on one HTML page, with tabs
 sheetpeek view sales.xlsx -t csv --notices full     # what is not shown, with its cells
 sheetpeek view sales.xlsx --strict --suppress font  # exit status 3 if anything else is not shown
 sheetpeek serve reports/                  # every workbook under reports/ as HTML pages

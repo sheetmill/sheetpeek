@@ -13,7 +13,7 @@ from functools import lru_cache
 from typing import TYPE_CHECKING, Any
 
 from sheetpeek._fill_border_census import fill_border_codes
-from sheetpeek._hyperlink import classify
+from sheetpeek._hyperlink import Hyperlink, classify
 from sheetpeek._model import CellRange, Font
 from sheetpeek._notices import FEATURES, CellSet, Notice, Outcome, Reason, Support, describe
 from sheetpeek._pass_outline import presence as outline_presence
@@ -34,8 +34,14 @@ class Presence:
     truncated: bool = False
 
 
-def census(rendered: RenderedSheet) -> dict[str, Presence]:
-    """What the laid-out sheet uses, by feature code, in registry order."""
+def census(
+    rendered: RenderedSheet, follows: Callable[[Hyperlink], bool] | None = None
+) -> dict[str, Presence]:
+    """What the laid-out sheet uses, by feature code, in registry order.
+
+    ``follows`` tells the links to other places in the workbook that the output goes to (the
+    workbook page's links to its other sheets); they count as ``link.internal``.
+    """
     sheet = rendered.sheet
     normal = sheet.normal_font
     sets: dict[str, CellSet] = {}
@@ -58,6 +64,8 @@ def census(rendered: RenderedSheet) -> dict[str, Presence]:
                 continue
             if cell.hyperlink is not None and cell.value != "":
                 kind = classify(cell.hyperlink, sheet.name, shown)[0]
+                if kind == "elsewhere" and follows is not None and follows(cell.hyperlink):
+                    kind = "internal"
                 if kind != "refused":  # the reader reports it, once for every output
                     add(_LINKS[kind], row, column)
             if cell.runs:
@@ -154,11 +162,17 @@ def shown_cells(rendered: RenderedSheet) -> Callable[[int, int], bool]:
 
 
 def output_notices(
-    rendered: RenderedSheet, output: str, support: Mapping[str, Support] | None
+    rendered: RenderedSheet,
+    output: str,
+    support: Mapping[str, Support] | None,
+    follows: Callable[[Hyperlink], bool] | None = None,
 ) -> tuple[Notice, ...]:
-    """What ``output`` leaves out or approximates of what the sheet uses."""
+    """What ``output`` leaves out or approximates of what the sheet uses.
+
+    ``follows`` is as for :func:`census`.
+    """
     notices = []
-    for code, presence in census(rendered).items():
+    for code, presence in census(rendered, follows).items():
         declared = support.get(code) if support is not None else None
         context: dict[str, str | int | float] = {}
         outcome: Outcome

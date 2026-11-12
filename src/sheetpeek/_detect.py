@@ -78,12 +78,17 @@ CODES: dict[str, tuple[Outcome, Reason, str]] = {
     "print.area": ("omitted", "not_implemented", ""),
     "print.titles": ("omitted", "not_implemented", ""),
     "print.breaks": ("omitted", "not_implemented", ""),
-    "sheet.tab_color": ("omitted", "not_implemented", ""),
+    "sheet.tab_color": (
+        "omitted",
+        "option",
+        "drawn only on the HTML workbook page (sheetpeek.render_workbook)",
+    ),
+    "sheet.hidden": ("omitted", "option", "drawn only with hidden=True"),
     "sheet.chartsheet": ("omitted", "not_implemented", ""),
     "sheet.dialogsheet": (
         "omitted",
         "not_implemented",
-        "a legacy dialog: its frame and controls are not drawn",
+        "a legacy form: its frame and controls are not drawn",
     ),
     "sheet.macrosheet": (
         "approximated",
@@ -200,6 +205,18 @@ def book_notices(collector: Collector, info: WorkbookInfo) -> None:
     for name, kind in info.kinds.items():
         if kind == "chartsheet":
             _report(collector, "sheet.chartsheet", context={"sheet": name}, detail=f"{name!r}")
+        elif kind == "dialogsheet":
+            _, _, how = CODES["sheet.dialogsheet"]
+            detail = f"{name!r}, {how}"
+            _report(collector, "sheet.dialogsheet", context={"sheet": name}, detail=detail)
+
+
+def hidden_sheets(collector: Collector, names: list[str], very_hidden: int) -> None:
+    """The workbook-level notice for hidden sheets a workbook page leaves out."""
+    _, _, how = CODES["sheet.hidden"]
+    detail = f"{very_hidden} of them very hidden; {how}" if very_hidden else how
+    context: dict[str, str | int | float] = {"very_hidden": very_hidden}
+    _report(collector, "sheet.hidden", count=len(names), detail=detail, context=context)
 
 
 def string_marks(archive: zipfile.ZipFile, part: str | None) -> bytes | None:
@@ -314,9 +331,8 @@ def sheet_notices(
     ref: CellRange | None,
 ) -> None:
     """Report what one sheet uses at sheet level and from its other parts."""
-    kind = info.kinds.get(name, "worksheet")
-    if kind in ("dialogsheet", "macrosheet"):
-        _report(collector, f"sheet.{kind}")
+    if info.kinds.get(name) == "macrosheet":
+        _report(collector, "sheet.macrosheet")
     context = SheetContext(
         collector,
         archive,

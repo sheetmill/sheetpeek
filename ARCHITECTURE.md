@@ -349,6 +349,8 @@ element states something Excel draws differently from its default:
   `sheet.unknown_element` or `sheet.unknown_extension`;
 - dialog sheets, which openpyxl loads as worksheets, and macro sheets are told apart by their
   relationship type from the workbook and reported.
+- a chartsheet or dialog sheet is reported once for the workbook (`Book.notices`), and the
+  workbook page reports the hidden sheets it leaves out (`sheet.hidden`, §4.15).
 
 `tests/test_notices.py` holds a workbook using every registered feature and checks that each
 output shows or reports each one, that every built-in output declares every census code, and that
@@ -634,6 +636,8 @@ What sheetpeek decides (not Excel's behavior):
   is an anchor that goes nowhere (`link.elsewhere`, approximated). Defined names are not resolved.
 - **The census** (§3.7) counts `link` (an allowed URL), `link.internal` and `link.elsewhere` on
   cells that show text; each output declares what it does with them (`backends/_support.py`).
+- **On the workbook page** (§4.15) a link to a cell of another sheet on the page goes there, and
+  counts as `link.internal`.
 
 ### 4.11 Outlines
 
@@ -953,6 +957,82 @@ them in points like the cells (`backends/html/_headings.py`).
 | theme fonts | as any font name: omitted | omitted | omitted | omitted |
 | grid color | approximated: the column separators in the grid color | omitted | omitted | omitted |
 | `[ColorN]` from the workbook palette | reported by the reader (`format.palette`), as for HTML | the same | the same | the same |
+
+### 4.15 Sheets and the workbook page
+
+**Captures** (Excel 16.114.4 for Mac, Office 2021, dark appearance, zoom 100, measured
+on the screen image): which tabs the strip shows and how a tab color is drawn. They stay
+**unverified until recaptured after the move to Microsoft 365**; the tests that rest on them
+(`tests/test_workbook.py`) say so. The rules live in `_sheets.py` and
+`backends/html/_workbook.py`.
+
+**The sheet list** (`Book.sheets`, a `SheetInfo` per sheet, in workbook order):
+- **Kind** from the relationship type of the workbook's `<sheet>`, never from openpyxl, which
+  branches only on chartsheets and loads a dialog sheet as an empty worksheet: `worksheet`,
+  `chartsheet`, `dialogsheet`, or `macrosheet` (Microsoft's `xlMacrosheet` and
+  `xlIntlMacrosheet`). A type that names none is a worksheet.
+- **State** from `sheet@state`: `visible`, `hidden`, `very_hidden`; anything else is visible.
+- **Tab color** from `sheetPr/tabColor`, read from the head of the sheet's part (openpyxl's
+  read-only sheets do not parse `sheetPr`); the parse stops at the end of `sheetPr` or at the
+  first other child, so no cell is read for it. Resolved like any color (§3.3); `auto` and no
+  color are `None`, since `auto` draws an uncolored tab (captured). When several of `indexed`,
+  `theme`, `auto` and `rgb` are given, they are taken in openpyxl's order, as every other color
+  is (which one Excel takes is unverified). An index or theme number is an `unsignedInt`
+  (`[0-9]{1,9}`, else none); a tint that is not a finite number is 0, and one past ±1 is
+  clamped.
+- Sheets whose part is missing are left out, as openpyxl leaves them out, so `Book.sheets` and
+  `Book.sheet_names` agree; a second sheet of one name is left out too.
+
+**Which sheets read.** Worksheets and macro sheets; a macro sheet's cells are cells, and it is
+reported (`sheet.macrosheet`, approximated). A chartsheet or dialog sheet raises
+`NotAWorksheetError` (a `ValueError`) and is reported at workbook level in `Book.notices`
+(`sheet.chartsheet`, `sheet.dialogsheet`). Hidden and very hidden sheets read by name.
+**The default sheet** is the active one (the first `workbookView`'s `activeTab`, an index into
+the workbook's own `<sheet>` list) when it is a visible worksheet or macro sheet; else the first
+visible one; else the first readable one, hidden or not; with none, `NotAWorksheetError`.
+
+**The tab strip** (captured): Excel shows the visible sheets only, in file order; hidden and very
+hidden sheets have no tab. An inactive colored tab is filled solid with the color, with white
+text; the active tab is a vertical gradient from near white to a light tint of the color (two
+samples fit 10 % and 40 % of the color mixed with white, an inference), with bold text in
+Excel's own green (`#278452`), not the file's color. Each tab is 72 × 20 pt, 7 pt apart.
+`showSheetTabs`, `firstSheet` and a tab's platform shape are window chrome with no counterpart
+on a page and are not read.
+
+**The workbook page** (`render_workbook`, `sheetpeek view --all-sheets`): one HTML page, an
+option; one sheet per page stays the default everywhere.
+- A `<nav>` of tabs, one per visible sheet in workbook order (with `hidden=True` hidden and very
+  hidden ones too, in italics, titled with their state), then a `<section>` per tab. A worksheet's
+  section is the `html` backend's sheet; a chartsheet's or dialog sheet's says that it is not
+  shown. The strip is drawn above the sheets, not below them as in Excel's window.
+- **Ids by position, not by name:** a sheet's section is `sp-<n>`, its position in the workbook
+  from 1, and a cell a link goes to is `sp-<n>-<cell>`, so ids are unique on the page and no
+  file string reaches an id or an `href`. A one-sheet page keeps `sp-<cell>`.
+- **Without script.** A tab is a link to its section. In a browser with CSS's `:has()`, a
+  section shows when it is the URL's target or holds it, and the active sheet's when none is;
+  the shown section's tab takes the active style. Elsewhere every section shows, one after
+  another, and the active sheet's tab is the active one. The page's first section is the active
+  sheet's (`activeTab`) when it is a visible sheet on the page, else the first tab's.
+- **Links across sheets work:** a `location` naming a cell of another sheet on the page, drawn
+  there (not in a hidden row or column, inside the used range), goes to `#sp-<n>-<cell>` (a
+  merge's first visible cell), and the census counts it as `link.internal`. A link to a sheet
+  not on the page, a cell not drawn or a defined name stays `link.elsewhere`.
+- **Generated classes** (`sp-f-`, `sp-b-`) carry a per-sheet tag (`sp-f-a-`, `sp-f-b-`, ...), so
+  two sheets' rules do not collide in the one stylesheet.
+- **Notices:** each sheet's as for `render`, without `sheet.tab_color` (drawn); then the
+  workbook's: the chartsheets and dialog sheets on the page, and `sheet.hidden` (omitted, option)
+  for the hidden sheets left out, with how many are very hidden. The default is one
+  `NotShownWarning` per sheet with something to report and one for the workbook.
+- **Cost:** every sheet is read and laid out before the page is written, since a link gives an
+  id to a cell of another sheet; `max_cells` bounds the page's cells, every sheet's together.
+- `hidden=True` also draws hidden rows and columns, as `sheetpeek view --hidden` does.
+
+**Other outputs** (decided): text, `rich`, Markdown, CSV and TSV have no workbook page and draw
+one sheet; `--all-sheets` refuses any `-t` other than `html`. In a one-sheet render of any
+output a tab color is `sheet.tab_color`, omitted with reason `option`: only the workbook page
+draws tabs. `sheetpeek view --list` prints each sheet's name, and its state and kind when it is
+not a visible worksheet; `serve` stays one sheet per page and marks a chartsheet or dialog sheet
+in its sheet list instead of linking it.
 
 ### 4.16 Rich-text runs
 
@@ -1530,6 +1610,10 @@ points.
   relative offset.
 - **Page or fragment:** a page is a standalone document titled with the sheet's name; a
   fragment is the stylesheet and the `<div class="sheetpeek">`, for a host page.
+- **The workbook page** (§4.15) holds every sheet's `<div class="sheetpeek">` in a
+  `<div class="sp-book">` with a `<nav>` of tabs; its classes `sp-book`, `sp-first` and
+  `sp-hidden`, the section ids `sp-<n>` and the cell ids `sp-<n>-<cell>` join the public
+  interface (`sp-t-` and letters, a tab color, is generated).
 - **Size** (`bench/html_size.py`, 5,000 rows × 20 columns, 100,000 cells and 97,144 runs, Apple
   M4 Pro): 11.1 MB of HTML, 111 bytes per cell, 0.58 MB gzipped; read 0.55 s, layout 1.90 s,
   render 0.29 s, peak RSS 245 MB. The first version, with a clip span and a `calc()` baseline on
@@ -1586,6 +1670,7 @@ src/sheetpeek/
   _rows.py           row heights (§4.7) and baselines
   _text_styles.py    superscript, subscript, underlines, shrink to fit, direction (§4.13)
   _runs.py           rich-text runs in the layout: measured, broken and cut by run (§4.16)
+  _sheets.py         SheetInfo, NotAWorksheetError; sheet kinds, states, tab colors (§4.15)
   backends/
     __init__.py      Backend protocol, registry, render(), notices()
     _support.py      what each output shows of each feature (§3.7)
@@ -1594,6 +1679,7 @@ src/sheetpeek/
     html/            __init__ (backend, page), _css, _table (grid, fills, gridlines),
                      _text (runs), _headings, _links (anchors, ids), _outline (the gutter), _notices
                      _patterns (the fill layer), _borders (the border layer)
+                     _workbook (render_workbook: the workbook page, §4.15)
   cli.py             `sheetpeek view`, `sheetpeek serve`
   _serve.py          the server behind `sheetpeek serve`
   _carlito.py        Carlito's advance widths, generated by tools/carlito_widths.py
@@ -1641,6 +1727,9 @@ rich.print(sheet)
 
 with sheetpeek.open("book.xlsx") as book:                         # several sheets, one load
     for name in book.sheet_names: ...
+    for info in book.sheets: info.kind, info.state, info.tab_color
+
+sheetpeek.render_workbook("book.xlsx")                            # every sheet, one HTML page
 
 limits = sheetpeek.ReadLimits(max_part_bytes=2**28, max_cells=10**6)
 sheetpeek.read(upload, limits=limits)                             # a file from someone else (§5.5)
@@ -1656,8 +1745,10 @@ sheetpeek already use openpyxl.
 **CLI.**
 - `sheetpeek view book.xlsx [--sheet NAME] [--ref A1:H40]
   [--to rich|text|html|markdown|csv|tsv] [--column-headings] [--row-headings] [--hidden] [--list]
+  [--all-sheets]
   [--max-parts N] [--max-part-bytes N] [--max-total-bytes N] [--max-cells N]`. The default is
-  `rich` on a terminal and `text` when piped or when `rich` is not installed. Warnings go to
+  `rich` on a terminal and `text` when piped or when `rich` is not installed. `--all-sheets`
+  writes the workbook page (§4.15), HTML only. Warnings go to
   standard error, and an unreadable or refused file, an unknown sheet or a bad range exits with
   status 1 and one line of explanation.
 - `sheetpeek serve DIR [--host 127.0.0.1] [--port 8000]`, with the same `--max-*` options and its

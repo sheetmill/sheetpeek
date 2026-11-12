@@ -514,6 +514,54 @@ def test_no_mode_allocates_or_fails_by_an_odd_palette_number(tmp_path, field):
             )
 
 
+# Numbers of the sheet list (ARCHITECTURE.md §4.15): a tab color's index, theme and tint, and the
+# workbook's active tab.
+ODD_SHEET_FIELDS = {
+    "tab index": (SHEET1, '<tabColor indexed="12" />', '<tabColor indexed="{}" />'),
+    "tab theme": (SHEET1, '<tabColor indexed="12" />', '<tabColor theme="{}" />'),
+    "tab tint": (SHEET1, '<tabColor indexed="12" />', '<tabColor theme="4" tint="{}" />'),
+    "active tab": (WORKBOOK, 'activeTab="0"', 'activeTab="{}"'),
+}
+
+
+def tabbed_book(path: Path) -> Path:
+    from openpyxl.styles.colors import Color
+
+    wb = openpyxl.Workbook()
+    wb.active["A1"] = 1
+    wb.active.sheet_properties.tabColor = Color(indexed=12)
+    wb.create_sheet("Two")["A1"] = 2
+    return save(wb, path)
+
+
+@pytest.mark.parametrize("field", ODD_SHEET_FIELDS)
+@bounded
+def test_the_sheet_list_takes_any_odd_number(tmp_path, field):
+    # One bounded child for each field, trying every odd number (as above).
+    part, old, new = ODD_SHEET_FIELDS[field]
+    plain = tabbed_book(tmp_path / "plain.xlsx").read_bytes()
+    for value in [*ODD_NUMBERS, "12", "4", "0.5", "1", "65", " 3", "+3", "3_0", "0x7", "9" * 5000]:
+        path = tmp_path / "odd.xlsx"
+        path.write_bytes(plain)
+        if new.format(value) != old:
+            rewrite(path, part, lambda t, v=value: t.replace(old, new.format(v), 1))
+        try:
+            book = sheetpeek.open(path)
+        except PackageError:
+            continue
+        with book:
+            # sheetpeek's own reading first: openpyxl refuses some of these on the sheet.
+            colors = [s.tab_color for s in book.sheets]
+            assert all(c is None or re.fullmatch("[0-9A-F]{6}", c) for c in colors), (field, value)
+            try:
+                assert book.sheet().name in ("Sheet", "Two"), (field, value)
+                markup = sheetpeek.render_workbook(book, hidden=True, on_notice="ignore")
+            except PackageError:
+                continue
+        assert markup is not None
+        assert "nan" not in markup.lower().replace("sans", ""), (field, value)
+
+
 @pytest.mark.parametrize("value", ["9" * 5000, "0x7", " 3", "", "1.5"])
 @bounded
 def test_an_odd_outline_level_is_read_as_a_level(book, value):

@@ -214,8 +214,9 @@ for _code, _name, _level in (
     ("print.breaks", "manual page breaks", "sheet"),
     ("sheet.tab_color", "tab colors", "sheet"),
     ("sheet.chartsheet", "chartsheets", "workbook"),
-    ("sheet.dialogsheet", "dialog sheets", "sheet"),
+    ("sheet.dialogsheet", "dialog sheets", "workbook"),
     ("sheet.macrosheet", "macro sheets", "sheet"),
+    ("sheet.hidden", "hidden sheets", "workbook"),
     ("sheet.unknown_element", "unrecognized sheet elements", "sheet"),
     ("sheet.unknown_extension", "unrecognized sheet extensions", "sheet"),
 ):

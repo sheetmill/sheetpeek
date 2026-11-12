@@ -8,7 +8,10 @@ Everything below is importable from `sheetpeek`.
 .. autofunction:: sheetpeek.read
 .. autofunction:: sheetpeek.open
 .. autoclass:: sheetpeek.Book
-   :members: sheet, sheet_names, date1904, close
+   :members: sheet, sheet_names, sheets, date1904, close
+.. autoclass:: sheetpeek.SheetInfo
+   :members:
+.. autoexception:: sheetpeek.NotAWorksheetError
 ```
 
 ## Limits and refusals
@@ -100,6 +103,7 @@ Everything below is importable from `sheetpeek`.
 
 ```{eval-rst}
 .. autofunction:: sheetpeek.render
+.. autofunction:: sheetpeek.render_workbook
 .. autofunction:: sheetpeek.register_backend
 .. autoclass:: sheetpeek.Backend
    :members:

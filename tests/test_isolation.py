@@ -32,5 +32,12 @@ def test_nothing_but_the_package_entry_points_import_the_reader():
         for path in PACKAGE.rglob("*.py")
         if "sheetpeek._read" in imported_modules(path)
     }
-    # the entry points: the public API, the command line, render(), and the server
-    assert importers <= {"__init__.py", "cli.py", "backends/__init__.py", "_serve.py"}
+    # the entry points: the public API, the command line, render(), render_workbook(), and the
+    # server
+    assert importers <= {
+        "__init__.py",
+        "cli.py",
+        "backends/__init__.py",
+        "backends/html/_workbook.py",
+        "_serve.py",
+    }

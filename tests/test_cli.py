@@ -145,8 +145,10 @@ def test_list_with_esc_in_a_name(book, monkeypatch):
     # Not from XML, which cannot hold it; the rule does not depend on that.
     class Stub:
         def __init__(self):
-            self.sheet_names = ["a\x1b[31mb\x9b[2Jc\nforged"]
-            self.notices = ()
+            self.sheets = (
+                sheetpeek.SheetInfo("a\x1b[31mb\x9b[2Jc\nforged", "worksheet", "visible"),
+                sheetpeek.SheetInfo("d\x1bx\ny", "chartsheet", "very_hidden"),
+            )
 
         def __enter__(self):
             return self
@@ -155,7 +157,7 @@ def test_list_with_esc_in_a_name(book, monkeypatch):
             pass
 
     monkeypatch.setattr(cli, "open_book", lambda *a, **k: Stub())
-    assert run(book, "--list")[1] == "a[31mb[2Jcforged\n"
+    assert run(book, "--list")[1] == "a[31mb[2Jcforged\ndxy  (very hidden, chartsheet, not shown)\n"
 
 
 def test_the_model_and_sheet_keep_the_original_name(c1_name):

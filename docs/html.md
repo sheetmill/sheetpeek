@@ -85,8 +85,12 @@ an API change.
 | `sp-colhead`, `sp-rowhead`, `sp-corner` | the headings |
 | `sp-ol`, `sp-olbutton`, `sp-ollevel` | the outline gutter's cells, its − and + buttons, its level buttons |
 | `sp-fills`, `sp-borders` | the layers of pattern and gradient fills and of borders, each a box per fill or line; their own classes (`sp-f-…`, `sp-b-…`) are generated per page, as is a grid color's (`sp-g-…`, on the wrapper) |
+| `sp-fills`, `sp-borders` | the layers of pattern and gradient fills and of borders, each a box per fill or line; their own classes (`sp-f-…`, `sp-b-…`) are generated per page |
+| `sp-book` | the workbook page's wrapper `<div>`, around its `<nav>` of tabs and a `<section>` per sheet |
+| `sp-first`, `sp-hidden` | on the workbook page, the tab and section shown first; a hidden sheet's tab. A tab color's class (`sp-t-…`) is generated |
 
-A cell that a link on the page goes to has the id `sp-` and its coordinate, such as `sp-C2`.
+A cell that a link on the page goes to has the id `sp-` and its coordinate, such as `sp-C2`; on
+the workbook page, `sp-`, the sheet's position and its coordinate, such as `sp-2-C2`.
 
 ```css
 /* Dark cells: the file's own fills and font colors are inline styles and stay as they are,
@@ -128,6 +132,40 @@ False
 >>> [n.code for n in sheetpeek.notices(path, "html")]
 ['link.scheme']
 ```
+
+## The whole workbook
+
+{func}`sheetpeek.render_workbook` draws every sheet on one page, an option beside the one sheet a
+page that {func}`sheetpeek.render` draws. A strip of tabs, as Excel's, comes first: the visible
+sheets in workbook order, each tab in its tab color (filled with white text; the active one a
+gradient to a light tint of it). Each sheet is drawn as above in a section of its own. A chartsheet
+or a dialog sheet gets a tab and a line saying it is not shown. Hidden sheets have no tab, as in
+Excel, unless `hidden=True`. The page has no script: a tab is a link to its sheet's section, and
+in a browser with CSS's `:has()` only the chosen sheet shows. A link to a cell of another sheet on
+the page goes there. Every option of the `html` backend applies.
+
+```python
+>>> wb = openpyxl.Workbook()
+>>> wb.active.title = "Summary"
+>>> wb.active["A1"] = "See the detail"
+>>> wb.active["A1"].hyperlink = Hyperlink(ref="A1", location="Detail!B2")
+>>> wb.active.sheet_properties.tabColor = "4472C4"
+>>> wb.create_sheet("Detail")["B2"] = 42
+>>> wb.create_sheet("Notes").sheet_state = "hidden"
+>>> wb.save(path)
+>>> with sheetpeek.open(path) as book:
+...     [(s.name, s.state, s.tab_color) for s in book.sheets]
+[('Summary', 'visible', '4472C4'), ('Detail', 'visible', None), ('Notes', 'hidden', None)]
+>>> page = sheetpeek.render_workbook(path, on_notice="ignore")
+>>> '<a href="#sp-1" class="sp-first sp-t-a">Summary</a><a href="#sp-2">Detail</a>' in page
+True
+>>> '<a href="#sp-2-B2">' in page, '<td id="sp-2-B2">' in page
+(True, True)
+```
+
+Each section's id is `sp-` and the sheet's position in the workbook, from 1, and a cell a link goes
+to is `sp-<n>-<cell>`. `sheetpeek view book.xlsx --all-sheets` writes the same page. The text
+outputs have no workbook page.
 
 ## Fonts
 
