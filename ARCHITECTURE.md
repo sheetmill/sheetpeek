@@ -142,6 +142,7 @@ the cell's font.
 | `outline` (`Outline`, or `None` when no row or column has a level) | scan: `<outlinePr summaryBelow summaryRight>`, `showOutlineSymbols` of the first `<sheetView>`, else of `<outlinePr>`; the deepest row and column levels in the sheet; the levels of the rows and columns just outside `ref` (§4.11) |
 | `default_column_width`, `default_row_height` | scan: `<sheetFormatPr>` (`defaultColWidth`, `baseColWidth`, `defaultRowHeight`) |
 | `show_gridlines` | scan: `<sheetView showGridLines>` |
+| `grid_color` | scan: `<sheetView defaultGridColor colorId>`, through the workbook palette (§4.14) |
 | `normal_font` | the `Normal` entry of `wb._named_styles`, else `wb._fonts[0]`; both are present in read-only mode |
 | `date1904` | `wb.epoch == CALENDAR_MAC_1904` |
 | `warnings` | reading and layout: formulas without cached values, approximated fonts, refused number formats, the date fallback (§5.3) |
@@ -160,8 +161,8 @@ on `type`.
 
 - `rgb`: `ARGB`, alpha ignored.
 - `indexed`: the workbook's custom palette if `styles.xml` has one, else the default 64-entry
-  palette (`openpyxl.styles.colors.COLOR_INDEX`). Index 64 is the system foreground color, which
-  means automatic.
+  palette (`_colors.DEFAULT_PALETTE`), entry by entry (§4.14). Index 64 is the system foreground
+  color, which means automatic.
 - `theme`: the `clrScheme` of the theme part (`wb.loaded_theme`, raw XML), six hex digits or the
   theme is treated as unreadable, since its text would reach CSS as it stands, then `tint` applied
   as ECMA-376 §18.8.19 describes. **Captured** (suite `theme_colors`: theme indices 0 to 11 with
@@ -177,7 +178,7 @@ on `type`.
   theme 1 ("Text 1"), so in practice it means ordinary text, not a chosen black.
 
 The number format's `[ColorN]` uses `xlformat.DEFAULT_PALETTE`. A workbook with a custom indexed
-palette recolors those in Excel. sheetpeek ignores that and documents it.
+palette recolors those in Excel; sheetpeek reports each one it changes (`format.palette`, §4.14).
 
 ### 3.4 What each backend shows
 
@@ -300,8 +301,8 @@ reason and context, never one per cell.
 
 Three producers, one for each stage:
 1. **The reader** (`Sheet.notices`, `_detect.py`) reports what the file uses that the model does
-   not carry. Styles are checked once per style, by each aspect in `_style/` (scheme fonts
-   against the theme's typefaces, rotation); the structure scan marks rich-text and phonetic
+   not carry. Styles are checked once per style, by each aspect in `_style/` (section colors
+   against the workbook palette, rotation); the structure scan marks rich-text and phonetic
    cells, uncached formulas, outline levels outside 0 to 7, row and column styles, and links no
    output can follow (§4.10); the sheet's other children, its drawing, VML, comments and
    threaded comments parts, and the workbook's sheet kinds and print names give the rest.
@@ -330,8 +331,7 @@ element states something Excel draws differently from its default:
   selection, the active tab) is not reported: a page shows the whole range;
 - `autoFilter` counts with a `ref`, `conditionalFormatting` with a `cfRule`, `tableParts` with a
   `tablePart`, page breaks only manual ones, outline symbols only while the file shows them,
-  a pane when frozen or split, a grid color other than automatic (`colorId` 64), a tab color other
-  than automatic; drawings, embedded objects and controls are not reported under
+  a pane when frozen or split, a tab color other than automatic; drawings, embedded objects and controls are not reported under
   `workbookPr showObjects="none"`;
 - a linked picture (`r:link` without `r:embed`) is reported as `unsafe`: Excel fetches the linked
   file on open, and sheetpeek never fetches;
@@ -878,6 +878,78 @@ has `direction: rtl`.
 | vertical justify, distributed | spread in whole lines (as `align.vertical`) | the same | omitted (as `align.vertical`) | omitted |
 | reading order | approximated: the terminal's own text direction | the same | omitted | omitted |
 
+### 4.14 Theme fonts, palette, grid color and headings
+
+**Captures** (Excel 16.114.4 for Mac, Office Home & Business 2021, dark appearance,
+zoom 100 and 200), to be recaptured on Microsoft 365, like §4.13. The tests that rest on them
+(`tests/test_theme.py`) say so.
+
+**Theme fonts.** A font with `scheme="minor"` or `"major"` is drawn in the theme's Latin typeface
+(`a:minorFont/a:latin`, `a:majorFont/a:latin`) whatever name it stores: Calibri-minor and
+Times-New-Roman-minor both draw the theme's Courier New, at its width, and Calibri-major draws
+Georgia; a font without a scheme keeps its own name. The reader resolves this when it reads the
+font (`_style/font.py`): `Font.name` is the typeface Excel draws, `Font.scheme` and
+`Font.stored_name` keep what the file says. **The Normal font follows the theme too**, so the
+default column takes the theme font's digits (captured: 61 pt for Courier New, against 53 pt for
+Calibri 11), and so does every width in `excel` mode. A typeface without xlformat glyph tables is
+measured as Calibri at the same size, with `font.no_metrics` (§6.2), so such a theme's widths are
+approximate. Without a theme, or with an empty typeface, the stored name is drawn (unverified).
+- **Other scripts:** East Asian text in a minor font is drawn in the theme's script font (`Jpan`,
+  captured), not the system fallback. sheetpeek reads the Latin typeface only, so a page draws
+  such text in the browser's fallback for that typeface. A `@font-face` family per theme
+  collection with a `unicode-range` per script would draw it exactly (measured equal to a
+  fallback list in WebKit); it needs the theme's script fonts in the model and a table from ISO
+  15924 codes to ranges, and is not built.
+
+**The workbook palette** (`_colors.workbook_palette`). `styles.xml`'s `indexedColors` replaces
+the default palette entry by entry: indices 0 to 7 no longer repeat 8 to 15 (captured: a written
+palette that recolors index 10 leaves fill index 2 red). Fill and font colors follow it (captured
+for indices 10 and 17). Excel caps the list at 64 entries; a shorter list keeps the default for
+the rest, and an entry that is not a color reads as the default's (both unverified). A
+`<colors>` without `indexedColors` keeps the default palette (openpyxl reads it as empty).
+Automatic colors (captured): a fill in indexed 64 is no fill, a fill index past the palette (81)
+is black, and a font in `auto` or indexed 64 is the automatic black.
+
+**Number-format colors.** `[ColorN]` draws the workbook palette's index `N + 7`; the eight named
+colors (`[Red]`, `[Blue]`) draw their default colors whatever the palette (captured; Excel's
+`display format` reports palette indices 2 and 4 for `[Red]` and `[Blue]` instead, so the screen
+was taken as the truth). The layout draws section colors from xlformat's default palette, so a
+`[ColorN]` that the workbook palette recolors is reported as `format.palette` (approximated), for
+cells with a value, by the number format's style aspect (`_style/number_format.py`). Quoted text
+and escaped characters are not section colors.
+
+**The grid color** (`Sheet.grid_color`). `<sheetView defaultGridColor="0" colorId>` draws the
+gridlines in the workbook palette's entry `colorId` (captured: teal for index 10 of a palette
+that makes it teal); 64, the default, is the automatic gray (captured). An index past the palette
+or a malformed one is automatic (unverified). The colored gridline is **1 device pixel wide**,
+half the default line's 2, at any zoom; a fill covers it as it covers the gray one (captured); the
+headings keep their colors (captured). The first `<sheetView>` is read, as for gridlines.
+- **HTML:** a generated class `sp-g-RRGGBB` on the wrapper sets `--sheetpeek-grid` and draws the
+  cells' gridlines 0.5 CSS px wide: one device pixel on a 2× display, as Excel draws it; a 1×
+  display rounds it (decided). A sheet that hides its gridlines draws no grid color.
+
+**Headings.** Excel's heading bands are sheet units: they scale with the zoom, so the page draws
+them in points like the cells (`backends/html/_headings.py`).
+- At Calibri 11 the column band is 21 pt high and the row band `16 + 3 × digits` pt wide, the
+  digits of the last row in the window (captured with 2, 3 and 4 digits: 22, 25 and 28 pt). The
+  page uses the last row it draws (decided: a page shows every row).
+- The bands grow with the Normal font: at Calibri 20 the column band is 25 pt and the row band 36
+  pt with 2 digits (captured). Other sizes follow the line through the two (unverified), which
+  stays positive at every size Excel accepts (1 to 409 pt).
+- Colors: the dark appearance's are captured (paper 22, text 255, separators 86); the light
+  appearance's were measured on Microsoft 365 (paper 247, separators 224,223,221, text the
+  darkest pixel of its glyphs, 94) and stay provisional until the light appearance is captured
+  with the rest. The size of the headings' text is not captured.
+- The headings options do not follow the file's `showRowColHeaders` (`headings.hidden`, §3.7).
+
+**Other outputs** (decided; each declared in `backends/_support.py`):
+
+| feature | `rich` | text | Markdown | CSV, TSV |
+|---|---|---|---|---|
+| theme fonts | as any font name: omitted | omitted | omitted | omitted |
+| grid color | approximated: the column separators in the grid color | omitted | omitted | omitted |
+| `[ColorN]` from the workbook palette | reported by the reader (`format.palette`), as for HTML | the same | the same | the same |
+
 ## 5. openpyxl facts that constrain the design
 
 All measured with openpyxl 3.1.5 (`bench/`).
@@ -1327,7 +1399,8 @@ points.
   spreadsheet text), and ascent and descent overrides that give it Calibri's 0.952 and 0.269 em,
   as Next.js builds fallback fonts. CSS cannot make the spacing depend on the font that loaded;
   the scaled fallback makes the same spacing fit it closely. Other families are named with a
-  `sans-serif` fallback and are not spaced. Kerning and ligatures are off, as in Excel.
+  `sans-serif` fallback and are not spaced. A theme font is named by the theme's typeface,
+  which the reader resolved (§4.14). Kerning and ligatures are off, as in Excel.
 - **Measured in WebKit, all 205 runs of the `layout` page, in three cases** (Calibri or Carlito
   given to `sheetpeek-calibri` in a scratch harness, and the page as shipped on a Mac with
   neither):
@@ -1342,7 +1415,7 @@ points.
   cells (`sp-colhead` in a `<thead>`, `sp-rowhead` with `scope="row"`, `sp-corner`);
   `color_scheme="light" | "dark"` (default light, never read from the system) changes only the
   headings, as in Excel. A sheet without gridlines gets `sp-nogrid`. The heading sizes and
-  colors and the gridline color are placeholders until the screen capture.
+  colors and the grid color are §4.14's.
 - **The outline gutter** (§4.11) is cells of the table, so it scrolls with it: a `<col>` and a
   `<td class="sp-ol">` before the row headings, and a row of them above the column headings.
   Each holds absolutely positioned segments (`<i>`), buttons (`sp-olbutton`, strokes as `<i>`, no
@@ -1412,7 +1485,8 @@ src/sheetpeek/
   _scan_links.py     the scan's hyperlink handlers, and the reader's link notices (§4.10)
   _scan_outline.py   the outline's scan handlers, and its rows, columns and settings
   _read.py           the reader: openpyxl read-only, date conversion off; builds a Sheet
-  _style/            a cell's style, one module per aspect: border, fill, font, alignment
+  _style/            a cell's style, one module per aspect: number format, border, fill, font,
+                     alignment
   _detect.py         what a file uses that the model does not carry: one rule per sheet child
   _notices.py        Notice, the registry of codes, aggregation (§3.7)
   _census.py         what laid-out cells use, and each output's notices from it (§3.7)

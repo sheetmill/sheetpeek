@@ -64,10 +64,10 @@ an API change.
 |---|---|---|
 | `--sheetpeek-paper` | the cells | `#ffffff` |
 | `--sheetpeek-ink` | text in the automatic color | `#000000` |
-| `--sheetpeek-grid` | gridlines | `#d4d4d4` |
-| `--sheetpeek-heading-paper` | the headings' background | `#f3f3f3`, dark `#2b2b2b` |
-| `--sheetpeek-heading-ink` | the headings' text | `#444444`, dark `#cccccc` |
-| `--sheetpeek-heading-grid` | the headings' lines | `#c8c8c8`, dark `#3d3d3d` |
+| `--sheetpeek-grid` | gridlines; a sheet with a grid color of its own sets it from the file | `#d4d4d4` |
+| `--sheetpeek-heading-paper` | the headings' background | `#f7f7f7`, dark `#161616` |
+| `--sheetpeek-heading-ink` | the headings' text | `#5e5e5e`, dark `#ffffff` |
+| `--sheetpeek-heading-grid` | the headings' lines | `#e0dfdd`, dark `#565656` |
 | `--sheetpeek-outline-paper` | the outline gutter | `#eeeeee`, dark `#555555` |
 | `--sheetpeek-outline-ink` | the outline's bars and dots | `#a6a6a6`, dark `#999999` |
 | `--sheetpeek-outline-button` | the outline buttons' borders and strokes | `#808080`, dark `#333333` |
@@ -84,7 +84,7 @@ an API change.
 | `sp-rule`, `sp-double` | an underline or strikethrough, 1 px thick; a double underline |
 | `sp-colhead`, `sp-rowhead`, `sp-corner` | the headings |
 | `sp-ol`, `sp-olbutton`, `sp-ollevel` | the outline gutter's cells, its − and + buttons, its level buttons |
-| `sp-fills`, `sp-borders` | the layers of pattern and gradient fills and of borders, each a box per fill or line; their own classes (`sp-f-…`, `sp-b-…`) are generated per page |
+| `sp-fills`, `sp-borders` | the layers of pattern and gradient fills and of borders, each a box per fill or line; their own classes (`sp-f-…`, `sp-b-…`) are generated per page, as is a grid color's (`sp-g-…`, on the wrapper) |
 
 A cell that a link on the page goes to has the id `sp-` and its coordinate, such as `sp-C2`.
 
@@ -140,5 +140,9 @@ widths. Every text is anchored where Excel anchors it, by its start, its end or 
 different font changes only the far end of a text, and the clip windows cut where Excel cuts.
 
 The outline gutter's colors in the light scheme are placeholders; its dark colors and its sizes
-come from Excel's screen. The gridline and heading colors, the heading sizes, and the text's insets and baseline come
-from Excel's print layout and are provisional until they are measured on screen.
+come from Excel's screen. The heading sizes and colors and the grid color come from Excel's
+screen too; the light headings' colors are provisional. The heading bands are in points, so they
+scale with the page like the cells, and grow with the Normal font's size. A sheet's own grid
+color draws its gridlines half a CSS pixel wide, one device pixel on a high-density display, as
+Excel draws it. The text's insets and baseline come from Excel's print layout and are provisional
+until they are measured on screen.

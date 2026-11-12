@@ -376,7 +376,26 @@ def font_name(tmp_path):
 def normal_font_name(tmp_path):
     path = xml_text(tmp_path, A2="x")
     return rewrite(
-        path, "xl/styles.xml", lambda t: t.replace('val="Calibri"', f"val={quoteattr(PAYLOAD)}")
+        path,
+        "xl/styles.xml",
+        # Without its scheme: a theme font is drawn in the theme's typeface.
+        lambda t: t.replace('val="Calibri"', f"val={quoteattr(PAYLOAD)}").replace(
+            '<scheme val="minor" />', ""
+        ),
+    )
+
+
+def theme_font_name(tmp_path):
+    path = xml_text(tmp_path, A2="x")
+    return rewrite(
+        path,
+        "xl/theme/theme1.xml",
+        lambda t: re.sub(
+            r'(<a:minorFont>\s*<a:latin typeface=)"Calibri"',
+            lambda m: m[1] + quoteattr(PAYLOAD),
+            t,
+            count=1,
+        ),
     )
 
 
@@ -487,6 +506,7 @@ SOURCES = [
     normal_font_name, theme_srgb, theme_system, style_rgb, palette, hyperlink, hyperlink_target,
     hyperlink_mailto, hyperlink_refused, hyperlink_tab, hyperlink_tooltip, hyperlink_formula,
     properties, defined_name,
+    theme_font_name,
 ]  # fmt: skip
 # Whichever of these openpyxl validates, it refuses when it loads the file: nothing is shown.
 BACKENDS = {
@@ -533,7 +553,7 @@ REACHES = {
     },
     "attribute": {
         "normal_font_name", "hyperlink_target", "hyperlink_mailto", "hyperlink_tooltip",
-        "hyperlink_formula",
+        "hyperlink_formula", "theme_font_name",
     },
 }  # fmt: skip
 

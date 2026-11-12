@@ -4,6 +4,7 @@ Theme colors follow ECMA-376: the theme's ``clrScheme`` gives the base color and
 lightens or darkens it in HLS space (§18.8.19). Captured (suite ``theme_colors``, 96 cells):
 Excel's index order swaps the first two pairs, and the tint is applied in Windows' integer HLS
 on a scale of 240 (``ColorRGBToHLS``), the lightness truncated, which reproduces every cell.
+The workbook's indexed palette, the grid color and number-format colors are §4.14.
 """
 
 from __future__ import annotations
@@ -11,6 +12,8 @@ from __future__ import annotations
 import re
 import xml.etree.ElementTree as ET
 from collections.abc import Sequence
+
+from xlformat import DEFAULT_PALETTE as _SECTION_COLORS
 
 _A = "{http://schemas.openxmlformats.org/drawingml/2006/main}"
 # clrScheme children in document order.
@@ -26,6 +29,65 @@ _RGB = 255
 
 
 _HEX = re.compile("[0-9A-F]{6}")
+
+PALETTE_SIZE = 64
+"""Entries of the indexed palette; Excel caps ``indexedColors`` at 64 ([MS-OI29500] 2.1.709)."""
+DEFAULT_PALETTE: tuple[str, ...] = tuple(
+    _SECTION_COLORS[f"Color{i}"] for i in (*range(1, 9), *range(1, 57))
+)
+"""Excel's default palette as ``RRGGBB``, indices 0 to 63: 0 to 7 repeat 8 to 15, and
+``[ColorN]`` of a number format is index ``N + 7``."""
+_AUTOMATIC_GRID = 64
+
+
+def workbook_palette(custom: Sequence[str] | None) -> tuple[str, ...]:
+    """The palette a workbook's indexed colors take: its ``indexedColors``, else the default.
+
+    Each written entry is used as it stands, so indices 0 to 7 no longer repeat 8 to 15 (captured,
+    Excel 16.114). Entries past 64 are dropped, as Excel caps the list; a shorter list takes the
+    default for the indices it leaves out (unverified: Excel writes all 64). An entry that is not
+    a color reads as the default's.
+    """
+    if not custom:
+        return DEFAULT_PALETTE
+
+    def entry(index: int) -> str:
+        found = custom[index] if index < len(custom) else None
+        color = found[-6:].upper() if isinstance(found, str) else ""
+        return color if _HEX.fullmatch(color) else DEFAULT_PALETTE[index]
+
+    return tuple(entry(i) for i in range(PALETTE_SIZE))
+
+
+def grid_color(color_id: int | None, palette: Sequence[str]) -> str | None:
+    """The gridline color of ``<sheetView defaultGridColor="0" colorId>``, or ``None`` (gray).
+
+    Captured on Excel 16.114: the color is the workbook palette's entry, and 64 is the automatic
+    gray. An index past the palette is taken as automatic too (unverified; Excel caps it at 64).
+    """
+    if color_id is None or not 0 <= color_id < min(len(palette), _AUTOMATIC_GRID):
+        return None
+    return palette[color_id]
+
+
+_SECTION_COLOR = re.compile(r"\[\s*color\s*([1-9][0-9]{0,2})\s*\]", re.IGNORECASE)
+_LITERAL = re.compile(r'"[^"]*"?|\\.')  # quoted text and escaped characters: no section color
+
+
+def recolored_sections(number_format: str, palette: Sequence[str]) -> tuple[int, ...]:
+    """The ``[ColorN]`` of a number format whose color this palette changes, by ``N``.
+
+    ``[ColorN]`` draws palette index ``N + 7`` (captured on Excel 16.114); the eight named colors
+    (``[Red]``) keep their default colors whatever the palette.
+    """
+    if "[" not in number_format or palette is DEFAULT_PALETTE:
+        return ()
+    found = set()
+    for match in _SECTION_COLOR.finditer(_LITERAL.sub("", number_format)):
+        n = int(match[1])
+        if n + 7 < len(palette) and palette[n + 7] != DEFAULT_PALETTE[n + 7]:
+            found.add(n)
+    return tuple(sorted(found))
 
 
 def theme_colors(theme_xml: bytes | str | None) -> tuple[str, ...]:

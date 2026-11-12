@@ -10,17 +10,37 @@ if TYPE_CHECKING:
     from sheetpeek.backends.html import HTMLBackend
     from sheetpeek.backends.html._table import Page
 
-# Placeholders until the screen capture: heading sizes in points.
-_COLUMN_HEADING_HEIGHT = 16.0
-_ROW_HEADING_DIGIT = 6.0
+# Heading bands in sheet points, so they scale with the page like the cells (§4.14). Excel 16.114
+# captures at Normal fonts Calibri 11 and 20: the column band is 21 and 25 pt; the row band is
+# 16 + 3 pt a digit of the last row at 11 (2, 3 and 4 digits), and 36 pt with 2 digits at 20.
+_SIZES = (11.0, 20.0)
+_COLUMN_BAND = (21.0, 25.0)
+_ROW_BAND_BASE, _ROW_BAND_DIGIT = 16.0, 3.0
+_ROW_BAND_GROWTH = 36.0 / 22.0  # at 20 pt, over 11 pt, with 2 digits
+
+
+def bands(normal_size: float, digits: int) -> tuple[float, float]:
+    """The row band's width and the column band's height in points.
+
+    They follow the Normal font's size and the digits of the last row shown. Between and beyond
+    the two captured sizes both grow linearly with the size (unverified); they stay positive
+    over every size Excel accepts (1 to 409 pt).
+    """
+    t = (normal_size - _SIZES[0]) / (_SIZES[1] - _SIZES[0])
+    column = _COLUMN_BAND[0] + t * (_COLUMN_BAND[1] - _COLUMN_BAND[0])
+    row = (_ROW_BAND_BASE + _ROW_BAND_DIGIT * digits) * (1 + t * (_ROW_BAND_GROWTH - 1))
+    return row, column
 
 
 def offsets(sheet: RenderedSheet, backend: HTMLBackend) -> tuple[float, float]:
-    """Where the sheet starts, in points: past the row headings and below the column headings."""
+    """Where the sheet starts, in points: past the row headings and below the column headings.
+
+    The row band follows the digits of the last row on the page, where Excel's follows the last
+    row in its window (a choice: a page shows every row).
+    """
     digits = max((len(str(r.index)) for r in sheet.rows), default=1)
-    ox = _ROW_HEADING_DIGIT * max(3, digits) + 6 if backend.row_headings else 0.0
-    oy = _COLUMN_HEADING_HEIGHT if backend.column_headings else 0.0
-    return ox, oy
+    row, column = bands(sheet.sheet.normal_font.size, digits)
+    return (row if backend.row_headings else 0.0), (column if backend.column_headings else 0.0)
 
 
 def write_column(page: Page, out: TextIO) -> None:

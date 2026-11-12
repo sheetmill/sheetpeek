@@ -21,11 +21,10 @@ from typing import IO, Any
 
 import xlformat
 from openpyxl import load_workbook
-from openpyxl.styles.colors import COLOR_INDEX
 from openpyxl.utils.datetime import CALENDAR_MAC_1904, to_excel
 
 from sheetpeek import _style as styles
-from sheetpeek._colors import resolve, theme_colors
+from sheetpeek._colors import grid_color, resolve, theme_colors, workbook_palette
 from sheetpeek._detect import (
     book_notices,
     report_cells,
@@ -146,18 +145,15 @@ class Book:
             self._epoch = self._workbook.epoch
             self._theme = theme_colors(getattr(self._workbook, "loaded_theme", None))
             palette = getattr(self._workbook, "_colors", None)
-            self._palette: Sequence[str] = (
-                palette
-                if isinstance(palette, Sequence) and all(isinstance(c, str) for c in palette)
-                else COLOR_INDEX
+            self._palette: Sequence[str] = workbook_palette(
+                palette if isinstance(palette, Sequence) and not isinstance(palette, str) else None
             )
+            self._theme_fonts = theme_fonts(getattr(self._workbook, "loaded_theme", None))
             self._normal_font = self._read_normal_font()
             self._info = workbook_info(self._archive)
             self._marks = string_marks(self._archive, self._info.strings_part)
             self._context = styles.Context(
-                self._color,
-                self._normal_font,
-                theme_fonts(getattr(self._workbook, "loaded_theme", None)),
+                self._color, self._normal_font, self._theme_fonts, self._palette
             )
         except PackageError:
             self.close()
@@ -295,6 +291,7 @@ class Book:
             thick_bottom=structure.thick_bottom,
             show_gridlines=structure.show_gridlines,
             show_headings=structure.show_headings,
+            grid_color=grid_color(structure.grid_color_id, self._palette),
             outline=outline,
             notices=notes.notices(),
             max_cells=self._limits.max_cells,
@@ -461,7 +458,7 @@ class Book:
             font = fonts[0] if fonts else None
         if font is None:
             return font_aspect.FALLBACK
-        return font_aspect.to_font(font, font_aspect.FALLBACK, self._color)
+        return font_aspect.to_font(font, font_aspect.FALLBACK, self._color, self._theme_fonts)
 
 
 @contextmanager

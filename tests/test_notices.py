@@ -39,6 +39,7 @@ ELSEWHERE = {
     "format.refused": "tests/test_layout.py and tests/test_cli.py",
     "value.unshowable": "tests/test_layout.py",
     "outline.cut": "only with a range that cuts a group; tests/test_outline.py",
+    "grid.color": "only where gridlines are shown, and All hides them; tests/test_theme.py",
 }
 
 DRAWING = (
@@ -149,6 +150,10 @@ def build_every_feature(path: Path) -> Path:
         ws.cell(row, 2, "text").alignment = alignment
     ws["B13"] = CellRichText([TextBlock(InlineFont(b=True), "rich"), " text"])
     ws["B14"] = "=1+1"
+    # A [ColorN] the workbook palette recolors (index 17, [Color10]).
+    wb._colors = [*wb._colors[:17], "00804000", *wb._colors[18:]]
+    ws["O2"] = 1
+    ws["O2"].number_format = "[Color10]0"
     ws["A30"] = "row format"
     ws.row_dimensions[30].fill = PatternFill("solid", fgColor="00FF00")
     ws.sheet_view.showZeros = False
@@ -328,7 +333,7 @@ def _with_hidden(path):
 
 def test_every_census_code_is_present(every):
     found = set(sheetpeek.read(every, "All").layout("excel").features)
-    expected = {c for c, f in FEATURES.items() if f.source == "census"}
+    expected = {c for c, f in FEATURES.items() if f.source == "census"} - set(ELSEWHERE)
     assert expected - found == set()
 
 

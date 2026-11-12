@@ -24,6 +24,21 @@ def _px(points: float) -> int:
     return round(points * 4 / 3)
 
 
+def _grid_css(color: str | None) -> str:
+    """A grid color's class: its gridlines one device pixel wide, 0.5 CSS px (§4.14).
+
+    A generated class, like the fill and border layers', not public interface.
+    """
+    if color is None:
+        return ""
+    name = f".sheetpeek.sp-g-{color}"
+    return (
+        f"{name} {{ --sheetpeek-grid: #{color}; }}\n"
+        f"{name} table {{ border-right-width: 0.5px; border-bottom-width: 0.5px; }}\n"
+        f"{name} td {{ border-left-width: 0.5px; border-top-width: 0.5px; }}\n"
+    )
+
+
 class Page:
     """One sheet's markup."""
 
@@ -39,10 +54,12 @@ class Page:
         self.width = self.x(sheet.width_pt) + 1  # px, the wrapper's width: the table's
         self.fills = _patterns.Fills(self)
         self.borders = _borders.Borders(self)
+        model = sheet.sheet
+        self.grid = model.grid_color if model.show_gridlines else None
 
     def css(self) -> str:
-        """The page's own stylesheet: the classes its fill and border layers use."""
-        return _patterns.layer_css(self.fills, self.borders.css())
+        """The page's own stylesheet: the classes its fill, border and grid colors use."""
+        return _patterns.layer_css(self.fills, self.borders.css()) + _grid_css(self.grid)
 
     def x(self, points: float) -> int:
         return self.gx + _px(self.ox + points)
@@ -53,6 +70,8 @@ class Page:
     def write(self, out: TextIO) -> None:
         sheet = self.sheet
         classes = "sheetpeek" if sheet.sheet.show_gridlines else "sheetpeek sp-nogrid"
+        if self.grid:
+            classes += f" sp-g-{self.grid}"
         out.write(f'<div class="{classes}" data-color-scheme="{self.backend.color_scheme}">')
         self.fills.write(out)
         self.borders.write(out)

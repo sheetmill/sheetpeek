@@ -89,6 +89,8 @@ class Structure:
     thick_bottom: bool = False
     show_headings: bool = True
     """The first ``<sheetView>``'s ``showRowColHeaders``."""
+    grid_color_id: int | None = None
+    """The first ``<sheetView>``'s ``colorId`` under ``defaultGridColor="0"``, else ``None``."""
     root: str = "worksheet"
     """The part's root element, without namespace: ``worksheet``, ``dialogsheet``, ..."""
     children: tuple[ET.Element, ...] = ()
@@ -142,6 +144,7 @@ class Scan:
         self.runs = CellSet()
         self.phonetic = CellSet()
         self.show_headings = True
+        self.grid_color_id: int | None = None
         self.root = "worksheet"
         self.children: list[ET.Element] = []
         self.row_styles: list[tuple[int, int]] = []
@@ -190,6 +193,7 @@ class Scan:
             thick_top=_flag(sheet_format.get("thickTop")),
             thick_bottom=_flag(sheet_format.get("thickBottom")),
             show_headings=self.show_headings,
+            grid_color_id=self.grid_color_id,
             root=self.root,
             children=tuple(self.children),
             uncached=self.uncached,
@@ -326,6 +330,15 @@ def _view(state: Scan, element: ET.Element) -> None:
     state.seen_view = True
     state.show_gridlines = _flag(element.get("showGridLines"), default=True)
     state.show_headings = _flag(element.get("showRowColHeaders"), default=True)
+    if not _flag(element.get("defaultGridColor"), default=True):
+        state.grid_color_id = _color_id(element.get("colorId"))
+
+
+def _color_id(value: str | None) -> int:
+    """A grid color index; 64, automatic, when absent or not a small whole number (unverified)."""
+    if value is None or not (value.isascii() and value.isdigit() and len(value) <= 5):
+        return 64
+    return int(value)
 
 
 @handler(_SHEET_FORMAT)

@@ -32,7 +32,7 @@ _CHUNK = 1 << 20
 
 # What each reader code reports: outcome, reason, and what is drawn instead (or why not).
 CODES: dict[str, tuple[Outcome, Reason, str]] = {
-    "font.scheme": ("approximated", "not_implemented", ""),
+    "format.palette": ("approximated", "not_implemented", ""),
     "text.rotation": ("approximated", "not_implemented", "drawn horizontally"),
     "text.stacked": ("approximated", "not_implemented", "drawn horizontally"),
     "text.runs": ("approximated", "not_implemented", "drawn in the cell's font"),
@@ -51,7 +51,6 @@ CODES: dict[str, tuple[Outcome, Reason, str]] = {
     ),
     "view.page_layout": ("approximated", "not_implemented", "drawn as the Normal view"),
     "view.panes": ("omitted", "not_implemented", ""),
-    "grid.color": ("approximated", "not_implemented", "drawn in the default gray"),
     "cf": ("omitted", "not_implemented", ""),
     "filter.buttons": ("omitted", "not_implemented", ""),
     "table": ("omitted", "not_implemented", "table styles and buttons not drawn"),
@@ -459,10 +458,6 @@ def _view(collector: Collector, view: ET.Element) -> None:
         _report(collector, "view.formulas")
     if view.get("view") in ("pageLayout", "pageBreakPreview"):
         _report(collector, "view.page_layout", context={"view": view.get("view", "")})
-    color = view.get("colorId")
-    default_color = view.get("defaultGridColor")
-    if default_color is not None and not _true(default_color) and color not in (None, "64"):
-        _report(collector, "grid.color", context={"color_id": color or ""})
     pane = view.find(f"{{{_MAIN}}}pane")
     if pane is not None:
         state = pane.get("state", "split")

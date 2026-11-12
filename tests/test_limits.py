@@ -477,6 +477,42 @@ def test_no_mode_allocates_or_fails_by_an_odd_alignment_number(tmp_path, field):
             )
 
 
+# Numbers that pick a palette entry: the grid color's index, and a number format's [ColorN].
+ODD_PALETTE_FIELDS = {
+    "grid color id": (SHEET1, "<sheetView ", '<sheetView defaultGridColor="0" colorId="{}" '),
+    "section color": (STYLES, '<numFmts count="0" />', '<numFmts count="1"><numFmt '
+                      'numFmtId="164" formatCode="[Color{}]0" /></numFmts>'),
+}  # fmt: skip
+
+
+@pytest.mark.parametrize("field", ODD_PALETTE_FIELDS)
+@bounded
+def test_no_mode_allocates_or_fails_by_an_odd_palette_number(tmp_path, field):
+    # One bounded child for each field, trying every odd number (as above).
+    part, old, new = ODD_PALETTE_FIELDS[field]
+    wb = openpyxl.Workbook()
+    wb.active["A1"] = 1
+    wb._colors = ["00804000"] * 64  # a custom palette: every entry differs from the default
+    plain = save(wb, tmp_path / "plain.xlsx").read_bytes()
+    for value in [*ODD_NUMBERS, "9" * 5000, "64", "65", "56", "57", "999"]:
+        path = tmp_path / "odd.xlsx"
+        path.write_bytes(plain)
+        rewrite(path, part, lambda text, v=value: text.replace(old, new.format(v), 1))
+        if part == STYLES:  # the cell takes the format
+            rewrite(path, STYLES, lambda t: t.replace('<xf numFmtId="0"', '<xf numFmtId="164"', 2))
+        try:
+            sheet = sheetpeek.read(path)
+        except PackageError:
+            continue
+        assert sheet.grid_color in (None, "804000"), (field, value)
+        for mode in ("excel", "characters", "none"):
+            sheetpeek.render(
+                sheet.layout(mode),
+                {"excel": "html", "characters": "text"}.get(mode, "csv"),
+                on_notice="ignore",
+            )
+
+
 @pytest.mark.parametrize("value", ["9" * 5000, "0x7", " 3", "", "1.5"])
 @bounded
 def test_an_odd_outline_level_is_read_as_a_level(book, value):

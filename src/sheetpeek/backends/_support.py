@@ -61,6 +61,7 @@ def html(
         "text.shrink": SHOWN,
         "text.reading_order": SHOWN,
         "font.color": SHOWN,
+        "grid.color": SHOWN,  # 0.5 CSS px: one device pixel on a 2x display, as Excel draws it
         "format.color": SHOWN,
         "fill": SHOWN,
         "fill.pattern": SHOWN,
@@ -117,6 +118,7 @@ def rich(
         "text.shrink": _approx("clipped at full size; a number too wide shows #"),
         "text.reading_order": _approx("the terminal's own text direction"),
         "font.color": terminal,
+        "grid.color": _approx("the column separators in the grid color"),
         "format.color": terminal,
         "fill": terminal,
         "fill.pattern": _approx("one color, the blend of its two by the pattern's share"),
@@ -148,6 +150,7 @@ def text(*, headings: bool, buttons: str = "static") -> dict[str, Support]:
         "text.shrink": _approx("clipped at full size; a number too wide shows #"),
         "text.reading_order": _approx("the terminal's own text direction"),
         "font.color": plain,
+        "grid.color": plain,
         "format.color": plain,
         "fill": plain,
         "fill.pattern": plain,
@@ -180,6 +183,7 @@ def markdown(*, emphasis: bool, letters: bool, local_links: bool = False) -> dic
         "text.shrink": SHOWN,  # the full text: nothing to shrink
         "text.reading_order": plain,
         "font.color": plain,
+        "grid.color": plain,
         "format.color": plain,
         "fill": plain,
         "fill.pattern": plain,
@@ -219,6 +223,7 @@ def delimited() -> dict[str, Support]:
         "text.shrink": SHOWN,  # the full text: nothing to shrink
         "text.reading_order": plain,
         "font.color": plain,
+        "grid.color": plain,
         "format.color": plain,
         "fill": plain,
         "fill.pattern": plain,

@@ -40,6 +40,10 @@ def _font_faces() -> str:
     return "".join(rules)
 
 
+# Heading colors (§4.14). Dark: Excel 16.114 (paper 22, text 255, separators 86). Light:
+# measured on Microsoft 365 (paper 247, separators 224,223,221, text the darkest pixel of its
+# anti-aliased glyphs, 94), provisional until the light appearance is captured with the rest.
+
 # Calibri's and Carlito's vertical metrics in em: ascent and descent, and where the baseline
 # sits in a 1 em line box (half the leading above the ascent).
 _ASCENT, _DESCENT = 0.952, 0.269
@@ -52,16 +56,16 @@ CSS = (
   --sheetpeek-paper: #ffffff;
   --sheetpeek-ink: #000000;
   --sheetpeek-grid: #d4d4d4;
-  --sheetpeek-heading-paper: #f3f3f3;
-  --sheetpeek-heading-ink: #444444;
-  --sheetpeek-heading-grid: #c8c8c8;
+  --sheetpeek-heading-paper: #f7f7f7;
+  --sheetpeek-heading-ink: #5e5e5e;
+  --sheetpeek-heading-grid: #e0dfdd;
   position: relative; display: inline-block; vertical-align: top;
   background: var(--sheetpeek-paper); color-scheme: light;
 }
 .sheetpeek[data-color-scheme="dark"] {
-  --sheetpeek-heading-paper: #2b2b2b;
-  --sheetpeek-heading-ink: #cccccc;
-  --sheetpeek-heading-grid: #3d3d3d;
+  --sheetpeek-heading-paper: #161616;
+  --sheetpeek-heading-ink: #ffffff;
+  --sheetpeek-heading-grid: #565656;
 }
 .sheetpeek.sp-nogrid { --sheetpeek-grid: transparent; }
 .sheetpeek table {

@@ -88,6 +88,7 @@ def test_unmeasured_normal_font(tmp_path):
     # in characters mode, which measures the Normal font; none mode measures nothing.
     path = save(openpyxl.Workbook(), tmp_path / "book.xlsx")
     rewrite(path, "xl/styles.xml", replace_once('<name val="Calibri"', '<name val="Arial"'))
+    rewrite(path, "xl/styles.xml", replace_once('<scheme val="minor" />', ""))  # §4.14
     sheet = sheetpeek.read(path, ref="A1")
     assert sheet.normal_font.name == "Arial"
     rendered = sheet.layout()

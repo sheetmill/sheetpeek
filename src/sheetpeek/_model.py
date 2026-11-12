@@ -167,6 +167,11 @@ class Font:
     vert_align: VerticalTextPosition | None = None
     """``superscript`` or ``subscript``: the whole cell's text drawn at two thirds of the size,
     raised or lowered (``ARCHITECTURE.md`` §4.13); ``None`` on the baseline."""
+    scheme: Literal["major", "minor"] | None = None
+    """The font scheme the file gives, ``major`` (headings) or ``minor`` (body) for a theme font,
+    whose ``name`` is then the theme's typeface (§4.14); ``None`` for a font named for itself."""
+    stored_name: str | None = None
+    """The name the file stores, when Excel draws another (a theme font); else ``None``."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -301,6 +306,9 @@ class Sheet:
     show_gridlines: bool = True
     show_headings: bool = True
     """The file's ``showRowColHeaders``: whether Excel shows row and column headings."""
+    grid_color: str | None = None
+    """The gridlines' color, ``RRGGBB`` from the workbook palette (``<sheetView
+    defaultGridColor="0" colorId>``), or ``None`` for Excel's automatic gray (§4.14)."""
     outline: Outline | None = None
     """The outline's settings when any row or column has an outline level, else ``None``."""
     notices: tuple[Notice, ...] = field(default=())

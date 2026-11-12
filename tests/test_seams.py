@@ -53,7 +53,9 @@ def test_a_rule_replaces_the_unknown_element_report(tmp_path, monkeypatch):
 
 
 def test_style_aspects_each_own_their_findings():
-    assert [a.ATTRIBUTE for a in _style.ASPECTS] == ["border", "fill", "font", "alignment"]
+    assert [a.ATTRIBUTE for a in _style.ASPECTS] == [
+        "number_format", "border", "fill", "font", "alignment"
+    ]  # fmt: skip
     for aspect in _style.ASPECTS:
         assert callable(aspect.read)
         assert callable(aspect.unread)

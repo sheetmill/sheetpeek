@@ -104,6 +104,8 @@ class RichBackend:
         dim = "dim"
         gutter = Gutter(sheet.outline if self.buttons != "none" else None)
         prefix = " " * gutter.width + (" " * label + self.separator if self.row_headings else "")
+        # A grid color draws the separators, Excel's gridlines, in that color (approximated).
+        grid = sheet.sheet.grid_color if sheet.sheet.show_gridlines else None
         if sheet.columns:
             for band in gutter.column_lines(sheet.columns, self.separator):
                 yield Text(prefix + band, style=dim, end="\n")
@@ -137,7 +139,7 @@ class RichBackend:
                                 text, crossing, style, cell.source if after == cell.source else None
                             )
                         else:
-                            text.append(self.separator, style=_style(None, None, gap.fill))
+                            text.append(self.separator, style=_style(None, grid, gap.fill))
                 yield text
 
 
@@ -176,8 +178,8 @@ class _Links:
 def _style(font: Font | None, color: str | None, fill: str | None) -> Any:
     from rich.style import Style
 
-    if font is None:
-        return Style(bgcolor=f"#{fill}" if fill else None)
+    if font is None:  # a separator, in the grid color
+        return Style(color=f"#{color}" if color else None, bgcolor=f"#{fill}" if fill else None)
     return Style(
         color=f"#{color}" if color else None,
         bgcolor=f"#{fill}" if fill else None,
