@@ -35,23 +35,33 @@ class MarkdownBackend:
     Args:
         header: ``"first"`` (the first row) or ``"letters"`` (column letters).
         emphasis: Mark bold and italic cells with ``**`` and ``*``.
+        local_links: Also link ``file:`` URLs and relative or drive-letter paths, which Excel
+            follows. Off by default: such links point into the viewer's own files, and they
+            reveal the paths the workbook names.
     """
 
     name = "markdown"
     mode: Mode = "none"
 
     def __init__(
-        self, header: Literal["first", "letters"] = "first", *, emphasis: bool = False
+        self,
+        header: Literal["first", "letters"] = "first",
+        *,
+        emphasis: bool = False,
+        local_links: bool = False,
     ) -> None:
         if header not in ("first", "letters"):
             raise ValueError("header must be 'first' or 'letters'")
         self.header = header
         self.emphasis = emphasis
+        self.local_links = local_links
 
     @property
     def support(self) -> dict[str, Support]:
         """What this output shows of each feature the census finds (``backends/_support.py``)."""
-        return _support.markdown(emphasis=self.emphasis, letters=self.header == "letters")
+        return _support.markdown(
+            emphasis=self.emphasis, letters=self.header == "letters", local_links=self.local_links
+        )
 
     def render(self, sheet: RenderedSheet, out: TextIO, /) -> None:
         """Write the table; nothing for a sheet without visible cells."""
@@ -77,7 +87,7 @@ class MarkdownBackend:
         text = _escape(text).replace("\n", "<br>")
         link = cell.cell.hyperlink
         if link is not None and text and cell.cell.kind != "empty":
-            url = external_url(link)
+            url = external_url(link, self.local_links)
             if url is not None:
                 text = f"[{text}]({_destination(url)})"
         if self.emphasis and text.strip() and cell.font is not None:

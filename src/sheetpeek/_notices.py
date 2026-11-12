@@ -153,6 +153,7 @@ for _code, _name, _level in (
     ("link", "hyperlinks", "cells"),
     ("link.internal", "links within the rendered cells", "cells"),
     ("link.elsewhere", "links to places outside the rendered cells", "cells"),
+    ("link.local", "links to local files and relative paths", "cells"),
     ("merge", "merged cells", "sheet"),
     ("column.width", "column widths", "sheet"),
     ("row.height", "row heights", "sheet"),

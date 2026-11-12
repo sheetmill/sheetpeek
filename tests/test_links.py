@@ -15,7 +15,7 @@ import sheetpeek
 from sheetpeek import CellRange, Hyperlink
 from sheetpeek._hyperlink import check_target, location_cell
 from sheetpeek._scan_links import literal_target
-from sheetpeek.backends import HTMLBackend
+from sheetpeek.backends import HTMLBackend, MarkdownBackend
 from tests.watchdog import bounded
 from tests.workbooks import raw_sheet, replace_part, save
 
@@ -485,3 +485,31 @@ def test_a_huge_link_range_costs_nothing_past_the_range_read(tmp_path):
     assert sheet.cell(1, 2).hyperlink == Hyperlink(None, "A1")
     for mode, to in (("excel", "html"), ("characters", "text"), ("none", "markdown")):
         sheetpeek.render(sheet.layout(mode), to, on_notice="ignore")
+
+
+LOCAL = ("file:///C:/data/budget.xlsx", "..\\budget.xlsx", "C:\\data\\budget.xlsx", "budget.xlsx")
+
+
+@pytest.mark.parametrize("target", LOCAL)
+def test_local_targets_are_linked_only_when_asked(tmp_path, target):
+    # Excel follows file: and relative targets; sheetpeek links them only with local_links.
+    wb = openpyxl.Workbook()
+    wb.active["A1"] = "local"
+    wb.active["A1"].hyperlink = target
+    wb.active["A2"] = "script"
+    wb.active["A2"].hyperlink = "javascript:alert(1)"
+    path = save(wb, tmp_path / "local.xlsx")
+    plain = sheetpeek.render(path, "html", on_notice="ignore")
+    assert "href" not in plain
+    found = {n.code: n for n in sheetpeek.notices(path, "html")}
+    assert (found["link.local"].outcome, found["link.local"].reason) == ("omitted", "option")
+    assert found["link.scheme"].count == 1  # the javascript: target only
+    linked = sheetpeek.render(path, HTMLBackend(local_links=True), on_notice="ignore")
+    assert linked.count("href=") == 1
+    assert "javascript" not in linked
+    assert "link.local" not in {
+        n.code for n in sheetpeek.notices(path, HTMLBackend(local_links=True))
+    }
+    markdown = sheetpeek.render(path, MarkdownBackend(local_links=True), on_notice="ignore")
+    assert "](" in markdown
+    assert "](" not in sheetpeek.render(path, "markdown", on_notice="ignore")

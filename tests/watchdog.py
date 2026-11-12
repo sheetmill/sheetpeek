@@ -184,23 +184,28 @@ def in_child(
 def watch_session(limit: int = LIMIT) -> None:
     """Stop this process, the whole test run, if its memory passes ``limit``.
 
-    The watcher ends when this process does. A test's child under ``bounded`` runs in a session
-    of its own, so killing this process does not reach it; its guardian ends it instead.
+    The watcher ends when this process does: when it is gone or a zombie. A caller that
+    captures the run's output reaps the run only after the output's pipe closes, so the watcher
+    holds no pipe but standard error, and stops waiting for a process that has exited but is
+    not reaped yet. A test's child under ``bounded`` runs in a session of its own, so killing
+    this process does not reach it; its guardian ends it instead.
     """
     subprocess.Popen(
         [sys.executable, str(Path(__file__)), "--session", str(os.getpid()), str(limit)],
         start_new_session=True,
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
     )
 
 
 def _watch_process(pid: int, limit: int) -> None:
     while True:
-        listing = subprocess.run(
-            ["ps", "-o", "rss=", "-p", str(pid)], capture_output=True, text=True, check=False
-        ).stdout.strip()
-        if not listing:
-            return
-        size = int(listing) * 1024
+        fields = subprocess.run(
+            ["ps", "-o", "stat=,rss=", "-p", str(pid)], capture_output=True, text=True, check=False
+        ).stdout.split()
+        if len(fields) != 2 or fields[0].startswith("Z"):
+            return  # gone, or exited and waiting to be reaped
+        size = int(fields[1]) * 1024
         if size > limit:
             sys.stderr.write(
                 f"\ntests/watchdog.py: the test run used {size / GIB:.1f} GiB, past the limit of "

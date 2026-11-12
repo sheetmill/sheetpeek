@@ -98,18 +98,25 @@ def resolve(
     return apply_tint(base, tint) if tint else base
 
 
+_TINT_TOLERANCE = 0.01
+"""Added to a tinted lightness before truncating it: 16-bit stored tints fall just short."""
+
+
 def apply_tint(rgb: str, tint: float) -> str:
     """Lighten (``tint > 0``) or darken (``tint < 0``) an ``RRGGBB`` color as Excel does.
 
     ECMA-376's tint on the lightness, in Windows' integer HLS (scale 240): darkening multiplies
     the lightness by ``1 + tint``, lightening moves it ``tint`` of the way to white, and the
-    result is truncated (captured, suite ``theme_colors``).
+    result is truncated after adding a small tolerance (captured, suite ``theme_colors``, and a
+    probe on Excel 16.114 of 14 cells). Files store a tint as a 16-bit fraction (0.6 as
+    0.59999389...), which would otherwise land a lightness just below a whole number; any
+    tolerance from 0.0055 to 0.2 fits every captured cell.
     """
     if not tint:
         return rgb
     hue, lightness, saturation = _to_hls(*(int(rgb[i : i + 2], 16) for i in (0, 2, 4)))
     tinted = lightness * (1 + tint) if tint < 0 else lightness * (1 - tint) + _HLS * tint
-    red, green, blue = _to_rgb(hue, max(0, min(_HLS, int(tinted))), saturation)
+    red, green, blue = _to_rgb(hue, max(0, min(_HLS, int(tinted + _TINT_TOLERANCE))), saturation)
     return f"{red:02X}{green:02X}{blue:02X}"
 
 

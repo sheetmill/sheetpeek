@@ -13,6 +13,10 @@ _approx = Support.approximated
 _omit = Support.omitted
 
 
+def _local() -> Support:
+    return _omit("option", "file and relative targets are linked only with local_links=True")
+
+
 def _headings(drawn: bool) -> Support:
     if drawn:
         return _approx("drawn, because a headings option is set; the file hides them", "option")
@@ -34,7 +38,11 @@ def _outline_characters(buttons: str) -> Support:
 
 
 def html(
-    *, headings: bool, buttons: str = "static", level_buttons: bool = False
+    *,
+    headings: bool,
+    buttons: str = "static",
+    level_buttons: bool = False,
+    local_links: bool = False,
 ) -> dict[str, Support]:
     """The HTML output (``excel`` mode)."""
     return {
@@ -55,6 +63,7 @@ def html(
         "link": SHOWN,
         "link.internal": SHOWN,
         "link.elsewhere": _approx("a link that goes nowhere: its target is not on this page"),
+        "link.local": SHOWN if local_links else _local(),
         "merge": SHOWN,
         "column.width": SHOWN,
         "row.height": SHOWN,
@@ -79,7 +88,9 @@ def _characters(*, headings: bool) -> dict[str, Support]:
     }
 
 
-def rich(*, headings: bool, buttons: str = "static") -> dict[str, Support]:
+def rich(
+    *, headings: bool, buttons: str = "static", local_links: bool = False
+) -> dict[str, Support]:
     """The ``rich`` terminal output."""
     terminal = _approx("in the terminal's colors")
     return {
@@ -96,6 +107,7 @@ def rich(*, headings: bool, buttons: str = "static") -> dict[str, Support]:
         "link": SHOWN,  # a terminal hyperlink (OSC 8), plain text where a terminal has none
         "link.internal": _omit(why="a terminal has no place in the sheet to go to"),
         "link.elsewhere": _omit(why="a terminal has no place in the workbook to go to"),
+        "link.local": SHOWN if local_links else _local(),
         **_characters(headings=headings),
         "outline": _outline_characters(buttons),
     }
@@ -118,12 +130,13 @@ def text(*, headings: bool, buttons: str = "static") -> dict[str, Support]:
         "link": plain,
         "link.internal": plain,
         "link.elsewhere": plain,
+        "link.local": plain,
         **_characters(headings=headings),
         "outline": _outline_characters(buttons),
     }
 
 
-def markdown(*, emphasis: bool, letters: bool) -> dict[str, Support]:
+def markdown(*, emphasis: bool, letters: bool, local_links: bool = False) -> dict[str, Support]:
     """Markdown (``none`` mode: full text, no widths)."""
     plain = _omit()
     emphasized = SHOWN if emphasis else _omit("option", "emphasis is off")
@@ -145,6 +158,7 @@ def markdown(*, emphasis: bool, letters: bool) -> dict[str, Support]:
         "link": SHOWN,
         "link.internal": _omit(why="a Markdown table has no anchors to link to"),
         "link.elsewhere": _omit(why="a Markdown table has no anchors to link to"),
+        "link.local": SHOWN if local_links else _local(),
         "merge": _approx("the anchor's text in its cell, the covered cells empty"),
         "column.width": plain,
         "row.height": plain,
@@ -175,6 +189,7 @@ def delimited() -> dict[str, Support]:
         "link": plain,
         "link.internal": plain,
         "link.elsewhere": plain,
+        "link.local": plain,
         "merge": _approx("the anchor's text in its cell, the covered cells empty"),
         "column.width": plain,
         "row.height": plain,

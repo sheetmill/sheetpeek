@@ -13,7 +13,7 @@ import xml.etree.ElementTree as ET
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
-from sheetpeek._hyperlink import Hyperlink, check_target
+from sheetpeek._hyperlink import LOCAL_TARGETS, Hyperlink, check_target
 from sheetpeek._model import CellRange
 from sheetpeek._structure import Scan, Structure, handler
 
@@ -247,7 +247,7 @@ def report(
             _refused(notes, position, "part", "a part of the package, not a URL")
         elif link.target is not None:
             url, scheme = check_target(link.target)
-            if url is None:
+            if url is None and scheme not in LOCAL_TARGETS:  # local ones: each output reports
                 label = scheme if len(scheme) <= _LABEL else scheme[:_LABEL] + "..."
                 why = (
                     "a relative or file path"

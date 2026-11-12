@@ -108,7 +108,12 @@ def census(rendered: RenderedSheet) -> dict[str, Presence]:
     return dict(sorted(found.items(), key=lambda item: order.index(item[0])))
 
 
-_LINKS = {"url": "link", "internal": "link.internal", "elsewhere": "link.elsewhere"}
+_LINKS = {
+    "url": "link",
+    "local": "link.local",
+    "internal": "link.internal",
+    "elsewhere": "link.elsewhere",
+}
 
 
 def shown_cells(rendered: RenderedSheet) -> Callable[[int, int], bool]:

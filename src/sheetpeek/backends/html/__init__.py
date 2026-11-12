@@ -49,6 +49,9 @@ class HTMLBackend:
             (``<details class="sp-notices">``).
         new_tab: Open links to web pages and e-mail addresses in a new tab
             (``target="_blank"``). Links within the page are not affected.
+        local_links: Also link ``file:`` URLs and relative or drive-letter paths, which Excel
+            follows. Off by default: such links point into the viewer's own files, and they
+            reveal the paths the workbook names.
         buttons: Whether to draw Excel's buttons, which do nothing on a static page. For now
             this is the outline: ``"static"`` (the default) draws the outline gutter beside the
             headings as Excel shows it, with its bars, dots, minus and plus buttons, and the level
@@ -68,6 +71,7 @@ class HTMLBackend:
         color_scheme: ColorScheme = "light",
         notices: bool = False,
         new_tab: bool = False,
+        local_links: bool = False,
         buttons: Buttons = "static",
     ) -> None:
         if color_scheme not in ("light", "dark"):
@@ -78,6 +82,7 @@ class HTMLBackend:
         self.color_scheme = color_scheme
         self.notices = notices
         self.new_tab = new_tab
+        self.local_links = local_links
         if buttons not in ("none", "static"):
             raise ValueError(f"buttons must be 'none' or 'static', not {buttons!r}")
         self.buttons = buttons
@@ -89,6 +94,7 @@ class HTMLBackend:
             headings=self.column_headings or self.row_headings,
             buttons=self.buttons,
             level_buttons=self.column_headings and self.row_headings,
+            local_links=self.local_links,
         )
 
     def render(self, sheet: RenderedSheet, out: TextIO, /) -> None:

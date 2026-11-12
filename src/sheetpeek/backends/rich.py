@@ -38,6 +38,9 @@ class RichBackend:
             shows outline symbols.
         color_system: Passed to ``rich.console.Console`` (``"auto"``, ``"truecolor"``, ...).
         force_terminal: Passed to ``rich.console.Console``; ``None`` detects.
+        local_links: Also link ``file:`` URLs and relative or drive-letter paths, which Excel
+            follows. Off by default: such links point into the viewer's own files, and they
+            reveal the paths the workbook names.
     """
 
     name = "rich"
@@ -52,10 +55,12 @@ class RichBackend:
         buttons: Buttons = "static",
         color_system: str | None = "auto",
         force_terminal: bool | None = None,
+        local_links: bool = False,
     ) -> None:
         if len(separator) != 1:
             raise ValueError("the separator must be one character")
         self.separator = separator
+        self.local_links = local_links
         self.column_headings = column_headings
         self.row_headings = row_headings
         if buttons not in ("none", "static"):
@@ -68,7 +73,9 @@ class RichBackend:
     def support(self) -> dict[str, Support]:
         """What this output shows of each feature the census finds (``backends/_support.py``)."""
         return _support.rich(
-            headings=self.column_headings or self.row_headings, buttons=self.buttons
+            headings=self.column_headings or self.row_headings,
+            buttons=self.buttons,
+            local_links=self.local_links,
         )
 
     def render(self, sheet: RenderedSheet, out: TextIO, /) -> None:
@@ -92,7 +99,7 @@ class RichBackend:
         """One ``rich.text.Text`` per output line, each ending in a newline."""
         from rich.text import Text
 
-        links = _Links(sheet)
+        links = _Links(sheet, self.local_links)
         label = max((len(str(row.index)) for row in sheet.rows), default=1)
         dim = "dim"
         gutter = Gutter(sheet.outline if self.buttons != "none" else None)
@@ -137,7 +144,7 @@ class RichBackend:
 class _Links:
     """Each linked cell's ``link`` style, one per URL so that a terminal sees one link."""
 
-    def __init__(self, sheet: RenderedSheet) -> None:
+    def __init__(self, sheet: RenderedSheet, local: bool = False) -> None:
         from rich.style import Style
 
         self.styles: dict[tuple[int, int], Any] = {}
@@ -147,7 +154,7 @@ class _Links:
                 cell = rendered.cell
                 if cell.hyperlink is None or cell.kind == "empty" or cell.value == "":
                     continue
-                url = external_url(cell.hyperlink)
+                url = external_url(cell.hyperlink, local)
                 if url is not None:
                     style = by_url.setdefault(url, Style(link=url))
                     self.styles[(cell.row, cell.column)] = style

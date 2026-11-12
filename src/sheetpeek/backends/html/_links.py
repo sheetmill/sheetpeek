@@ -41,7 +41,7 @@ class Links:
                 link = cell.hyperlink
                 if link is None or cell.kind == "empty" or cell.value == "":
                     continue
-                kind, url, target = classify(link, name, shown)
+                kind, url, target = classify(link, name, shown, page.backend.local_links)
                 if kind == "refused":
                     continue
                 attributes = ""

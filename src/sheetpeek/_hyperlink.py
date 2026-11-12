@@ -18,6 +18,11 @@ LinkSource: TypeAlias = Literal["element", "formula"]
 ALLOWED_SCHEMES = frozenset({"http", "https", "mailto"})
 """The URL schemes an output links to; any other target is drawn as plain text and reported."""
 
+LOCAL_TARGETS = frozenset({"file", "relative", "path"})
+"""Targets Excel follows that point into the viewer's own files: ``file:`` URLs, relative paths
+(UNC names included) and drive-letter paths. Linked only when a backend's ``local_links`` is set;
+otherwise reported by each output (``link.local``), not refused."""
+
 # What a browser drops from a URL before it parses it (the WHATWG URL standard): C0 controls and
 # spaces at either end, tabs and line breaks anywhere. "java\tscript:" is "javascript:" to it.
 _EDGES = "".join(chr(code) for code in range(0x21))
@@ -47,31 +52,35 @@ class Hyperlink:
     """``"element"`` for a ``<hyperlink>`` element, ``"formula"`` for a ``HYPERLINK()`` call."""
 
 
-def check_target(target: str) -> tuple[str | None, str]:
+def check_target(target: str, local: bool = False) -> tuple[str | None, str]:
     """A target as an output may link to it, or ``None`` when it is refused; and its scheme.
 
     The scheme is compared after what a browser drops is dropped, lower-cased. The URL returned
     has the controls a terminal or a browser would act on percent-encoded. A refused target's
     scheme is ``"relative"`` (a path, a UNC name, an anchor), ``"path"`` (a drive letter) or
-    ``"unparseable"`` when it has none.
+    ``"unparseable"`` when it has none. With ``local``, the :data:`LOCAL_TARGETS` are allowed
+    too.
     """
     cleaned = _TAB_OR_BREAK.sub("", target.strip(_EDGES))
     try:
         scheme = urlsplit(cleaned).scheme.lower()
     except ValueError:
         return None, "unparseable"
-    if scheme in ALLOWED_SCHEMES:
-        return _CONTROL.sub(lambda m: quote(m[0]), cleaned), scheme
+    label = scheme if scheme else "relative"
+    if len(label) == 1:
+        label = "path"
+    if scheme in ALLOWED_SCHEMES or (local and label in LOCAL_TARGETS):
+        return _CONTROL.sub(lambda m: quote(m[0]), cleaned), label
     if not scheme:
         return None, "relative"
     return None, "path" if len(scheme) == 1 else scheme
 
 
-def external_url(link: Hyperlink) -> str | None:
+def external_url(link: Hyperlink, local: bool = False) -> str | None:
     """The URL an output links to for an external target, ``#location`` added; else ``None``."""
     if link.target is None:
         return None
-    url, _ = check_target(link.target)
+    url, _ = check_target(link.target, local)
     if url is None:
         return None
     if link.location:
@@ -124,21 +133,25 @@ def _quoted(text: str) -> tuple[str | None, str]:
     return None, ""
 
 
-LinkKind: TypeAlias = Literal["url", "internal", "elsewhere", "refused"]
+LinkKind: TypeAlias = Literal["url", "local", "internal", "elsewhere", "refused"]
 
 
 def classify(
-    link: Hyperlink, sheet: str, shown: Callable[[int, int], bool]
+    link: Hyperlink, sheet: str, shown: Callable[[int, int], bool], local: bool = False
 ) -> tuple[LinkKind, str | None, tuple[int, int] | None]:
     """What an output can make of a link on ``sheet``, whose shown cells ``shown`` tells.
 
+    ``local`` is a target in the viewer's own files, not linked unless ``local`` is set.
     Returns the kind, the URL of a ``url`` link, and the cell an ``internal`` link points to.
     ``elsewhere`` is a place in the workbook that is not on the rendered sheet: another sheet, a
     defined name, or a cell outside what is shown.
     """
     if link.target is not None:
-        url = external_url(link)
-        return ("url", url, None) if url is not None else ("refused", None, None)
+        url = external_url(link, local)
+        if url is not None:
+            return "url", url, None
+        label = check_target(link.target)[1]
+        return ("local" if label in LOCAL_TARGETS else "refused"), None, None
     cell = location_cell(link.location or "", sheet)
     if cell is not None and shown(*cell):
         return "internal", None, cell

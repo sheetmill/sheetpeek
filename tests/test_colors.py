@@ -100,3 +100,41 @@ def test_resolve_gives_only_colors():
     assert resolve("theme", 0, 0.0, ('"><X>Y',), ()) is None
     assert resolve("indexed", 0, 0.0, (), ('FF"><X>Y',)) is None
     assert resolve("rgb", "FFABCDEF", 0.0, (), ()) == "ABCDEF"
+
+
+# Excel 16.114 capture (14 cells' own fills, read exactly; recaptured after the Microsoft 365
+# switch): files store a tint as a 16-bit fraction, and Excel draws the stored form as the round
+# tint it stands for.
+STORED_TINTS = [
+    (0.59999389629810485, 0.6),
+    (0.3999755851924192, 0.4),
+    (0.79998168889431442, 0.8),
+    (0.249977111117893, 0.25),
+    (0.499984740745262, 0.5),
+    (0.14999847407452621, 0.15),
+    (-0.249977111117893, -0.25),
+]
+
+
+@pytest.mark.parametrize(("stored", "round_"), STORED_TINTS)
+@pytest.mark.parametrize("rgb", ["9BBB59", "000000", "1F497D", "EEECE1", "C0504D"])
+def test_a_stored_tint_draws_as_its_round_value(rgb, stored, round_):
+    assert apply_tint(rgb, stored) == apply_tint(rgb, round_)
+
+
+def test_a_third_of_the_way_to_white_from_black():
+    # Excel 16.114 capture: tint 0.333333 on black is 555555 (lightness 80 of 240, not 79).
+    assert apply_tint("000000", 0.333333) == "555555"
+
+
+def test_without_the_tolerance_stored_tints_fall_short(monkeypatch):
+    # The mutation check: truncating without the tolerance breaks the captured cases.
+    monkeypatch.setattr(sheetpeek._colors, "_TINT_TOLERANCE", 0.0)
+    wrong = [
+        (rgb, stored)
+        for stored, round_ in STORED_TINTS
+        for rgb in ("9BBB59", "000000", "1F497D", "EEECE1", "C0504D")
+        if apply_tint(rgb, stored) != apply_tint(rgb, round_)
+    ]
+    assert wrong
+    assert apply_tint("000000", 0.333333) != "555555"

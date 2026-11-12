@@ -98,3 +98,18 @@ def test_a_finished_run_leaves_nothing_behind():
     result = run([sys.executable, "-c", "print('done')"])
     assert result.returncode == 0
     assert "done" in result.output
+
+
+def test_the_session_watcher_does_not_hold_a_caller_s_pipe():
+    # A caller that captures the run's output waits for the pipe to close before it reaps the
+    # run; the watcher must not wait for the run's (zombie) process while holding that pipe.
+    started = time.monotonic()
+    result = subprocess.run(
+        [sys.executable, "-c", "from tests.watchdog import watch_session; watch_session()"],
+        cwd=ROOT,
+        capture_output=True,
+        timeout=30,
+        check=False,
+    )
+    assert result.returncode == 0
+    assert time.monotonic() - started < 10

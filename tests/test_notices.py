@@ -113,6 +113,8 @@ def build_every_feature(path: Path) -> Path:
     # What the reader reports of links.
     ws["A9"] = "refused"
     ws["A9"].hyperlink = "javascript:alert(1)"
+    ws["A15"] = "local"
+    ws["A15"].hyperlink = "../budget.xlsx"
     ws["A11"] = '=HYPERLINK(B1&"x")'
     ws["A12"] = '=HYPERLINK("https://example.org/")'
     ws["A12"].hyperlink = "https://example.com/"
