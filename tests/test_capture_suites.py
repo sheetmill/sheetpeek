@@ -169,6 +169,27 @@ def test_every_case_names_a_distinct_cell_in_its_group():
         assert len({case.cell for case in found}) == len(found), group
 
 
+def test_each_wrap_text_measures_the_width_it_is_listed_under():
+    import xlformat
+
+    for table in (text_style.NARROW, text_style.WIDE, text_style.WORDS):
+        for width, text in table.items():
+            assert xlformat.text_width(text, font=None) == width, text
+
+
+def test_the_second_rotation_set_leaves_the_captured_windows_as_they_were():
+    from capture import rotation
+
+    windows, read = rotation._on_screen()
+    first = [case for _, chosen in rotation._windows(more=False) for case in chosen]
+    assert first == [case for chosen in windows for case in chosen]
+    lines = (rotation.OUTPUT).read_text(encoding="utf-8").splitlines()
+    captured = [line.split("\t")[1] for line in lines if line and not line.startswith("#")][1:]
+    assert captured[: len(first) + len(read)] == [case.name for case in first + read]
+    names = [case.name for case in rotation.cases() + rotation.more_cases()]
+    assert len(set(names)) == len(names)
+
+
 def test_an_underline_reads_as_a_rule_below_the_baseline():
     ws = openpyxl.Workbook().active
     found = text_style.fill(ws, "fonts")

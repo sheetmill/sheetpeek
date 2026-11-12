@@ -147,7 +147,11 @@ captures at once); `read SUITE ...` measures saved captures again from `capture/
 without Excel. Each suite writes `tests/captures/<suite>.tsv`. The suites: `rotation` (angled
 and stacked text: which borders slant, where general text is anchored, fitted heights over
 lengths and sizes; cases measured by row height alone are read without a capture), and the
-cell-style suites `borders`, `fills` and `text_style`.
+cell-style suites `borders`, `fills` and `text_style`. Cases added to a suite after it was
+captured go where the captured ones stay as they were: a group of their own (`text_style`'s
+`wrap` and `lone`, run with `python -m capture.text_style run wrap lone`), or windows of their
+own (`rotation`'s second set, `python -m capture.rotation run more`). `read` leaves out what is
+not captured yet.
 
 ## Saving a copy
 

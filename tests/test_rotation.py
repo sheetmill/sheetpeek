@@ -232,11 +232,12 @@ def test_the_capture_workbook_reads_back_as_built(tmp_path):
     from capture.rotation import build
 
     placed = build(tmp_path / "rotation.xlsx")
-    sheet = sheetpeek.read(tmp_path / "rotation.xlsx")
-    assert len(placed) > 90
-    for coordinate, case in placed:
+    book = sheetpeek.open(tmp_path / "rotation.xlsx")
+    sheets = {name: book.sheet(name) for name in dict.fromkeys(name for name, _, _ in placed)}
+    assert len(placed) > 150
+    for name, coordinate, case in placed:
         row, column = int(coordinate[1:]), 5
-        style = sheet.cell(row, column).style
+        style = sheets[name].cell(row, column).style
         expected = 0 if case.rotation == 255 else _rotation(case.rotation)
         assert (style.rotation, style.stacked) == (expected, case.rotation == 255), case.name
         if case.borders == "lr":

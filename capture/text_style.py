@@ -2,9 +2,10 @@
 
     EXCEL_EDITION="Microsoft 365" uv run --group capture python -m capture.screen run text_style
     uv run --group capture python -m capture.screen read text_style     # the saved captures again
+    uv run --group capture python -m capture.text_style run wrap lone   # some groups only
     uv run --group capture python -m capture.text_style build PATH      # the workbooks only
 
-Three groups, each its own workbook and window (their layouts share cells), with the default
+Five groups, each its own workbook and window (their layouts share cells), with the default
 markers B2 and J20. Rows are fitted by Excel on opening unless a group sets a height.
 
 - ``align``, zoom 100. Rows 4, 6, 8, 10 and 12 are 60 pt high with vertical alignment top,
@@ -33,13 +34,26 @@ markers B2 and J20. Rows are fitted by Excel on opening unless a group sets a he
   the same text in Calibri. Row 24 at 24 pt: outline (C), shadow (E), plain (G), condense and
   extend (I). Measured: the glyphs' baseline and the horizontal rules (underlines, strike):
   each rule's offset below the baseline, thickness, and where it starts and ends; the ink box.
+- ``wrap``, zoom 100 and 200. The width a wrapped line may take: two words measuring 44 to 50
+  points with the space (``NARROW``) in default columns, wrap alone (C) and with shrink to fit
+  (E), rows 4 to 16; 111 to 117 points (``WIDE``) in columns of 20 characters (G and I) the same
+  way; single words of 45 to 50 points (``WORDS``, broken between characters when too wide),
+  rows 18 to 28 in C and E; the 47-point pair distributed (C30) and justified (E30), and E4's
+  text of ``shrink`` with wrap alone (G30). Measured: the lines and the ink box.
+- ``lone``, zoom 100. Where distributed text puts a line of one word: "spilled text that is
+  much wider than one column" in default columns, its rows fitted (row 4): distributed (C),
+  with ``justifyLastLine`` (E), justified (G), distributed with indent 1 (I); in a 15 pt row
+  (row 6): distributed without and with wrap (C, E), wrapped (G), distributed at the top (I);
+  row 8 distributed: "spilled" and "abc" alone (C, E), a lone word in the middle line (G), at
+  the end (I). Measured: the lines, the ink box and each line's ink (``line_inks``).
 
 A cell outside the window at zoom 200 is skipped at that zoom. ``read`` writes
 ``tests/captures/text_style.tsv``: one row per case and zoom, lengths in points: x from the
 cell's left edge (``ink_left``, ``rule_start``, ``words``) or from its right edge, or the
 merge's (``ink_right``, ``rule_end``, negative inside), y from the cell's top edge (``ink_top``,
 ``ink_bottom``, ``line_tops``, ``baseline``), rules' offsets down from the baseline; lists are
-space separated, ``start+length`` each. ``row_height`` and the ``display`` fields are Excel's
+space separated, ``start+length`` each (``line_inks`` from the cell's left edge, one a line). A
+group not captured yet is left out. ``row_height`` and the ``display`` fields are Excel's
 reads.
 """
 
@@ -56,13 +70,15 @@ from openpyxl.styles import Alignment, Font
 ROOT = Path(__file__).resolve().parents[1]
 BUILD_DIR = ROOT / "capture" / "build" / "text_style"
 OUTPUT = ROOT / "tests" / "captures" / "text_style.tsv"
-GROUPS = ("align", "shrink", "fonts")
-ZOOMS = {"align": (100,), "shrink": (100, 200), "fonts": (100, 200)}
+GROUPS = ("align", "shrink", "fonts", "wrap", "lone")
+ZOOMS = {
+    "align": (100,), "shrink": (100, 200), "fonts": (100, 200), "wrap": (100, 200), "lone": (100,),
+}  # fmt: skip
 COLUMNS = (
     "group", "name", "zoom", "cell", "row_height", "cell_width", "lines", "line_tops", "ink_left",
     "ink_right", "ink_top", "ink_bottom", "words", "baseline", "glyph_top", "rule_offset",
     "rule_thickness", "rule_start", "rule_end", "width_ratio", "height_ratio", "ink_width",
-    "ref_width", "font_name", "font_size", "underline", "h_align", "v_align", "text",
+    "ref_width", "font_name", "font_size", "underline", "h_align", "v_align", "text", "line_inks",
 )  # fmt: skip
 READS = {
     "row_height": "geometry.height",
@@ -245,7 +261,99 @@ def _fonts(ws: Any) -> list[Case]:
     return found
 
 
-FILLS = {"align": _align, "shrink": _shrink, "fonts": _fonts}
+# Two words whose widths with the space between them are the key, in points at Calibri 11 by
+# xlformat's tables (whole points at that size): where wrapping breaks them tells the width a line
+# may take. Around 48 for a default column (53 pt less the insets), around 115 for 20 characters.
+NARROW = {
+    44: "aaaa baaii", 45: "aaaa aaaai", 46: "aaaa baaai", 47: "aaaa aaaaa",
+    48: "aaaa aaaaii", 49: "aaaa baaaii", 50: "aaaa aaaaai",
+}  # fmt: skip
+WIDE = {
+    111: "aaaaaaaaaa bbbbbbaaaai", 112: "aaaaaaaaaa bbbbbbbaaai", 113: "aaaaaaaaaa bbbbbaaaaaii",
+    114: "aaaaaaaaaa bbbbbbaaaaii", 115: "aaaaaaaaaa bbbbbbbaaaii", 116: "aaaaaaaaaa bbbbbbaaaaai",
+    117: "aaaaaaaaaa bbbbbbbaaaai",
+}  # fmt: skip
+WORDS = {
+    45: "bbbbaaaii", 46: "bbbaaaaai", 47: "bbbbaaaai", 48: "bbbbbaaai", 49: "bbbaaaaaii",
+    50: "bbbbaaaaii",
+}  # fmt: skip
+"""Single words of these widths: a word wider than a line is broken between characters."""
+SPILLED = "spilled text that is much wider than one column"
+
+
+def _wrap(ws: Any) -> list[Case]:
+    for column in "GI":
+        ws.column_dimensions[column].width = 20
+    found = []
+    shrink = Alignment(wrap_text=True, shrink_to_fit=True)
+    for k, (narrow, wide) in enumerate(zip(NARROW.items(), WIDE.items(), strict=True)):
+        row = 4 + 2 * k
+        for column, (width, text), options, label in (
+            ("C", narrow, Alignment(wrap_text=True), "wrap"),
+            ("E", narrow, shrink, "shrink wrap"),
+            ("G", wide, Alignment(wrap_text=True), "wrap"),
+            ("I", wide, shrink, "shrink wrap"),
+        ):
+            ws[f"{column}{row}"] = text
+            ws[f"{column}{row}"].alignment = options
+            found.append(Case("wrap", f"{label} {width}", f"{column}{row}", ("lines", "ink")))
+    for k, (width, word) in enumerate(WORDS.items()):
+        row = 18 + 2 * k
+        for column, options, label in (
+            ("C", Alignment(wrap_text=True), "word"),
+            ("E", shrink, "shrink word"),
+        ):
+            ws[f"{column}{row}"] = word
+            ws[f"{column}{row}"].alignment = options
+            found.append(Case("wrap", f"{label} {width}", f"{column}{row}", ("lines", "ink")))
+    for column, horizontal in (("C", "distributed"), ("E", "justify")):
+        ws[f"{column}30"] = NARROW[47]
+        ws[f"{column}30"].alignment = Alignment(horizontal=horizontal, wrap_text=True)
+        found.append(Case("wrap", f"{horizontal} 47", f"{column}30", ("lines", "ink")))
+    ws["G30"] = "shrink and wrap both set here"
+    ws["G30"].alignment = Alignment(wrap_text=True)
+    found.append(Case("wrap", "wrap only, the shrink text", "G30", ("lines", "ink")))
+    return found
+
+
+def _lone(ws: Any) -> list[Case]:
+    found = []
+    for column, text, options, label in (
+        ("C", SPILLED, {"horizontal": "distributed"}, "distributed"),
+        ("E", SPILLED, {"horizontal": "distributed", "justifyLastLine": True}, "last line"),
+        ("G", SPILLED, {"horizontal": "justify"}, "justify"),
+        ("I", SPILLED, {"horizontal": "distributed", "indent": 1}, "distributed indent 1"),
+    ):
+        ws[f"{column}4"] = text
+        ws[f"{column}4"].alignment = Alignment(wrap_text=True, **options)
+        found.append(Case("lone", f"{label} fitted", f"{column}4", ("lines", "ink", "line_inks")))
+    ws.row_dimensions[6].height = 15
+    for column, settings, label in (
+        ("C", {"horizontal": "distributed"}, "distributed 15"),
+        ("E", {"horizontal": "distributed", "wrap_text": True}, "distributed wrapped 15"),
+        ("G", {"wrap_text": True}, "wrapped 15"),
+        ("I", {"horizontal": "distributed", "vertical": "top"}, "distributed top 15"),
+    ):
+        ws[f"{column}6"] = SPILLED
+        ws[f"{column}6"].alignment = Alignment(**settings)
+        found.append(Case("lone", label, f"{column}6", ("lines", "ink", "line_inks")))
+    for column, text in (
+        ("C", "spilled"),
+        ("E", "abc"),
+        ("G", "aa bb cccccccc dd ee"),
+        ("I", "aaaa bbbb cccc"),
+    ):
+        ws[f"{column}8"] = text
+        ws[f"{column}8"].alignment = Alignment(horizontal="distributed", wrap_text=True)
+        found.append(
+            Case("lone", f"distributed {text}", f"{column}8", ("lines", "ink", "line_inks"))
+        )
+    return found
+
+
+FILLS = {
+    "align": _align, "shrink": _shrink, "fonts": _fonts, "wrap": _wrap, "lone": _lone,
+}  # fmt: skip
 
 
 def fill(ws: Any, group: str) -> list[Case]:
@@ -277,11 +385,11 @@ def build(path: Path) -> list[Case]:
     return found
 
 
-def run() -> None:
+def run(groups: tuple[str, ...] = GROUPS) -> None:
     """Capture each group's window at its zooms, then write the TSV (needs Excel)."""
     from capture.screen.run import capture
 
-    for group in GROUPS:
+    for group in groups:
         capture(
             lambda ws, group=group: fill(ws, group),
             cells=_cells(cases(group)),
@@ -356,6 +464,13 @@ def measure(cap: Any, case: Case) -> dict[str, str] | None:
         found["line_tops"] = " ".join(_span(cap, y, n, top) for y, n in lines)
     if "words" in case.measure:
         found["words"] = _words(cap, box, left)
+    if "line_inks" in case.measure:
+        spans = []
+        for y, n in bands(cap, box):
+            line = ink(cap, (box[0], y, box[2], y + n))
+            if line is not None:
+                spans.append(_span(cap, line[0], line[2] - line[0], left))
+        found["line_inks"] = " ".join(spans)
     if glyph is not None and "rules" in case.measure:
         found.update(_rules(cap, box, glyph, (left, right, top)))
     if glyph is not None and case.reference:
@@ -376,6 +491,9 @@ def write() -> None:
     first: dict[str, str] = {}
     for group in GROUPS:
         out = BUILD_DIR / group
+        if not (out / "formats.tsv").exists():
+            print(f"{group}: not captured yet, left out", file=sys.stderr)
+            continue
         first = first or header(out)
         for cap in load(out):
             for case in cases(group):
@@ -408,8 +526,8 @@ def main(argv: list[str]) -> int:
         placed = build(Path(argv[1]))
         print(f"{len(placed)} cases in {argv[1]}")
         return 0
-    if argv == ["run"]:
-        run()
+    if argv[:1] == ["run"] and all(group in GROUPS for group in argv[1:]):
+        run(tuple(argv[1:]) or GROUPS)
         return 0
     if argv == ["read"]:
         write()

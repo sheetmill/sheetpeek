@@ -1,6 +1,7 @@
 """Capture how Excel for Mac draws angled and stacked text, from the screen (route C).
 
     EXCEL_EDITION="Microsoft 365" uv run --group capture python -m capture.rotation run
+    EXCEL_EDITION="Microsoft 365" uv run --group capture python -m capture.rotation run more
     uv run --group capture python -m capture.rotation read     # the saved captures again
     uv run --group capture python -m capture.rotation build PATH   # the workbook only
 
@@ -26,6 +27,20 @@ Cases (``ARCHITECTURE.md`` §4.17 marks what each one settles):
 - ``other``: a number wider than its column at 45 and 90 degrees (``#`` or the number?), and
   wrapped angled text with a line feed. Measured: the ink box and what ``display format``
   reads.
+
+A second set (``more_cases``), added after the first was captured, goes in windows of its own
+(``more_<k>``; ``run more`` captures only those), so the first set's windows stay as captured:
+- ``slant`` again, all four sides unless named: what the text's shift between slanted borders
+  depends on. Angles 5 to 85 and -15 to -75; row heights 30, 60 and 120 at 15 and 45 degrees
+  (60 at -45); the short and long texts; left, center and right; top and center in a 90 pt row;
+  20 pt; indent 2; the left or the bottom side alone; column E 4 and 20 characters wide (cases of
+  one width share a window). Measured: the ink box and the borders, as above.
+- ``turned``: wrapped angled text in custom rows (45 degrees in 30, 60 and 120 pt; 15, 75, -45
+  and 90 in 60 pt), in a fitted row, justified and distributed, and inside four borders.
+  Measured: the ink box.
+- ``upright``: the three texts upright at 9, 11, 14 and 20 pt (not the long one at 20), and the
+  medium text at 90 degrees at 11, 14 and 20 pt: whether Excel measures upright text wider than
+  xlformat's tables at the larger sizes too, as it does angled text. Measured: the ink box.
 """
 
 from __future__ import annotations
@@ -72,6 +87,7 @@ class Case:
     wrap: bool = False
     height: float | None = None  # a custom row height, or fitted by Excel
     number: bool = False
+    width: float | None = None  # column E's width in characters, or the default
     measure: tuple[str, ...] = field(default=("ink",))
 
 
@@ -139,6 +155,79 @@ def cases() -> list[Case]:
     return found
 
 
+TURNED = ((45, 30), (45, 60), (45, 120), (15, 60), (75, 60), (-45, 60), (90, 60))
+"""Angle and custom row height of the wrapped angled cases."""
+
+
+def _slant(name: str, angle: int, **options: Any) -> Case:
+    sides = options.pop("borders", "lrtb")
+    return Case(
+        "slant", name, options.pop("text", TEXT), _stored(angle), borders=sides,
+        measure=("ink", "borders"), **options,
+    )  # fmt: skip
+
+
+def more_cases() -> list[Case]:
+    """The second set: what the text's shift between slanted borders depends on, turned wrapping,
+    and upright text at the sizes where Excel measures angled text wider than xlformat."""
+    found = [_slant(f"{angle} lrtb", angle) for angle in (5, 30, 60, 75, 85, -15, -30, -60, -75)]
+    found.extend(
+        _slant(f"{angle} lrtb height {height}", angle, height=height)
+        for angle in (15, 45)
+        for height in (30, 60, 120)
+    )
+    found.append(_slant("-45 lrtb height 60", -45, height=60))
+    found.extend(
+        _slant(f"{angle} lrtb {length}", angle, text=LENGTHS[length])
+        for angle in (15, 45)
+        for length in ("short", "long")
+    )
+    found.extend(
+        _slant(f"{angle} lrtb {horizontal}", angle, horizontal=horizontal)
+        for angle in (15, 45)
+        for horizontal in ("left", "center", "right")
+    )
+    found.extend(
+        _slant(f"45 lrtb vertical {vertical}", 45, vertical=vertical, height=90)
+        for vertical in ("top", "center")
+    )
+    found.extend(_slant(f"{angle} lrtb 20", angle, size=20.0) for angle in (15, 45))
+    found.append(_slant("45 lrtb indent 2", 45, horizontal="left", indent=2))
+    found.extend(_slant(f"45 {side}", 45, borders=side) for side in ("l", "b"))
+    found.extend(
+        _slant(f"{angle} lrtb width {width:g}", angle, width=width)
+        for width in (4.0, 20.0)
+        for angle in (15, 45)
+    )
+    found.extend(
+        Case(
+            "turned", f"wrapped {angle} height {height}", TEXT, _stored(angle), wrap=True,
+            height=height,
+        )
+        for angle, height in TURNED
+    )  # fmt: skip
+    found.append(Case("turned", "wrapped 45 fitted", TEXT, 45, wrap=True))
+    found.extend(
+        Case("turned", f"{horizontal} 45 height 60", TEXT, 45, horizontal=horizontal, height=60)
+        for horizontal in ("justify", "distributed")
+    )
+    found.append(
+        Case("turned", "wrapped 45 lrtb height 60", TEXT, 45, wrap=True, height=60, borders="lrtb",
+             measure=("ink", "borders"))
+    )  # fmt: skip
+    found.extend(
+        Case("upright", f"{length} {size:g}", LENGTHS[length], 0, size=size)
+        for size in (9.0, 11.0, 14.0, 20.0)
+        for length in ("short", "medium", "long")
+        if (length, size) != ("long", 20.0)
+    )
+    found.extend(
+        Case("upright", f"90 ink medium {size:g}", TEXT, 90, size=size)
+        for size in (11.0, 14.0, 20.0)
+    )
+    return found
+
+
 def fill(ws: Any, chosen: list[Case]) -> list[tuple[str, Case]]:
     """Place ``chosen`` on a worksheet; each case's cell address with the case."""
     thin = Side(style="thin", color="FF000000")
@@ -164,15 +253,21 @@ def fill(ws: Any, chosen: list[Case]) -> list[tuple[str, Case]]:
             cell.fill = PatternFill("solid", fgColor="FFFFE699")
         if case.height is not None:
             ws.row_dimensions[row].height = case.height
+        if case.width is not None:
+            ws.column_dimensions[COLUMN].width = case.width
         placed.append((cell.coordinate, case))
     return placed
 
 
-def build(path: Path) -> list[tuple[str, Case]]:
-    """Write every case to one workbook at ``path``; each case's cell address with the case."""
+def build(path: Path) -> list[tuple[str, str, Case]]:
+    """Write every case to one workbook at ``path``: the first set on one sheet, each window of
+    the second on its own. Each case's sheet and cell address with the case."""
     wb = openpyxl.Workbook()
     wb.active.title = "Rotation"
-    placed = fill(wb.active, cases())
+    placed = [("Rotation", cell, case) for cell, case in fill(wb.active, cases())]
+    for name, chosen in _windows(first=False):
+        ws = wb.create_sheet(name)
+        placed.extend((name, cell, case) for cell, case in fill(ws, chosen))
     wb.save(path)
     return placed
 
@@ -186,24 +281,44 @@ def _on_screen() -> tuple[list[list[Case]], list[Case]]:
     return windows, read
 
 
-def run() -> None:
+def _more_windows() -> list[list[Case]]:
+    """The second set in windows of its own, so that the first set's windows stay as captured;
+    cases that set column E's width share a window only with cases of the same width."""
+    windows: list[list[Case]] = []
+    every = more_cases()
+    for width in dict.fromkeys(case.width for case in every):
+        same = [case for case in every if case.width == width]
+        windows.extend(same[k : k + PER_WINDOW] for k in range(0, len(same), PER_WINDOW))
+    return windows
+
+
+def _windows(first: bool = True, more: bool = True) -> list[tuple[str, list[Case]]]:
+    """Each window's folder name with its cases: the first set's, then the second's."""
+    found = [(f"window_{k}", chosen) for k, chosen in enumerate(_on_screen()[0])] if first else []
+    if more:
+        found += [(f"more_{k}", chosen) for k, chosen in enumerate(_more_windows())]
+    return found
+
+
+def run(first: bool = True, more: bool = True) -> None:
     """Capture every window of cases and read the rest, then write the TSV (needs Excel)."""
     from capture.screen.run import capture, read_only
 
-    windows, read = _on_screen()
-    for k, chosen in enumerate(windows):
+    for name, chosen in _windows(first, more):
         last = FIRST_ROW + 2 * (len(chosen) - 1)
         cells = [cell for cell, _ in fill(openpyxl.Workbook().active, chosen)]
         cells += [f"{c}{FIRST_ROW + 2 * i}" for i in range(len(chosen)) for c in "AI"]
         capture(
             lambda ws, chosen=chosen: fill(ws, chosen),
             cells=cells,
-            out=BUILD_DIR / f"window_{k}",
+            out=BUILD_DIR / name,
             markers=("B2", f"J{last + 2}"),
-            name=f"rotation_{k}",
+            name=f"rotation_{name}",
         )
-    cells = [cell for cell, _ in fill(openpyxl.Workbook().active, read)]
-    read_only(lambda ws: fill(ws, read), cells, BUILD_DIR / "heights", name="rotation_heights")
+    if first:
+        read = _on_screen()[1]
+        cells = [cell for cell, _ in fill(openpyxl.Workbook().active, read)]
+        read_only(lambda ws: fill(ws, read), cells, BUILD_DIR / "heights", name="rotation_heights")
     write()
 
 
@@ -248,11 +363,14 @@ def write() -> None:
     """Measure the saved captures and reads again (no Excel) and write ``rotation.tsv``."""
     from capture.screen.run import header, load
 
-    windows, read = _on_screen()
+    read = _on_screen()[1]
     records = []
     first: dict[str, str] = {}
-    for k, chosen in enumerate(windows):
-        out = BUILD_DIR / f"window_{k}"
+    for name, chosen in _windows():
+        out = BUILD_DIR / name
+        if not (out / "formats.tsv").exists():
+            print(f"{name}: not captured yet, left out", file=sys.stderr)
+            continue
         first = first or header(out)
         (cap,) = load(out)
         for cell, case in fill(openpyxl.Workbook().active, chosen):
@@ -302,6 +420,9 @@ def main(argv: list[str]) -> int:
         return 0
     if argv == ["run"]:
         run()
+        return 0
+    if argv == ["run", "more"]:
+        run(first=False)
         return 0
     if argv == ["read"]:
         write()
