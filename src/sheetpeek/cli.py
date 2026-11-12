@@ -68,8 +68,12 @@ def _parser() -> argparse.ArgumentParser:
     view.add_argument(
         "--all-sheets",
         action="store_true",
-        help="every sheet on one HTML page, with Excel's tabs (-t html only; with --hidden, "
-        "hidden sheets too)",
+        help="every sheet on one HTML page, with Excel's tabs (-t html only)",
+    )
+    view.add_argument(
+        "--hidden-sheets",
+        action="store_true",
+        help="with --all-sheets, hidden and very hidden sheets too",
     )
     view.add_argument(
         "--notices",
@@ -165,6 +169,9 @@ def _view(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
         if refused:
             _say(err, f"sheetpeek: --all-sheets {refused}")
             return 2
+    elif args.hidden_sheets:
+        _say(err, "sheetpeek: --hidden-sheets goes with --all-sheets (-s names a hidden sheet)")
+        return 2
     try:
         with open_book(args.file, limits=_limits(args)) as book:
             if args.list:
@@ -238,7 +245,8 @@ def _all_sheets(args: argparse.Namespace, book: Book, out: TextIO, err: TextIO) 
     found: list[Notice] = []
     page = render_workbook(
         book,
-        hidden=args.hidden,
+        hidden_sheets=args.hidden_sheets,
+        show_hidden=args.hidden,
         on_notice=found.append,
         column_headings=args.column_headings,
         row_headings=args.row_headings,

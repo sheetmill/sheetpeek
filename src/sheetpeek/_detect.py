@@ -83,7 +83,7 @@ CODES: dict[str, tuple[Outcome, Reason, str]] = {
         "option",
         "drawn only on the HTML workbook page (sheetpeek.render_workbook)",
     ),
-    "sheet.hidden": ("omitted", "option", "drawn only with hidden=True"),
+    "sheet.hidden": ("omitted", "option", "drawn only with hidden_sheets=True"),
     "sheet.chartsheet": ("omitted", "not_implemented", ""),
     "sheet.dialogsheet": (
         "omitted",

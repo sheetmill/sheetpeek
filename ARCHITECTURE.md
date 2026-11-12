@@ -26,9 +26,16 @@ CLI views a file and serves a folder of workbooks as HTML.
   Excel would refuse falls back to `General`. A Normal font without glyph tables is approximated.
   The exception is a package refused as unsafe or a request over a limit (§5.5): those raise
   `PackageError` or `LimitError`, since nothing can be shown of a file that may not be read.
-- **Excel is the reference.** Correct means what Excel 16 for Mac shows. ECMA-376 is secondary;
-  LibreOffice is a lower-trust secondary reference.
-- Out of scope: conditional formatting, charts, images, comments, editing, any interactive UI.
+- **Excel is the reference.** Correct means what Excel for Mac (Microsoft 365) shows; each
+  capture records its build and update channel. ECMA-376 is secondary; LibreOffice is a
+  lower-trust secondary reference.
+- **Scope grows by feature groups.** Each group is read, drawn in Excel-mode HTML, and given a
+  stated judgment per other output, with notices for the rest. In scope and built: cell styles
+  (fonts, fills, borders, alignment, rich-text runs), hyperlinks, outlines, theme fonts and the
+  workbook palette, gridline colors and headings, sheet kinds, states and tab colors. In scope
+  and not built yet: rotated text, tables, filter buttons, conditional formatting, notes and
+  comments, pictures, panes and other sheet-view parts, print settings, pivot tables; charts
+  possibly as a package of their own (§11). Out of scope: editing and any interactive UI.
 
 ## 2. Pipeline
 
@@ -934,7 +941,11 @@ half the default line's 2, at any zoom; a fill covers it as it covers the gray o
 headings keep their colors (captured). The first `<sheetView>` is read, as for gridlines.
 - **HTML:** a generated class `sp-g-RRGGBB` on the wrapper sets `--sheetpeek-grid` and draws the
   cells' gridlines 0.5 CSS px wide: one device pixel on a 2× display, as Excel draws it; a 1×
-  display rounds it (decided). A sheet that hides its gridlines draws no grid color.
+  display rounds it (decided). Measured in WebKit's snapshots: at 2× the line is one device pixel
+  in the full color, against the gray line's two; at 1× both are one pixel; over 30 columns every
+  line stays within one device pixel of the gray grid's, with no drift. WebKit draws it on the
+  first of the gray line's two pixels, Excel on the second, at zoom 100. A sheet that hides its
+  gridlines draws no grid color.
 
 **Headings.** Excel's heading bands are sheet units: they scale with the zoom, so the page draws
 them in points like the cells (`backends/html/_headings.py`).
@@ -1001,10 +1012,11 @@ on a page and are not read.
 
 **The workbook page** (`render_workbook`, `sheetpeek view --all-sheets`): one HTML page, an
 option; one sheet per page stays the default everywhere.
-- A `<nav>` of tabs, one per visible sheet in workbook order (with `hidden=True` hidden and very
-  hidden ones too, in italics, titled with their state), then a `<section>` per tab. A worksheet's
-  section is the `html` backend's sheet; a chartsheet's or dialog sheet's says that it is not
-  shown. The strip is drawn above the sheets, not below them as in Excel's window.
+- A `<section>` per tab, then a `<nav>` of tabs, one per visible sheet in workbook order (with
+  `hidden_sheets=True` hidden and very hidden ones too, in italics, titled with their state). A
+  worksheet's section is the `html` backend's sheet; a chartsheet's or dialog sheet's says that
+  it is not shown. The strip is below the sheets, as in Excel's window; `tabs="top"` draws it
+  above them.
 - **Ids by position, not by name:** a sheet's section is `sp-<n>`, its position in the workbook
   from 1, and a cell a link goes to is `sp-<n>-<cell>`, so ids are unique on the page and no
   file string reaches an id or an `href`. A one-sheet page keeps `sp-<cell>`.
@@ -1025,7 +1037,8 @@ option; one sheet per page stays the default everywhere.
   `NotShownWarning` per sheet with something to report and one for the workbook.
 - **Cost:** every sheet is read and laid out before the page is written, since a link gives an
   id to a cell of another sheet; `max_cells` bounds the page's cells, every sheet's together.
-- `hidden=True` also draws hidden rows and columns, as `sheetpeek view --hidden` does.
+- **Options stay orthogonal:** `hidden_sheets` (`--hidden-sheets`) is about sheets, and
+  `show_hidden` (`--hidden`) about rows and columns, as for `Sheet.layout`.
 
 **Other outputs** (decided): text, `rich`, Markdown, CSV and TSV have no workbook page and draw
 one sheet; `--all-sheets` refuses any `-t` other than `html`. In a one-sheet render of any
@@ -1611,8 +1624,8 @@ points.
 - **Page or fragment:** a page is a standalone document titled with the sheet's name; a
   fragment is the stylesheet and the `<div class="sheetpeek">`, for a host page.
 - **The workbook page** (§4.15) holds every sheet's `<div class="sheetpeek">` in a
-  `<div class="sp-book">` with a `<nav>` of tabs; its classes `sp-book`, `sp-first` and
-  `sp-hidden`, the section ids `sp-<n>` and the cell ids `sp-<n>-<cell>` join the public
+  `<div class="sp-book">` with a `<nav>` of tabs; its classes `sp-book`, `sp-first`,
+  `sp-hidden` and `sp-notshown`, the section ids `sp-<n>` and the cell ids `sp-<n>-<cell>` join the public
   interface (`sp-t-` and letters, a tab color, is generated).
 - **Size** (`bench/html_size.py`, 5,000 rows × 20 columns, 100,000 cells and 97,144 runs, Apple
   M4 Pro): 11.1 MB of HTML, 111 bytes per cell, 0.58 MB gzipped; read 0.55 s, layout 1.90 s,
@@ -1996,12 +2009,24 @@ are read.
 
 ## 11. Roadmap
 
-1. **The next 0.x minors:** live recalculation through `xlrecalc`, an optional sibling.
-2. **By 1.0:** automated screen capture of the test sheets, checked against the PDF route on a
-   sample (§4). Planned options (§9) as they are asked for.
-3. **After 1.0:** a PDF backend drawing from the `excel` mode geometry (§2.1), possibly as an
+1. **Cell styles and sheet features, on openpyxl:** what openpyxl's read-only mode and the structure
+   scan reach: cell styles and runs, hyperlinks, outlines, theme fonts and the palette, grid
+   colors and headings, sheets and the workbook page, then rotated and stacked text.
+2. **Screen captures:** the capture tool for the screen (route C, beside the PDF route of §4),
+   with every existing suite rerun on Microsoft 365 as the check on the rules built from earlier
+   captures.
+3. **The middle tier:** filter and sort buttons, tables with the differential-format layer,
+   conditional formatting, pictures and their placement, notes and comments, sheet-view parts
+   (panes, zero display), print settings; then pivot tables. Most of it needs parts that
+   openpyxl's read-only mode does not expose.
+4. **The shared xlsx reader:** sheetpeek moves from openpyxl onto the reader now inside
+   `xlrecalc`, once it is a package of its own; `_read.py` is the only module that changes
+   (§8.1).
+5. **Recalculation** through `xlrecalc`, an optional sibling. Charts, possibly as a package of
+   their own. Planned options (§9) as they are asked for.
+6. **After 1.0:** a PDF backend drawing from the `excel` mode geometry (§2.1), possibly as an
    optional extra.
-4. **Last: a cross-platform phase**, which waits on having those machines and browsers to measure
+7. **Last: a cross-platform phase**, which waits on having those machines and browsers to measure
    on. Refinements that stop paying on the Mac are logged here:
    - Windows Excel: column widths, row heights and glyph tables (xlformat measures the Mac only);
    - Linux viewers, and Chrome and Firefox for the HTML technique (only WebKit is measured);

@@ -1,7 +1,8 @@
 """The workbook page: every sheet of a workbook on one static HTML page, with a tab strip.
 
-A ``<nav>`` of tabs, one per sheet in workbook order (hidden ones only on request, as Excel's
-strip leaves them out), and a ``<section>`` per sheet drawn by :class:`HTMLBackend`. Without
+A ``<section>`` per sheet drawn by :class:`HTMLBackend`, and a ``<nav>`` of tabs, one per sheet
+in workbook order (hidden ones only on request, as Excel's strip leaves them out), below the
+sheets as Excel draws it, or above them on request. Without
 script, a tab is a link to its section's id; a browser that has CSS's ``:has()`` shows the
 section that is the URL's target, or holds it, and the active sheet when none is. Other browsers
 show the sections one after another. A link to a cell of another sheet on the page goes there.
@@ -42,7 +43,7 @@ _NOT_SHOWN = {
 _STATE_TITLES = {"hidden": "hidden sheet", "very_hidden": "very hidden sheet"}
 
 _BOOK_CSS = """\
-.sp-book > nav { display: flex; flex-wrap: wrap; gap: 4px 9px; margin: 0 0 8px;
+.sp-book > nav { display: flex; flex-wrap: wrap; gap: 4px 9px; margin: 0;
   font: 12px/27px system-ui, sans-serif; }
 .sp-book > nav a { display: block; min-width: 96px; padding: 0 10px; box-sizing: border-box;
   text-align: center; white-space: pre; text-decoration: none; border-radius: 5px; }
@@ -61,7 +62,9 @@ _NONE_TARGETED = ".sp-book:not(:has(> section:target, > section :target))"
 def render_workbook(
     source: Source | Any,
     *,
-    hidden: bool = False,
+    hidden_sheets: bool = False,
+    show_hidden: bool = False,
+    tabs: Literal["bottom", "top"] = "bottom",
     out: TextIO | None = None,
     limits: ReadLimits | None = None,
     on_notice: Callable[[Notice], object] | Literal["ignore"] | None = None,
@@ -78,9 +81,12 @@ def render_workbook(
     Args:
         source: A workbook: a path, a binary file object, or an open :class:`~sheetpeek.Book`
             (left open).
-        hidden: Also draw hidden and very hidden sheets, and the hidden rows and columns of
-            every sheet, as ``sheetpeek view --hidden`` does. Excel's tab strip leaves hidden
-            sheets out, and so does the page by default.
+        hidden_sheets: Also draw hidden and very hidden sheets, each with a tab. Excel's tab
+            strip leaves them out, and so does the page by default.
+        show_hidden: Also draw the hidden rows and columns of every sheet, as
+            :meth:`Sheet.layout <sheetpeek.Sheet.layout>` does.
+        tabs: Where the tab strip goes: ``"bottom"``, below the sheets as Excel draws it, or
+            ``"top"``.
         out: A text stream to write to. Without one, the page is returned as a string.
         limits: What reading may cost. ``max_cells`` bounds the whole page's cells, every
             sheet's together. By default, ``ReadLimits()``.
@@ -97,15 +103,18 @@ def render_workbook(
         LimitError: The file, a sheet, or the page's cells exceed ``limits``.
         PackageError: The file is not a readable xlsx workbook, or it is refused.
     """
-    from sheetpeek._read import Book
+    from sheetpeek._read import Book, book_limits
 
+    if tabs not in ("bottom", "top"):
+        raise ValueError(f"tabs must be 'bottom' or 'top', not {tabs!r}")
     backend = HTMLBackend(**html_options)
     if isinstance(source, Book):
         book, owned = source, False
     else:
         book, owned = Book(source, limits=limits), True
     try:
-        page = _WorkbookPage(book, backend, hidden, limits or book._limits)
+        page = _WorkbookPage(book, backend, hidden_sheets, show_hidden, limits or book_limits(book))
+        page.tabs_first = tabs == "top"
     finally:
         if owned:
             book.close()
@@ -125,16 +134,26 @@ def render_workbook(
 class _WorkbookPage:
     """The sheets read and laid out, their pages, tabs and notices, ready to write."""
 
-    def __init__(self, book: Any, backend: HTMLBackend, hidden: bool, limits: ReadLimits) -> None:
+    def __init__(
+        self,
+        book: Any,
+        backend: HTMLBackend,
+        hidden_sheets: bool,
+        show_hidden: bool,
+        limits: ReadLimits,
+    ) -> None:
         self.backend = backend
-        self.title = os.path.basename(book._path) if book._path else "workbook"
+        self.tabs_first = False
+        from sheetpeek._read import active_sheet, book_file_name
+
+        self.title = book_file_name(book) or "workbook"
         infos: tuple[SheetInfo, ...] = book.sheets
         self.tabs: list[tuple[int, SheetInfo]] = [
             (index, info)
             for index, info in enumerate(infos, 1)
-            if hidden or info.state == "visible"
+            if hidden_sheets or info.state == "visible"
         ]
-        active = book._listing[1]
+        active = active_sheet(book)
         shown = [info.name for _, info in self.tabs]
         if active is not None and active.state == "visible" and active.name in shown:
             self.first = shown.index(active.name)
@@ -145,7 +164,7 @@ class _WorkbookPage:
         for k, (index, info) in enumerate(self.tabs):
             if not info.readable:
                 continue
-            rendered = book.sheet(info.name).layout("excel", show_hidden=hidden)
+            rendered = book.sheet(info.name).layout("excel", show_hidden=show_hidden)
             cells += len(rendered.rows) * len(rendered.columns)
             if cells > limits.max_cells:
                 raise LimitError(
@@ -181,7 +200,32 @@ class _WorkbookPage:
                 f"<style>\n{css}body {{ margin: 8px; background: {background}; }}\n</style>\n"
                 "</head>\n<body>\n"
             )
-        out.write('<div class="sp-book">\n<nav>')
+        out.write('<div class="sp-book">\n')
+        if self.tabs_first:
+            self.write_tabs(out)
+        for k, (index, info) in enumerate(self.tabs):
+            first = ' class="sp-first"' if k == self.first else ""
+            out.write(f'<section id="sp-{index}"{first}>\n')
+            page = self.pages.get(index)
+            if page is None:
+                name = html.escape(one_line(repr(info.name)))
+                out.write(f'<p class="sp-notshown">{name} {_NOT_SHOWN[info.kind]}</p>\n')
+            else:
+                page.write(out)
+                if backend.notices:
+                    write_notices(None, backend, out, self.notices[index])
+            out.write("</section>\n")
+        if not self.tabs_first:
+            self.write_tabs(out)
+        if backend.notices:
+            write_notices(None, backend, out, self.book_notices)
+        out.write("</div>\n")
+        if not backend.fragment:
+            out.write("</body>\n</html>\n")
+
+    def write_tabs(self, out: TextIO) -> None:
+        """The tab strip: a link to each sheet's section, in its tab color."""
+        out.write("<nav>")
         for k, (index, info) in enumerate(self.tabs):
             classes = " ".join(
                 c
@@ -198,23 +242,6 @@ class _WorkbookPage:
             label = html.escape(one_line(info.name))
             out.write(f'<a href="#sp-{index}"{attributes}>{label}</a>')
         out.write("</nav>\n")
-        for k, (index, info) in enumerate(self.tabs):
-            first = ' class="sp-first"' if k == self.first else ""
-            out.write(f'<section id="sp-{index}"{first}>\n')
-            page = self.pages.get(index)
-            if page is None:
-                name = html.escape(one_line(repr(info.name)))
-                out.write(f'<p class="sp-notshown">{name} {_NOT_SHOWN[info.kind]}</p>\n')
-            else:
-                page.write(out)
-                if backend.notices:
-                    write_notices(None, backend, out, self.notices[index])
-            out.write("</section>\n")
-        if backend.notices:
-            write_notices(None, backend, out, self.book_notices)
-        out.write("</div>\n")
-        if not backend.fragment:
-            out.write("</body>\n</html>\n")
 
     def color_class(self, k: int) -> str:
         """The generated class of the ``k``-th tab's color, or ``""`` for an uncolored tab."""

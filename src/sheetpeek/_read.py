@@ -129,6 +129,24 @@ def disable_date_conversion(workbook: Any) -> bool:
     return True
 
 
+def book_file_name(book: Book) -> str | None:
+    """The file name a book was opened from, without its folder; ``None`` for a file object."""
+    return os.path.basename(book._path) if book._path else None
+
+
+def active_sheet(book: Book) -> SheetInfo | None:
+    """The sheet Excel opens on (``activeTab``), if the workbook lists it; any kind or state."""
+    active = book._listing[1]
+    if active is None:
+        return None
+    return next((info for info in book.sheets if info.name == active.name), None)
+
+
+def book_limits(book: Book) -> ReadLimits:
+    """The limits a book reads under."""
+    return book._limits
+
+
 class Book:
     """An open workbook, for reading several sheets with one load. Use :func:`open`.
 

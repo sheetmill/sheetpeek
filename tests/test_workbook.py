@@ -156,7 +156,8 @@ def test_the_default_sheet_skips_a_hidden_active_sheet(tabs):
 
 
 def test_a_workbook_of_chartsheets_has_no_default_sheet(kinds):
-    hide = r'(<sheet name="(?:Data|Macro)" sheetId="\d+") state="visible"'
+    # with lxml installed, openpyxl writes the r: namespace before the name
+    hide = r'(<sheet [^>]*?name="(?:Data|Macro)" sheetId="\d+") state="visible"'
     rewrite(kinds, WORKBOOK, lambda t: re.sub(hide, r'\1 state="hidden"', t))
     assert sheetpeek.read(kinds).name == "Data"  # hidden, but the only readable kind left
     rewrite(
@@ -196,10 +197,34 @@ def test_the_page_has_a_tab_for_each_visible_sheet_in_file_order(tabs):
 
 
 def test_hidden_sheets_are_drawn_on_request(tabs):
-    markup = page(tabs, hidden=True)
+    markup = page(tabs, hidden_sheets=True)
     assert re.findall(r">([^<]+)</a>", nav(markup))[5:] == ["Hidden", "Secret"]
     assert '<a href="#sp-6" class="sp-hidden sp-t-f" title="hidden sheet">' in markup
     assert '<a href="#sp-7" class="sp-hidden sp-t-g" title="very hidden sheet">' in markup
+
+
+def test_the_tab_strip_is_below_the_sheets_or_above_on_request(tabs):
+    markup = page(tabs)
+    assert markup.index("<nav>") > markup.rindex("</section>")  # as Excel draws it
+    markup = page(tabs, tabs="top")
+    assert markup.index("</nav>") < markup.index("<section")
+    with pytest.raises(ValueError, match="tabs must be"):
+        page(tabs, tabs="left")
+
+
+def test_hidden_sheets_and_hidden_rows_are_separate_options(tmp_path):
+    wb = openpyxl.Workbook()
+    wb.active["A1"], wb.active["A2"] = "shown", "row hidden"
+    wb.active.row_dimensions[2].hidden = True
+    wb.create_sheet("Hidden").sheet_state = "hidden"
+    path = tmp_path / "both.xlsx"
+    wb.save(path)
+    markup = page(path, hidden_sheets=True)
+    assert ">Hidden</a>" in markup
+    assert "row hidden" not in markup
+    markup = page(path, show_hidden=True)
+    assert ">Hidden</a>" not in markup
+    assert "row hidden" in markup
 
 
 def test_tab_colors_as_excel_draws_them(tabs):
@@ -293,7 +318,7 @@ def test_notices_are_delivered_per_sheet_and_for_the_workbook(tabs):
     assert hidden.context["very_hidden"] == 1
     assert "1 of them very hidden" in hidden.message
     found = []
-    page(tabs, hidden=True, on_notice=found.append)
+    page(tabs, hidden_sheets=True, on_notice=found.append)
     assert found == []
 
 
@@ -366,7 +391,14 @@ def test_cli_all_sheets(tabs, capsys):
     assert main(["view", str(tabs), "--all-sheets", "-t", "html", "--notices", "none"]) == 0
     assert '<div class="sp-book">' in capsys.readouterr().out
     assert main(["view", str(tabs), "--all-sheets", "--hidden", "--notices", "none"]) == 0
+    assert ">Secret</a>" not in capsys.readouterr().out  # --hidden is rows and columns
+    assert main(["view", str(tabs), "--all-sheets", "--hidden-sheets", "--notices", "none"]) == 0
     assert ">Secret</a>" in capsys.readouterr().out
+
+
+def test_cli_hidden_sheets_goes_with_all_sheets(tabs, capsys):
+    assert main(["view", str(tabs), "--hidden-sheets"]) == 2
+    assert "--hidden-sheets goes with --all-sheets" in capsys.readouterr().err
 
 
 def test_cli_all_sheets_reports_and_is_strict(tabs, capsys):

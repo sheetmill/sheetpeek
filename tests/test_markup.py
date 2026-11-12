@@ -714,15 +714,17 @@ def test_a_cell_is_shown_as_its_literal_text_in_markdown(tmp_path, layout):
 
 WORKBOOK_PAGES = {
     "page": {},
-    "hidden": {"hidden": True},
+    "hidden": {"hidden_sheets": True, "show_hidden": True},
+    "tabs on top": {"tabs": "top"},
     "fragment, headings, notices": {
         "fragment": True,
         "column_headings": True,
         "row_headings": True,
         "notices": True,
-        "hidden": True,
+        "hidden_sheets": True,
+        "show_hidden": True,
     },
-    "dark": {"color_scheme": "dark", "hidden": True},
+    "dark": {"color_scheme": "dark", "hidden_sheets": True},
 }
 BOOK_TAGS = frozenset({"nav", "section", "p"})
 
@@ -740,7 +742,7 @@ def test_the_workbook_page_holds_no_markup_from_the_file(source, options):
 
 def test_the_workbook_page_shows_sheet_names_as_text(tmp_path):
     path = other_sheet_name(tmp_path)
-    page = sheetpeek.render_workbook(path, hidden=True, on_notice="ignore")
+    page = sheetpeek.render_workbook(path, hidden_sheets=True, on_notice="ignore")
     found = assert_html_is_ours(page, extra_tags=BOOK_TAGS)
     assert PAYLOAD in "".join(found.text)  # the tab's label
     assert ("href", "#sp-2-B2") in found.attributes  # the link, by the sheet's position

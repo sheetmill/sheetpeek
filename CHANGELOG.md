@@ -122,10 +122,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Kinds come from the workbook's relationship types: `worksheet`, `chartsheet`, `dialogsheet`,
   `macrosheet`. Tab colors are `RRGGBB` through the palette and theme; `auto` is `None`.
 - `sheetpeek.render_workbook()`: every sheet on one static HTML page, with Excel's tab strip
-  (visible sheets in file order, tab colors as Excel draws them, hidden sheets with
-  `hidden=True`). Links to a cell of another sheet on the page go there. Chartsheets and dialog
+  below the sheets, or above them with `tabs="top"` (visible sheets in file order, tab colors as
+  Excel draws them; hidden sheets with `hidden_sheets=True`, hidden rows and columns with
+  `show_hidden=True`). Links to a cell of another sheet on the page go there. Chartsheets and dialog
   sheets get a tab and a line saying they are not shown.
-- `sheetpeek view --all-sheets` writes that page (`-t html` only).
+- `sheetpeek view --all-sheets` writes that page (`-t html` only; `--hidden-sheets` for hidden
+  sheets).
 - `NotAWorksheetError`, a `ValueError`, raised for a chartsheet or a dialog sheet.
 - The notice `sheet.hidden`: hidden sheets the workbook page leaves out.
 

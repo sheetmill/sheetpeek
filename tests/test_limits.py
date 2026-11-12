@@ -555,7 +555,9 @@ def test_the_sheet_list_takes_any_odd_number(tmp_path, field):
             assert all(c is None or re.fullmatch("[0-9A-F]{6}", c) for c in colors), (field, value)
             try:
                 assert book.sheet().name in ("Sheet", "Two"), (field, value)
-                markup = sheetpeek.render_workbook(book, hidden=True, on_notice="ignore")
+                markup = sheetpeek.render_workbook(
+                    book, hidden_sheets=True, show_hidden=True, on_notice="ignore"
+                )
             except PackageError:
                 continue
         assert markup is not None
