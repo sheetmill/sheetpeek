@@ -38,9 +38,10 @@ class RichBackend:
             shows outline symbols.
         color_system: Passed to ``rich.console.Console`` (``"auto"``, ``"truecolor"``, ...).
         force_terminal: Passed to ``rich.console.Console``; ``None`` detects.
-        local_links: Also link ``file:`` URLs and relative or drive-letter paths, which Excel
-            follows. Off by default: such links point into the viewer's own files, and they
-            reveal the paths the workbook names.
+        local_links: Also link ``file:`` URLs and relative, UNC and drive-letter paths, which
+            Excel follows. Off by default: such links point into the viewer's own files, they
+            reveal the paths the workbook names, and a target starting with ``//`` resolves to a
+            network host when a page is served, as an ``http`` link would.
     """
 
     name = "rich"

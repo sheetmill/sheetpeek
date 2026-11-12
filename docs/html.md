@@ -122,11 +122,16 @@ format draws it (the Hyperlink cell style is blue and underlined, a link in the 
 looks like any text). Its `title` is the file's tooltip, if it has one. The text shown is the
 cell's value; the hyperlink's `display` text, which Excel does not show either, is not drawn.
 
-Only `http`, `https` and `mailto` targets become links, with `rel="noopener noreferrer"`. A
-`javascript:`, `data:` or `file:` target, a relative path, a UNC path or anything else is drawn as
-plain text, never echoed into the page, and reported (`link.scheme`). A link to a cell on the
-page goes to that cell; a link to another sheet or a defined name stays an `<a>` without a target
-(`link.elsewhere`).
+By default only `http`, `https` and `mailto` targets become links, with
+`rel="noopener noreferrer"`. A `javascript:` or `data:` target, or any other scheme, is never
+linked: it is drawn as plain text, never echoed into the page, and reported (`link.scheme`).
+Local targets, which Excel follows (`file:` URLs, relative paths, UNC names and drive-letter
+paths), are drawn as text and reported (`link.local`) unless `HTMLBackend(local_links=True)`,
+which links them as the file writes them. Such links point into the viewer's own files and reveal
+the paths the workbook names, and a target that starts with `//` (a UNC name written with forward
+slashes) resolves to a network host when the page is served over HTTP, as an `http` link to that
+host would. A link to a cell on the page goes to that cell; a link to another sheet or a defined
+name stays an `<a>` without a target (`link.elsewhere`).
 
 ```python
 >>> from openpyxl.worksheet.hyperlink import Hyperlink

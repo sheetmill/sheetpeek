@@ -35,13 +35,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   file's tooltip. A link to a cell on the page goes to that cell (the cell gets the id `sp-` and
   its coordinate). `HTMLBackend(new_tab=True)` opens external links in a new tab. `rich` draws
   terminal hyperlinks, and Markdown `[text](url)` links; plain text, CSV and TSV keep the text.
-- Only `http`, `https` and `mailto` targets become links. Any other target (`javascript:`,
-  `data:`, `file:`, relative and UNC paths, and others) is drawn as plain text, is never written
-  into the output, and is reported (`link.scheme`).
+- By default only `http`, `https` and `mailto` targets become links. `javascript:`, `data:` and
+  any other scheme are never linked: drawn as plain text, never written into the output, and
+  reported (`link.scheme`).
 - `local_links=True` on `HTMLBackend`, `RichBackend` and `MarkdownBackend` also links `file:`
-  URLs and relative and drive-letter paths, which Excel follows; such links point into the
-  viewer's own files and reveal the paths the workbook names. Without it they are drawn as text
-  and reported by each output (`link.local`).
+  URLs and relative, UNC and drive-letter paths, which Excel follows; such links point into the
+  viewer's own files and reveal the paths the workbook names, and a target starting with `//`
+  resolves to a network host when a page is served, as an `http` link would. Without it they are
+  drawn as text and reported by each output (`link.local`).
 - A `HYPERLINK()` formula whose first argument is a string links its cell. One with a computed
   target, or in a shared or array formula, is reported (`link.computed`); a cell with both a
   hyperlink element and a `HYPERLINK()` formula takes the element's (`link.conflict`). A link on
