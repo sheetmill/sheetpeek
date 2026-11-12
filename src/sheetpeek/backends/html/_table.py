@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TextIO
+from typing import TYPE_CHECKING, TextIO, overload
 
 from sheetpeek._model import CellRange
 from sheetpeek._rendered import RenderedCell, RenderedSheet, TextRun
@@ -42,6 +42,36 @@ def _grid_css(color: str | None) -> str:
     )
 
 
+class Holder:
+    """Sheet position → grid position of the cell that draws it, as a read-only mapping.
+
+    A cell outside any merge is at its own row and column, found from two small maps instead of
+    an entry per cell; a merged cell, and a merge's anchor, are at the merge's first visible cell.
+    """
+
+    def __init__(
+        self, grid: list[tuple[RenderedCell, ...]], merged: dict[tuple[int, int], tuple[int, int]]
+    ) -> None:
+        self.merged = merged
+        self.rows = {cells[0].row: i for i, cells in enumerate(grid) if cells}
+        self.columns = {cell.column: p for p, cell in enumerate(grid[0])} if grid else {}
+
+    @overload
+    def get(self, key: tuple[int, int]) -> tuple[int, int] | None: ...
+    @overload
+    def get(self, key: tuple[int, int], default: tuple[int, int]) -> tuple[int, int]: ...
+    def get(
+        self, key: tuple[int, int], default: tuple[int, int] | None = None
+    ) -> tuple[int, int] | None:
+        found = self.merged.get(key)
+        if found is not None:
+            return found
+        i, p = self.rows.get(key[0]), self.columns.get(key[1])
+        if i is None or p is None:
+            return default
+        return i, p
+
+
 class Page:
     """One sheet's markup.
 
@@ -67,12 +97,13 @@ class Page:
         """The workbook page's other sheets, for links to them; ``None`` for one sheet."""
         self.ids: dict[tuple[int, int], str] = {}
         """Grid position of a cell a link goes to → its id."""
-        self._grid: tuple[_Spans, dict[tuple[int, int], tuple[int, int]]] | None = None
+        self._grid: tuple[_Spans, Holder] | None = None
         self._links: _links.Links | None = None
         self.ox, self.oy = _headings.offsets(sheet, backend)
         self.gx, self.gy = _outline.offsets(sheet, backend)  # px, the outline gutters
         self.outline_rows = _outline.row_marks(sheet, backend)
         self.normal = sheet.sheet.normal_font
+        self.normal_face = _text._face(self.normal)
         self.width = self.x(sheet.width_pt) + 1  # px, the wrapper's width: the table's
         self.fills = _patterns.Fills(self)
         self.borders = _borders.Borders(self)
@@ -114,7 +145,7 @@ class Page:
         self.write_rows(out)
         out.write("</tbody></table></div>\n")
 
-    def grid(self) -> tuple[_Spans, dict[tuple[int, int], tuple[int, int]]]:
+    def grid(self) -> tuple[_Spans, Holder]:
         """Each merge's grid span, and sheet position → grid position of the cell drawing it."""
         if self._grid is not None:
             return self._grid
@@ -126,16 +157,15 @@ class Page:
                 if cell.merge is not None:
                     first = spans.get(cell.merge, (i, p, i, p))
                     spans[cell.merge] = (first[0], first[1], i, p)
-        holder: dict[tuple[int, int], tuple[int, int]] = {}  # sheet position -> grid position
-        for i, cells in enumerate(grid):
-            for p, cell in enumerate(cells):
+        merged: dict[tuple[int, int], tuple[int, int]] = {}
+        for cells in grid:
+            for cell in cells:
                 if cell.merge is not None:
                     top, left = spans[cell.merge][:2]
-                    holder[(cell.row, cell.column)] = (top, left)
+                    merged[(cell.row, cell.column)] = (top, left)
                     anchor = (cell.merge.min_row, cell.merge.min_col)
-                    holder.setdefault(anchor, (top, left))
-                else:
-                    holder[(cell.row, cell.column)] = (i, p)
+                    merged.setdefault(anchor, (top, left))
+        holder = Holder(grid, merged)
         self._grid = spans, holder
         return self._grid
 
@@ -184,20 +214,25 @@ class Page:
     ) -> str:
         rows = self.sheet.rows
         style = []
-        left = _patterns.solid(self, rows[i].cells[p - 1]) if p else None
-        above = _patterns.solid(self, rows[i - 1].cells[p]) if i else None
-        fill = _patterns.solid(self, cell)
+        solid = _patterns.solid
+        # Most cells have no fill: ask the fill layer only about cells that have one.
+        left = rows[i].cells[p - 1] if p else None
+        left_fill = solid(self, left) if left is not None and left.fill is not None else None
+        above = rows[i - 1].cells[p] if i else None
+        above_fill = solid(self, above) if above is not None and above.fill is not None else None
+        fill = solid(self, cell) if cell.fill is not None else None
         if fill:
             # A fill covers the cell's own gridlines and its far ones (captured).
             style += [f"background:#{fill}", f"border-color:#{fill}"]
         else:
-            if left:
-                style.append(f"border-left-color:#{left}")
-            if above:
-                style.append(f"border-top-color:#{above}")
+            if left_fill:
+                style.append(f"border-left-color:#{left_fill}")
+            if above_fill:
+                style.append(f"border-top-color:#{above_fill}")
         attrs = ""
-        if (i, p) in self.ids:
-            attrs += f' id="{self.ids[(i, p)]}"'
+        found = self.ids.get((i, p)) if self.ids else None
+        if found is not None:
+            attrs += f' id="{found}"'
         if p and rows[i].crossed[p - 1]:
             attrs += ' class="sp-crossed"'
         if style:
@@ -206,11 +241,15 @@ class Page:
             attrs += f' colspan="{colspan}"'
         if rowspan > 1:
             attrs += f' rowspan="{rowspan}"'
-        return f"<td{attrs}>{self.text(runs)}</td>"
+        return f"<td{attrs}>{self.text(runs) if runs else ''}</td>"
 
     def text(self, runs: list[TextRun] | tuple[()]) -> str:
         """A cell's runs, each linked cell's inside its anchor."""
+        if not runs:
+            return ""
         opening = self.links.opening
+        if not opening:
+            return "".join(_text.run(self, run) for run in runs)
         parts = []
         source = None
         for run in runs:

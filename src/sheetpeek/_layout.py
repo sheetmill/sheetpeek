@@ -32,7 +32,7 @@ from sheetpeek._rendered import (
     RenderedSheet,
     SpillEdge,
 )
-from sheetpeek._rows import row_height
+from sheetpeek._rows import font_row_height, row_height
 from sheetpeek._text_styles import right_to_left, vert_scale
 
 # Characters per indent level. Captured (ARCHITECTURE.md §4.6): one level is one digit's width,
@@ -292,9 +292,16 @@ class _Fonts:
         self._measured = {name.lower() for name in xlformat.measured_fonts()}
         self._fonts: dict[Font, xlformat.Font] = {}
         self._warned: set[str] = set()
+        # By identity, since every cell of a style shares its font and hashing a font costs
+        # more than the lookup. Each entry holds its font, so an id is not reused while cached.
+        self._by_id: dict[int, tuple[Font, xlformat.Font, bool]] = {}
+        self._heights: dict[int, tuple[Font, float]] = {}
 
     def get(self, font: Font, *, measured: bool = True) -> xlformat.Font:
         """The font to pass to xlformat; ``measured`` when its glyph widths decide the layout."""
+        hit = self._by_id.get(id(font))
+        if hit is not None and hit[0] is font and (hit[2] or not measured):
+            return hit[1]
         known = font.name.lower() in self._measured
         if measured and not known and font.name not in self._warned:
             self._warned.add(font.name)
@@ -312,7 +319,16 @@ class _Fonts:
             # Superscript and subscript are measured at the size they are drawn (§4.13).
             size = font.size * vert_scale(font)
             found = self._fonts[font] = xlformat.Font(name, size, font.bold, font.italic)
+        # Checked for the warning once it was measured, or when it needs none.
+        self._by_id[id(font)] = (font, found, measured or known)
         return found
+
+    def row_height(self, font: Font) -> float:
+        """``font_row_height``, by the font's identity."""
+        hit = self._heights.get(id(font))
+        if hit is None or hit[0] is not font:
+            hit = self._heights[id(font)] = (font, font_row_height(font))
+        return hit[1]
 
 
 class _Formatter:

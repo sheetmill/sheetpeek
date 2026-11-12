@@ -141,6 +141,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The notice `sheet.hidden`: hidden sheets the workbook page leaves out.
 
 ### Changed
+- The HTML backend writes a page faster: 13 % on a plain 100,000-cell sheet
+  (`bench/html_size.py`), with layout within 4 % of 0.2.0 on it; a sheet pays for the newer
+  features only where it uses them.
 - Tints stored as 16-bit fractions (0.6 is stored as 0.59999389...) give the colors Excel draws:
   the tinted lightness is truncated after a small tolerance. Some fills and font colors with such
   tints were a lightness level or two off.

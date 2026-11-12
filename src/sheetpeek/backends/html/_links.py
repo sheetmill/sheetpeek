@@ -16,13 +16,13 @@ from sheetpeek._census import shown_cells
 from sheetpeek._hyperlink import Hyperlink, classify, location_place
 
 if TYPE_CHECKING:
-    from sheetpeek.backends.html._table import Page
+    from sheetpeek.backends.html._table import Holder, Page
 
 
 class Links:
     """The opening tag of each linked cell's anchor, and the id of each cell a link goes to."""
 
-    def __init__(self, page: Page, holder: dict[tuple[int, int], tuple[int, int]]) -> None:
+    def __init__(self, page: Page, holder: Holder) -> None:
         """Find the links of the page's cells.
 
         Args:

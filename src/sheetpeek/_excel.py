@@ -29,7 +29,7 @@ from sheetpeek._layout import (
     _Shown,
     check_area,
 )
-from sheetpeek._model import Column, Row, Sheet
+from sheetpeek._model import Column, Font, Row, Sheet
 from sheetpeek._rendered import RenderedCell, RenderedColumn, RenderedRow, TextRun
 from sheetpeek._rows import (
     fits_cells,
@@ -152,7 +152,7 @@ def _fitted(
         # A cell with rich-text runs counts its runs' fonts (§4.16).
         spans = drawn_spans(cell, _UNDRAWN.sub("", str(cell.value))) if cell.runs else None
         own = [span.font for span in spans] if spans else [cell.font]
-        height = max(height, *map(font_row_height, own))
+        height = max(height, *map(fonts.row_height, own))
         if cell.kind != "empty":
             styled += [f for f in own if f.vert_align or accounting(f)]
         # A merged cell's font counts, its wrapped lines do not (captured).
@@ -235,6 +235,15 @@ class _Points:
         self.xs = _running(widths)
         self.ys = _running(heights)
         self.no_claims: set[tuple[int, int]] = set()  # both competing spills take a cell
+        self._metrics: dict[tuple[int, int], tuple[Font, tuple[float, float, float]]] = {}
+
+    def plain_metrics(self, font: Font, lines: int) -> tuple[float, float, float]:
+        """``line_metrics`` of text in one font, by the font's identity (see ``_Fonts``)."""
+        key = (id(font), lines)
+        hit = self._metrics.get(key)
+        if hit is None or hit[0] is not font:
+            hit = self._metrics[key] = (font, line_metrics([font], lines))
+        return hit[1]
 
     def render(self) -> tuple[tuple[RenderedRow, ...], list[int]]:
         grid = self.grid
@@ -320,8 +329,9 @@ class _Points:
         top = self.ys[origin.rows[0]]
         bottom = self.ys[origin.rows[-1]] + self.heights[origin.rows[-1]]
         style = cell.style
-        font = self.fonts.get(cell.font)  # at the drawn size of superscript and subscript
-        size = cell.font.size * vert_scale(cell.font)
+        cell_font = cell.font
+        font = self.fonts.get(cell_font)  # at the drawn size of superscript and subscript
+        size = cell_font.size * vert_scale(cell_font)
         align = shown.align
         budget = (x1 - x0) - self.left_inset - self.right_inset
         v_align = style.v_align
@@ -351,24 +361,30 @@ class _Points:
             text = Text.of_spans(spans, self.fonts.get, breaks=wraps, scale=shrink)
         else:
             content = shown.text.replace("\r", "")
-            text = Text.plain(content if wraps else content.replace("\n", ""), cell.font, font)
+            text = Text.plain(content if wraps else content.replace("\n", ""), cell_font, font)
         lines = wrap(text.text, budget, text.width) if wraps else [(0, len(text.text))]
         n = len(lines)
         if spans:
             metrics = [line_metrics(text.fonts(a, b), n) for a, b in lines]
         else:
-            metrics = [line_metrics([cell.font], n)] * n
-        baselines = _baselines(metrics, top, bottom, v_align)
-        shift = 0.0 if spans else vert_shift(cell.font)
-        color = shown.format_color or cell.font.color
+            metrics = [self.plain_metrics(cell_font, n)] * n
+        if n == 1 and v_align == "bottom" and metrics[0][0] <= bottom - top:
+            # One bottom-aligned line, as most cells are: ``_baselines``' arithmetic, inline.
+            _, above, below = metrics[0]
+            baselines = [bottom - below - above + above]
+        else:
+            baselines = _baselines(metrics, top, bottom, v_align)
+        shift = 0.0 if spans else vert_shift(cell_font)
+        color = shown.format_color or cell_font.color
         direction: TextDirection = (
             "rtl" if style.reading_order != 1 and right_to_left(text.text) else "ltr"
         )
         source = (cell.row, cell.column)
         low, high = first, last
         own = (x0, x1) if cell.kind == "text" else None  # an accounting underline's span
-        # Each piece: start, end and copies of the text, x, anchor, baseline, whether first.
-        placed: list[tuple[int, int, int, float, str, float, bool]] = []
+        # Each piece: start, end and copies of the text, x, anchor, baseline, whether first, and
+        # the line's width when the piece is the whole line once (measured already).
+        placed: list[tuple[int, int, int, float, str, float, bool, float | None]] = []
         for k, ((a, b), baseline) in enumerate(zip(lines, baselines, strict=True)):
             baseline += shift
             width = text.width(a, b)
@@ -394,11 +410,12 @@ class _Points:
                 x = pieces[0][3]
                 low, high = self.spill(origin, x, x + width, align)
             placed.extend(
-                (*piece[:4], piece[4], baseline, j == 0) for j, piece in enumerate(pieces)
+                (*piece[:4], piece[4], baseline, j == 0, width if piece[:3] == (a, b, 1) else None)
+                for j, piece in enumerate(pieces)
             )
         clip = (self.xs[low] + 1, top + 1, self.xs[high] + self.widths[high], bottom)
         runs = []
-        for a, b, copies, x, anchor, baseline, first_piece in placed:
+        for a, b, copies, x, anchor, baseline, first_piece, line_width in placed:
             if a == b:
                 continue
             piece = text.text[a:b] * copies
@@ -408,9 +425,11 @@ class _Points:
                 ruled = _span_rules(drawn, x, baseline, own)
                 scale = shrink
             else:
-                width = xlformat.text_width(piece, font=font)
-                ruled = rules(cell.font, size, baseline, (x, x + width), own)
-                scale = size / cell.font.size
+                width = (
+                    line_width if line_width is not None else xlformat.text_width(piece, font=font)
+                )
+                ruled = rules(cell_font, size, baseline, (x, x + width), own)
+                scale = size / cell_font.size
             if own is not None and not first_piece and any(accounting(f) for f in text.fonts(a, b)):
                 # An accounting underline under text spans the cell, once per line.
                 ruled = tuple(r for r in ruled if r.kind != "underline")
@@ -423,7 +442,7 @@ class _Points:
                     clip,
                     anchor,  # type: ignore[arg-type]
                     source,
-                    cell.font,
+                    cell_font,
                     color,
                     scale,
                     ruled,

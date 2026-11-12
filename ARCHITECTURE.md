@@ -1682,8 +1682,13 @@ points.
   `sp-hidden` and `sp-notshown`, the section ids `sp-<n>` and the cell ids `sp-<n>-<cell>` join the public
   interface (`sp-t-` and letters, a tab color, is generated).
 - **Size** (`bench/html_size.py`, 5,000 rows × 20 columns, 100,000 cells and 97,144 runs, Apple
-  M4 Pro): 11.1 MB of HTML, 111 bytes per cell, 0.58 MB gzipped; read 0.55 s, layout 1.90 s,
-  render 0.29 s, peak RSS 245 MB. The first version, with a clip span and a `calc()` baseline on
+  M4 Pro): 11.1 MB of HTML, 111 bytes per cell, 0.58 MB gzipped; read 0.60 s, layout 1.77 s,
+  render 0.29 s, peak RSS 246 MB. The same grid with every cell using a newer feature (borders,
+  pattern fills, runs, angled text, links, outlines) is 33.5 MB, 335 bytes per cell: layout
+  2.74 s, render 0.65 s, 362 MB (`bench/README.md`). A sheet pays only for the features it
+  uses: the passes and the HTML layers skip what is absent, and fonts, heights and line
+  metrics are looked up by the identity of the style's font, which every cell of a style
+  shares. The first version, with a clip span and a `calc()` baseline on
   every run, was 19.8 MB (198 bytes per cell); dropping clip spans a run does not need and
   writing the baseline as a number halved it. Layout time is mostly xlformat's formatting, at
   about 19 µs per cell.
@@ -1754,7 +1759,7 @@ src/sheetpeek/
 tests/               unit tests; captures/ (TSV) and their loader
 capture/             capture tooling (not in the wheel)
 tools/               the generator of _carlito.py (not in the wheel)
-bench/               scripts that rerun §5
+bench/               scripts that rerun §5 and §7.3's figures; README.md records them
 docs/                Sphinx, as in xlformat
 ```
 

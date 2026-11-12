@@ -544,3 +544,20 @@ def test_refused_format_with_a_value_general_cannot_format(tmp_path):
         "number format 'General' cannot show the value inf (first: A1; cannot format "
         "non-finite number inf); shown as its text",
     )
+
+
+def test_the_font_cache_still_warns_once_a_font_is_measured():
+    from sheetpeek._layout import _Fonts
+    from sheetpeek._model import Font
+    from sheetpeek._notices import Collector
+
+    notes = Collector("Sheet")
+    fonts = _Fonts(notes)
+    font = Font("No Such Typeface", 11.0)
+    first = fonts.get(font, measured=False)  # cached without the check
+    assert not [n for n in notes.notices() if n.code == "font.no_metrics"]
+    assert fonts.get(font) is first
+    assert [n.code for n in notes.notices()].count("font.no_metrics") == 1
+    fonts.get(font)
+    assert [n.code for n in notes.notices()].count("font.no_metrics") == 1
+    assert fonts.row_height(font) == fonts.row_height(Font("No Such Typeface", 11.0))

@@ -157,6 +157,8 @@ def right_to_left(text: str) -> bool:
 
     Text with no strong character is left to right.
     """
+    if text.isascii():  # no ASCII character is strongly right-to-left
+        return False
     for char in text:
         kind = unicodedata.bidirectional(char)
         if kind == "L":

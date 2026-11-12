@@ -38,8 +38,8 @@ def run(page: Page, run: TextRun) -> str:
         and run.x + run.width <= right
         and top <= run.y - _ASCENT * size
         and run.y + _DESCENT * size <= bottom
-        and all(left <= r.x0 and r.x1 <= right and top <= r.y
-                and r.y + 0.75 * (2 * r.lines - 1) <= bottom for r in run.rules)
+        and (not run.rules or all(left <= r.x0 and r.x1 <= right and top <= r.y
+             and r.y + 0.75 * (2 * r.lines - 1) <= bottom for r in run.rules))
     )  # fmt: skip
     # Each run is anchored where Excel anchors it: left text by its start, right text by its
     # end, centered text by its center, so another font changes only the far end.
@@ -57,7 +57,7 @@ def run(page: Page, run: TextRun) -> str:
         anchor, classes = f"left:{center:g}px", "sp-run sp-center"
     baseline = page.y(run.y) - y0 - _BASELINE * size * 4 / 3
     style = [anchor, f"top:{_number(baseline)}px"]
-    if _face(run.font, size) != _face(page.normal):
+    if _face(run.font, size) != page.normal_face:
         style.append(f"font:{_font(run.font, size)}")
     if run.direction == "rtl":
         style.append("direction:rtl")
@@ -68,7 +68,8 @@ def run(page: Page, run: TextRun) -> str:
     if run.angle:
         style.append(_turn(run.angle, 0, _BASELINE * size * 4 / 3))
     span = f'<span class="{classes}" style="{";".join(style)}">{html.escape(run.text)}</span>'
-    span += "".join(_rule(page, rule, run.color, x0, y0, run) for rule in run.rules)
+    if run.rules:
+        span += "".join(_rule(page, rule, run.color, x0, y0, run) for rule in run.rules)
     if inside:
         return span
     return (
