@@ -126,9 +126,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   draws one character a line, centered. `rich`, plain
   text, Markdown and CSV draw both horizontally and report them. Wrapped angled text is drawn on
   one line and reported (`text.rotation_wrapped`). The side borders of an angled cell slant with
-  the text into a parallelogram, as Excel draws them (`SlantedBorders`, `RenderedBorders.slanted`);
-  the text is still placed as without borders, and a merge's borders stay upright, so such cells
-  are reported (`border.slanted`).
+  the text into a parallelogram and the text sits between them, as Excel draws them
+  (`SlantedBorders`, `RenderedBorders.slanted`); a merge's borders stay upright and its text is
+  placed as without borders, reported (`border.slanted`).
 - `CellStyle.rotation` and `CellStyle.stacked`; `TextRun.angle`.
 - Census codes `text.rotation`, `text.stacked` and `border.slanted`, which every output declares.
 - `Book.sheets`: every sheet in workbook order as a `SheetInfo` (name, kind, state, tab color).

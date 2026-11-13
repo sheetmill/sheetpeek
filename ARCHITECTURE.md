@@ -1197,9 +1197,22 @@ characters at 9, 14 and 20 pt, all exact).
 into a parallelogram whose bottom edge is the cell's: at a height `y` above the bottom, a border
 lies `y·cot θ` right of its upright place (captured at 15°, 45° and −45°, at 25 % and 75 % of the
 row; 90° and −90° stay upright). Any side border makes the text move as with all four, top and
-bottom alone included; a fill alone does not (captured). The text moves right by about
-`15·cot θ − 4` pt toward the slant (captured: 52.5 pt at 15°, 11 at 45°, −11 at −45°; the rule
-is fitted to three angles). The right side lies one column width right of the left side (the
+bottom alone included; a fill alone does not (captured).
+
+**Text between slanted sides** is laid out as in an upright cell turned with it: the sides run
+along the baseline, the side the text's ascent faces is that cell's top and the other its bottom
+(captured, 46 cases: 5° to 85° and −15° to −75°, rows of 15 to 120 pt, columns of 4 to 20
+characters, three lengths, left, center and right, top and center, 20 pt, indent 2). Text aligned
+toward the ascent side (left at positive angles, general included; right at negative ones) keeps
+its ascent 2 pt inside that side, measured across the line; text aligned toward the other side
+keeps its descent 1.5 pt inside it; centered text centers its line box between them; an indent
+moves the text horizontally, `6n` pt (`SLANT_INSETS`). How high the text sits is as without
+borders. None of row height, column width and length changes it. Against the capture, both ink
+edges lie within 3.7 pt across the line (the unbordered placement is within 2.4 at the same
+angles), the farthest at −60° and for top alignment at 45°; at 20 pt Excel's wider text
+(xlformat's tables, §4.17 upright cases) puts the far edge up to 4.7 pt further. Left at
+negative angles and right at positive ones are not captured at negative angles (the rule is
+taken as symmetric, **unverified**). The right side lies one column width right of the left side (the
 measured gaps, 56.5, 54.5 and 54 pt at 15°, 45° and 90° in a 53 pt column, are that width plus a
 1 pt line's run across a row, `1/|sin θ|`); the top border lies along the cell's top edge, shifted
 `h·cot θ` with the box, over the neighbors' cells, and the gridlines stay (seen in the crops).
@@ -1207,12 +1220,12 @@ measured gaps, 56.5, 54.5 and 54 pt at 15°, 45° and 90° in a 53 pt column, ar
 The layout records each unmerged angled cell's own sides as `SlantedBorders` (`shift_pt` is
 `h·cot θ`), takes them out of the upright grid, where a neighbor's own side on a shared edge is
 still drawn (unverified), and keeps the columns the box reaches, as for spill, within the columns
-the layout adds for spill; HTML draws the four sides as lines in one SVG, clipped to the sheet.
+the layout adds for spill; HTML draws the four sides as lines in one SVG, clipped to the sheet, and the text between them
+as above.
 Against the capture, each side's center lies within 1.05 pt of Excel's, measured across the line
 (at 15°; 39 cases from 5° to 85° and −15° to −75°, rows of 15 to 120 pt, columns of 4 to 20
-characters, every alignment and size captured). A merge's borders stay upright (unverified). The text is still placed
-as without borders, so every angled cell with a side border is reported (`border.slanted`,
-approximated).
+characters, every alignment and size captured). A merge's borders stay upright and its text is placed as without borders (unverified), reported
+as `border.slanted` (approximated); an unmerged cell is drawn as captured and not reported.
 
 **HTML** turns the run with `transform: rotate()` about the start of its baseline, and its
 underlines and strikethrough with it; the clip window stays upright. Measured in WebKit with neither

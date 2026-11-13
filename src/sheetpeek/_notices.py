@@ -158,7 +158,7 @@ for _code, _name, _level in (
     ("border", "borders", "cells"),
     ("border.diagonal", "diagonal borders", "cells"),
     ("border.slant_dash_dot", "slanted dash-dot borders", "cells"),
-    ("border.slanted", "borders of angled text", "cells"),
+    ("border.slanted", "borders of angled text in a merge", "cells"),
     ("align.horizontal", "horizontal alignment", "cells"),
     ("align.vertical", "vertical alignment", "cells"),
     ("align.wrap", "wrapped text", "cells"),

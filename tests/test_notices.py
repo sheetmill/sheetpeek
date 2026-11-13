@@ -150,7 +150,11 @@ def build_every_feature(path: Path) -> Path:
         8,
     ):
         ws.cell(row, 2, "text").alignment = alignment
-    ws["B8"].border = Border(top=Side("thin"))  # Excel slants it with the text
+    ws["B8"].border = Border(top=Side("thin"))  # Excel slants it with the text, as drawn
+    ws["B16"] = "merged"  # a merge's borders stay upright
+    ws["B16"].alignment = Alignment(textRotation=45)
+    ws["B16"].border = Border(left=Side("thin"))
+    ws.merge_cells("B16:C16")
     ws["B13"] = CellRichText([TextBlock(InlineFont(b=True), "rich"), " text"])
     ws["B14"] = "=1+1"
     # A [ColorN] the workbook palette recolors (index 17, [Color10]).

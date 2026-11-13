@@ -85,8 +85,9 @@ def census(
                 add("text.stacked", row, column)
             elif style.rotation:
                 add("text.rotation", row, column)
-                if style.rotation not in (90, -90) and _boxed(style.borders):
-                    add("border.slanted", row, column)
+                merged = rendered_cell.merge is not None
+                if merged and style.rotation not in (90, -90) and _boxed(style.borders):
+                    add("border.slanted", row, column)  # an unmerged cell's slant is drawn
             if rendered_cell.format_color is not None:
                 add("format.color", row, column)
             if style.h_align != "general":

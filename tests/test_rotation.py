@@ -161,22 +161,26 @@ def test_a_wrapped_angled_cell_is_drawn_on_one_line_and_reported(tmp_path):
     assert notice.outcome == "approximated"
 
 
-def test_angled_cells_with_borders_are_reported_except_at_90(tmp_path):
+def test_only_merged_angled_cells_with_borders_are_reported(tmp_path):
+    # An unmerged cell's slanted borders and the text between them are drawn (§4.17); a merge's
+    # stay upright, reported.
     thin = Side("thin")
-    boxed = {"border": Border(left=thin, right=thin, top=thin, bottom=thin)}
-    path = _book(
-        tmp_path,
-        [
-            ("B2", "a", Alignment(textRotation=45), boxed),
-            ("B4", "b", Alignment(textRotation=90), boxed),
-            ("B6", "c", Alignment(textRotation=255), boxed),
-            ("B8", "d", Alignment(textRotation=45), {}),
-        ],
-    )
-    rendered = sheetpeek.read(path).layout("excel")
+    boxed = Border(left=thin, right=thin, top=thin, bottom=thin)
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    for coordinate, value, rotation in (
+        ("B2", "a", 45), ("B4", "b", 90), ("B6", "c", 255), ("B8", "d", 45), ("B10", "e", 45),
+    ):  # fmt: skip
+        ws[coordinate] = value
+        ws[coordinate].alignment = Alignment(textRotation=rotation)
+        if coordinate != "B8":
+            ws[coordinate].border = boxed
+    ws.merge_cells("B10:C10")
+    rendered = sheetpeek.read(save(wb, tmp_path / "boxed.xlsx")).layout("excel")
     found = sheetpeek.notices(rendered, "html")
     (slanted,) = [n for n in found if n.code == "border.slanted"]
     assert (slanted.count, slanted.outcome) == (1, "approximated")
+    assert (slanted.cells[0].min_row, slanted.cells[0].min_col) == (10, 2)
     assert not [n for n in found if n.code in ("text.rotation", "text.stacked")]  # drawn
 
 
@@ -388,5 +392,43 @@ def test_html_draws_the_slanted_box_as_four_lines(tmp_path):
     assert right == (71.5, 93.5, 164.5, 0.5)
     assert top[1] == top[3] == 0.5
     assert bottom[1] == bottom[3] == 93.5
-    notice = next(n for n in sheetpeek.notices(rendered, "html") if n.code == "border.slanted")
-    assert notice.outcome == "approximated"  # the text is not yet placed between the sides
+    assert not [n for n in sheetpeek.notices(rendered, "html") if n.code == "border.slanted"]
+
+
+def _slant_text_captures():
+    """Captured slant cases with a side drawn: (name, row height, ink edges)."""
+    from pathlib import Path
+
+    path = Path(__file__).parent / "captures" / "rotation.tsv"
+    lines = [line.split("\t") for line in path.read_text(encoding="utf-8").splitlines()]
+    header = next(line for line in lines if line[0] == "group")
+    rows = [dict(zip(header, line, strict=False)) for line in lines if line[0] == "slant"]
+    return [
+        (row["name"], float(row["row_height"]), float(row["ink_left"]), float(row["ink_right"]))
+        for row in rows
+        if "fill" not in row["name"] and not row["name"].startswith(("90 ", "-90 "))
+    ]
+
+
+@pytest.mark.parametrize(("name", "height", "left", "right"), _slant_text_captures())
+def test_text_between_slanted_sides_sits_where_excel_draws_it(tmp_path, name, height, left, right):
+    # Captured (rotation suite, slant, 46 cases from 5 to 85 and -15 to -75 degrees): the ink's
+    # left and right edges lie within 3.7 pt of the model's, measured across the line, where the
+    # unbordered placement is within 2.4 pt at the same angles. Not compared: the right edge at
+    # 20 pt (xlformat measures the text narrower than Excel), and in a 30 pt row at 45 degrees,
+    # where the row clips the text.
+    from capture import rotation
+
+    (case,) = [c for c in rotation.cases() + rotation.more_cases() if c.name == name]
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    rotation.fill(ws, [case])
+    ws.row_dimensions[4].height = height  # fitted heights are tested on their own
+    rendered = sheetpeek.read(save(wb, tmp_path / "slant.xlsx")).layout("excel")
+    column = next(c for c in rendered.columns if c.letter == "E")
+    (run,) = [r for r in _row(rendered, 4).runs if r.source == (4, 5)]
+    lo, hi = _ink(run, column)
+    across = abs(math.sin(math.radians(run.angle)))
+    assert abs(lo - left) * across <= 3.7, (name, lo, left)
+    if case.size == 11.0 and height != 30.0:
+        assert abs(hi - right) * across <= 3.7, (name, hi, right)

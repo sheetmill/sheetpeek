@@ -58,6 +58,9 @@ _SPREAD = ("justify", "distributed")
 _WORD = re.compile(r"\S+")
 ROTATED_INSETS = (3.0, 4.0)
 """Left and right insets of angled text's box, fitted to the rotation capture (§4.17)."""
+SLANT_INSETS = (2.0, 1.5)
+"""How far inside the slanted sides angled text's ascent and descent lie, across the line,
+fitted to the rotation capture (§4.17)."""
 ROTATED_EXTRA = 7.0
 """Points a row fitted to angled text adds to its footprint, fitted the same way (§4.17)."""
 STACKED_EXTRA = 2.0
@@ -480,6 +483,42 @@ class _Points:
             )
         return runs, low, high, n
 
+    @staticmethod
+    def _between_slanted(
+        x0: float,
+        x1: float,
+        rise: float,
+        align: str,
+        angle: int,
+        above: float,
+        below: float,
+        indent: float,
+    ) -> float:
+        """The baseline's start x for angled text between its slanted sides (§4.17).
+
+        The sides run along the baseline, so Excel lays the line out as in an upright cell turned
+        with it: the side its ascent faces is that cell's top, the other its bottom. Text aligned
+        to the ascent side puts its ascent ``SLANT_INSETS[0]`` inside it, text aligned to the
+        other side its descent ``SLANT_INSETS[1]`` inside that one, centered text its line box
+        midway; an indent moves the text horizontally. The baseline's height, ``rise`` from the
+        cell's bottom edge (negative above it), is placed as without borders, and the x follows
+        from its distance to the side.
+        """
+        sin, cos = math.sin(math.radians(angle)), math.cos(math.radians(angle))
+        ascent_side = x0 if angle > 0 else x1
+        across = abs(sin)
+        apart = (x1 - x0) * across  # the sides' distance, across the line
+        near = "left" if angle > 0 else "right"  # the alignment toward the ascent side
+        if align == "center":
+            depth = apart / 2 + (above - below) / 2
+        elif align == near:
+            depth = SLANT_INSETS[0] + above + indent * across
+        else:
+            depth = apart - SLANT_INSETS[1] - below - indent * across
+        # depth: the baseline's distance below the ascent side, across the line; that side
+        # passes through the cell's bottom corner on its own side.
+        return ascent_side + (depth - rise * cos) / sin
+
     def _one_line(self, origin: _Origin) -> tuple[Text, tuple[TextSpan, ...] | None]:
         """The origin's text as one line: line breaks are not drawn, and wrapping is reported."""
         cell, shown = origin.cell, origin.shown
@@ -543,6 +582,8 @@ class _Points:
             y = top + math.floor((bottom - top - (y_hi - y_lo)) / 2) - y_lo
         else:  # bottom; justify as bottom (unverified); a box taller than the row (captured)
             y = bottom - y_hi
+        if len(origin.rows) == len(origin.cols) == 1 and slants(style):
+            x = self._between_slanted(x0, x1, y - bottom, align, angle, above, below, indent)
         shift = 0.0 if spans else vert_shift(cell.font)
         x, y = x + shift * sin, y + shift * cos  # down in the turned frame
         low, high = first, last
