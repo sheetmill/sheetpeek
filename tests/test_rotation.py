@@ -61,6 +61,27 @@ def _ink(run, column):
     return min(xs) - column.x_pt, max(xs) - column.x_pt - column.width_pt
 
 
+# The top of each letter of the captured texts, in em: Calibri's glyph bounds (Calibri.ttf, as
+# Excel for Mac ships it). The first and last letter's tops bound a line's turned ink.
+_TOPS = {
+    ",": 0.109, "R": 0.632, "a": 0.474, "d": 0.678, "e": 0.474, "f": 0.684, "h": 0.68,
+    "i": 0.648, "l": 0.68, "m": 0.474, "n": 0.474, "o": 0.474, "r": 0.474, "s": 0.474,
+    "t": 0.584, "w": 0.467, "x": 0.467,
+}  # fmt: skip
+
+
+def _glyph_ink(run, column):
+    """``_ink`` with the first and last letters' own heights, where ``_ink`` takes 7.5 pt."""
+    angle = math.radians(run.angle)
+    size = run.font.size * run.scale
+    xs = [
+        run.x + s * math.cos(angle) - t * math.sin(angle)
+        for s, letter in ((0.8, run.text[0]), (run.width - 0.8, run.text[-1]))
+        for t in (0.0, _TOPS.get(letter, 0.68) * size)
+    ]
+    return min(xs) - column.x_pt, max(xs) - column.x_pt - column.width_pt
+
+
 @pytest.fixture(scope="module")
 def captured(tmp_path_factory):
     cells = []
@@ -417,13 +438,26 @@ def _slant_text_captures():
     ]
 
 
+SLANT_BOUND = 1.5
+"""Points, across the line, within which each slanted case's ink edges lie (median 0.6, 90th
+percentile 1.1 over the 46 cases' 88 edges), but for ``SLANT_OUTLIERS``."""
+SLANT_OUTLIERS = {
+    # Top alignment between slanted sides, one case: the height is placed as without borders,
+    # where this case is within 0.6 pt; Excel puts the text 2.2 to 2.5 pt further across.
+    "45 lrtb vertical top": 2.75,
+    # The unbordered placement is already 1 pt off at -60 degrees; the right edge is 1.9.
+    "-60 lrtb": 2.25,
+    # The insets are fitted at 11 pt; at 20 pt the left edge lies 1.7 pt inside.
+    "45 lrtb 20": 2.0,
+}
+
+
 @pytest.mark.parametrize(("name", "height", "left", "right"), _slant_text_captures())
 def test_text_between_slanted_sides_sits_where_excel_draws_it(tmp_path, name, height, left, right):
     # Captured (rotation suite, slant, 46 cases from 5 to 85 and -15 to -75 degrees): the ink's
-    # left and right edges lie within 3.7 pt of the model's, measured across the line, where the
-    # unbordered placement is within 2.4 pt at the same angles. Not compared: the right edge at
-    # 20 pt (xlformat measures the text narrower than Excel), and in a 30 pt row at 45 degrees,
-    # where the row clips the text.
+    # edges, measured across the line, against the model's (the first and last letters' own
+    # heights). Not compared: the right edge at 20 pt (xlformat measures the text narrower than
+    # Excel), and in a 30 pt row at 45 degrees, where the row clips the text.
     from capture import rotation
 
     (case,) = [c for c in rotation.cases() + rotation.more_cases() if c.name == name]
@@ -434,11 +468,12 @@ def test_text_between_slanted_sides_sits_where_excel_draws_it(tmp_path, name, he
     rendered = sheetpeek.read(save(wb, tmp_path / "slant.xlsx")).layout("excel")
     column = next(c for c in rendered.columns if c.letter == "E")
     (run,) = [r for r in _row(rendered, 4).runs if r.source == (4, 5)]
-    lo, hi = _ink(run, column)
+    lo, hi = _glyph_ink(run, column)
     across = abs(math.sin(math.radians(run.angle)))
-    assert abs(lo - left) * across <= 3.7, (name, lo, left)
+    bound = SLANT_OUTLIERS.get(name, SLANT_BOUND)
+    assert abs(lo - left) * across <= bound, (name, lo, left)
     if case.size == 11.0 and height != 30.0:
-        assert abs(hi - right) * across <= 3.7, (name, hi, right)
+        assert abs(hi - right) * across <= bound, (name, hi, right)
 
 
 def _turned_captures():
@@ -461,11 +496,19 @@ def _turned_captures():
     ]
 
 
+TURNED_BOUND = 1.5
+"""Points within which each wrapped angled case's ink edges lie (median 0.4 over 24 edges)."""
+TURNED_OUTLIERS = {
+    # The second line's end at a negative angle, one case: 1.7 pt.
+    "wrapped -45 height 60": 2.0,
+}
+
+
 @pytest.mark.parametrize(("name", "height", "left", "right"), _turned_captures())
 def test_wrapped_angled_text_sits_where_excel_draws_it(tmp_path, name, height, left, right):
     # Captured (rotation suite, turned; align and other at 45 degrees in 15 pt rows): lines as
     # long as fit between the row's top and bottom, a line apart toward the descent side, each
-    # placed in height on its own; the row is not fitted to them. Both ink edges within 2.5 pt.
+    # placed in height on its own; the row is not fitted to them. Ink edges within TURNED_BOUND.
     # In a 15 pt row each line holds one character and the text runs past the measured window
     # (Excel also gives a space its own line there, which sheetpeek drops), so only the left
     # edge is compared.
@@ -478,7 +521,8 @@ def test_wrapped_angled_text_sits_where_excel_draws_it(tmp_path, name, height, l
     column = next(c for c in rendered.columns if c.letter == "E")
     row = _row(rendered, 4)
     assert row.height_pt == height
-    edges = [_ink(run, column) for run in row.runs if run.source == (4, 5)]
-    assert abs(min(lo for lo, _ in edges) - left) <= 2.5, name
+    edges = [_glyph_ink(run, column) for run in row.runs if run.source == (4, 5)]
+    bound = TURNED_OUTLIERS.get(name, TURNED_BOUND)
+    assert abs(min(lo for lo, _ in edges) - left) <= bound, name
     if height > 15:
-        assert abs(max(hi for _, hi in edges) - right) <= 2.5, name
+        assert abs(max(hi for _, hi in edges) - right) <= bound, name

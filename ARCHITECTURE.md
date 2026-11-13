@@ -1188,7 +1188,7 @@ boxes match a rigid rotation of the upright box (captured: 45°, 58.5 × 57.5 pt
   `pitch / sin θ` apart across the row; the whole is placed across the cell as one box, or
   between slanted sides by its first line; the row is not fitted (captured, `turned`: 45° in
   30, 60 and 120 pt rows, 15°, 75°, −45° and 90° in 60 pt, justify, distributed and inside four
-  borders; both ink edges within 2.5 pt). Justified and distributed lines are not spread (their
+  borders; ink edges within 1.5 pt, median 0.4, but 1.7 at a second line's end at −45°). Justified and distributed lines are not spread (their
   ink matches plain wrap at 45°), and distributed is placed as left (captured at 45°). At 45°
   in a 15 pt row every line holds one character, about 21 pt apart; Excel also gives a space
   its own line there, which sheetpeek drops (a known deviation). Stacked text is still drawn on
@@ -1217,10 +1217,13 @@ toward the ascent side (left at positive angles, general included; right at nega
 its ascent 2 pt inside that side, measured across the line; text aligned toward the other side
 keeps its descent 1.5 pt inside it; centered text centers its line box between them; an indent
 moves the text horizontally, `6n` pt (`SLANT_INSETS`). How high the text sits is as without
-borders. None of row height, column width and length changes it. Against the capture, both ink
-edges lie within 3.7 pt across the line (the unbordered placement is within 2.4 at the same
-angles), the farthest at −60° and for top alignment at 45°; at 20 pt Excel's wider text
-(xlformat's tables, §4.17 upright cases) puts the far edge up to 4.7 pt further. Left at
+borders. None of row height, column width and length changes it. Against the capture, with each end
+letter's own height, the ink edges lie within 1.5 pt across the line (median 0.6) but for three
+cases: top alignment at 45° (2.5; the height is placed as without borders, which puts this case
+within 0.6 there, so Excel moves top-aligned text between slanted sides differently, one case,
+**unverified**), −60° (1.9; the unbordered placement is 1 pt off at that angle) and 20 pt (1.7;
+the insets are fitted at 11 pt). At 20 pt Excel's wider text (xlformat's tables, the `upright`
+cases) puts the far edge up to 4.7 pt further. Left at
 negative angles and right at positive ones are not captured at negative angles (the rule is
 taken as symmetric, **unverified**). The right side lies one column width right of the left side (the
 measured gaps, 56.5, 54.5 and 54 pt at 15°, 45° and 90° in a 53 pt column, are that width plus a
