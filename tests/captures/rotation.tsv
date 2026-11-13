@@ -104,3 +104,65 @@ height	stacked Stacked! 14	E110	255	154.0									orientation vertical	Stacked!
 height	stacked Abc 20	E112	255	80.0									orientation vertical	Abc
 height	stacked Stack 20	E114	255	132.0									orientation vertical	Stack
 height	stacked Stacked! 20	E116	255	210.0									orientation vertical	Stacked!
+slant	5 lrtb	E4	5	23.0	175.5	199.5	7.5	20	201	264.5	69.5	133.5	5	Rotated text here
+slant	30 lrtb	E6	30	55.0	28.5	45	9	51	71.5	126	24.5	79	30	Rotated text here
+slant	60 lrtb	E8	60	80.0	11.5	2	6.5	75	34.5	88.5	11.5	65.5	60	Rotated text here
+slant	75 lrtb	E10	75	84.0	7.5	-19.5	5.5	80.5	17	70.5	5.5	59.5	75	Rotated text here
+slant	85 lrtb	E12	85	84.0	6	-33.5	4	81	4.5	58.5	1.5	55.5	85	Rotated text here
+slant	-15 lrtb	E4	105	38.0	-78.5	-56.5	7	33.5	-111	-54.5	-38.5	18	-15	Rotated text here
+slant	-30 lrtb	E6	120	55.0	-44	-28.5	7	51	-72	-17.5	-25	29.5	-30	Rotated text here
+slant	-60 lrtb	E8	150	80.0	-3	-14	5.5	75	-34.5	19.5	-11.5	42.5	-60	Rotated text here
+slant	-75 lrtb	E10	165	84.0	18.5	-10	5.5	81.5	-16.5	37	-5.5	48.5	-75	Rotated text here
+slant	15 lrtb height 30	E12	15	30.0	57	79.5	1	25.5	85.5	142.5	28.5	85	15	Rotated text here
+slant	15 lrtb height 60	E4	15	60.0	57	79.5	31	55.5	170	226.5	56.5	113	15	Rotated text here
+slant	15 lrtb height 120	E6	15	120.0	57	79.5	91	115.5			112.5	169	15	Rotated text here
+slant	45 lrtb height 30	E8	45	30.0	17	-7.5	1	26.5	22.5	77	7.5	62	45	Rotated text here
+slant	45 lrtb height 60	E10	45	60.0	17	22.5	1	56.5	45	99.5	15	69.5	45	Rotated text here
+slant	45 lrtb height 120	E12	45	120.0	17	22.5	59	116.5	90	144.5	30	84.5	45	Rotated text here
+slant	-45 lrtb height 60	E4	135	60.0	-23.5	-19	1	56.5	-45.5	9	-15.5	39	-45	Rotated text here
+slant	15 lrtb short	E6	15	22.0	57	19.5	8	17.5	63.5	120	21	77.5	15	Rot
+slant	15 lrtb long	E8	15	55.0	57	145	7	50.5	154.5	211	52.5	109	15	Rotated text here, and more of it
+slant	45 lrtb short	E10	45	25.0	17	-21.5	8	21.5	19	73.5	6	60.5	45	Rot
+slant	45 lrtb long	E12	45	117.0	17	70.5	8	113.5	88	142.5	29	83.5	45	Rotated text here, and more of it
+slant	15 lrtb left	E4	15	38.0	57	79.5	9	33.5	108.5	165	36	92.5	15	Rotated text here
+slant	15 lrtb center	E6	15	38.0	53	75.5	9	33.5	108.5	165	36	92.5	15	Rotated text here
+slant	15 lrtb right	E8	15	38.0	45	67.5	9	33.5	108.5	165	36	92.5	15	Rotated text here
+slant	45 lrtb left	E10	45	69.0	17	22.5	8	65.5	52	106.5	17	71.5	45	Rotated text here
+slant	45 lrtb center	E12	45	69.0	30	35.5	8	65.5	52	106.5	17	71.5	45	Rotated text here
+slant	45 lrtb right	E4	45	69.0	44	49.5	8	65.5	52	106.5	17	71.5	45	Rotated text here
+slant	45 lrtb vertical top	E6	45	90.0	38	43.5	8	65.5	67.5	122	22.5	77	45	Rotated text here
+slant	45 lrtb vertical center	E8	45	90.0	28	33.5	18	75.5	67.5	122	22.5	77	45	Rotated text here
+slant	15 lrtb 20	E10	15	66.0	100.5	190.5	14	60	186.5	243	62	119	15	Rotated text here
+slant	45 lrtb 20	E12	45	128.0	28	85.5	13.5	121	96	150.5	32	86.5	45	Rotated text here
+slant	45 lrtb indent 2	E4	45	69.0	29	34.5	8	65.5	52	106.5	17	71.5	45	Rotated text here
+slant	45 l	E6	45	69.0	17	22.5	8	65.5	52	53.5	17	18.5	45	Rotated text here
+slant	45 b	E8	45	69.0	17	22.5	8	65.5					45	Rotated text here
+turned	wrapped 45 height 30	E10	45	30.0	6	33.5	9.5	26.5					45	Rotated text here
+turned	wrapped 45 height 60	E12	45	60.0	6	-4	14.5	56.5					45	Rotated text here
+turned	wrapped 45 height 120	E4	45	120.0	6	11.5	59	116.5					45	Rotated text here
+turned	wrapped 15 height 60	E6	15	60.0	5	27.5	31	55.5					15	Rotated text here
+turned	wrapped 75 height 60	E8	75	60.0	6.5	-14.5	18	56.5					75	Rotated text here
+turned	wrapped -45 height 60	E10	135	60.0	1.5	-9.5	12	56.5					-45	Rotated text here
+turned	wrapped 90 height 60	E12	90	60.0	23.5	-7	18	58					orientation upward	Rotated text here
+turned	wrapped 45 fitted	E4	45	15.0	6	190	3.5	11.5					45	Rotated text here
+turned	justify 45 height 60	E6	45	60.0	6	-4	14.5	56.5					45	Rotated text here
+turned	distributed 45 height 60	E8	45	60.0	6	-4	14.5	56.5					45	Rotated text here
+turned	wrapped 45 lrtb height 60	E10	45	60.0	17	7	14.5	56.5	45	99.5	15	69.5	45	Rotated text here
+upright	short 9	E12	0	15.0	3.5	-37.5	6	12					orientation horizontal	Rot
+upright	medium 9	E4	0	15.0	3.5	13	6	12					orientation horizontal	Rotated text here
+upright	long 9	E6	0	15.0	3.5	68.5	6	13					orientation horizontal	Rotated text here, and more of it
+upright	short 11	E8	0	15.0	4	-34.5	5	12					orientation horizontal	Rot
+upright	medium 11	E10	0	15.0	4	28	4.5	12					orientation horizontal	Rotated text here
+upright	long 11	E12	0	15.0	4	95.5	4.5	13.5					orientation horizontal	Rotated text here, and more of it
+upright	short 14	E4	0	19.0	4	-30.5	6	15					orientation horizontal	Rot
+upright	medium 14	E6	0	19.0	4	50.5	5.5	15					orientation horizontal	Rotated text here
+upright	long 14	E8	0	19.0	4	135.5	5.5	17					orientation horizontal	Rotated text here, and more of it
+upright	short 20	E10	0	26.0	5.5	-21	8	21					orientation horizontal	Rot
+upright	medium 20	E12	0	26.0	5.5	98	7	21					orientation horizontal	Rotated text here
+upright	90 ink medium 11	E4	90	85.0	38.5	-7	5	82					orientation upward	Rotated text here
+upright	90 ink medium 14	E6	90	109.0	35.5	-8	6.5	106					orientation upward	Rotated text here
+upright	90 ink medium 20	E8	90	159.0	29.5	-9.5	9	154.5					orientation upward	Rotated text here
+slant	15 lrtb width 4	E4	15	38.0	57	108.5	9	33.5	108.5	136	36	64	15	Rotated text here
+slant	45 lrtb width 4	E6	45	69.0	17	51.5	8	65.5	52	77.5	17	42.5	45	Rotated text here
+slant	15 lrtb width 20	E4	15	38.0	57	12.5	9	33.5	108.5	232	36	159.5	15	Rotated text here
+slant	45 lrtb width 20	E6	45	69.0	17	-44.5	8	65.5	52	173.5	17	138.5	45	Rotated text here

@@ -286,13 +286,16 @@ def _slant_captures():
 def test_slanted_sides_lie_where_excel_draws_them(tmp_path, name, angle, height, captured):
     # Captured (rotation suite, slant): the dark run of each side at 25 % and 75 % of the row,
     # 1 / |sin| wide for a 1 pt line. The modeled line's center lies within 1.25 pt of the run's,
-    # measured across the line (15 degrees is the farthest, 1.04 pt).
+    # measured across the line (15 degrees is the farthest, 1.05 pt, over 5 to 85 and -15 to -75
+    # degrees, row heights 30 to 120 and columns of 4 to 20 characters).
     thin = Side("thin", color="FF000000")
-    sides = {"left": thin, "right": thin}
-    if name.endswith("lrtb"):
-        sides.update(top=thin, bottom=thin)
+    words = name.split()
+    letters = {"l": "left", "r": "right", "t": "top", "b": "bottom"}
+    sides = {letters[letter]: thin for letter in words[1]}
     wb = openpyxl.Workbook()
     ws = wb.active
+    if "width" in words:
+        ws.column_dimensions["E"].width = float(words[words.index("width") + 1])
     ws["E4"] = "Rotated text here"
     ws["E4"].alignment = Alignment(textRotation=_stored(angle))
     ws["E4"].border = Border(**sides)
@@ -308,10 +311,9 @@ def test_slanted_sides_lie_where_excel_draws_them(tmp_path, name, angle, height,
     width = next(c for c in rendered.columns if c.letter == "E").width_pt
     for k, share in enumerate((0.25, 0.75)):
         base = slant.shift_pt * (1 - share)
-        for model, start, end_side in (
-            (base, captured[2 * k], False),
-            (base + width, captured[2 * k + 1], True),
-        ):
+        # With the left side alone, the darkest run's end is that side's too.
+        far = (base + width, captured[2 * k + 1], True) if "right" in sides else None
+        for model, start, end_side in [(base, captured[2 * k], False), *([far] if far else [])]:
             center = start - 1 / (2 * sine) if end_side else start + 1 / (2 * sine)
             assert abs(model - center) * sine <= 1.25, (name, share, model, center)
 

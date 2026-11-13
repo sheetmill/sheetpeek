@@ -364,20 +364,27 @@ def write() -> None:
     from capture.screen.run import header, load
 
     read = _on_screen()[1]
-    records = []
+    records: list[dict[str, str]] = []
     first: dict[str, str] = {}
-    for name, chosen in _windows():
-        out = BUILD_DIR / name
-        if not (out / "formats.tsv").exists():
-            print(f"{name}: not captured yet, left out", file=sys.stderr)
-            continue
-        first = first or header(out)
-        (cap,) = load(out)
-        for cell, case in fill(openpyxl.Workbook().active, chosen):
-            records.append(_record(cap.rows, cell, case, _measure(cap, cell, case)))
+
+    def measured(windows: list[tuple[str, list[Case]]]) -> None:
+        nonlocal first
+        for name, chosen in windows:
+            out = BUILD_DIR / name
+            if not (out / "formats.tsv").exists():
+                print(f"{name}: not captured yet, left out", file=sys.stderr)
+                continue
+            first = first or header(out)
+            (cap,) = load(out)
+            for cell, case in fill(openpyxl.Workbook().active, chosen):
+                records.append(_record(cap.rows, cell, case, _measure(cap, cell, case)))
+
+    # The first set, its windows then its reads, keeps its rows; the second set follows.
+    measured(_windows(more=False))
     rows = _reads(BUILD_DIR / "heights")
     for cell, case in fill(openpyxl.Workbook().active, read):
         records.append(_record(rows, cell, case, {}))
+    measured(_windows(first=False))
     with open(OUTPUT, "w", encoding="utf-8") as out:
         for key, value in first.items():
             if key not in ("markers", "suite", "workbooks_open_after"):

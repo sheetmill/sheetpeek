@@ -1208,8 +1208,9 @@ The layout records each unmerged angled cell's own sides as `SlantedBorders` (`s
 `h·cot θ`), takes them out of the upright grid, where a neighbor's own side on a shared edge is
 still drawn (unverified), and keeps the columns the box reaches, as for spill, within the columns
 the layout adds for spill; HTML draws the four sides as lines in one SVG, clipped to the sheet.
-Against the capture, each side's center lies within 1.04 pt of Excel's, measured across the line
-(at 15°; within 0.7 at ±45°). A merge's borders stay upright (unverified). The text is still placed
+Against the capture, each side's center lies within 1.05 pt of Excel's, measured across the line
+(at 15°; 39 cases from 5° to 85° and −15° to −75°, rows of 15 to 120 pt, columns of 4 to 20
+characters, every alignment and size captured). A merge's borders stay upright (unverified). The text is still placed
 as without borders, so every angled cell with a side border is reported (`border.slanted`,
 approximated).
 
