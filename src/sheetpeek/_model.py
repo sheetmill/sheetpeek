@@ -16,6 +16,7 @@ from xlformat import ExcelError
 from sheetpeek._fill_border_model import Borders, Fill
 from sheetpeek._hyperlink import Hyperlink
 from sheetpeek._outline_model import Outline
+from sheetpeek._view_model import SheetView
 
 if TYPE_CHECKING:
     from sheetpeek._notices import Notice
@@ -320,6 +321,18 @@ class Sheet:
     defaultGridColor="0" colorId>``), or ``None`` for Excel's automatic gray (§4.14)."""
     outline: Outline | None = None
     """The outline's settings when any row or column has an outline level, else ``None``."""
+    view: SheetView = field(default_factory=SheetView)
+    """The first sheet view's zoom, zero display and frozen panes (§4.18)."""
+    print_areas: tuple[CellRange, ...] = ()
+    """The print area's ranges in file order (``_xlnm.Print_Area``); Excel's Normal view does
+    not show them (§4.18)."""
+    print_area_problem: str | None = None
+    """Why some or all of a defined print area could not be used (``#REF!``, a formula, another
+    sheet), else ``None``."""
+    row_breaks: tuple[int, ...] = ()
+    """Rows a manual page break falls below."""
+    column_breaks: tuple[int, ...] = ()
+    """Columns a manual page break falls right of."""
     notices: tuple[Notice, ...] = field(default=())
     """What the file uses that sheetpeek does not read yet (:class:`~sheetpeek.Notice`)."""
     max_cells: int | None = field(default=None, repr=False, compare=False)

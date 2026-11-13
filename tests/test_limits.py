@@ -358,6 +358,12 @@ ODD_FIELDS = {
         "<sheetData>",
         '<cols><col min="1" max="16384" outlineLevel="{}"/></cols><sheetData>',
     ),
+    "zoom": ('<sheetView workbookViewId="0">', '<sheetView workbookViewId="0" zoomScale="{}">'),
+    "frozen rows": (
+        '<sheetView workbookViewId="0">',
+        '<sheetView workbookViewId="0"><pane ySplit="{0}" xSplit="{0}" state="frozen"/>',
+    ),
+    "page break": ("</worksheet>", '<rowBreaks><brk id="{}" man="1"/></rowBreaks></worksheet>'),
 }
 
 

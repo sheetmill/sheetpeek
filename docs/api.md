@@ -85,6 +85,8 @@ Everything below is importable from `sheetpeek`.
    :members:
 .. autoclass:: sheetpeek.Gap
    :members:
+.. autoclass:: sheetpeek.SheetView
+   :members:
 .. autoclass:: sheetpeek.RenderedBorders
    :members:
 .. autoclass:: sheetpeek.Diagonal

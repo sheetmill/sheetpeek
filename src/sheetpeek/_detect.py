@@ -162,6 +162,8 @@ class WorkbookInfo:
     """Sheet name → ``worksheet``, ``chartsheet``, ``dialogsheet`` or ``macrosheet``."""
     print_areas: frozenset[str] = frozenset()
     print_titles: frozenset[str] = frozenset()
+    print_area_text: dict[str, str] = field(default_factory=dict)
+    """Sheet name → its ``_xlnm.Print_Area`` value, as written."""
     show_objects: str = "all"
     strings_part: str | None = None
 
@@ -182,12 +184,14 @@ def workbook_info(archive: zipfile.ZipFile) -> WorkbookInfo:
         )
     areas: set[str] = set()
     titles: set[str] = set()
+    texts: dict[str, str] = {}
     for defined in root.iter(f"{{{_MAIN}}}definedName"):
         local = defined.get("localSheetId", "")
         if not local.isdigit() or int(local) >= len(names) or not (defined.text or "").strip():
             continue
         if defined.get("name") == "_xlnm.Print_Area":
             areas.add(names[int(local)])
+            texts[names[int(local)]] = (defined.text or "").strip()
         elif defined.get("name") == "_xlnm.Print_Titles":
             titles.add(names[int(local)])
     properties = root.find(f"{{{_MAIN}}}workbookPr")
@@ -195,7 +199,7 @@ def workbook_info(archive: zipfile.ZipFile) -> WorkbookInfo:
     strings = next(
         (target for kind, target in rels.values() if kind.endswith("/sharedStrings")), None
     )
-    return WorkbookInfo(kinds, frozenset(areas), frozenset(titles), show_objects, strings)
+    return WorkbookInfo(kinds, frozenset(areas), frozenset(titles), texts, show_objects, strings)
 
 
 def book_notices(collector: Collector, info: WorkbookInfo) -> None:

@@ -61,6 +61,7 @@ from sheetpeek._rendered import (
 from sheetpeek._runs_model import TextSpan
 from sheetpeek._sheets import NotAWorksheetError, SheetInfo
 from sheetpeek._text_model import TextRule
+from sheetpeek._view_model import SheetView
 from sheetpeek.backends import Backend, notices, register_backend, render
 from sheetpeek.backends.html._workbook import render_workbook
 
@@ -114,6 +115,7 @@ __all__ = [
     "Sheet",
     "SheetInfo",
     "SheetState",
+    "SheetView",
     "Side",
     "SlantedBorders",
     "SpillEdge",

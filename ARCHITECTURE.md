@@ -654,8 +654,8 @@ What sheetpeek decides (not Excel's behavior):
   reported per output (`link.local`) unless the backend's `local_links=True`, which links them as
   the file writes them. Anything else (`javascript:`, `data:`, `vbscript:`, unparseable text) is
   drawn as plain text and reported once by the reader (`link.scheme`, `unsafe`), never per output,
-  and the refused target is never written into any output. Controls left in an allowed URL are percent-encoded,
-  so none reaches a terminal.
+  and the refused target is never written into any output. Controls left in an allowed URL are
+  percent-encoded, so none reaches a terminal.
 - **Places in the workbook.** `location` names a cell (`A1`, `Sheet!A1`, `'My sheet'!B2:C3`,
   first cell taken; sheet names compared ignoring case) or a defined name. A reference without a
   sheet is taken as the link's own sheet (unverified). A link to a cell that is laid out goes
@@ -1259,6 +1259,26 @@ Calibri nor Carlito installed, the captured cases' ink lies within 2.5 pt of Exc
 the larger differences are at the far end, where the fallback font's width differs (§7.3). **Other
 outputs** draw angled and stacked text horizontally (`text.rotation`, `text.stacked`, approximated
 in `rich` and text, omitted in Markdown and CSV, which show the full text).
+
+
+### 4.18 Sheet view and page layout
+
+**Read, not yet drawn.** The first `<sheetView>` gives `Sheet.view` (`SheetView`, `_scan_view.py`):
+the saved zoom (`zoomScale`, 100 when absent; a value outside Excel's 10 to 400 or not whole is
+100, unverified), `showZeros`, and a frozen pane's rows and columns (`ySplit`, `xSplit` of a pane
+whose state is `frozen` or `frozenSplit`) from the view's top-left cell; a `split` pane is kept
+as its state only. The sheet's defined name `Print_Area` (reserved, local to the sheet) gives
+`Sheet.print_areas`,
+its ranges in file order (`_page.py`): parts split at commas outside quoted sheet names, each
+`sheet!range` with `$A$1:$C$5`, `$A:$C`, `$1:$5` or one cell; a part with `#REF!`, on another
+sheet, or not a plain range (a formula) is left out and named in `Sheet.print_area_problem`.
+`rowBreaks` and `colBreaks` give `Sheet.row_breaks` and `Sheet.column_breaks`: a `brk id` counts
+boundaries from zero, so `id="10"` falls below row 10; only manual breaks (`man="1"`) are kept.
+
+**What Excel's Normal view draws** (captured on Excel 16.114 only, unverified on Microsoft 365):
+neither the print area nor page breaks; a frozen pane as a line one screen point wide, gray 155,
+over borders and fills, with the frozen rows and columns kept in place while the rest scrolls;
+with `showZeros="0"`, an empty cell where a value shows as zero, which still blocks spill.
 
 ## 5. openpyxl facts that constrain the design
 
@@ -1902,16 +1922,16 @@ attribute of `<dimension>`, `<mergeCell>` and `<autoFilter>` in the file format.
 sheetpeek already use openpyxl.
 
 **CLI.**
-- `sheetpeek view book.xlsx [--sheet NAME] [--ref A1:H40]
-  [--to rich|text|html|markdown|csv|tsv] [--column-headings] [--row-headings] [--hidden] [--list]
-  [--all-sheets] [--hidden-sheets] [--notices summary|full|none] [--strict] [--suppress CODE]
-  [--max-parts N] [--max-part-bytes N] [--max-total-bytes N] [--max-cells N]`. The default is
-  `rich` on a terminal and `text` when piped or when `rich` is not installed. `--all-sheets`
-  writes the workbook page (§4.15), HTML only, with `--hidden-sheets` adding hidden and very
-  hidden sheets. Notices (§3.7) go to standard error, one line per kind by default
-  (`--notices`); `--strict` exits with status 3 when anything is not shown, and `--suppress`
-  leaves a code and the codes under it out. Warnings go to standard error, and an unreadable or refused file, an unknown sheet or a bad range exits with
-  status 1 and one line of explanation.
+- `sheetpeek view book.xlsx [--sheet NAME] [--ref A1:H40] [--to rich|text|html|markdown|csv|tsv]
+  [--column-headings] [--row-headings] [--hidden] [--list] [--all-sheets] [--hidden-sheets]
+  [--notices summary|full|none] [--strict] [--suppress CODE] [--max-parts N] [--max-part-bytes N]
+  [--max-total-bytes N] [--max-cells N]`. The default is `rich` on a terminal and `text` when piped
+  or when `rich` is not installed. `--all-sheets` writes the workbook page (§4.15), HTML only, with
+  `--hidden-sheets` adding hidden and very hidden sheets. Notices (§3.7) go to standard error, one
+  line per kind by default (`--notices`); `--strict` exits with status 3 when anything is not shown,
+  and `--suppress` leaves a code and the codes under it out. Warnings go to standard error, and an
+  unreadable or refused file, an unknown sheet or a bad range exits with status 1 and one line of
+  explanation.
 - `sheetpeek serve DIR [--host 127.0.0.1] [--port 8000]`, with the same `--max-*` options and its
   own defaults (§5.5) (`_serve.py`): a standard-library `ThreadingHTTPServer`. `/` lists the
   `.xlsx` files under DIR, under the folder's name and not its path, `/view/<path>` shows a

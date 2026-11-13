@@ -58,10 +58,12 @@ from sheetpeek._package import (
     relationships,
     worksheet_parts,
 )
+from sheetpeek._page import page_breaks, print_areas
 from sheetpeek._runs_model import TextSpan
 from sheetpeek._scan_links import cell_links
 from sheetpeek._scan_links import report as report_links
 from sheetpeek._scan_outline import read_outline
+from sheetpeek._scan_view import sheet_view
 from sheetpeek._sheets import (
     ListedSheet,
     NotAWorksheetError,
@@ -344,6 +346,10 @@ class Book:
         except Exception as error:
             raise self._unreadable(error) from error
         self._report_structure(notes, structure, ref)
+        areas, area_problem = print_areas(self._info.print_area_text.get(name, ""), name)
+        if not self._info.print_area_text.get(name):
+            areas, area_problem = (), None
+        row_breaks, column_breaks = page_breaks(structure.children)
         rows, columns, outline = read_outline(
             structure, ref, _rows(structure, ref), _columns(structure, ref), notes
         )
@@ -370,6 +376,11 @@ class Book:
             show_headings=structure.show_headings,
             grid_color=grid_color(structure.grid_color_id, self._palette),
             outline=outline,
+            view=sheet_view(structure),
+            print_areas=areas,
+            print_area_problem=area_problem,
+            row_breaks=row_breaks,
+            column_breaks=column_breaks,
             notices=notes.notices(),
             max_cells=self._limits.max_cells,
         )

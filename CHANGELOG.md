@@ -145,6 +145,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `NotAWorksheetError`, a `ValueError`, raised for a chartsheet or a dialog sheet.
 - The notice `sheet.hidden`: hidden sheets the workbook page leaves out.
 
+- The sheet view and page layout are read, not yet drawn: `Sheet.view` (a `SheetView`: the saved
+  zoom, whether zeros show, a frozen pane's rows and columns), `Sheet.print_areas` (the print
+  area's ranges; `Sheet.print_area_problem` says why a part was left out: `#REF!`, a formula,
+  another sheet), and the manual page breaks, `Sheet.row_breaks` and `Sheet.column_breaks`.
+
 ### Changed
 - The HTML backend writes a page faster: 13 % on a plain 100,000-cell sheet
   (`bench/html_size.py`), with layout within 4 % of 0.2.0 on it; a sheet pays for the newer
