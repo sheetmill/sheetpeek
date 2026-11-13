@@ -28,7 +28,12 @@ the newer features: on the `features` sheet it shows what the same cells cost wi
 | plain | now | 11.1 MB | 0.60 s | 1.77 s | 0.29 s | 246 MB |
 | features | 0.2.0 | 21.6 MB | 0.54 s | 2.03 s | 0.50 s | 285 MB |
 | features | before the per-cell overhead was removed | 33.5 MB | 0.70 s | 3.08 s | 0.70 s | 361 MB |
-| features | now | 33.5 MB | 0.70 s | 2.74 s | 0.65 s | 362 MB |
+| features | before the wrap rule and turned wrapping | 33.5 MB | 0.70 s | 2.74 s | 0.65 s | 357 MB |
+| features | now | 33.8 MB | 0.69 s | 2.80 s | 0.65 s | 366 MB |
+
+The wrap rule (a word joins a line only if the space after it fits too) breaks the wrapped
+cells of one column of the `features` sheet into one more line: 4,999 more runs, 1 % more HTML,
+2 % more layout time and memory. The plain sheet is byte-identical, at the same times.
 
 On the plain sheet layout is 4 % slower than 0.2.0, about the runs' variation, and render is
 13 % faster. What
