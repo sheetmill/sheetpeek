@@ -51,7 +51,7 @@ def _rotation(value: Any) -> int:
     """Degrees counterclockwise: 0 to 90 as stored, 91 to 180 for -1 to -90 (§4.17).
 
     255 (stacked) is 0. openpyxl refuses a workbook with any other value (measured), so the
-    last branch only guards the reader move.
+    last branch only guards the move to the shared xlsx reader.
     """
     angle = int(value or 0)
     if 0 <= angle <= 90:

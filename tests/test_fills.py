@@ -1,7 +1,7 @@
 """Fills: pattern and gradient fills read, their one color, the census, and the HTML fill layer.
 
-The expected tiles, shares, colors and angles come from captures (Excel 16 for Mac,
-Office 2021), to be recaptured after the Microsoft 365 switch (ARCHITECTURE.md §4.12).
+The expected tiles, shares and colors come from captures on Excel 16.114 and 16.115 (the screen
+suite ``fills``), the gradient angles from captures on Excel 16.114 only (ARCHITECTURE.md §4.12).
 """
 
 import math
@@ -19,7 +19,7 @@ from tests.workbooks import rewrite, save
 
 STYLES = "xl/styles.xml"
 
-# The captured foreground shares, in percent (capture on Excel 16.114).
+# The captured foreground shares, in percent (capture on Excel 16.114, suite fills on 16.115).
 SHARES = {
     "mediumGray": 50,
     "darkGray": 75,
@@ -183,7 +183,8 @@ def test_a_gradient_without_stops_is_no_fill(tmp_path):
 
 
 def test_duplicate_stop_positions_refuse_the_workbook(tmp_path):
-    # openpyxl refuses the whole stylesheet; until the reader move this is a PackageError.
+    # openpyxl refuses the whole stylesheet; until sheetpeek reads through the shared xlsx reader
+    # this is a PackageError.
     path = filled(tmp_path, GradientFill(stop=("FFFFFFFF", "FF0000FF")))
     rewrite(path, STYLES, lambda t: t.replace('<stop position="1"', '<stop position="0"', 1))
     with pytest.raises(sheetpeek.PackageError, match="cannot read this workbook"):

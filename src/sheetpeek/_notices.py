@@ -231,7 +231,7 @@ for _code, _name, _level in (
     ("rows.hidden_shown", "hidden rows", "sheet"),
     ("columns.hidden_shown", "hidden columns", "sheet"),
     ("outline.cut", "outline groups cut by the range", "sheet"),
-    ("text.rotation_wrapped", "wrapped stacked text", "cells"),
+    ("text.stacked_wrapped", "wrapped stacked text", "cells"),
 ):
     _register(_code, _name, _level, "layout")
 

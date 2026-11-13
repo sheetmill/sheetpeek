@@ -1,7 +1,7 @@
 """Rich-text runs: read from shared strings, measured and drawn per run (ARCHITECTURE.md §4.16).
 
-The expected layouts are captures (Excel 16 for Mac, Office 2021, zoom 100), to be
-recaptured on Microsoft 365; each test says which. Excel writes runs in shared strings; openpyxl
+The expected layouts are captures (Excel 16.114 for Mac, Office 2021, zoom 100),
+unverified on Microsoft 365; each test says which. Excel writes runs in shared strings; openpyxl
 writes inline strings, whose runs its read-only reader drops, so the workbooks here move their
 runs into shared strings.
 """
@@ -70,7 +70,7 @@ def test_runs_are_read_with_their_fonts(tmp_path):
     cell = sheetpeek.read(path).cell(1, 1)
     assert cell.value == "plain bold!"
     red = ModelFont("Calibri", 16.0, color="FF0000")
-    # Excel 16.114 capture (R4): a run without properties takes the cell's 16 pt red; a run whose
+    # Capture on Excel 16.114: a run without properties takes the cell's 16 pt red; a run whose
     # properties hold only bold takes nothing from the cell, and is drawn 11 pt and black. The
     # Normal font's name and size where a run states none are unverified.
     assert cell.runs == (
@@ -167,7 +167,7 @@ def test_runs_of_inline_strings_are_reported_lost(tmp_path):
 
 
 def captured(tmp_path):
-    """The cells of the capture on Excel 16.114 of runs, in column C; D to H are empty."""
+    """The cells of the runs capture (Excel 16.114), in column C; D to H are empty."""
     head, tail = LONG.split("LARGE")
 
     def build(ws):
@@ -194,7 +194,7 @@ def excel(tmp_path):
 
 
 def test_a_larger_run_fits_the_row_as_a_cell_of_its_size(excel):
-    # Excel 16.114 capture (R1): one 20 pt run in an 11 pt cell gives a 26 pt row, the same as a
+    # Capture on Excel 16.114: one 20 pt run in an 11 pt cell gives a 26 pt row, the same as a
     # 20 pt cell, and the small runs sit on the large run's baseline.
     small, large = row_of(excel, 4), row_of(excel, 6)
     assert small.height_pt == large.height_pt == 26
@@ -204,7 +204,7 @@ def test_a_larger_run_fits_the_row_as_a_cell_of_its_size(excel):
 
 
 def test_widths_add_per_run_for_spill(excel):
-    # Excel 16.114 capture (R2): the bold 16 pt run makes the text reach 15 pt further (ink ends
+    # Capture on Excel 16.114: the bold 16 pt run makes the text reach 15 pt further (ink ends
     # 166 pt past C's right edge, against 151 pt), one column more; the row fits Calibri 16.
     ((spanned,), (plain,)) = runs_of(excel, 8), runs_of(excel, 10)
     assert spanned.width - plain.width == pytest.approx(15, abs=2)
@@ -215,7 +215,7 @@ def test_widths_add_per_run_for_spill(excel):
 
 
 def test_each_wrapped_line_takes_its_largest_runs_height(excel):
-    # Excel 16.114 capture (R3): "aaa" / "BBB" / "ccc ddd", the row 59 pt = 16 + 27 + 16.
+    # Capture on Excel 16.114: "aaa" / "BBB" / "ccc ddd", the row 59 pt = 16 + 27 + 16.
     row = row_of(excel, 12)
     assert [r.text for r in row.runs] == ["aaa", "BBB", "ccc ddd"]
     assert row.height_pt == 59
@@ -227,7 +227,7 @@ def test_each_wrapped_line_takes_its_largest_runs_height(excel):
 
 
 def test_superscript_and_subscript_runs(excel):
-    # Excel 16.114 capture (R5): rows of 17 pt, as whole cells in superscript or subscript.
+    # Capture on Excel 16.114: rows of 17 pt, as whole cells in superscript or subscript.
     assert row_of(excel, 16).height_pt == row_of(excel, 18).height_pt == 17
     (formula,) = runs_of(excel, 16)
     plain, raised = formula.spans

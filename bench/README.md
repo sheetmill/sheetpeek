@@ -18,29 +18,32 @@ one, never into the repository.
 
 `python bench/html_size.py DIR 5000 20 plain|features`, each run in a fresh process under
 `tests/watchdog.py`, best of three; Python 3.11, openpyxl 3.1.5, xlformat 0.3.0, Apple M4 Pro,
-macOS. Times vary by about 5 % between runs. 0.2.0 is the release from PyPI, which draws none of
-the newer features: on the `features` sheet it shows what the same cells cost without them.
+macOS. Times vary by about 5 % between runs and from one day to the next, and peak RSS by about
+5 MB, so rows compare only when measured together: each version below was measured beside the
+next. 0.2.0 is
+the release from PyPI, which draws none of the newer features: on the `features` sheet it shows
+what the same cells cost without them. `2421aed` is the first push after 0.2.0.
 
 | case | version | HTML | read | layout | render | peak RSS |
 |---|---|---|---|---|---|---|
 | plain | 0.2.0 | 11.1 MB | 0.55 s | 1.70 s | 0.33 s | 237 MB |
-| plain | before the per-cell overhead was removed | 11.1 MB | 0.60 s | 2.02 s | 0.44 s | 246 MB |
-| plain | now | 11.1 MB | 0.60 s | 1.77 s | 0.29 s | 246 MB |
+| plain | `2421aed` | 11.1 MB | 0.60 s | 1.76 s | 0.28 s | 248 MB |
+| plain | now | 11.1 MB | 0.60 s | 1.76 s | 0.28 s | 246 MB |
 | features | 0.2.0 | 21.6 MB | 0.54 s | 2.03 s | 0.50 s | 285 MB |
-| features | before the per-cell overhead was removed | 33.5 MB | 0.70 s | 3.08 s | 0.70 s | 361 MB |
-| features | before the wrap rule and turned wrapping | 33.5 MB | 0.70 s | 2.74 s | 0.65 s | 357 MB |
-| features | now | 33.8 MB | 0.69 s | 2.80 s | 0.65 s | 366 MB |
+| features | `2421aed` | 33.5 MB | 0.66 s | 2.60 s | 0.62 s | 356 MB |
+| features | now | 33.8 MB | 0.67 s | 2.69 s | 0.63 s | 358 MB |
 
-The wrap rule (a word joins a line only if the space after it fits too) breaks the wrapped
-cells of one column of the `features` sheet into one more line: 4,999 more runs, 1 % more HTML,
-2 % more layout time and memory. The plain sheet is byte-identical, at the same times.
+**Against 0.2.0**, on the plain sheet layout is 4 % slower, about the runs' variation, and render
+is 13 % faster, after removing per-cell overhead the newer features had added: a second
+measurement of every line's width, a `Font` hashed several times a cell (fonts, row heights and
+line metrics are now found by the identity of the style's font), the bidirectional check on
+ASCII text, the general baseline routine for a single bottom-aligned line, and in HTML the link
+and rule bookkeeping for cells and runs that have none. Read time grew with the structure scan,
+which now reads every cell's type and the rich-text runs (in `load_modes.py` on 100,000 × 20
+cells: 2.46 s with 0.2.0, 3.13 s now); the scan is replaced when sheetpeek moves to the shared
+xlsx reader.
 
-On the plain sheet layout is 4 % slower than 0.2.0, about the runs' variation, and render is
-13 % faster. What
-was removed: a second measurement of every line's width, a `Font` hashed several times a cell
-(fonts, row heights and line metrics are now found by the identity of the style's font), the
-bidirectional check on ASCII text, the general baseline routine for a single bottom-aligned
-line, and in HTML the link and rule bookkeeping for cells and runs that have none. Read time
-grew with the structure scan, which now reads every cell's type and the rich-text runs (in
-`load_modes.py` on 100,000 × 20 cells: 2.46 s with 0.2.0, 3.13 s now); the scan is replaced
-when sheetpeek moves to the shared xlsx reader.
+**Against `2421aed`**, the plain sheet is byte-identical at the same times. On the `features`
+sheet the wrap rule (a word joins a line only if the space after it fits too) breaks the wrapped
+cells of one column into one more line: 4,999 more runs, 1 % more HTML, 3 % more layout time;
+peak memory is within the run-to-run spread.

@@ -102,8 +102,8 @@ def test_resolve_gives_only_colors():
     assert resolve("rgb", "FFABCDEF", 0.0, (), ()) == "ABCDEF"
 
 
-# Excel 16.114 capture (14 cells' own fills, read exactly; recaptured after the Microsoft 365
-# switch): files store a tint as a 16-bit fraction, and Excel draws the stored form as the round
+# Capture on Excel 16.114, unverified on Microsoft 365 (14 cells' own fills, read exactly): files
+# store a tint as a 16-bit fraction, and Excel draws the stored form as the round
 # tint it stands for.
 STORED_TINTS = [
     (0.59999389629810485, 0.6),

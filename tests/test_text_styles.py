@@ -2,8 +2,8 @@
 justify and distributed, horizontal distributed with indent, and reading order (ARCHITECTURE.md
 §4.13).
 
-The expected values are captures (Excel 16 for Mac, Office 2021, zoom 100), to be
-recaptured on Microsoft 365; each test says which.
+The expected values are captures (Excel 16.114, zoom 100), confirmed on Excel
+16.115 by the screen suite ``text_style``; each test says which.
 """
 
 import io
@@ -89,7 +89,7 @@ def test_a_reading_order_no_interface_writes_reads_as_context(tmp_path, value):
     assert runs_of(rendered, 1)[0].direction == "rtl"
 
 
-# Superscript and subscript (capture on Excel 16.114).
+# Superscript and subscript (capture on Excel 16.114, suite text_style on 16.115).
 
 
 def test_superscript_and_subscript_are_two_thirds_raised_and_lowered(tmp_path):
@@ -143,7 +143,7 @@ def test_a_tiny_superscript_never_lowers_a_row(tmp_path):
     assert row_extras([font]) == [(font, 0)]
 
 
-# Underlines and strikethrough (capture on Excel 16.114).
+# Underlines and strikethrough (capture on Excel 16.114, suite text_style on 16.115).
 
 
 def test_underline_offsets(tmp_path):
@@ -233,7 +233,7 @@ def test_superscript_is_drawn_smaller_in_html(tmp_path):
     assert "font:7.333pt 'sheetpeek-calibri'" in html(lay_out(tmp_path, build))
 
 
-# Shrink to fit (capture on Excel 16.114).
+# Shrink to fit (capture on Excel 16.114, suite text_style on 16.115).
 
 CAPTURED_STEPS = {
     **dict.fromkeys(range(4, 7), 7),
@@ -328,7 +328,7 @@ def test_characters_mode_clips_shrunk_text_and_keeps_hashes(tmp_path):
     assert [n.outcome for n in found if n.code == "text.shrink"] == ["approximated"]
 
 
-# Vertical justify and distributed (capture on Excel 16.114).
+# Vertical justify and distributed (capture on Excel 16.114, suite text_style on 16.115).
 
 
 @pytest.mark.parametrize(("v_align", "baseline"), [("justify", 11), ("distributed", 33)])
@@ -376,7 +376,7 @@ def test_characters_mode_spreads_in_whole_lines(tmp_path):
     assert [line.strip() for line in rendered.cell(1, 4).lines] == ["y", "", "", ""]
 
 
-# Horizontal distributed and indent (capture on Excel 16.114).
+# Horizontal distributed and indent (capture on Excel 16.114, suite text_style on 16.115).
 
 
 def test_distributed_indent_moves_both_ends(tmp_path):
@@ -405,7 +405,7 @@ def test_right_indent_goes_on_the_side_general_resolves_to(tmp_path):
     assert text.x + text.width == 106 - 2 - 6
 
 
-# Reading order (capture on Excel 16.114).
+# Reading order (capture on Excel 16.114, suite text_style on 16.115).
 
 
 def test_general_right_to_left_text_aligns_right_whatever_the_order(tmp_path):

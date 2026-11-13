@@ -49,6 +49,10 @@ True
   The scheme is never read from the viewer's system.
 - `new_tab=True` opens links to web pages and e-mail addresses in a new tab
   (`target="_blank"`). It is off by default.
+- `local_links=True` also links local targets (`file:` URLs, relative, UNC and drive-letter
+  paths), which Excel follows; off by default (see "Links" below).
+- `notices=True` adds, after the sheet, a collapsed list of what the page does not show; off by
+  default.
 - `buttons="static"` (the default) or `"none"`: whether to draw Excel's buttons, which do nothing
   on a static page. For now this is the outline of grouped rows and columns: a gutter before the
   row headings and above the column headings, with its bars, dots and − and + buttons, drawn at

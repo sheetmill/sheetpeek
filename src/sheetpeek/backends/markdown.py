@@ -41,8 +41,8 @@ class MarkdownBackend:
             of a cell's rich text.
         local_links: Also link ``file:`` URLs and relative, UNC and drive-letter paths, which
             Excel follows. Off by default: such links point into the viewer's own files, they
-            reveal the paths the workbook names, and a target starting with ``//`` resolves to a
-            network host when a page is served, as an ``http`` link would.
+            reveal the paths the workbook names, and a target starting with ``//`` names a
+            network host.
     """
 
     name = "markdown"

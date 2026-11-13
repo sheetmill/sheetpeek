@@ -189,8 +189,9 @@ def _turned_height(grid: _Grid, cell: Any, p: int, fonts: _Fonts) -> float:
     """The row height Excel fits to angled or stacked text (§4.17), at least the font's.
 
     Angled: the text's width times the sine of its angle, its size times the cosine, and
-    ``ROTATED_EXTRA``, to the nearest point (unverified beyond Calibri 11 at 15, 45 and 90
-    degrees); wrapped, justified or distributed angled text leaves the row as it is. Stacked: a
+    ``ROTATED_EXTRA``, to the nearest point (captured over three lengths at 15, 45, 75 and 90
+    degrees and 9, 11, 14 and 20 pt; at 14 and 20 pt Excel measures text wider than xlformat's
+    tables); wrapped, justified or distributed angled text leaves the row as it is. Stacked: a
     font line a character and ``STACKED_EXTRA``.
     """
     shown = grid.show(cell, [p])
@@ -532,7 +533,7 @@ class _Points:
         )
         if wraps and self.notes is not None:
             self.notes.add(
-                "text.rotation_wrapped",
+                "text.stacked_wrapped",
                 "approximated",
                 "not_implemented",
                 row=cell.row,
@@ -548,10 +549,10 @@ class _Points:
     def place_turned(self, origin: _Origin) -> tuple[list[TextRun], int, int, int]:
         """Angled text: lines turned about their baselines' starts, placed (§4.17).
 
-        A line's box, from its descent to its ascent and along its width, turned, is placed in
-        the cell by its upright bounding box: general text by its angle's sign, left for 0 to 89
-        degrees and -90, right for -1 to -89 and 90 (captured at 15, 45, -45, 90 and -90; the
-        switch between is unverified); bottom, top or center by the vertical alignment. A box
+        A line's box, from its descent to its ascent and along its width, turned, is placed in the
+        cell by its upright bounding box: general text by its angle's sign, left for 1 to 89 degrees
+        and -90, right for -1 to -89 and 90 (captured at 15 to 89 degrees, their negatives, 90 and
+        -90: the switch is exactly at ±90); bottom, top or center by the vertical alignment. A box
         taller than its row stays bottom-aligned and is clipped at the row (captured).
 
         Wrapped text breaks into lines as long as fit between the row's top and bottom, as a

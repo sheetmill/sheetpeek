@@ -1,9 +1,9 @@
 """Pattern and gradient fills: a layer of boxes under the text, in sheet coordinates.
 
-A solid fill is the cell's own background (``_table.py``). A pattern or a gradient is a box in
-this layer, written before the table's text, so text lies over it: the cell and its far
-gridlines, ``[x, x + width + 1)``, unless the neighbor to the right or below has a fill of its
-own, which Excel paints over that gridline (``ARCHITECTURE.md`` §4.12, captures on Excel 16.114).
+A solid fill is the cell's own background (``_table.py``). A pattern or a gradient is a box in this
+layer, written before the table's text, so text lies over it: the cell and its far gridlines, ``[x,
+x + width + 1)``, unless the neighbor to the right or below has a fill of its own, which Excel
+paints over that gridline (``ARCHITECTURE.md`` §4.12, captures on Excel 16.114 and 16.115).
 
 - **Patterns** are the captured tiles, one character a screen point and so a CSS pixel, as SVG
   images drawn with ``image-rendering: pixelated`` and anchored at the sheet's origin. Excel

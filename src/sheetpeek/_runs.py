@@ -1,8 +1,7 @@
 """Rich-text runs in the layout: a cell's text measured, broken and cut by its runs (§4.16).
 
-Every number here rests on captures (Excel 16 for Mac, Office 2021), unverified until
-recaptured on Microsoft 365: widths add per run, and each line of text takes the height of its
-largest run.
+Every number here rests on captures on Excel 16.114 only, unverified on Microsoft 365: widths add
+per run, and each line of text takes the height of its largest run.
 """
 
 from __future__ import annotations
@@ -136,7 +135,7 @@ def wrap(text: str, budget: float, width: Callable[[int, int], float]) -> list[t
     ``width(start, end)`` measures a part of the text. Explicit line breaks are kept; a word
     wider than the budget is broken between characters. A word joins a line only if the line
     fits with the space after the word, when one follows: Excel keeps that space on the line
-    (captured, ``text_style`` groups ``wrap`` and ``lone``, ``ARCHITECTURE.md`` §4.13). A space
+    (captured, ``text_style`` groups ``wrap`` and ``lone``, ``ARCHITECTURE.md`` §4.7). A space
     at a break is not drawn, and neither are spaces that would start a line.
     """
     lines: list[tuple[int, int]] = []

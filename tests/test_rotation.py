@@ -105,7 +105,8 @@ def test_text_rotation_is_read_as_an_angle(tmp_path, stored, rotation, stacked):
 
 @pytest.mark.parametrize("value", [-1, 181, 254, 256, 1000])
 def test_a_rotation_outside_the_standard_is_upright(value):
-    # openpyxl refuses such a workbook (tests/test_limits.py); this guards the reader move.
+    # openpyxl refuses such a workbook (tests/test_limits.py); this guards the move to the shared
+    # xlsx reader.
     assert _rotation(value) == 0
 
 
@@ -185,7 +186,7 @@ def test_wrapped_angled_text_breaks_at_line_feeds_and_stacked_text_is_reported(t
     # Wrapped angled text leaves its row as it is (captured): in 15 pt a line holds one character.
     assert _row(rendered, 6).height_pt == 15
     assert [run.text for run in _row(rendered, 6).runs] == list("twolines")
-    (notice,) = [n for n in rendered.notices if n.code == "text.rotation_wrapped"]
+    (notice,) = [n for n in rendered.notices if n.code == "text.stacked_wrapped"]
     assert (notice.outcome, notice.count) == ("approximated", 1)  # the stacked cell
 
 

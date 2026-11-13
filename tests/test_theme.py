@@ -1,7 +1,7 @@
 """Theme fonts, the workbook palette, the grid color and the headings (ARCHITECTURE.md §4.14).
 
-Expected values come from captures (Excel 16.114.4 for Mac, dark appearance), to be
-recaptured on Microsoft 365; the light heading colors were measured on Microsoft 365.
+Expected values come from captures (Excel 16.114.4 for Mac, dark appearance), unverified
+on Microsoft 365; the light heading colors were measured on Microsoft 365.
 """
 
 import io

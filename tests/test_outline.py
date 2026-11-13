@@ -1,7 +1,7 @@
 """Outlines: levels and settings read, groups and symbols laid out, the gutter in each output.
 
 The expected symbols and sizes come from captures (Excel 16 for Mac, Office 2021,
-dark appearance), to be recaptured after the Microsoft 365 switch (ARCHITECTURE.md §4.11).
+dark appearance), unverified on Microsoft 365 (ARCHITECTURE.md §4.11).
 """
 
 import re

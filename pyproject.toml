@@ -74,18 +74,18 @@ packages = ["src/sheetpeek"]
 # Source, tests (with the small workbooks under tests/files), the capture tooling, the
 # documentation sources and the project documents. Never capture workbooks or build output.
 include = [
-  "src/sheetpeek",
-  "tests",
-  "capture",
-  "tools",
-  "docs",
-  "README.md",
-  "CHANGELOG.md",
-  "ARCHITECTURE.md",
-  "CAPTURING.md",
-  "CONTRIBUTING.md",
-  "LICENSE",
-  "pagefind.yml",
+  "/src/sheetpeek",
+  "/tests",
+  "/capture",
+  "/tools",
+  "/docs",
+  "/README.md",
+  "/CHANGELOG.md",
+  "/ARCHITECTURE.md",
+  "/CAPTURING.md",
+  "/CONTRIBUTING.md",
+  "/LICENSE",
+  "/pagefind.yml",
 ]
 exclude = ["capture/build", "docs/_build", "capture/**/*.xlsx", "**/__pycache__"]
 

@@ -1,7 +1,7 @@
 """Borders: sides read, conflicts resolved in the layout, and the HTML border layer.
 
-The expected order, ties, merges, spill and line geometry come from captures (Excel 16
-for Mac, Office 2021), to be recaptured after the Microsoft 365 switch (ARCHITECTURE.md §4.12).
+The line geometry comes from captures on Excel 16.114 and 16.115 (the screen suite ``borders``);
+the order, ties, merges and spill from captures on Excel 16.114 only (ARCHITECTURE.md §4.12).
 A default column here is 71 or 70 px wide (53 pt) and a row 20 px (15 pt).
 """
 

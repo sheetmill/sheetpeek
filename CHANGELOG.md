@@ -72,7 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   drops the vertical sides that spilled text crosses. `slantDashDot` is drawn as
   `mediumDashDot`, and reported.
 - `CellStyle.fill_spec` (a `Pattern` or a `Gradient`) and `CellStyle.borders` (a `Borders` of
-  `Side`s), and `RenderedSheet.extra["borders"]`, a `RenderedBorders` of the resolved lines in
+  `Side`s), and `RenderedSheet.borders`, a `RenderedBorders` of the resolved lines in
   `excel` mode. New public types: `Pattern`, `Gradient`, `Fill`, `PatternKind`, `Borders`, `Side`,
   `BorderStyle`, `RenderedBorders`, `Diagonal`.
 - Census codes `fill.pattern`, `fill.gradient`, `border`, `border.diagonal` and
@@ -126,7 +126,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   draws one character a line, centered. `rich`, plain
   text, Markdown and CSV draw both horizontally and report them. Wrapped angled text wraps along
   the turned direction, as Excel draws it, and leaves its row as it is; wrapped stacked text is
-  drawn on one line and reported (`text.rotation_wrapped`). The side borders of an angled cell slant with
+  drawn on one line and reported (`text.stacked_wrapped`). The side borders of an angled cell slant with
   the text into a parallelogram and the text sits between them, as Excel draws them
   (`SlantedBorders`, `RenderedBorders.slanted`); a merge's borders stay upright and its text is
   placed as without borders, reported (`border.slanted`).

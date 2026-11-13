@@ -107,8 +107,8 @@ def nav(markup):
 def test_sheets_list_kind_state_and_tab_color(tabs):
     with sheetpeek.open(tabs) as book:
         found = [(s.name, s.kind, s.state, s.tab_color) for s in book.sheets]
-    # Theme accent1 of the default theme is 4F81BD and indexed 12 is 0000FF, as the Excel 16.114
-    # capture read them on the tabs; auto draws an uncolored tab (capture on Excel 16.114).
+    # Theme accent1 of the default theme is 4F81BD and indexed 12 is 0000FF, as the capture read
+    # them on the tabs; auto draws an uncolored tab (capture on Excel 16.114).
     assert found == [
         ("Active", "worksheet", "visible", "FF0000"),
         ("Theme", "worksheet", "visible", "4F81BD"),

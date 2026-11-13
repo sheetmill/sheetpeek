@@ -1,8 +1,9 @@
 """Fills and borders: what a cell's ``fillId`` and ``borderId`` resolve to, and Excel's rules.
 
-The rules are ``ARCHITECTURE.md`` §4.12, from captures (Excel 16 for Mac, Office
-2021), unverified until recaptured on Microsoft 365: the pattern tiles, the colors a pattern's
-automatic colors take, the conflict order of border styles, and the tie between two colors.
+The rules are ``ARCHITECTURE.md`` §4.12, from captures: the pattern tiles on Excel 16.114 and
+16.115 (the screen suite ``fills``); the colors a pattern's automatic colors take, the conflict
+order of border styles and the tie between two colors on Excel 16.114 only, unverified on
+Microsoft 365.
 """
 
 from __future__ import annotations
@@ -165,8 +166,8 @@ class Gradient:
     def color_at(self, t: float) -> str:
         """The color at ``t`` from 0 to 1 along the gradient.
 
-        Past the last stop the last color holds. Before a first stop placed after 0 the color
-        runs from the last stop's color at 0 to the first stop's (one capture on Excel 16.114,
+        Past the last stop the last color holds. Before a first stop placed after 0 the color runs
+        from the last stop's color at 0 to the first stop's (one capture on Excel 16.114,
         unverified as a general rule).
         """
         stops = self.stops

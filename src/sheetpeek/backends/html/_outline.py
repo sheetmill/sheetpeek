@@ -3,8 +3,8 @@
 The gutter is cells of the table: a column before the row headings and a row above the column
 headings, each cell holding absolutely positioned segments, so it scrolls with the table. Its
 sizes are screen-fixed: one screen point of Excel is one CSS pixel at any page scale, as Excel
-keeps them at any zoom (``ARCHITECTURE.md`` §4.11). Captures on Excel 16.114, to be recaptured after
-the move to Microsoft 365. The column gutter is the row gutter's geometry transposed.
+keeps them at any zoom (``ARCHITECTURE.md`` §4.11). Captures on Excel 16.114
+only, unverified on Microsoft 365. The column gutter is the row gutter's geometry transposed.
 """
 
 from __future__ import annotations
