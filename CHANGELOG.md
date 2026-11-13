@@ -124,8 +124,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   spilled into empty neighbors in the direction it runs, clipped at a custom-height row, with
   fitted rows grown to it; an angled value shows in full, never `#` or shortened. Stacked text
   draws one character a line, centered. `rich`, plain
-  text, Markdown and CSV draw both horizontally and report them. Wrapped angled text is drawn on
-  one line and reported (`text.rotation_wrapped`). The side borders of an angled cell slant with
+  text, Markdown and CSV draw both horizontally and report them. Wrapped angled text wraps along
+  the turned direction, as Excel draws it, and leaves its row as it is; wrapped stacked text is
+  drawn on one line and reported (`text.rotation_wrapped`). The side borders of an angled cell slant with
   the text into a parallelogram and the text sits between them, as Excel draws them
   (`SlantedBorders`, `RenderedBorders.slanted`); a merge's borders stay upright and its text is
   placed as without borders, reported (`border.slanted`).

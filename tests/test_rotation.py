@@ -152,13 +152,20 @@ def test_stacked_text_draws_a_character_a_line(tmp_path):
         assert center == pytest.approx(column.width_pt / 2, abs=1.0)
 
 
-def test_a_wrapped_angled_cell_is_drawn_on_one_line_and_reported(tmp_path):
-    path = _book(tmp_path, [("B2", "two\nlines", Alignment(textRotation=45, wrap_text=True), {})])
-    rendered = sheetpeek.read(path).layout("excel")
-    (run,) = _row(rendered, 2).runs
-    assert run.text == "twolines"
+def test_wrapped_angled_text_breaks_at_line_feeds_and_stacked_text_is_reported(tmp_path):
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    for coordinate, rotation in (("B2", 45), ("B4", 255), ("B6", 45)):
+        ws[coordinate] = "two\nlines"
+        ws[coordinate].alignment = Alignment(textRotation=rotation, wrap_text=True)
+    ws.row_dimensions[2].height = 60
+    rendered = sheetpeek.read(save(wb, tmp_path / "wrapped.xlsx")).layout("excel")
+    assert [run.text for run in _row(rendered, 2).runs] == ["two", "lines"]
+    # Wrapped angled text leaves its row as it is (captured): in 15 pt a line holds one character.
+    assert _row(rendered, 6).height_pt == 15
+    assert [run.text for run in _row(rendered, 6).runs] == list("twolines")
     (notice,) = [n for n in rendered.notices if n.code == "text.rotation_wrapped"]
-    assert notice.outcome == "approximated"
+    assert (notice.outcome, notice.count) == ("approximated", 1)  # the stacked cell
 
 
 def test_only_merged_angled_cells_with_borders_are_reported(tmp_path):
@@ -432,3 +439,46 @@ def test_text_between_slanted_sides_sits_where_excel_draws_it(tmp_path, name, he
     assert abs(lo - left) * across <= 3.7, (name, lo, left)
     if case.size == 11.0 and height != 30.0:
         assert abs(hi - right) * across <= 3.7, (name, hi, right)
+
+
+def _turned_captures():
+    from pathlib import Path
+
+    path = Path(__file__).parent / "captures" / "rotation.tsv"
+    lines = [line.split("\t") for line in path.read_text(encoding="utf-8").splitlines()]
+    header = next(line for line in lines if line[0] == "group")
+    rows = [dict(zip(header, line, strict=False)) for line in lines if line[0] != "group"]
+    picked = [
+        row
+        for row in rows
+        if row.get("group") == "turned"
+        or (row.get("group"), row.get("name")) in {("other", "wrapped"), ("align", "justify")}
+        or (row.get("group"), row.get("name")) == ("align", "distributed")
+    ]
+    return [
+        (r["name"], float(r["row_height"]), float(r["ink_left"]), float(r["ink_right"]))
+        for r in picked
+    ]
+
+
+@pytest.mark.parametrize(("name", "height", "left", "right"), _turned_captures())
+def test_wrapped_angled_text_sits_where_excel_draws_it(tmp_path, name, height, left, right):
+    # Captured (rotation suite, turned; align and other at 45 degrees in 15 pt rows): lines as
+    # long as fit between the row's top and bottom, a line apart toward the descent side, each
+    # placed in height on its own; the row is not fitted to them. Both ink edges within 2.5 pt.
+    # In a 15 pt row each line holds one character and the text runs past the measured window
+    # (Excel also gives a space its own line there, which sheetpeek drops), so only the left
+    # edge is compared.
+    from capture import rotation
+
+    (case,) = [c for c in rotation.cases() + rotation.more_cases() if c.name == name]
+    wb = openpyxl.Workbook()
+    rotation.fill(wb.active, [case])
+    rendered = sheetpeek.read(save(wb, tmp_path / "turned.xlsx")).layout("excel")
+    column = next(c for c in rendered.columns if c.letter == "E")
+    row = _row(rendered, 4)
+    assert row.height_pt == height
+    edges = [_ink(run, column) for run in row.runs if run.source == (4, 5)]
+    assert abs(min(lo for lo, _ in edges) - left) <= 2.5, name
+    if height > 15:
+        assert abs(max(hi for _, hi in edges) - right) <= 2.5, name

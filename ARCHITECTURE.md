@@ -1164,8 +1164,8 @@ boxes match a rigid rotation of the upright box (captured: 45°, 58.5 × 57.5 pt
   their negatives, 90 and −90: the switch is exactly at ±90). Left and right use insets of 3 and 4
   pt, fitted to the capture: every captured ink edge is within 1.1 pt. Center centers the box on
   the cell (captured at 45°); right puts it against the right inset (captured at 45°). An indent
-  moves the box in by 6 pt a level (captured: 12 pt for 2, left and right). Fill is placed as
-  left (captured).
+  moves the box in by 6 pt a level (captured: 12 pt for 2, left and right). Fill, justify and
+  distributed are placed as left (captured at 45°).
 - **Vertical:** bottom puts the box's lowest corner on the cell's bottom, top its highest on the
   top, center centers it (captured in a 90 pt row at 45°). A box taller than its row
   stays bottom-aligned and is clipped at the row; nothing is drawn in the row above (captured,
@@ -1175,14 +1175,24 @@ boxes match a rigid rotation of the upright box (captured: 45°, 58.5 × 57.5 pt
 - **Fitted rows:** a row Excel fits grows to `W·|sin θ| + S·|cos θ| + 7` pt, to the nearest
   point, with `W` the text's width and `S` its font size. Captured over three lengths, four angles
   and four sizes: within 2 pt at 9 and 11 pt (at 90° Excel's row is exactly `W + 7`), but Excel
-  measures larger angled text wider than xlformat's widths, by about 0.13 pt a character at 14 pt
-  and 0.5 at 20 pt, so long text at 20 pt fits rows up to 19 pt taller (a known gap). A merge does
+  measures larger text wider than xlformat's widths, by about 0.13 pt a character at 14 pt and
+  0.5 at 20 pt, so long text at 20 pt fits rows up to 19 pt taller (a known gap). It is the
+  glyph tables, not the angle: upright text and text at 90° measure the same ink length at 11,
+  14 and 20 pt (77, 99.5 and 145.5 pt for "Rotated text here"; captured, `upright`). A merge does
   not count, as for wrapped text.
 - **Wrapped angled text** (wrap, justify or distributed) wraps along the turned direction: a line
-  holds what fits between the row's top and bottom along the text, and the lines step
-  perpendicular to it; the row is not fitted. At 45° in a 15 pt row every line holds one
-  character, so the characters stand about 21 pt apart across the row and beyond the cell
-  (captured). sheetpeek draws such text on one line and reports it (`text.rotation_wrapped`).
+  holds what a fitted row of this height would, `W·|sin θ| + S·|cos θ| + 7 ≤ h`, with a word
+  joining a line only if the space after it fits too (§4.7); the lines step one font line
+  (15 pt at Calibri 11) toward the descent side, each placed in height on its own by the
+  vertical alignment, so bottom-aligned lines all end on the bottom inset and at 45° stand
+  `pitch / sin θ` apart across the row; the whole is placed across the cell as one box, or
+  between slanted sides by its first line; the row is not fitted (captured, `turned`: 45° in
+  30, 60 and 120 pt rows, 15°, 75°, −45° and 90° in 60 pt, justify, distributed and inside four
+  borders; both ink edges within 2.5 pt). Justified and distributed lines are not spread (their
+  ink matches plain wrap at 45°), and distributed is placed as left (captured at 45°). At 45°
+  in a 15 pt row every line holds one character, about 21 pt apart; Excel also gives a space
+  its own line there, which sheetpeek drops (a known deviation). Stacked text is still drawn on
+  one line when wrapped, and reported (`text.rotation_wrapped`).
 - **Values show in full:** an angled number is neither `#` nor General shortened to the column
   (captured: 12345678901 at 45° and 90° in a 53 pt column); the layout formats an angled cell
   without its column's width.
