@@ -407,7 +407,9 @@ def test_each_output_reports_what_it_does_with_runs(tmp_path, output, outcome):
 @pytest.mark.parametrize(
     ("text", "lines"),
     [
-        ("aaa bbb ccc", ["aaa bbb", "ccc"]),
+        ("aaa bbb ccc", ["aaa", "bbb ccc"]),  # "aaa bbb " is 8: the space counts
+        ("aaa bb ccc", ["aaa bb", "ccc"]),  # "aaa bb " is 7
+        ("aaa bbb", ["aaa bbb"]),  # nothing follows the last word
         ("  lead", ["lead"]),
         ("a  b", ["a  b"]),
         ("x\nyy\n\nz", ["x", "yy", "", "z"]),

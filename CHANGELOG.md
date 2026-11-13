@@ -192,6 +192,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `sheetpeek view --list` shows each sheet's state and kind when it is not a visible worksheet
   (`Chart  (chartsheet, not shown)`, `Data  (hidden)`), where it printed the name alone.
 - `serve` marks a chartsheet or dialog sheet in its sheet list instead of linking to an error.
+- Wrapped text breaks where Excel breaks it (`excel` mode, so HTML and fitted rows): a word joins
+  a line only if the line fits with the space after the word. "shrink and wrap both set here"
+  in a default column takes 4 lines, as in Excel, where it took 3.
+- Distributed and justified lines share the room among their gaps as Excel does, counting the
+  space that ends a broken line: a one-word line inside distributed text sits at the left inset,
+  where it was centered; a one-word last line stays centered. Distributed text with an indent
+  breaks between the indents at both ends.
 
 ### Deprecated
 - `Sheet.warnings` and `RenderedSheet.warnings`, now views of the notices that were warnings

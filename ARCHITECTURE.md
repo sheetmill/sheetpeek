@@ -289,8 +289,9 @@ of its baseline, with its rules; its `clip` stays upright (§4.17).
   columns' points (`xlformat.column_metrics_from_points`), and its runs clip to the merged
   interior.
 - **Wrapped, `justify` and `distributed` text** is broken at spaces by `text_width`, one run per
-  line; `justify` spreads every line but the last, `distributed` every line, a lone word centered
-  between the insets (§4.13). `fill` repeats whole copies of the text that fit between the
+  line: a word joins a line if the line fits with the space after the word (§4.7). `justify`
+  spreads every line but the last, `distributed` every line, each sharing the room among its
+  gaps, a line broken at a space counting its last one (§4.13). `fill` repeats whole copies of the text that fit between the
   insets (row 159).
 - **Text styles** (§4.13): a run's `scale` is its drawn size over `font.size` (superscript,
   subscript, shrink to fit), its `rules` its underlines and strikethrough, its `direction` `rtl`
@@ -589,7 +590,13 @@ which rows have a `<row>` element, whether the sheet has `<sheetFormatPr>`, and 
 `customHeight`, `zeroHeight`, `thickTop` and `thickBottom` attributes.
 
 In `characters` mode the break uses Python's `textwrap` (long words broken), by characters; `excel`
-mode breaks by `text_width` (§3.6).
+mode breaks by `text_width` (§3.6). **A word joins a line only if the line fits with the space
+after the word**, when one follows: a line may take the column less the insets (48 pt in a
+default column, 115 in one of 20 characters), and the space that ends it counts (captured,
+`text_style` groups `wrap` and `lone`, Excel 16.115: "aaaa aaaaii", 48 pt with nothing after it,
+fits; "shrink and ", 49, breaks before "and"). Excel wraps narrower at zoom 200 (47 pt breaks
+there); the layout is zoom 100. How an indent narrows wrapped text that is not distributed is
+**unverified**: sheetpeek breaks it at the full width.
 
 Superscript, subscript and accounting underlines grow a fitted row, and shrunk text fits it at its
 unshrunk size (§4.13).
@@ -855,12 +862,8 @@ width at 5/7 measures 50 pt in a 48 pt budget), a known deviation. Captured at C
 the step at other sizes is unverified, and when even 1/7 does not fit the text is clipped
 (decided). **It replaces `####`**: a value whose format overflows shows its full text, shrunk
 (`RenderedCell.text` is that text). **Wrap overrides it**, as do horizontal and vertical justify
-and distributed, which wrap: the text keeps its size. With both flags Excel 16.115 breaks lines
-narrower than sheetpeek: "shrink and wrap both set here" takes 4 lines in a default column
-(`text_style` shrink E4), where sheetpeek's 48 pt line holds "shrink and" (47 pt) and draws 3, a
-known deviation. Whether the width a wrapped line may take is under 47 pt with wrap alone too, or
-only with shrink, is **unverified**; the screen suite `text_style` group `wrap` measures both
-around 48 pt and 115 pt. **Shrunk text never spills**, in every mode. **Rows fit the unshrunk
+and distributed, which wrap: the text keeps its size and breaks where wrap alone breaks it (captured, `text_style`
+group `wrap`: 28 pairs of cases, identical). **Shrunk text never spills**, in every mode. **Rows fit the unshrunk
 size** (captured at 20 pt). A merge with the flag on its anchor is not shrunk, clipped at the
 merge's edge (captured once, doubtful). The baseline stays where unshrunk text would sit
 (unverified).
@@ -873,11 +876,15 @@ top, as other wrapped text. Characters mode spreads them in whole lines, and doe
 with one line.
 
 **Horizontal distributed** spreads the words between the insets, a single word centered
-(§3.6; captured for a cell of one word, `text_style` E14), and wraps. A line of one word among
-several is centered too, which is **unverified**: Excel 16.115 draws the first line of the long
-distributed text in `layout` row 162, the one word "spilled", at the left inset (16.114 centered
-it), a known deviation. The screen suite `text_style` group `lone` captures lone words on the
-first, a middle and the last line, fitted and in a 15 pt row. **Indent moves both ends in** (captured: 12 pt for indent 2). `justifyLastLine`
+(§3.6), and wraps. **A line broken at a space keeps that space as a last gap**, and the room
+left is shared by all the gaps, so a line of one word that is not its paragraph's last sits at
+the left inset, and a last line of one word, or a cell of one word, is centered (captured,
+`text_style` groups `lone` and align, Excel 16.115: "aa bb " ends 26 pt short of the right
+inset's 51, "text that " 5.5 pt short; `layout` row 162). Justify shares the room the same way
+and leaves its last line at the left. With an indent, distributed lines break between the
+indents at both ends (captured: 8 lines for indent 1). Excel fits that row to 144 pt, nine lines'
+height for eight drawn, where sheetpeek fits 128 to the lines drawn (a known deviation, one
+case). **Indent moves both ends in** (captured: 12 pt for indent 2). `justifyLastLine`
 is read (`CellStyle.justify_last_line`) and changes nothing: distributed already spreads the last
 line (captured). A row Excel fits grows to the lines distributed text draws, with the wrap flag
 or without it: two lines of Calibri 11 take 32 pt (Excel 16.115, screen suite `text_style`;

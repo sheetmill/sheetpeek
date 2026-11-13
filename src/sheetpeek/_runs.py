@@ -134,18 +134,23 @@ def wrap(text: str, budget: float, width: Callable[[int, int], float]) -> list[t
     """Lines of ``text`` broken at spaces to fit ``budget`` points, as offsets into ``text``.
 
     ``width(start, end)`` measures a part of the text. Explicit line breaks are kept; a word
-    wider than the budget is broken between characters. A space at a break is dropped, and so
-    are spaces that would start a line.
+    wider than the budget is broken between characters. A word joins a line only if the line
+    fits with the space after the word, when one follows: Excel keeps that space on the line
+    (captured, ``text_style`` groups ``wrap`` and ``lone``, ``ARCHITECTURE.md`` §4.13). A space
+    at a break is not drawn, and neither are spaces that would start a line.
     """
     lines: list[tuple[int, int]] = []
     position = 0
     for paragraph in text.split("\n"):
         start = end = position  # the line so far is text[start:end]; empty when equal
         offset = position
-        for word in paragraph.split(" "):
+        words = paragraph.split(" ")
+        last = len(words) - 1
+        for k, word in enumerate(words):
             word_start, word_end = offset, offset + len(word)
             offset = word_end + 1
-            if end > start and width(start, word_end) > budget:
+            after = word_end + (k < last)  # with the space that follows, if any
+            if end > start and width(start, after) > budget:
                 lines.append((start, end))
                 start = word_start
             elif end == start:

@@ -167,6 +167,8 @@ def _fitted(
         wraps = cell.style.wrap or cell.style.h_align == "distributed"
         if cell.kind == "text" and wraps and widths[p] and not merged:
             budget = widths[p] - base.left_inset - base.right_inset
+            if cell.style.h_align == "distributed":  # between the indents, as drawn
+                budget -= 2 * cell.style.indent * base.digit_width
             if spans:
                 text = Text.of_spans(spans, fonts.get, breaks=True)
                 height = max(height, fitted_height(text, wrap(text.text, budget, text.width)))
@@ -383,7 +385,10 @@ class _Points:
         else:
             content = shown.text.replace("\r", "")
             text = Text.plain(content if wraps else content.replace("\n", ""), cell_font, font)
-        lines = wrap(text.text, budget, text.width) if wraps else [(0, len(text.text))]
+        # Distributed lines are broken between the indents at both ends (captured, text_style
+        # lone); how an indent narrows other wrapped text is unverified, so it does not.
+        line_budget = budget - 2 * indent if align == "distributed" else budget
+        lines = wrap(text.text, line_budget, text.width) if wraps else [(0, len(text.text))]
         n = len(lines)
         if spans:
             metrics = [line_metrics(text.fonts(a, b), n) for a, b in lines]
@@ -416,8 +421,10 @@ class _Points:
                 pieces = [(a, b, copies, x0 + self.left_inset, "left")]
             elif align == "distributed" or (align == "justify" and k < n - 1 and len(words) > 1):
                 distributed = align == "distributed"
+                # A line broken at a space keeps it as a last gap (captured, text_style lone).
+                trailing = b < len(text.text) and text.text[b] == " "
                 pieces = self.spread(
-                    words, text, x0, x1, distributed, indent if distributed else 0.0
+                    words, text, x0, x1, distributed, indent if distributed else 0.0, trailing
                 )
             elif align == "right" and not shown.overflow:
                 pieces = [(a, b, 1, x1 - self.right_inset - indent - width, "right")]
@@ -639,21 +646,25 @@ class _Points:
         x1: float,
         distributed: bool,
         indent: float = 0.0,
+        trailing: bool = False,
     ) -> list[tuple[int, int, int, float, str]]:
         """Words spread across the cell between its insets, less ``indent`` at both ends.
 
         Each word is its start and end in ``text``; each piece returned is a word's start, end,
-        copies, x and anchor. A single word is centered there when ``distributed`` and
-        left-aligned otherwise.
+        copies, x and anchor. The room left is shared by the gaps between words and, when
+        ``trailing`` (the line was broken at a space), one more after the last word, as Excel
+        shares it (captured, ``text_style`` group ``lone``). A line without a gap, a single word
+        ending its paragraph, is centered when ``distributed`` and left-aligned otherwise.
         """
         lo, hi = x0 + self.left_inset + indent, x1 - self.right_inset - indent
         widths = [text.width(a, b) for a, b in words]
-        if len(words) == 1:
+        gaps = len(words) - 1 + trailing
+        if not gaps:
             (a, b), width = words[0], widths[0]
             if distributed:
                 return [(a, b, 1, lo + math.floor((hi - lo - width) / 2), "center")]
             return [(a, b, 1, lo, "left")]
-        gap = (hi - lo - sum(widths)) / (len(words) - 1)
+        gap = (hi - lo - sum(widths)) / gaps
         result, x = [], lo
         for (a, b), width in zip(words, widths, strict=True):
             result.append((a, b, 1, x, "left"))

@@ -308,12 +308,8 @@ def test_excel_boundaries_match_excel(excel):
     assert set(deviations) == set(KNOWN_BOUNDARIES), deviations
 
 
-KNOWN_RUN_DEVIATIONS = {
-    # Excel 16.115 moved the lone first word of long distributed text in a custom-height row 9 pt
-    # left of where 16.114 drew it and sheetpeek draws it; the text_style screen suite's group
-    # "lone" holds the cases to settle the rule (ARCHITECTURE.md §4.13).
-    "distributed long, B empty": "16.115 places a lone distributed word differently",
-}
+KNOWN_RUN_DEVIATIONS: dict[str, str] = {}
+"""Runs whose start or end differs from Excel's, by case, with the reason (none now)."""
 
 
 @pytest.mark.excel

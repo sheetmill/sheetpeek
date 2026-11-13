@@ -215,3 +215,53 @@ def test_every_text_case_is_measured_on_a_blank_capture():
             measured = text_style.measure(cap, case)
             assert measured is not None, case.name
             assert set(text_style.COLUMNS) >= set(measured)
+
+
+def _text_style_cases(group):
+    """The captured rows of a text_style group at zoom 100, by cell."""
+    path = text_style.OUTPUT
+    lines = [line.split("\t") for line in path.read_text(encoding="utf-8").splitlines()]
+    rows = [line for line in lines if line[0] and not line[0].startswith("#")]
+    header, body = rows[0], rows[1:]
+    found = [dict(zip(header, row, strict=False)) for row in body]
+    return {r["cell"]: r for r in found if r["group"] == group and r["zoom"] == "100"}
+
+
+def _drawn_lines(tmp_path, group):
+    """sheetpeek's lines of each cell of a text_style group: (start, end) from the cell's left."""
+    text_style.build(tmp_path / "text_style.xlsx")
+    rendered = sheetpeek.read(tmp_path / "text_style.xlsx", group.capitalize()).layout("excel")
+    x0 = {c.index: c.x_pt for c in rendered.columns}
+    found: dict[str, dict[float, list[float]]] = {}
+    for row in rendered.rows:
+        for run in row.runs:
+            r, c = run.source
+            line = found.setdefault(f"{get_column_letter(c)}{r}", {}).setdefault(run.y, [])
+            line.extend((run.x - x0[c], run.x + run.width - x0[c]))
+    return {cell: [(min(v), max(v)) for _, v in sorted(ys.items())] for cell, ys in found.items()}
+
+
+def test_wrapped_lines_break_where_excel_breaks_them(tmp_path):
+    # Captured (text_style group wrap, zoom 100): a line fits up to 48 pt in a default column
+    # and 115 in one of 20 characters, shrink to fit or not. A band under 3 pt is an i's dot.
+    captured = _text_style_cases("wrap")
+    ours = _drawn_lines(tmp_path, "wrap")
+    assert len(captured) == 43
+    for cell, row in captured.items():
+        bands = [b for b in row["line_tops"].split() if float(b.split("+")[1]) >= 3]
+        assert len(ours[cell]) == len(bands), (row["name"], ours[cell], bands)
+
+
+def test_distributed_lines_sit_where_excel_draws_them(tmp_path):
+    # Captured (text_style group lone, zoom 100): each line's ink against sheetpeek's advance
+    # box, within the glyphs' side bearings; a 15 pt row shows its first line only.
+    captured = _text_style_cases("lone")
+    ours = _drawn_lines(tmp_path, "lone")
+    assert len(captured) == 12
+    for cell, row in captured.items():
+        theirs = [tuple(map(float, s.split("+"))) for s in row["line_inks"].split()]
+        lines = ours[cell] if row["row_height"] != "15.0" else ours[cell][:1]
+        assert len(lines) == len(theirs), (row["name"], lines, theirs)
+        for (start, end), (left, width) in zip(lines, theirs, strict=True):
+            assert abs(left - start) <= 1.5, (row["name"], start, left)
+            assert abs(left + width - end) <= 1.5, (row["name"], end, left + width)
