@@ -1192,8 +1192,19 @@ lies `y·cot θ` right of its upright place (captured at 15°, 45° and −45°,
 row; 90° and −90° stay upright). Any side border makes the text move as with all four, top and
 bottom alone included; a fill alone does not (captured). The text moves right by about
 `15·cot θ − 4` pt toward the slant (captured: 52.5 pt at 15°, 11 at 45°, −11 at −45°; the rule
-is fitted to three angles). sheetpeek draws borders upright, places the text as without borders,
-and reports every angled cell with a side border (`border.slanted`, approximated).
+is fitted to three angles). The right side lies one column width right of the left side (the
+measured gaps, 56.5, 54.5 and 54 pt at 15°, 45° and 90° in a 53 pt column, are that width plus a
+1 pt line's run across a row, `1/|sin θ|`); the top border lies along the cell's top edge, shifted
+`h·cot θ` with the box, over the neighbors' cells, and the gridlines stay (seen in the crops).
+
+The layout records each unmerged angled cell's own sides as `SlantedBorders` (`shift_pt` is
+`h·cot θ`), takes them out of the upright grid, where a neighbor's own side on a shared edge is
+still drawn (unverified), and keeps the columns the box reaches, as for spill, within the columns
+the layout adds for spill; HTML draws the four sides as lines in one SVG, clipped to the sheet.
+Against the capture, each side's center lies within 1.04 pt of Excel's, measured across the line
+(at 15°; within 0.7 at ±45°). A merge's borders stay upright (unverified). The text is still placed
+as without borders, so every angled cell with a side border is reported (`border.slanted`,
+approximated).
 
 **HTML** turns the run with `transform: rotate()` about the start of its baseline, and its
 underlines and strikethrough with it; the clip window stays upright. Measured in WebKit with neither

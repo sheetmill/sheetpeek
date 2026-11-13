@@ -255,3 +255,136 @@ def test_an_angled_number_shows_in_full_never_hashes(tmp_path, rotation):
     assert run.text == "12345678901"
     assert rendered.cell(2, 2).text == "12345678901"
     assert not rendered.cell(2, 2).overflow
+
+
+def _slant_captures():
+    """The captured slant cases with left and right borders: (name, angle, row height, the four
+    border x's at 25 % and 75 % of the row)."""
+    from pathlib import Path
+
+    path = Path(__file__).parent / "captures" / "rotation.tsv"
+    lines = [line.split("\t") for line in path.read_text(encoding="utf-8").splitlines()]
+    header = next(line for line in lines if line[0] == "group")
+    rows = [dict(zip(header, line, strict=False)) for line in lines if line[0] == "slant"]
+    return [
+        (
+            row["name"],
+            _rotation(int(row["rotation"])),
+            float(row["row_height"]),
+            [
+                float(row[f"border_{side}_{share}"])
+                for share in (25, 75)
+                for side in ("left", "right")
+            ],
+        )
+        for row in rows
+        if row["border_left_25"] and "fill" not in row["name"]
+    ]
+
+
+@pytest.mark.parametrize(("name", "angle", "height", "captured"), _slant_captures())
+def test_slanted_sides_lie_where_excel_draws_them(tmp_path, name, angle, height, captured):
+    # Captured (rotation suite, slant): the dark run of each side at 25 % and 75 % of the row,
+    # 1 / |sin| wide for a 1 pt line. The modeled line's center lies within 1.25 pt of the run's,
+    # measured across the line (15 degrees is the farthest, 1.04 pt).
+    thin = Side("thin", color="FF000000")
+    sides = {"left": thin, "right": thin}
+    if name.endswith("lrtb"):
+        sides.update(top=thin, bottom=thin)
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws["E4"] = "Rotated text here"
+    ws["E4"].alignment = Alignment(textRotation=_stored(angle))
+    ws["E4"].border = Border(**sides)
+    ws.row_dimensions[4].height = height  # fitted heights are tested on their own
+    rendered = sheetpeek.read(save(wb, tmp_path / "slant.xlsx")).layout("excel")
+    borders = rendered.borders
+    if angle == 90:
+        assert borders.slanted == ()
+        return
+    (slant,) = borders.slanted
+    assert slant.shift_pt == pytest.approx(height / math.tan(math.radians(angle)))
+    sine = abs(math.sin(math.radians(angle)))
+    width = next(c for c in rendered.columns if c.letter == "E").width_pt
+    for k, share in enumerate((0.25, 0.75)):
+        base = slant.shift_pt * (1 - share)
+        for model, start, end_side in (
+            (base, captured[2 * k], False),
+            (base + width, captured[2 * k + 1], True),
+        ):
+            center = start - 1 / (2 * sine) if end_side else start + 1 / (2 * sine)
+            assert abs(model - center) * sine <= 1.25, (name, share, model, center)
+
+
+def _stored(angle):
+    return angle if angle >= 0 else 90 - angle
+
+
+def test_slanted_sides_leave_the_upright_grid_but_a_neighbors_side_stays(tmp_path):
+    thin, medium = Side("thin"), Side("medium")
+    path = _book(
+        tmp_path,
+        [
+            ("B2", "a", Alignment(textRotation=45), {"border": Border(left=thin, right=thin)}),
+            ("C2", None, Alignment(), {"border": Border(left=medium)}),
+        ],
+    )
+    rendered = sheetpeek.read(path).layout("excel")
+    borders = rendered.borders
+    (slant,) = borders.slanted
+    assert slant.left is not None
+    assert slant.left == slant.right
+    assert (slant.top, slant.bottom) == (None, None)
+    p = [c.letter for c in rendered.columns].index("C")
+    i = [r.index for r in rendered.rows].index(2)
+    assert borders.vertical[i][p].style == "medium"  # C2's own left, upright
+    assert borders.vertical[i][p - 1] is None  # B2's left left the grid
+
+
+def test_borders_stay_upright_at_90_stacked_and_in_a_merge(tmp_path):
+    thin = Side("thin")
+    boxed = {"border": Border(left=thin, right=thin, top=thin, bottom=thin)}
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    for coordinate, rotation in (("B2", 90), ("B4", 255), ("B6", 45)):
+        ws[coordinate] = "a"
+        ws[coordinate].alignment = Alignment(textRotation=rotation)
+        ws[coordinate].border = boxed["border"]
+    ws.merge_cells("B6:C6")
+    rendered = sheetpeek.read(save(wb, tmp_path / "upright.xlsx")).layout("excel")
+    assert rendered.borders.slanted == ()
+
+
+def test_a_slanted_box_keeps_the_columns_it_reaches(tmp_path):
+    thin = Side("thin")
+    boxed = {"border": Border(left=thin, right=thin, top=thin, bottom=thin)}
+    for rotation, letters in ((15, "CDEF"), (45, "CDE"), (135, "ABC")):
+        path = _book(
+            tmp_path,
+            [("C3", "Rotated text here", Alignment(textRotation=rotation), boxed)],
+            f"{rotation}.xlsx",
+        )
+        rendered = sheetpeek.read(path).layout("excel")
+        assert "".join(c.letter for c in rendered.columns) == letters, rotation
+
+
+def test_html_draws_the_slanted_box_as_four_lines(tmp_path):
+    from urllib.parse import unquote
+
+    thin = Side("thin", color="FF0000C0")
+    boxed = {"border": Border(left=thin, right=thin, top=thin, bottom=thin)}
+    path = _book(tmp_path, [("C3", "Rotated text here", Alignment(textRotation=45), boxed)])
+    rendered = sheetpeek.read(path).layout("excel")
+    markup = unquote(sheetpeek.render(rendered, to="html", on_notice="ignore"))
+    lines = re.findall(
+        r"<line x1='([\d.]+)' y1='([\d.]+)' x2='([\d.]+)' y2='([\d.]+)' stroke='#0000C0'", markup
+    )
+    assert len(lines) == 4
+    # 70 pt row and shift, 53 pt column: 93 and 71 px at 4/3, the box from x 0 to 164 px.
+    left, right, top, bottom = (tuple(float(v) for v in line) for line in lines)
+    assert left == (0.5, 93.5, 93.5, 0.5)
+    assert right == (71.5, 93.5, 164.5, 0.5)
+    assert top[1] == top[3] == 0.5
+    assert bottom[1] == bottom[3] == 93.5
+    notice = next(n for n in sheetpeek.notices(rendered, "html") if n.code == "border.slanted")
+    assert notice.outcome == "approximated"  # the text is not yet placed between the sides

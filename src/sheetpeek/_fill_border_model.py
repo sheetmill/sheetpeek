@@ -264,6 +264,28 @@ class Diagonal:
 
 
 @dataclass(frozen=True, slots=True)
+class SlantedBorders:
+    """An angled cell's own side borders, which Excel slants with its text (§4.17).
+
+    ``row`` indexes ``RenderedSheet.rows`` and ``column`` its cells. The sides form a
+    parallelogram whose bottom edge is the cell's bottom edge: the left and right sides lean at
+    the text's ``angle``, and the top edge lies along the cell's top edge, ``shift_pt`` to the
+    right of it (to the left when negative), which is the cell's height times the cotangent of
+    the angle. These sides are not in the ``horizontal`` or ``vertical`` lines of
+    :class:`RenderedBorders`, where a neighbor's own side on a shared edge is drawn upright.
+    """
+
+    row: int
+    column: int
+    angle: int
+    shift_pt: float
+    left: Side | None
+    right: Side | None
+    top: Side | None
+    bottom: Side | None
+
+
+@dataclass(frozen=True, slots=True)
 class RenderedBorders:
     """The border lines a laid-out sheet draws, one resolved side per edge (``excel`` mode).
 
@@ -277,6 +299,8 @@ class RenderedBorders:
     horizontal: tuple[tuple[Side | None, ...], ...]
     vertical: tuple[tuple[Side | None, ...], ...]
     diagonals: tuple[Diagonal, ...]
+    slanted: tuple[SlantedBorders, ...] = ()
+    """The borders of angled cells, slanted with their text, in grid order."""
 
 
 def finite(value: object, default: float = 0.0) -> float:

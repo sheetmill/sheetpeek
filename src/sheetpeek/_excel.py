@@ -10,6 +10,7 @@ draws both.
 
 from __future__ import annotations
 
+import bisect
 import math
 import re
 from dataclasses import replace
@@ -30,6 +31,7 @@ from sheetpeek._layout import (
     check_area,
 )
 from sheetpeek._model import Column, Font, Row, Sheet
+from sheetpeek._pass_borders import slant_shift, slants
 from sheetpeek._rendered import RenderedCell, RenderedColumn, RenderedRow, TextRun
 from sheetpeek._rows import (
     fits_cells,
@@ -248,6 +250,21 @@ class _Points:
             hit = self._metrics[key] = (font, line_metrics([font], lines))
         return hit[1]
 
+    def slant_spans(self, origins: list[Any]) -> list[tuple[int, int]]:
+        """The columns each slanted border box reaches, kept as a spill keeps them (§4.17)."""
+        found = []
+        for origin in origins:
+            if len(origin.rows) > 1 or len(origin.cols) > 1 or not slants(origin.cell.style):
+                continue
+            i, p = origin.rows[0], origin.cols[0]
+            shift = slant_shift(origin.cell.style, self.heights[i])
+            left = self.xs[p] + min(shift, 0.0)
+            right = self.xs[p] + self.widths[p] + max(shift, 0.0)
+            low = max(bisect.bisect_right(self.xs, left) - 1, 0)
+            high = min(bisect.bisect_left(self.xs, right) - 1, len(self.widths) - 1)
+            found.append((low, max(high, p)))
+        return found
+
     def render(self) -> tuple[tuple[RenderedRow, ...], list[int]]:
         grid = self.grid
         origins, shown = grid.origins()
@@ -272,6 +289,7 @@ class _Points:
             if len(origin.rows) == 1:
                 i = origin.rows[0]
                 lines_of[i] = max(lines_of.get(i, 1), count)
+        spans.extend(self.slant_spans(origins))
         real = [p for p in range(len(grid.columns)) if p not in grid.added]
         reached = [p for low, high in spans for p in (low, high) if p in grid.added]
         kept = list(range(min([*reached, real[0]]), max([*reached, real[-1]]) + 1))

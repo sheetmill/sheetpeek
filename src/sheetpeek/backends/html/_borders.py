@@ -21,7 +21,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, TextIO
 
-from sheetpeek._fill_border_model import BorderStyle, Diagonal, Side
+from sheetpeek._fill_border_model import BorderStyle, Diagonal, Side, SlantedBorders
 from sheetpeek._pass_borders import rendered_borders
 from sheetpeek.backends.html._patterns import Classes, svg_uri, tile_svg
 
@@ -134,6 +134,11 @@ class Borders:
                 self.line(side, xs[q] - before, start, before + after, end - start, True)
         for diagonal in resolved.diagonals:
             self.diagonal(diagonal, xs, ys)
+        for slant in resolved.slanted:
+            x = columns[slant.column].x_pt or 0
+            shift = page.x(x + slant.shift_pt) - page.x(x)
+            box = (xs[slant.column], ys[slant.row], xs[slant.column + 1], ys[slant.row + 1])
+            self.slanted(slant, box, shift, (xs[0], ys[0], xs[-1], ys[-1]))
 
     def line(self, side: Side, left: int, top: int, width: int, height: int, upright: bool) -> None:
         if width <= 0 or height <= 0:
@@ -186,6 +191,61 @@ class Borders:
         name = self.classes.name(f"background-image:{svg_uri(svg)}")
         self.lines.append(
             f'<i class="{name}" style="left:{left}px;top:{top}px;width:{width}px;'
+            f'height:{height}px"></i>'
+        )
+
+    def slanted(
+        self,
+        slant: SlantedBorders,
+        box: tuple[int, int, int, int],
+        shift: int,
+        bounds: tuple[int, int, int, int],
+    ) -> None:
+        """Draw an angled cell's sides as a parallelogram, clipped to the sheet (§4.17).
+
+        The bottom edge lies on the cell's, the top edge ``shift`` px right of the cell's top edge.
+        """
+        x0, top, x1, bottom = box
+        corners = {  # each side's two ends, on the first pixel of its gridline
+            "left": (x0, bottom, x0 + shift, top),
+            "right": (x1, bottom, x1 + shift, top),
+            "top": (x0 + shift, top, x1 + shift, top),
+            "bottom": (x0, bottom, x1, bottom),
+        }
+        reach = 3  # the widest band past a gridline
+        left = max(min(x0, x0 + shift) - reach, bounds[0])
+        right = min(max(x1, x1 + shift) + reach, bounds[2])
+        upper, lower = max(top - reach, bounds[1]), min(bottom + reach, bounds[3])
+        if right <= left or lower <= upper:
+            return
+        lines: list[str] = []
+        for name, (ax, ay, bx, by) in corners.items():
+            side: Side | None = getattr(slant, name)
+            if side is None:
+                continue
+            stroke, dashes = _DIAGONAL[side.style]
+            before, after = band(side.style)
+            middle = (after - before) / 2  # the band's center past the gridline's first pixel
+            dash = f" stroke-dasharray='{dashes}'" if dashes else ""
+            paint = f"stroke='#{side.drawn_color}' stroke-width='{stroke:g}'{dash}"
+            offsets = (-1.0, 1.0) if side.style == "double" else (0.0,)
+            flat = ay == by
+            for offset in offsets:
+                dx, dy = (0.0, offset) if flat else (offset, 0.0)
+                lines.append(
+                    f"<line x1='{ax - left + middle + dx:g}' y1='{ay - upper + middle + dy:g}' "
+                    f"x2='{bx - left + middle + dx:g}' y2='{by - upper + middle + dy:g}' {paint}/>"
+                )
+        if not lines:
+            return
+        width, height = right - left, lower - upper
+        svg = (
+            f"<svg xmlns='http://www.w3.org/2000/svg' width='{width}' height='{height}'>"
+            f"{''.join(lines)}</svg>"
+        )
+        name = self.classes.name(f"background-image:{svg_uri(svg)}")
+        self.lines.append(
+            f'<i class="{name}" style="left:{left}px;top:{upper}px;width:{width}px;'
             f'height:{height}px"></i>'
         )
 

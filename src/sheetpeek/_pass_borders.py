@@ -2,7 +2,8 @@
 
 The rules (``ARCHITECTURE.md`` §4.12, captures on Excel 16.114): where two cells' sides meet, one is
 drawn whole, by :func:`~sheetpeek._fill_border_model.winner`; each cell keeps its own sides,
-also inside a merge, whose inner sides are dropped; a vertical side that spilled text crosses is
+also inside a merge, whose inner sides are dropped; an unmerged angled cell's own sides slant with
+its text (§4.17) and leave the upright grid; a vertical side that spilled text crosses is
 not drawn, over the whole row; hidden rows and columns are not in the grid, so their sides do not
 compete. A merge's diagonals are its anchor's, across the whole merge. The pass runs in ``excel``
 mode, after the cells, since spill decides which vertical sides are drawn.
@@ -10,13 +11,14 @@ mode, after the cells, since spill decides which vertical sides are drawn.
 
 from __future__ import annotations
 
+import math
 from typing import TYPE_CHECKING
 
-from sheetpeek._fill_border_model import Diagonal, RenderedBorders, Side, winner
+from sheetpeek._fill_border_model import Diagonal, RenderedBorders, Side, SlantedBorders, winner
 
 if TYPE_CHECKING:
     from sheetpeek._layout import Draft
-    from sheetpeek._model import CellRange
+    from sheetpeek._model import CellRange, CellStyle
     from sheetpeek._rendered import RenderedSheet
 
 
@@ -33,9 +35,12 @@ def borders_pass(draft: Draft) -> None:
     def merge_at(i: int, p: int) -> CellRange | None:
         return grid[i][p].merge if 0 <= i < count and 0 <= p < width else None
 
+    slanted = _slanted(draft)
+    at = {(s.row, s.column) for s in slanted}
+
     def own(i: int, p: int, side: int) -> Side | None:
         """Side ``side`` (left, right, top, bottom) of grid cell (i, p), if it is in the grid."""
-        if not (0 <= i < count and 0 <= p < width):
+        if not (0 <= i < count and 0 <= p < width) or (i, p) in at:
             return None
         borders = grid[i][p].cell.style.borders
         return borders.sides[side] if borders is not None else None
@@ -62,7 +67,42 @@ def borders_pass(draft: Draft) -> None:
             else:
                 line.append(winner(own(i, q - 1, 1), own(i, q, 0)))
         vertical.append(tuple(line))
-    draft.extra["borders"] = RenderedBorders(tuple(horizontal), tuple(vertical), _diagonals(draft))
+    draft.extra["borders"] = RenderedBorders(
+        tuple(horizontal), tuple(vertical), _diagonals(draft), slanted
+    )
+
+
+def slants(style: CellStyle) -> bool:
+    """Whether an unmerged cell of ``style`` draws its side borders slanted (§4.17).
+
+    Captured at 15, 45 and -45 degrees: any side border slants the box, and at 90 and -90 the
+    sides stay upright.
+    """
+    borders = style.borders
+    return style.rotation not in (0, 90, -90) and borders is not None and any(borders.sides)
+
+
+def slant_shift(style: CellStyle, height: float) -> float:
+    """How far right of the cell's top edge the top of the slanted box lies, in points."""
+    return height / math.tan(math.radians(style.rotation))
+
+
+def _slanted(draft: Draft) -> tuple[SlantedBorders, ...]:
+    """The side borders of unmerged angled cells, slanted with the text (:func:`slants`).
+
+    A merge's borders stay upright (unverified; reported as ``border.slanted``).
+    """
+    found = []
+    for i, row in enumerate(draft.rows):
+        for p, rendered in enumerate(row.cells):
+            style = rendered.cell.style
+            borders = style.borders
+            if rendered.merge is not None or borders is None or not slants(style):
+                continue
+            shift = slant_shift(style, row.height_pt or 0.0)
+            left, right, top, bottom = borders.sides
+            found.append(SlantedBorders(i, p, style.rotation, shift, left, right, top, bottom))
+    return tuple(found)
 
 
 def _diagonals(draft: Draft) -> tuple[Diagonal, ...]:

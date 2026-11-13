@@ -17,6 +17,7 @@ from sheetpeek._fill_border_model import (
     PatternKind,
     RenderedBorders,
     Side,
+    SlantedBorders,
 )
 from sheetpeek._hyperlink import Hyperlink, LinkSource
 from sheetpeek._model import (
@@ -114,6 +115,7 @@ __all__ = [
     "SheetInfo",
     "SheetState",
     "Side",
+    "SlantedBorders",
     "SpillEdge",
     "Support",
     "TextRule",

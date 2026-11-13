@@ -89,6 +89,8 @@ Everything below is importable from `sheetpeek`.
    :members:
 .. autoclass:: sheetpeek.Diagonal
    :members:
+.. autoclass:: sheetpeek.SlantedBorders
+   :members:
 .. autoclass:: sheetpeek.RenderedOutline
    :members:
 .. autoclass:: sheetpeek.OutlineMark

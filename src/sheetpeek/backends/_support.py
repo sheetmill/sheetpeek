@@ -73,8 +73,8 @@ def html(
         "border.diagonal": SHOWN,
         "border.slant_dash_dot": _approx("as mediumDashDot, gaps square", "not_implemented"),
         "border.slanted": _approx(
-            "drawn upright, the text placed as without borders; Excel slants the side borders "
-            "with the text and places the text between them",
+            "the side borders slant with the text, but the text is placed as without borders, "
+            "where Excel places it between them; a merge's borders are drawn upright",
             "not_implemented",
         ),
         "align.horizontal": SHOWN,
