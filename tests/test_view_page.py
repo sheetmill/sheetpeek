@@ -124,3 +124,35 @@ def test_breaks_outside_the_sheet_are_dropped():
     )
     columns = ET.fromstring(f'<colBreaks xmlns="{ns}"><brk id="16384" man="1"/></colBreaks>')
     assert page_breaks([rows, columns]) == ((5,), ())
+
+
+def test_a_print_area_and_page_breaks_are_not_reported(book):  # noqa: F811
+    # Excel's Normal view draws neither, so the sheet is shown as Excel shows it: no notice,
+    # and --strict passes.
+    from sheetpeek.cli import main
+
+    rewrite(
+        book,
+        "xl/workbook.xml",
+        lambda text: text.replace(
+            "</workbook>",
+            '<definedNames><definedName name="_xlnm.Print_Area" localSheetId="0">'
+            "Sheet!$A$1:$B$4</definedName></definedNames></workbook>",
+            1,
+        ),
+    )
+    rewrite(
+        book,
+        SHEET1,
+        lambda text: text.replace(
+            "</worksheet>",
+            '<rowBreaks count="1" manualBreakCount="1"><brk id="10" man="1"/></rowBreaks>'
+            '<colBreaks count="1" manualBreakCount="1"><brk id="6" man="1"/></colBreaks>'
+            "</worksheet>",
+            1,
+        ),
+    )
+    sheet = sheetpeek.read(book)
+    assert sheet.print_areas
+    assert not [n for n in sheet.notices if n.code.startswith("print.") or "element" in n.code]
+    assert main(["view", str(book), "--to", "text", "--strict", "--notices", "none"]) == 0

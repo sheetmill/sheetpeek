@@ -1278,7 +1278,9 @@ boundaries from zero, so `id="10"` falls below row 10; only manual breaks (`man=
 **What Excel's Normal view draws** (captured on Excel 16.114 only, unverified on Microsoft 365):
 neither the print area nor page breaks; a frozen pane as a line one screen point wide, gray 155,
 over borders and fills, with the frozen rows and columns kept in place while the rest scrolls;
-with `showZeros="0"`, an empty cell where a value shows as zero, which still blocks spill.
+with `showZeros="0"`, an empty cell where a value shows as zero, which still blocks spill. So a
+print area and page breaks are not reported: a sheet with them is shown as Excel's Normal view
+shows it, and `--strict` passes.
 
 ## 5. openpyxl facts that constrain the design
 

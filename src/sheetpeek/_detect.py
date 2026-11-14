@@ -73,9 +73,7 @@ CODES: dict[str, tuple[Outcome, Reason, str]] = {
     "picture.background": ("omitted", "not_implemented", ""),
     "comment": ("omitted", "not_implemented", "the note indicators and shown notes"),
     "comment.threaded": ("omitted", "not_implemented", "the comment indicators"),
-    "print.area": ("omitted", "not_implemented", ""),
     "print.titles": ("omitted", "not_implemented", ""),
-    "print.breaks": ("omitted", "not_implemented", ""),
     "sheet.tab_color": (
         "omitted",
         "option",
@@ -123,10 +121,15 @@ _SILENT = frozenset(
         "drawingHF",
     }
 )
-# Children the model reads (sheetPr and sheetViews are also checked below).
+# sheetPr and sheetViews are also checked below.
 _READ = frozenset(
-    {"sheetPr", "sheetViews", "sheetFormatPr", "cols", "mergeCells", "hyperlinks", "sheetData"}
-)
+    {
+        "sheetPr", "sheetViews", "sheetFormatPr", "cols", "mergeCells", "hyperlinks", "sheetData",
+        "rowBreaks", "colBreaks",
+    }
+)  # fmt: skip
+"""Children the model reads. Page breaks are read and, like the print area, not reported: Excel's
+Normal view draws neither, so a sheet with them is shown as Excel shows it (§4.18)."""
 
 # Sheet extension URIs. Excel compares them exactly: conditional formatting's is captured
 # (lower-case "407d"; the upper-case form printed in [MS-XLSX] is ignored by Excel). The others
@@ -356,8 +359,6 @@ def sheet_notices(
             _report(
                 collector, "sheet.unknown_element", detail=f"<{local}>", context={"element": local}
             )
-    if name in info.print_areas:
-        _report(collector, "print.area")
     if name in info.print_titles:
         _report(collector, "print.titles")
     _comments(collector, archive, context.rels, ref)
@@ -421,12 +422,6 @@ def _embedded(context: SheetContext, child: ET.Element) -> None:
     count = sum(1 for e in child.iter() if _local(e)[0] == item)
     if count and context.objects:
         _report(context.collector, code, count=count)
-
-
-@rule("rowBreaks", "colBreaks")
-def _breaks(context: SheetContext, child: ET.Element) -> None:
-    if manual := sum(1 for b in child.iter(f"{{{_MAIN}}}brk") if _true(b.get("man"))):
-        _report(context.collector, "print.breaks", count=manual)
 
 
 @rule("extLst")
