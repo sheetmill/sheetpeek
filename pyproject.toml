@@ -14,6 +14,7 @@ requires-python = ">=3.11"
 dependencies = [
   "openpyxl>=3.1",
   "xlformat>=0.3,<1",
+  "xlio>=0.1,<1",
 ]
 keywords = ["excel", "xlsx", "openpyxl", "spreadsheet", "html", "markdown", "terminal"]
 classifiers = [
@@ -131,3 +132,7 @@ filterwarnings = [
   # render() reports what an output leaves out; tests/test_notices.py asserts it.
   "ignore::sheetpeek.NotShownWarning",
 ]
+
+[tool.uv.sources]
+# Until xlio 0.1.0 is on PyPI: a wheel built with `git archive` from xlio's commit 92a2435.
+xlio = { path = "../xlio-wheels/92a243508e10048c2a84388d9d2fb7e20bd4cd72/xlio-0.1.0-py3-none-any.whl" }
