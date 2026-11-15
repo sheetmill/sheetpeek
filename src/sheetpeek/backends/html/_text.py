@@ -28,7 +28,8 @@ def run(page: Page, run: TextRun) -> str:
         return _spanned(page, run)
     left, top, right, bottom = run.clip
     size = run.font.size * run.scale
-    spacing = _spacing(run.font, run.text, run.width, run.scale)
+    drawn = page.size(size)
+    spacing = page.size(_spacing(run.font, run.text, run.width, run.scale))
     # A Calibri run spaced to Excel's width that lies inside its clip window needs no clip.
     inside = (
         not run.angle
@@ -39,7 +40,7 @@ def run(page: Page, run: TextRun) -> str:
         and top <= run.y - _ASCENT * size
         and run.y + _DESCENT * size <= bottom
         and (not run.rules or all(left <= r.x0 and r.x1 <= right and top <= r.y
-             and r.y + 0.75 * (2 * r.lines - 1) <= bottom for r in run.rules))
+             and r.y + 75 / page.zoom * (2 * r.lines - 1) <= bottom for r in run.rules))
     )  # fmt: skip
     # Each run is anchored where Excel anchors it: left text by its start, right text by its
     # end, centered text by its center, so another font changes only the far end.
@@ -55,10 +56,10 @@ def run(page: Page, run: TextRun) -> str:
     else:
         center = (page.x(run.x) + page.x(run.x + run.width)) / 2 - x0
         anchor, classes = f"left:{center:g}px", "sp-run sp-center"
-    baseline = page.y(run.y) - y0 - _BASELINE * size * 4 / 3
+    baseline = page.y(run.y) - y0 - _BASELINE * drawn * 4 / 3
     style = [anchor, f"top:{_number(baseline)}px"]
-    if _face(run.font, size) != page.normal_face:
-        style.append(f"font:{_font(run.font, size)}")
+    if _face(run.font, drawn) != page.normal_face:
+        style.append(f"font:{_font(run.font, drawn)}")
     if run.direction == "rtl":
         style.append("direction:rtl")
     if run.color:
@@ -66,7 +67,7 @@ def run(page: Page, run: TextRun) -> str:
     if spacing:
         style.append(f"letter-spacing:{_number(spacing)}pt")
     if run.angle:
-        style.append(_turn(run.angle, 0, _BASELINE * size * 4 / 3))
+        style.append(_turn(run.angle, 0, _BASELINE * drawn * 4 / 3))
     span = f'<span class="{classes}" style="{";".join(style)}">{html.escape(run.text)}</span>'
     if run.rules:
         span += "".join(_rule(page, rule, run.color, x0, y0, run) for rule in run.rules)
@@ -174,14 +175,14 @@ def _spanned(page: Page, run: TextRun) -> str:
         center = (page.x(run.x) + page.x(run.x + run.width)) / 2 - x0
         anchor, classes = f"left:{center:g}px", "sp-run sp-center"
     largest = max(run.spans, key=lambda s: s.font.size * s.scale)
-    face = (largest.font, largest.font.size * largest.scale)
+    face = (largest.font, page.size(largest.font.size * largest.scale))
     baseline = page.y(run.y) - y0 - _BASELINE * face[1] * 4 / 3
     style = [anchor, f"top:{_number(baseline)}px", f"font:{_font(*face)}"]
     if run.direction == "rtl":
         style.append("direction:rtl")
     if run.angle:
         style.append(_turn(run.angle, 0, _BASELINE * face[1] * 4 / 3))
-    inner = "".join(_span(span, face) for span in run.spans)
+    inner = "".join(_span(page, span, face) for span in run.spans)
     rules = "".join(_rule(page, r, _rule_color(run, r), x0, y0, run) for r in run.rules)
     return (
         f'<span class="sp-clip" style="left:{x0}px;top:{y0}px;width:{x1 - x0}px;'
@@ -190,19 +191,19 @@ def _spanned(page: Page, run: TextRun) -> str:
     )
 
 
-def _span(span: TextSpan, face: tuple[Font, float]) -> str:
+def _span(page: Page, span: TextSpan, face: tuple[Font, float]) -> str:
     """One run of rich text inside its line."""
-    size = span.font.size * span.scale
+    size = page.size(span.font.size * span.scale)
     style = ["line-height:0"]
     if _face(span.font, size) != _face(*face):
         style.append(f"font:{_font(span.font, size)}")
     if span.font.color:
         style.append(f"color:#{span.font.color}")
-    spacing = _spacing(span.font, span.text, span.width, span.scale)
+    spacing = page.size(_spacing(span.font, span.text, span.width, span.scale))
     if spacing:
         style.append(f"letter-spacing:{_number(spacing)}pt")
     if span.shift:
-        style.append(f"position:relative;top:{round(span.shift * 4 / 3)}px")
+        style.append(f"position:relative;top:{round(page.size(span.shift) * 4 / 3)}px")
     return f'<span style="{";".join(style)}">{html.escape(span.text)}</span>'
 
 

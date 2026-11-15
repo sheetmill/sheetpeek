@@ -20,6 +20,7 @@ from typing import Literal, TextIO
 from sheetpeek._model import one_line
 from sheetpeek._notices import Support
 from sheetpeek._rendered import Mode, RenderedSheet
+from sheetpeek._view_model import MAX_ZOOM, MIN_ZOOM
 from sheetpeek.backends import _support
 from sheetpeek.backends.html._css import CSS
 from sheetpeek.backends.html._notices import write_notices
@@ -28,6 +29,15 @@ from sheetpeek.backends.html._table import Page
 
 ColorScheme = Literal["light", "dark"]
 Buttons = Literal["none", "static"]
+
+
+def check_zoom(zoom: int | None) -> int | None:
+    """``zoom`` if it is ``None`` or a whole percent Excel allows, else ``ValueError``."""
+    if zoom is None:
+        return None
+    if isinstance(zoom, bool) or not isinstance(zoom, int) or not MIN_ZOOM <= zoom <= MAX_ZOOM:
+        raise ValueError(f"zoom must be a whole number from {MIN_ZOOM} to {MAX_ZOOM}, not {zoom!r}")
+    return zoom
 
 
 class HTMLBackend:
@@ -58,6 +68,12 @@ class HTMLBackend:
             headings as Excel shows it, with its bars, dots, minus and plus buttons, and the level
             buttons where the headings are drawn; ``"none"`` leaves the gutter out. A sheet's
             outline is drawn only when the file shows outline symbols.
+        zoom: The zoom in percent, 10 to 400, as Excel's zoom box takes it. By default
+            (``None``), the zoom saved with each sheet, as Excel opens it. Cells, text, fills
+            and borders' positions and the headings scale; lines, pattern tiles and the outline's
+            symbols keep their size in screen points, as in Excel. The page scales the layout
+            Excel makes at 100 %, so text Excel wraps or places differently at another zoom (it
+            lays out each zoom in whole screen pixels) is not reproduced. Only HTML has a zoom.
     """
 
     name = "html"
@@ -74,6 +90,7 @@ class HTMLBackend:
         new_tab: bool = False,
         local_links: bool = False,
         buttons: Buttons = "static",
+        zoom: int | None = None,
     ) -> None:
         if color_scheme not in ("light", "dark"):
             raise ValueError(f"color_scheme must be 'light' or 'dark', not {color_scheme!r}")
@@ -87,6 +104,7 @@ class HTMLBackend:
         if buttons not in ("none", "static"):
             raise ValueError(f"buttons must be 'none' or 'static', not {buttons!r}")
         self.buttons = buttons
+        self.zoom = check_zoom(zoom)
 
     @property
     def support(self) -> dict[str, Support]:

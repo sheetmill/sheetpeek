@@ -110,6 +110,7 @@ def check(name: str, text: str) -> None:
         ("showcase.csv", DelimitedBackend(",")),
         ("showcase.tsv", DelimitedBackend("\t")),
         ("showcase.html", HTMLBackend(column_headings=True, row_headings=True)),
+        ("showcase_zoom75.html", HTMLBackend(column_headings=True, row_headings=True, zoom=75)),
     ],
     ids=lambda value: value if isinstance(value, str) else "",
 )

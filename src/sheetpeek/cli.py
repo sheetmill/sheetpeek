@@ -15,6 +15,7 @@ from sheetpeek._package import SERVE_LIMITS, PackageError, ReadLimits
 from sheetpeek._read import Book
 from sheetpeek._read import open as open_book
 from sheetpeek._sheets import SheetInfo
+from sheetpeek._view_model import MAX_ZOOM, MIN_ZOOM
 from sheetpeek.backends import (
     Backend,
     HTMLBackend,
@@ -60,6 +61,12 @@ def _parser() -> argparse.ArgumentParser:
     view.add_argument("--column-headings", action="store_true", help="show column letters")
     view.add_argument("--row-headings", action="store_true", help="show row numbers")
     view.add_argument("--hidden", action="store_true", help="show hidden rows and columns")
+    view.add_argument(
+        "--zoom",
+        type=int,
+        metavar="PERCENT",
+        help="zoom from 10 to 400 (-t html only; default: the zoom saved with the sheet)",
+    )
     view.add_argument(
         "--list",
         action="store_true",
@@ -164,6 +171,13 @@ def _serve(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
 
 
 def _view(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
+    html_only = [o for o, given in (("--zoom", args.zoom is not None),) if given]
+    if html_only and args.to != "html" and not (args.all_sheets and args.to is None):
+        _say(err, f"sheetpeek: {html_only[0]} draws HTML only (use -t html)")
+        return 2
+    if args.zoom is not None and not MIN_ZOOM <= args.zoom <= MAX_ZOOM:
+        _say(err, f"sheetpeek: --zoom must be from {MIN_ZOOM} to {MAX_ZOOM}")
+        return 2
     if args.all_sheets:
         refused = _all_sheets_refused(args)
         if refused:
@@ -250,6 +264,7 @@ def _all_sheets(args: argparse.Namespace, book: Book, out: TextIO, err: TextIO) 
         on_notice=found.append,
         column_headings=args.column_headings,
         row_headings=args.row_headings,
+        zoom=args.zoom,
     )
     assert page is not None
     out.write(page)
@@ -271,7 +286,9 @@ def _backend(args: argparse.Namespace, out: TextIO) -> Backend:
     if name == "text":
         return TextBackend(column_headings=args.column_headings, row_headings=args.row_headings)
     if name == "html":
-        return HTMLBackend(column_headings=args.column_headings, row_headings=args.row_headings)
+        return HTMLBackend(
+            column_headings=args.column_headings, row_headings=args.row_headings, zoom=args.zoom
+        )
     return get_backend(name)
 
 

@@ -58,6 +58,12 @@ True
   row headings and above the column headings, with its bars, dots and − and + buttons, drawn at
   Excel's screen sizes in CSS pixels, and the level buttons when both headings are drawn. A sheet's
   outline is drawn only when the file shows outline symbols.
+- `zoom=None` (the default) draws each sheet at the zoom saved with it, as Excel opens it; a
+  whole percent from 10 to 400 overrides it. Cells, text and the headings scale; gridlines,
+  border lines, pattern tiles, underlines and the outline's symbols keep their size in CSS
+  pixels, as Excel keeps them in screen points. The page scales the layout Excel makes at 100 %:
+  Excel lays out each zoom in whole screen pixels, so where it wraps or places text differently
+  at another zoom, the page does not follow. The other outputs have no zoom.
 
 ```python
 >>> wb = openpyxl.Workbook()
@@ -70,6 +76,8 @@ True
 True
 >>> "sp-ol" in sheetpeek.render(path, HTMLBackend(buttons="none"), on_notice="ignore")
 False
+>>> "--sheetpeek-zoom:1.5" in sheetpeek.render(path, HTMLBackend(zoom=150), on_notice="ignore")
+True
 ```
 
 ## Restyling
@@ -87,6 +95,7 @@ an API change.
 | `--sheetpeek-heading-paper` | the headings' background | `#f7f7f7`, dark `#161616` |
 | `--sheetpeek-heading-ink` | the headings' text | `#5e5e5e`, dark `#ffffff` |
 | `--sheetpeek-heading-grid` | the headings' lines | `#e0dfdd`, dark `#565656` |
+| `--sheetpeek-zoom` | set by the page when its zoom is not 100: the zoom as a factor, which scales the headings' font | `1` |
 | `--sheetpeek-outline-paper` | the outline gutter | `#eeeeee`, dark `#555555` |
 | `--sheetpeek-outline-ink` | the outline's bars and dots | `#a6a6a6`, dark `#999999` |
 | `--sheetpeek-outline-button` | the outline buttons' borders and strokes | `#808080`, dark `#333333` |

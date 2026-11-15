@@ -79,7 +79,8 @@ CSS = (
 }
 .sheetpeek th {
   padding: 0; box-sizing: border-box; overflow: hidden; white-space: nowrap;
-  font-size: 9pt; font-weight: normal; text-align: center; vertical-align: middle;
+  font-size: calc(9pt * var(--sheetpeek-zoom, 1)); font-weight: normal;
+  text-align: center; vertical-align: middle;
   background: var(--sheetpeek-heading-paper); color: var(--sheetpeek-heading-ink);
   border-left: 1px solid var(--sheetpeek-heading-grid);
   border-top: 1px solid var(--sheetpeek-heading-grid);

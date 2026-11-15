@@ -1263,7 +1263,7 @@ in `rich` and text, omitted in Markdown and CSV, which show the full text).
 
 ### 4.18 Sheet view and page layout
 
-**Read, not yet drawn.** The first `<sheetView>` gives `Sheet.view` (`SheetView`, `_scan_view.py`):
+**Read.** The first `<sheetView>` gives `Sheet.view` (`SheetView`, `_scan_view.py`):
 the saved zoom (`zoomScale`, 100 when absent; a value outside Excel's 10 to 400 or not whole is
 100, unverified), `showZeros`, and a frozen pane's rows and columns (`ySplit`, `xSplit` of a pane
 whose state is `frozen` or `frozenSplit`) from the view's top-left cell; a `split` pane is kept
@@ -1281,6 +1281,17 @@ over borders and fills, with the frozen rows and columns kept in place while the
 with `showZeros="0"`, an empty cell where a value shows as zero, which still blocks spill. So a
 print area and page breaks are not reported: a sheet with them is shown as Excel's Normal view
 shows it, and `--strict` passes.
+
+**The zoom** (HTML; `backends/html/_table.py`, `Page.zoom`). The default is the zoom saved with
+the sheet, as Excel opens it (decided); `HTMLBackend(zoom=)` overrides it with any whole percent
+Excel's zoom box takes, 10 to 400. A sheet point is `4/3 × zoom/100` CSS px: cells, text, fills,
+borders' positions and the headings' bands scale, and so do font sizes (the headings' through
+`--sheetpeek-zoom`). What Excel keeps in screen points stays in CSS px: gridlines (§4.14), border
+lines and pattern tiles (§4.12), underlines (§4.13) and the outline's gutter and symbols (§4.11),
+each captured identical at zoom 100 and 200. Excel lays out every zoom in whole screen pixels
+(at 200 % it wraps at 47 pt where 100 % holds 48, §4.7); the page scales the zoom-100 layout
+instead, so such differences are not reproduced (decided; zooms 75 to 125 are to be captured to
+measure them). The other outputs have no zoom; the zoom is window state and never reported.
 
 ## 5. openpyxl facts that constrain the design
 

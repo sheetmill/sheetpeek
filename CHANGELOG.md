@@ -149,6 +149,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   zoom, whether zeros show, a frozen pane's rows and columns), `Sheet.print_areas` (the print
   area's ranges; `Sheet.print_area_problem` says why a part was left out: `#REF!`, a formula,
   another sheet), and the manual page breaks, `Sheet.row_breaks` and `Sheet.column_breaks`.
+- HTML draws the zoom saved with each sheet, as Excel opens it; `HTMLBackend(zoom=...)` (10 to
+  400), `sheetpeek view --zoom` and `serve`'s `?zoom=` override it. Cells, text and headings
+  scale; lines, pattern tiles and outline symbols keep their screen size, as in Excel.
 
 ### Changed
 - The HTML backend writes a page faster: 13 % on a plain 100,000-cell sheet

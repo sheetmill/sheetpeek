@@ -1,9 +1,10 @@
 """``sheetpeek serve``: a small read-only web server for a folder of workbooks.
 
 Standard library only. ``/`` lists the ``.xlsx`` files under the folder, ``/view/<path>`` shows
-a workbook's default sheet, and ``?sheet=`` and ``?ref=`` choose another sheet and a range. Each
-sheet is drawn by the HTML backend. Only regular ``.xlsx`` files inside the folder are read:
-every requested path is resolved, symbolic links included, and must stay inside it.
+a workbook's default sheet; ``?sheet=`` and ``?ref=`` choose another sheet and a range, and
+``?zoom=`` a zoom. Each sheet is drawn by the HTML backend. Only regular ``.xlsx`` files inside
+the folder are read: every requested path is resolved, symbolic links included, and must stay
+inside it.
 
 A page can be asked for by anyone who can connect, and through a web page in a browser on this
 machine, so what one request may cost is bounded (``SERVE_LIMITS``, two reads at a time), and a
@@ -172,7 +173,18 @@ class _Handler(BaseHTTPRequestHandler):
         name = path.relative_to(self.root)
         sheet_name = query.get("sheet", [None])[0]
         ref = query.get("ref", [None])[0]
+        zoom_text = query.get("zoom", [None])[0]
         try:
+            zoom = (
+                int(zoom_text)
+                if zoom_text and zoom_text.isascii() and zoom_text.isdigit()
+                else None
+            )
+            if zoom_text is not None and zoom is None:
+                raise ValueError("zoom must be a whole number from 10 to 400")
+            backend = HTMLBackend(
+                fragment=True, column_headings=True, row_headings=True, notices=True, zoom=zoom
+            )
             with open_book(path, limits=self.limits) as book:
                 infos = book.sheets
                 sheet = book.sheet(sheet_name, ref=CellRange.parse(ref) if ref else None)
@@ -186,9 +198,7 @@ class _Handler(BaseHTTPRequestHandler):
             sys.stderr.write(one_line(f"sheetpeek: {name}: {error}") + "\n")
             return HTTPStatus.UNPROCESSABLE_ENTITY, self.error("Cannot read this file.")
         out = io.StringIO()
-        HTMLBackend(fragment=True, column_headings=True, row_headings=True, notices=True).render(
-            rendered, out
-        )
+        backend.render(rendered, out)
         fragment = out.getvalue().split("</style>\n", 1)[1]  # the page carries the stylesheet
         tabs = "".join(
             f'<span class="sp-current">{html.escape(i.name)}</span>'

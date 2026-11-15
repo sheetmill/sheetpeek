@@ -6,6 +6,7 @@ import os
 import re
 import socket
 import threading
+from urllib.parse import quote
 
 import openpyxl
 import pytest
@@ -328,3 +329,11 @@ def test_an_internal_error_is_logged_without_control_characters(server, folder, 
     log = capfd.readouterr().err
     assert "bad [31m thing" in log
     assert not re.search("[\x00-\x09\x0b-\x1f\x7f-\x9f]", log)
+
+
+def test_a_zoom_is_asked_for_in_the_query(server):
+    status, body, _ = get(server, "/view/book.xlsx?zoom=150")
+    assert status == 200
+    assert "--sheetpeek-zoom:1.5" in body
+    for zoom in ("5", "401", "abc", "1e2", "-100", "\u0661\u0660\u0660"):  # Arabic-Indic 100
+        assert get(server, f"/view/book.xlsx?zoom={quote(zoom)}")[0] == 404

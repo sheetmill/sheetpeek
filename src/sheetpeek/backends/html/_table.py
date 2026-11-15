@@ -22,9 +22,9 @@ if TYPE_CHECKING:
 _Spans = dict[CellRange, tuple[int, int, int, int]]
 
 
-def _px(points: float) -> int:
-    """A sheet position in whole CSS pixels."""
-    return round(points * 4 / 3)
+def _px(points: float, zoom: int = 100) -> int:
+    """A sheet position in whole CSS pixels at ``zoom`` percent."""
+    return round(points * 4 / 3 * zoom / 100)
 
 
 def _grid_css(color: str | None) -> str:
@@ -40,6 +40,11 @@ def _grid_css(color: str | None) -> str:
         f"{name} table {{ border-right-width: 0.5px; border-bottom-width: 0.5px; }}\n"
         f"{name} td {{ border-left-width: 0.5px; border-top-width: 0.5px; }}\n"
     )
+
+
+def page_zoom(sheet: RenderedSheet, backend: HTMLBackend) -> int:
+    """The zoom a page is drawn at: the backend's ``zoom``, else the one saved in the file."""
+    return sheet.sheet.view.zoom if backend.zoom is None else backend.zoom
 
 
 class Holder:
@@ -99,11 +104,13 @@ class Page:
         """Grid position of a cell a link goes to → its id."""
         self._grid: tuple[_Spans, Holder] | None = None
         self._links: _links.Links | None = None
+        self.zoom = page_zoom(sheet, backend)
+        """The zoom in percent: the backend's, else the one saved in the file (§4.18)."""
         self.ox, self.oy = _headings.offsets(sheet, backend)
         self.gx, self.gy = _outline.offsets(sheet, backend)  # px, the outline gutters
         self.outline_rows = _outline.row_marks(sheet, backend)
         self.normal = sheet.sheet.normal_font
-        self.normal_face = _text._face(self.normal)
+        self.normal_face = _text._face(self.normal, self.normal.size * self.zoom / 100)
         self.width = self.x(sheet.width_pt) + 1  # px, the wrapper's width: the table's
         self.fills = _patterns.Fills(self)
         self.borders = _borders.Borders(self)
@@ -115,20 +122,26 @@ class Page:
         return _patterns.layer_css(self.fills, self.borders.css()) + _grid_css(self.grid_color)
 
     def x(self, points: float) -> int:
-        return self.gx + _px(self.ox + points)
+        return self.gx + _px(self.ox + points, self.zoom)
 
     def y(self, points: float) -> int:
-        return self.gy + _px(self.oy + points)
+        return self.gy + _px(self.oy + points, self.zoom)
+
+    def size(self, points: float) -> float:
+        """A font size in points, at the page's zoom."""
+        return points * self.zoom / 100
 
     def write(self, out: TextIO) -> None:
         sheet = self.sheet
         classes = "sheetpeek" if sheet.sheet.show_gridlines else "sheetpeek sp-nogrid"
         if self.grid_color:
             classes += f" sp-g-{self.grid_color}"
-        out.write(f'<div class="{classes}" data-color-scheme="{self.backend.color_scheme}">')
+        zoom = f' style="--sheetpeek-zoom:{self.zoom / 100:g}"' if self.zoom != 100 else ""
+        out.write(f'<div class="{classes}" data-color-scheme="{self.backend.color_scheme}"{zoom}>')
         self.fills.write(out)
         self.borders.write(out)
-        out.write(f'<table style="width:{self.width}px;font:{_text._font(self.normal)}">\n')
+        font = _text._font(self.normal, self.normal_face[1])
+        out.write(f'<table style="width:{self.width}px;font:{font}">\n')
         out.write("<colgroup>")
         _outline.write_column(self, out)
         _headings.write_column(self, out)
