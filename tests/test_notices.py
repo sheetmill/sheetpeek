@@ -19,6 +19,7 @@ from openpyxl.styles import Alignment, Border, Font, GradientFill, PatternFill, 
 from openpyxl.worksheet.hyperlink import Hyperlink
 from openpyxl.worksheet.pagebreak import Break
 from openpyxl.worksheet.table import Table
+from openpyxl.worksheet.views import Pane
 
 import sheetpeek
 from sheetpeek import cli
@@ -169,7 +170,7 @@ def build_every_feature(path: Path) -> Path:
     ws.sheet_view.view = "pageLayout"
     ws.sheet_view.defaultGridColor = False
     ws.sheet_view.colorId = 10
-    ws.freeze_panes = "B2"
+    ws.sheet_view.pane = Pane(xSplit=2400, ySplit=1800, topLeftCell="C4", state="split")
     ws.row_dimensions[5].outlineLevel = 1
     ws.column_dimensions["Z"].outlineLevel = 9  # past Excel's 7
     ws.conditional_formatting.add(

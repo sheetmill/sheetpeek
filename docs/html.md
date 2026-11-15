@@ -64,6 +64,11 @@ True
   pixels, as Excel keeps them in screen points. The page scales the layout Excel makes at 100 %:
   Excel lays out each zoom in whole screen pixels, so where it wraps or places text differently
   at another zoom, the page does not follow. The other outputs have no zoom.
+- `freeze`: how a sheet's frozen pane is drawn. `"panes"` keeps the frozen rows and columns in
+  place while the page scrolls, through CSS `position: sticky`, with no script; `"static"`
+  draws only the freeze lines. By default, panes on a whole page and static in a fragment, whose
+  host page decides how it scrolls. Every row and column of the range is drawn either way: where
+  the file was scrolled to is the viewer's state, not content, and is not followed.
 
 ```python
 >>> wb = openpyxl.Workbook()
@@ -96,6 +101,7 @@ an API change.
 | `--sheetpeek-heading-ink` | the headings' text | `#5e5e5e`, dark `#ffffff` |
 | `--sheetpeek-heading-grid` | the headings' lines | `#e0dfdd`, dark `#565656` |
 | `--sheetpeek-zoom` | set by the page when its zoom is not 100: the zoom as a factor, which scales the headings' font | `1` |
+| `--sheetpeek-freeze` | a frozen pane's freeze lines | `#9b9b9b` |
 | `--sheetpeek-outline-paper` | the outline gutter | `#eeeeee`, dark `#555555` |
 | `--sheetpeek-outline-ink` | the outline's bars and dots | `#a6a6a6`, dark `#999999` |
 | `--sheetpeek-outline-button` | the outline buttons' borders and strokes | `#808080`, dark `#333333` |
@@ -116,6 +122,8 @@ an API change.
 | `sp-book` | the workbook page's wrapper `<div>`, around its `<nav>` of tabs and a `<section>` per sheet |
 | `sp-first`, `sp-hidden` | on the workbook page, the tab and section shown first; a hidden sheet's tab. A tab color's class (`sp-t-…`) is generated |
 | `sp-notshown` | on the workbook page, the line that says a chartsheet or dialog sheet is not shown |
+| `sp-freeze` | a freeze line |
+| `sp-panes`, `sp-pane`, `sp-pane-top`, `sp-pane-left`, `sp-pane-corner` | a sheet with frozen panes, and the copies of its frozen rows, columns and corner |
 | `sp-notices` | the `<details>` list of notices, when the backend's `notices` option asks for it |
 
 A cell that a link on the page goes to has the id `sp-` and its coordinate, such as `sp-C2`; on

@@ -156,3 +156,29 @@ def test_a_print_area_and_page_breaks_are_not_reported(book):  # noqa: F811
     assert sheet.print_areas
     assert not [n for n in sheet.notices if n.code.startswith("print.") or "element" in n.code]
     assert main(["view", str(book), "--to", "text", "--strict", "--notices", "none"]) == 0
+
+
+@pytest.mark.parametrize("state", ["frozen", "frozenSplit"])
+def test_a_frozen_pane_is_not_reported(book, state):  # noqa: F811
+    _view(book, "", f'<pane xSplit="2" ySplit="3" topLeftCell="C4" state="{state}"/>')
+    assert "view.panes" not in {n.code for n in sheetpeek.read(book).notices}
+
+
+def test_a_split_pane_is_reported(book):  # noqa: F811
+    _view(book, "", '<pane xSplit="2400" ySplit="1800" topLeftCell="C4"/>')
+    assert "view.panes" in {n.code for n in sheetpeek.read(book).notices}
+
+
+def test_print_titles_are_not_reported(book):  # noqa: F811
+    # Excel's Normal view draws nothing for print titles, as for a print area.
+    rewrite(
+        book,
+        "xl/workbook.xml",
+        lambda text: text.replace(
+            "</sheets>",
+            '</sheets><definedNames><definedName name="_xlnm.Print_Titles" localSheetId="0">'
+            "Sheet!$1:$1</definedName></definedNames>",
+            1,
+        ),
+    )
+    assert sheetpeek.read(book).notices == ()

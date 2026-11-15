@@ -25,10 +25,13 @@ from sheetpeek.backends import _support
 from sheetpeek.backends.html._css import CSS
 from sheetpeek.backends.html._notices import write_notices
 from sheetpeek.backends.html._outline import css as outline_css
+from sheetpeek.backends.html._panes import css as panes_css
+from sheetpeek.backends.html._panes import write as write_sheet
 from sheetpeek.backends.html._table import Page
 
 ColorScheme = Literal["light", "dark"]
 Buttons = Literal["none", "static"]
+Freeze = Literal["panes", "static"]
 
 
 def check_zoom(zoom: int | None) -> int | None:
@@ -74,6 +77,12 @@ class HTMLBackend:
             symbols keep their size in screen points, as in Excel. The page scales the layout
             Excel makes at 100 %, so text Excel wraps or places differently at another zoom (it
             lays out each zoom in whole screen pixels) is not reproduced. Only HTML has a zoom.
+        freeze: How a sheet's frozen pane is drawn. ``"panes"`` keeps the frozen rows and
+            columns in place while the page scrolls, through CSS ``position: sticky`` (no
+            script); ``"static"`` draws only the freeze lines. By default (``None``), panes on a
+            whole page and static in a fragment, whose host page decides how it scrolls. Every
+            row and column of the range is drawn either way; the scroll position saved in the
+            file is not followed.
     """
 
     name = "html"
@@ -91,6 +100,7 @@ class HTMLBackend:
         local_links: bool = False,
         buttons: Buttons = "static",
         zoom: int | None = None,
+        freeze: Freeze | None = None,
     ) -> None:
         if color_scheme not in ("light", "dark"):
             raise ValueError(f"color_scheme must be 'light' or 'dark', not {color_scheme!r}")
@@ -105,6 +115,9 @@ class HTMLBackend:
             raise ValueError(f"buttons must be 'none' or 'static', not {buttons!r}")
         self.buttons = buttons
         self.zoom = check_zoom(zoom)
+        if freeze not in (None, "panes", "static"):
+            raise ValueError(f"freeze must be 'panes', 'static' or None, not {freeze!r}")
+        self.freeze = freeze
 
     @property
     def support(self) -> dict[str, Support]:
@@ -119,6 +132,7 @@ class HTMLBackend:
     def render(self, sheet: RenderedSheet, out: TextIO, /) -> None:
         """Write the page or the fragment to ``out``."""
         page = Page(sheet, self)
+        stylesheet = f"{CSS}{outline_css(sheet, self)}{panes_css(sheet, self)}{page.css()}"
         if not self.fragment:
             title = html.escape(one_line(sheet.sheet.name))
             background = "#1e1e1e" if self.color_scheme == "dark" else "#ffffff"
@@ -126,17 +140,17 @@ class HTMLBackend:
                 '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
                 '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
                 f"<title>{title}</title>\n"
-                f"<style>\n{CSS}{outline_css(sheet, self)}{page.css()}"
+                f"<style>\n{stylesheet}"
                 f"body {{ margin: 8px; background: {background}; }}\n</style>\n"
                 "</head>\n<body>\n"
             )
         else:
-            out.write(f"<style>\n{CSS}{outline_css(sheet, self)}{page.css()}</style>\n")
-        page.write(out)
+            out.write(f"<style>\n{stylesheet}</style>\n")
+        write_sheet(page, out)
         if self.notices:
             write_notices(sheet, self, out)
         if not self.fragment:
             out.write("</body>\n</html>\n")
 
 
-__all__ = ["CSS", "Buttons", "ColorScheme", "HTMLBackend"]
+__all__ = ["CSS", "Buttons", "ColorScheme", "Freeze", "HTMLBackend"]

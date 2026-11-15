@@ -8,7 +8,8 @@ import re
 
 import openpyxl
 import pytest
-from openpyxl.styles import Border, Font, PatternFill, Side
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+from openpyxl.worksheet.hyperlink import Hyperlink
 
 import sheetpeek
 from sheetpeek.backends import HTMLBackend
@@ -117,3 +118,128 @@ def test_the_cli_takes_a_zoom_for_html_only(tmp_path, capsys):
     assert main(["view", path, "-t", "html", "--zoom", "5"]) == 2
     assert main(["view", path, "--all-sheets", "--zoom", "150", "--notices", "none"]) == 0
     assert "--sheetpeek-zoom:1.5" in capsys.readouterr().out
+
+
+def _frozen(tmp_path, x=1, y=2, top_left="B3", view_top_left="", state="frozen", rows=8):
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+    for row in range(1, rows + 1):
+        for column in range(1, 5):
+            sheet.cell(row, column).value = f"r{row}c{column}"
+    sheet["D2"].hyperlink = Hyperlink(ref="D2", location="A1")
+    path = save(workbook, tmp_path / "frozen.xlsx")
+    pane = f'<pane xSplit="{x}" ySplit="{y}" topLeftCell="{top_left}" state="{state}"/>'
+    attributes = f'topLeftCell="{view_top_left}"' if view_top_left else ""
+    rewrite(
+        path,
+        SHEET1,
+        lambda text: text.replace(
+            '<sheetView workbookViewId="0">',
+            f'<sheetView workbookViewId="0" {attributes}>{pane}',
+            1,
+        ),
+    )
+    return path
+
+
+def _panes(page):
+    """Each pane copy's markup by its class."""
+    pattern = r'<div class="sp-pane sp-pane-(\w+)"[^>]*>(.*?)</div>\n</div>'
+    return dict(re.findall(pattern, page, re.S))
+
+
+def test_a_frozen_pane_holds_its_rows_and_columns_on_a_page(tmp_path):
+    page = _html(_frozen(tmp_path))
+    assert page.count('<div class="sp-panes">') == 1
+    panes = _panes(page)
+    assert set(panes) == {"left", "top", "corner"}
+    # The copies hold only the frozen rows (with the headings' row) or the frozen columns.
+    assert panes["top"].count("<tr") == 3
+    assert panes["corner"].count("<tr") == 3
+    assert "r1c1" in panes["corner"]
+    assert "r1c2" not in panes["corner"]
+    assert "r8c1" in panes["left"]
+    assert "r8c2" not in panes["left"]
+    assert "r3c1" not in panes["top"]
+    # Cell ids stay unique: only the sheet itself carries them.
+    assert page.count('id="sp-A1"') == 1
+    assert "position: sticky" in page
+    assert "<script" not in page.lower()
+
+
+def test_the_freeze_lines_are_drawn_where_the_split_is(tmp_path):
+    page = _html(_frozen(tmp_path), column_headings=False, row_headings=False)
+    pattern = r'class="sp-freeze" style="left:(\d+)px;top:(\d+)px;width:(\d+)px;height:(\d+)px"'
+    lines = re.findall(pattern, page)
+    # Two lines in the sheet and in each of its three copies.
+    assert len(lines) == 8
+    horizontal, vertical = lines[0], lines[1]
+    assert horizontal[1] == str(round(2 * 15 * 4 / 3))  # below two default rows
+    assert horizontal[3] == "1"
+    first_column = re.search(r'<col style="width:(\d+)px">', page).group(1)
+    assert vertical[0] == first_column  # after column A
+    assert vertical[2] == "1"
+    assert "--sheetpeek-freeze: #9b9b9b" in page
+
+
+def test_a_fragment_draws_only_the_freeze_lines_by_default(tmp_path):
+    path = _frozen(tmp_path)
+    fragment = _html(path, fragment=True)
+    assert "sp-panes" not in fragment.split("</style>")[1]
+    assert fragment.count('class="sp-freeze"') == 2
+    assert 'class="sp-panes"' in _html(path, fragment=True, freeze="panes")
+    assert 'class="sp-panes"' not in _html(path, freeze="static")
+
+
+def test_the_saved_scroll_position_is_not_followed(tmp_path):
+    # Frozen two rows from row 3 of the view: rows 1 to 4 are before the split, all drawn.
+    page = _html(_frozen(tmp_path, x=0, y=2, top_left="A5", view_top_left="A3"))
+    panes = _panes(page)
+    assert set(panes) == {"top"}
+    assert panes["top"].count("<tr") == 5  # the headings' row and rows 1 to 4
+    assert "r1c1" in page.split('<div class="sp-pane ')[0]
+
+
+@pytest.mark.parametrize(
+    ("x", "y", "top_left", "state"),
+    [(0, 9, "A10", "frozen"), (5, 0, "F1", "frozen"), (2400, 1800, "C4", "split")],
+    ids=["split below the range", "split past the range", "split pane"],
+)
+def test_nothing_is_frozen_without_a_split_inside_the_range(tmp_path, x, y, top_left, state):
+    page = _html(_frozen(tmp_path, x=x, y=y, top_left=top_left, state=state))
+    assert "sp-freeze" not in page
+
+
+def test_a_frozen_split_pane_is_drawn_as_frozen(tmp_path):
+    assert 'class="sp-panes"' in _html(_frozen(tmp_path, state="frozenSplit"))
+
+
+def test_text_reaching_into_the_frozen_columns_is_in_their_copy(tmp_path):
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+    sheet["C1"] = "right-aligned text long enough to spill"
+    sheet["C1"].alignment = Alignment(horizontal="right")
+    sheet["A3"] = 1
+    path = save(workbook, tmp_path / "spill.xlsx")
+    rewrite(
+        path,
+        SHEET1,
+        lambda text: text.replace(
+            '<sheetView workbookViewId="0">',
+            '<sheetView workbookViewId="0"><pane xSplit="2" topLeftCell="C1" state="frozen"/>',
+            1,
+        ),
+    )
+    panes = _panes(_html(path))
+    assert "right-aligned text" in panes["left"]
+
+
+def test_an_unknown_freeze_is_refused():
+    with pytest.raises(ValueError, match="freeze"):
+        HTMLBackend(freeze="sticky")
+
+
+def test_other_outputs_draw_and_report_nothing_for_a_frozen_pane(tmp_path):
+    path = _frozen(tmp_path)
+    for to in ("text", "markdown", "csv"):
+        assert not [n for n in sheetpeek.notices(path, to) if n.code.startswith("view")]

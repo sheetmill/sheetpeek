@@ -14,10 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   that output cannot show, without rendering. A notice has a dotted code (`FEATURES` lists them),
   an outcome (`omitted` or `approximated`), a reason, the cells and the output.
 - Reported when a file uses them, until they are drawn: phonetic guides, rich-text runs in inline strings (which openpyxl does not keep), row and column formats, sheet views (hidden zeros, right to left, formulas,
-  page layout, panes), conditional formatting, filter buttons,
+  page layout, split panes), conditional formatting, filter buttons,
   tables, sparklines, slicers, timelines, pictures, charts, shapes, embedded objects, form
-  controls, background pictures, notes and threaded comments, print areas, print titles, manual
-  page breaks, tab colors (drawn only on the workbook page), dialog sheets, macro sheets, and any sheet element or extension sheetpeek
+  controls, background pictures, notes and threaded comments, tab colors (drawn only on the workbook page), dialog sheets, macro sheets, and any sheet element or extension sheetpeek
   does not recognize. A file is reported for what it uses, not what it contains: margins, page
   setup, protection and validation, which draw nothing, are never reported. A linked picture is
   reported as refused: Excel fetches the linked file, sheetpeek never does.
@@ -152,6 +151,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - HTML draws the zoom saved with each sheet, as Excel opens it; `HTMLBackend(zoom=...)` (10 to
   400), `sheetpeek view --zoom` and `serve`'s `?zoom=` override it. Cells, text and headings
   scale; lines, pattern tiles and outline symbols keep their screen size, as in Excel.
+- HTML draws a frozen pane: the freeze lines, and on a whole page the frozen rows and columns held
+  in place while the page scrolls, through CSS `position: sticky` (no script).
+  `HTMLBackend(freeze="panes" | "static")` chooses; a fragment draws only the lines by default.
+  Every row and column of the range is drawn; the saved scroll position is not followed.
 
 ### Changed
 - The HTML backend writes a page faster: 13 % on a plain 100,000-cell sheet

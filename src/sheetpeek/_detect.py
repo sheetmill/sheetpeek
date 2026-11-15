@@ -73,7 +73,6 @@ CODES: dict[str, tuple[Outcome, Reason, str]] = {
     "picture.background": ("omitted", "not_implemented", ""),
     "comment": ("omitted", "not_implemented", "the note indicators and shown notes"),
     "comment.threaded": ("omitted", "not_implemented", "the comment indicators"),
-    "print.titles": ("omitted", "not_implemented", ""),
     "sheet.tab_color": (
         "omitted",
         "option",
@@ -164,7 +163,6 @@ class WorkbookInfo:
     kinds: dict[str, str] = field(default_factory=dict)
     """Sheet name → ``worksheet``, ``chartsheet``, ``dialogsheet`` or ``macrosheet``."""
     print_areas: frozenset[str] = frozenset()
-    print_titles: frozenset[str] = frozenset()
     print_area_text: dict[str, str] = field(default_factory=dict)
     """Sheet name → its ``_xlnm.Print_Area`` value, as written."""
     show_objects: str = "all"
@@ -186,7 +184,6 @@ def workbook_info(archive: zipfile.ZipFile) -> WorkbookInfo:
             (k for suffix, k in _SHEET_KINDS if suffix in kind_url.lower()), "worksheet"
         )
     areas: set[str] = set()
-    titles: set[str] = set()
     texts: dict[str, str] = {}
     for defined in root.iter(f"{{{_MAIN}}}definedName"):
         local = defined.get("localSheetId", "")
@@ -195,14 +192,12 @@ def workbook_info(archive: zipfile.ZipFile) -> WorkbookInfo:
         if defined.get("name") == "_xlnm.Print_Area":
             areas.add(names[int(local)])
             texts[names[int(local)]] = (defined.text or "").strip()
-        elif defined.get("name") == "_xlnm.Print_Titles":
-            titles.add(names[int(local)])
     properties = root.find(f"{{{_MAIN}}}workbookPr")
     show_objects = properties.get("showObjects", "all") if properties is not None else "all"
     strings = next(
         (target for kind, target in rels.values() if kind.endswith("/sharedStrings")), None
     )
-    return WorkbookInfo(kinds, frozenset(areas), frozenset(titles), texts, show_objects, strings)
+    return WorkbookInfo(kinds, frozenset(areas), texts, show_objects, strings)
 
 
 def book_notices(collector: Collector, info: WorkbookInfo) -> None:
@@ -359,8 +354,6 @@ def sheet_notices(
             _report(
                 collector, "sheet.unknown_element", detail=f"<{local}>", context={"element": local}
             )
-    if name in info.print_titles:
-        _report(collector, "print.titles")
     _comments(collector, archive, context.rels, ref)
 
 
@@ -478,10 +471,9 @@ def _view(collector: Collector, view: ET.Element) -> None:
     pane = view.find(f"{{{_MAIN}}}pane")
     if pane is not None:
         state = pane.get("state", "split")
-        if (
-            state in ("frozen", "frozenSplit")
-            or _number(pane.get("xSplit"))
-            or _number(pane.get("ySplit"))
+        # A frozen pane is drawn (HTML) or, like printing, has nothing to show (§4.18).
+        if state not in ("frozen", "frozenSplit") and (
+            _number(pane.get("xSplit")) or _number(pane.get("ySplit"))
         ):
             _report(collector, "view.panes", context={"state": state})
 

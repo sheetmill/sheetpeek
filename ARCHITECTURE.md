@@ -347,8 +347,8 @@ element states something Excel draws differently from its default:
   selection, the active tab) is not reported: a page shows the whole range;
 - `autoFilter` counts with a `ref`, `conditionalFormatting` with a `cfRule`, `tableParts` with a
   `tablePart`, page breaks only manual ones, outline symbols only while the file shows them, a pane
-  when frozen or split, a tab color other than automatic; drawings, embedded objects and controls
-  are not reported under `workbookPr showObjects="none"`;
+  only when split (a frozen pane is drawn, §4.18), a tab color other than automatic; drawings,
+  embedded objects and controls are not reported under `workbookPr showObjects="none"`;
 - a linked picture (`r:link` without `r:embed`) is reported as `unsafe`: Excel fetches the linked
   file on open, and sheetpeek never fetches;
 - sheet extension URIs are compared as Excel compares them, exactly. For conditional formatting
@@ -1279,8 +1279,8 @@ boundaries from zero, so `id="10"` falls below row 10; only manual breaks (`man=
 neither the print area nor page breaks; a frozen pane as a line one screen point wide, gray 155,
 over borders and fills, with the frozen rows and columns kept in place while the rest scrolls;
 with `showZeros="0"`, an empty cell where a value shows as zero, which still blocks spill. So a
-print area and page breaks are not reported: a sheet with them is shown as Excel's Normal view
-shows it, and `--strict` passes.
+print area, print titles and page breaks are not reported: a sheet with them is shown as Excel's
+Normal view shows it, and `--strict` passes.
 
 **The zoom** (HTML; `backends/html/_table.py`, `Page.zoom`). The default is the zoom saved with
 the sheet, as Excel opens it (decided); `HTMLBackend(zoom=)` overrides it with any whole percent
@@ -1292,6 +1292,24 @@ each captured identical at zoom 100 and 200. Excel lays out every zoom in whole 
 (at 200 % it wraps at 47 pt where 100 % holds 48, §4.7); the page scales the zoom-100 layout
 instead, so such differences are not reproduced (decided; zooms 75 to 125 are to be captured to
 measure them). The other outputs have no zoom; the zoom is window state and never reported.
+
+**Frozen panes** (HTML; `backends/html/_panes.py`). A `frozen` or `frozenSplit` pane splits the
+sheet before row `top_left + frozen_rows` and column `top_left + frozen_columns`. **The saved
+scroll position is not followed** (decided): the view's and the pane's top-left cells say where
+the window was scrolled, which is the viewer's state like the window's size, not content, and
+sheetpeek does not start an unfrozen sheet at its saved top-left cell either; so every row and
+column of the range is drawn, and those before the split are frozen. A split outside the drawn
+range freezes nothing. The freeze line is one CSS px of `#9B9B9B` over fills, borders and text,
+across the sheet below the frozen rows and down it after the frozen columns. With `freeze="panes"`
+(the default on a whole page) the sheet is drawn once and its frozen rows, columns and corner again
+as copies holding only their own rows or columns (with the runs of later cells that reach into
+them), stacked over it in one grid cell and held by `position: sticky`; copies carry no ids. This
+is CSS layout, not interactivity (no script, no hover; a browser without sticky positioning shows
+the static drawing), measured in WebKit: scrolled by (600, 900), the row copy stays at the top and
+follows the sheet sideways, the column copy stays at the left, the corner stays put. With
+`"static"` (the default in a fragment, whose host decides how it scrolls) only the lines are
+drawn. A frozen pane is not reported; the other outputs have nothing to draw for it, as a printed
+sheet has none (a choice). A split pane is reported (`view.panes`).
 
 ## 5. openpyxl facts that constrain the design
 
@@ -2127,9 +2145,9 @@ on a clipped text, so the full value shows on hover. No script: the output stays
 - custom scripts the caller supplies.
 - *Scope:* document (HTML backend).
 
-**Frozen headings and panes** (planned). The column headings, the row headings, or the first N
-rows and columns stay in place while the page scrolls, through CSS `position: sticky`. By default
-the sheet's own frozen panes (`<pane>` in its `<sheetView>`) decide.
+**Frozen headings** (planned). The column headings, the row headings, or the first N rows and
+columns stay in place while the page scrolls, as the sheet's own frozen panes do (§4.18), for a
+sheet without them.
 - *Scope:* document (HTML backend).
 
 **A terminal pager** (planned). `sheetpeek view --pager` pages the output with rich's pager,

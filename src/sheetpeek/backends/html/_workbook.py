@@ -28,6 +28,8 @@ from sheetpeek.backends.html._css import CSS
 from sheetpeek.backends.html._links import BookLinks
 from sheetpeek.backends.html._notices import write_notices
 from sheetpeek.backends.html._outline import css as outline_css
+from sheetpeek.backends.html._panes import css as panes_css
+from sheetpeek.backends.html._panes import write as write_sheet
 from sheetpeek.backends.html._patterns import letters
 from sheetpeek.backends.html._table import Page
 
@@ -187,7 +189,9 @@ class _WorkbookPage:
 
     def write(self, out: TextIO) -> None:
         backend = self.backend
-        css = CSS + "".join({outline_css(p.sheet, backend) for p in self.pages.values()} - {""})
+        shared = {outline_css(p.sheet, backend) for p in self.pages.values()}
+        shared |= {panes_css(p.sheet, backend) for p in self.pages.values()}
+        css = CSS + "".join(sorted(shared - {""}))
         css += "".join(p.css() for p in self.pages.values()) + _BOOK_CSS + self.tab_css()
         if backend.fragment:
             out.write(f"<style>\n{css}</style>\n")
@@ -211,7 +215,7 @@ class _WorkbookPage:
                 name = html.escape(one_line(repr(info.name)))
                 out.write(f'<p class="sp-notshown">{name} {_NOT_SHOWN[info.kind]}</p>\n')
             else:
-                page.write(out)
+                write_sheet(page, out)
                 if backend.notices:
                     write_notices(None, backend, out, self.notices[index])
             out.write("</section>\n")

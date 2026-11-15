@@ -98,6 +98,8 @@ class Page:
         self.backend = backend
         self.scope = scope
         self.tag = tag
+        self.copy = False
+        """Whether a frozen pane's copy is being written: its cells take no ids."""
         self.book: _links.BookLinks | None = None
         """The workbook page's other sheets, for links to them; ``None`` for one sheet."""
         self.ids: dict[tuple[int, int], str] = {}
@@ -131,7 +133,24 @@ class Page:
         """A font size in points, at the page's zoom."""
         return points * self.zoom / 100
 
-    def write(self, out: TextIO) -> None:
+    def write(
+        self,
+        out: TextIO,
+        *,
+        rows: int | None = None,
+        columns: int | None = None,
+        lines: str = "",
+    ) -> None:
+        """Write the sheet, or a frozen pane's copy of it.
+
+        Args:
+            out: Where to write.
+            rows: Write only the first ``rows`` rows (a frozen pane's copy); ``None`` for all.
+            columns: Write only the first ``columns`` columns' cells, with the runs of later
+                cells that start inside them; ``None`` for all.
+            lines: Markup drawn over everything else: the freeze lines.
+        """
+        self.copy = rows is not None or columns is not None
         sheet = self.sheet
         classes = "sheetpeek" if sheet.sheet.show_gridlines else "sheetpeek sp-nogrid"
         if self.grid_color:
@@ -155,8 +174,8 @@ class Page:
             _headings.write_header(self, out, _outline.lead(self))
             out.write("</thead>\n")
         out.write("<tbody>\n")
-        self.write_rows(out)
-        out.write("</tbody></table></div>\n")
+        self.write_rows(out, rows, columns)
+        out.write(f"</tbody></table>{lines}</div>\n")
 
     def grid(self) -> tuple[_Spans, Holder]:
         """Each merge's grid span, and sheet position → grid position of the cell drawing it."""
@@ -193,7 +212,7 @@ class Page:
             self._links = _links.Links(self, self.grid()[1])
         return self._links
 
-    def write_rows(self, out: TextIO) -> None:
+    def write_rows(self, out: TextIO, last: int | None = None, columns: int | None = None) -> None:
         sheet = self.sheet
         spans, holder = self.grid()
         self.links  # noqa: B018 - found before the cells are written, for their ids
@@ -201,12 +220,20 @@ class Page:
         for i, row in enumerate(sheet.rows):
             for run in row.runs:
                 runs.setdefault(holder.get(run.source, (i, 0)), []).append(run)
-        for i, row in enumerate(sheet.rows):
+        edge = None
+        if columns is not None and columns < len(sheet.columns):
+            edge = sheet.columns[columns].x_pt or 0
+        for i, row in enumerate(sheet.rows if last is None else sheet.rows[:last]):
             y0, y1 = row.y_pt or 0, (row.y_pt or 0) + (row.height_pt or 0)
             out.write(f'<tr style="height:{self.y(y1) - self.y(y0)}px">')
             _outline.write_row(self, row, out)
             _headings.write_row(self, row, out)
+            beyond: list[TextRun] = []
             for p, cell in enumerate(row.cells):
+                if edge is not None and p >= (columns or 0):
+                    # A copy of the frozen columns: later cells' runs that reach into them.
+                    beyond += [r for r in runs.get((i, p), ()) if r.clip[0] < edge]
+                    continue
                 colspan = rowspan = 1
                 if cell.merge is not None:
                     top, left, bottom, right = spans[cell.merge]
@@ -214,6 +241,8 @@ class Page:
                         continue  # covered by its merge
                     colspan, rowspan = right - left + 1, bottom - top + 1
                 out.write(self.cell(i, p, cell, colspan, rowspan, runs.get((i, p), ())))
+            if beyond:
+                out.write(f"<td>{self.text(beyond)}</td>")  # past the copy's edge, clipped
             out.write("</tr>\n")
 
     def cell(
@@ -243,7 +272,7 @@ class Page:
             if above_fill:
                 style.append(f"border-top-color:#{above_fill}")
         attrs = ""
-        found = self.ids.get((i, p)) if self.ids else None
+        found = self.ids.get((i, p)) if self.ids and not self.copy else None
         if found is not None:
             attrs += f' id="{found}"'
         if p and rows[i].crossed[p - 1]:
