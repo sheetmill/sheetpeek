@@ -444,19 +444,24 @@ def test_render_still_warns_once(tabs):
     ["FF'><b>x", "FF;x:url", "#FF0000", "FF0000;}", "red", "FFGGGGGG", "", "FF00FF0"],
 )
 def test_a_tab_color_reaches_css_only_as_hex(kinds, color):
-    # openpyxl refuses such a color on a worksheet or chartsheet it reads, but never reads a
-    # dialog sheet's, so sheetpeek's own reading is all there is.
+    # Excel takes text that is not hex as opaque black, and fewer than eight hex digits as a
+    # number whose low 24 bits are the color (xlio's capture attributes).
     from xml.sax.saxutils import quoteattr
 
     tab = f"<sheetPr><tabColor rgb={quoteattr(color)} />"
     rewrite(kinds, "xl/worksheets/sheet2.xml", lambda t: t.replace("<sheetPr>", tab, 1))
     markup = page(kinds)
     with sheetpeek.open(kinds) as book:
-        assert book.sheets[1].tab_color is None
+        expected = (
+            f"{int(color, 16) & 0xFFFFFF:06X}"
+            if re.fullmatch("[0-9A-Fa-f]{1,7}", color)
+            else "000000"
+        )
+        assert book.sheets[1].tab_color == expected
     assert "<b>" not in markup
     assert "GGGG" not in markup
     assert "x:url" not in markup
-    assert "sp-t-b" not in markup
+    assert f"nav a.sp-t-b {{ background: #{expected};" in markup
 
 
 def test_a_dialog_sheets_tab_color_is_drawn(kinds):
@@ -475,12 +480,14 @@ def test_a_dialog_sheets_tab_color_is_drawn(kinds):
         ("INF", "4F81BD"),
         ("-inf", "4F81BD"),
         ("x", "4F81BD"),
-        ("2", "FFFFFF"),  # past 1: white
-        ("-2", "000000"),  # past -1: black
+        # Past 1 or -1, a tint wraps as a signed 16-bit count of 32,767ths, as Excel takes it
+        # (xlio's capture attributes): 2 is -2/32,767, which leaves the color as it is.
+        ("2", "4F81BD"),
+        ("-2", "4F81BD"),
         ("-0.5", "244062"),
     ],
 )
-def test_a_tab_tint_is_a_number_from_minus_one_to_one(kinds, tint, expected):
+def test_a_tab_tint_is_read_as_excel_reads_it(kinds, tint, expected):
     tab = f'<sheetPr><tabColor theme="4" tint="{tint}" />'
     rewrite(kinds, "xl/worksheets/sheet2.xml", lambda t: t.replace("<sheetPr>", tab, 1))
     with sheetpeek.open(kinds) as book:

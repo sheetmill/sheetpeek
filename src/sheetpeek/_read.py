@@ -70,9 +70,10 @@ from sheetpeek._sheets import (
     ListedSheet,
     NotAWorksheetError,
     SheetInfo,
+    SheetKind,
+    StatedColor,
     default_sheet,
-    listed_sheets,
-    tab_color,
+    from_xlio,
 )
 from sheetpeek._structure import Structure, scan
 from sheetpeek._style import Code
@@ -149,6 +150,31 @@ def active_sheet(book: Book) -> SheetInfo | None:
 def book_limits(book: Book) -> ReadLimits:
     """The limits a book reads under."""
     return book._limits
+
+
+_KIND: dict[str, SheetKind] = {
+    "worksheet": "worksheet",
+    "chartsheet": "chartsheet",
+    "dialogsheet": "dialogsheet",
+    "macrosheet": "macrosheet",
+}
+_STATE: dict[str, SheetState] = {
+    "visible": "visible",
+    "hidden": "hidden",
+    "veryHidden": "very_hidden",
+}
+
+
+def _tab_color(sheet: xlio.Sheet) -> StatedColor | None:
+    """A sheet's tab color as stated; none where xlio cannot read the sheet's properties.
+
+    xlio raises on some numbers no file Excel writes holds (an index of thousands of digits, a
+    tint past the range of a double once scaled); such a tab is drawn uncolored (unverified).
+    """
+    try:
+        return from_xlio(sheet.properties.tab_color)
+    except (ValueError, OverflowError):
+        return None
 
 
 class Book:
@@ -258,34 +284,34 @@ class Book:
         Each with its kind, state and tab color. A chartsheet or dialog sheet is listed here, and
         :meth:`sheet` raises :class:`NotAWorksheetError` for it.
         """
-        assert self._archive is not None
         return tuple(
-            SheetInfo(
-                listed.name,
-                listed.kind,
-                listed.state,
-                self._color(tab_color(self._archive, listed.part)),
-            )
-            for listed in self._listing[0]
+            SheetInfo(listed.name, listed.kind, listed.state, self._color(color))
+            for listed, color in self._listing[0]
         )
 
     @functools.cached_property
-    def _listing(self) -> tuple[list[ListedSheet], ListedSheet | None]:
-        """The sheets openpyxl lists too (the first of a name), and the active one, if listed.
+    def _listing(self) -> tuple[list[tuple[ListedSheet, StatedColor | None]], ListedSheet | None]:
+        """The workbook's sheets (the first of a name) with their tab colors, and the active one.
 
-        openpyxl skips a sheet whose part is missing; so does sheetpeek. The active one is
-        ``activeTab``, an index into the workbook part's own list.
+        Only sheets openpyxl lists too, while it reads the cells; it skips a sheet whose part is
+        missing. The active one is the first book view's ``activeTab``, an index into the
+        workbook part's own list.
         """
-        assert self._archive is not None
-        listed, active = listed_sheets(self._archive)
+        assert self._book is not None
         present = set(self._workbook.sheetnames)
-        kept: dict[str, ListedSheet] = {}
-        for sheet in listed:
-            if sheet.name in present:
-                kept.setdefault(sheet.name, sheet)
-        sheets = list(kept.values())
-        chosen = listed[active] if active is not None and active < len(listed) else None
-        return sheets, chosen if chosen is not None and chosen in sheets else None
+        listed = [
+            (ListedSheet(s.name, _KIND.get(s.kind, "worksheet"), _STATE[s.state], None), s)
+            for s in self._book
+        ]
+        kept: dict[str, tuple[ListedSheet, StatedColor | None]] = {}
+        for sheet, source in listed:
+            if sheet.name in present and sheet.name not in kept:
+                kept[sheet.name] = (sheet, _tab_color(source))
+        views = self._book.views
+        active = views[0].active_tab if views else None
+        chosen = listed[active][0] if active is not None and 0 <= active < len(listed) else None
+        found = any(chosen is sheet for sheet, _ in kept.values())
+        return list(kept.values()), chosen if found else None
 
     @property
     def notices(self) -> tuple[Notice, ...]:
@@ -478,7 +504,7 @@ class Book:
             )
 
     def _default_sheet_name(self) -> str:
-        found = default_sheet(*self._listing)
+        found = default_sheet([sheet for sheet, _ in self._listing[0]], self._listing[1])
         if found is None:
             raise NotAWorksheetError("the workbook has no worksheet to show")
         return found.name
