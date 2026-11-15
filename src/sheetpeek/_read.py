@@ -22,6 +22,7 @@ from types import TracebackType
 from typing import IO, Any, overload
 
 import xlformat
+import xlio
 from openpyxl import load_workbook
 from openpyxl.utils.datetime import CALENDAR_MAC_1904, to_excel
 
@@ -55,6 +56,7 @@ from sheetpeek._package import (
     PackageError,
     ReadLimits,
     open_package,
+    open_workbook,
     relationships,
     worksheet_parts,
 )
@@ -171,9 +173,12 @@ class Book:
             handle = io.BytesIO(source.read())
         self._handle = handle
         self._workbook: Any = None
+        self._book: xlio.Workbook | None = None
         self._archive: zipfile.ZipFile | None = None
         try:
             self._archive = open_package(handle, self._limits, name)
+            self._book = open_workbook(handle, self._limits)
+            handle.seek(0)
             self._workbook = load_workbook(
                 handle, read_only=True, data_only=True, keep_links=False, rich_text=True
             )
@@ -233,6 +238,8 @@ class Book:
 
     def close(self) -> None:
         """Close the file."""
+        if self._book is not None:
+            self._book.close()
         if self._workbook is not None:
             self._workbook.close()
         if self._archive is not None:

@@ -15,7 +15,9 @@ import xml.parsers.expat
 import zipfile
 import zlib
 from dataclasses import dataclass
-from typing import IO, NoReturn
+from typing import IO, BinaryIO, NoReturn
+
+import xlio
 
 _MAIN = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
 _REL = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}"
@@ -118,6 +120,35 @@ def open_package(handle: IO[bytes], limits: ReadLimits, name: str | None = None)
         archive.close()
         raise
     return archive
+
+
+def open_workbook(handle: BinaryIO, limits: ReadLimits) -> xlio.Workbook:
+    """The package, checked by ``check_package`` first, opened by xlio.
+
+    ``xlio.open`` checks the archive's directory and refuses the rest of what Excel refuses as it
+    reads each part; ``check_package`` has already inflated every part (sizes, DTDs), which
+    ``xlio.check`` would do only together with reading every sheet whole. xlio's refusals become
+    sheetpeek's own errors, a refusal
+    worded as sheetpeek words a workbook it cannot read.
+
+    Raises:
+        LimitError: The package exceeds ``limits``.
+        PackageError: xlio refuses the package.
+    """
+    handle.seek(0)
+    try:
+        return xlio.open(
+            handle,
+            limits=xlio.ReadLimits(
+                max_parts=limits.max_parts,
+                max_part_bytes=limits.max_part_bytes,
+                max_total_bytes=limits.max_total_bytes,
+            ),
+        )
+    except xlio.LimitError as error:
+        raise LimitError(str(error)) from None
+    except xlio.PackageError as error:
+        raise PackageError(f"cannot read this workbook: {error}") from None
 
 
 def check_package(archive: zipfile.ZipFile, handle: IO[bytes], limits: ReadLimits) -> None:
