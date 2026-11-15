@@ -21,9 +21,9 @@ from sheetpeek.backends import (
     HTMLBackend,
     RichBackend,
     TextBackend,
+    _write_blocks,
     backend_names,
     get_backend,
-    write_blocks,
 )
 from sheetpeek.backends.html._workbook import render_workbook
 
@@ -232,7 +232,7 @@ def _view(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
     except PackageError as error:
         _say(err, f"sheetpeek: cannot show {args.file}: {error}")
         return 1
-    return _report(args, list(write_blocks(backend, blocks, problem, out)), err)
+    return _report(args, list(_write_blocks(backend, blocks, problem, out)), err)
 
 
 def _report(args: argparse.Namespace, notices: list[Notice], err: TextIO) -> int:

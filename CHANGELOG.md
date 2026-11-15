@@ -162,6 +162,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   with a solid blue line, as Excel's page break preview draws them. Off by default.
 
 ### Changed
+- HTML draws each sheet at the zoom saved with it, as Excel opens it, where 0.2.0 drew every
+  sheet at 100 %: a sheet saved at another zoom renders at another size. Pass
+  `HTMLBackend(zoom=100)` (or `sheetpeek view --zoom 100`) for 0.2.0's size.
 - The HTML backend writes a page faster: 13 % on a plain 100,000-cell sheet
   (`bench/html_size.py`), with layout within 4 % of 0.2.0 on it; a sheet pays for the newer
   features only where it uses them.

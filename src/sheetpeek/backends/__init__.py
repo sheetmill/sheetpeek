@@ -129,12 +129,12 @@ def render(
     buffer = io.StringIO() if out is None else None
     target = out if out is not None else buffer
     assert target is not None
-    found = write_blocks(backend, blocks, problem, target)
+    found = _write_blocks(backend, blocks, problem, target)
     deliver(found, on_notice, blocks[0].sheet.name, backend.name, 2)
     return buffer.getvalue() if buffer is not None else None
 
 
-def write_blocks(
+def _write_blocks(
     backend: Backend, blocks: list[RenderedSheet], problem: str | None, out: TextIO
 ) -> tuple[Notice, ...]:
     """Write one or more blocks of a sheet; their notices merged, with the print area's."""

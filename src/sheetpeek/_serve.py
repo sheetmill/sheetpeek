@@ -30,7 +30,7 @@ from urllib.parse import parse_qs, quote, unquote, urlsplit
 from sheetpeek._model import CellRange, one_line
 from sheetpeek._package import SERVE_LIMITS, PackageError, ReadLimits
 from sheetpeek._read import open as open_book
-from sheetpeek.backends import write_blocks
+from sheetpeek.backends import _write_blocks
 from sheetpeek.backends.html import CSS, HTMLBackend
 
 _READS_AT_ONCE = 2
@@ -207,7 +207,7 @@ class _Handler(BaseHTTPRequestHandler):
             sys.stderr.write(one_line(f"sheetpeek: {name}: {error}") + "\n")
             return HTTPStatus.UNPROCESSABLE_ENTITY, self.error("Cannot read this file.")
         out = io.StringIO()
-        write_blocks(backend, blocks, problem, out)
+        _write_blocks(backend, blocks, problem, out)
         # The page carries the base stylesheet; the fragment keeps the sheet's own rules (its
         # fill, border, outline and freeze classes).
         fragment = out.getvalue().replace(f"<style>\n{CSS}", "<style>\n", 1)
