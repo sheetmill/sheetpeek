@@ -69,6 +69,8 @@ True
   draws only the freeze lines. By default, panes on a whole page and static in a fragment, whose
   host page decides how it scrolls. Every row and column of the range is drawn either way: where
   the file was scrolled to is the viewer's state, not content, and is not followed.
+- `page_breaks=True` marks the sheet's manual page breaks with a solid blue line 3 CSS pixels
+  wide, as Excel's page break preview draws them; off by default, as in Excel's Normal view.
 
 ```python
 >>> wb = openpyxl.Workbook()
@@ -102,6 +104,7 @@ an API change.
 | `--sheetpeek-heading-grid` | the headings' lines | `#e0dfdd`, dark `#565656` |
 | `--sheetpeek-zoom` | set by the page when its zoom is not 100: the zoom as a factor, which scales the headings' font | `1` |
 | `--sheetpeek-freeze` | a frozen pane's freeze lines | `#9b9b9b` |
+| `--sheetpeek-page-break` | the page-break marks, when the `page_breaks` option asks for them | `#0000d0` |
 | `--sheetpeek-outline-paper` | the outline gutter | `#eeeeee`, dark `#555555` |
 | `--sheetpeek-outline-ink` | the outline's bars and dots | `#a6a6a6`, dark `#999999` |
 | `--sheetpeek-outline-button` | the outline buttons' borders and strokes | `#808080`, dark `#333333` |
@@ -124,6 +127,8 @@ an API change.
 | `sp-notshown` | on the workbook page, the line that says a chartsheet or dialog sheet is not shown |
 | `sp-freeze` | a freeze line |
 | `sp-panes`, `sp-pane`, `sp-pane-top`, `sp-pane-left`, `sp-pane-corner` | a sheet with frozen panes, and the copies of its frozen rows, columns and corner |
+| `sp-pagebreak` | a page-break mark |
+| `sp-area` | a block of the print area, when `render(print_area=True)` shows several |
 | `sp-notices` | the `<details>` list of notices, when the backend's `notices` option asks for it |
 
 A cell that a link on the page goes to has the id `sp-` and its coordinate, such as `sp-C2`; on

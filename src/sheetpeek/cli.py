@@ -67,6 +67,11 @@ def _parser() -> argparse.ArgumentParser:
         help="show the print area, each of its ranges as a block, instead of the used range",
     )
     view.add_argument(
+        "--page-breaks",
+        action="store_true",
+        help="mark manual page breaks, as page break preview does (-t html only)",
+    )
+    view.add_argument(
         "--zoom",
         type=int,
         metavar="PERCENT",
@@ -176,7 +181,8 @@ def _serve(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
 
 
 def _view(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
-    html_only = [o for o, given in (("--zoom", args.zoom is not None),) if given]
+    given = (("--zoom", args.zoom is not None), ("--page-breaks", args.page_breaks))
+    html_only = [o for o, asked in given if asked]
     if html_only and args.to != "html" and not (args.all_sheets and args.to is None):
         _say(err, f"sheetpeek: {html_only[0]} draws HTML only (use -t html)")
         return 2
@@ -278,6 +284,7 @@ def _all_sheets(args: argparse.Namespace, book: Book, out: TextIO, err: TextIO) 
         column_headings=args.column_headings,
         row_headings=args.row_headings,
         zoom=args.zoom,
+        page_breaks=args.page_breaks,
     )
     assert page is not None
     out.write(page)
@@ -300,7 +307,10 @@ def _backend(args: argparse.Namespace, out: TextIO) -> Backend:
         return TextBackend(column_headings=args.column_headings, row_headings=args.row_headings)
     if name == "html":
         return HTMLBackend(
-            column_headings=args.column_headings, row_headings=args.row_headings, zoom=args.zoom
+            column_headings=args.column_headings,
+            row_headings=args.row_headings,
+            zoom=args.zoom,
+            page_breaks=args.page_breaks,
         )
     return get_backend(name)
 

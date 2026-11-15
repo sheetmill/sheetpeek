@@ -85,6 +85,8 @@ class HTMLBackend:
             whole page and static in a fragment, whose host page decides how it scrolls. Every
             row and column of the range is drawn either way; the scroll position saved in the
             file is not followed.
+        page_breaks: Mark the sheet's manual page breaks with a solid blue line, as Excel's page
+            break preview draws them; off by default, as in Excel's Normal view.
     """
 
     name = "html"
@@ -103,6 +105,7 @@ class HTMLBackend:
         buttons: Buttons = "static",
         zoom: int | None = None,
         freeze: Freeze | None = None,
+        page_breaks: bool = False,
     ) -> None:
         if color_scheme not in ("light", "dark"):
             raise ValueError(f"color_scheme must be 'light' or 'dark', not {color_scheme!r}")
@@ -120,6 +123,7 @@ class HTMLBackend:
         if freeze not in (None, "panes", "static"):
             raise ValueError(f"freeze must be 'panes', 'static' or None, not {freeze!r}")
         self.freeze = freeze
+        self.page_breaks = page_breaks
 
     @property
     def support(self) -> dict[str, Support]:

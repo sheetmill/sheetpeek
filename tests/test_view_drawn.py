@@ -342,3 +342,89 @@ def test_the_cli_shows_the_print_area(tmp_path, capsys):
     assert main(["view", path, "--print-area", "-r", "A1:B2"]) == 2
     assert main(["view", path, "--print-area", "--all-sheets"]) == 2
     assert "--print-area" in capsys.readouterr().err
+
+
+def _with_breaks(tmp_path, rows=(2,), columns=(1,), hidden_row=None):
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+    for row in range(1, 6):
+        for column in range(1, 5):
+            sheet.cell(row, column).value = f"r{row}c{column}"
+    if hidden_row:
+        sheet.row_dimensions[hidden_row].hidden = True
+    path = save(workbook, tmp_path / "breaks.xlsx")
+
+    def breaks(kind, ids):
+        if not ids:
+            return ""
+        items = "".join(f'<brk id="{i}" max="16383" man="1"/>' for i in ids)
+        return f'<{kind} count="{len(ids)}" manualBreakCount="{len(ids)}">{items}</{kind}>'
+
+    rewrite(
+        path,
+        SHEET1,
+        lambda text: text.replace(
+            "</worksheet>",
+            breaks("rowBreaks", rows) + breaks("colBreaks", columns) + "</worksheet>",
+            1,
+        ),
+    )
+    return path
+
+
+def _marks(page):
+    pattern = r'class="sp-pagebreak" style="left:(\d+)px;top:(\d+)px;width:(\d+)px;height:(\d+)px"'
+    return [tuple(int(v) for v in m) for m in re.findall(pattern, page)]
+
+
+def test_page_breaks_are_marked_only_on_request(tmp_path):
+    path = _with_breaks(tmp_path)
+    assert "sp-pagebreak" not in _html(path, column_headings=False, row_headings=False)
+    page = _html(path, column_headings=False, row_headings=False, page_breaks=True)
+    marks = _marks(page)
+    assert len(marks) == 2
+    rows = [int(h) for h in re.findall(r'<tr style="height:(\d+)px">', page)]
+    first_column = int(re.search(r'<col style="width:(\d+)px">', page).group(1))
+    # Below row 2 and after column A, 3 px centered on the gridline.
+    assert marks[0][1:] == (rows[0] + rows[1] - 1, marks[0][2], 3)
+    assert (marks[1][0], marks[1][2]) == (first_column - 1, 3)
+    assert "--sheetpeek-page-break: #0000d0" in page
+
+
+@pytest.mark.parametrize(
+    ("rows", "columns"),
+    [((5,), ()), ((0, 9), ()), ((), (4,))],
+    ids=["below the last row", "outside the range", "after the last column"],
+)
+def test_breaks_at_or_past_the_edge_are_not_marked(tmp_path, rows, columns):
+    page = _html(_with_breaks(tmp_path, rows, columns), page_breaks=True)
+    assert "sp-pagebreak" not in page
+
+
+def test_a_break_below_a_hidden_row_is_marked_before_the_next_drawn_row(tmp_path):
+    page = _html(_with_breaks(tmp_path, rows=(3,), columns=(), hidden_row=3), page_breaks=True)
+    assert len(_marks(page)) == 1
+
+
+def test_page_breaks_are_drawn_with_a_frozen_pane(tmp_path):
+    path = _with_breaks(tmp_path)
+    rewrite(
+        path,
+        SHEET1,
+        lambda text: text.replace(
+            '<sheetView workbookViewId="0">',
+            '<sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" state="frozen"/>',
+            1,
+        ),
+    )
+    page = _html(path, page_breaks=True)
+    assert len(_marks(page)) == 2 * 2  # in the sheet and in the frozen rows' copy
+
+
+def test_the_cli_marks_page_breaks_in_html_only(tmp_path, capsys):
+    from sheetpeek.cli import main
+
+    path = str(_with_breaks(tmp_path))
+    assert main(["view", path, "-t", "html", "--page-breaks", "--notices", "none"]) == 0
+    assert "sp-pagebreak" in capsys.readouterr().out
+    assert main(["view", path, "-t", "csv", "--page-breaks"]) == 2

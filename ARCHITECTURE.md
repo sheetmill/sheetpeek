@@ -1321,6 +1321,14 @@ empty record in CSV and TSV; HTML draws them in one page, each a `<div class="sp
 own fill and border classes. A sheet without a print area is shown whole, without a notice; a
 part left out (`print_area_problem`) is reported only with the option (`print.area_unusable`).
 
+**Page-break marks** (HTML; `HTMLBackend(page_breaks=True)`, `view --page-breaks`). Off by
+default, as in the Normal view (decided). When on, each manual break inside the drawn range is a
+solid line 3 CSS px wide of `#0000D0`, centered on the gridline before the first drawn row or
+column after it (a break below a hidden row falls before the next drawn one), screen-sized like
+the freeze line and drawn with it over everything else, in the frozen copies too. The look is
+that of Excel's page break preview (unverified: not captured). The other outputs draw nothing
+and report nothing for breaks.
+
 ## 5. openpyxl facts that constrain the design
 
 All measured with openpyxl 3.1.5 (`bench/`).

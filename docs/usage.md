@@ -174,6 +174,7 @@ sheetpeek view sales.xlsx --list          # the sheet names, and what each is
 sheetpeek view sales.xlsx --all-sheets > sales.html   # every sheet on one HTML page, with tabs
 sheetpeek view sales.xlsx --print-area   # the print area, a block for each of its ranges
 sheetpeek view sales.xlsx -t html --zoom 150 > sales.html   # at 150 % (default: the saved zoom)
+sheetpeek view sales.xlsx -t html --page-breaks > sales.html  # manual page breaks marked
 sheetpeek view sales.xlsx -t csv --notices full     # what is not shown, with its cells
 sheetpeek view sales.xlsx --strict --suppress font  # exit status 3 if anything else is not shown
 sheetpeek serve reports/                  # every workbook under reports/ as HTML pages

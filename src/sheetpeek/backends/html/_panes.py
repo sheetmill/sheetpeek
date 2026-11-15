@@ -1,4 +1,4 @@
-"""Frozen panes: the freeze lines, and the frozen rows and columns held in place (§4.18).
+"""Lines over the sheet: frozen panes, and page-break marks on request (§4.18).
 
 With ``freeze="panes"`` the sheet is drawn once, and the frozen rows, the frozen columns and
 their corner are drawn again, each copy holding only its own rows or columns, stacked over the
@@ -10,7 +10,7 @@ lines are drawn.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+import bisect
 from typing import TYPE_CHECKING, TextIO
 
 from sheetpeek._model import CellRange
@@ -34,20 +34,6 @@ CSS = f"""\
 .sp-panes > .sp-pane-corner {{ top: 0; left: 0; z-index: 3; }}
 """
 """The stylesheet of a page with a frozen pane."""
-
-
-@dataclass(frozen=True, slots=True)
-class Frozen:
-    """Which of the drawn rows and columns a frozen pane keeps in place.
-
-    ``rows`` and ``columns`` count the drawn rows and columns before the freeze lines; ``y`` and
-    ``x`` are the lines' positions in CSS px, ``None`` where nothing is frozen that way.
-    """
-
-    rows: int
-    columns: int
-    y: int | None
-    x: int | None
 
 
 def frozen(sheet: RenderedSheet) -> tuple[int, int]:
@@ -77,23 +63,74 @@ def frozen(sheet: RenderedSheet) -> tuple[int, int]:
     return rows, columns
 
 
+BREAK_LINE = "0000d0"
+"""A manual page break's mark, as page break preview draws it (unverified)."""
+
+BREAK_CSS = f"""\
+.sheetpeek {{ --sheetpeek-page-break: #{BREAK_LINE}; }}
+.sheetpeek .sp-pagebreak {{ position: absolute; background: var(--sheetpeek-page-break); }}
+"""
+"""The stylesheet of a page with page-break marks."""
+
+
 def css(sheet: RenderedSheet, backend: HTMLBackend) -> str:
-    """The panes' stylesheet, for a sheet with a frozen pane."""
-    return CSS if frozen(sheet) != (0, 0) else ""
+    """The stylesheet of a sheet with a frozen pane or, when asked for, page-break marks."""
+    found = CSS if frozen(sheet) != (0, 0) else ""
+    if backend.page_breaks and _breaks(sheet) != ([], []):
+        found += BREAK_CSS
+    return found
+
+
+def _breaks(sheet: RenderedSheet) -> tuple[list[int], list[int]]:
+    """The drawn rows and columns that start after a manual break inside the drawn range.
+
+    A break below row ``r`` (``Sheet.row_breaks``) falls before the first drawn row after ``r``,
+    when some drawn row is at or before ``r``; columns likewise.
+    """
+    model = sheet.sheet
+    rows = [r.index for r in sheet.rows]
+    columns = [c.index for c in sheet.columns]
+
+    def starts(breaks: tuple[int, ...], drawn: list[int]) -> list[int]:
+        found = {bisect.bisect_right(drawn, b) for b in breaks}
+        return sorted(k for k in found if 0 < k < len(drawn))
+
+    return starts(model.row_breaks, rows), starts(model.column_breaks, columns)
+
+
+def marks(page: Page) -> str:
+    """The page-break marks: 3 CSS px, centered on the gridline after each break."""
+    rows, columns = _breaks(page.sheet)
+    sheet = page.sheet
+    left, top = page.x(0), page.y(0)
+    last = sheet.rows[-1]
+    bottom = page.y((last.y_pt or 0) + (last.height_pt or 0)) + 1
+    found = [
+        f'<i class="sp-pagebreak" style="left:{left}px;top:{page.y(sheet.rows[k].y_pt or 0) - 1}px;'
+        f'width:{page.width - left}px;height:3px"></i>'
+        for k in rows
+    ]
+    found += [
+        f'<i class="sp-pagebreak" style="left:{page.x(sheet.columns[k].x_pt or 0) - 1}px;'
+        f'top:{top}px;width:3px;height:{bottom - top}px"></i>'
+        for k in columns
+    ]
+    return "".join(found)
 
 
 def write(page: Page, out: TextIO) -> None:
     """Write the sheet, with its frozen pane drawn as the backend's ``freeze`` option says."""
+    breaks = marks(page) if page.backend.page_breaks else ""
     rows, columns = frozen(page.sheet)
     if (rows, columns) == (0, 0):
-        page.write(out)
+        page.write(out, lines=breaks)
         return
     sheet = page.sheet
     y = page.y(sheet.rows[rows].y_pt or 0) if rows else None
     x = page.x(sheet.columns[columns].x_pt or 0) if columns else None
     last_row = sheet.rows[-1]
     bottom = page.y((last_row.y_pt or 0) + (last_row.height_pt or 0)) + 1
-    lines = ""
+    lines = breaks
     if y is not None:
         left = page.x(0)
         lines += f'<i class="sp-freeze" style="left:{left}px;top:{y}px;'

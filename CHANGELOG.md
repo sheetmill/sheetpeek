@@ -158,6 +158,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `render(print_area=True)`, `sheetpeek view --print-area` and `serve`'s `?print_area=1` show the
   sheet's print area instead of its used range, as Excel prints it: each of its ranges as a
   block, in the file's order, whole columns or rows cut to the used range. Off by default.
+- `HTMLBackend(page_breaks=True)` and `sheetpeek view --page-breaks` mark manual page breaks
+  with a solid blue line, as Excel's page break preview draws them. Off by default.
 
 ### Changed
 - The HTML backend writes a page faster: 13 % on a plain 100,000-cell sheet
