@@ -1,10 +1,10 @@
 """``sheetpeek serve``: a small read-only web server for a folder of workbooks.
 
-Standard library only. ``/`` lists the ``.xlsx`` files under the folder, ``/view/<path>`` shows
-a workbook's default sheet; ``?sheet=`` and ``?ref=`` choose another sheet and a range, and
-``?zoom=`` a zoom. Each sheet is drawn by the HTML backend. Only regular ``.xlsx`` files inside
-the folder are read: every requested path is resolved, symbolic links included, and must stay
-inside it.
+Standard library only. ``/`` lists the ``.xlsx`` files under the folder, ``/view/<path>`` shows a
+workbook's default sheet; ``?sheet=`` and ``?ref=`` choose another sheet and a range, and
+``?zoom=`` a zoom; ``?print_area=1`` shows the print area. Each sheet is drawn by the HTML
+backend. Only regular ``.xlsx`` files inside the folder are read: every requested path is resolved,
+symbolic links included, and must stay inside it.
 
 A page can be asked for by anyone who can connect, and through a web page in a browser on this
 machine, so what one request may cost is bounded (``SERVE_LIMITS``, two reads at a time), and a
@@ -30,6 +30,7 @@ from urllib.parse import parse_qs, quote, unquote, urlsplit
 from sheetpeek._model import CellRange, one_line
 from sheetpeek._package import SERVE_LIMITS, PackageError, ReadLimits
 from sheetpeek._read import open as open_book
+from sheetpeek.backends import write_blocks
 from sheetpeek.backends.html import CSS, HTMLBackend
 
 _READS_AT_ONCE = 2
@@ -187,8 +188,16 @@ class _Handler(BaseHTTPRequestHandler):
             )
             with open_book(path, limits=self.limits) as book:
                 infos = book.sheets
-                sheet = book.sheet(sheet_name, ref=CellRange.parse(ref) if ref else None)
-            rendered = sheet.layout("excel")
+                if query.get("print_area", ["0"])[0] == "1":
+                    if ref:
+                        raise ValueError("print_area shows the print area; it takes no ref")
+                    sheets, problem = book._print_area_sheets(sheet_name)
+                    sheets = sheets or (book.sheet(sheet_name),)
+                else:
+                    sheets = (book.sheet(sheet_name, ref=CellRange.parse(ref) if ref else None),)
+                    problem = None
+            blocks = [s.layout("excel") for s in sheets]
+            sheet = blocks[0].sheet
         except PackageError as error:
             return HTTPStatus.UNPROCESSABLE_ENTITY, self.error(f"Cannot read this file: {error}")
         except (KeyError, ValueError) as error:
@@ -198,8 +207,10 @@ class _Handler(BaseHTTPRequestHandler):
             sys.stderr.write(one_line(f"sheetpeek: {name}: {error}") + "\n")
             return HTTPStatus.UNPROCESSABLE_ENTITY, self.error("Cannot read this file.")
         out = io.StringIO()
-        backend.render(rendered, out)
-        fragment = out.getvalue().split("</style>\n", 1)[1]  # the page carries the stylesheet
+        write_blocks(backend, blocks, problem, out)
+        # The page carries the base stylesheet; the fragment keeps the sheet's own rules (its
+        # fill, border, outline and freeze classes).
+        fragment = out.getvalue().replace(f"<style>\n{CSS}", "<style>\n", 1)
         tabs = "".join(
             f'<span class="sp-current">{html.escape(i.name)}</span>'
             if i.name == sheet.name

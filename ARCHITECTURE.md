@@ -1311,6 +1311,16 @@ follows the sheet sideways, the column copy stays at the left, the corner stays 
 drawn. A frozen pane is not reported; the other outputs have nothing to draw for it, as a printed
 sheet has none (a choice). A split pane is reported (`view.panes`).
 
+**The print area** (every output; `render(print_area=True)`, `view --print-area`, `serve`'s
+`?print_area=1`; `Book._print_area_sheets`). Off by default, since the Normal view shows the whole
+sheet (decided). When on, each range of the print area is read as a sheet of its own, in the
+file's order, as Excel prints each on its own pages (decided: one block per range, not their
+bounding range); a range of whole columns or rows is cut to the used range before `max_cells` is
+checked (a `$A:$C` area is otherwise 3 million cells). Blocks are separated by a blank line, an
+empty record in CSV and TSV; HTML draws them in one page, each a `<div class="sp-area">` with its
+own fill and border classes. A sheet without a print area is shown whole, without a notice; a
+part left out (`print_area_problem`) is reported only with the option (`print.area_unusable`).
+
 ## 5. openpyxl facts that constrain the design
 
 All measured with openpyxl 3.1.5 (`bench/`).

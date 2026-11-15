@@ -19,7 +19,7 @@ import zipfile
 from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
 from types import TracebackType
-from typing import IO, Any
+from typing import IO, Any, overload
 
 import xlformat
 from openpyxl import load_workbook
@@ -58,7 +58,7 @@ from sheetpeek._package import (
     relationships,
     worksheet_parts,
 )
-from sheetpeek._page import page_breaks, print_areas
+from sheetpeek._page import MAX_COLUMN, MAX_ROW, page_breaks, print_areas
 from sheetpeek._runs_model import TextSpan
 from sheetpeek._scan_links import cell_links
 from sheetpeek._scan_links import report as report_links
@@ -308,6 +308,39 @@ class Book:
             LimitError: ``ref``, or else the sheet's used range, is over ``max_cells``.
             PackageError: The sheet's part cannot be read.
         """
+        return self._sheet(name, ref)
+
+    def _print_area_sheets(self, name: str | None) -> tuple[tuple[Sheet, ...], str | None]:
+        """A sheet's print areas, each read as a sheet of its own, in the file's order.
+
+        An area of whole columns or whole rows is cut to the sheet's used range, as Excel
+        prints it. A sheet without a print area gives the whole sheet, as :meth:`sheet` does.
+
+        Returns:
+            The sheets, and why a part of the print area was left out (``#REF!``, a formula,
+            another sheet), else ``None``.
+        """
+        if name is None:
+            name = self._default_sheet_name()
+        text = self._info.print_area_text.get(name)
+        if not text:
+            return (self._sheet(name, None),), None
+        areas, problem = print_areas(text, name)
+        sheets = tuple(s for area in areas if (s := self._sheet(name, area, clip=True)) is not None)
+        return sheets, problem
+
+    @overload
+    def _sheet(self, name: str | None, ref: str | CellRange | None) -> Sheet: ...
+    @overload
+    def _sheet(self, name: str | None, ref: CellRange, *, clip: bool) -> Sheet | None: ...
+    def _sheet(
+        self, name: str | None, ref: str | CellRange | None, *, clip: bool = False
+    ) -> Sheet | None:
+        """Read one sheet, as :meth:`sheet` does.
+
+        With ``clip``, whole columns or rows of ``ref`` are cut to the used range first, and
+        ``None`` is given when nothing of it is left.
+        """
         if name is None:
             name = self._default_sheet_name()
         if name not in self._workbook.sheetnames:
@@ -321,7 +354,7 @@ class Book:
         part = self._parts[name]
         if isinstance(ref, str):
             ref = CellRange.parse(ref)
-        if ref is not None:
+        if ref is not None and not clip:
             self._check_area(ref)
         assert self._archive is not None
         try:
@@ -335,6 +368,11 @@ class Book:
             ref = structure.used_range
             if ref is not None:
                 self._check_area(ref)
+        elif clip:
+            ref = _clip(ref, structure.used_range)
+            if ref is None:
+                return None
+            self._check_area(ref)
 
         notes = Collector(name)
         try:
@@ -689,6 +727,18 @@ def read(
     """
     with Book(source, limits=limits) as book:
         return book.sheet(sheet, ref=ref)
+
+
+def _clip(area: CellRange, used: CellRange | None) -> CellRange | None:
+    """A print area of whole columns or rows cut to the used range, ``None`` if nothing is left."""
+    max_row, max_col = area.max_row, area.max_col
+    if area.min_row == 1 and max_row == MAX_ROW:
+        max_row = min(max_row, used.max_row) if used is not None else 0
+    if area.min_col == 1 and max_col == MAX_COLUMN:
+        max_col = min(max_col, used.max_col) if used is not None else 0
+    if max_row < area.min_row or max_col < area.min_col:
+        return None
+    return CellRange(area.min_row, area.min_col, max_row, max_col)
 
 
 def _columns(structure: Structure, ref: CellRange | None) -> tuple[Column, ...]:

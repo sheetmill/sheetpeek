@@ -35,6 +35,7 @@ REL = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 
 # Registered codes the every-feature workbook cannot hold, each tested where it can arise.
 ELSEWHERE = {
+    "print.area_unusable": "only with render(print_area=True); tests/test_view_drawn.py",
     "value.date_converted": "only with an openpyxl that cannot switch off date conversion; "
     "tests/test_read.py",
     "format.refused": "tests/test_layout.py and tests/test_cli.py",

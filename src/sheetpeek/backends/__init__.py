@@ -16,7 +16,7 @@ from collections.abc import Callable
 from typing import IO, Literal, Protocol, TextIO, runtime_checkable
 
 from sheetpeek._model import CellRange, Sheet
-from sheetpeek._notices import Notice, deliver
+from sheetpeek._notices import Notice, Reason, deliver
 from sheetpeek._package import ReadLimits
 from sheetpeek._rendered import Mode, RenderedSheet
 from sheetpeek.backends.delimited import DelimitedBackend
@@ -87,6 +87,7 @@ def render(
     out: TextIO | None = None,
     limits: ReadLimits | None = None,
     on_notice: Callable[[Notice], object] | Literal["ignore"] | None = None,
+    print_area: bool = False,
 ) -> str | None:
     """Render a sheet with a backend.
 
@@ -107,21 +108,72 @@ def render(
         limits: What reading may cost, when ``source`` is a workbook. By default,
             ``ReadLimits()``.
         on_notice: Called with each notice, ``"ignore"``, or ``None`` for one warning.
+        print_area: Show the sheet's print area instead of its used range, as Excel prints it:
+            each of its ranges as a block of its own, in the file's order, a range of whole
+            columns or rows cut to the used range. Blocks are separated by a blank line (an
+            empty record in CSV and TSV); HTML draws them one below another on one page. A sheet
+            without a print area is shown whole. Off by default: Excel's Normal view shows the
+            whole sheet. Needs a workbook as ``source``, and no ``ref``.
 
     Returns:
         The output, or ``None`` when it was written to ``out``.
+
+    Raises:
+        ValueError: ``print_area`` with a ``ref``, or with a sheet as ``source``.
     """
     backend = get_backend(to)
-    rendered = _laid_out(source, backend, sheet, ref, limits)
-    if out is not None:
-        backend.render(rendered, out)
-        result = None
+    if print_area:
+        blocks, problem = _print_area(source, backend, sheet, ref, limits)
     else:
-        buffer = io.StringIO()
-        backend.render(rendered, buffer)
-        result = buffer.getvalue()
-    deliver(_all_notices(rendered, backend), on_notice, rendered.sheet.name, backend.name, 2)
-    return result
+        blocks, problem = [_laid_out(source, backend, sheet, ref, limits)], None
+    buffer = io.StringIO() if out is None else None
+    target = out if out is not None else buffer
+    assert target is not None
+    found = write_blocks(backend, blocks, problem, target)
+    deliver(found, on_notice, blocks[0].sheet.name, backend.name, 2)
+    return buffer.getvalue() if buffer is not None else None
+
+
+def write_blocks(
+    backend: Backend, blocks: list[RenderedSheet], problem: str | None, out: TextIO
+) -> tuple[Notice, ...]:
+    """Write one or more blocks of a sheet; their notices, and the print area's problem's."""
+    if len(blocks) > 1 and isinstance(backend, HTMLBackend):
+        backend.render_blocks(blocks, out)
+    else:
+        for k, block in enumerate(blocks):
+            if k:
+                out.write("\n")
+            backend.render(block, out)
+    found = [n for block in blocks for n in _all_notices(block, backend)]
+    if problem is not None:
+        reason: Reason = "not_implemented" if "formula" in problem else "file"
+        message = f"part of the print area is not shown: {problem}"
+        found.append(
+            Notice("print.area_unusable", "omitted", reason, message, blocks[0].sheet.name)
+        )
+    return tuple(dict.fromkeys(found))
+
+
+def _print_area(
+    source: str | os.PathLike[str] | IO[bytes] | Sheet | RenderedSheet,
+    backend: Backend,
+    sheet: str | None,
+    ref: str | CellRange | None,
+    limits: ReadLimits | None,
+) -> tuple[list[RenderedSheet], str | None]:
+    """The print area's blocks, laid out, and why a part of it was left out."""
+    if ref is not None:
+        raise ValueError("print_area shows the print area; it takes no ref")
+    if isinstance(source, (Sheet, RenderedSheet)):
+        raise ValueError("print_area reads the workbook: pass a path or a binary file object")
+    from sheetpeek._read import Book
+
+    with Book(source, limits=limits) as book:
+        sheets, problem = book._print_area_sheets(sheet)
+        if not sheets:  # nothing of any area is on the sheet: the sheet, empty
+            sheets = (book.sheet(sheet),)
+    return [s.layout(backend.mode) for s in sheets], problem
 
 
 def notices(

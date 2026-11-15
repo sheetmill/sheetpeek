@@ -23,7 +23,7 @@ from sheetpeek.backends import (
     TextBackend,
     backend_names,
     get_backend,
-    notices,
+    write_blocks,
 )
 from sheetpeek.backends.html._workbook import render_workbook
 
@@ -61,6 +61,11 @@ def _parser() -> argparse.ArgumentParser:
     view.add_argument("--column-headings", action="store_true", help="show column letters")
     view.add_argument("--row-headings", action="store_true", help="show row numbers")
     view.add_argument("--hidden", action="store_true", help="show hidden rows and columns")
+    view.add_argument(
+        "--print-area",
+        action="store_true",
+        help="show the print area, each of its ranges as a block, instead of the used range",
+    )
     view.add_argument(
         "--zoom",
         type=int,
@@ -183,6 +188,9 @@ def _view(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
         if refused:
             _say(err, f"sheetpeek: --all-sheets {refused}")
             return 2
+    elif args.print_area and args.ref is not None:
+        _say(err, "sheetpeek: --print-area shows the print area; it takes no --ref")
+        return 2
     elif args.hidden_sheets:
         _say(err, "sheetpeek: --hidden-sheets goes with --all-sheets (-s names a hidden sheet)")
         return 2
@@ -194,7 +202,11 @@ def _view(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
                 return 0
             if args.all_sheets:
                 return _all_sheets(args, book, out, err)
-            sheet = book.sheet(args.sheet, ref=args.ref)
+            if args.print_area:
+                sheets, problem = book._print_area_sheets(args.sheet)
+                sheets = sheets or (book.sheet(args.sheet),)
+            else:
+                sheets, problem = (book.sheet(args.sheet, ref=args.ref),), None
     except FileNotFoundError:
         _say(err, f"sheetpeek: no such file: {args.file}")
         return 1
@@ -210,12 +222,11 @@ def _view(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
         return 1
     backend = _backend(args, out)
     try:
-        rendered = sheet.layout(backend.mode, show_hidden=args.hidden)
+        blocks = [s.layout(backend.mode, show_hidden=args.hidden) for s in sheets]
     except PackageError as error:
         _say(err, f"sheetpeek: cannot show {args.file}: {error}")
         return 1
-    backend.render(rendered, out)
-    return _report(args, list(notices(rendered, backend)), err)
+    return _report(args, list(write_blocks(backend, blocks, problem, out)), err)
 
 
 def _report(args: argparse.Namespace, notices: list[Notice], err: TextIO) -> int:
@@ -250,6 +261,8 @@ def _all_sheets_refused(args: argparse.Namespace) -> str:
         return f"draws an HTML page; -t {args.to} has no workbook page (use -t html)"
     if args.sheet is not None or args.ref is not None:
         return "draws every sheet whole; it takes no --sheet or --ref"
+    if args.print_area:
+        return "draws every sheet whole; it takes no --print-area"
     if args.list:
         return "and --list cannot go together"
     return ""

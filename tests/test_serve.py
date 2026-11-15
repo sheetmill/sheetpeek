@@ -337,3 +337,17 @@ def test_a_zoom_is_asked_for_in_the_query(server):
     assert "--sheetpeek-zoom:1.5" in body
     for zoom in ("5", "401", "abc", "1e2", "-100", "\u0661\u0660\u0660"):  # Arabic-Indic 100
         assert get(server, f"/view/book.xlsx?zoom={quote(zoom)}")[0] == 404
+
+
+def test_the_print_area_and_the_sheets_own_rules_reach_the_page(server, folder):
+    from tests.test_view_drawn import _frozen, _with_area
+
+    _with_area(folder, "Sheet!$C$4:$D$5,Sheet!$A$1:$B$2", name="area.xlsx")
+    status, body, _ = get(server, "/view/area.xlsx?print_area=1")
+    assert status == 200
+    assert body.count('<div class="sp-area">') == 2
+    assert get(server, "/view/area.xlsx?print_area=1&ref=A1:B2")[0] == 404
+    _frozen(folder)
+    status, body, _ = get(server, "/view/frozen.xlsx")
+    assert body.count('class="sp-freeze"') == 2
+    assert ".sheetpeek .sp-freeze {" in body  # the fragment's own stylesheet is kept

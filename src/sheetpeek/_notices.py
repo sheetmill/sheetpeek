@@ -211,6 +211,7 @@ for _code, _name, _level in (
     ("comment", "notes", "cells"),
     ("comment.threaded", "threaded comments", "cells"),
     ("sheet.tab_color", "tab colors", "sheet"),
+    ("print.area_unusable", "parts of print areas", "sheet"),
     ("sheet.chartsheet", "chartsheets", "workbook"),
     ("sheet.dialogsheet", "dialog sheets", "workbook"),
     ("sheet.macrosheet", "macro sheets", "sheet"),

@@ -50,6 +50,25 @@ element or from a `HYPERLINK()` formula whose target is a string. HTML makes it 
 text without the target. Only `http`, `https` and `mailto` targets become links in any output;
 others are reported, as the HTML page describes.
 
+`print_area=True` shows the sheet's print area instead of its used range, as Excel prints it:
+each of its ranges as a block of its own, in the file's order, separated by a blank line (an
+empty record in CSV and TSV; HTML draws them one below another on one page). A range of whole
+columns or rows is cut to the used range. A sheet without a print area is shown whole. It is off
+by default, since Excel's Normal view shows the whole sheet.
+
+```python
+>>> wb = openpyxl.Workbook()
+>>> for row in range(1, 4):
+...     wb.active.append([f"a{row}", f"b{row}"])
+>>> wb.active.print_area = ["A1:A2", "B3"]
+>>> wb.save(path)
+>>> print(sheetpeek.render(path, "csv", print_area=True), end="")
+a1
+a2
+<BLANKLINE>
+b3
+```
+
 ## The rendered cells
 
 {meth}`sheetpeek.Sheet.layout` gives the layout itself, the same data every backend draws from.
@@ -153,6 +172,8 @@ sheetpeek view sales.xlsx --column-headings --row-headings   # letters and numbe
 sheetpeek view sales.xlsx -t markdown     # or html, csv, tsv, text, rich
 sheetpeek view sales.xlsx --list          # the sheet names, and what each is
 sheetpeek view sales.xlsx --all-sheets > sales.html   # every sheet on one HTML page, with tabs
+sheetpeek view sales.xlsx --print-area   # the print area, a block for each of its ranges
+sheetpeek view sales.xlsx -t html --zoom 150 > sales.html   # at 150 % (default: the saved zoom)
 sheetpeek view sales.xlsx -t csv --notices full     # what is not shown, with its cells
 sheetpeek view sales.xlsx --strict --suppress font  # exit status 3 if anything else is not shown
 sheetpeek serve reports/                  # every workbook under reports/ as HTML pages

@@ -15,6 +15,7 @@ public interface for callers' stylesheets.
 from __future__ import annotations
 
 import html
+from collections.abc import Sequence
 from typing import Literal, TextIO
 
 from sheetpeek._model import one_line
@@ -27,6 +28,7 @@ from sheetpeek.backends.html._notices import write_notices
 from sheetpeek.backends.html._outline import css as outline_css
 from sheetpeek.backends.html._panes import css as panes_css
 from sheetpeek.backends.html._panes import write as write_sheet
+from sheetpeek.backends.html._patterns import letters
 from sheetpeek.backends.html._table import Page
 
 ColorScheme = Literal["light", "dark"]
@@ -133,6 +135,15 @@ class HTMLBackend:
         """Write the page or the fragment to ``out``."""
         page = Page(sheet, self)
         stylesheet = f"{CSS}{outline_css(sheet, self)}{panes_css(sheet, self)}{page.css()}"
+        self._head(sheet, stylesheet, out)
+        write_sheet(page, out)
+        if self.notices:
+            write_notices(sheet, self, out)
+        if not self.fragment:
+            out.write("</body>\n</html>\n")
+
+    def _head(self, sheet: RenderedSheet, stylesheet: str, out: TextIO) -> None:
+        """The document's start and the stylesheet, or the stylesheet alone in a fragment."""
         if not self.fragment:
             title = html.escape(one_line(sheet.sheet.name))
             background = "#1e1e1e" if self.color_scheme == "dark" else "#ffffff"
@@ -146,9 +157,25 @@ class HTMLBackend:
             )
         else:
             out.write(f"<style>\n{stylesheet}</style>\n")
-        write_sheet(page, out)
+
+    def render_blocks(self, sheets: Sequence[RenderedSheet], out: TextIO, /) -> None:
+        """Write several ranges of one sheet, such as its print areas, one below another.
+
+        Each block is a ``<div class="sp-area">`` holding the sheet's markup; the notices, when
+        asked for, follow the last block (the first block's notices). Fill and border classes
+        are made unique to each block.
+        """
+        pages = [Page(s, self, scope=f"sp-{k}", tag=letters(k) + "-") for k, s in enumerate(sheets)]
+        shared = {outline_css(s, self) for s in sheets} | {panes_css(s, self) for s in sheets}
+        stylesheet = CSS + "".join(sorted(shared - {""})) + "".join(p.css() for p in pages)
+        stylesheet += ".sp-area + .sp-area { margin-top: 16px; }\n"
+        self._head(sheets[0], stylesheet, out)
+        for page in pages:
+            out.write('<div class="sp-area">')
+            write_sheet(page, out)
+            out.write("</div>\n")
         if self.notices:
-            write_notices(sheet, self, out)
+            write_notices(sheets[0], self, out)  # the first block's, which names the sheet's
         if not self.fragment:
             out.write("</body>\n</html>\n")
 

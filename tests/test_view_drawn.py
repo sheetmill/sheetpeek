@@ -243,3 +243,102 @@ def test_other_outputs_draw_and_report_nothing_for_a_frozen_pane(tmp_path):
     path = _frozen(tmp_path)
     for to in ("text", "markdown", "csv"):
         assert not [n for n in sheetpeek.notices(path, to) if n.code.startswith("view")]
+
+
+def _with_area(tmp_path, area, rows=5, name="area.xlsx"):
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+    for row in range(1, rows + 1):
+        for column in range(1, 5):
+            sheet.cell(row, column).value = f"r{row}c{column}"
+    path = save(workbook, tmp_path / name)
+    if area:
+        rewrite(
+            path,
+            "xl/workbook.xml",
+            lambda text: text.replace(
+                "</sheets>",
+                '</sheets><definedNames><definedName name="_xlnm.Print_Area" localSheetId="0">'
+                f"{area}</definedName></definedNames>",
+                1,
+            ),
+        )
+    return path
+
+
+def test_each_print_area_is_a_block_in_the_file_order(tmp_path):
+    path = _with_area(tmp_path, "Sheet!$C$4:$D$5,Sheet!$A$1:$B$2")
+    text = sheetpeek.render(path, "text", print_area=True, on_notice="ignore")
+    assert text == "r4c3     r4c4\nr5c3     r5c4\n\nr1c1     r1c2\nr2c1     r2c2\n"
+    csv = sheetpeek.render(path, "csv", print_area=True, on_notice="ignore")
+    assert csv == "r4c3,r4c4\nr5c3,r5c4\n\nr1c1,r1c2\nr2c1,r2c2\n"
+
+
+def test_print_areas_are_blocks_of_one_html_page(tmp_path):
+    path = _with_area(tmp_path, "Sheet!$C$4:$D$5,Sheet!$A$1:$B$2")
+    page = sheetpeek.render(path, "html", print_area=True, on_notice="ignore")
+    assert page.count("<html") == 1
+    assert page.count('<div class="sp-area">') == 2
+    assert page.index("r4c3") < page.index("r1c1")
+
+
+def test_whole_columns_and_rows_are_cut_to_the_used_range(tmp_path):
+    path = _with_area(tmp_path, "Sheet!$B:$C")
+    assert sheetpeek.render(path, "csv", print_area=True, on_notice="ignore").count("\n") == 5
+    path = _with_area(tmp_path, "Sheet!$2:$3", name="rows.xlsx")
+    csv = sheetpeek.render(path, "csv", print_area=True, on_notice="ignore")
+    assert csv == "r2c1,r2c2,r2c3,r2c4\nr3c1,r3c2,r3c3,r3c4\n"
+
+
+def test_whole_columns_stay_within_a_small_cell_limit(tmp_path):
+    path = _with_area(tmp_path, "Sheet!$A:$D")
+    limits = sheetpeek.ReadLimits(max_cells=100)
+    assert sheetpeek.render(path, "csv", print_area=True, limits=limits, on_notice="ignore")
+
+
+def test_a_sheet_without_a_print_area_is_shown_whole(tmp_path):
+    path = _with_area(tmp_path, "")
+    found = []
+    assert sheetpeek.render(path, "csv", print_area=True, on_notice=found.append) == (
+        sheetpeek.render(path, "csv", on_notice="ignore")
+    )
+    assert found == []
+
+
+def test_the_print_area_is_off_by_default(tmp_path):
+    path = _with_area(tmp_path, "Sheet!$A$1:$A$1")
+    assert sheetpeek.render(path, "csv", on_notice="ignore").count("\n") == 5
+
+
+def test_an_unusable_part_is_reported_only_with_the_option(tmp_path):
+    path = _with_area(tmp_path, "Sheet!$A$1:$A$2,Sheet!#REF!")
+    found = []
+    csv = sheetpeek.render(path, "csv", print_area=True, on_notice=found.append)
+    assert csv == "r1c1\nr2c1\n"
+    assert [(n.code, n.reason) for n in found] == [("print.area_unusable", "file")]
+    found.clear()
+    sheetpeek.render(path, "csv", on_notice=found.append)
+    assert found == []
+
+
+def test_the_print_area_option_takes_a_workbook_and_no_range(tmp_path):
+    path = _with_area(tmp_path, "Sheet!$A$1:$A$2")
+    with pytest.raises(ValueError, match="ref"):
+        sheetpeek.render(path, "csv", ref="A1:B2", print_area=True)
+    with pytest.raises(ValueError, match="workbook"):
+        sheetpeek.render(sheetpeek.read(path), "csv", print_area=True)
+    with path.open("rb") as handle:
+        assert (
+            sheetpeek.render(handle, "csv", print_area=True, on_notice="ignore") == "r1c1\nr2c1\n"
+        )
+
+
+def test_the_cli_shows_the_print_area(tmp_path, capsys):
+    from sheetpeek.cli import main
+
+    path = str(_with_area(tmp_path, "Sheet!$C$4:$D$5,Sheet!$A$1:$B$2"))
+    assert main(["view", path, "-t", "csv", "--print-area", "--notices", "none"]) == 0
+    assert capsys.readouterr().out == "r4c3,r4c4\nr5c3,r5c4\n\nr1c1,r1c2\nr2c1,r2c2\n"
+    assert main(["view", path, "--print-area", "-r", "A1:B2"]) == 2
+    assert main(["view", path, "--print-area", "--all-sheets"]) == 2
+    assert "--print-area" in capsys.readouterr().err

@@ -155,6 +155,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   in place while the page scrolls, through CSS `position: sticky` (no script).
   `HTMLBackend(freeze="panes" | "static")` chooses; a fragment draws only the lines by default.
   Every row and column of the range is drawn; the saved scroll position is not followed.
+- `render(print_area=True)`, `sheetpeek view --print-area` and `serve`'s `?print_area=1` show the
+  sheet's print area instead of its used range, as Excel prints it: each of its ranges as a
+  block, in the file's order, whole columns or rows cut to the used range. Off by default.
 
 ### Changed
 - The HTML backend writes a page faster: 13 % on a plain 100,000-cell sheet
