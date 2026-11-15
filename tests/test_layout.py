@@ -208,7 +208,7 @@ def test_first_spill_wins_a_contested_cell(tmp_path):
 
 
 def test_spill_past_the_used_range_adds_columns(tmp_path):
-    # spill_edge="extend": empty columns at the default width, as far as the text reaches.
+    # range_edge="extend": empty columns at the default width, as far as the text reaches.
     text = LONG + " and more!"  # 27 characters: three 8-character columns and two gaps hold 26
     rendered = lay_out(tmp_path, lambda ws: ws.cell(1, 1, text))
     assert drawn(rendered) == [text]
@@ -252,9 +252,20 @@ def test_spill_left_past_the_range(tmp_path):
     assert drawn(rendered) == [LONG]
 
 
-def test_unknown_spill_edge(tmp_path):
+def test_unknown_range_edge(tmp_path):
     sheet = sheetpeek.read(save(openpyxl.Workbook(), tmp_path / "e.xlsx"))
     with pytest.raises(ValueError, match="only 'extend' is available"):
+        sheet.layout(range_edge="clip")
+
+
+def test_spill_edge_is_range_edge_under_its_former_name(tmp_path):
+    sheet = sheetpeek.read(save(openpyxl.Workbook(), tmp_path / "e.xlsx"))
+    with pytest.warns(DeprecationWarning, match="range_edge"):
+        assert sheet.layout(spill_edge="extend") == sheet.layout()
+    with (
+        pytest.warns(DeprecationWarning, match="spill_edge"),
+        pytest.raises(ValueError, match="only 'extend' is available"),
+    ):
         sheet.layout(spill_edge="clip")
 
 

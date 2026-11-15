@@ -474,7 +474,7 @@ it is cut at the merge's edge. **A center-across run spills like centered text**
 area to both sides, a blocked side cut.
 
 **Past the edge of the range**, spilled text runs on into empty columns that the layout adds at
-the default width and marks `added` (`spill_edge="extend"`, the default; the alternatives are in
+the default width and marks `added` (`range_edge="extend"`, the default; the alternatives are in
 §9). Columns are added only past the used range, where the sheet is known to be empty; where an
 explicit `ref` cuts through the data, the spill is clipped at the edge, because the cells beyond
 it were not read.
@@ -2011,14 +2011,17 @@ named, not hard-coded, and each has a scope:
 - a **column** option overrides it per column;
 - a **cell** option overrides it per cell.
 
-The options that exist are `spill_edge`, `show_hidden`, `scale` and `max_width` on
-`Sheet.layout`, the backends' `column_headings`, `row_headings` and `color_scheme`, and
-Markdown's `header` and `emphasis`; the rest are planned. Behaviors a capture has settled
+The options that exist are `range_edge` (formerly `spill_edge`, deprecated until 1.0),
+`show_hidden`, `scale` and `max_width` on `Sheet.layout`; `render`'s `print_area`; the backends'
+`column_headings`, `row_headings` and `color_scheme`; HTML's `zoom`, `freeze`, `page_breaks`,
+`buttons`, `notices`, `new_tab` and `local_links`; and Markdown's `header` and `emphasis`; the
+rest are planned. Behaviors a capture has settled
 with one right answer are not listed: Excel's behavior is the only rendering (hidden columns
 crossed whatever they hold, one digit per indent level, a merge's text at the bottom by default).
 
-**Spill at the edge of the range** (`spill_edge`; §4.1). Default `"extend"`: empty
-columns at the default width past the used range, marked `added`.
+**Spill at the edge of the range** (`range_edge`; §4.1). Default `"extend"`: empty
+columns at the default width past the used range, marked `added`. One option for text and, when
+drawn, objects reaching past the edge (decided), hence its general name.
 - *Alternatives:* `"margin"` (a borderless overflow margin past the last column, not a column);
   `"widen"` (the last column widened to hold its spill); `"clip"`, with an `ellipsis` of `"…"`,
   `"..."` or a custom string.
@@ -2040,7 +2043,7 @@ takes the cell. HTML could overlay the two texts as Excel does.
 **Clipped text** (§4.1). Excel cuts blocked text at the cell's edge, through a glyph, with no
 marker (captured); `characters` mode cuts at a character.
 - *Alternatives:* an ellipsis marker where text is cut, with the same `ellipsis` strings as
-  `spill_edge="clip"`.
+  `range_edge="clip"`.
 - *Scope leaning:* document, with a column override for one narrow column of long labels.
 
 **Values that do not fit** (§4.2). Default: `#` filling the column in the section's color, as Excel

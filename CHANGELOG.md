@@ -218,6 +218,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   breaks between the indents at both ends.
 
 ### Deprecated
+- `Sheet.layout(spill_edge=...)`: use `range_edge`, the same option under a name that also covers
+  objects reaching past the range. `spill_edge` still works, with a `DeprecationWarning`, and is
+  removed in 1.0; `SpillEdge` is an alias of `RangeEdge`.
 - `Sheet.warnings` and `RenderedSheet.warnings`, now views of the notices that were warnings
   before. Use `notices`.
 

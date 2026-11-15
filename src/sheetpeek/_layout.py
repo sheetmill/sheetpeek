@@ -26,11 +26,11 @@ from sheetpeek._rendered import (
     Alignment,
     Gap,
     Mode,
+    RangeEdge,
     RenderedCell,
     RenderedColumn,
     RenderedRow,
     RenderedSheet,
-    SpillEdge,
 )
 from sheetpeek._rows import font_row_height, row_height
 from sheetpeek._text_styles import right_to_left, vert_scale
@@ -63,15 +63,15 @@ def layout(
     show_hidden: bool = False,
     scale: float = 1.0,
     max_width: int | None = None,
-    spill_edge: SpillEdge = "extend",
+    range_edge: RangeEdge = "extend",
 ) -> RenderedSheet:
     """Lay out a sheet; see :meth:`sheetpeek.Sheet.layout`."""
     if mode not in ("excel", "characters", "none"):
         raise ValueError(f"unknown width mode {mode!r}; expected 'excel', 'characters' or 'none'")
     if scale <= 0:
         raise ValueError("scale must be positive")
-    if spill_edge != "extend":
-        raise ValueError(f"unknown spill_edge {spill_edge!r}; only 'extend' is available")
+    if range_edge != "extend":
+        raise ValueError(f"unknown range_edge {range_edge!r}; only 'extend' is available")
     if mode == "excel" and (scale != 1.0 or max_width is not None):
         raise ValueError("scale and max_width apply to characters mode only")
     notes = Collector(sheet.name)

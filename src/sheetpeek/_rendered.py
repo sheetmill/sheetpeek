@@ -26,7 +26,10 @@ if TYPE_CHECKING:
     from sheetpeek._notices import Notice
 
 Mode: TypeAlias = Literal["excel", "characters", "none"]
-SpillEdge: TypeAlias = Literal["extend"]
+RangeEdge: TypeAlias = Literal["extend"]
+"""What reaches past the edge of the range does: ``"extend"`` (see :meth:`Sheet.layout`)."""
+SpillEdge: TypeAlias = RangeEdge
+"""Deprecated: :data:`RangeEdge`, under its former name; removed in 1.0."""
 """What spilled text does at the edge of the range read. Only ``"extend"`` exists so far; the
 planned alternatives are listed in ``ARCHITECTURE.md`` ("Planned options")."""
 Alignment: TypeAlias = Literal["left", "center", "right", "fill", "justify", "distributed"]

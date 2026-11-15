@@ -7,6 +7,7 @@ Everything here is immutable. Coordinates are 1-based, as in openpyxl and Excel.
 from __future__ import annotations
 
 import re
+import warnings
 from collections.abc import Iterator
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Literal, TypeAlias
@@ -20,7 +21,7 @@ from sheetpeek._view_model import SheetView
 
 if TYPE_CHECKING:
     from sheetpeek._notices import Notice
-    from sheetpeek._rendered import Mode, RenderedSheet, SpillEdge
+    from sheetpeek._rendered import Mode, RangeEdge, RenderedSheet, SpillEdge
     from sheetpeek._runs_model import TextSpan
 
 CellKind: TypeAlias = Literal["empty", "number", "text", "bool", "error"]
@@ -365,7 +366,8 @@ class Sheet:
         show_hidden: bool = False,
         scale: float = 1.0,
         max_width: int | None = None,
-        spill_edge: SpillEdge = "extend",
+        range_edge: RangeEdge = "extend",
+        spill_edge: SpillEdge | None = None,
     ) -> RenderedSheet:
         """Lay the sheet out for one width mode: what each visible cell shows.
 
@@ -381,11 +383,13 @@ class Sheet:
             scale: Multiplies every column's width in characters (``characters`` mode only).
                 A column is never wider than 255 characters, Excel's own limit.
             max_width: Caps every column's width in characters (``characters`` mode only).
-            spill_edge: What text spilling past the edge of the range does. ``"extend"`` (the
+            range_edge: What text spilling past the edge of the range does. ``"extend"`` (the
                 default, as Excel shows it) adds empty columns at the default width past the
                 range, marked ``added``, as far as the spill reaches. Columns are added only past
                 the used range, where the sheet is known to be empty; a range that cuts through
                 the data clips the spill at its edge.
+            spill_edge: Deprecated: ``range_edge`` under its former name, with a
+                :class:`DeprecationWarning`; removed in 1.0.
 
         Raises:
             ValueError: an unknown mode, a scale that is not positive, or ``scale`` or
@@ -395,13 +399,20 @@ class Sheet:
         """
         from sheetpeek._layout import layout
 
+        if spill_edge is not None:
+            warnings.warn(
+                "spill_edge is deprecated; use range_edge (spill_edge is removed in 1.0)",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            range_edge = spill_edge
         return layout(
             self,
             mode,
             show_hidden=show_hidden,
             scale=scale,
             max_width=max_width,
-            spill_edge=spill_edge,
+            range_edge=range_edge,
         )
 
     def __iter__(self) -> Iterator[tuple[Cell, ...]]:
