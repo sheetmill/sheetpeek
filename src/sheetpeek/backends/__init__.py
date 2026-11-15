@@ -16,7 +16,7 @@ from collections.abc import Callable
 from typing import IO, Literal, Protocol, TextIO, runtime_checkable
 
 from sheetpeek._model import CellRange, Sheet
-from sheetpeek._notices import Notice, Reason, deliver
+from sheetpeek._notices import Notice, Reason, deliver, merge
 from sheetpeek._package import ReadLimits
 from sheetpeek._rendered import Mode, RenderedSheet
 from sheetpeek.backends.delimited import DelimitedBackend
@@ -137,14 +137,7 @@ def render(
 def write_blocks(
     backend: Backend, blocks: list[RenderedSheet], problem: str | None, out: TextIO
 ) -> tuple[Notice, ...]:
-    """Write one or more blocks of a sheet; their notices, and the print area's problem's."""
-    if len(blocks) > 1 and isinstance(backend, HTMLBackend):
-        backend.render_blocks(blocks, out)
-    else:
-        for k, block in enumerate(blocks):
-            if k:
-                out.write("\n")
-            backend.render(block, out)
+    """Write one or more blocks of a sheet; their notices merged, with the print area's."""
     found = [n for block in blocks for n in _all_notices(block, backend)]
     if problem is not None:
         reason: Reason = "not_implemented" if "formula" in problem else "file"
@@ -152,7 +145,15 @@ def write_blocks(
         found.append(
             Notice("print.area_unusable", "omitted", reason, message, blocks[0].sheet.name)
         )
-    return tuple(dict.fromkeys(found))
+    notices = merge(found)
+    if len(blocks) > 1 and isinstance(backend, HTMLBackend):
+        backend.render_blocks(blocks, out, notices)
+    else:
+        for k, block in enumerate(blocks):
+            if k:
+                out.write("\n")
+            backend.render(block, out)
+    return notices
 
 
 def _print_area(

@@ -1324,7 +1324,9 @@ file's order, as Excel prints each on its own pages (decided: one block per rang
 bounding range); a range of whole columns or rows is cut to the used range before `max_cells` is
 checked (a `$A:$C` area is otherwise 3 million cells). Blocks are separated by a blank line, an
 empty record in CSV and TSV; HTML draws them in one page, each a `<div class="sp-area">` with its
-own fill and border classes. A sheet without a print area is shown whole, without a notice; a
+own fill and border classes. The blocks' notices are merged (`_notices.merge`): equal ones
+kept once, those of one kind about cells joined into one with their counts added; the page lists
+them after the last block. A sheet without a print area is shown whole, without a notice; a
 part left out (`print_area_problem`) is reported only with the option (`print.area_unusable`).
 
 **Page-break marks** (HTML; `HTMLBackend(page_breaks=True)`, `view --page-breaks`). Off by

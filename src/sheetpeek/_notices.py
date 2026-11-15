@@ -12,6 +12,7 @@ Every code is registered in :data:`FEATURES`. ``ARCHITECTURE.md`` has the design
 
 from __future__ import annotations
 
+import dataclasses
 import warnings
 from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass, field
@@ -456,6 +457,40 @@ def describe(
         amount = f" ({count})"
     why = detail or _REASONS[reason].format(output=output or "this output", dependency=dependency)
     return f"{feature.name} {verb}{where}{amount}: {why}"
+
+
+def merge(notices: Iterable[Notice]) -> tuple[Notice, ...]:
+    """Notices from several blocks of one sheet (its print areas) as one list, in first order.
+
+    Equal notices, such as a sheet-level notice each block repeats, are kept once. Notices of
+    one kind about cells become one: their ranges joined, their counts added and the count in
+    the message changed to match.
+    """
+    groups: dict[tuple[object, ...], list[Notice]] = {}
+    for notice in notices:
+        key: tuple[object, ...] = (notice.code, notice.outcome, notice.reason, notice.sheet)
+        key += (notice.output, None if notice.level == "cells" else notice.message)
+        group = groups.setdefault(key, [])
+        if notice not in group:
+            group.append(notice)
+    result = []
+    for group in groups.values():
+        first = group[0]
+        if len(group) == 1:
+            result.append(first)
+            continue
+        cells = tuple(dict.fromkeys(r for n in group for r in n.cells))
+        count = sum(n.count for n in group)
+        old = f" ({first.count} cell{'s' if first.count != 1 else ''})"
+        new = f" ({count} cell{'s' if count != 1 else ''})"
+        context = dict(first.context)
+        if len(cells) > _MAX_RANGES or any(n.context.get("truncated") for n in group):
+            cells, context["truncated"] = cells[:_MAX_RANGES], 1
+        message = first.message.replace(old, new, 1)
+        result.append(
+            dataclasses.replace(first, message=message, cells=cells, count=count, context=context)
+        )
+    return tuple(result)
 
 
 def visible(

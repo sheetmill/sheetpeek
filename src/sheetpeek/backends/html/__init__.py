@@ -19,7 +19,7 @@ from collections.abc import Sequence
 from typing import Literal, TextIO
 
 from sheetpeek._model import one_line
-from sheetpeek._notices import Support
+from sheetpeek._notices import Notice, Support, merge
 from sheetpeek._rendered import Mode, RenderedSheet
 from sheetpeek._view_model import MAX_ZOOM, MIN_ZOOM
 from sheetpeek.backends import _support
@@ -162,12 +162,18 @@ class HTMLBackend:
         else:
             out.write(f"<style>\n{stylesheet}</style>\n")
 
-    def render_blocks(self, sheets: Sequence[RenderedSheet], out: TextIO, /) -> None:
+    def render_blocks(
+        self,
+        sheets: Sequence[RenderedSheet],
+        out: TextIO,
+        notices: tuple[Notice, ...] | None = None,
+        /,
+    ) -> None:
         """Write several ranges of one sheet, such as its print areas, one below another.
 
         Each block is a ``<div class="sp-area">`` holding the sheet's markup; the notices, when
-        asked for, follow the last block (the first block's notices). Fill and border classes
-        are made unique to each block.
+        asked for, follow the last block: every block's, merged (``notices``, else worked out
+        here). Fill and border classes are made unique to each block.
         """
         pages = [Page(s, self, scope=f"sp-{k}", tag=letters(k) + "-") for k, s in enumerate(sheets)]
         shared = {outline_css(s, self) for s in sheets} | {panes_css(s, self) for s in sheets}
@@ -179,7 +185,15 @@ class HTMLBackend:
             write_sheet(page, out)
             out.write("</div>\n")
         if self.notices:
-            write_notices(sheets[0], self, out)  # the first block's, which names the sheet's
+            if notices is None:
+                from sheetpeek._census import output_notices
+
+                notices = merge(
+                    n
+                    for s in sheets
+                    for n in s.notices + output_notices(s, self.name, self.support)
+                )
+            write_notices(None, self, out, notices)
         if not self.fragment:
             out.write("</body>\n</html>\n")
 

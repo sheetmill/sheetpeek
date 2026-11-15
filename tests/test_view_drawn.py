@@ -458,3 +458,38 @@ def test_a_copy_holds_only_the_fills_and_borders_that_start_in_it(tmp_path):
 
     assert (boxes(body, "borders"), boxes(body, "fills")) == (2, 2)
     assert (boxes(left, "borders"), boxes(left, "fills")) == (1, 1)
+
+
+def test_the_blocks_notices_are_merged(tmp_path):
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+    for row in range(1, 6):
+        sheet.cell(row, 1).value = row
+    sheet["A1"].comment = openpyxl.comments.Comment("first", "author")
+    sheet["A4"].comment = openpyxl.comments.Comment("second", "author")
+    sheet.sheet_view.showZeros = False
+    path = save(workbook, tmp_path / "notes.xlsx")
+    rewrite(
+        path,
+        "xl/workbook.xml",
+        lambda text: text.replace(
+            "</sheets>",
+            '</sheets><definedNames><definedName name="_xlnm.Print_Area" localSheetId="0">'
+            "Sheet!$A$1:$A$2,Sheet!$A$4:$A$5</definedName></definedNames>",
+            1,
+        ),
+    )
+    found = []
+    page = sheetpeek.render(path, "html", print_area=True, on_notice=found.append)
+    codes = [n.code for n in found]
+    assert codes.count("comment") == 1
+    assert codes.count("view.hide_zeros") == 1
+    (note,) = [n for n in found if n.code == "comment"]
+    assert note.count == 2
+    assert [str(r) for r in note.cells] == ["A1", "A4"]
+    assert "(2 cells)" in note.message
+    listed = sheetpeek.render(path, HTMLBackend(notices=True), print_area=True, on_notice="ignore")
+    items = re.findall(r"<li>(.*?)</li>", listed)
+    assert len(items) == len(found)
+    assert sum("(2 cells)" in item for item in items) == 1
+    assert "<html" in page
