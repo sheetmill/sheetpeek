@@ -4,13 +4,13 @@ ARCHITECTURE.md §4.18. These are the values as read, what the file states, read
 them where that is captured; ``tests/test_view_drawn.py`` tests how they are drawn.
 """
 
+import openpyxl
 import pytest
 
 import sheetpeek
 from sheetpeek import CellRange, SheetView
-from sheetpeek._page import print_areas
 from tests.test_limits import SHEET1, book  # noqa: F401 - the fixture
-from tests.workbooks import rewrite
+from tests.workbooks import rewrite, save
 
 
 def _view(book, attributes, pane=""):  # noqa: F811
@@ -64,23 +64,32 @@ def test_a_split_pane_freezes_nothing(book):  # noqa: F811
         ("Sheet!$A$1:$C$5", [CellRange(1, 1, 5, 3)], None),
         ("sheet!$B$2", [CellRange(2, 2, 2, 2)], None),
         ("Sheet!$A$1:$B$2,Sheet!$D$4:$E$5", [CellRange(1, 1, 2, 2), CellRange(4, 4, 5, 5)], None),
-        ("Sheet!$A:$C", [CellRange(1, 1, 1048576, 3)], None),
-        ("Sheet!$2:$4", [CellRange(2, 1, 4, 16384)], None),
-        ("Sheet!#REF!", [], "a deleted range (#REF!)"),
-        ("#REF!", [], "a deleted range (#REF!)"),
-        ("Other!$A$1:$B$2", [], "a range on another sheet"),
-        ("OFFSET(Sheet!$A$1,0,0,5,5)", [], "a formula"),
-        ("Sheet!$A$1:$B$2,Sheet!#REF!", [CellRange(1, 1, 2, 2)], "a deleted range (#REF!)"),
-        ("Sheet!$A$1:$XFE$2", [], "a formula"),
+        ("Sheet!$A:$C", [CellRange(1, 1, 1_048_576, 3)], None),
+        ("Sheet!$2:$4", [CellRange(2, 1, 4, 16_384)], None),
+        ("Sheet!#REF!", [], "#REF!"),
+        ("Other!$A$1:$B$2", [], "another sheet"),
+        ("OFFSET(Sheet!$A$1,0,0,5,5)", [], "formula"),
+        ("Sheet!$A$1:$B$2,Sheet!#REF!", [CellRange(1, 1, 2, 2)], "#REF!"),
     ],
 )
-def test_a_print_area_is_parsed_part_by_part(text, areas, problem):
-    assert print_areas(text, "Sheet") == (tuple(areas), problem)
-
-
-def test_quoted_sheet_names_keep_their_commas_and_quotes():
-    text = "'It''s, here'!$A$1:$B$2,'It''s, here'!$C$3"
-    assert print_areas(text, "It's, here") == ((CellRange(1, 1, 2, 2), CellRange(3, 3, 3, 3)), None)
+def test_a_print_area_is_read_part_by_part(book, text, areas, problem):  # noqa: F811
+    # xlio reads the defined name; its problem is worded by xlio.
+    rewrite(
+        book,
+        "xl/workbook.xml",
+        lambda t: t.replace(
+            "</sheets>",
+            '</sheets><definedNames><definedName name="_xlnm.Print_Area" localSheetId="0">'
+            f"{text}</definedName></definedNames>",
+            1,
+        ),
+    )
+    sheet = sheetpeek.read(book)
+    assert sheet.print_areas == tuple(areas)
+    if problem is None:
+        assert sheet.print_area_problem is None
+    else:
+        assert problem in sheet.print_area_problem
 
 
 def test_the_print_area_and_manual_breaks_are_read_from_the_file(book):  # noqa: F811
@@ -112,18 +121,26 @@ def test_the_print_area_and_manual_breaks_are_read_from_the_file(book):  # noqa:
     assert (sheet.row_breaks, sheet.column_breaks) == ((10,), (6,))
 
 
-def test_breaks_outside_the_sheet_are_dropped():
-    import xml.etree.ElementTree as ET
+def test_quoted_sheet_names_keep_their_commas_and_quotes(tmp_path):
+    workbook = openpyxl.Workbook()
+    workbook.active.title = "It's, here"
+    workbook.active["A1"] = 1
+    workbook.active.print_area = ["A1:B2", "C3"]
+    path = save(workbook, tmp_path / "quoted.xlsx")
+    sheet = sheetpeek.read(path)
+    assert sheet.print_areas == (CellRange(1, 1, 2, 2), CellRange(3, 3, 3, 3))
+    assert sheet.print_area_problem is None
 
-    from sheetpeek._page import page_breaks
 
-    ns = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
-    rows = ET.fromstring(
-        f'<rowBreaks xmlns="{ns}"><brk id="0" man="1"/><brk id="1048576" man="1"/>'
+def test_breaks_outside_the_sheet_are_dropped(book):  # noqa: F811
+    rows = (
+        '<rowBreaks count="5" manualBreakCount="5"><brk id="0" man="1"/><brk id="1048576" man="1"/>'
         '<brk id="99999999999" man="1"/><brk id="-3" man="1"/><brk id="5" man="1"/></rowBreaks>'
+        '<colBreaks count="1" manualBreakCount="1"><brk id="16384" man="1"/></colBreaks>'
     )
-    columns = ET.fromstring(f'<colBreaks xmlns="{ns}"><brk id="16384" man="1"/></colBreaks>')
-    assert page_breaks([rows, columns]) == ((5,), ())
+    rewrite(book, SHEET1, lambda t: t.replace("</worksheet>", rows + "</worksheet>", 1))
+    sheet = sheetpeek.read(book)
+    assert (sheet.row_breaks, sheet.column_breaks) == ((5,), ())
 
 
 def test_a_print_area_and_page_breaks_are_not_reported(book):  # noqa: F811

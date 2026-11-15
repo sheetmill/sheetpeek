@@ -60,7 +60,7 @@ from sheetpeek._package import (
     relationships,
     worksheet_parts,
 )
-from sheetpeek._page import MAX_COLUMN, MAX_ROW, page_breaks, print_areas
+from sheetpeek._page import MAX_COLUMN, MAX_ROW, manual_breaks, print_areas
 from sheetpeek._runs_model import TextSpan
 from sheetpeek._scan_links import cell_links
 from sheetpeek._scan_links import report as report_links
@@ -355,12 +355,29 @@ class Book:
         """
         if name is None:
             name = self._default_sheet_name()
-        text = self._info.print_area_text.get(name)
-        if not text:
+        areas, problem = self._page_layout(name)[:2]
+        if not areas and problem is None:
             return (self._sheet(name, None),), None
-        areas, problem = print_areas(text, name)
         sheets = tuple(s for area in areas if (s := self._sheet(name, area, clip=True)) is not None)
         return sheets, problem
+
+    def _page_layout(
+        self, name: str
+    ) -> tuple[tuple[CellRange, ...], str | None, tuple[int, ...], tuple[int, ...]]:
+        """The print area, its problem, and the manual row and column breaks, from xlio.
+
+        xlio raises on some numbers no file Excel writes holds (an attribute of thousands of
+        digits); such a sheet is read without a print area or breaks (unverified).
+        """
+        assert self._book is not None
+        try:
+            source = self._book.sheet(name)
+            areas, problem = print_areas(source.print_area)
+            rows = manual_breaks(source.row_breaks, MAX_ROW)
+            columns = manual_breaks(source.column_breaks, MAX_COLUMN)
+        except (ValueError, OverflowError):
+            return (), None, (), ()
+        return areas, problem, rows, columns
 
     @overload
     def _sheet(self, name: str | None, ref: str | CellRange | None) -> Sheet: ...
@@ -417,10 +434,7 @@ class Book:
         except Exception as error:
             raise self._unreadable(error) from error
         self._report_structure(notes, structure, ref)
-        areas, area_problem = print_areas(self._info.print_area_text.get(name, ""), name)
-        if not self._info.print_area_text.get(name):
-            areas, area_problem = (), None
-        row_breaks, column_breaks = page_breaks(structure.children)
+        areas, area_problem, row_breaks, column_breaks = self._page_layout(name)
         rows, columns, outline = read_outline(
             structure, ref, _rows(structure, ref), _columns(structure, ref), notes
         )
