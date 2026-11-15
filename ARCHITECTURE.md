@@ -575,7 +575,11 @@ at, in order:
    the file print 14 pt apart);
 2. `0` when `<sheetFormatPr zeroHeight="1">` and the row has no `<row>` element;
 3. `defaultRowHeight` when `<sheetFormatPr customHeight="1">` and `zeroHeight` is not set;
-4. 16 pt when the file has no `<sheetFormatPr>` and the row has no `<row>` element;
+4. 16 pt when the file has no `<sheetFormatPr>` and the row has no `<row>` element (the height
+   of Excel's application standard font, which is Aptos Narrow 12 under Microsoft 365 and was
+   Calibri 12 under Office 2021: both give 16 pt in the table below, so the captures cannot tell
+   which font the rule follows, and a workbook opened where the standard font differs is
+   unverified);
 5. otherwise the Normal font's height from the captured table (Calibri 12, 14, 15, 16, 19, 21 pt
    at 9 to 16; Aptos Narrow 13, 14, 15, 16, 19, 22), plus 1 pt each for `thickTop` and
    `thickBottom` when the row has no `<row>` element.
