@@ -106,6 +106,7 @@ class Page:
         """Grid position of a cell a link goes to → its id."""
         self._grid: tuple[_Spans, Holder] | None = None
         self._links: _links.Links | None = None
+        self._runs: dict[tuple[int, int], list[TextRun]] | None = None
         self.zoom = page_zoom(sheet, backend)
         """The zoom in percent: the backend's, else the one saved in the file (§4.18)."""
         self.ox, self.oy = _headings.offsets(sheet, backend)
@@ -157,8 +158,15 @@ class Page:
             classes += f" sp-g-{self.grid_color}"
         zoom = f' style="--sheetpeek-zoom:{self.zoom / 100:g}"' if self.zoom != 100 else ""
         out.write(f'<div class="{classes}" data-color-scheme="{self.backend.color_scheme}"{zoom}>')
-        self.fills.write(out)
-        self.borders.write(out)
+        window = None
+        if self.copy:
+            inf = float("inf")
+            window = (
+                inf if columns is None else self.x(sheet.columns[columns].x_pt or 0) + 1,
+                inf if rows is None else self.y(sheet.rows[rows].y_pt or 0) + 1,
+            )
+        self.fills.write(out, window)
+        self.borders.write(out, window)
         font = _text._font(self.normal, self.normal_face[1])
         out.write(f'<table style="width:{self.width}px;font:{font}">\n')
         out.write("<colgroup>")
@@ -216,10 +224,12 @@ class Page:
         sheet = self.sheet
         spans, holder = self.grid()
         self.links  # noqa: B018 - found before the cells are written, for their ids
-        runs: dict[tuple[int, int], list[TextRun]] = {}
-        for i, row in enumerate(sheet.rows):
-            for run in row.runs:
-                runs.setdefault(holder.get(run.source, (i, 0)), []).append(run)
+        if self._runs is None:  # found once: a frozen pane's copies use them again
+            self._runs = {}
+            for i, row in enumerate(sheet.rows):
+                for run in row.runs:
+                    self._runs.setdefault(holder.get(run.source, (i, 0)), []).append(run)
+        runs = self._runs
         edge = None
         if columns is not None and columns < len(sheet.columns):
             edge = sheet.columns[columns].x_pt or 0

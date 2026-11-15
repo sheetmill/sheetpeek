@@ -100,6 +100,8 @@ class Fills:
         self.page = page
         self.classes = Classes(f"sp-f-{page.tag}")
         self.boxes: list[str] = []
+        self.at: list[tuple[int, int]] = []
+        """Each box's left and top, for a frozen pane's copy, which writes only its own."""
         sheet = page.sheet
         rows, columns = sheet.rows, sheet.columns
         if not rows or not columns:
@@ -151,14 +153,23 @@ class Fills:
         else:
             name = self.classes.name(gradient(spec, width, height))
         self.boxes.append(f'<i class="{name}" style="{style}"></i>')
+        self.at.append((left, top))
 
     def css(self) -> str:
         """The layer's stylesheet, empty on a page without patterns or gradients."""
         return self.classes.css()
 
-    def write(self, out: TextIO) -> None:
-        if self.boxes:
-            out.write(f'<div class="sp-fills">{"".join(self.boxes)}</div>')
+    def write(self, out: TextIO, window: tuple[float, float] | None = None) -> None:
+        """Write the boxes; with ``window`` (px), only those starting left of and above it."""
+        boxes = self.boxes if window is None else inside(self.boxes, self.at, window)
+        if boxes:
+            out.write(f'<div class="sp-fills">{"".join(boxes)}</div>')
+
+
+def inside(boxes: list[str], at: list[tuple[int, int]], window: tuple[float, float]) -> list[str]:
+    """The boxes whose top-left corner lies inside ``window``, a right and a bottom edge."""
+    right, bottom = window
+    return [b for b, (x, y) in zip(boxes, at, strict=True) if x < right and y < bottom]
 
 
 def gradient(spec: Gradient, width: int, height: int) -> str:

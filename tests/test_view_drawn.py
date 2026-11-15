@@ -428,3 +428,33 @@ def test_the_cli_marks_page_breaks_in_html_only(tmp_path, capsys):
     assert main(["view", path, "-t", "html", "--page-breaks", "--notices", "none"]) == 0
     assert "sp-pagebreak" in capsys.readouterr().out
     assert main(["view", path, "-t", "csv", "--page-breaks"]) == 2
+
+
+def test_a_copy_holds_only_the_fills_and_borders_that_start_in_it(tmp_path):
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+    for row in range(1, 9):
+        sheet.cell(row, 4).value = row
+    sheet["A6"].border = Border(bottom=Side("dashed"))
+    sheet["D6"].border = Border(bottom=Side("dashed"))
+    sheet["A7"].fill = PatternFill("gray125", fgColor="FF0000")
+    sheet["D7"].fill = PatternFill("gray125", fgColor="FF0000")
+    path = save(workbook, tmp_path / "layers.xlsx")
+    rewrite(
+        path,
+        SHEET1,
+        lambda text: text.replace(
+            '<sheetView workbookViewId="0">',
+            '<sheetView workbookViewId="0"><pane xSplit="1" topLeftCell="B1" state="frozen"/>',
+            1,
+        ),
+    )
+    page = _html(path)
+    body, left = page.split('<div class="sp-pane ')[0], _panes(page)["left"]
+
+    def boxes(markup, layer):
+        found = re.search(rf'<div class="sp-{layer}">(.*?)</div>', markup)
+        return found.group(1).count("<i ") if found else 0
+
+    assert (boxes(body, "borders"), boxes(body, "fills")) == (2, 2)
+    assert (boxes(left, "borders"), boxes(left, "fills")) == (1, 1)

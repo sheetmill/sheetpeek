@@ -23,7 +23,7 @@ from typing import TYPE_CHECKING, TextIO
 
 from sheetpeek._fill_border_model import BorderStyle, Diagonal, Side, SlantedBorders
 from sheetpeek._pass_borders import rendered_borders
-from sheetpeek.backends.html._patterns import Classes, svg_uri, tile_svg
+from sheetpeek.backends.html._patterns import Classes, inside, svg_uri, tile_svg
 
 if TYPE_CHECKING:
     from sheetpeek.backends.html._table import Page
@@ -99,6 +99,8 @@ class Borders:
     def __init__(self, page: Page) -> None:
         self.classes = Classes(f"sp-b-{page.tag}")
         self.lines: list[str] = []
+        self.at: list[tuple[int, int]] = []
+        """Each line's left and top, for a frozen pane's copy, which writes only its own."""
         sheet = page.sheet
         resolved = rendered_borders(sheet)
         rows, columns = sheet.rows, sheet.columns
@@ -159,6 +161,7 @@ class Borders:
             f'<i class="{name}" style="left:{left}px;top:{top}px;width:{width}px;'
             f'height:{height}px"></i>'
         )
+        self.at.append((left, top))
 
     def diagonal(self, diagonal: Diagonal, xs: list[int], ys: list[int]) -> None:
         left, top = xs[diagonal.left], ys[diagonal.top]
@@ -193,6 +196,7 @@ class Borders:
             f'<i class="{name}" style="left:{left}px;top:{top}px;width:{width}px;'
             f'height:{height}px"></i>'
         )
+        self.at.append((left, top))
 
     def slanted(
         self,
@@ -248,14 +252,17 @@ class Borders:
             f'<i class="{name}" style="left:{left}px;top:{upper}px;width:{width}px;'
             f'height:{height}px"></i>'
         )
+        self.at.append((left, upper))
 
     def css(self) -> str:
         """The layer's stylesheet, empty on a page without borders."""
         return self.classes.css()
 
-    def write(self, out: TextIO) -> None:
-        if self.lines:
-            out.write(f'<div class="sp-borders">{"".join(self.lines)}</div>')
+    def write(self, out: TextIO, window: tuple[float, float] | None = None) -> None:
+        """Write the lines; with ``window`` (px), only those starting left of and above it."""
+        lines = self.lines if window is None else inside(self.lines, self.at, window)
+        if lines:
+            out.write(f'<div class="sp-borders">{"".join(lines)}</div>')
 
 
 def _runs(line: list[Side | None] | tuple[Side | None, ...]) -> list[tuple[int, int, Side]]:

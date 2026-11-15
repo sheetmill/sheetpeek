@@ -1306,8 +1306,10 @@ column of the range is drawn, and those before the split are frozen. A split out
 range freezes nothing. The freeze line is one CSS px of `#9B9B9B` over fills, borders and text,
 across the sheet below the frozen rows and down it after the frozen columns. With `freeze="panes"`
 (the default on a whole page) the sheet is drawn once and its frozen rows, columns and corner again
-as copies holding only their own rows or columns (with the runs of later cells that reach into
-them), stacked over it in one grid cell and held by `position: sticky`; copies carry no ids. This
+as copies holding only their own rows or columns, the runs of later cells that reach into them
+and the fill and border boxes that start in them, stacked over it in one grid cell and held by
+`position: sticky`; copies carry no ids. On `bench/html_size.py`'s `features` sheet, frozen at
+B2, the page is 7 % larger and written 6 % slower. This
 is CSS layout, not interactivity (no script, no hover; a browser without sticky positioning shows
 the static drawing), measured in WebKit: scrolled by (600, 900), the row copy stays at the top and
 follows the sheet sideways, the column copy stays at the left, the corner stays put. With
