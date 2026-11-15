@@ -1,6 +1,6 @@
 """Size and time of the HTML output for a large sheet (ARCHITECTURE.md §7.3).
 
-    uv run python bench/html_size.py [DIR] [ROWS] [COLUMNS] [plain|features]
+    uv run python bench/html_size.py [DIR] [ROWS] [COLUMNS] [plain|features] [frozen]
 
 Writes a workbook of ROWS x COLUMNS cells (default 5,000 x 20, 100,000 cells) into DIR (default:
 a temporary directory) unless it exists, then reads it, lays it out in excel mode and renders
@@ -16,11 +16,15 @@ macOS, kilobytes on Linux).
   shrunk, distributed and indented text, reading order, angled and stacked text, hyperlinks,
   grouped rows and columns, merges, a grid color and a tab color.
 
+``frozen`` freezes the sheet at B2 (one row, one column) after reading it, as a ``<pane>`` would,
+so the HTML holds the frozen-pane copies (ARCHITECTURE.md §4.18).
+
 ``bench/README.md`` records the figures.
 """
 
 from __future__ import annotations
 
+import dataclasses
 import datetime as dt
 import io
 import random
@@ -194,12 +198,16 @@ def main() -> None:
     case = sys.argv[4] if len(sys.argv) > 4 else "plain"
     if case not in ("plain", "features"):
         raise SystemExit("the case is plain or features")
+    frozen = len(sys.argv) > 5 and sys.argv[5] == "frozen"
     name = "html" if case == "plain" else "features"
     path = directory / f"{name}_{rows}x{columns}.xlsx"
     if not path.exists():
         (build if case == "plain" else build_features)(path, rows, columns)
     start = time.perf_counter()
     sheet = sheetpeek.read(path)
+    if frozen:
+        pane = sheetpeek.SheetView(frozen_rows=1, frozen_columns=1, pane_state="frozen")
+        sheet = dataclasses.replace(sheet, view=pane)
     read = time.perf_counter()
     rendered = sheet.layout("excel")
     laid = time.perf_counter()

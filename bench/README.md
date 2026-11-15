@@ -22,7 +22,7 @@ macOS. Times vary by about 5 % between runs and from one day to the next, and pe
 5 MB, so rows compare only when measured together: each version below was measured beside the
 next. 0.2.0 is
 the release from PyPI, which draws none of the newer features: on the `features` sheet it shows
-what the same cells cost without them. `2421aed` is the first push after 0.2.0.
+what the same cells cost without them. `2421aed` is an intermediate version, measured beside 0.2.0 and beside the next.
 
 | case | version | HTML | read | layout | render | peak RSS |
 |---|---|---|---|---|---|---|
@@ -32,6 +32,10 @@ what the same cells cost without them. `2421aed` is the first push after 0.2.0.
 | features | 0.2.0 | 21.6 MB | 0.54 s | 2.03 s | 0.50 s | 285 MB |
 | features | `2421aed` | 33.5 MB | 0.66 s | 2.60 s | 0.62 s | 356 MB |
 | features | now | 33.8 MB | 0.67 s | 2.69 s | 0.63 s | 358 MB |
+
+With a frozen pane (`... 5000 20 features frozen`, the sheet frozen at B2, measured beside the
+`features` case on the same version): 36.2 MB against 33.8 MB, render 0.73 s against 0.66 s, best
+of three; the copies hold only the frozen rows', columns' and corner's cells, fills and borders.
 
 **Against 0.2.0**, on the plain sheet layout is 4 % slower, about the runs' variation, and render
 is 13 % faster, after removing per-cell overhead the newer features had added: a second

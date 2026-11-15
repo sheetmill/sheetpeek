@@ -34,8 +34,9 @@ CLI views a file and serves a folder of workbooks as HTML.
   stated judgment per other output, with notices for the rest. In scope and built: cell styles
   (fonts, fills, borders, alignment, rich-text runs), hyperlinks, outlines, theme fonts and the
   workbook palette, gridline colors and headings, sheet kinds, states and tab colors, rotated and
-  stacked text. In scope and not built yet: tables, filter buttons, conditional formatting, notes
-  and comments, pictures, panes and other sheet-view parts, print settings, pivot tables; charts
+  stacked text, the zoom, frozen panes, the print area and manual page breaks (§4.18). In scope and
+  not built yet: tables, filter buttons, conditional formatting, notes and comments, pictures,
+  hidden zeros and the other sheet-view parts, the other print settings, pivot tables; charts
   possibly as a package of their own (§11). Out of scope: editing and any interactive UI.
 
 ## 2. Pipeline
@@ -1308,8 +1309,9 @@ across the sheet below the frozen rows and down it after the frozen columns. Wit
 (the default on a whole page) the sheet is drawn once and its frozen rows, columns and corner again
 as copies holding only their own rows or columns, the runs of later cells that reach into them
 and the fill and border boxes that start in them, stacked over it in one grid cell and held by
-`position: sticky`; copies carry no ids. On `bench/html_size.py`'s `features` sheet, frozen at
-B2, the page is 7 % larger and written 6 % slower. This
+`position: sticky`; copies carry no ids. On `bench/html_size.py`'s `features` sheet frozen at
+B2 (`... features frozen`), the page is 7 % larger (36.2 against 33.8 MB) and rendered in
+0.73 s against 0.66 s, best of three. This
 is CSS layout, not interactivity (no script, no hover; a browser without sticky positioning shows
 the static drawing), measured in WebKit: scrolled by (600, 900), the row copy stays at the top and
 follows the sheet sideways, the column copy stays at the left, the corner stays put. With
@@ -1981,10 +1983,12 @@ sheetpeek already use openpyxl.
 **CLI.**
 - `sheetpeek view book.xlsx [--sheet NAME] [--ref A1:H40] [--to rich|text|html|markdown|csv|tsv]
   [--column-headings] [--row-headings] [--hidden] [--list] [--all-sheets] [--hidden-sheets]
-  [--notices summary|full|none] [--strict] [--suppress CODE] [--max-parts N] [--max-part-bytes N]
+  [--print-area] [--page-breaks] [--zoom PERCENT] [--notices summary|full|none] [--strict] [--suppress CODE] [--max-parts N] [--max-part-bytes N]
   [--max-total-bytes N] [--max-cells N]`. The default is `rich` on a terminal and `text` when piped
   or when `rich` is not installed. `--all-sheets` writes the workbook page (§4.15), HTML only, with
-  `--hidden-sheets` adding hidden and very hidden sheets. Notices (§3.7) go to standard error, one
+  `--hidden-sheets` adding hidden and very hidden sheets. `--print-area` shows the print area
+  instead of the used range (not with `--ref` or `--all-sheets`); `--page-breaks` and `--zoom`
+  are HTML options (§4.18), refused with another output. Notices (§3.7) go to standard error, one
   line per kind by default (`--notices`); `--strict` exits with status 3 when anything is not shown,
   and `--suppress` leaves a code and the codes under it out. Warnings go to standard error, and an
   unreadable or refused file, an unknown sheet or a bad range exits with status 1 and one line of
@@ -1993,7 +1997,8 @@ sheetpeek already use openpyxl.
   own defaults (§5.5) (`_serve.py`): a standard-library `ThreadingHTTPServer`. `/` lists the
   `.xlsx` files under DIR, under the folder's name and not its path, `/view/<path>` shows a
   workbook's default sheet through the HTML backend (a fragment with headings inside the server's
-  page, with links to the other sheets), and `?sheet=` and `?ref=` choose a sheet and a range. It
+  page, with links to the other sheets); `?sheet=` and `?ref=` choose a sheet and a range,
+  `?zoom=` a zoom (10 to 400) and `?print_area=1` the print area (not with `?ref=`). It
   binds to 127.0.0.1 by default and is read-only with no state: GET and HEAD only.
   A request names a workbook only if, after resolving `..` and symbolic links, it is a regular
   `.xlsx` file inside DIR whose path has no part starting with a dot; anything else is a 404. A
@@ -2242,8 +2247,9 @@ are read.
 ## 11. Roadmap
 
 1. **The middle tier:** filter and sort buttons, tables with the differential-format layer,
-   conditional formatting, pictures and their placement, notes and comments, sheet-view parts
-   (panes, zero display), print settings; then pivot tables. Most of it needs parts that
+   conditional formatting, pictures and their placement, notes and comments, hidden zeros (with
+   xlformat 0.4), the print settings not yet drawn (titles, headers and footers); then pivot
+   tables. Most of it needs parts that
    openpyxl's read-only mode does not expose.
 2. **The shared xlsx reader:** sheetpeek moves from openpyxl onto the shared reader, in
    development as a package of its own; `_read.py` is the only module that changes (§8.1).

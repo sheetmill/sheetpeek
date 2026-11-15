@@ -143,8 +143,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   sheets).
 - `NotAWorksheetError`, a `ValueError`, raised for a chartsheet or a dialog sheet.
 - The notice `sheet.hidden`: hidden sheets the workbook page leaves out.
-
-- The sheet view and page layout are read, not yet drawn: `Sheet.view` (a `SheetView`: the saved
+- The sheet view and page layout are read: `Sheet.view` (a `SheetView`: the saved
   zoom, whether zeros show, a frozen pane's rows and columns), `Sheet.print_areas` (the print
   area's ranges; `Sheet.print_area_problem` says why a part was left out: `#REF!`, a formula,
   another sheet), and the manual page breaks, `Sheet.row_breaks` and `Sheet.column_breaks`.
