@@ -14,7 +14,7 @@ requires-python = ">=3.11"
 dependencies = [
   "openpyxl>=3.1",
   "xlformat>=0.3,<1",
-  "xlio>=0.1,<1",
+  "xlio==0.1.*",
 ]
 keywords = ["excel", "xlsx", "openpyxl", "spreadsheet", "html", "markdown", "terminal"]
 classifiers = [
