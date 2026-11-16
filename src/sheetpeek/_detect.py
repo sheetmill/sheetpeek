@@ -13,14 +13,14 @@ from __future__ import annotations
 
 import re
 import xml.etree.ElementTree as ET
-import zipfile
 from collections.abc import Callable, Iterable, Iterator
 from dataclasses import dataclass, field
 from typing import Any
 
+import xlio
+
 from sheetpeek._model import CellRange
 from sheetpeek._notices import Collector, Outcome, Reason
-from sheetpeek._package import related, workbook_part
 from sheetpeek._structure import PHONETIC, RICH, Structure
 from sheetpeek._style import Code
 
@@ -166,11 +166,31 @@ class WorkbookInfo:
     strings_part: str | None = None
 
 
-def workbook_info(archive: zipfile.ZipFile) -> WorkbookInfo:
+def _related(parts: xlio.Parts, part: str) -> list[tuple[str, str, str, bool]]:
+    """A part's relationships as (id, type, target, external); targets resolved to part names."""
+    return [
+        (r.id, r.type, r.target if r.external else (r.target_part or ""), r.external)
+        for r in parts.relationships(part)
+    ]
+
+
+def _workbook_part(parts: xlio.Parts) -> str:
+    """The workbook part's name, from the package's own relationship to it."""
+    return next(
+        (
+            r.target_part
+            for r in parts.relationships("")
+            if r.type.endswith("/officeDocument") and r.target_part
+        ),
+        "xl/workbook.xml",
+    )
+
+
+def workbook_info(parts: xlio.Parts) -> WorkbookInfo:
     """Read sheet kinds, ``showObjects`` and the shared strings part."""
-    part = workbook_part(archive)
-    rels = {rid: (kind, target) for rid, kind, target, _ in related(archive, part)}
-    root = ET.fromstring(archive.read(part))
+    part = _workbook_part(parts)
+    rels = {rid: (kind, target) for rid, kind, target, _ in _related(parts, part)}
+    root = ET.fromstring(parts.read(part))
     kinds: dict[str, str] = {}
     for sheet in root.iter(f"{{{_MAIN}}}sheet"):
         name = sheet.get("name", "")
@@ -205,16 +225,16 @@ def hidden_sheets(collector: Collector, names: list[str], very_hidden: int) -> N
     _report(collector, "sheet.hidden", count=len(names), detail=detail, context=context)
 
 
-def string_marks(archive: zipfile.ZipFile, part: str | None) -> bytes | None:
+def string_marks(parts: xlio.Parts, part: str | None) -> bytes | None:
     """Per shared string, :data:`RICH` and :data:`PHONETIC` bits; ``None`` when none is set.
 
     A byte search skips the parse for the many workbooks whose strings have neither.
     """
-    if part is None or part not in archive.namelist():
+    if part is None or part not in parts:
         return None
     found = False
     tail = b""
-    with archive.open(part) as handle:
+    with parts.open(part) as handle:
         while chunk := handle.read(_CHUNK):
             data = tail + chunk
             if b"<r>" in data or b":r>" in data or b"rPh" in data:
@@ -224,7 +244,7 @@ def string_marks(archive: zipfile.ZipFile, part: str | None) -> bytes | None:
     if not found:
         return None
     marks = bytearray()
-    with archive.open(part) as handle:
+    with parts.open(part) as handle:
         for _, element in ET.iterparse(handle):
             if element.tag.rpartition("}")[2] != "si":
                 continue
@@ -263,7 +283,7 @@ class SheetContext:
     """What a sheet's rules need besides the element: the package and what was found so far."""
 
     collector: Collector
-    archive: zipfile.ZipFile
+    parts: xlio.Parts
     rels: dict[str, tuple[str, str, bool]]
     objects: bool
     """Whether the workbook shows objects (``showObjects`` is not ``none``)."""
@@ -290,7 +310,7 @@ def rule(*names: str) -> Callable[[Rule], Rule]:
 
 def sheet_notices(
     collector: Collector,
-    archive: zipfile.ZipFile,
+    parts: xlio.Parts,
     part: str,
     structure: Structure,
     info: WorkbookInfo,
@@ -302,8 +322,8 @@ def sheet_notices(
         _report(collector, "sheet.macrosheet")
     context = SheetContext(
         collector,
-        archive,
-        {rid: (kind, target, external) for rid, kind, target, external in related(archive, part)},
+        parts,
+        {rid: (kind, target, external) for rid, kind, target, external in _related(parts, part)},
         info.show_objects != "none",
     )
     for child in _children(structure.children):
@@ -321,7 +341,7 @@ def sheet_notices(
             _report(
                 collector, "sheet.unknown_element", detail=f"<{local}>", context={"element": local}
             )
-    _comments(collector, archive, context.rels, ref)
+    _comments(collector, parts, context.rels, ref)
 
 
 @rule("sheetPr")
@@ -364,9 +384,9 @@ def _drawings(context: SheetContext, child: ET.Element) -> None:
     if target is None or target[2]:
         return
     if _local(child)[0] == "drawing":
-        _drawing(context.collector, context.archive, target[1])
+        _drawing(context.collector, context.parts, target[1])
     else:
-        _vml(context.collector, context.archive, target[1])
+        _vml(context.collector, context.parts, target[1])
 
 
 @rule("picture")
@@ -464,9 +484,9 @@ def _extensions(collector: Collector, ext_list: ET.Element) -> None:
             _report(collector, "sheet.unknown_extension", detail=uri, context={"uri": uri})
 
 
-def _drawing(collector: Collector, archive: zipfile.ZipFile, part: str) -> None:
+def _drawing(collector: Collector, parts: xlio.Parts, part: str) -> None:
     try:
-        root = ET.fromstring(archive.read(part))
+        root = ET.fromstring(parts.read(part))
     except (KeyError, ET.ParseError):
         return
     counts: dict[str, int] = {}
@@ -506,13 +526,13 @@ def _drawn(item: ET.Element, counts: dict[str, int]) -> None:
         counts[code] = counts.get(code, 0) + 1
 
 
-def _vml(collector: Collector, archive: zipfile.ZipFile, part: str) -> None:
+def _vml(collector: Collector, parts: xlio.Parts, part: str) -> None:
     """Form controls in a legacy (VML) drawing; notes are reported from the comments part.
 
     VML is often not well-formed XML, so it is searched, not parsed.
     """
     try:
-        data = archive.read(part)
+        data = parts.read(part)
     except KeyError:
         return
     controls = sum(1 for kind in _OBJECT_TYPE.findall(data) if kind != b"Note")
@@ -522,21 +542,21 @@ def _vml(collector: Collector, archive: zipfile.ZipFile, part: str) -> None:
 
 def _comments(
     collector: Collector,
-    archive: zipfile.ZipFile,
+    parts: xlio.Parts,
     rels: dict[str, tuple[str, str, bool]],
     ref: CellRange | None,
 ) -> None:
     threaded: set[str] = set()
     for rel_type, target, external in rels.values():
         if rel_type.endswith("/threadedComment") and not external:
-            for element in _parse(archive, target):
+            for element in _parse(parts, target):
                 if _local(element)[0] == "threadedComment" and element.get("ref"):
                     threaded.add(element.get("ref", ""))
     for cell in sorted(threaded):
         _cell_report(collector, "comment.threaded", cell, ref)
     for rel_type, target, external in rels.values():
         if rel_type.endswith("/comments") and not external:
-            for element in _parse(archive, target):
+            for element in _parse(parts, target):
                 cell = element.get("ref", "")
                 if _local(element)[0] == "comment" and cell and cell not in threaded:
                     _cell_report(collector, "comment", cell, ref)
@@ -551,9 +571,9 @@ def _cell_report(collector: Collector, code: str, cell: str, ref: CellRange | No
         _report(collector, code, cells=cells)
 
 
-def _parse(archive: zipfile.ZipFile, part: str) -> Iterator[ET.Element]:
+def _parse(parts: xlio.Parts, part: str) -> Iterator[ET.Element]:
     try:
-        root = ET.fromstring(archive.read(part))
+        root = ET.fromstring(parts.read(part))
     except (KeyError, ET.ParseError):
         return iter(())
     return root.iter()

@@ -233,8 +233,8 @@ class Book:
             )
             self._theme_fonts = xlio_theme_fonts(self._book.theme)
             self._normal_font = self._read_normal_font()
-            self._info = workbook_info(self._archive)
-            self._marks = string_marks(self._archive, self._info.strings_part)
+            self._info = workbook_info(self._book.parts)
+            self._marks = string_marks(self._book.parts, self._info.strings_part)
             self._context = styles.Context(
                 self._cell_color, self._normal_font, self._theme_fonts, self._palette
             )
@@ -435,12 +435,11 @@ class Book:
             ref = CellRange.parse(ref)
         if ref is not None and not clip:
             self._check_area(ref)
-        assert self._archive is not None
+        assert self._book is not None
         try:
-            with self._archive.open(part) as handle:
-                structure = scan(handle, self._marks)
             with self._xlio_errors():
-                assert self._book is not None
+                with self._book.parts.open(part) as handle:
+                    structure = scan(handle, self._marks)
                 source = self._book.sheet(name)
                 structure = with_elements(fill(structure, source), source)
         except PackageError:
@@ -459,7 +458,8 @@ class Book:
 
         notes = Collector(name)
         try:
-            sheet_notices(notes, self._archive, part, structure, self._info, name, ref)
+            with self._xlio_errors():
+                sheet_notices(notes, self._book.parts, part, structure, self._info, name, ref)
             with _quiet_extensions():
                 cells = self._read_cells(worksheet, ref, structure, notes) if ref else ()
         except PackageError:

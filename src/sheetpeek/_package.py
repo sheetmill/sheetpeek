@@ -326,29 +326,6 @@ def relationships(archive: zipfile.ZipFile, part: str) -> dict[str, tuple[str, b
     return result
 
 
-def related(archive: zipfile.ZipFile, part: str) -> list[tuple[str, str, str, bool]]:
-    """A part's relationships as (id, type, target, external); targets resolved to part names."""
-    folder, name = posixpath.split(part)
-    rels = posixpath.join(folder, "_rels", f"{name}.rels")
-    try:
-        root = ET.fromstring(archive.read(rels))
-    except KeyError:
-        return []
-    result = []
-    for rel in root.iter(f"{_PKG_REL}Relationship"):
-        target = rel.get("Target", "")
-        external = rel.get("TargetMode") == "External"
-        if not external:
-            target = _resolve(folder, target)
-        result.append((rel.get("Id", ""), rel.get("Type", ""), target, external))
-    return result
-
-
-def workbook_part(archive: zipfile.ZipFile) -> str:
-    """The workbook part's name."""
-    return _workbook_part(archive)
-
-
 def worksheet_parts(archive: zipfile.ZipFile) -> dict[str, str]:
     """Sheet name → worksheet part name, in workbook order (chartsheets included)."""
     workbook = _workbook_part(archive)
