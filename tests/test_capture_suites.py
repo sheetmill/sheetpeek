@@ -5,11 +5,14 @@ a white image with cells laid out from the worksheet's own column widths and row
 pixels a point (zoom 100 on a 2x display), with a few known marks drawn in it.
 """
 
+import dataclasses
+
 import openpyxl
+import pytest
 from capture import borders, fills, text_style
 from capture.screen import png
 from capture.screen.run import Capture
-from capture.screen.window import Grid
+from capture.screen.window import GRIDLINE, NO_GRIDLINE, Grid, locate, nominal_scale
 from openpyxl.utils import column_index_from_string, get_column_letter
 from openpyxl.utils.cell import coordinate_from_string
 
@@ -265,3 +268,62 @@ def test_distributed_lines_sit_where_excel_draws_them(tmp_path):
         for (start, end), (left, width) in zip(lines, theirs, strict=True):
             assert abs(left - start) <= 1.5, (row["name"], start, left)
             assert abs(left + width - end) <= 1.5, (row["name"], end, left + width)
+
+
+# --- grids and platforms
+
+
+def _marked(cells, markers):
+    ws = openpyxl.Workbook().active
+    canvas = Canvas(ws, [*cells, *markers])
+    for marker in markers:
+        x0, y0, x1, y1 = canvas.box(marker)
+        canvas.paint(x0, y0, x1, y1, (255, 0, 255))
+    return canvas
+
+
+def test_one_marker_and_the_nominal_scale_give_the_two_marker_grid():
+    canvas = _marked(["E6"], ("B2", "K12"))
+    image = canvas.capture().image
+    first, second = canvas.geometry["B2"], canvas.geometry["K12"]
+    nominal = nominal_scale(100, 2.0, "mac")
+    two, check = locate(image, first, second, nominal)
+    one, _ = locate(image, first, second, nominal, one_marker=True)
+    assert check["nominal_off"] == 0
+    for points in (0.0, 100.0, 333.25):
+        assert one.x(points) == two.x(points)
+        assert one.y(points) == two.y(points)
+
+
+def test_a_screen_showing_only_the_first_marker_needs_the_nominal_scale():
+    canvas = _marked(["K12"], ("B2",))
+    image = canvas.capture().image
+    first, second = canvas.geometry["B2"], canvas.geometry["K12"]
+    grid, check = locate(image, first, second, nominal_scale(100, 2.0, "mac"))
+    assert check["scale"] == "nominal"
+    assert (grid.x(first["left"]), grid.y(first["top"])) == canvas.box("B2")[:2]
+    with pytest.raises(RuntimeError, match="expected 2 marker regions"):
+        locate(image, first, second)
+
+
+def test_windows_units_are_96_pixels_an_inch():
+    assert nominal_scale(200, 1.0, "windows") == pytest.approx(8 / 3)
+    assert nominal_scale(200, 2.0, "mac") == 4.0
+
+
+def test_the_borders_control_takes_its_platforms_gridline_or_is_skipped(capsys):
+    ws = openpyxl.Workbook().active
+    borders.fill(ws)
+    canvas = Canvas(ws, list(borders.CELLS.values()))
+    x0, _, x1, bottom = canvas.box(borders.CELLS["none"])
+    canvas.paint(x0 - 2, bottom - 1, x1 + 2, bottom, GRIDLINE["mac"])
+
+    def control(platform):
+        capture = dataclasses.replace(canvas.capture(), platform=platform)
+        records = borders.measure(capture)
+        return [r for r in records if r["style"] == "none" and r["edge"] == "bottom"]
+
+    assert control("mac")
+    assert GRIDLINE["windows"] is None  # stated once a capture here records it
+    assert control("windows") == []
+    assert NO_GRIDLINE in capsys.readouterr().out

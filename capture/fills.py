@@ -49,7 +49,6 @@ ANCHOR = ("C20", "D20", "E20")
 MARKERS = ("B2", "M22")
 ZOOMS = (100, 200)
 INSET = 4
-GRID = (212, 212, 212)
 ROOT = Path(__file__).resolve().parents[1]
 BUILD_DIR = ROOT / "capture" / "build" / "fills"
 OUTPUT = ROOT / "tests" / "captures" / "fills.tsv"
@@ -271,7 +270,9 @@ def _fill_box(cap: Any, cell: str) -> dict[str, str]:
     from capture.screen.ink import nearest, pt
 
     palette = {"blue": (0, 0, 255), "yellow": (255, 255, 0), "white": (255, 255, 255)}
-    palette.update({"grid": GRID, "black": (0, 0, 0)})
+    palette["black"] = (0, 0, 0)
+    if cap.gridline is not None:
+        palette["grid"] = cap.gridline
     left, right = round(cap.edge(cell, "left")), round(cap.edge(cell, "right"))
     top, bottom = round(cap.edge(cell, "top")), round(cap.edge(cell, "bottom"))
     cx, cy = (left + right) // 2, (top + bottom) // 2
@@ -302,7 +303,9 @@ def _gridline_pixels(cap: Any, cell: str) -> str:
 
     left, right = round(cap.edge(cell, "left")), round(cap.edge(cell, "right"))
     y = round(cap.edge(cell, "cy"))
-    grid = {"grid": GRID}
+    if cap.gridline is None:
+        return ""  # the platform's gray is not recorded (window.NO_GRIDLINE)
+    grid = {"grid": cap.gridline}
     count = sum(
         nearest(cap.image.pixel(x, y), grid, 8) == "grid" for x in range(left - 2, right + 2)
     )

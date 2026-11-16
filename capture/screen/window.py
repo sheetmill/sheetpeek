@@ -4,9 +4,15 @@ The window is found through CoreGraphics (by title, which is the workbook's name
 with ``screencapture -l``, which stores it at the display's scale (2 px a point on a 2x display).
 The capture is repeated a second apart until two shots are identical: Excel may still be
 redrawing after a zoom change. Cells are mapped to pixels from Excel's own positions in points
-(``left position``, ``top``, ``width``, ``height`` of a range, from the sheet's origin) and two
-marker cells filled with a marker color: their pixel boxes give the origin and the scale per
-axis, and the scale is checked against the window's own size.
+(``left position``, ``top``, ``width``, ``height`` of a range, from the sheet's origin) and
+marker cells filled with a marker color (:func:`locate`). With two markers on screen, their
+pixel boxes give the origin and the scale per axis, and the zoom's nominal scale is checked
+against them. A screen too small to show both uses the first marker for the origin and the
+nominal scale: screen pixels
+per point at zoom 100 (:data:`POINT_PIXELS`) times the display's scale and the zoom. Excel rounds
+rows and columns to whole pixels at some zooms (zoom 150 on the Mac: 3.008 across, 3.060 down,
+against 3.0), so a one-marker grid holds only where a two-marker run's check shows the nominal
+scale holds.
 """
 
 from __future__ import annotations
@@ -21,6 +27,30 @@ from capture.screen.session import excel_windows
 
 MARKER = "FF00FF"
 """Magenta: absent from Excel's chrome and from the test content."""
+
+POINT_PIXELS = {"mac": 1.0, "windows": 96 / 72}
+"""Screen pixels per sheet point at zoom 100 on a display of scale 1, by platform."""
+
+GRIDLINE: dict[str, tuple[int, int, int] | None] = {"mac": (212, 212, 212), "windows": None}
+"""The default gridline's gray in sRGB, by platform: ``#D4D4D4`` on the Mac (captured). A
+platform's gray is stated once a capture in this repository records it; until then it is
+``None``, and what needs it is skipped with :data:`NO_GRIDLINE`."""
+
+NO_GRIDLINE = "no capture in this repository records this platform's gridline gray yet"
+"""Why a gridline control is skipped."""
+
+
+def platform_of(header: dict[str, str]) -> str:
+    """A run's platform from its header: ``platform``, else ``mac`` (runs before the field)."""
+    found = header.get("platform", "mac")
+    if found not in POINT_PIXELS:
+        raise ValueError(f"unknown platform {found!r} in the run's header")
+    return found
+
+
+def nominal_scale(zoom: int, display_scale: float, platform: str) -> float:
+    """Image pixels per sheet point at ``zoom``, as the platform's units give it."""
+    return POINT_PIXELS[platform] * display_scale * zoom / 100
 
 
 def capture_window(title: str, out: Path) -> tuple[dict[str, object], png.Image]:
@@ -114,6 +144,73 @@ class Grid:
 
     def y(self, points: float) -> float:
         return self.origin_y + points * (self.scale_y or self.scale)
+
+
+def locate(
+    image: png.Image,
+    first: dict[str, float],
+    second: dict[str, float],
+    nominal: float | None = None,
+    *,
+    one_marker: bool = False,
+) -> tuple[Grid, dict[str, object]]:
+    """The grid from the markers on screen: both when both show, else the first and ``nominal``.
+
+    With two markers the grid is measured (:func:`grid_from_markers`), and ``nominal`` (if
+    given) is compared with the measured scales in ``check``; with one, :func:`grid_from_marker`.
+    ``one_marker`` measures from the first marker and ``nominal`` even when both show, to
+    compare the two ways on the same image.
+    """
+    boxes = marker_boxes(image)
+    if one_marker and boxes and nominal is not None:
+        return grid_from_marker(image, first, nominal, boxes[0])
+    if len(boxes) == 2:
+        grid, check = grid_from_markers(image, first, second)
+        if nominal is not None:
+            check["nominal_scale"] = round(nominal, 4)
+            check["nominal_off"] = round(
+                max(abs(grid.scale_x - nominal), abs(grid.scale_y - nominal)) / nominal, 5
+            )
+        return grid, check
+    if len(boxes) == 1 and nominal is not None:
+        return grid_from_marker(image, first, nominal)
+    raise RuntimeError(
+        f"expected 2 marker regions, or 1 and a nominal scale; found {len(boxes)}: {boxes}"
+    )
+
+
+def grid_from_marker(
+    image: png.Image,
+    first: dict[str, float],
+    scale: float,
+    box: tuple[int, int, int, int] | None = None,
+) -> tuple[Grid, dict[str, object]]:
+    """The grid from the first marker's box and a known scale, the same on both axes.
+
+    ``box`` is the first marker's pixel box, by default the one marker region on screen. Its size
+    is checked against the cell's at ``scale``, within 2 pixels each way.
+    """
+    if box is None:
+        boxes = marker_boxes(image)
+        if len(boxes) != 1:
+            raise RuntimeError(f"expected 1 marker region, found {len(boxes)}: {boxes}")
+        box = boxes[0]
+    x0, y0, x1, y1 = box
+    boxes = [box]
+    size = (x1 - x0 + 1, y1 - y0 + 1)
+    expected = (first["width"] * scale, first["height"] * scale)
+    if any(abs(got - want) > 2 for got, want in zip(size, expected, strict=True)):
+        raise RuntimeError(f"the marker box {size} is not the first marker's {expected}")
+    grid = Grid(x0 - first["left"] * scale, y0 - first["top"] * scale, scale, scale, scale)
+    check = {
+        "boxes": boxes,
+        "scale": "nominal",
+        "nominal_scale": round(scale, 4),
+        "first_box_wh": size,
+        "first_cell_wh_px": (round(expected[0], 2), round(expected[1], 2)),
+        "first_marker_rgb": image.pixel((x0 + x1) // 2, (y0 + y1) // 2),
+    }
+    return grid, check
 
 
 def grid_from_markers(image: png.Image, first: dict, second: dict) -> tuple[Grid, dict]:

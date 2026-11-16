@@ -1,8 +1,8 @@
 """Measuring ink in a window capture: boxes, bands of rows, horizontal rules, on/off patterns.
 
 Boxes are image pixels ``(x0, y0, x1, y1)``, end exclusive. Text is black (or a marked color) on
-white; gridlines are luma 212, so the default ink threshold (150) leaves them out. Standard
-library only.
+white; gridlines are luma 212 on the Mac (``window.GRIDLINE``), so the default ink threshold
+(150) leaves them out. Standard library only.
 """
 
 from __future__ import annotations
@@ -13,7 +13,7 @@ from typing import Any
 from capture.screen.run import luma, runs
 
 DARK = 150
-"""Luma below which a pixel counts as text ink (gridlines are 212)."""
+"""Luma below which a pixel counts as text ink (the Mac's gridlines are 212)."""
 
 Box = tuple[int, int, int, int]
 Test = Callable[[tuple[int, int, int]], bool]

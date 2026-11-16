@@ -131,11 +131,23 @@ pt high in the file prints 14 pt apart). `capture/screen/` captures Excel's wind
   boxes, against Excel's own `left position`, `top`, `width` and `height` of the cells, give the
   origin and the scale per axis. A marker must be a cell's full height, which keeps out the
   floating Copilot button of Microsoft 365 (a 15 × 10 px magenta-ish disk, when it is on).
+- **One marker, on a small screen:** where only B2 shows, its box gives the origin and the zoom's
+  nominal scale the rest: screen pixels per point at zoom 100 (1 on the Mac, 96/72 on Windows)
+  times the display's scale (recorded in the header as `display_scale`) and the zoom. Wherever
+  both markers show, the nominal scale is checked against them (`nominal_off`). On the Mac, at
+  zoom 100 and 200, it matched every saved capture exactly, and measuring every suite's saved
+  captures from one marker gave the same results; at other zooms Excel rounds rows and columns
+  to whole pixels (zoom 150: 3.008 across and 3.060 down against 3.0), so a one-marker grid holds
+  only where a two-marker run's check shows the nominal scale holds.
+- **Gridlines** are `#D4D4D4` on the Mac. A control that finds a gridline takes its run's
+  platform's gray (`window.GRIDLINE`, from the header's `platform`, `mac` for runs before the
+  field); a platform whose gray no capture here records yet has none, and the control is skipped
+  with the reason.
 - **Reads:** for every cell measured, its display format (with conditional formatting and table
   styles), its own format, its own borders and its geometry, each property in its own `try`.
 - **Headers** record Excel's version and build, the edition (stated in `EXCEL_EDITION`, which
   Excel's dictionary does not give), the update channel, macOS, the appearance, the zoom, the
-  color conversion, the date and the suite. The older suites' headers record version, build,
+  color conversion, the date, the suite, the platform and the display's scale. The older suites' headers record version, build,
   edition and channel too.
 
 Units: lengths are reported in sheet points at the capture's zoom (image pixels divided by the

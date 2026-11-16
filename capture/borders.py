@@ -46,8 +46,6 @@ CLEAR = 12
 """Image pixels kept clear of each corner, so that the other sides' lines are not scanned."""
 HALF = 10
 """Image pixels scanned on each side of a boundary."""
-GRID = (212, 212, 212)
-"""The gridline's gray, as captured in sRGB."""
 ROOT = Path(__file__).resolve().parents[1]
 BUILD_DIR = ROOT / "capture" / "build" / "borders"
 OUTPUT = ROOT / "tests" / "captures" / "borders.tsv"
@@ -105,8 +103,9 @@ def _is_ink(rgb: tuple[int, int, int]) -> bool:
     return luma(rgb) < 180
 
 
-def _is_grid(rgb: tuple[int, int, int]) -> bool:
-    return all(abs(c - g) <= 10 for c, g in zip(rgb, GRID, strict=True))
+def _is_grid(rgb: tuple[int, int, int], grid: tuple[int, int, int]) -> bool:
+    """Within 10 per channel of the platform's gridline gray (``Capture.gridline``)."""
+    return all(abs(c - g) <= 10 for c, g in zip(rgb, grid, strict=True))
 
 
 def _line(cap: Any, along: str, fixed: int, a0: int, a1: int) -> list[tuple[int, int, int]]:
@@ -125,7 +124,14 @@ def _measure_edge(cap: Any, cell: str, edge: str, control: bool) -> list[dict[st
     boundary = {"top": top, "bottom": bottom, "left": left, "right": right}[edge]
     start, end = (left, right) if along == "x" else (top, bottom)
     a0, a1 = start + CLEAR, end - CLEAR
-    test = _is_grid if control else _is_ink
+    grid = cap.gridline
+    shades = (
+        {"white": (255, 255, 255)} if grid is None else {"white": (255, 255, 255), "grid": grid}
+    )
+
+    def test(rgb: tuple[int, int, int]) -> bool:
+        return _is_grid(rgb, grid) if control and grid is not None else _is_ink(rgb)
+
     found = []
     for offset in range(-HALF, HALF):
         pixels = _line(cap, along, boundary + offset, a0, a1)
@@ -133,11 +139,7 @@ def _measure_edge(cap: Any, cell: str, edge: str, control: bool) -> list[dict[st
         if not any(flags):
             continue
         marked = Counter(p for p, f in zip(pixels, flags, strict=True) if f)
-        gaps = Counter(
-            nearest(p, {"white": (255, 255, 255), "grid": GRID}, 20)
-            for p, f in zip(pixels, flags, strict=True)
-            if not f
-        )
+        gaps = Counter(nearest(p, shades, 20) for p, f in zip(pixels, flags, strict=True) if not f)
         darkest = min(marked, key=sum)
         found.append(
             {
@@ -152,10 +154,16 @@ def _measure_edge(cap: Any, cell: str, edge: str, control: bool) -> list[dict[st
 
 
 def measure(cap: Any) -> list[dict[str, str]]:
-    """Every style's records at one zoom."""
+    """Every style's records at one zoom; the gridline control only where its gray is known."""
+    from capture.screen.window import NO_GRIDLINE
+
+    styles = dict(CELLS)
+    if cap.gridline is None:
+        del styles["none"]
+        print(f"borders: the gridline control is skipped at zoom {cap.zoom}: {NO_GRIDLINE}")
     return [
         {"zoom": str(cap.zoom), "style": style, "cell": cell, "edge": edge, **found}
-        for style, cell in CELLS.items()
+        for style, cell in styles.items()
         for edge in EDGES
         for found in _measure_edge(cap, cell, edge, style == "none")
     ]

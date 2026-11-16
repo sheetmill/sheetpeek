@@ -29,7 +29,15 @@ from typing import Any
 
 from capture.screen import png
 from capture.screen.session import CONTAINER, ExcelSession, environment
-from capture.screen.window import MARKER, Grid, capture_window, grid_from_markers
+from capture.screen.window import (
+    GRIDLINE,
+    MARKER,
+    Grid,
+    capture_window,
+    locate,
+    nominal_scale,
+    platform_of,
+)
 
 SRGB = Path("/System/Library/ColorSync/Profiles/sRGB Profile.icc")
 PARK = "AZ300"
@@ -55,6 +63,12 @@ class Capture:
     check: dict
     geometry: dict[str, dict[str, float]]
     rows: list[tuple[str, str, str]] = field(repr=False)
+    platform: str = "mac"
+
+    @property
+    def gridline(self) -> tuple[int, int, int] | None:
+        """The default gridline's gray on this run's platform, in sRGB; ``None`` until recorded."""
+        return GRIDLINE[self.platform]
 
     @property
     def scale(self) -> float:
@@ -142,8 +156,9 @@ def capture(
             for zoom in zooms:
                 session.view(PARK, zoom)
                 raw = out / f"window_{zoom}_display.png"
-                window, _ = capture_window(path.stem, raw)
+                window, shot = capture_window(path.stem, raw)
                 shots.append((zoom, window, raw))
+                header.setdefault("display_scale", f"{shot.width / window['w']:.3f}")
     finally:
         path.unlink(missing_ok=True)
     header["zooms"] = ",".join(str(z) for z in zooms)
@@ -151,6 +166,7 @@ def capture(
     header["suite"] = name
     header["markers"] = ",".join(markers)
     header["workbooks_open_after"] = session.open_after or "unknown"
+    header["platform"] = "mac"
     write_tsv(out / "formats.tsv", header, rows)
     geometry = _geometry(rows)
     results = []
@@ -159,20 +175,34 @@ def capture(
         to_srgb(raw, srgb)
         raw.unlink(missing_ok=True)
         image = png.read(srgb)
-        grid, check = grid_from_markers(image, geometry[markers[0]], geometry[markers[1]])
-        check["display_scale"] = round(image.width / window["w"], 3)
+        display = image.width / window["w"]
+        nominal = nominal_scale(zoom, round(display, 3), "mac")
+        grid, check = locate(image, geometry[markers[0]], geometry[markers[1]], nominal)
+        check["display_scale"] = round(display, 3)
         results.append(Capture(zoom, image, grid, check, geometry, rows))
     return results
 
 
-def load(out: Path, markers: tuple[str, str] | None = None) -> list[Capture]:
+def load(
+    out: Path,
+    markers: tuple[str, str] | None = None,
+    *,
+    display_scale: float | None = None,
+    one_marker: bool = False,
+) -> list[Capture]:
     """Reload a saved run (``formats.tsv`` and ``window_<zoom>.png``) without Excel.
 
-    The markers are the ones the run's header records, unless given.
+    The markers are the ones the run's header records, unless given. The nominal scale needs the
+    display's scale: the header's ``display_scale``, else ``display_scale`` (runs before the
+    field); without either, both markers must show. ``one_marker`` measures from the first marker
+    and the nominal scale even where both show (:func:`capture.screen.window.locate`).
     """
+    found = header(out)
     if markers is None:
-        first, _, second = header(out).get("markers", "B2,J20").partition(",")
+        first, _, second = found.get("markers", "B2,J20").partition(",")
         markers = (first, second)
+    platform = platform_of(found)
+    display = float(found["display_scale"]) if "display_scale" in found else display_scale
     rows = []
     for line in (out / "formats.tsv").read_text(encoding="utf-8").splitlines(keepends=True):
         if line.startswith("# ") or line.startswith("cell\t"):
@@ -188,8 +218,11 @@ def load(out: Path, markers: tuple[str, str] | None = None) -> list[Capture]:
             continue
         stem = parts[1]
         image = png.read(image_path)
-        grid, check = grid_from_markers(image, geometry[markers[0]], geometry[markers[1]])
-        results.append(Capture(int(stem), image, grid, check, geometry, rows))
+        nominal = nominal_scale(int(stem), display, platform) if display else None
+        grid, check = locate(
+            image, geometry[markers[0]], geometry[markers[1]], nominal, one_marker=one_marker
+        )
+        results.append(Capture(int(stem), image, grid, check, geometry, rows, platform))
     return sorted(results, key=lambda c: c.zoom)
 
 

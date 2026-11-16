@@ -2261,6 +2261,8 @@ are read.
 5. **Last: a cross-platform phase**, which waits on having those machines and browsers to measure
    on. Refinements that stop paying on the Mac are logged here:
    - Windows Excel: column widths, row heights and glyph tables (xlformat measures the Mac only);
+     the automatic gridline gray, which the HTML backend draws (`--sheetpeek-grid`) and the
+     capture controls take per platform;
    - Linux viewers, and Chrome and Firefox for the HTML technique (only WebKit is measured);
    - a glyph-spacing correction for Aptos Narrow, for which no free metric-compatible font is
      known;
