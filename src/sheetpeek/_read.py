@@ -8,6 +8,7 @@ structure scan in ``_structure.py``. ``ARCHITECTURE.md`` §5 has the measurement
 
 from __future__ import annotations
 
+import contextlib
 import dataclasses
 import datetime as dt
 import functools
@@ -192,18 +193,6 @@ def xlio_theme_fonts(theme: xlio.Theme | None) -> dict[str, str]:
     return {key: fonts.latin for key, fonts in pairs if fonts is not None and fonts.latin}
 
 
-def _tab_color(sheet: xlio.Sheet) -> StatedColor | None:
-    """A sheet's tab color as stated; none where xlio cannot read the sheet's properties.
-
-    xlio raises on some numbers no file Excel writes holds (an index of thousands of digits, a
-    tint past the range of a double once scaled); such a tab is drawn uncolored (unverified).
-    """
-    try:
-        return from_xlio(sheet.properties.tab_color)
-    except (ValueError, OverflowError):
-        return None
-
-
 class Book:
     """An open workbook, for reading several sheets with one load. Use :func:`open`.
 
@@ -272,6 +261,16 @@ class Book:
             reason = reason.replace(self._path, os.path.basename(self._path))
         return PackageError(f"cannot read this workbook: {reason}")
 
+    @contextlib.contextmanager
+    def _xlio_errors(self) -> Iterator[None]:
+        """Translate the refusals xlio raises while reading after opening into sheetpeek's."""
+        try:
+            yield
+        except xlio.LimitError as error:
+            raise LimitError(str(error)) from None
+        except xlio.PackageError as error:
+            raise self._unreadable(error) from error
+
     def _check_area(self, ref: CellRange) -> None:
         area = (ref.max_row - ref.min_row + 1) * (ref.max_col - ref.min_col + 1)
         if area > self._limits.max_cells:
@@ -323,8 +322,8 @@ class Book:
         """The workbook's sheets (the first of a name) with their tab colors, and the active one.
 
         Only sheets openpyxl lists too, while it reads the cells; it skips a sheet whose part is
-        missing. The active one is the first book view's ``activeTab``, an index into the
-        workbook part's own list.
+        missing. The active one is the first book view's ``activeTab``, which xlio gives as an
+        index into its own list (a sheet listed without a part counts only as written).
         """
         assert self._book is not None
         present = set(self._workbook.sheetnames)
@@ -333,10 +332,11 @@ class Book:
             for s in self._book
         ]
         kept: dict[str, tuple[ListedSheet, StatedColor | None]] = {}
-        for sheet, source in listed:
-            if sheet.name in present and sheet.name not in kept:
-                kept[sheet.name] = (sheet, _tab_color(source))
-        views = self._book.views
+        with self._xlio_errors():
+            for sheet, source in listed:
+                if sheet.name in present and sheet.name not in kept:
+                    kept[sheet.name] = (sheet, from_xlio(source.properties.tab_color))
+            views = self._book.views
         active = views[0].active_tab if views else None
         chosen = listed[active][0] if active is not None and 0 <= active < len(listed) else None
         found = any(chosen is sheet for sheet, _ in kept.values())
@@ -391,32 +391,21 @@ class Book:
         return sheets, problem
 
     def _view(self, name: str) -> SheetView:
-        """The sheet view, from xlio; the defaults where xlio cannot read it.
-
-        As for ``_page_layout``: xlio raises on some numbers no file Excel writes holds.
-        """
+        """The sheet view, from xlio."""
         assert self._book is not None
-        try:
+        with self._xlio_errors():
             return sheet_view(self._book.sheet(name).views)
-        except (ValueError, OverflowError):
-            return SheetView()
 
     def _page_layout(
         self, name: str
     ) -> tuple[tuple[CellRange, ...], str | None, tuple[int, ...], tuple[int, ...]]:
-        """The print area, its problem, and the manual row and column breaks, from xlio.
-
-        xlio raises on some numbers no file Excel writes holds (an attribute of thousands of
-        digits); such a sheet is read without a print area or breaks (unverified).
-        """
+        """The print area, its problem, and the manual row and column breaks, from xlio."""
         assert self._book is not None
-        try:
+        with self._xlio_errors():
             source = self._book.sheet(name)
             areas, problem = print_areas(source.print_area)
             rows = manual_breaks(source.row_breaks, MAX_ROW)
             columns = manual_breaks(source.column_breaks, MAX_COLUMN)
-        except (ValueError, OverflowError):
-            return (), None, (), ()
         return areas, problem, rows, columns
 
     @overload

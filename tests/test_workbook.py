@@ -155,6 +155,37 @@ def test_the_default_sheet_skips_a_hidden_active_sheet(tabs):
     assert sheetpeek.read(active_tab(tabs, 2)).name == "Index"
 
 
+# openpyxl, which still reads the cells, warns about the sheet without a part.
+@pytest.mark.filterwarnings("ignore::UserWarning:openpyxl")
+def test_a_sheet_listed_without_a_part_still_counts_in_tab_and_name_indexes(tmp_path):
+    # <sheet r:id=""> is listed in the workbook part but has no part: activeTab and a defined
+    # name's localSheetId count it as written, so the sheets after it keep their own.
+    workbook = openpyxl.Workbook()
+    workbook.active.title = "First"
+    for name, area in (("Second", "A1:B2"), ("Third", "C3:D4")):
+        sheet = workbook.create_sheet(name)
+        sheet["A1"] = name
+        sheet.print_area = area
+    path = save(workbook, tmp_path / "gone.xlsx")
+
+    def edit(text):
+        text = re.sub(
+            r"(<sheets><sheet [^>]*/>)",
+            r'\1<sheet name="Gone" sheetId="9" '
+            r'state="veryHidden" r:id=""/>',
+            text,
+            count=1,
+        )
+        text = text.replace('localSheetId="2"', 'localSheetId="3"')
+        return text.replace('localSheetId="1"', 'localSheetId="2"')
+
+    rewrite(path, WORKBOOK, edit)
+    active_tab(path, 2)
+    assert sheetpeek.read(path).name == "Second"
+    assert sheetpeek.read(path, "Second").print_areas == (sheetpeek.CellRange(1, 1, 2, 2),)
+    assert sheetpeek.read(path, "Third").print_areas == (sheetpeek.CellRange(3, 3, 4, 4),)
+
+
 def test_a_workbook_of_chartsheets_has_no_default_sheet(kinds):
     # with lxml installed, openpyxl writes the r: namespace before the name
     hide = r'(<sheet [^>]*?name="(?:Data|Macro)" sheetId="\d+") state="visible"'

@@ -1148,7 +1148,7 @@ requires-dist = [
     { name = "openpyxl", specifier = ">=3.1" },
     { name = "rich", marker = "extra == 'rich'", specifier = ">=13" },
     { name = "xlformat", specifier = ">=0.3,<1" },
-    { name = "xlio", path = "../xlio-wheels/92a243508e10048c2a84388d9d2fb7e20bd4cd72/xlio-0.1.0-py3-none-any.whl" },
+    { name = "xlio", path = "../xlio-wheels/bfae65dd974075954ff98edb85a12a41cfc2a7e4/xlio-0.1.0-py3-none-any.whl" },
 ]
 provides-extras = ["rich"]
 
@@ -1436,9 +1436,9 @@ wheels = [
 [[package]]
 name = "xlio"
 version = "0.1.0"
-source = { path = "../xlio-wheels/92a243508e10048c2a84388d9d2fb7e20bd4cd72/xlio-0.1.0-py3-none-any.whl" }
+source = { path = "../xlio-wheels/bfae65dd974075954ff98edb85a12a41cfc2a7e4/xlio-0.1.0-py3-none-any.whl" }
 wheels = [
-    { filename = "xlio-0.1.0-py3-none-any.whl", hash = "sha256:badeb0b466087e5de69b0bed9d251e99f471e3eb6949eae642fbe2f34d447865" },
+    { filename = "xlio-0.1.0-py3-none-any.whl", hash = "sha256:e4cd43b83880a555c4f89d20ad7baba5645aae30bde6e1cc9c0bad09f52b938a" },
 ]
 
 [[package]]

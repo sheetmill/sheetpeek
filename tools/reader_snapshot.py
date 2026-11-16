@@ -2,8 +2,9 @@
 
 Used to change the reader without changing what it reads: snapshot a corpus with the version
 before the change and with the one after, and every difference is listed for a reason to be
-given. One JSON line per workbook and per sheet: the sheet list, and for each sheet digests of
-its values, styles, runs, columns, rows, merges and links, its view, print layout and notices.
+given. One JSON line per workbook and per sheet: the sheet list and the default sheet, and for
+each sheet digests of its values, styles, runs, columns, rows, merges and links, its view, print
+layout and notices.
 
     find CORPUS -name '*.xlsx' > list.txt
     python -m tests.watchdog -- python tools/reader_snapshot.py sweep OLD/src list.txt a.jsonl
@@ -65,6 +66,14 @@ def _sheet(book: Any, name: str) -> dict[str, Any]:
     }
 
 
+def _default(book: Any) -> str | None:
+    """The sheet ``book.sheet()`` reads, without reading it: a private name, held by both sides."""
+    try:
+        return str(book._default_sheet_name())
+    except Exception as error:  # a workbook without one is a result to compare
+        return f"{type(error).__name__}: {str(error)[:120]}"
+
+
 def snap(listing: str, out: str, start: int = 0, stop: int | None = None) -> None:
     """Append the records of lines ``start`` to ``stop`` of ``listing`` to ``out``."""
     import sheetpeek
@@ -77,7 +86,8 @@ def snap(listing: str, out: str, start: int = 0, stop: int | None = None) -> Non
             try:
                 with sheetpeek.open(path, limits=limits) as book:
                     infos = [(i.name, i.kind, i.state, i.tab_color) for i in book.sheets]
-                    handle.write(json.dumps({"file": path, "sheets": infos}) + "\n")
+                    head = {"file": path, "sheets": infos, "default": _default(book)}
+                    handle.write(json.dumps(head) + "\n")
                     for name, *_ in infos:
                         try:
                             record = _sheet(book, name)

@@ -134,5 +134,5 @@ filterwarnings = [
 ]
 
 [tool.uv.sources]
-# Until xlio 0.1.0 is on PyPI: a wheel built with `git archive` from xlio's commit 92a2435.
-xlio = { path = "../xlio-wheels/92a243508e10048c2a84388d9d2fb7e20bd4cd72/xlio-0.1.0-py3-none-any.whl" }
+# Until xlio 0.1.0 is on PyPI: a wheel built with `git archive` from xlio's commit bfae65d.
+xlio = { path = "../xlio-wheels/bfae65dd974075954ff98edb85a12a41cfc2a7e4/xlio-0.1.0-py3-none-any.whl" }
