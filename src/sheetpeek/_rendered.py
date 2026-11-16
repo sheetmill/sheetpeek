@@ -27,9 +27,9 @@ if TYPE_CHECKING:
 
 Mode: TypeAlias = Literal["excel", "characters", "none"]
 RangeEdge: TypeAlias = Literal["extend"]
-"""What spilled text, and later drawn objects, do at the edge of the range read. Only
-``"extend"`` exists so far (see ``Sheet.layout``); the planned alternatives are listed in
-``ARCHITECTURE.md`` ("Planned options")."""
+"""What spilled text does at the edge of the range read; objects such as pictures will follow
+the same option once they are drawn. Only ``"extend"`` exists so far (see ``Sheet.layout``); the
+planned alternatives are listed in ``ARCHITECTURE.md`` ("Planned options")."""
 SpillEdge: TypeAlias = RangeEdge
 """Deprecated: ``RangeEdge`` under its former name; removed in 1.0."""
 Alignment: TypeAlias = Literal["left", "center", "right", "fill", "justify", "distributed"]

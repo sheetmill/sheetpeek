@@ -1,7 +1,7 @@
 """The sheet view and page layout as read: zoom, zeros, frozen panes, print areas, page breaks.
 
-ARCHITECTURE.md §4.18. These are the values as read, what the file states, read as Excel reads
-them where that is captured; ``tests/test_view_drawn.py`` tests how they are drawn.
+ARCHITECTURE.md §4.18. These tests check the values the file states, taken as Excel takes them
+where that is captured; ``tests/test_view_drawn.py`` tests how they are drawn.
 """
 
 import openpyxl
