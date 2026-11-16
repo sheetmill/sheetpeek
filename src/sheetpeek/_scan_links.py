@@ -1,17 +1,20 @@
-"""Hyperlinks in the sheet XML: ``<hyperlink>`` elements and ``HYPERLINK()`` formulas.
+"""Hyperlinks: ``<hyperlink>`` elements and ``HYPERLINK()`` formulas.
 
-The structure scan's handlers keep what they find in ``Scan.extra`` under :data:`KEY`; the reader
-then gives each cell its :class:`~sheetpeek.Hyperlink` and reports what cannot be linked
-(``ARCHITECTURE.md`` §4.10).
+xlio reads the elements (:func:`with_elements`); the structure scan's handlers find the formulas.
+Both are kept in ``Structure.extra`` under :data:`KEY`; the reader then gives each cell its
+:class:`~sheetpeek.Hyperlink` and reports what cannot be linked (``ARCHITECTURE.md`` §4.10).
 """
 
 from __future__ import annotations
 
 import contextlib
+import dataclasses
 import re
 import xml.etree.ElementTree as ET
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
+
+import xlio
 
 from sheetpeek._hyperlink import LOCAL_TARGETS, Hyperlink, check_target
 from sheetpeek._model import CellRange
@@ -25,8 +28,6 @@ KEY = "links"
 """Where the handlers keep what they find, in ``Scan.extra`` and ``Structure.extra``."""
 
 _NS = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
-_REL_ID = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id"
-_HYPERLINK = f"{_NS}hyperlink"
 _FORMULA = f"{_NS}f"
 _ROW = f"{_NS}row"
 _STRING = re.compile(r'"(?:[^"]|"")*"')
@@ -62,24 +63,30 @@ def _found(state: Scan) -> Found:
     return found
 
 
-@handler(_HYPERLINK)
-def _element(state: Scan, element: ET.Element) -> None:
-    """A ``<hyperlink>``: its range, target, location, tooltip and display text."""
-    ref = element.get("ref")
-    if not ref:
-        return
-    target: str | None = None
-    part = False
-    rel_id = element.get(_REL_ID)
-    if rel_id and rel_id in state.rels:
-        target, external = state.rels[rel_id]
-        if not external:  # a part of the package: nothing a link can open
-            target, part = None, True
-    location = element.get("location") or None
-    if target is None and location is None and not part:
-        return
-    link = Hyperlink(target, location, element.get("tooltip"), element.get("display"))
-    _found(state).elements.append((CellRange.parse(ref), link, part))
+def with_elements(structure: Structure, sheet: xlio.Sheet) -> Structure:
+    """``structure`` with the sheet's ``<hyperlink>`` elements.
+
+    Each with its range, target, location, tooltip and display text. A relationship to a part of
+    the package is nothing a link can open.
+    """
+    elements: list[tuple[CellRange, Hyperlink, bool]] = []
+    parts = {r.id for r in sheet.relationships if not r.external}
+    for element in sheet.hyperlinks:
+        if not element.ref:
+            continue
+        part = element.target is None and element.relationship_id in parts
+        location = element.location or None
+        if element.target is None and location is None and not part:
+            continue
+        link = Hyperlink(element.target, location, element.tooltip, element.display)
+        elements.append((CellRange.parse(element.ref), link, part))
+    if not elements:
+        return structure
+    found = structure.extra.get(KEY)
+    if not isinstance(found, Found):
+        found = Found()
+    found.elements = elements
+    return dataclasses.replace(structure, extra={**structure.extra, KEY: found})
 
 
 @handler(_FORMULA)

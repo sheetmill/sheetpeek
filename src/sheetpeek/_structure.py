@@ -1,23 +1,25 @@
-"""The structure scan: what openpyxl's read-only mode does not expose, read from the sheet XML.
+"""A worksheet's structure: what the layout reads besides the cells.
 
-One ``iterparse`` pass over a worksheet part records the sheet view, the sheet format, column
-widths, row heights and hidden flags, merged ranges, and the bounds of every ``<c>``
-element, which with the merged ranges give the used range. Cell contents are not read, apart
-from noticing a formula without a cached value. The ``<dimension>`` element is ignored: some
-writers omit it or get it wrong.
+xlio reads the sheet format, column widths, row heights and hidden flags, the merged ranges and
+the gridline settings (:func:`fill`), as Excel takes them. One ``iterparse`` pass over the
+part (:func:`scan`) records the bounds of every ``<c>`` element, which with the merged ranges
+give the used range, the rows the file lists, and what openpyxl's read-only mode does not expose
+about cells. Cell contents are not read, apart from noticing a formula without a cached value.
+The ``<dimension>`` element is ignored: some writers omit it or get it wrong.
 """
 
 from __future__ import annotations
 
-import math
+import dataclasses
 import xml.etree.ElementTree as ET
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import IO, Any
 
+import xlio
+
 from sheetpeek._model import CellRange
 from sheetpeek._notices import CellSet
-from sheetpeek._package import PackageError
 
 _NS = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
 _SHEET_DATA = f"{_NS}sheetData"
@@ -26,27 +28,13 @@ _CELL = f"{_NS}c"
 _FORMULA = f"{_NS}f"
 _VALUE = f"{_NS}v"
 _COL = f"{_NS}col"
-_MERGE = f"{_NS}mergeCell"
 _SHEET_VIEW = f"{_NS}sheetView"
-_SHEET_FORMAT = f"{_NS}sheetFormatPr"
 _INLINE = f"{_NS}is"
 _RUN = f"{_NS}r"
 RICH = 1
 """A shared string's mark: it has runs."""
 PHONETIC = 2
 """A shared string's mark: it has a phonetic guide."""
-# The numbers a file can give a column or a row, as Excel takes them (ARCHITECTURE.md §5.5).
-_DIGIT_POINTS = 6  # at Calibri 11, the only font this was captured with
-_WIDTH_WRAP = 65_536  # points: Excel keeps a column's width in 16 bits
-_WIDEST_FILE_WIDTH = 10_922.0  # the widest that does not wrap
-_ONE_POINT_WIDTH = 0.1  # a file width of one point: what Excel makes of 1e9 to 1e30
-_INT_RANGE = 2**31
-_ENORMOUS = 1e30  # past this, a width or a height is 0; 1e30 and 1e308 are captured
-_TALLEST = 409.5
-_TWIPS = 20
-_HEIGHT_WRAP = 65_536  # twips
-_WIDEST_DEFAULT = 255.0  # 300 is refused; between them is not captured
-_WIDEST_BASE = 255
 
 
 @dataclass(frozen=True, slots=True)
@@ -64,17 +52,17 @@ class Structure:
     """What the scan found in one worksheet part."""
 
     used_range: CellRange | None
-    merges: tuple[CellRange, ...]
-    columns: tuple[ColumnSpec, ...]
-    rows: dict[int, tuple[float | None, bool]]
-    """Row index → (height in points or ``None``, hidden), for rows that set either."""
-    default_column_width: float | None
-    base_column_width: int
-    default_row_height: float | None
-    show_gridlines: bool
     uncached_formulas: int
     """Formula cells without a cached value (a file written by a library, never opened by Excel)."""
     first_uncached_formula: str | None
+    merges: tuple[CellRange, ...] = ()
+    columns: tuple[ColumnSpec, ...] = ()
+    rows: dict[int, tuple[float | None, bool]] = field(default_factory=dict)
+    """Row index → (height in points or ``None``, hidden), for rows that set either."""
+    default_column_width: float | None = None
+    base_column_width: int = 8
+    default_row_height: float | None = None
+    show_gridlines: bool = True
     empty_strings: frozenset[tuple[int, int]] = frozenset()
     """(row, column) of formula cells whose cached result is the empty string."""
     listed_rows: frozenset[int] = frozenset()
@@ -132,97 +120,115 @@ def handler(tag: str) -> Callable[[Handler], Handler]:
 class Scan:
     """What the scan has found so far; the handlers read and add to it."""
 
-    def __init__(self, rels: dict[str, tuple[str, bool]], marks: bytes | None) -> None:
-        self.rels = rels
+    def __init__(self, marks: bytes | None) -> None:
         self.marks = marks
         self.min_row = self.min_col = 1 << 30
         self.max_row = self.max_col = 0
         self.row_index = 0
-        self.rows: dict[int, tuple[float | None, bool]] = {}
-        self.columns: list[ColumnSpec] = []
-        self.merges: list[CellRange] = []
         self.uncached = CellSet()
         self.first_uncached: str | None = None
         self.runs = CellSet()
         self.inline_runs = CellSet()
         self.phonetic = CellSet()
-        self.show_headings = True
-        self.grid_color_id: int | None = None
         self.root = "worksheet"
         self.children: list[ET.Element] = []
-        self.row_styles: list[tuple[int, int]] = []
-        self.column_styles: list[tuple[int, int, int]] = []
         self.empty_strings: set[tuple[int, int]] = set()
-        self.default_column_width: float | None = None
-        self.base_column_width = 8
-        self.default_row_height: float | None = None
-        self.show_gridlines = True
         self.listed: set[int] = set()
-        self.sheet_format: dict[str, str] | None = None
-        self.seen_view = False
         self.extra: dict[str, Any] = {}
 
     def finish(self) -> Structure:
-        """The structure found."""
-        min_row, max_row, min_col, max_col = self.min_row, self.max_row, self.min_col, self.max_col
-        # A merged range occupies its cells even where the file has no <c> for them.
-        for merge in self.merges:
-            min_row, max_row = min(min_row, merge.min_row), max(max_row, merge.max_row)
-            min_col, max_col = min(min_col, merge.min_col), max(max_col, merge.max_col)
-        used = CellRange(min_row, min_col, max_row, max_col) if max_row else None
-        sheet_format = self.sheet_format or {}
-        custom_height = _flag(sheet_format.get("customHeight"))
-        zero_height = _flag(sheet_format.get("zeroHeight"))
-        if custom_height and self.default_row_height == 0.0:
-            # An enormous default acts as zeroHeight: a row with an element keeps its height
-            # (captured).
-            custom_height, zero_height = False, True
+        """What the scan found; :func:`fill` adds the rest."""
+        found = self.max_row
+        used = CellRange(self.min_row, self.min_col, self.max_row, self.max_col) if found else None
         return Structure(
             used_range=used,
-            merges=tuple(self.merges),
-            columns=tuple(self.columns),
-            rows=self.rows,
-            default_column_width=self.default_column_width,
-            base_column_width=self.base_column_width,
-            default_row_height=self.default_row_height,
-            show_gridlines=self.show_gridlines,
             uncached_formulas=self.uncached.count,
             first_uncached_formula=self.first_uncached,
             empty_strings=frozenset(self.empty_strings),
             listed_rows=frozenset(self.listed),
-            has_sheet_format=self.sheet_format is not None,
-            custom_row_height=custom_height,
-            zero_row_height=zero_height,
-            thick_top=_flag(sheet_format.get("thickTop")),
-            thick_bottom=_flag(sheet_format.get("thickBottom")),
-            show_headings=self.show_headings,
-            grid_color_id=self.grid_color_id,
             root=self.root,
             children=tuple(self.children),
             uncached=self.uncached,
             runs=self.runs,
             inline_runs=self.inline_runs,
             phonetic=self.phonetic,
-            row_styles=tuple(self.row_styles),
-            column_styles=tuple(self.column_styles),
             extra=dict(self.extra),
         )
 
 
+def fill(found: Structure, sheet: xlio.Sheet) -> Structure:
+    """``found`` with what xlio reads of ``sheet``: format, columns, rows, merges, gridlines.
+
+    Each value as Excel takes it (xlio's captures). A merged range occupies its cells even where
+    the file has no ``<c>`` for them, so the used range grows to hold every merge.
+    """
+    merges = tuple(CellRange.parse(ref) for ref in sheet.merges)
+    used = found.used_range
+    for merge in merges:
+        used = merge if used is None else _union(used, merge)
+    form = sheet.format
+    custom_height, zero_height = form.custom_height, form.zero_height
+    if custom_height and form.default_row_height == 0.0:
+        # An enormous default acts as zeroHeight: a row with an element keeps its height
+        # (captured).
+        custom_height, zero_height = False, True
+    views = sheet.views
+    view = views[0] if views else None
+    rows = sheet.rows
+    return dataclasses.replace(
+        found,
+        used_range=used,
+        merges=merges,
+        columns=tuple(
+            ColumnSpec(column.min, column.max, column.width, column.hidden)
+            for column in sheet.columns
+        ),
+        rows={
+            index: (row.height, row.hidden)
+            for index, row in rows.items()
+            if row.height is not None or row.hidden
+        },
+        default_column_width=form.default_col_width,
+        base_column_width=form.base_col_width,
+        default_row_height=form.default_row_height,
+        has_sheet_format=form.source is not None,
+        custom_row_height=custom_height,
+        zero_row_height=zero_height,
+        thick_top=form.thick_top,
+        thick_bottom=form.thick_bottom,
+        show_gridlines=view.show_grid_lines if view else True,
+        show_headings=view.show_row_col_headers if view else True,
+        grid_color_id=view.color_id if view and not view.default_grid_color else None,
+        row_styles=tuple(
+            (index, row.style) for index, row in rows.items() if row.custom_format and row.style
+        ),
+        column_styles=tuple(
+            (column.min, column.max, column.style) for column in sheet.columns if column.style
+        ),
+    )
+
+
+def _union(a: CellRange, b: CellRange) -> CellRange:
+    return CellRange(
+        min(a.min_row, b.min_row),
+        min(a.min_col, b.min_col),
+        max(a.max_row, b.max_row),
+        max(a.max_col, b.max_col),
+    )
+
+
 def scan(
     source: IO[bytes],
-    rels: dict[str, tuple[str, bool]] | None = None,
     marks: bytes | None = None,
 ) -> Structure:
     """Scan one worksheet part.
 
     Args:
         source: The worksheet part, opened for reading.
-        rels: The part's relationships (id → target, external), for hyperlink targets.
         marks: Per shared string, :data:`RICH` and :data:`PHONETIC` bits, or ``None`` when no
             shared string has either.
     """
-    state = Scan(rels or {}, marks)
+    state = Scan(marks)
     depth = 0
     sheet_data: ET.Element | None = None
     for event, element in ET.iterparse(source, events=("start", "end")):
@@ -248,7 +254,7 @@ def scan(
 
 @handler(_ROW)
 def _row(state: Scan, element: ET.Element) -> None:
-    """A row: its height and hidden flag, the used range, and its cells' marks."""
+    """A row: that the file lists it, the used range, and its cells' marks."""
     r = element.get("r")
     row_index = state.row_index = int(r) if r else state.row_index + 1
     state.listed.add(row_index)
@@ -259,12 +265,6 @@ def _row(state: Scan, element: ET.Element) -> None:
         state.min_col = min(state.min_col, first_col)
         state.max_col = max(state.max_col, last_col)
         _cells(state, element, row_index)
-    if _flag(element.get("customFormat")) and (style := _style(element.get("s"))):
-        state.row_styles.append((row_index, style))
-    height = element.get("ht")
-    hidden = _flag(element.get("hidden"))
-    if height is not None or hidden:
-        state.rows[row_index] = (_row_height(height) if height is not None else None, hidden)
 
 
 def _cells(state: Scan, row: ET.Element, row_index: int) -> None:
@@ -302,118 +302,6 @@ def _cells(state: Scan, row: ET.Element, row_index: int) -> None:
                 state.inline_runs.add(row_index, column)
 
 
-@handler(_COL)
-def _col(state: Scan, element: ET.Element) -> None:
-    """A run of columns: width, hidden flag, style."""
-    first = int(element.get("min", "1"))
-    last = int(element.get("max", element.get("min", "1")))
-    width = element.get("width")
-    if style := _style(element.get("style")):
-        state.column_styles.append((first, last, style))
-    state.columns.append(
-        ColumnSpec(
-            first,
-            last,
-            _column_width(width) if width is not None else None,
-            _flag(element.get("hidden")),
-        )
-    )
-
-
-@handler(_MERGE)
-def _merge(state: Scan, element: ET.Element) -> None:
-    ref = element.get("ref")
-    if ref:
-        state.merges.append(CellRange.parse(ref))
-
-
-@handler(_SHEET_VIEW)
-def _view(state: Scan, element: ET.Element) -> None:
-    """The first sheet view only: the main window's."""
-    if state.seen_view:
-        return
-    state.seen_view = True
-    state.show_gridlines = _flag(element.get("showGridLines"), default=True)
-    state.show_headings = _flag(element.get("showRowColHeaders"), default=True)
-    if not _flag(element.get("defaultGridColor"), default=True):
-        state.grid_color_id = _color_id(element.get("colorId"))
-
-
-def _color_id(value: str | None) -> int:
-    """A grid color index; 64, automatic, when absent or not a small whole number (unverified)."""
-    if value is None or not (value.isascii() and value.isdigit() and len(value) <= 5):
-        return 64
-    return int(value)
-
-
-@handler(_SHEET_FORMAT)
-def _sheet_format(state: Scan, element: ET.Element) -> None:
-    state.sheet_format = dict(element.attrib)
-    if (value := element.get("defaultColWidth")) is not None:
-        state.default_column_width = _default_width(value)
-    if (value := element.get("baseColWidth")) is not None:
-        state.base_column_width = _base_width(value)
-    if (value := element.get("defaultRowHeight")) is not None:
-        state.default_row_height = _default_height(value)
-
-
-def _column_width(text: str) -> float:
-    """A ``<col width>`` as Excel takes it, in points modulo 65,536 (captured)."""
-    width = float(text)
-    if not math.isfinite(width) or abs(width) > _ENORMOUS:
-        return 0.0
-    if 0 <= width <= _WIDEST_FILE_WIDTH:
-        return width
-    points = width * _DIGIT_POINTS
-    if abs(points) >= _INT_RANGE:
-        return _ONE_POINT_WIDTH
-    wrapped = math.fmod(points, _WIDTH_WRAP) % _WIDTH_WRAP
-    return (wrapped + (1 if width < 0 else 0)) / _DIGIT_POINTS
-
-
-def _row_height(text: str) -> float | None:
-    """A ``<row ht>`` as Excel takes it, or ``None`` when it ignores it (captured)."""
-    height = abs(float(text))
-    if not math.isfinite(height):
-        return None
-    if height > _ENORMOUS:
-        return 0.0
-    if height <= _TALLEST:
-        return height
-    twips = height * _TWIPS
-    if twips >= _INT_RANGE:
-        return _TALLEST
-    return min(_TALLEST, math.floor((twips % _HEIGHT_WRAP) / _TWIPS * 4) / 4)
-
-
-def _default_width(text: str) -> float | None:
-    """``defaultColWidth`` as Excel takes it, or ``None`` when it ignores it (captured)."""
-    width = float(text)
-    if math.isnan(width) or width == math.inf:
-        return None
-    if width < 0 or _ENORMOUS >= width > _WIDEST_DEFAULT:
-        raise PackageError(f"defaultColWidth of {text}, which Excel refuses")
-    return 0.0 if width > _ENORMOUS else width
-
-
-def _base_width(text: str) -> int:
-    """``baseColWidth`` as Excel takes it (captured): out of an int's range or negative, ignored."""
-    width = int(text)
-    if width < 0 or width >= _INT_RANGE:
-        return 8
-    if width > _WIDEST_BASE:
-        raise PackageError(f"baseColWidth of {text}, which Excel refuses")
-    return width
-
-
-def _default_height(text: str) -> float:
-    """``defaultRowHeight``: Excel refuses NaN and infinity (captured)."""
-    height = _row_height(text)
-    if height is None:
-        raise PackageError(f"defaultRowHeight of {text}, which Excel refuses")
-    return height
-
-
 def _column_extent(row: ET.Element) -> tuple[int, int]:
     """First and last column of a row's cells, which the schema orders by column."""
     first, last = row[0].get("r"), row[-1].get("r")
@@ -441,11 +329,6 @@ def _position(ref: str) -> tuple[int, int]:
         elif char != "$":
             return int(ref[i:].replace("$", "")), col
     raise ValueError(f"not a cell reference: {ref!r}")
-
-
-def _style(value: str | None) -> int:
-    """A style index, or 0 when absent or not a number."""
-    return int(value) if value and value.isdigit() else 0
 
 
 def _flag(value: str | None, *, default: bool = False) -> bool:

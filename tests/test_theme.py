@@ -4,7 +4,6 @@ Expected values come from captures (Excel 16.114.4 for Mac, dark appearance), un
 on Microsoft 365; the light heading colors were measured on Microsoft 365.
 """
 
-import io
 import re
 
 import openpyxl
@@ -13,7 +12,6 @@ from openpyxl.styles import Font, PatternFill
 from openpyxl.styles.colors import Color
 
 import sheetpeek
-from sheetpeek import _structure
 from sheetpeek._colors import (
     DEFAULT_PALETTE,
     grid_color,
@@ -23,7 +21,8 @@ from sheetpeek._colors import (
 from sheetpeek._model import Font as ModelFont
 from sheetpeek.backends import HTMLBackend, TextBackend
 from sheetpeek.backends.html._headings import bands
-from tests.workbooks import NS, SHEET1, replace_once, rewrite, save
+from tests.test_structure import scan_file
+from tests.workbooks import SHEET1, raw_sheet, replace_once, rewrite, save
 
 THEME = "xl/theme/theme1.xml"
 STYLES = "xl/styles.xml"
@@ -251,13 +250,15 @@ def test_an_automatic_grid_color_is_none(tmp_path, color_id, default):
 
 
 @pytest.mark.parametrize("color_id", ["9" * 5000, "x", "-1", "1.5", "\u0661", ""])
-def test_a_malformed_color_id_is_automatic_in_the_scan(color_id):
-    # openpyxl refuses most of these when it reads the sheet; the scan runs first.
-    xml = (
-        f'<worksheet {NS}><sheetViews><sheetView defaultGridColor="0" colorId="{color_id}" '
-        'workbookViewId="0"/></sheetViews><sheetData/></worksheet>'
-    ).encode()
-    assert _structure.scan(io.BytesIO(xml)).grid_color_id == 64
+def test_a_malformed_color_id_is_automatic(tmp_path, color_id):
+    # xlio reads these as 64 or, for thousands of digits, bounded; either is past the palette.
+    # openpyxl refuses most of them when it reads the sheet, so the structure is checked alone.
+    body = (
+        f'<sheetViews><sheetView defaultGridColor="0" colorId="{color_id}" '
+        'workbookViewId="0"/></sheetViews><sheetData/>'
+    )
+    found = scan_file(raw_sheet(tmp_path / "grid.xlsx", body))
+    assert grid_color(found.grid_color_id, DEFAULT_PALETTE) is None
 
 
 def test_grid_color_bounds():

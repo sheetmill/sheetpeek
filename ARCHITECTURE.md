@@ -123,7 +123,7 @@ layout fields marked *layout*. The style fields (`number_format` to `indent`) li
 | `rotation`, `stacked` | `int` (−90 to 90), `bool` | `cell.alignment.textRotation`: 0 to 90 as stored, 91 to 180 as 90 − value, 255 stacked | §4.17 |
 | `font.vert_align` | `"superscript" \| "subscript" \| None` | `cell.font.vertAlign` | drawn at 2/3 size, raised or lowered (§4.13) |
 | `runs` | `tuple[TextSpan, ...] \| None` | the shared string's runs (§4.16) | each run's text and resolved `Font`; `None` without runs or when every run is in the cell's font; `value` is their text joined |
-| `hyperlink` | `Hyperlink \| None` | the structure scan's `<hyperlinks>` and `HYPERLINK()` formulas (§4.10) | `target`, `location`, `tooltip`, `display` (never drawn), `source` (`element` or `formula`) |
+| `hyperlink` | `Hyperlink \| None` | xlio's `<hyperlinks>` and the structure scan's `HYPERLINK()` formulas (§4.10) | `target`, `location`, `tooltip`, `display` (never drawn), `source` (`element` or `formula`) |
 | *layout* `text` | `str` | xlformat `FormattedCell.text` at the mode's width | what the cell itself shows: `####`, reduced `General`, `*` fills applied; never clipped or spilled |
 | *layout* `full_text` | `str` | `FormattedCell.full_text` | width-less; what copy and paste gives |
 | *layout* `overflow` | `bool` | `FormattedCell.overflow` | `text` is a run of `#` |
@@ -595,7 +595,7 @@ sizes between the measured ones, are **unverified**.
 
 Excel ignores a stored `defaultRowHeight` without `customHeight` (15, 20 and 30 captured): with
 openpyxl's 15, a Calibri 14 workbook shows 19 pt rows and a Calibri 9 one 12 pt rows, so that
-default would be right only for Calibri or Aptos Narrow 11. The structure scan therefore records
+default would be right only for Calibri or Aptos Narrow 11. The reader therefore records
 which rows have a `<row>` element, whether the sheet has `<sheetFormatPr>`, and its
 `customHeight`, `zeroHeight`, `thickTop` and `thickBottom` attributes.
 
@@ -1414,14 +1414,13 @@ read-only mode drops. Normal mode was rejected: it costs about 465 bytes per cel
 day and some seconds, and makes a 100-row preview of a large file as slow as reading the whole
 file.
 
-The scan is one pass of `xml.etree.ElementTree.iterparse` over the worksheet part. It records:
-- `<sheetView>` and `<sheetFormatPr>`;
-- `<cols>`;
-- each `<row>`'s `r`, `ht` and `hidden`;
-- each `<c>`'s `r`, for the used range;
-- `<mergeCells>`;
-- through features' own handlers, `<hyperlinks>` and the formulas that call `HYPERLINK()`
-  (`_scan_links.py`, §4.10).
+xlio reads the sheet format (`<sheetFormatPr>`), `<cols>`, each `<row>`'s height, hidden flag and
+format, `<mergeCells>`, `<hyperlinks>` and the first `<sheetView>`'s gridline settings, each
+value as Excel takes it (`_structure.fill`, `_scan_links.with_elements`). The scan is one pass of `xml.etree.ElementTree.iterparse` over the
+worksheet part. It records:
+- each `<row>`'s `r`, for the rows the file lists, and each `<c>`'s `r`, for the used range;
+- through features' own handlers, the formulas that call `HYPERLINK()` (`_scan_links.py`,
+  §4.10) and the outline (`_scan_outline.py`).
 
 Cells are handled at the end of their row, after which the row is cleared. A row's column extent
 comes from its first and last cell, since the schema orders cells by column; each cell is
@@ -1890,7 +1889,7 @@ src/sheetpeek/
   _runs_model.py     TextSpan, a run of rich text (§4.16)
   _rendered.py       RenderedSheet, RenderedRow, RenderedCell, RenderedColumn, Gap
   _package.py        ReadLimits, the check before reading (§5.5), sheet name → worksheet part
-  _structure.py      the structure scan (§5.4): one handler per element
+  _structure.py      the sheet structure (§5.4): xlio's reading plus a scan for cells and rows
   _scan_links.py     the scan's hyperlink handlers, and the reader's link notices (§4.10)
   _scan_outline.py   the outline's scan handlers, and its rows, columns and settings
   _read.py           the reader: openpyxl read-only, date conversion off; builds a Sheet

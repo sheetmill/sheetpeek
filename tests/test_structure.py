@@ -1,28 +1,30 @@
-"""The structure scan, checked against openpyxl's normal mode and against hand-written XML."""
+"""A sheet's structure (the scan and xlio's reading), against openpyxl's normal mode and XML."""
 
-import io
 import zipfile
 
 import openpyxl
+import pytest
+import xlio
 from openpyxl.styles import Alignment
 
 from sheetpeek import CellRange
-from sheetpeek._structure import ColumnSpec, scan
+from sheetpeek._structure import ColumnSpec, fill, scan
 from tests.workbooks import SHEET1, raw_sheet, save
 
 
-def scan_file(path, rels=None):
+def scan_file(path):
     with zipfile.ZipFile(path) as archive, archive.open(SHEET1) as handle:
-        return scan(handle, rels)
+        found = scan(handle)
+    with xlio.open(path) as book:
+        return fill(found, book.sheet(0))
 
 
-def scan_xml(body: str, rels=None):
-    xml = (
-        '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" '
-        'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
-        f"{body}</worksheet>"
-    )
-    return scan(io.BytesIO(xml.encode()), rels)
+@pytest.fixture
+def scan_xml(tmp_path):
+    def scan_body(body: str):
+        return scan_file(raw_sheet(tmp_path / "raw.xlsx", body))
+
+    return scan_body
 
 
 def test_matches_openpyxl_normal_mode(tmp_path):
@@ -57,7 +59,7 @@ def test_matches_openpyxl_normal_mode(tmp_path):
     assert found.used_range == CellRange.parse(reference.dimensions)
 
 
-def test_used_range_counts_every_cell_element():
+def test_used_range_counts_every_cell_element(scan_xml):
     found = scan_xml(
         '<dimension ref="A1"/><sheetData>'
         '<row r="3"><c r="C3" s="1"/></row>'
@@ -70,7 +72,7 @@ def test_used_range_counts_every_cell_element():
     assert found.rows == {9: (30.0, False)}
 
 
-def test_positions_without_references():
+def test_positions_without_references(scan_xml):
     # The schema allows omitting r on rows and cells; positions then follow their predecessors.
     found = scan_xml(
         "<sheetData>"
@@ -82,7 +84,7 @@ def test_positions_without_references():
     assert found.used_range == CellRange.parse("A1:D5")
 
 
-def test_used_range_includes_merges():
+def test_used_range_includes_merges(scan_xml):
     found = scan_xml(
         "<sheetData><row r='2'><c r='B2'><v>1</v></c></row></sheetData>"
         "<mergeCells count='1'><mergeCell ref='C1:E3'/></mergeCells>"
@@ -90,13 +92,13 @@ def test_used_range_includes_merges():
     assert found.used_range == CellRange.parse("B1:E3")
 
 
-def test_empty_sheet():
+def test_empty_sheet(scan_xml):
     found = scan_xml("<sheetData/>")
     assert found.used_range is None
     assert found.merges == ()
 
 
-def test_column_specs():
+def test_column_specs(scan_xml):
     found = scan_xml(
         '<cols><col min="2" max="4" width="3.5" customWidth="1"/>'
         '<col min="6" max="6" hidden="true"/></cols><sheetData/>'
@@ -104,7 +106,7 @@ def test_column_specs():
     assert found.columns == (ColumnSpec(2, 4, 3.5, False), ColumnSpec(6, 6, None, True))
 
 
-def test_formulas_returning_the_empty_string():
+def test_formulas_returning_the_empty_string(scan_xml):
     found = scan_xml(
         "<sheetData><row r='1'>"
         "<c r='A1' t='str'><f>\"\"</f><v></v></c>"
@@ -116,7 +118,7 @@ def test_formulas_returning_the_empty_string():
     assert found.uncached_formulas == 1
 
 
-def test_formulas_without_cached_values():
+def test_formulas_without_cached_values(scan_xml):
     found = scan_xml(
         "<sheetData><row r='1'>"
         "<c r='A1'><f>1+1</f><v>2</v></c>"
@@ -128,7 +130,7 @@ def test_formulas_without_cached_values():
     assert found.first_uncached_formula == "B1"
 
 
-def test_first_sheet_view_wins():
+def test_first_sheet_view_wins(scan_xml):
     found = scan_xml(
         '<sheetViews><sheetView showGridLines="0" workbookViewId="0"/>'
         '<sheetView workbookViewId="1"/></sheetViews><sheetData/>'

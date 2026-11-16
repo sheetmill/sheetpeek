@@ -57,12 +57,11 @@ from sheetpeek._package import (
     ReadLimits,
     open_package,
     open_workbook,
-    relationships,
     worksheet_parts,
 )
 from sheetpeek._page import MAX_COLUMN, MAX_ROW, manual_breaks, print_areas
 from sheetpeek._runs_model import TextSpan
-from sheetpeek._scan_links import cell_links
+from sheetpeek._scan_links import cell_links, with_elements
 from sheetpeek._scan_links import report as report_links
 from sheetpeek._scan_outline import read_outline
 from sheetpeek._scan_view import sheet_view
@@ -75,7 +74,7 @@ from sheetpeek._sheets import (
     default_sheet,
     from_xlio,
 )
-from sheetpeek._structure import Structure, scan
+from sheetpeek._structure import Structure, fill, scan
 from sheetpeek._style import Code
 from sheetpeek._style import font as font_aspect
 from sheetpeek._view_model import SheetView
@@ -438,7 +437,11 @@ class Book:
         assert self._archive is not None
         try:
             with self._archive.open(part) as handle:
-                structure = scan(handle, relationships(self._archive, part), self._marks)
+                structure = scan(handle, self._marks)
+            with self._xlio_errors():
+                assert self._book is not None
+                source = self._book.sheet(name)
+                structure = with_elements(fill(structure, source), source)
         except PackageError:
             raise
         except Exception as error:

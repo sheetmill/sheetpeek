@@ -318,7 +318,8 @@ def test_a_tiny_file_cannot_ask_for_a_huge_grid(book, tail):
 def test_a_row_past_excel_cannot_ask_for_a_huge_grid(book):
     data = '<sheetData><row r="99999999999"><c r="A99999999999"><v>1</v></c></row></sheetData>'
     rewrite(book, SHEET1, replace_sheet_data(data))
-    with pytest.raises(LimitError):
+    # Excel refuses a row off its grid (xlio's capture value_forms), before any grid is sized.
+    with pytest.raises(PackageError, match="off the sheet"):
         sheetpeek.read(book)
 
 
