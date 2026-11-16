@@ -77,6 +77,7 @@ from sheetpeek._sheets import (
 from sheetpeek._structure import Structure, scan
 from sheetpeek._style import Code
 from sheetpeek._style import font as font_aspect
+from sheetpeek._view_model import SheetView
 
 Source = str | os.PathLike[str] | IO[bytes]
 
@@ -389,6 +390,17 @@ class Book:
         sheets = tuple(s for area in areas if (s := self._sheet(name, area, clip=True)) is not None)
         return sheets, problem
 
+    def _view(self, name: str) -> SheetView:
+        """The sheet view, from xlio; the defaults where xlio cannot read it.
+
+        As for ``_page_layout``: xlio raises on some numbers no file Excel writes holds.
+        """
+        assert self._book is not None
+        try:
+            return sheet_view(self._book.sheet(name).views)
+        except (ValueError, OverflowError):
+            return SheetView()
+
     def _page_layout(
         self, name: str
     ) -> tuple[tuple[CellRange, ...], str | None, tuple[int, ...], tuple[int, ...]]:
@@ -489,7 +501,7 @@ class Book:
             show_headings=structure.show_headings,
             grid_color=grid_color(structure.grid_color_id, self._palette),
             outline=outline,
-            view=sheet_view(structure),
+            view=self._view(name),
             print_areas=areas,
             print_area_problem=area_problem,
             row_breaks=row_breaks,

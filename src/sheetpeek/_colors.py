@@ -81,8 +81,6 @@ def recolored_sections(number_format: str, palette: Sequence[str]) -> tuple[int,
     return tuple(sorted(found))
 
 
-
-
 def resolve(
     kind: str | None,
     value: str | int | None,

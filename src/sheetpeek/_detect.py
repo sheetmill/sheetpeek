@@ -254,8 +254,6 @@ def string_marks(archive: zipfile.ZipFile, part: str | None) -> bytes | None:
     return bytes(marks) if any(marks) else None
 
 
-
-
 def visible_style(workbook: Any, index: int) -> bool:
     """Whether a row or column style draws on empty cells: a fill or a border side."""
     styles = getattr(workbook, "_cell_styles", None)
