@@ -2,6 +2,7 @@
 
 import io
 import re
+import zipfile
 from pathlib import Path
 
 import openpyxl
@@ -91,6 +92,26 @@ def test_disable_date_conversion_needs_both_sets():
     partial = Partial()
     assert disable_date_conversion(partial) is False
     assert partial._date_formats == {1}
+
+
+def zip_text(path, part):
+    with zipfile.ZipFile(path) as archive:
+        return archive.read(part).decode()
+
+
+def test_built_in_date_format_14_is_read_as_today(tmp_path):
+    # Pinned on purpose: the built-in codes come from openpyxl's table, which gives id 14 (what
+    # Excel writes for a typed short date) as mm-dd-yy. What Excel for Mac shows for it is not
+    # captured yet; xlformat is to own the built-in table from that capture. When the table
+    # changes, this fails: update it with the capture, and list the change in the changelog.
+    wb = openpyxl.Workbook()
+    wb.active["A1"] = 45293  # 2024-01-02
+    wb.active["A1"].number_format = "mm-dd-yy"  # openpyxl writes it as numFmtId 14
+    path = save(wb, tmp_path / "date14.xlsx")
+    assert 'numFmtId="14"' in zip_text(path, "xl/styles.xml")
+    sheet = sheetpeek.read(path)
+    assert sheet.cell(1, 1).style.number_format == "mm-dd-yy"
+    assert sheetpeek.render(sheet, "text").strip() == "01-02-24"
 
 
 def test_value_kinds(tmp_path):
