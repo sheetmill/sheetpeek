@@ -2,9 +2,9 @@
 
 Used to change the reader without changing what it reads: snapshot a corpus with the version
 before the change and with the one after, and every difference is listed for a reason to be
-given. One JSON line per workbook and per sheet: the sheet list and the default sheet, and for
-each sheet digests of its values, styles, runs, columns, rows, merges and links, its view, print
-layout and notices.
+given. One JSON line per workbook and per sheet: the sheet list, the default sheet and the
+workbook's notices, and for each sheet digests of its values, styles, runs, columns, rows,
+merges and links, its view, print layout and notices.
 
     find CORPUS -name '*.xlsx' > list.txt
     python -m tests.watchdog -- python tools/reader_snapshot.py sweep OLD/src list.txt a.jsonl
@@ -86,7 +86,12 @@ def snap(listing: str, out: str, start: int = 0, stop: int | None = None) -> Non
             try:
                 with sheetpeek.open(path, limits=limits) as book:
                     infos = [(i.name, i.kind, i.state, i.tab_color) for i in book.sheets]
-                    head = {"file": path, "sheets": infos, "default": _default(book)}
+                    head = {
+                        "file": path,
+                        "sheets": infos,
+                        "default": _default(book),
+                        "notices": sorted(f"{n.code}:{n.count}" for n in book.notices),
+                    }
                     handle.write(json.dumps(head) + "\n")
                     for name, *_ in infos:
                         try:
