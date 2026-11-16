@@ -162,42 +162,28 @@ class WorkbookInfo:
 
     kinds: dict[str, str] = field(default_factory=dict)
     """Sheet name → ``worksheet``, ``chartsheet``, ``dialogsheet`` or ``macrosheet``."""
-    print_areas: frozenset[str] = frozenset()
-    print_area_text: dict[str, str] = field(default_factory=dict)
-    """Sheet name → its ``_xlnm.Print_Area`` value, as written."""
     show_objects: str = "all"
     strings_part: str | None = None
 
 
 def workbook_info(archive: zipfile.ZipFile) -> WorkbookInfo:
-    """Read sheet kinds, print names, ``showObjects`` and the shared strings part."""
+    """Read sheet kinds, ``showObjects`` and the shared strings part."""
     part = workbook_part(archive)
     rels = {rid: (kind, target) for rid, kind, target, _ in related(archive, part)}
     root = ET.fromstring(archive.read(part))
     kinds: dict[str, str] = {}
-    names: list[str] = []
     for sheet in root.iter(f"{{{_MAIN}}}sheet"):
         name = sheet.get("name", "")
-        names.append(name)
         kind_url = rels.get(sheet.get(f"{{{_REL}}}id", ""), ("", ""))[0]
         kinds[name] = next(
             (k for suffix, k in _SHEET_KINDS if suffix in kind_url.lower()), "worksheet"
         )
-    areas: set[str] = set()
-    texts: dict[str, str] = {}
-    for defined in root.iter(f"{{{_MAIN}}}definedName"):
-        local = defined.get("localSheetId", "")
-        if not local.isdigit() or int(local) >= len(names) or not (defined.text or "").strip():
-            continue
-        if defined.get("name") == "_xlnm.Print_Area":
-            areas.add(names[int(local)])
-            texts[names[int(local)]] = (defined.text or "").strip()
     properties = root.find(f"{{{_MAIN}}}workbookPr")
     show_objects = properties.get("showObjects", "all") if properties is not None else "all"
     strings = next(
         (target for kind, target in rels.values() if kind.endswith("/sharedStrings")), None
     )
-    return WorkbookInfo(kinds, frozenset(areas), texts, show_objects, strings)
+    return WorkbookInfo(kinds, show_objects, strings)
 
 
 def book_notices(collector: Collector, info: WorkbookInfo) -> None:
