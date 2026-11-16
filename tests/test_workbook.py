@@ -171,8 +171,10 @@ def test_a_sheet_listed_without_a_part_still_counts_in_tab_and_name_indexes(tmp_
     def edit(text):
         text = re.sub(
             r"(<sheets><sheet [^>]*/>)",
-            r'\1<sheet name="Gone" sheetId="9" '
-            r'state="veryHidden" r:id=""/>',
+            # The prefix is declared here: with lxml, openpyxl declares it on each element.
+            r'\1<sheet name="Gone" sheetId="9" state="veryHidden" '
+            r'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" '
+            r'r:id=""/>',
             text,
             count=1,
         )
