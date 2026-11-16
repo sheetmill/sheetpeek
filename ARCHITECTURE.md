@@ -1924,7 +1924,8 @@ src/sheetpeek/
   __main__.py
 tests/               unit tests; captures/ (TSV) and their loader
 capture/             capture tooling (not in the wheel)
-tools/               the generator of _carlito.py (not in the wheel)
+tools/               the generator of _carlito.py; reader_snapshot.py, which snapshots what the
+                     reader gives for a folder of workbooks and diffs two snapshots (not in the wheel)
 bench/               scripts that rerun §5 and §7.3's figures; README.md records them
 docs/                Sphinx, as in xlformat
 ```
