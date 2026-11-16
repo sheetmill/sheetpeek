@@ -27,14 +27,13 @@ from openpyxl import load_workbook
 from openpyxl.utils.datetime import CALENDAR_MAC_1904, to_excel
 
 from sheetpeek import _style as styles
-from sheetpeek._colors import grid_color, resolve, theme_colors, workbook_palette
+from sheetpeek._colors import grid_color, resolve, workbook_palette
 from sheetpeek._detect import (
     book_notices,
     report_cells,
     report_style,
     sheet_notices,
     string_marks,
-    theme_fonts,
     visible_style,
     workbook_info,
 )
@@ -152,6 +151,7 @@ def book_limits(book: Book) -> ReadLimits:
     return book._limits
 
 
+_HEX6 = re.compile(r"[0-9A-Fa-f]{6}")
 _KIND: dict[str, SheetKind] = {
     "worksheet": "worksheet",
     "chartsheet": "chartsheet",
@@ -163,6 +163,32 @@ _STATE: dict[str, SheetState] = {
     "hidden": "hidden",
     "veryHidden": "very_hidden",
 }
+
+
+def xlio_theme_colors(theme: xlio.Theme | None) -> tuple[str, ...]:
+    """The twelve theme colors as ``RRGGBB`` in Excel's index order, from xlio's reading.
+
+    No theme, a color missing, or one that is not six hex digits gives no theme colors: the
+    theme's text reaches CSS, so nothing but a color may leave here.
+    """
+    if theme is None or theme.colors is None:
+        return ()
+    found = []
+    for index in range(12):
+        color = theme.colors.by_index(index)
+        rgb = (color.rgb or "") if color is not None else ""
+        if not _HEX6.fullmatch(rgb):
+            return ()
+        found.append(rgb.upper())
+    return tuple(found)
+
+
+def xlio_theme_fonts(theme: xlio.Theme | None) -> dict[str, str]:
+    """The theme's Latin typefaces, ``{"major": ..., "minor": ...}``, those it names."""
+    if theme is None:
+        return {}
+    pairs = (("major", theme.major_fonts), ("minor", theme.minor_fonts))
+    return {key: fonts.latin for key, fonts in pairs if fonts is not None and fonts.latin}
 
 
 def _tab_color(sheet: xlio.Sheet) -> StatedColor | None:
@@ -211,12 +237,11 @@ class Book:
             self._raw_dates = disable_date_conversion(self._workbook)
             self._parts = worksheet_parts(self._archive)
             self._epoch = self._workbook.epoch
-            self._theme = theme_colors(getattr(self._workbook, "loaded_theme", None))
-            palette = getattr(self._workbook, "_colors", None)
+            self._theme = xlio_theme_colors(self._book.theme)
             self._palette: Sequence[str] = workbook_palette(
-                palette if isinstance(palette, Sequence) and not isinstance(palette, str) else None
+                self._book.styles.indexed_colors or None
             )
-            self._theme_fonts = theme_fonts(getattr(self._workbook, "loaded_theme", None))
+            self._theme_fonts = xlio_theme_fonts(self._book.theme)
             self._normal_font = self._read_normal_font()
             self._info = workbook_info(self._archive)
             self._marks = string_marks(self._archive, self._info.strings_part)
@@ -226,6 +251,9 @@ class Book:
         except PackageError:
             self.close()
             raise
+        except xlio.LimitError as error:
+            self.close()
+            raise LimitError(str(error)) from None
         except Exception as error:  # openpyxl raises many kinds on a file it cannot read
             self.close()
             raise self._unreadable(error) from error

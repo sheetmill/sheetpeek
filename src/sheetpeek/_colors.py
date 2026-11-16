@@ -10,19 +10,10 @@ The workbook's indexed palette, the grid color and number-format colors are §4.
 from __future__ import annotations
 
 import re
-import xml.etree.ElementTree as ET
 from collections.abc import Sequence
 
 from xlformat import DEFAULT_PALETTE as _SECTION_COLORS
 
-_A = "{http://schemas.openxmlformats.org/drawingml/2006/main}"
-# clrScheme children in document order.
-_SCHEME = (
-    "dk1", "lt1", "dk2", "lt2", "accent1", "accent2", "accent3", "accent4", "accent5",
-    "accent6", "hlink", "folHlink",
-)  # fmt: skip
-# Excel's theme index → clrScheme entry: the light and dark pairs are swapped.
-_THEME_ORDER = (1, 0, 3, 2, 4, 5, 6, 7, 8, 9, 10, 11)
 _AUTOMATIC_INDEX = (64, 65)  # system foreground and background
 _HLS = 240  # Windows' HLSMAX
 _RGB = 255
@@ -40,7 +31,7 @@ DEFAULT_PALETTE: tuple[str, ...] = tuple(
 _AUTOMATIC_GRID = 64
 
 
-def workbook_palette(custom: Sequence[str] | None) -> tuple[str, ...]:
+def workbook_palette(custom: Sequence[str | None] | None) -> tuple[str, ...]:
     """The palette a workbook's indexed colors take: its ``indexedColors``, else the default.
 
     Each written entry is used as it stands, so indices 0 to 7 no longer repeat 8 to 15 (captured,
@@ -90,37 +81,6 @@ def recolored_sections(number_format: str, palette: Sequence[str]) -> tuple[int,
     return tuple(sorted(found))
 
 
-def theme_colors(theme_xml: bytes | str | None) -> tuple[str, ...]:
-    """The twelve theme colors as ``RRGGBB``, in Excel's theme index order.
-
-    A workbook without a theme part, or with an unreadable one, has no theme colors.
-    """
-    if not theme_xml:
-        return ()
-    try:
-        root = ET.fromstring(theme_xml)
-    except ET.ParseError:
-        return ()
-    scheme = root.find(f".//{_A}clrScheme")
-    if scheme is None:
-        return ()
-    found: dict[str, str] = {}
-    for name in _SCHEME:
-        entry = scheme.find(f"{_A}{name}")
-        if entry is None:
-            return ()
-        srgb = entry.find(f"{_A}srgbClr")
-        system = entry.find(f"{_A}sysClr")
-        if srgb is not None:
-            found[name] = srgb.get("val", "000000").upper()
-        elif system is not None:
-            found[name] = system.get("lastClr", "000000").upper()
-        else:
-            return ()
-        # The theme's text reaches CSS as it stands, so nothing but a color may leave here.
-        if not _HEX.fullmatch(found[name]):
-            return ()
-    return tuple(found[_SCHEME[i]] for i in _THEME_ORDER)
 
 
 def resolve(

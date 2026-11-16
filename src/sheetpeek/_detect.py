@@ -254,20 +254,6 @@ def string_marks(archive: zipfile.ZipFile, part: str | None) -> bytes | None:
     return bytes(marks) if any(marks) else None
 
 
-def theme_fonts(theme: bytes | None) -> dict[str, str]:
-    """The theme's Latin typefaces: ``{"major": ..., "minor": ...}``."""
-    if not theme:
-        return {}
-    try:
-        root = ET.fromstring(theme)
-    except ET.ParseError:
-        return {}
-    result = {}
-    for scheme, key in (("majorFont", "major"), ("minorFont", "minor")):
-        latin = root.find(f".//{{{_DRAWING}}}{scheme}/{{{_DRAWING}}}latin")
-        if latin is not None and latin.get("typeface"):
-            result[key] = latin.get("typeface", "")
-    return result
 
 
 def visible_style(workbook: Any, index: int) -> bool:

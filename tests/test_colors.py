@@ -1,15 +1,16 @@
 import importlib.util
 import io
 import re
-import zipfile
 
 import openpyxl
 import pytest
+import xlio
 from openpyxl.styles import Font, PatternFill
 from openpyxl.styles.colors import COLOR_INDEX, Color
 
 import sheetpeek
-from sheetpeek._colors import apply_tint, resolve, theme_colors
+from sheetpeek._colors import apply_tint, resolve
+from sheetpeek._read import xlio_theme_colors
 from tests.workbooks import rewrite, save
 
 
@@ -17,8 +18,9 @@ from tests.workbooks import rewrite, save
 def default_theme():
     stream = io.BytesIO()
     openpyxl.Workbook().save(stream)
-    with zipfile.ZipFile(stream) as archive:
-        return theme_colors(archive.read("xl/theme/theme1.xml"))
+    stream.seek(0)
+    with xlio.open(stream) as workbook:
+        return xlio_theme_colors(workbook.theme)
 
 
 def test_theme_order(default_theme):
@@ -29,10 +31,21 @@ def test_theme_order(default_theme):
     assert default_theme[4] == "4F81BD"
 
 
-def test_unreadable_theme():
-    assert theme_colors(None) == ()
-    assert theme_colors(b"not xml") == ()
-    assert theme_colors(b"<theme/>") == ()
+def test_a_workbook_without_a_theme_has_no_theme_colors():
+    assert xlio_theme_colors(None) == ()
+
+
+def test_a_theme_color_that_is_not_hex_gives_no_theme_colors(tmp_path):
+    # The theme's text reaches CSS, so a color that is not six hex digits drops the theme.
+    path = save(openpyxl.Workbook(), tmp_path / "theme.xlsx")
+    rewrite(
+        path,
+        "xl/theme/theme1.xml",
+        lambda t: t.replace('val="4F81BD"', 'val="4F81BD;}x"', 1),
+    )
+    assert sheetpeek.read(path).name == "Sheet"
+    with xlio.open(path) as workbook:
+        assert xlio_theme_colors(workbook.theme) == ()
 
 
 def test_tint():

@@ -139,10 +139,10 @@ def open_workbook(handle: BinaryIO, limits: ReadLimits) -> xlio.Workbook:
     try:
         return xlio.open(
             handle,
+            # The package's total is held to max_total_bytes by check_package; xlio counts the
+            # bytes of every read it makes, a part read twice twice, so it keeps its own total.
             limits=xlio.ReadLimits(
-                max_parts=limits.max_parts,
-                max_part_bytes=limits.max_part_bytes,
-                max_total_bytes=limits.max_total_bytes,
+                max_parts=limits.max_parts, max_part_bytes=limits.max_part_bytes
             ),
         )
     except xlio.LimitError as error:
