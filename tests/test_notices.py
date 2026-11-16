@@ -695,3 +695,40 @@ def test_only_notices_are_issued_for_sheet_extensions(tmp_path):
     assert {"cf", "sparkline", "slicer", "sheet.unknown_extension"} <= codes(
         sheetpeek.read(path).notices
     )
+
+
+def _row_column_notice(tmp_path, style_row=None, style_column=None, edit=None):
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+    for ref in ("A1", "C3"):
+        sheet[ref] = 1
+    if style_row is not None:
+        for key, value in style_row.items():
+            setattr(sheet.row_dimensions[2], key, value)
+    if style_column is not None:
+        for key, value in style_column.items():
+            setattr(sheet.column_dimensions["B"], key, value)
+    path = save(workbook, tmp_path / "rows.xlsx")
+    if edit is not None:
+        rewrite(path, "xl/styles.xml", edit)
+    found = [n for n in sheetpeek.read(path).notices if n.code == "style.row_column"]
+    return found[0].context if found else None
+
+
+def test_a_row_fill_and_a_column_border_are_reported(tmp_path):
+    fill = PatternFill("solid", fgColor="FF0000")
+    assert _row_column_notice(tmp_path, style_row={"fill": fill}) == {"rows": 1, "columns": 0}
+    side = Border(left=Side(style="thin"))
+    assert _row_column_notice(tmp_path, style_column={"border": side}) == {
+        "rows": 0,
+        "columns": 1,
+    }
+
+
+def test_border_sides_of_style_none_draw_nothing_on_rows(tmp_path):
+    side = Border(left=Side(style="thin"))
+
+    def edit(text):
+        return text.replace('style="thin"', 'style="none"')
+
+    assert _row_column_notice(tmp_path, style_row={"border": side}, edit=edit) is None

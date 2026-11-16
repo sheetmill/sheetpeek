@@ -5,7 +5,8 @@ carries of that aspect, and ``unread``, which gives what the style uses of it th
 not carry yet (reported as notices). A feature that comes to be drawn moves from one to the other
 inside its own aspect module, so groups working on different aspects do not meet here.
 
-The modules take openpyxl's style objects without importing openpyxl (only ``_read.py`` does).
+The modules take xlio's style objects (``xlio.CellFormat`` and its parts), with the number
+format's code resolved by the reader.
 """
 
 from __future__ import annotations
@@ -30,7 +31,7 @@ class Context:
     """What reading an aspect needs from the workbook."""
 
     color: Callable[[Any], str | None]
-    """An openpyxl ``Color`` to ``RRGGBB``, or ``None`` for automatic."""
+    """An ``xlio.Color`` to ``RRGGBB``, or ``None`` for automatic."""
     normal_font: Font
     theme_fonts: dict[str, str] = field(default_factory=dict)
     """The theme's Latin typefaces, ``{"major": ..., "minor": ...}``."""

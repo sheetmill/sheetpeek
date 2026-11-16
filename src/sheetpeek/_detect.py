@@ -254,24 +254,21 @@ def string_marks(archive: zipfile.ZipFile, part: str | None) -> bytes | None:
     return bytes(marks) if any(marks) else None
 
 
-def visible_style(workbook: Any, index: int) -> bool:
-    """Whether a row or column style draws on empty cells: a fill or a border side."""
-    styles = getattr(workbook, "_cell_styles", None)
-    if not styles or index >= len(styles):
+def visible_style(styles: Any, index: int) -> bool:
+    """Whether a row or column style draws on empty cells: a fill or a border side.
+
+    ``styles`` is the workbook's ``xlio.Styles``.
+    """
+    formats = styles.cell_formats
+    if not 0 <= index < len(formats):
         return False
-    array = styles[index]
-    fills = getattr(workbook, "_fills", ())
-    borders = getattr(workbook, "_borders", ())
-    fill = fills[array.fillId] if array.fillId < len(fills) else None
-    if fill is not None and (
-        getattr(fill, "tagname", None) == "gradientFill"
-        or getattr(fill, "fill_type", None) not in (None, "none")
-    ):
+    fill = formats[index].fill
+    if fill is not None and getattr(fill, "pattern", "gradient") not in (None, "none"):
         return True
-    border = borders[array.borderId] if array.borderId < len(borders) else None
+    border = formats[index].border
     sides = ("left", "right", "top", "bottom")
     return border is not None and any(
-        getattr(getattr(border, s, None), "style", None) for s in sides
+        getattr(getattr(border, s, None), "style", None) not in (None, "none") for s in sides
     )
 
 

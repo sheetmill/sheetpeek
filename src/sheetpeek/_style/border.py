@@ -19,20 +19,20 @@ def read(part: Any, context: Context) -> dict[str, Any]:
 
 
 def to_borders(part: Any, context: Context) -> Borders | None:
-    """An openpyxl ``Border`` as the model's :class:`Borders`.
+    """An ``xlio.Border`` as the model's :class:`Borders`.
 
-    ``start`` and ``end`` are read as ``left`` and ``right`` where those are absent (captured).
+    xlio reads ``start`` and ``end`` as ``left`` and ``right`` where those are absent (captured).
     A diagonal counts only with a style and a direction, as Excel draws it.
     """
     if part is None:
         return None
-    left = side(getattr(part, "left", None), context) or side(getattr(part, "start", None), context)
-    right = side(getattr(part, "right", None), context) or side(getattr(part, "end", None), context)
-    top = side(getattr(part, "top", None), context)
-    bottom = side(getattr(part, "bottom", None), context)
-    diagonal = side(getattr(part, "diagonal", None), context)
-    up = bool(getattr(part, "diagonalUp", False))
-    down = bool(getattr(part, "diagonalDown", False))
+    left = side(part.left, context)
+    right = side(part.right, context)
+    top = side(part.top, context)
+    bottom = side(part.bottom, context)
+    diagonal = side(part.diagonal, context)
+    up = bool(part.diagonal_up)
+    down = bool(part.diagonal_down)
     if diagonal is None or not (up or down):
         diagonal, up, down = None, False, False
     if not (left or right or top or bottom or diagonal):
@@ -42,10 +42,10 @@ def to_borders(part: Any, context: Context) -> Borders | None:
 
 def side(source: Any, context: Context) -> Side | None:
     """One side: ``None`` without a style Excel draws. An automatic color is black (captured)."""
-    style = getattr(source, "style", None)
+    style = source.style if source is not None else None
     if style not in _STYLES:
         return None
-    return Side(style, context.color(getattr(source, "color", None)))
+    return Side(style, context.color(source.color))
 
 
 def unread(part: Any, context: Context) -> Found:

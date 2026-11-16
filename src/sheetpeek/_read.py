@@ -25,6 +25,7 @@ from typing import IO, Any, overload
 import xlformat
 import xlio
 from openpyxl import load_workbook
+from openpyxl.styles.numbers import BUILTIN_FORMATS
 from openpyxl.utils.datetime import CALENDAR_MAC_1904, to_excel
 
 from sheetpeek import _style as styles
@@ -235,7 +236,7 @@ class Book:
             self._info = workbook_info(self._archive)
             self._marks = string_marks(self._archive, self._info.strings_part)
             self._context = styles.Context(
-                self._color, self._normal_font, self._theme_fonts, self._palette
+                self._cell_color, self._normal_font, self._theme_fonts, self._palette
             )
         except PackageError:
             self.close()
@@ -526,17 +527,18 @@ class Book:
             )
         if ref is None:
             return
+        assert self._book is not None
         ranges, _ = structure.phonetic.ranges()
         report_cells(notes, "text.phonetic", (r for r in map(ref.intersection, ranges) if r))
         rows = sum(
             1
             for row, style in structure.row_styles
-            if ref.min_row <= row <= ref.max_row and visible_style(self._workbook, style)
+            if ref.min_row <= row <= ref.max_row and visible_style(self._book.styles, style)
         )
         columns = sum(
             max(0, min(last, ref.max_col) - max(first, ref.min_col) + 1)
             for first, last, style in structure.column_styles
-            if visible_style(self._workbook, style)
+            if visible_style(self._book.styles, style)
         )
         if rows or columns:
             notes.add(
@@ -654,7 +656,7 @@ class Book:
                 font
                 if properties is None
                 else font_aspect.to_font(
-                    _RunFont(properties), self._normal_font, self._color, self._theme_fonts
+                    _RunFont(properties), self._normal_font, self._cell_color, self._theme_fonts
                 )
             )
             if not text:
@@ -669,16 +671,34 @@ class Book:
 
     def _style(self, source: Any) -> tuple[CellStyle, tuple[Code, ...], tuple[Code, ...]]:
         """The cell's style, and what it uses that is not read: (for any cell, for values)."""
-        style_array = getattr(source, "style_array", None)
-        if style_array is None:  # an EmptyCell: no <c> element at this position
+        index = getattr(source, "_style_id", None)  # openpyxl's read-only cell: its xf index
+        if index is None:  # an EmptyCell: no <c> element at this position
             return self._default_style, (), ()
-        found = self._styles.get(style_array)
+        found = self._styles.get(index)
         if found is None:
-            found = self._styles[style_array] = styles.resolve(source, self._context)
+            assert self._book is not None
+            # An index past the cell formats raises IndexError: the sheet is unreadable.
+            cell_format = self._book.styles.cell_formats[index]
+            code = cell_format.number_format
+            if code is None:
+                code = BUILTIN_FORMATS.get(cell_format.number_format_id, "General")
+            cell_format = dataclasses.replace(cell_format, number_format=code)
+            found = self._styles[index] = styles.resolve(cell_format, self._context)
         return found
 
+    def _cell_color(self, color: Any) -> str | None:
+        """An ``xlio.Color`` as ``RRGGBB`` or ``None``.
+
+        A color element without attributes is read as ``00000000``, black (unverified;
+        openpyxl's reading, kept).
+        """
+        stated = from_xlio(color)
+        if stated is None and color is not None:
+            stated = StatedColor("rgb", rgb="00000000", tint=color.tint)
+        return self._color(stated)
+
     def _color(self, color: Any) -> str | None:
-        """An openpyxl ``Color`` as ``RRGGBB`` or ``None``."""
+        """A :class:`StatedColor` (or an object of its shape) as ``RRGGBB`` or ``None``."""
         if color is None:
             return None
         kind = getattr(color, "type", None)
@@ -688,18 +708,22 @@ class Book:
         return resolve(kind, value, getattr(color, "tint", 0.0) or 0.0, self._theme, self._palette)
 
     def _read_normal_font(self) -> Font:
-        workbook = self._workbook
-        font = None
-        for style in getattr(workbook, "_named_styles", ()):
-            if getattr(style, "name", None) == "Normal":
-                font = style.font
-                break
-        if font is None:
-            fonts = getattr(workbook, "_fonts", None)
-            font = fonts[0] if fonts else None
+        """The Normal style's font; else the first font; else Calibri 11."""
+        assert self._book is not None
+        found = self._book.styles
+        font = next(
+            (
+                style.format.font
+                for style in found.cell_styles
+                if style.name == "Normal" and style.format is not None
+            ),
+            None,
+        )
+        if font is None and found.fonts:
+            font = found.fonts[0]
         if font is None:
             return font_aspect.FALLBACK
-        return font_aspect.to_font(font, font_aspect.FALLBACK, self._color, self._theme_fonts)
+        return font_aspect.to_font(font, font_aspect.FALLBACK, self._cell_color, self._theme_fonts)
 
 
 def _parts(value: list[Any]) -> Iterator[tuple[str, Any]]:
@@ -719,19 +743,44 @@ def _drawn(font: Font) -> Font:
 
 
 class _RunFont:
-    """A run's properties as the font reader takes a cell's font: ``rFont`` is its name."""
+    """A run's properties (openpyxl's ``InlineFont``) in the shape of an ``xlio.Font``."""
 
     __slots__ = ("_properties",)
 
     def __init__(self, properties: Any) -> None:
         self._properties = properties
 
-    @property
-    def name(self) -> Any:
-        return self._properties.rFont
+    name = property(lambda self: self._properties.rFont)
+    size = property(lambda self: self._properties.sz)
+    bold = property(lambda self: self._properties.b)
+    italic = property(lambda self: self._properties.i)
+    underline = property(lambda self: self._properties.u)
+    strike = property(lambda self: self._properties.strike)
+    vert_align = property(lambda self: self._properties.vertAlign)
+    scheme = property(lambda self: self._properties.scheme)
 
-    def __getattr__(self, attribute: str) -> Any:
-        return getattr(self._properties, attribute)
+    @property
+    def color(self) -> _RunColor | None:
+        color = self._properties.color
+        return None if color is None else _RunColor(color)
+
+
+class _RunColor:
+    """An openpyxl ``Color`` in the shape of an ``xlio.Color``.
+
+    openpyxl returns an error text, not a value, when a field of another type is read, so only
+    the field its ``type`` names is taken.
+    """
+
+    __slots__ = ("auto", "indexed", "rgb", "theme", "tint")
+
+    def __init__(self, color: Any) -> None:
+        kind = getattr(color, "type", None)
+        self.indexed = color.indexed if kind == "indexed" else None
+        self.theme = color.theme if kind == "theme" else None
+        self.auto = kind == "auto"
+        self.rgb = color.rgb if kind == "rgb" else None
+        self.tint = getattr(color, "tint", 0.0) or 0.0
 
 
 def _report_lost_runs(notes: Collector, structure: Structure, ref: CellRange) -> None:

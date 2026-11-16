@@ -25,6 +25,8 @@ _LARGEST = 409.5  # 410 is refused
 
 def read(part: Any, context: Context) -> dict[str, Any]:
     """The cell's font, with the Normal font's name and size where the font gives none."""
+    if part is None:
+        return {"font": context.normal_font}
     return {"font": to_font(part, context.normal_font, context.color, context.theme_fonts)}
 
 
@@ -34,28 +36,29 @@ def to_font(
     color_of: Callable[[Any], str | None],
     theme_fonts: Mapping[str, str] | None = None,
 ) -> Font:
-    """An openpyxl ``Font`` as the model's :class:`~sheetpeek.Font`.
+    """An ``xlio.Font`` as the model's :class:`~sheetpeek.Font`.
 
     ``theme_fonts`` holds the theme's Latin typefaces, ``{"major": ..., "minor": ...}``: a font
     of either scheme is drawn in that typeface, whatever name it stores (captured on Excel 16.114).
     """
     color = font.color
     # Theme color 1 ("Text 1") is what Excel's own default font uses for ordinary text, so
-    # untinted it means the default foreground, like an automatic color.
-    if getattr(color, "type", None) == "theme" and color.theme == 1 and not color.tint:
+    # untinted it means the default foreground, like an automatic color. The theme wins over
+    # rgb and auto, as indexed wins over the theme.
+    if color is not None and color.indexed is None and color.theme == 1 and not color.tint:
         color = None
     stored = font.name or normal.name
     scheme = _SCHEMES.get(font.scheme)
     name = (theme_fonts or {}).get(scheme or "") or stored
     return Font(
         name=name,
-        size=size(font.sz) if font.sz is not None else normal.size,
-        bold=bool(font.b),
-        italic=bool(font.i),
-        underline=font.u or None,
+        size=size(font.size) if font.size is not None else normal.size,
+        bold=bool(font.bold),
+        italic=bool(font.italic),
+        underline=font.underline or None,
         strike=bool(font.strike),
         color=color_of(color),
-        vert_align=_VERT_ALIGN.get(font.vertAlign),
+        vert_align=_VERT_ALIGN.get(font.vert_align),
         scheme=scheme,
         stored_name=stored if name != stored else None,
     )

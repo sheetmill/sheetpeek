@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
 ATTRIBUTE = "fill"
 _SYSTEM_FOREGROUND, _SYSTEM_BACKGROUND = 64, 65
-_MISSING = "00000000"  # what openpyxl reads for a missing color element
+_ZERO = "00000000"
 
 
 def read(part: Any, context: Context) -> dict[str, Any]:
@@ -34,56 +34,52 @@ def read(part: Any, context: Context) -> dict[str, Any]:
 
 
 def to_fill(part: Any, context: Context) -> Fill | None:
-    """An openpyxl fill as the model's, or ``None`` where Excel draws no fill."""
-    tag = getattr(part, "tagname", None)
-    if tag == "patternFill":
-        kind = getattr(part, "fill_type", None)
+    """An ``xlio.PatternFill`` or ``GradientFill`` as the model's, or ``None``: no fill drawn."""
+    if part is None:
+        return None
+    if hasattr(part, "pattern"):
+        kind = part.pattern
         if kind != "solid" and kind not in TILES:  # none, or no patternType: nothing drawn
             return None
-        fg = color(getattr(part, "fgColor", None), context)
-        bg = color(getattr(part, "bgColor", None), context, background=True)
+        fg = color(part.foreground, context)
+        bg = color(part.background, context, background=True)
         if kind == "solid":
             # A solid fill in the system foreground color is no fill (captured for indexed 64;
             # automatic taken alike, unverified).
             return Pattern("solid", fg) if fg is not None else None
         return Pattern(kind, fg, bg)
-    if tag == "gradientFill":
-        stops = sorted(
-            (unit(getattr(stop, "position", 0)), color(getattr(stop, "color", None), context))
-            for stop in getattr(part, "stop", ()) or ()
-        )
-        if not stops:  # nothing to draw; what Excel does is not captured
-            return None
-        return Gradient(
-            "path" if getattr(part, "type", None) == "path" else "linear",
-            tuple((position, found or BLACK) for position, found in stops),
-            degree=finite(getattr(part, "degree", 0)) % 360,
-            left=unit(getattr(part, "left", 0)),
-            right=unit(getattr(part, "right", 0)),
-            top=unit(getattr(part, "top", 0)),
-            bottom=unit(getattr(part, "bottom", 0)),
-        )
-    return None
+    stops = sorted((unit(stop.position), color(stop.color, context)) for stop in part.stops)
+    if not stops:  # nothing to draw; what Excel does is not captured
+        return None
+    return Gradient(
+        "path" if part.type == "path" else "linear",
+        tuple((position, found or BLACK) for position, found in stops),
+        degree=finite(part.degree) % 360,
+        left=unit(part.left),
+        right=unit(part.right),
+        top=unit(part.top),
+        bottom=unit(part.bottom),
+    )
 
 
 def color(source: Any, context: Context, *, background: bool = False) -> str | None:
     """A fill color as ``RRGGBB``, or ``None`` for automatic (captures on Excel 16.114).
 
-    Indexed 64 is automatic, 65 white, and an index past the palette black. openpyxl reads a
-    missing color element as ``00000000``: for a foreground that is black either way, and a
-    missing background is automatic (white).
+    Indexed 64 is automatic, 65 white, and an index past the palette black. A missing color
+    element, or one without attributes, is read as ``00000000`` (unverified; openpyxl's reading,
+    kept): for a foreground that is black, and a background in it is automatic (white).
     """
-    if source is None:
-        return None
-    kind = getattr(source, "type", None)
-    if kind == "indexed":
-        index = getattr(source, "indexed", None)
-        if index == _SYSTEM_FOREGROUND:
+    if source is None or (
+        source.indexed is None and source.theme is None and not source.auto and source.rgb is None
+    ):
+        return None if background else BLACK
+    if source.indexed is not None:
+        if source.indexed == _SYSTEM_FOREGROUND:
             return None
-        if index == _SYSTEM_BACKGROUND:
+        if source.indexed == _SYSTEM_BACKGROUND:
             return WHITE
         return context.color(source) or BLACK
-    if kind == "rgb" and background and getattr(source, "rgb", None) == _MISSING:
+    if background and source.theme is None and not source.auto and source.rgb == _ZERO:
         return None
     return context.color(source)
 

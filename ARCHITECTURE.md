@@ -111,7 +111,7 @@ layout fields marked *layout*. The style fields (`number_format` to `indent`) li
 | `value` | `None \| bool \| int \| float \| str \| ExcelError` | `cell.value` in read-only mode with date conversion off (§5.3) | raw cached value; dates stay serial numbers; `xlformat.ExcelError` (a `str` enum, compared with `==`) for `data_type == "e"`, or `str` when the file's text is not shaped like an error code |
 | `kind` | `"empty" \| "number" \| "text" \| "bool" \| "error"` | `cell.data_type` | a date is a `number` whose format is a date format; `d` cells (ISO 8601, rare) become serials |
 | `number_format` | `str` | `cell.number_format` | |
-| `font` | `Font(name, size, bold, italic, underline, strike, color)` | `cell.font`; a missing name or size inherits the Normal style's (openpyxl returns `None` for a font record without them, measured) | `color` is resolved `RRGGBB`, or `None` for automatic (§3.3) |
+| `font` | `Font(name, size, bold, italic, underline, strike, color)` | the cell format's font (xlio); a missing name or size inherits the Normal style's | `color` is resolved `RRGGBB`, or `None` for automatic (§3.3) |
 | `fill` | `str \| None` | `fgColor` of a `solid` pattern fill, resolved | other patterns map to their foreground color, a documented approximation; gradients are ignored |
 | `fill_spec` | `Pattern \| Gradient \| None` | `cell.fill` (§4.12) | the fill itself: a pattern's kind and two colors, or a gradient's kind, angle, rectangle and stops; `fill` is its one color |
 | `borders` | `Borders \| None` | `cell.border` (§4.12) | four `Side`s (style, color) and the diagonal with its two flags; `start` and `end` read as `left` and `right` |
@@ -165,10 +165,10 @@ leave them out by default and show them with an option.
 
 ### 3.3 Colors
 
-openpyxl returns a font or fill color as a `Color` whose `type` is `rgb`, `theme` (with `tint`),
-`indexed` or `auto`. Reading `.rgb` on a theme color returns the text
-`"Values must be of type <class 'str'>"` instead of raising (measured), so the reader branches
-on `type`.
+xlio returns a font, fill or border color as a `Color` holding every attribute the file states
+(`rgb`, `theme`, `indexed`, `auto`, `tint`). Where a file states more than one, the reader takes
+them in the order indexed, theme, auto, rgb (`_sheets.from_xlio`). A color element without
+attributes is read as `00000000`, black (unverified).
 
 - `rgb`: `ARGB`, alpha ignored.
 - `indexed`: the workbook's custom palette if `styles.xml` has one, else the default 64-entry
@@ -757,8 +757,8 @@ one.
   draws black; a pattern without colors, with automatic ones, or with indexed 64 and 65, is black
   on white; one color given, the other takes its default (fg black, bg white). A `solid` fill in
   indexed 64 is no fill; a fill index past the palette (81) is black; `patternType="none"` or none
-  at all draws nothing, whatever its colors. The alpha byte is ignored. openpyxl reads a missing
-  color as `00000000`, so a background of `00000000` is read as missing (white).
+  at all draws nothing, whatever its colors. The alpha byte is ignored. A missing color element is read
+  as `00000000` (unverified), so a background of `00000000` is read as missing (white).
 - **The representative color** of a pattern is the blend of its two colors by the foreground's
   share of the tile (6.25 % for `gray0625`, 43.75 % for `lightGrid`); of a gradient, its color at
   the midpoint.

@@ -33,25 +33,27 @@ VERTICAL: dict[str | None, VerticalAlignment] = {
 
 
 def read(part: Any, context: Context) -> dict[str, Any]:
-    """The alignment fields the model carries."""
+    """The alignment fields the model carries; the defaults where the format has none."""
+    if part is None:
+        return {}
     return {
         "h_align": HORIZONTAL.get(part.horizontal, "general"),
         "v_align": VERTICAL.get(part.vertical, "bottom"),
         "wrap": bool(part.wrap_text),
         "indent": int(part.indent or 0),
-        "shrink": bool(part.shrinkToFit),
-        "reading_order": _reading_order(part.readingOrder),
-        "justify_last_line": bool(part.justifyLastLine),
-        "rotation": _rotation(part.textRotation),
-        "stacked": part.textRotation == 255,
+        "shrink": bool(part.shrink_to_fit),
+        "reading_order": _reading_order(part.reading_order),
+        "justify_last_line": bool(part.justify_last_line),
+        "rotation": _rotation(part.text_rotation),
+        "stacked": part.text_rotation == 255,
     }
 
 
 def _rotation(value: Any) -> int:
     """Degrees counterclockwise: 0 to 90 as stored, 91 to 180 for -1 to -90 (§4.17).
 
-    255 (stacked) is 0. openpyxl refuses a workbook with any other value (measured), so the
-    last branch only guards the move to the shared xlsx reader.
+    255 (stacked) is 0, and so is any other value (unverified: what Excel does with one is not
+    captured).
     """
     angle = int(value or 0)
     if 0 <= angle <= 90:
