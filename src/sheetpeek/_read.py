@@ -523,8 +523,13 @@ class Book:
         links = cell_links(structure, ref)
         width = ref.max_col - ref.min_col + 1
         rows: dict[int, list[Cell | None]] = {}
+        current = 0
         for source in self._book.sheet(name).cells(str(ref), rich=True):
             row, column = source.row, source.column
+            if row == current:
+                row = current  # one int per row: each cell's own would cost 32 bytes a cell
+            else:
+                current = row
             value, kind = self._value(source)
             if value is None and (row, column) in structure.empty_strings:
                 value, kind = "", "text"
