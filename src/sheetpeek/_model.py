@@ -323,6 +323,10 @@ class Sheet:
     grid_color: str | None = None
     """The gridlines' color, ``RRGGBB`` from the workbook palette (``<sheetView
     defaultGridColor="0" colorId>``), or ``None`` for Excel's automatic gray (§4.14)."""
+    palette: tuple[str, ...] | None = None
+    """The workbook's indexed palette when the file has its own (``<indexedColors>``), as its
+    indexed colors are drawn: 64 ``RRGGBB`` entries, one the file lacks or cannot be read taken
+    from Excel's default; ``None`` for the default palette (§4.14)."""
     outline: Outline | None = None
     """The outline's settings when any row or column has an outline level, else ``None``."""
     view: SheetView = field(default_factory=SheetView)

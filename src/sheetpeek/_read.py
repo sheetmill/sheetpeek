@@ -190,9 +190,9 @@ class Book:
             self._parts = worksheet_parts(self._archive)
             self._date1904 = bool(self._book.properties.date1904)
             self._theme = xlio_theme_colors(self._book.theme)
-            self._palette: Sequence[str] = workbook_palette(
-                self._book.styles.indexed_colors or None
-            )
+            custom = self._book.styles.indexed_colors or None
+            self._palette: Sequence[str] = workbook_palette(custom)
+            self._own_palette = tuple(self._palette) if custom else None
             self._theme_fonts = xlio_theme_fonts(self._book.theme)
             self._normal_font = self._read_normal_font()
             self._info = workbook_info(self._book.parts)
@@ -451,6 +451,7 @@ class Book:
             show_gridlines=structure.show_gridlines,
             show_headings=structure.show_headings,
             grid_color=grid_color(structure.grid_color_id, self._palette),
+            palette=self._own_palette,
             outline=outline,
             view=self._view(name),
             print_areas=areas,

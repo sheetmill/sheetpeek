@@ -154,6 +154,7 @@ text styles into `Font` and `CellStyle` (§4.13). Rich-text runs inside one cell
 | `default_column_width`, `default_row_height` | scan: `<sheetFormatPr>` (`defaultColWidth`, `baseColWidth`, `defaultRowHeight`) |
 | `show_gridlines` | scan: `<sheetView showGridLines>` |
 | `grid_color` | scan: `<sheetView defaultGridColor colorId>`, through the workbook palette (§4.14) |
+| `palette` | xlio: `<indexedColors>` as the indexed colors take it (64 entries, the default's for an entry missing or not a color), `None` without it (§4.14) |
 | `normal_font` | the font of xlio's `Normal` cell style, else the workbook's first font |
 | `date1904` | `wb.epoch == CALENDAR_MAC_1904` |
 | `warnings` | reading and layout: formulas without cached values, approximated fonts, refused number formats, the date fallback (§5.3) |
@@ -188,8 +189,8 @@ attributes is read as `00000000`, black (unverified).
 - A font color of theme 1 without tint is also `None`. Excel's own default font is stored as
   theme 1 ("Text 1"), so in practice it means ordinary text, not a chosen black.
 
-The number format's `[ColorN]` uses `xlformat.DEFAULT_PALETTE`. A workbook with a custom indexed
-palette recolors those in Excel; sheetpeek reports each one it changes (`format.palette`, §4.14).
+The number format's `[ColorN]` is drawn from the workbook's palette (`Sheet.palette`, §4.14), as
+Excel draws it.
 
 ### 3.4 What each backend shows
 
@@ -972,10 +973,10 @@ is black, and a font in `auto` or indexed 64 is the automatic black.
 **Number-format colors.** `[ColorN]` draws the workbook palette's index `N + 7`; the eight named
 colors (`[Red]`, `[Blue]`) draw their default colors whatever the palette (captured; Excel's
 `display format` reports palette indices 2 and 4 for `[Red]` and `[Blue]` instead, so the screen
-was taken as the truth). The layout draws section colors from xlformat's default palette, so a
-`[ColorN]` that the workbook palette recolors is reported as `format.palette` (approximated), for
-cells with a value, by the number format's style aspect (`_style/number_format.py`). Quoted text
-and escaped characters are not section colors.
+was taken as the truth). The reader gives the sheet the workbook's palette (`Sheet.palette`, the
+same palette its indexed fill, font and border colors are drawn in, `None` when the file has none)
+and the layout draws a section color through `xlformat.section_rgb` with it. Quoted text and
+escaped characters are not section colors.
 
 **The grid color** (`Sheet.grid_color`). `<sheetView defaultGridColor="0" colorId>` draws the
 gridlines in the workbook palette's entry `colorId` (captured: teal for index 10 of a palette
@@ -1011,7 +1012,6 @@ them in points like the cells (`backends/html/_headings.py`).
 |---|---|---|---|---|
 | theme fonts | as any font name: omitted | omitted | omitted | omitted |
 | grid color | approximated: the column separators in the grid color | omitted | omitted | omitted |
-| `[ColorN]` from the workbook palette | reported by the reader (`format.palette`), as for HTML | the same | the same | the same |
 
 ### 4.15 Sheets and the workbook page
 

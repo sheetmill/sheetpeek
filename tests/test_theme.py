@@ -15,7 +15,6 @@ import sheetpeek
 from sheetpeek._colors import (
     DEFAULT_PALETTE,
     grid_color,
-    recolored_sections,
     workbook_palette,
 )
 from sheetpeek._model import Font as ModelFont
@@ -185,40 +184,53 @@ def test_a_colors_element_without_indexed_colors_keeps_the_default_palette(tmp_p
 # --- number-format colors
 
 
-def test_recolored_sections():
-    palette = workbook_palette(custom_palette())
-    assert recolored_sections("[Color10]0", palette) == (10,)
-    assert recolored_sections("[color 3]0;[COLOR10]-0", palette) == (3, 10)
-    assert recolored_sections("[Red]0;[Color11]-0", palette) == ()  # named and unchanged
-    assert recolored_sections('"[Color10]"0;\\[Color10]', palette) == ()  # literal text
-    assert recolored_sections("[Color10]0", DEFAULT_PALETTE) == ()
-    assert recolored_sections("[Color57]0;[Color999]0;[Color0]0", palette) == ()
-
-
-def test_a_section_color_the_palette_changes_is_reported(tmp_path):
-    # Excel 16.114 capture: [Color10] follows the palette (128,64,0 here); [Red] keeps red.
+def test_a_section_color_follows_the_workbook_palette(tmp_path):
+    # Excel 16.114 capture: [Color10] follows the palette (brown here); [Red] keeps red, though
+    # the palette makes its slot teal; [Color3] is that slot.
     path = build(
         tmp_path,
         {
             "A1": (-1, {"number_format": "[Color10]0;[Red]-0"}),
-            "A2": (1, {"number_format": "[Red]0"}),
-            "A3": (None, {"number_format": "[Color10]0"}),  # no value: nothing drawn
+            "A2": (1, {"number_format": "[Color10]0;[Red]-0"}),
+            "A3": (1, {"number_format": "[Color3]0"}),
+            "A4": (1, {"number_format": "[Blue]0"}),
         },
         palette=custom_palette(),
     )
     sheet = sheetpeek.read(path)
-    (notice,) = [n for n in sheet.notices if n.code == "format.palette"]
-    assert (notice.outcome, notice.reason, notice.count) == ("approximated", "not_implemented", 1)
-    assert notice.cells == (sheetpeek.CellRange(1, 1, 1, 1),)
-    assert notice.context == {"colors": "[Color10]"}
-    assert "[Color10]" in notice.message
-    # Drawn from the default palette until the palette reaches the layout.
-    assert sheet.layout("excel").cell(1, 1).format_color == "FF0000"  # [Red] for -1
+    assert sheet.palette is not None
+    assert len(sheet.palette) == 64
+    assert (sheet.palette[10], sheet.palette[17]) == (TEAL, BROWN)
+    laid = sheet.layout("excel")
+    assert [laid.cell(r, 1).format_color for r in (1, 2, 3, 4)] == [
+        "FF0000",
+        BROWN,
+        TEAL,
+        "0000FF",
+    ]
+    assert "format.palette" not in {n.code for n in sheet.notices}
 
 
-def test_a_default_palette_reports_no_section_color(tmp_path):
+def test_the_palette_is_the_one_indexed_colors_take(tmp_path):
+    # One source: a fill in indexed color 17 and [Color10] are drawn in the same color.
+    fill = PatternFill("solid", fgColor=Color(indexed=17))
+    path = build(
+        tmp_path,
+        {"A1": (1, {"number_format": "[Color10]0", "fill": fill})},
+        palette=custom_palette(),
+    )
+    sheet = sheetpeek.read(path)
+    cell = sheet.layout("excel").cell(1, 1)
+    assert sheet.cell(1, 1).style.fill == cell.format_color == BROWN
+
+
+def test_without_its_own_palette_a_sheet_has_none(tmp_path):
+    # openpyxl always writes the default palette; Excel writes <colors> only for its own.
     path = build(tmp_path, {"A1": (1, {"number_format": "[Color10]0"})})
-    assert not [n for n in sheetpeek.read(path).notices if n.code == "format.palette"]
+    rewrite(path, "xl/styles.xml", lambda t: re.sub(r"<colors>.*?</colors>", "", t, flags=re.S))
+    sheet = sheetpeek.read(path)
+    assert sheet.palette is None
+    assert sheet.layout("excel").cell(1, 1).format_color == "008000"  # the default's index 17
 
 
 # --- the grid color

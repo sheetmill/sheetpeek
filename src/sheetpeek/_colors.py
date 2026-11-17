@@ -61,24 +61,6 @@ def grid_color(color_id: int | None, palette: Sequence[str]) -> str | None:
     return palette[color_id]
 
 
-_SECTION_COLOR = re.compile(r"\[\s*color\s*([1-9][0-9]{0,2})\s*\]", re.IGNORECASE)
-_LITERAL = re.compile(r'"[^"]*"?|\\.')  # quoted text and escaped characters: no section color
-
-
-def recolored_sections(number_format: str, palette: Sequence[str]) -> tuple[int, ...]:
-    """The ``[ColorN]`` of a number format whose color this palette changes, by ``N``.
-
-    ``[ColorN]`` draws palette index ``N + 7`` (captured on Excel 16.114); the eight named colors
-    (``[Red]``) keep their default colors whatever the palette.
-    """
-    if "[" not in number_format or palette is DEFAULT_PALETTE:
-        return ()
-    found = set()
-    for match in _SECTION_COLOR.finditer(_LITERAL.sub("", number_format)):
-        n = int(match[1])
-        if n + 7 < len(palette) and palette[n + 7] != DEFAULT_PALETTE[n + 7]:
-            found.add(n)
-    return tuple(sorted(found))
 
 
 def resolve(

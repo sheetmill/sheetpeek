@@ -180,7 +180,6 @@ for _code, _name, _level in (
 # What the reader finds in the file and does not read yet.
 for _code, _name, _level in (
     ("value.no_cached_value", "formulas without a cached value", "cells"),
-    ("format.palette", "number-format colors from the workbook palette", "cells"),
     ("text.phonetic", "phonetic guides", "cells"),
     ("link.scheme", "link targets", "cells"),
     ("link.empty_cell", "links on empty cells", "cells"),

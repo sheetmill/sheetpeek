@@ -105,8 +105,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The grid color: `Sheet.grid_color` reads `<sheetView defaultGridColor="0" colorId>` through
   the workbook palette. HTML draws the gridlines in it, one device pixel wide as Excel does;
   `rich` draws the column separators in it.
-- `format.palette`: a number format's `[ColorN]` that the workbook's palette recolors is reported,
-  since the layout draws section colors from Excel's default palette.
+- `Sheet.palette`: the workbook's own indexed palette, `None` when it has none. A number format's
+  `[ColorN]` is drawn from it, as Excel draws it, where 0.2.0 drew Excel's default palette; the
+  eight named colors (`[Red]`) keep their standard colors.
 - Rich-text runs are drawn, from captures of Excel for Mac. A run without properties takes the
   cell's font, and a run with properties takes nothing from it. In `excel` mode each run is
   measured in its own font for spill, `####`, wrapping and shrink to fit, and each line takes the

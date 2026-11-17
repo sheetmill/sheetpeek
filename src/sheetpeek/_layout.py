@@ -389,7 +389,7 @@ class _Formatter:
         align: Alignment = explicit or formatted.align
         if explicit is None and cell.kind == "text" and right_to_left(str(value)):
             align = "right"  # general follows the text's first strong character (§4.13)
-        color = xlformat.DEFAULT_PALETTE.get(formatted.color) if formatted.color else None
+        color = _section_rgb(formatted.color, self._sheet.palette) if formatted.color else None
         return _Shown(formatted.text, formatted.full_text, formatted.overflow, align, color)
 
     def _format(
@@ -858,3 +858,11 @@ def _ink(origin: _Origin | None) -> str | None:
     if origin is None:
         return None
     return origin.shown.format_color or origin.cell.font.color
+
+
+def _section_rgb(color: str, palette: tuple[str, ...] | None) -> str | None:
+    """A number format's section color as drawn: ``[ColorN]`` from the workbook's palette."""
+    try:
+        return xlformat.section_rgb(color, palette)
+    except (KeyError, ValueError):  # not a section color xlformat knows
+        return None
