@@ -21,10 +21,10 @@ from typing import IO, Any, overload
 
 import xlformat
 import xlio
-from openpyxl.utils.datetime import CALENDAR_MAC_1904, CALENDAR_WINDOWS_1900, from_ISO8601, to_excel
 
 from sheetpeek import _style as styles
 from sheetpeek._colors import grid_color, resolve, workbook_palette
+from sheetpeek._dates import iso_serial
 from sheetpeek._detect import (
     book_notices,
     report_cells,
@@ -188,8 +188,7 @@ class Book:
             self._archive = open_package(handle, self._limits, name)
             self._book = open_workbook(handle, self._limits)
             self._parts = worksheet_parts(self._archive)
-            date1904 = self._book.properties.date1904
-            self._epoch = CALENDAR_MAC_1904 if date1904 else CALENDAR_WINDOWS_1900
+            self._date1904 = bool(self._book.properties.date1904)
             self._theme = xlio_theme_colors(self._book.theme)
             self._palette: Sequence[str] = workbook_palette(
                 self._book.styles.indexed_colors or None
@@ -312,7 +311,7 @@ class Book:
     @property
     def date1904(self) -> bool:
         """Whether the workbook uses the 1904 date system."""
-        return bool(self._epoch == CALENDAR_MAC_1904)
+        return self._date1904
 
     def sheet(self, name: str | None = None, *, ref: str | CellRange | None = None) -> Sheet:
         """Read one sheet.
@@ -582,7 +581,7 @@ class Book:
                 return int(value), "number"
             return value, "number"
         if source.type == "d":  # ISO 8601 text: Excel reads it as a date serial
-            return to_excel(from_ISO8601(value), self._epoch), "number"
+            return iso_serial(value, date1904=self._date1904), "number"
         return whole_characters(value), "text"
 
     def _runs(

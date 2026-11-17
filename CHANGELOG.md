@@ -237,6 +237,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   longer openpyxl's: a typed date, which Excel stores as format 14, shows as `1/2/24` where it
   showed `01-02-24`; formats 44 and 47 are Excel's, and the built-in ids from 50 to 163, read as
   General before, are the formats Excel gives them.
+- A date cell (`t="d"`) holding 1900-02-29, a day Excel's 1900 date system has, reads as serial
+  60; the workbook was refused as unreadable.
 
 ## [0.2.0] - 2026-11-04
 

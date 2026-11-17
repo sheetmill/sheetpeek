@@ -17,13 +17,14 @@ def imported_modules(path: Path) -> set[str]:
     return names
 
 
-def test_only_the_reader_imports_openpyxl():
+def test_nothing_imports_openpyxl():
+    # The package reads through xlio; openpyxl only builds workbooks in the tests.
     importers = {
         path.relative_to(PACKAGE).as_posix()
         for path in PACKAGE.rglob("*.py")
         if any(name.split(".")[0] == "openpyxl" for name in imported_modules(path))
     }
-    assert importers == {"_read.py"}
+    assert importers == set()
 
 
 def test_nothing_but_the_package_entry_points_import_the_reader():
