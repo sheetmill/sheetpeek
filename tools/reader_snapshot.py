@@ -4,7 +4,7 @@ Used to change the reader without changing what it reads: snapshot a corpus with
 before the change and with the one after, and every difference is listed for a reason to be
 given. One JSON line per workbook and per sheet: the sheet list, the default sheet and the
 workbook's notices, and for each sheet digests of its values, styles, runs, columns, rows,
-merges and links, its view, print layout and notices.
+merges, links and outline, its view, print layout and notices.
 
     find CORPUS -name '*.xlsx' > list.txt
     python -m tests.watchdog -- python tools/reader_snapshot.py sweep OLD/src list.txt a.jsonl
@@ -63,6 +63,17 @@ def _sheet(book: Any, name: str) -> dict[str, Any]:
         "notices": sorted(f"{n.code}:{n.count}" for n in sheet.notices),
         "normal": repr(sheet.normal_font),
         "grid": repr((sheet.show_gridlines, sheet.grid_color)),
+        "outline": _digest(
+            [
+                *((r.index, r.outline_level, r.collapsed) for r in sheet.rows if r.outline_level),
+                *(
+                    (c.index, c.outline_level, c.collapsed)
+                    for c in sheet.columns
+                    if c.outline_level
+                ),
+                repr(sheet.outline),
+            ]
+        ),
     }
 
 
