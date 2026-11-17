@@ -11,6 +11,7 @@ draws both.
 from __future__ import annotations
 
 import bisect
+import functools
 import math
 import re
 from dataclasses import replace
@@ -187,18 +188,22 @@ def _fitted(
     # unshrunk size of shrunk text, so shrink adds nothing.
     for font, extra in row_extras(styled):
         height = max(height, font_row_height(font) + extra)
-    return max(height, _row_model(sheet.normal_font, cell_fonts, wrapped))
+    if not wrapped:
+        return height
+    return max(height, _row_model(sheet.normal_font, frozenset(cell_fonts), tuple(wrapped)))
 
 
-def _row_model(normal: Font, cell_fonts: list[Font], wrapped: list[tuple[Font, int]]) -> float:
+@functools.lru_cache(maxsize=1024)
+def _row_model(
+    normal: Font, cell_fonts: frozenset[Font], wrapped: tuple[tuple[Font, int], ...]
+) -> float:
     """The height xlformat's captured row model gives, or 0 when a font is not measured.
 
     Wrapped lines take a point each beyond the font's height, one line included, and a larger
     font in the row adds the difference of the faces' line insets (xlformat's CAPTURING.md
-    section 2 item 44; several wrapped cells in one row are not captured).
+    section 2 item 44; several wrapped cells in one row are not captured). Rows repeat the same
+    fonts, so the result is kept by them.
     """
-    if not wrapped:
-        return 0.0  # the fonts alone: the table already gave their heights
 
     def spec(font: Font) -> xlformat.Font:
         return xlformat.Font(font.name, font.size, font.bold, font.italic)
