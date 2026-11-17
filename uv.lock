@@ -1148,7 +1148,7 @@ requires-dist = [
     { name = "openpyxl", specifier = ">=3.1" },
     { name = "rich", marker = "extra == 'rich'", specifier = ">=13" },
     { name = "xlformat", specifier = ">=0.3,<1" },
-    { name = "xlio", path = "../xlio-wheels/bfae65dd974075954ff98edb85a12a41cfc2a7e4/xlio-0.1.0-py3-none-any.whl" },
+    { name = "xlio", specifier = "==0.2.*" },
 ]
 provides-extras = ["rich"]
 
@@ -1435,10 +1435,11 @@ wheels = [
 
 [[package]]
 name = "xlio"
-version = "0.1.0"
-source = { path = "../xlio-wheels/bfae65dd974075954ff98edb85a12a41cfc2a7e4/xlio-0.1.0-py3-none-any.whl" }
+version = "0.2.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/d9/f5/c7a6f54d87eabb42a87fd3161cc8cde954c1e478aa2c829909d916c124f3/xlio-0.2.0.tar.gz", hash = "sha256:7c704ea0a233279a3e50bf7053f2be821abbfac1b96b09b3dc8d9d1ef476b676", size = 265561, upload-time = "2026-11-16T22:02:37.737Z" }
 wheels = [
-    { filename = "xlio-0.1.0-py3-none-any.whl", hash = "sha256:e4cd43b83880a555c4f89d20ad7baba5645aae30bde6e1cc9c0bad09f52b938a" },
+    { url = "https://files.pythonhosted.org/packages/d4/c1/4cf32254b1d815f94aa29c8c41f4b8b55fad2d012de479ca673ebfc502e3/xlio-0.2.0-py3-none-any.whl", hash = "sha256:89e5e5f7cc6788ab94fbd5024b22a59ac54cac5bdaab4a1252dc241102172aad", size = 113781, upload-time = "2026-11-16T22:02:36.231Z" },
 ]
 
 [[package]]
