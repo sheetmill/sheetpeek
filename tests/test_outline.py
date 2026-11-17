@@ -142,11 +142,10 @@ def test_show_outline_symbols(book, view, properties, shown):
 
 
 @pytest.mark.parametrize(
-    ("text", "level", "detail"),
-    [("8", 7, "above 7"), ("255", 7, "above 7"), ("-1", 0, "whole"), ("x", 0, "whole")],
+    ("text", "level"), [("8", 0), ("9", 1), ("255", 7), ("-1", 0), ("x", 0), ("1.5", 0)]
 )
-def test_a_level_outside_0_to_7_is_read_within_and_reported(book, text, level, detail):
-    # What Excel does with these is not captured (unverified).
+def test_a_level_outside_0_to_7_is_read_as_excel_reads_it(book, text, level):
+    # Modulo 8; not decimal digits, no level (xlio's capture outline). Nothing to report.
     rewrite(
         book,
         SHEET1,
@@ -154,10 +153,7 @@ def test_a_level_outside_0_to_7_is_read_within_and_reported(book, text, level, d
     )
     sheet = sheetpeek.read(book)
     assert sheet.rows[3].outline_level == level
-    found = [n for n in sheet.notices if n.code == "outline.level"]
-    assert len(found) == 1
-    assert detail in found[0].message
-    assert (found[0].outcome, found[0].reason) == ("approximated", "file")
+    assert "outline.level" not in {n.code for n in sheet.notices}
 
 
 # --- groups and symbols

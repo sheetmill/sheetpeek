@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from typing import Literal, TypeAlias
 
 MAX_LEVEL = 7
-"""The deepest outline level Excel offers; a deeper level in a file is read as this one."""
+"""The deepest outline level Excel offers; a level in a file is read modulo 8, as Excel does."""
 
 
 @dataclass(frozen=True, slots=True)

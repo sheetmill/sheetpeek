@@ -54,8 +54,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`RenderedOutline`, `OutlineMark`). The HTML backend draws Excel's outline gutter beside the
   headings, at Excel's screen sizes in CSS pixels, with level buttons when both headings are
   drawn; `rich` and plain text draw it in characters; Markdown, CSV and TSV report it as not
-  shown. A range that cuts a group reports the button it leaves out (`outline.cut`), and a level
-  above 7 is read as 7 and reported (`outline.level`).
+  shown. A range that cuts a group reports the button it leaves out (`outline.cut`). A level is read as
+  Excel reads it: modulo 8, and one that is not decimal digits as none.
 - `buttons="static" | "none"` on `HTMLBackend`, `RichBackend` and `TextBackend`: whether to draw
   Excel's buttons, which do nothing in a static output; for now the outline gutter. New CSS custom
   properties `--sheetpeek-outline-paper`, `--sheetpeek-outline-ink`,

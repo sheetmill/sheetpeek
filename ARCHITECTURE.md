@@ -148,8 +148,8 @@ text styles into `Font` and `CellStyle` (§4.13). Rich-text runs inside one cell
 | `used_range` | the structure scan: bounding box of every `<c>` element, from `<row r>` and `<c r>` (positions inferred when `r` is omitted, as the schema allows), widened to cover every merged range, since a merge occupies its cells even where the file has no `<c>` for them; `<dimension>` is never trusted |
 | `ref` | the requested range, or `used_range` |
 | `merges` | scan: `<mergeCells>` |
-| `columns`: per column `width`, `hidden`, `outline_level`, `collapsed` | scan: `<cols>` (each `<col>` covers `min` to `max`) |
-| `rows`: per row `height` in points, `hidden`, `outline_level`, `collapsed` | scan: `ht`, `hidden`, `outlineLevel`, `collapsed` of `<row>` |
+| `columns`: per column `width`, `hidden`, `outline_level`, `collapsed` | xlio: `<cols>` (each `<col>` covers `min` to `max`) |
+| `rows`: per row `height` in points, `hidden`, `outline_level`, `collapsed` | xlio: `ht`, `hidden`, `outlineLevel`, `collapsed` of `<row>` |
 | `outline` (`Outline`, or `None` when no row or column has a level) | scan: `<outlinePr summaryBelow summaryRight>`, `showOutlineSymbols` of the first `<sheetView>`, else of `<outlinePr>`; the deepest row and column levels in the sheet; the levels of the rows and columns just outside `ref` (§4.11) |
 | `default_column_width`, `default_row_height` | scan: `<sheetFormatPr>` (`defaultColWidth`, `baseColWidth`, `defaultRowHeight`) |
 | `show_gridlines` | scan: `<sheetView showGridLines>` |
@@ -320,7 +320,7 @@ Three producers, one for each stage:
 1. **The reader** (`Sheet.notices`, `_detect.py`) reports what the file uses that the model does
    not carry. Styles are checked once per style, by each aspect in `_style/` (section colors
    against the workbook palette, rotation); the structure scan marks rich-text and phonetic
-   cells, uncached formulas, outline levels outside 0 to 7, row and column styles, and links no
+   cells, uncached formulas, row and column styles, and links no
    output can follow (§4.10); the sheet's other children, its drawing, VML, comments and
    threaded comments parts, and the workbook's sheet kinds and print names give the rest.
    Notices on cells a layout hides are dropped there (`_notices.visible`).
@@ -694,10 +694,12 @@ and columns laid out.
 `summaryBelow` and `summaryRight` of `<outlinePr>`; `showOutlineSymbols` of the first
 `<sheetView>`, which wins over `<outlinePr>`'s. **The depth is the deepest level found in the
 whole sheet** (captured: without `outlineLevelRow` Excel draws the same gutter as with it), so the
-declared `outlineLevelRow` and `outlineLevelCol` are not read. Office allows levels 0 to 7; a
-deeper level is read as 7, and a level that is not a whole number from 0 up as 0, reported as
-`outline.level` (what Excel does with them is not captured). With `showOutlineSymbols="0"` nothing
-is drawn and nothing is reported (taken as given, unverified).
+declared `outlineLevelRow` and `outlineLevelCol` are not read, though Excel refuses a file that
+declares 8 to 255 (xlio refuses it too). Office allows levels 0 to 7; xlio reads a level as Excel
+does (captured in xlio): modulo 8, and one that is not decimal digits as none. With
+`showOutlineSymbols="0"` nothing is drawn and nothing is reported (taken as given, unverified).
+xlio reads the levels, collapsed flags and summary settings; the scan reads `showOutlineSymbols`,
+since xlio does not tell a stated value from its default.
 
 **A range that cuts a group** still draws the bars of its rows inside the range. The model keeps
 the levels of the row and column just outside the range (`Outline.rows_beyond`,

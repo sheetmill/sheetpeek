@@ -62,7 +62,7 @@ from sheetpeek._page import MAX_COLUMN, MAX_ROW, manual_breaks, print_areas
 from sheetpeek._runs_model import TextSpan
 from sheetpeek._scan_links import cell_links, with_elements
 from sheetpeek._scan_links import report as report_links
-from sheetpeek._scan_outline import read_outline
+from sheetpeek._scan_outline import read_outline, with_levels
 from sheetpeek._scan_view import sheet_view
 from sheetpeek._sheets import (
     ListedSheet,
@@ -415,7 +415,7 @@ class Book:
                 with self._book.parts.open(part) as handle:
                     structure = scan(handle, self._marks)
                 source = self._book.sheet(name)
-                structure = with_elements(fill(structure, source), source)
+                structure = with_levels(with_elements(fill(structure, source), source), source)
         except PackageError:
             raise
         except Exception as error:

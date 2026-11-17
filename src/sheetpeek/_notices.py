@@ -192,7 +192,6 @@ for _code, _name, _level in (
     ("view.formulas", "formulas shown in cells", "sheet"),
     ("view.page_layout", "page layout and page break views", "sheet"),
     ("view.panes", "split panes", "sheet"),
-    ("outline.level", "outline levels outside 0 to 7", "sheet"),
     ("cf", "conditional formatting", "sheet"),
     ("filter.buttons", "filter buttons", "sheet"),
     ("table", "tables", "sheet"),

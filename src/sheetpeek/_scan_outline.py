@@ -1,7 +1,12 @@
-"""Reading outlines: the scan's handlers for levels, collapsed flags and the outline settings.
+"""Reading outlines: levels, collapsed flags and the outline settings.
 
-The handlers keep what they find in ``Scan.extra["outline"]``; :func:`read_outline` puts it into
-the model's rows and columns and builds the sheet's :class:`~sheetpeek.Outline`.
+xlio reads the levels and collapsed flags of rows and columns, as Excel takes them (a level is
+kept modulo 8; one that is not decimal digits is none), and ``summaryBelow`` and
+``summaryRight`` (:func:`with_levels`). Whether the outline symbols show comes from the first
+``<sheetView>``'s ``showOutlineSymbols`` when it states one, else ``<outlinePr>``'s: the scan's
+handlers read those two, since xlio does not tell a stated value from its default. All is kept
+in ``Structure.extra["outline"]``; :func:`read_outline` puts it into the model's rows and columns
+and builds the sheet's :class:`~sheetpeek.Outline`.
 """
 
 from __future__ import annotations
@@ -10,10 +15,12 @@ import dataclasses
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 
+import xlio
+
 from sheetpeek._model import CellRange, Column, Row
 from sheetpeek._notices import Collector
-from sheetpeek._outline_model import MAX_LEVEL, Outline
-from sheetpeek._structure import _COL, _NS, _ROW, _SHEET_VIEW, Scan, Structure, _flag, handler
+from sheetpeek._outline_model import Outline
+from sheetpeek._structure import _NS, _SHEET_VIEW, Scan, Structure, _flag, handler
 
 KEY = "outline"
 _OUTLINE_PR = f"{_NS}outlinePr"
@@ -21,7 +28,7 @@ _OUTLINE_PR = f"{_NS}outlinePr"
 
 @dataclass(slots=True)
 class Found:
-    """What the handlers found in one sheet."""
+    """What the sheet's outline holds."""
 
     rows: dict[int, int] = field(default_factory=dict)
     """Row → outline level, for rows with a level."""
@@ -33,10 +40,6 @@ class Found:
     symbols_view: bool | None = None
     symbols_properties: bool | None = None
     seen_view: bool = False
-    clamped: int = 0
-    """Rows and column elements whose level is above 7, read as 7."""
-    unreadable: int = 0
-    """Rows and column elements whose level is not a whole number from 0 up, read as 0."""
 
 
 def _found(state: Scan) -> Found:
@@ -46,52 +49,29 @@ def _found(state: Scan) -> Found:
     return found
 
 
-def _level(state: Scan, element: ET.Element) -> int:
-    """An element's ``outlineLevel``: 7 at most, and 0 when it is not a whole number."""
-    text = element.get("outlineLevel")
-    if text is None:
-        return 0
-    try:
-        level = int(text)
-    except ValueError:  # not a number, or one of thousands of digits
-        level = -1
-    if level < 0:
-        _found(state).unreadable += 1
-        return 0
-    if level > MAX_LEVEL:
-        _found(state).clamped += 1
-        return MAX_LEVEL
-    return level
-
-
-@handler(_ROW)
-def _row(state: Scan, element: ET.Element) -> None:
-    """A row's level and collapsed flag; the core handler has set ``state.row_index``."""
-    level = _level(state, element)
-    collapsed = _flag(element.get("collapsed"))
-    if level or collapsed:
-        found = _found(state)
-        if level:
-            found.rows[state.row_index] = level
-        if collapsed:
-            found.collapsed_rows.add(state.row_index)
-
-
-@handler(_COL)
-def _col(state: Scan, element: ET.Element) -> None:
-    level = _level(state, element)
-    collapsed = _flag(element.get("collapsed"))
-    if level or collapsed:
-        first = int(element.get("min", "1"))
-        last = int(element.get("max", element.get("min", "1")))
-        _found(state).columns.append((first, last, level, collapsed))
+def with_levels(structure: Structure, sheet: xlio.Sheet) -> Structure:
+    """``structure`` with the levels and collapsed flags of rows and columns, from xlio."""
+    found = structure.extra.get(KEY)
+    found = dataclasses.replace(found) if isinstance(found, Found) else Found()
+    for index, row in sheet.rows.items():
+        if row.outline_level:
+            found.rows[index] = row.outline_level
+        if row.collapsed:
+            found.collapsed_rows.add(index)
+    found.columns = [
+        (column.min, column.max, column.outline_level, column.collapsed)
+        for column in sheet.columns
+        if column.outline_level or column.collapsed
+    ]
+    properties = sheet.properties
+    found.summary_below = properties.summary_below
+    found.summary_right = properties.summary_right
+    return dataclasses.replace(structure, extra={**structure.extra, KEY: found})
 
 
 @handler(_OUTLINE_PR)
 def _properties(state: Scan, element: ET.Element) -> None:
     found = _found(state)
-    found.summary_below = _flag(element.get("summaryBelow"), default=True)
-    found.summary_right = _flag(element.get("summaryRight"), default=True)
     if (symbols := element.get("showOutlineSymbols")) is not None:
         found.symbols_properties = _flag(symbols)
 
@@ -118,7 +98,6 @@ def read_outline(
     found = structure.extra.get(KEY)
     if not isinstance(found, Found):
         return rows, columns, None
-    _report(found, notes)
     rows = tuple(
         dataclasses.replace(
             row,
@@ -168,13 +147,3 @@ def read_outline(
             columns_beyond=beyond_columns,
         ),
     )
-
-
-def _report(found: Found, notes: Collector) -> None:
-    """Levels outside 0 to 7. What Excel does with them is not captured (unverified)."""
-    for count, detail in (
-        (found.clamped, "levels above 7 read as 7"),
-        (found.unreadable, "levels that are not whole numbers from 0 up read as 0"),
-    ):
-        if count:
-            notes.add("outline.level", "approximated", "file", count=count, detail=detail)
