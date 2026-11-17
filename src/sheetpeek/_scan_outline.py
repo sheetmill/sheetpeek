@@ -1,18 +1,16 @@
 """Reading outlines: levels, collapsed flags and the outline settings.
 
 xlio reads the levels and collapsed flags of rows and columns, as Excel takes them (a level is
-kept modulo 8; one that is not decimal digits is none), and ``summaryBelow`` and
-``summaryRight`` (:func:`with_levels`). Whether the outline symbols show comes from the first
-``<sheetView>``'s ``showOutlineSymbols`` when it states one, else ``<outlinePr>``'s: the scan's
-handlers read those two, since xlio does not tell a stated value from its default. All is kept
-in ``Structure.extra["outline"]``; :func:`read_outline` puts it into the model's rows and columns
-and builds the sheet's :class:`~sheetpeek.Outline`.
+kept modulo 8; one that is not decimal digits is none), ``summaryBelow`` and ``summaryRight``,
+and ``showOutlineSymbols`` with whether the file states it (:func:`with_levels`). The symbols
+show as the first ``<sheetView>`` says when it states it, else as ``<outlinePr>`` says. All is
+kept in ``Structure.extra["outline"]``; :func:`read_outline` puts it into the model's rows and
+columns and builds the sheet's :class:`~sheetpeek.Outline`.
 """
 
 from __future__ import annotations
 
 import dataclasses
-import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 
 import xlio
@@ -20,10 +18,9 @@ import xlio
 from sheetpeek._model import CellRange, Column, Row
 from sheetpeek._notices import Collector
 from sheetpeek._outline_model import Outline
-from sheetpeek._structure import _NS, _SHEET_VIEW, Scan, Structure, _flag, handler
+from sheetpeek._structure import Structure
 
 KEY = "outline"
-_OUTLINE_PR = f"{_NS}outlinePr"
 
 
 @dataclass(slots=True)
@@ -39,20 +36,11 @@ class Found:
     summary_right: bool = True
     symbols_view: bool | None = None
     symbols_properties: bool | None = None
-    seen_view: bool = False
-
-
-def _found(state: Scan) -> Found:
-    found = state.extra.get(KEY)
-    if not isinstance(found, Found):
-        found = state.extra[KEY] = Found()
-    return found
 
 
 def with_levels(structure: Structure, sheet: xlio.Sheet) -> Structure:
-    """``structure`` with the levels and collapsed flags of rows and columns, from xlio."""
-    found = structure.extra.get(KEY)
-    found = dataclasses.replace(found) if isinstance(found, Found) else Found()
+    """``structure`` with the sheet's outline from xlio: levels, collapsed flags, settings."""
+    found = Found()
     for index, row in sheet.rows.items():
         if row.outline_level:
             found.rows[index] = row.outline_level
@@ -66,25 +54,12 @@ def with_levels(structure: Structure, sheet: xlio.Sheet) -> Structure:
     properties = sheet.properties
     found.summary_below = properties.summary_below
     found.summary_right = properties.summary_right
+    if properties.show_outline_symbols_text is not None:
+        found.symbols_properties = properties.show_outline_symbols
+    views = sheet.views
+    if views and views[0].show_outline_symbols_text is not None:
+        found.symbols_view = views[0].show_outline_symbols
     return dataclasses.replace(structure, extra={**structure.extra, KEY: found})
-
-
-@handler(_OUTLINE_PR)
-def _properties(state: Scan, element: ET.Element) -> None:
-    found = _found(state)
-    if (symbols := element.get("showOutlineSymbols")) is not None:
-        found.symbols_properties = _flag(symbols)
-
-
-@handler(_SHEET_VIEW)
-def _view(state: Scan, element: ET.Element) -> None:
-    """The first sheet view's ``showOutlineSymbols``, which wins over ``outlinePr``'s."""
-    found = _found(state)
-    if found.seen_view:
-        return
-    found.seen_view = True
-    if (symbols := element.get("showOutlineSymbols")) is not None:
-        found.symbols_view = _flag(symbols)
 
 
 def read_outline(

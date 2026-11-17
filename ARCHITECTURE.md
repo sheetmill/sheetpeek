@@ -150,7 +150,7 @@ text styles into `Font` and `CellStyle` (§4.13). Rich-text runs inside one cell
 | `merges` | scan: `<mergeCells>` |
 | `columns`: per column `width`, `hidden`, `outline_level`, `collapsed` | xlio: `<cols>` (each `<col>` covers `min` to `max`) |
 | `rows`: per row `height` in points, `hidden`, `outline_level`, `collapsed` | xlio: `ht`, `hidden`, `outlineLevel`, `collapsed` of `<row>` |
-| `outline` (`Outline`, or `None` when no row or column has a level) | scan: `<outlinePr summaryBelow summaryRight>`, `showOutlineSymbols` of the first `<sheetView>`, else of `<outlinePr>`; the deepest row and column levels in the sheet; the levels of the rows and columns just outside `ref` (§4.11) |
+| `outline` (`Outline`, or `None` when no row or column has a level) | xlio: `<outlinePr summaryBelow summaryRight>`, `showOutlineSymbols` of the first `<sheetView>` when it states one, else of `<outlinePr>`; the deepest row and column levels in the sheet; the levels of the rows and columns just outside `ref` (§4.11) |
 | `default_column_width`, `default_row_height` | scan: `<sheetFormatPr>` (`defaultColWidth`, `baseColWidth`, `defaultRowHeight`) |
 | `show_gridlines` | scan: `<sheetView showGridLines>` |
 | `grid_color` | scan: `<sheetView defaultGridColor colorId>`, through the workbook palette (§4.14) |
@@ -698,8 +698,8 @@ declared `outlineLevelRow` and `outlineLevelCol` are not read, though Excel refu
 declares 8 to 255 (xlio refuses it too). Office allows levels 0 to 7; xlio reads a level as Excel
 does (captured in xlio): modulo 8, and one that is not decimal digits as none. With
 `showOutlineSymbols="0"` nothing is drawn and nothing is reported (taken as given, unverified).
-xlio reads the levels, collapsed flags and summary settings; the scan reads `showOutlineSymbols`,
-since xlio does not tell a stated value from its default.
+xlio reads all of it, and tells a stated `showOutlineSymbols` from one left out; a stated value
+other than `0`, `1`, `false` and `true` reads as shown, as xlio reads every flag (unverified).
 
 **A range that cuts a group** still draws the bars of its rows inside the range. The model keeps
 the levels of the row and column just outside the range (`Outline.rows_beyond`,
@@ -1415,7 +1415,7 @@ value as Excel takes it (`_structure.fill`, `_scan_links.with_elements`). The sc
 worksheet part. It records:
 - each `<row>`'s `r`, for the rows the file lists, and each `<c>`'s `r`, for the used range;
 - through features' own handlers, the formulas that call `HYPERLINK()` (`_scan_links.py`,
-  §4.10) and the outline (`_scan_outline.py`).
+  §4.10).
 
 Cells are handled at the end of their row, after which the row is cleared. A row's column extent
 comes from its first and last cell, since the schema orders cells by column; each cell is
@@ -1886,7 +1886,7 @@ src/sheetpeek/
   _package.py        ReadLimits, the check before reading (§5.5), sheet name → worksheet part
   _structure.py      the sheet structure (§5.4): xlio's reading plus a scan for cells and rows
   _scan_links.py     the scan's hyperlink handlers, and the reader's link notices (§4.10)
-  _scan_outline.py   the outline's scan handlers, and its rows, columns and settings
+  _scan_outline.py   the outline from xlio: its rows, columns and settings
   _read.py           the reader: openpyxl read-only, date conversion off; builds a Sheet
   _style/            a cell's style, one module per aspect: number format, border, fill, font,
                      alignment

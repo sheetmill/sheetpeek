@@ -117,6 +117,10 @@ def _part(path):
         ("0", None, False),
         ("1", "0", True),  # the sheet view wins
         ("0", "1", False),
+        ("false", None, False),
+        (None, "false", False),
+        ("true", "0", True),
+        ("yes", "0", True),  # stated, not a boolean: xlio's default, shown (unverified)
     ],
 )
 def test_show_outline_symbols(book, view, properties, shown):
