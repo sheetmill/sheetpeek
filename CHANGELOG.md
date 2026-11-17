@@ -159,6 +159,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   with a solid blue line, as Excel's page break preview draws them. Off by default.
 
 ### Changed
+- Requires xlformat 0.4. Through it, a workbook whose Normal font is 18 pt or more gets Excel's
+  wider column padding: its columns without a stored width are wider (2 pt at Calibri 20).
 - `Cell.value` of a whole number is an `int` only below 2**53 in magnitude, a `float` above:
   it comes from the stored double, not the file's digits, so `9995806932108624` (one value in
   a corpus of 15,966 workbooks) is now `9995806932108624.0`. The rendered text is the same.

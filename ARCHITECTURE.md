@@ -2006,7 +2006,7 @@ sheetpeek already use openpyxl.
 ### 8.3 Dependencies
 
 - `openpyxl>=3.1`, no upper bound (§5.3).
-- `xlformat>=0.3,<1` (§6.4), imported normally: it is required.
+- `xlformat>=0.4,<1` (§6.4), imported normally: it is required.
 - Extra `sheetpeek[rich]`: `rich>=13`.
 
 ## 9. Planned options
