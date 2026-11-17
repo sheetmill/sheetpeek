@@ -582,9 +582,12 @@ at, in order:
    Calibri 12 under Office 2021: both give 16 pt in the table below, so the captures cannot tell
    which font the rule follows, and a workbook opened where the standard font differs is
    unverified);
-5. otherwise the Normal font's height from the captured table (Calibri 12, 14, 15, 16, 19, 21 pt
-   at 9 to 16; Aptos Narrow 13, 14, 15, 16, 19, 22), plus 1 pt each for `thickTop` and
-   `thickBottom` when the row has no `<row>` element.
+5. otherwise the Normal font's height from xlformat's row model (`row_metrics`, captured from
+   Excel for Mac; this repository's suite `row_height` agrees at 9 to 16): Calibri 12, 14, 15, 16,
+   19, 21, 24, 26, 31 pt at 9, 10, 11, 12, 14, 16, 18, 20, 24; Aptos Narrow 13, 14, 15, 16, 19,
+   22, 24, 27, 32. A size between them takes the nearest measured size's, and another face
+   Calibri's (unverified). Plus 1 pt each for `thickTop` and `thickBottom` when the row has no
+   `<row>` element.
 
 **Rows are fitted to their cells** when Excel opens a file (captured, suite `row_height`): a row
 with a `<row>` element and no `ht`, in a sheet without `customHeight`, takes the largest of those

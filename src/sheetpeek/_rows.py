@@ -9,13 +9,20 @@ from __future__ import annotations
 
 from functools import lru_cache
 
+import xlformat
+
 from sheetpeek._model import Font, Row, Sheet
 
-# Captured (suite row_height, Excel 16.114 and 16.115): the height of a row without ``ht`` per
-# Normal font. Calibri 20 is §4.16's runs capture of a row fitted to a 20 pt cell (Excel 16.114).
+_MEASURED_SIZES = (9, 10, 11, 12, 14, 16, 18, 20, 24)
+# The height of a row without ``ht`` per Normal font: xlformat's row model, captured from Excel
+# for Mac for Calibri and Aptos Narrow at these sizes (its CAPTURING.md section 2 item 44; it
+# agrees with this repository's suite row_height at 9 to 16 points).
 FONT_ROW_HEIGHTS: dict[str, dict[int, float]] = {
-    "calibri": {9: 12, 10: 14, 11: 15, 12: 16, 14: 19, 16: 21, 20: 26},
-    "aptos narrow": {9: 13, 10: 14, 11: 15, 12: 16, 14: 19, 16: 22},
+    family.lower(): {
+        size: xlformat.row_metrics(xlformat.Font(family, size)).font_height
+        for size in _MEASURED_SIZES
+    }
+    for family in ("Calibri", "Aptos Narrow")
 }
 NO_SHEET_FORMAT = 16.0  # an unlisted row of a file without <sheetFormatPr>, every font
 WRAPPED_LEADING = 1.0  # wrapped lines are the font's row height plus 1 apart (Calibri 11: 16)
@@ -25,8 +32,8 @@ WRAPPED_LEADING = 1.0  # wrapped lines are the font's row height plus 1 apart (C
 def font_row_height(font: Font) -> float:
     """The captured row height for a font, at the nearest measured size.
 
-    A family not in the table uses Calibri's heights, as xlformat measures it as Calibri
-    (unverified, as are sizes between the measured ones).
+    A family not in the table uses Calibri's heights, as xlformat measures it as Calibri; both are
+    unverified, as are sizes between the measured ones (xlformat's ``row_metrics`` refuses them).
     """
     table = FONT_ROW_HEIGHTS.get(font.name.lower(), FONT_ROW_HEIGHTS["calibri"])
     size = min(table, key=lambda s: (abs(s - font.size), s))

@@ -238,6 +238,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   longer openpyxl's: a typed date, which Excel stores as format 14, shows as `1/2/24` where it
   showed `01-02-24`; formats 44 and 47 are Excel's, and the built-in ids from 50 to 163, read as
   General before, are the formats Excel gives them.
+- Rows in a Normal font of Calibri 18 or 24, or Aptos Narrow 18, 20 or 24, are as tall as Excel
+  makes them (Calibri 18: 24 pt, 24: 31 pt, from xlformat's captured row model); they took the
+  nearest smaller measured size's height (21 pt).
 - A date cell (`t="d"`) holding 1900-02-29, a day Excel's 1900 date system has, reads as serial
   60; the workbook was refused as unreadable.
 

@@ -188,6 +188,29 @@ def test_row_heights(tmp_path, sheet_format, size, heights):
     assert [r.listed for r in sheet.rows] == [True, False, True, False]
 
 
+@pytest.mark.parametrize(
+    ("family", "size", "height"),
+    [("Calibri", 18, 24), ("Calibri", 24, 31), ("Aptos Narrow", 20, 27), ("Calibri", 13, 16)],
+)
+def test_row_heights_of_larger_normal_fonts(tmp_path, family, size, height):
+    # xlformat's row model, captured at 9 to 24 points; 13 is not measured and takes the
+    # nearest size's, 12 (unverified).
+    wb = openpyxl.Workbook()
+    wb.active["A1"] = 1
+    path = save(wb, tmp_path / "rows.xlsx")
+    rewrite(
+        path,
+        "xl/styles.xml",
+        lambda x: (
+            x.replace('<sz val="11" />', f'<sz val="{size}" />', 1)
+            .replace('<name val="Calibri" />', f'<name val="{family}" />', 1)
+            .replace('<scheme val="minor" />', "", 1)
+        ),  # else the theme's minor font names it
+    )
+    sheet = sheetpeek.read(path, ref="A1:A2")
+    assert [row_height(row, sheet) for row in sheet.rows] == [height, height]
+
+
 def test_zero_height_rows_are_hidden(tmp_path):
     sheet = sheet_with(tmp_path, 'baseColWidth="8" defaultRowHeight="15" zeroHeight="1"')
     assert [r.index for r in sheet.layout("excel").rows] == [1, 3]
