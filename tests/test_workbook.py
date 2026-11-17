@@ -23,6 +23,7 @@ from tests.workbooks import rewrite, save
 
 REL = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 WORKBOOK = "xl/workbook.xml"
+XM = "http://schemas.microsoft.com/office/excel/2006/main"
 RELS = "xl/_rels/workbook.xml.rels"
 
 
@@ -66,6 +67,18 @@ def kinds_book(path):
     chart.add_data(Reference(wb.active, min_col=1, min_row=1, max_row=1))
     wb.create_chartsheet("Chart").add_chart(chart)
     save(wb, path)
+    # A macro sheet in Excel's form: the root is xm:macrosheet, the body SpreadsheetML (one
+    # rooted in SpreadsheetML's namespace opens in Excel without its cells, xlio's capture).
+    rewrite(
+        path,
+        "xl/worksheets/sheet3.xml",
+        lambda t: re.sub(
+            r"<worksheet ([^>]*)>(.*)</worksheet>",
+            rf'<xm:macrosheet \1 xmlns:xm="{XM}">\2</xm:macrosheet>',
+            t,
+            flags=re.S,
+        ),
+    )
     return rewrite(
         path,
         RELS,

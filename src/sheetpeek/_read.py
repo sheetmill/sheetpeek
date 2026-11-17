@@ -10,15 +10,12 @@ from __future__ import annotations
 
 import contextlib
 import dataclasses
-import datetime as dt
 import functools
 import io
 import os
 import re
-import warnings
 import zipfile
 from collections.abc import Iterator, Sequence
-from contextlib import contextmanager
 from types import TracebackType
 from typing import IO, Any, overload
 
@@ -26,7 +23,7 @@ import xlformat
 import xlio
 from openpyxl import load_workbook
 from openpyxl.styles.numbers import BUILTIN_FORMATS
-from openpyxl.utils.datetime import CALENDAR_MAC_1904, to_excel
+from openpyxl.utils.datetime import CALENDAR_MAC_1904, from_ISO8601, to_excel
 
 from sheetpeek import _style as styles
 from sheetpeek._colors import grid_color, resolve, workbook_palette
@@ -39,6 +36,7 @@ from sheetpeek._detect import (
     visible_style,
     workbook_info,
 )
+from sheetpeek._hyperlink import Hyperlink
 from sheetpeek._model import (
     Cell,
     CellKind,
@@ -82,11 +80,6 @@ from sheetpeek._view_model import SheetView
 
 Source = str | os.PathLike[str] | IO[bytes]
 
-DATE_FALLBACK_WARNING = (
-    "dates were read through openpyxl's date conversion, because this openpyxl version does not "
-    "allow switching it off: times may be off by up to a millisecond, and serial 60 "
-    "(1900-02-29) shows as 1900-02-28"
-)
 _STATES: dict[str, SheetState] = {
     "visible": "visible",
     "hidden": "hidden",
@@ -96,7 +89,7 @@ _NOT_SHOWN = {
     "chartsheet": "is a chartsheet; charts are not shown",
     "dialogsheet": "is a dialog sheet (a legacy form); it is not shown",
 }
-_DATE_TYPES = (dt.datetime, dt.date, dt.time, dt.timedelta)
+_EXACT = 2**53  # whole numbers below this are exact as floats
 _ESCAPE = re.compile(r"_x([0-9A-Fa-f]{4})_")
 _SURROGATE = re.compile("[\ud800-\udfff]")
 
@@ -115,24 +108,6 @@ def unescape(text: str) -> str:
     if _SURROGATE.search(decoded):
         return decoded.encode("utf-16", "surrogatepass").decode("utf-16", "replace")
     return decoded
-
-
-def disable_date_conversion(workbook: Any) -> bool:
-    """Make a read-only workbook yield date cells as serial numbers; report whether it worked.
-
-    openpyxl converts a number to a date while parsing a sheet when the cell's style is in
-    ``workbook._date_formats``. Read-only mode parses lazily, so emptying that set (and
-    ``_timedelta_formats``) before iterating leaves every number as stored. The attributes are
-    private, so their presence is checked; without them the caller falls back to converting
-    openpyxl's dates back to serials.
-    """
-    formats = getattr(workbook, "_date_formats", None)
-    timedeltas = getattr(workbook, "_timedelta_formats", None)
-    if not isinstance(formats, set) or not isinstance(timedeltas, set):
-        return False
-    workbook._date_formats = set()
-    workbook._timedelta_formats = set()
-    return True
 
 
 def book_file_name(book: Book) -> str | None:
@@ -224,7 +199,6 @@ class Book:
             self._workbook = load_workbook(
                 handle, read_only=True, data_only=True, keep_links=False, rich_text=True
             )
-            self._raw_dates = disable_date_conversion(self._workbook)
             self._parts = worksheet_parts(self._archive)
             self._epoch = self._workbook.epoch
             self._theme = xlio_theme_colors(self._book.theme)
@@ -460,8 +434,7 @@ class Book:
         try:
             with self._xlio_errors():
                 sheet_notices(notes, self._book.parts, part, structure, self._info, name, ref)
-            with _quiet_extensions():
-                cells = self._read_cells(worksheet, ref, structure, notes) if ref else ()
+                cells = self._read_cells(name, ref, structure, notes) if ref else ()
         except PackageError:
             raise
         except Exception as error:
@@ -558,122 +531,112 @@ class Book:
         return found.name
 
     def _read_cells(
-        self, worksheet: Any, ref: CellRange, structure: Structure, notes: Collector
+        self, name: str, ref: CellRange, structure: Structure, notes: Collector
     ) -> tuple[tuple[Cell, ...], ...]:
+        """The cells of ``ref``, from xlio's stream; positions without a ``<c>`` are empty."""
+        assert self._book is not None
         links = cell_links(structure, ref)
-        converted_dates = False
-        grid: list[tuple[Cell, ...]] = []
-        row_index = ref.min_row
-        for source_row in worksheet.iter_rows(
-            min_row=ref.min_row, max_row=ref.max_row, min_col=ref.min_col, max_col=ref.max_col
-        ):
-            row: list[Cell] = []
-            col_index = ref.min_col - 1
-            for col_index, source in enumerate(source_row, ref.min_col):
-                value, kind, from_date = self._value(source)
-                converted_dates |= from_date
-                if value is None and (row_index, col_index) in structure.empty_strings:
-                    value, kind = "", "text"
-                style, every, text = self._style(source)
-                for code in every:
-                    report_style(notes, code, row_index, col_index)
-                if text and value is not None:
-                    for code in text:
-                        report_style(notes, code, row_index, col_index)
-                row.append(
-                    Cell(
-                        row_index,
-                        col_index,
-                        value,
-                        kind,
-                        style,
-                        links.get((row_index, col_index)),
-                        self._runs(getattr(source, "value", None), style.font),
-                    )
-                )
-            row.extend(self._empty(row_index, c) for c in range(col_index + 1, ref.max_col + 1))
-            grid.append(tuple(row))
-            row_index += 1
-        # Read-only iteration stops after the last row holding data, whatever max_row says.
-        grid.extend(
-            tuple(self._empty(index, c) for c in range(ref.min_col, ref.max_col + 1))
-            for index in range(row_index, ref.max_row + 1)
-        )
-        if converted_dates and not self._raw_dates:
-            notes.add(
-                "value.date_converted",
-                "approximated",
-                "needs_dependency",
-                message=DATE_FALLBACK_WARNING,
-                dependency="openpyxl",
+        width = ref.max_col - ref.min_col + 1
+        rows: dict[int, list[Cell | None]] = {}
+        for source in self._book.sheet(name).cells(str(ref), rich=True):
+            row, column = source.row, source.column
+            value, kind = self._value(source)
+            if value is None and (row, column) in structure.empty_strings:
+                value, kind = "", "text"
+            style, every, text = self._style(source.style)
+            for code in every:
+                report_style(notes, code, row, column)
+            if text and value is not None:
+                for code in text:
+                    report_style(notes, code, row, column)
+            found = rows.get(row)
+            if found is None:
+                found = rows[row] = [None] * width
+            found[column - ref.min_col] = Cell(
+                row,
+                column,
+                value,
+                kind,
+                style,
+                links.get((row, column)),
+                self._runs(source.rich, style.font, source.value) if kind == "text" else None,
             )
+        grid = tuple(
+            tuple(
+                cell or self._empty(index, ref.min_col + offset, links)
+                for offset, cell in enumerate(rows.get(index) or [None] * width)
+            )
+            for index in range(ref.min_row, ref.max_row + 1)
+        )
         report_links(notes, structure, ref, grid)
-        _report_lost_runs(notes, structure, ref)
-        return tuple(grid)
+        return grid
 
-    def _empty(self, row: int, column: int) -> Cell:
-        return Cell(row, column, None, "empty", self._default_style)
+    def _empty(
+        self, row: int, column: int, links: dict[tuple[int, int], Hyperlink] | None = None
+    ) -> Cell:
+        """A position without a ``<c>``: empty, in the default style, with its link if any."""
+        link = links.get((row, column)) if links else None
+        return Cell(row, column, None, "empty", self._default_style, link)
 
-    def _value(self, source: Any) -> tuple[CellValue, CellKind, bool]:
-        """Value, kind, and whether it was converted from an openpyxl date."""
-        value = getattr(source, "value", None)
+    def _value(self, source: xlio.Cell) -> tuple[CellValue, CellKind]:
+        """A cell's value and kind as Excel reads it (xlio), ``_xHHHH_`` escapes decoded."""
+        value = source.value
         if value is None:
-            return None, "empty", False
-        if getattr(source, "data_type", None) == "e":
+            return None, "empty"
+        if source.type == "e" or isinstance(value, xlio.ErrorCode):
             try:
-                return xlformat.ExcelError(value), "error", False
+                return xlformat.ExcelError(str(value)), "error"
             except ValueError:  # not shaped like an error code: a malformed file
-                return str(value), "text", False
+                return str(value), "text"
         if isinstance(value, bool):
-            return value, "bool", False
-        if isinstance(value, int | float):
-            return value, "number", False
-        if isinstance(value, str):
-            return unescape(value), "text", False
-        if isinstance(value, list):  # openpyxl's CellRichText: rich-text runs (§4.16)
-            return "".join(text for text, _ in _parts(value)), "text", False
-        if isinstance(value, _DATE_TYPES):
-            # ISO 8601 cells (t="d") always arrive as dates; other date cells only when the
-            # conversion could not be switched off.
-            return to_excel(value, self._epoch), "number", True
-        return str(value), "text", False
+            return value, "bool"
+        if isinstance(value, float):
+            # A whole number is an int, as the file's digits gave it before the move to xlio.
+            if value.is_integer() and -_EXACT < value < _EXACT:
+                return int(value), "number"
+            return value, "number"
+        if source.type == "d":  # ISO 8601 text: Excel reads it as a date serial
+            return to_excel(from_ISO8601(value), self._epoch), "number"
+        return whole_characters(value), "text"
 
-    def _runs(self, value: Any, font: Font) -> tuple[TextSpan, ...] | None:
-        """A rich-text value's runs in their fonts; ``None`` when every run is in ``font``.
+    def _runs(
+        self, rich: xlio.RichString | None, font: Font, value: Any
+    ) -> tuple[TextSpan, ...] | None:
+        """A string's runs in their fonts; ``None`` when every run is in ``font``.
 
         A run without properties takes the cell's font. A run with properties stands alone: what
         they leave out is the default, not the cell's (Excel 16.114), and a missing name or
         size the Normal font's (unverified). Adjacent runs in one font are joined.
         """
-        if not isinstance(value, list):
+        if rich is None or not rich.runs:
             return None
-        cached = self._run_cache.get(id(value))
-        if cached is not None and cached[0] is value and cached[1] == font:
+        if "".join(run.text for run in rich.runs) != value:
+            return None  # a string with text of its own outside its runs shows that text alone
+        cached = self._run_cache.get(id(rich))
+        if cached is not None and cached[0] is rich and cached[1] == font:
             return cached[2]
         spans: list[TextSpan] = []
-        for text, properties in _parts(value):
+        for run in rich.runs:
             own = (
                 font
-                if properties is None
+                if run.font is None
                 else font_aspect.to_font(
-                    _RunFont(properties), self._normal_font, self._cell_color, self._theme_fonts
+                    run.font, self._normal_font, self._cell_color, self._theme_fonts
                 )
             )
-            if not text:
+            if not run.text:
                 continue
+            text = whole_characters(run.text)
             if spans and _drawn(spans[-1].font) == _drawn(own):
                 spans[-1] = TextSpan(spans[-1].text + text, own)
             else:
                 spans.append(TextSpan(text, own))
         runs = tuple(spans) if any(_drawn(span.font) != _drawn(font) for span in spans) else None
-        self._run_cache[id(value)] = (value, font, runs)  # the value keeps its id from reuse
+        self._run_cache[id(rich)] = (rich, font, runs)  # the string keeps its id from reuse
         return runs
 
-    def _style(self, source: Any) -> tuple[CellStyle, tuple[Code, ...], tuple[Code, ...]]:
-        """The cell's style, and what it uses that is not read: (for any cell, for values)."""
-        index = getattr(source, "_style_id", None)  # openpyxl's read-only cell: its xf index
-        if index is None:  # an EmptyCell: no <c> element at this position
-            return self._default_style, (), ()
+    def _style(self, index: int) -> tuple[CellStyle, tuple[Code, ...], tuple[Code, ...]]:
+        """Cell format ``index``'s style, and what it uses that is not read (any cell, values)."""
         found = self._styles.get(index)
         if found is None:
             assert self._book is not None
@@ -726,86 +689,20 @@ class Book:
         return font_aspect.to_font(font, font_aspect.FALLBACK, self._cell_color, self._theme_fonts)
 
 
-def _parts(value: list[Any]) -> Iterator[tuple[str, Any]]:
-    """Each run of openpyxl's ``CellRichText``: its text, escapes decoded, and its properties.
+def whole_characters(text: str) -> str:
+    """``text`` with a lone UTF-16 surrogate as the replacement character.
 
-    The properties are an ``InlineFont``, or ``None`` for a run without them.
+    xlio joins an escaped surrogate pair (``_xD83D__xDE00_``) into the character it spells and
+    keeps a lone one (``_xD800_``), which text cannot be encoded for output with.
     """
-    for part in value:
-        properties = getattr(part, "font", None)
-        text = getattr(part, "text", part) if properties is not None else part
-        yield unescape(str(text)), properties
+    if _SURROGATE.search(text):
+        return text.encode("utf-16", "surrogatepass").decode("utf-16", "replace")
+    return text
 
 
 def _drawn(font: Font) -> Font:
     """A font as drawn: what the file stored for a theme font (scheme, name) does not count."""
     return dataclasses.replace(font, scheme=None, stored_name=None) if font.scheme else font
-
-
-class _RunFont:
-    """A run's properties (openpyxl's ``InlineFont``) in the shape of an ``xlio.Font``."""
-
-    __slots__ = ("_properties",)
-
-    def __init__(self, properties: Any) -> None:
-        self._properties = properties
-
-    name = property(lambda self: self._properties.rFont)
-    size = property(lambda self: self._properties.sz)
-    bold = property(lambda self: self._properties.b)
-    italic = property(lambda self: self._properties.i)
-    underline = property(lambda self: self._properties.u)
-    strike = property(lambda self: self._properties.strike)
-    vert_align = property(lambda self: self._properties.vertAlign)
-    scheme = property(lambda self: self._properties.scheme)
-
-    @property
-    def color(self) -> _RunColor | None:
-        color = self._properties.color
-        return None if color is None else _RunColor(color)
-
-
-class _RunColor:
-    """An openpyxl ``Color`` in the shape of an ``xlio.Color``.
-
-    openpyxl returns an error text, not a value, when a field of another type is read, so only
-    the field its ``type`` names is taken.
-    """
-
-    __slots__ = ("auto", "indexed", "rgb", "theme", "tint")
-
-    def __init__(self, color: Any) -> None:
-        kind = getattr(color, "type", None)
-        self.indexed = color.indexed if kind == "indexed" else None
-        self.theme = color.theme if kind == "theme" else None
-        self.auto = kind == "auto"
-        self.rgb = color.rgb if kind == "rgb" else None
-        self.tint = getattr(color, "tint", 0.0) or 0.0
-
-
-def _report_lost_runs(notes: Collector, structure: Structure, ref: CellRange) -> None:
-    """Runs in inline strings, which openpyxl's read-only reader drops (§4.16)."""
-    ranges, _ = structure.inline_runs.ranges()
-    report_cells(notes, "text.runs_lost", (r for r in map(ref.intersection, ranges) if r))
-
-
-@contextmanager
-def _quiet_extensions() -> Iterator[None]:
-    """Silence openpyxl's warning that it drops a sheet extension, while it parses a sheet.
-
-    sheetpeek reports those extensions itself, as notices; openpyxl's warning would tell the
-    caller a second time, about openpyxl. Only that warning, from openpyxl's sheet reader, is
-    silenced. ``catch_warnings`` changes process-wide state: two threads reading at once can
-    let one such warning through, which is harmless.
-    """
-    with warnings.catch_warnings():
-        warnings.filterwarnings(
-            "ignore",
-            message=r".* extension is not supported and will be removed$",
-            category=UserWarning,
-            module=r"openpyxl\.worksheet\._reader$",
-        )
-        yield
 
 
 def open(  # noqa: A001 - the module-level open() of gzip, tarfile, shelve

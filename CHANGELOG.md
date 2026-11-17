@@ -115,8 +115,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Census code `text.runs`, which every output declares: `rich` draws runs in the cell's font,
   plain text, CSV and TSV leave them out, and Markdown shows bold and italic runs with
   `emphasis=True`. A cell with runs is also counted under each font feature its runs use.
-- Reader code `text.runs_lost`: the runs of inline strings (what openpyxl writes), which
-  openpyxl's read-only reader drops; they are drawn in the cell's font.
 - Rotated and stacked text are drawn in HTML (`excel` mode), from captures of Excel for Mac.
   Angled text is one line turned about the start of its baseline, placed in the cell by its
   turned box (general text left for positive angles below 90 and at -90, right otherwise),
@@ -161,6 +159,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   with a solid blue line, as Excel's page break preview draws them. Off by default.
 
 ### Changed
+- `Cell.value` of a whole number is an `int` only below 2**53 in magnitude, a `float` above:
+  it comes from the stored double, not the file's digits, so `9995806932108624` (one value in
+  a corpus of 15,966 workbooks) is now `9995806932108624.0`. The rendered text is the same.
 - HTML draws each sheet at the zoom saved with it, as Excel opens it, where 0.2.0 drew every
   sheet at 100 %: a sheet saved at another zoom renders at another size. Pass
   `HTMLBackend(zoom=100)` (or `sheetpeek view --zoom 100`) for 0.2.0's size.

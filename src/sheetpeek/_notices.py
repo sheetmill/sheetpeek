@@ -180,9 +180,7 @@ for _code, _name, _level in (
 # What the reader finds in the file and does not read yet.
 for _code, _name, _level in (
     ("value.no_cached_value", "formulas without a cached value", "cells"),
-    ("value.date_converted", "dates read through openpyxl's conversion", "sheet"),
     ("format.palette", "number-format colors from the workbook palette", "cells"),
-    ("text.runs_lost", "rich-text runs in inline strings", "cells"),
     ("text.phonetic", "phonetic guides", "cells"),
     ("link.scheme", "link targets", "cells"),
     ("link.empty_cell", "links on empty cells", "cells"),
@@ -237,7 +235,6 @@ for _code, _name, _level in (
 LEGACY = frozenset(
     {
         "value.no_cached_value",
-        "value.date_converted",
         "font.no_metrics",
         "format.refused",
         "value.unshowable",

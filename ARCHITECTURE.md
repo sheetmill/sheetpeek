@@ -1096,18 +1096,11 @@ screen image): every rule here is captured on Excel 16.114 only, unverified on M
 the tests that rest on them (`tests/test_runs.py`) say so. The code is `_read.py` (reading),
 `_runs.py` and `_excel.py` (layout), `backends/html/_text.py` and `backends/markdown.py`.
 
-**Reading.** A cell's string can hold runs, each with its own font (`<r>` with `<rPr>`). openpyxl
-gives them only with `load_workbook(rich_text=True)`, and in read-only mode only for shared
-strings, which is where Excel writes them: there the value is a `CellRichText`, a run without
-properties a `str` and the others `TextBlock(InlineFont, text)`. Its read-only sheet parser is
-built without `rich_text`, so the runs of an **inline string** (what openpyxl itself writes) are
-lost; the structure scan marks those cells and they are reported as `text.runs_lost`. The reader
-always passes `rich_text=True`: on 300 workbooks drawn at random from the 15,935 of §5.5's two
-public corpora (41 of
-them with runs), reading every cell took 7.13 s against 7.18 s without it, and the summed peak
-of traced memory was 310.6 MB against 307.6 MB (1.0 %; 1.9 % on the files with runs). A shared
-string holding both a `<t>` and runs, which the schema allows and Excel does not write, comes
-back as its `<t>` alone (what Excel shows is unverified).
+**Reading.** A cell's string can hold runs, each with its own font (`<r>` with `<rPr>`), in a
+shared string (where Excel writes them) or an inline one (what openpyxl writes). xlio gives both
+with `Sheet.cells(rich=True)`: each run's text and its `xlio.Font`, or no font for a run without
+properties. A string holding both a `<t>` and runs, which the schema allows and Excel does not
+write, reads as the text of both, drawn in the cell's font (what Excel shows is unverified).
 
 **The model.** `Cell.runs` holds the runs as `TextSpan`s (text and fully resolved `Font`), and
 `Cell.value` their text joined; escapes (§5.6) are decoded in each run. Adjacent runs in one font

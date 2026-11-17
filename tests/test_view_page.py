@@ -41,10 +41,9 @@ def test_a_zoom_excel_does_not_allow_is_100(book, value):  # noqa: F811
 
 
 @pytest.mark.parametrize("value", ["85.5", "abc", ""])
-def test_a_zoom_that_is_not_a_whole_number_refuses_the_workbook(book, value):  # noqa: F811
-    # openpyxl refuses it (measured, 3.1.5); what Excel does is not captured.
-    with pytest.raises(sheetpeek.PackageError):
-        _view(book, f'zoomScale="{value}"')
+def test_a_zoom_that_is_not_a_whole_number_is_100(book, value):  # noqa: F811
+    # As xlio reads it; what Excel does is not captured yet (unverified).
+    assert _view(book, f'zoomScale="{value}"').zoom == 100
 
 
 def test_a_frozen_pane_gives_its_rows_and_columns(book):  # noqa: F811

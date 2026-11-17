@@ -178,9 +178,12 @@ def test_an_empty_linked_cell_is_reported_but_not_a_merges_covered_cells(tmp_pat
         '<hyperlink ref="F1" location="A3"/>',
         merges='<mergeCells count="1"><mergeCell ref="A1:C1"/></mergeCells>',
     )
-    notices = link_notices(sheetpeek.read(path, ref="A1:F3"))
+    sheet = sheetpeek.read(path, ref="A1:F3")
+    notices = link_notices(sheet)
     assert list(notices) == ["link.empty_cell"]
     assert [str(c) for c in notices["link.empty_cell"].cells] == ["E1:F1"]
+    # E1 has no <c>: the empty cell still carries its link.
+    assert sheet.cell(1, 5).hyperlink is not None
 
 
 @pytest.mark.parametrize(

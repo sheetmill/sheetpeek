@@ -28,6 +28,7 @@ from tests.workbooks import (
     NS,
     R_NS,
     SHEET1,
+    link_shared_strings,
     replace_once,
     replace_part,
     replace_sheet_data,
@@ -236,16 +237,7 @@ def date_text(tmp_path):
 
 
 def shared(tmp_path):
-    path = cell_xml(tmp_path, '<c r="A2" t="s"><v>0</v></c>')
-    rewrite(
-        path,
-        "[Content_Types].xml",
-        replace_once(
-            "</Types>",
-            '<Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.'
-            'openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/></Types>',
-        ),
-    )
+    path = link_shared_strings(cell_xml(tmp_path, '<c r="A2" t="s"><v>0</v></c>'))
     strings = f"<sst {NS}><si><t>{escape(PAYLOAD)}</t></si></sst>"
     return replace_part(path, "xl/sharedStrings.xml", strings.encode())
 
@@ -630,11 +622,12 @@ def read_or_refused(path):
 # without valid colors, a hidden cell, a refused format's General, what no backend draws).
 REACHES = {
     "refused": {
-        "date_text", "style_rgb", "palette", "border_rgb", "gradient_rgb", "run_rgb", "tab_color",
+        "date_text", "style_rgb", "palette", "border_rgb", "gradient_rgb", "run_rgb",
+        "error_text", "error_shaped",
     },
     "absent": {
         "hidden", "format_refused", "theme_srgb", "theme_system", "hyperlink", "properties",
-        "defined_name", "hyperlink_refused", "hyperlink_tab", "other_sheet_name",
+        "tab_color", "defined_name", "hyperlink_refused", "hyperlink_tab", "other_sheet_name",
     },
     "attribute": {
         "normal_font_name", "hyperlink_target", "hyperlink_mailto", "hyperlink_tooltip",

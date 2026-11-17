@@ -133,6 +133,12 @@ def shared_strings(path: Path, strings: dict[str, str]) -> Path:
     items = "".join(f"<si>{strings[c]}</si>" for c in order)
     table = f'<sst {NS} count="{len(order)}" uniqueCount="{len(order)}">{items}</sst>'
     replace_part(path, "xl/sharedStrings.xml", table.encode())
+    return link_shared_strings(path)
+
+
+def link_shared_strings(path: Path) -> Path:
+    """Declare ``xl/sharedStrings.xml`` in the package: its content type and the workbook's
+    relationship to it, which Excel and xlio follow to find it."""
     rewrite(
         path,
         "[Content_Types].xml",

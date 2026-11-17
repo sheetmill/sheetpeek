@@ -22,7 +22,15 @@ from capture.layout import build
 import sheetpeek
 from tests.capture_report import REPORT
 from tests.watchdog import in_child
-from tests.workbooks import NS, SHEET1, replace_once, replace_part, replace_sheet_data, rewrite
+from tests.workbooks import (
+    NS,
+    SHEET1,
+    link_shared_strings,
+    replace_once,
+    replace_part,
+    replace_sheet_data,
+    rewrite,
+)
 
 CAPTURE = Path(__file__).with_name("captures") / "layout.tsv"
 
@@ -487,12 +495,6 @@ def test_error_width_matches_excel(tmp_path):
 
 # text -----------------------------------------------------------------------------------------
 
-TEXT_DEVIATIONS = {
-    "shared string _x005F_x0041_": "openpyxl removes x005F_ from shared strings before it is read",
-    "shared string x005F_keep": "openpyxl removes x005F_ from shared strings before it is read",
-    "whitespace without xml:space": "openpyxl does not say whether the element preserves it",
-}
-
 
 def shared_string(tmp_path, xml):
     """A workbook whose A1 is the shared string given as the content of an ``<si>``."""
@@ -500,15 +502,7 @@ def shared_string(tmp_path, xml):
     wb.active["A1"] = "placeholder"
     path = tmp_path / "strings.xlsx"
     wb.save(path)
-    rewrite(
-        path,
-        "[Content_Types].xml",
-        replace_once(
-            "</Types>",
-            '<Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.'
-            'openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/></Types>',
-        ),
-    )
+    link_shared_strings(path)
     replace_part(path, "xl/sharedStrings.xml", f"<sst {NS}><si>{xml}</si></sst>".encode())
     rewrite(
         path,
@@ -519,23 +513,20 @@ def shared_string(tmp_path, xml):
 
 
 @pytest.mark.excel
-def test_text_deviations_are_what_openpyxl_makes_them(tmp_path):
-    # Each is pinned to today's value: if one starts to match Excel, this fails and it comes off
-    # the list. Excel shows the literal _x0041_ (layout row 191, which goes through an inline
-    # string and matches) and drops the spaces (xlrecalc's capture `whitespace`).
+def test_shared_strings_read_as_excel_shows_them(tmp_path):
+    # Excel shows the literal _x0041_ (layout row 191, through an inline string) and drops the
+    # spaces of a <t> without xml:space (xlrecalc's capture `whitespace`).
     got = {
         "shared string _x005F_x0041_": shared_string(tmp_path, "<t>_x005F_x0041_</t>"),
         "shared string x005F_keep": shared_string(tmp_path, "<t>x005F_keep</t>"),
         "whitespace without xml:space": shared_string(tmp_path, "<t>  pad  </t>"),
     }
     assert got == {
-        "shared string _x005F_x0041_": "A",
-        "shared string x005F_keep": "keep",
-        "whitespace without xml:space": "  pad  ",
+        "shared string _x005F_x0041_": "_x0041_",
+        "shared string x005F_keep": "x005F_keep",
+        "whitespace without xml:space": "pad",
     }
-    REPORT["text"] = f"text: {len(TEXT_DEVIATIONS)} known deviations: " + "; ".join(
-        f"{case} ({why})" for case, why in TEXT_DEVIATIONS.items()
-    )
+    REPORT["text"] = f"text: {len(got)} shared strings compared with Excel, 0 deviations"
 
 
 @pytest.mark.excel

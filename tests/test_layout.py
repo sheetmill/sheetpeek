@@ -4,6 +4,9 @@ Rules verified against Excel cite ARCHITECTURE.md §4; characters mode's own cho
 such.
 """
 
+import dataclasses
+import math
+
 import openpyxl
 import pytest
 import xlformat
@@ -12,7 +15,7 @@ from openpyxl.styles import Alignment, Font, PatternFill
 import sheetpeek
 from sheetpeek._layout import _Fonts
 from sheetpeek._notices import Collector
-from tests.workbooks import SHEET1, raw_sheet, replace_once, rewrite, save, set_cached
+from tests.workbooks import SHEET1, raw_sheet, replace_once, rewrite, save
 
 LONG = "a long text value"  # 17 characters; default columns are 8 wide
 
@@ -526,17 +529,36 @@ def test_fonts_for_xlformat():
     ]
 
 
-def test_values_xlformat_cannot_format(tmp_path):
-    # ARCHITECTURE.md §6.2: shown as their text, with one warning per format string. openpyxl
-    # reads 1E400 as infinity, which no number format shows.
+def _with_value(sheet, value):
+    """``sheet`` with A1's value replaced: infinity reaches the model only from code, since a
+    file's number too large for a double reads as #NULL!."""
+    cell = dataclasses.replace(sheet.cells[0][0], value=value)
+    return dataclasses.replace(sheet, cells=((cell, *sheet.cells[0][1:]), *sheet.cells[1:]))
+
+
+def test_a_number_too_large_for_a_double_reads_as_null(tmp_path):
+    # As Excel reads it (xlio's capture value_forms).
     path = raw_sheet(
         tmp_path / "inf.xlsx",
         "<sheetData><row r='1'>"
         "<c r='A1'><v>1E400</v></c><c r='B1'><v>-1E400</v></c><c r='C1'><v>1</v></c>"
         "</row></sheetData>",
     )
-    rendered = sheetpeek.read(path).layout()
-    assert [c.text for c in rendered.rows[0].cells] == ["inf", "-inf", "1"]
+    sheet = sheetpeek.read(path)
+    assert [(c.value, c.kind) for c in sheet.cells[0]] == [
+        ("#NULL!", "error"),
+        ("#NULL!", "error"),
+        (1, "number"),
+    ]
+
+
+def test_values_xlformat_cannot_format(tmp_path):
+    # ARCHITECTURE.md §6.2: shown as their text, with one warning per format string.
+    path = raw_sheet(
+        tmp_path / "one.xlsx", "<sheetData><row r='1'><c r='A1'><v>1</v></c></row></sheetData>"
+    )
+    rendered = _with_value(sheetpeek.read(path), math.inf).layout()
+    assert [c.text for c in rendered.rows[0].cells] == ["inf"]
     assert rendered.warnings == (
         "number format 'General' cannot show the value inf (first: A1; cannot format "
         "non-finite number inf); shown as its text",
@@ -547,8 +569,8 @@ def test_refused_format_with_a_value_general_cannot_format(tmp_path):
     wb = openpyxl.Workbook()
     wb.active["A1"] = 1
     wb.active["A1"].number_format = "0;0;0;0;0"  # five sections: Excel refuses the file
-    path = set_cached(save(wb, tmp_path / "bad.xlsx"), "A1", "1E400")
-    rendered = sheetpeek.read(path).layout()
+    sheet = sheetpeek.read(save(wb, tmp_path / "bad.xlsx"))
+    rendered = _with_value(sheet, math.inf).layout()
     assert rendered.cell(1, 1).text == "inf"
     assert rendered.warnings == (
         "number format '0;0;0;0;0' is one Excel refuses to open; shown as General",

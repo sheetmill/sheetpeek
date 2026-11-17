@@ -87,8 +87,6 @@ class Structure:
     """Formula cells without a cached value."""
     runs: CellSet = field(default_factory=CellSet)
     """Cells whose string has rich-text runs."""
-    inline_runs: CellSet = field(default_factory=CellSet)
-    """Cells whose inline string has rich-text runs, which openpyxl's read-only reader drops."""
     phonetic: CellSet = field(default_factory=CellSet)
     """Cells that show a phonetic guide their string has."""
     row_styles: tuple[tuple[int, int], ...] = ()
@@ -128,7 +126,6 @@ class Scan:
         self.uncached = CellSet()
         self.first_uncached: str | None = None
         self.runs = CellSet()
-        self.inline_runs = CellSet()
         self.phonetic = CellSet()
         self.root = "worksheet"
         self.children: list[ET.Element] = []
@@ -150,7 +147,6 @@ class Scan:
             children=tuple(self.children),
             uncached=self.uncached,
             runs=self.runs,
-            inline_runs=self.inline_runs,
             phonetic=self.phonetic,
             extra=dict(self.extra),
         )
@@ -299,7 +295,6 @@ def _cells(state: Scan, row: ET.Element, row_index: int) -> None:
             inline = cell.find(_INLINE)
             if inline is not None and inline.find(_RUN) is not None:
                 state.runs.add(row_index, column)
-                state.inline_runs.add(row_index, column)
 
 
 def _column_extent(row: ET.Element) -> tuple[int, int]:

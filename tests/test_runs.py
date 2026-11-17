@@ -138,14 +138,14 @@ def shared_strings_again(path):
     )  # fmt: skip
 
 
-def test_a_string_with_text_and_runs_keeps_its_text_alone(tmp_path):
-    # Known deviation: the schema allows a <t> before runs, which Excel does not write; openpyxl's
-    # rich-text reader keeps the <t> alone. What Excel shows is unverified.
+def test_a_string_with_text_outside_its_runs_shows_in_the_cell_font(tmp_path):
+    # The schema allows a <t> before runs, which Excel does not write. xlio reads the text of
+    # both; sheetpeek draws it in the cell's font. What Excel shows is unverified.
     cell = sheetpeek.read(book(tmp_path, nothing, {"A1": "<t>top</t>" + run("runs", "<b/>")}))
-    assert (cell.cell(1, 1).value, cell.cell(1, 1).runs) == ("top", None)
+    assert (cell.cell(1, 1).value, cell.cell(1, 1).runs) == ("topruns", None)
 
 
-def test_runs_of_inline_strings_are_reported_lost(tmp_path):
+def test_runs_of_inline_strings_are_drawn(tmp_path):
     from openpyxl.cell.rich_text import CellRichText, TextBlock
     from openpyxl.cell.text import InlineFont
 
@@ -153,14 +153,9 @@ def test_runs_of_inline_strings_are_reported_lost(tmp_path):
     wb.active["B2"] = CellRichText([TextBlock(InlineFont(b=True), "rich"), " text"])
     sheet = sheetpeek.read(save(wb, tmp_path / "inline.xlsx"))
     cell = sheet.cell(2, 2)
-    assert (cell.value, cell.runs) == ("rich text", None)
-    (notice,) = sheet.notices
-    assert notice.code == "text.runs_lost"
-    assert (notice.outcome, notice.count, [str(r) for r in notice.cells]) == (
-        "approximated",
-        1,
-        ["B2"],
-    )
+    assert cell.value == "rich text"
+    assert [(span.text, span.font.bold) for span in cell.runs] == [("rich", True), (" text", False)]
+    assert sheet.notices == ()
 
 
 # Layout in excel mode.

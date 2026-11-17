@@ -1,6 +1,5 @@
 """Reading cells, styles and geometry into a Sheet."""
 
-import io
 import re
 import zipfile
 from pathlib import Path
@@ -15,10 +14,10 @@ from openpyxl.utils.datetime import CALENDAR_MAC_1904
 import sheetpeek
 import sheetpeek._read
 from sheetpeek import CellRange
-from sheetpeek._read import DATE_FALLBACK_WARNING, disable_date_conversion
 from tests.workbooks import (
     NS,
     SHEET1,
+    link_shared_strings,
     raw_sheet,
     replace_once,
     replace_part,
@@ -46,52 +45,11 @@ def dated(tmp_path):
     return path
 
 
-def test_fast_path_is_available():
-    # Pins the private openpyxl detail sheetpeek relies on; if this fails on a new openpyxl,
-    # dates go through the fallback and the reader warns.
-    wb = openpyxl.Workbook()
-    stream = io.BytesIO()
-    wb.save(stream)
-    stream.seek(0)
-    assert disable_date_conversion(openpyxl.load_workbook(stream, read_only=True)) is True
-
-
 def test_dates_stay_serials(dated):
     sheet = sheetpeek.read(dated)
     assert [sheet.cell(r, 1).value for r in range(1, 5)] == [60, CLOCK_SERIAL, 1.5, 60]
     assert {sheet.cell(r, 1).kind for r in range(1, 5)} == {"number"}
     assert sheet.warnings == ()
-
-
-def test_date_fallback(dated, monkeypatch):
-    real = sheetpeek._read.load_workbook
-
-    def changed_private_attributes(*args, **kwargs):
-        # As if a later openpyxl kept its date formats in another type: still used by openpyxl
-        # itself, no longer recognized by sheetpeek.
-        workbook = real(*args, **kwargs)
-        workbook._date_formats = dict.fromkeys(workbook._date_formats)
-        return workbook
-
-    monkeypatch.setattr(sheetpeek._read, "load_workbook", changed_private_attributes)
-    sheet = sheetpeek.read(dated)
-    # Serial 60 comes back as 59 and the time to the millisecond: the loss the fast path avoids.
-    assert sheet.cell(1, 1).value == 59
-    assert sheet.cell(2, 1).value == pytest.approx(CLOCK_SERIAL, abs=0.0005 / 86400)
-    assert sheet.cell(2, 1).value != CLOCK_SERIAL
-    assert sheet.cell(3, 1).value == 1.5
-    assert sheet.cell(4, 1).value == 60  # General: never a date
-    assert sheet.warnings == (DATE_FALLBACK_WARNING,)
-
-
-def test_disable_date_conversion_needs_both_sets():
-    class Partial:
-        def __init__(self):
-            self._date_formats = {1}
-
-    partial = Partial()
-    assert disable_date_conversion(partial) is False
-    assert partial._date_formats == {1}
 
 
 def zip_text(path, part):
@@ -149,25 +107,28 @@ def test_value_kinds(tmp_path):
 
 
 def test_error_values(tmp_path):
-    # A code this xlformat does not list still reads as an error; text not shaped like an error
-    # code (a malformed file) reads as text rather than failing.
     path = raw_sheet(
         tmp_path / "errors.xlsx",
         "<sheetData><row r='1'>"
-        "<c r='A1' t='e'><v>#SPILL!</v></c>"
-        "<c r='B1' t='e'><v>#NEWCODE!</v></c>"
-        "<c r='C1' t='e'><v>oops</v></c>"
+        "<c r='A1' t='e'><v>#N/A</v></c>"
+        "<c r='B1' t='e'><v>#BUSY!</v></c>"
         "</row></sheetData>",
     )
     cells = sheetpeek.read(path).cells[0]
-    assert [(c.value, c.kind) for c in cells] == [
-        ("#SPILL!", "error"),
-        ("#NEWCODE!", "error"),
-        ("oops", "text"),
-    ]
-    assert cells[0].value == xlformat.ExcelError.SPILL
-    assert isinstance(cells[1].value, xlformat.ExcelError)
-    assert type(cells[2].value) is str
+    assert [(c.value, c.kind) for c in cells] == [("#N/A", "error"), ("#BUSY!", "error")]
+    assert all(isinstance(c.value, xlformat.ExcelError) for c in cells)
+
+
+@pytest.mark.parametrize("text", ["#SPILL!", "#NEWCODE!", "oops"])
+def test_an_error_excel_does_not_read_as_text_refuses_the_file(tmp_path, text):
+    # Excel reads nine codes written as text and refuses any other (xlio's capture errors);
+    # #SPILL! and the newer codes come through a rich value instead.
+    path = raw_sheet(
+        tmp_path / "errors.xlsx",
+        f"<sheetData><row r='1'><c r='A1' t='e'><v>{text}</v></c></row></sheetData>",
+    )
+    with pytest.raises(sheetpeek.PackageError, match="an error Excel refuses"):
+        sheetpeek.read(path)
 
 
 @pytest.mark.parametrize(
@@ -418,15 +379,7 @@ def test_a_shared_string_is_decoded(tmp_path):
     wb = openpyxl.Workbook()
     wb.active["A1"] = "x"
     path = save(wb, tmp_path / "text.xlsx")
-    rewrite(
-        path,
-        "[Content_Types].xml",
-        replace_once(
-            "</Types>",
-            '<Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.'
-            'openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/></Types>',
-        ),
-    )
+    link_shared_strings(path)
     replace_part(
         path, "xl/sharedStrings.xml", f"<sst {NS}><si><t>a_x000D_b</t></si></sst>".encode()
     )
