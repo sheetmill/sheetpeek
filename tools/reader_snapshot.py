@@ -4,7 +4,8 @@ Used to change the reader without changing what it reads: snapshot a corpus with
 before the change and with the one after, and every difference is listed for a reason to be
 given. One JSON line per workbook and per sheet: the sheet list, the default sheet and the
 workbook's notices, and for each sheet digests of its values, styles, runs, columns, rows,
-merges, links and outline, its view, print layout and notices.
+merges, links and outline, the rows the file lists, its sheet format, view, print layout, and
+its notices with their cells.
 
     find CORPUS -name '*.xlsx' > list.txt
     python -m tests.watchdog -- python tools/reader_snapshot.py sweep OLD/src list.txt a.jsonl
@@ -72,6 +73,22 @@ def _sheet(book: Any, name: str) -> dict[str, Any]:
         "runs": _digest((c.row, c.column, c.runs) for c in cells if c.runs),
         "cols": _digest((c.index, c.width, c.hidden) for c in sheet.columns),
         "rows": _digest((r.index, r.height, r.hidden) for r in sheet.rows),
+        "listed": _digest(r.index for r in sheet.rows if r.listed),
+        "format": repr(
+            (
+                sheet.state,
+                sheet.date1904,
+                sheet.default_column_width,
+                sheet.base_column_width,
+                sheet.default_row_height,
+                sheet.has_sheet_format,
+                sheet.custom_row_height,
+                sheet.zero_row_height,
+                sheet.thick_top,
+                sheet.thick_bottom,
+                sheet.show_headings,
+            )
+        ),
         "merges": _digest(map(str, sheet.merges)),
         "view": repr(sheet.view),
         "print": repr(
@@ -79,15 +96,22 @@ def _sheet(book: Any, name: str) -> dict[str, Any]:
         ),
         "links": _digest((c.row, c.column, c.hyperlink) for c in cells if c.hyperlink),
         "notices": sorted(f"{n.code}:{n.count}" for n in sheet.notices),
+        "notice_cells": _digest(
+            sorted((n.code, tuple(map(str, n.ranges))) for n in sheet.notices if n.ranges)
+        ),
         "normal": repr(sheet.normal_font),
         "grid": repr((sheet.show_gridlines, sheet.grid_color)),
         "outline": _digest(
             [
-                *((r.index, r.outline_level, r.collapsed) for r in sheet.rows if r.outline_level),
+                *(
+                    (r.index, r.outline_level, r.collapsed)
+                    for r in sheet.rows
+                    if r.outline_level or r.collapsed
+                ),
                 *(
                     (c.index, c.outline_level, c.collapsed)
                     for c in sheet.columns
-                    if c.outline_level
+                    if c.outline_level or c.collapsed
                 ),
                 repr(sheet.outline),
             ]
