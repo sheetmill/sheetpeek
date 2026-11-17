@@ -336,6 +336,7 @@ class _Formatter:
 
     def __init__(self, sheet: Sheet, notes: Collector, fonts: _Fonts) -> None:
         self._date1904 = sheet.date1904
+        self._show_zeros = sheet.view.show_zeros
         self._notes = notes
         self._fonts = fonts
         self._sheet = sheet
@@ -408,6 +409,7 @@ class _Formatter:
             font=font,
             normal_font=normal,
             date1904=self._date1904,
+            show_zeros=self._show_zeros,
         )
 
 

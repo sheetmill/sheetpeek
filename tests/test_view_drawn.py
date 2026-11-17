@@ -483,7 +483,7 @@ def test_the_blocks_notices_are_merged(tmp_path):
     page = sheetpeek.render(path, "html", print_area=True, on_notice=found.append)
     codes = [n.code for n in found]
     assert codes.count("comment") == 1
-    assert codes.count("view.hide_zeros") == 1
+    assert "view.hide_zeros" not in codes  # drawn: zeros are hidden
     (note,) = [n for n in found if n.code == "comment"]
     assert note.count == 2
     assert [str(r) for r in note.cells] == ["A1", "A4"]

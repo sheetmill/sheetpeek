@@ -34,9 +34,9 @@ CLI views a file and serves a folder of workbooks as HTML.
   stated judgment per other output, with notices for the rest. In scope and built: cell styles
   (fonts, fills, borders, alignment, rich-text runs), hyperlinks, outlines, theme fonts and the
   workbook palette, gridline colors and headings, sheet kinds, states and tab colors, rotated and
-  stacked text, the zoom, frozen panes, the print area and manual page breaks (§4.18). In scope and
-  not built yet: tables, filter buttons, conditional formatting, notes and comments, pictures,
-  hidden zeros and the other sheet-view parts, the other print settings, pivot tables; charts
+  stacked text, the zoom, frozen panes, hidden zeros, the print area and manual page breaks
+  (§4.18). In scope and not built yet: tables, filter buttons, conditional formatting, notes and
+  comments, pictures, the other sheet-view parts, the other print settings, pivot tables; charts
   possibly as a package of their own (§11). Out of scope: editing and any interactive UI.
 
 ## 2. Pipeline
@@ -1281,6 +1281,11 @@ with `showZeros="0"`, an empty cell where a value shows as zero, which still blo
 print area, print titles and page breaks are not reported: a sheet with them is shown as Excel's
 Normal view shows it, and `--strict` passes.
 
+**Hidden zeros.** Under `showZeros="0"` the layout formats with xlformat's `show_zeros=False`: a
+value equal to 0 under a format of fewer than three sections shows nothing, a format with a zero
+section shows it, and only the stored value counts (0.4 under `0` shows `0`); captured by
+xlformat on Excel 16.115 under Microsoft 365. The cell stays a number, so it still blocks spill.
+
 **The zoom** (HTML; `backends/html/_table.py`, `Page.zoom`). The default is the zoom saved with
 the sheet, as Excel opens it (decided); `HTMLBackend(zoom=)` overrides it with any whole percent
 Excel's zoom box takes, 10 to 400. A sheet point is `4/3 × zoom/100` CSS px: cells, text, fills,
@@ -2242,8 +2247,8 @@ are read.
 ## 11. Roadmap
 
 1. **The middle tier:** filter and sort buttons, tables with the differential-format layer,
-   conditional formatting, pictures and their placement, notes and comments, hidden zeros (with
-   xlformat 0.4), the print settings not yet drawn (titles, headers and footers); then pivot
+   conditional formatting, pictures and their placement, notes and comments, the print
+   settings not yet drawn (titles, headers and footers); then pivot
    tables. Most of it needs parts that
    openpyxl's read-only mode does not expose.
 2. **The shared xlsx reader:** sheetpeek moves from openpyxl onto the shared reader, in

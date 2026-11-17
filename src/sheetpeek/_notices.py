@@ -187,7 +187,6 @@ for _code, _name, _level in (
     ("link.computed", "HYPERLINK() formulas", "cells"),
     ("link.conflict", "cells with two links", "cells"),
     ("style.row_column", "row and column formats", "sheet"),
-    ("view.hide_zeros", "hidden zero values", "sheet"),
     ("view.right_to_left", "right-to-left sheets", "sheet"),
     ("view.formulas", "formulas shown in cells", "sheet"),
     ("view.page_layout", "page layout and page break views", "sheet"),

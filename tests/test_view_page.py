@@ -198,3 +198,32 @@ def test_print_titles_are_not_reported(book):  # noqa: F811
         ),
     )
     assert sheetpeek.read(book).notices == ()
+
+
+@pytest.mark.parametrize("show_zeros", [True, False])
+def test_a_sheet_that_hides_zeros_shows_them_as_excel_does(tmp_path, show_zeros):
+    # xlformat's capture "a sheet that hides zeros": a value equal to 0 under a format without a
+    # zero section shows nothing; a zero section still shows; only the stored value counts. The
+    # hidden zero's cell still blocks spill (captured on Excel 16.114 only).
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+    sheet.sheet_view.showZeros = show_zeros
+    sheet["A1"] = 0
+    sheet["B1"] = 0
+    sheet["B1"].number_format = '0;-0;"zero"'
+    sheet["C1"] = 0.4
+    sheet["C1"].number_format = "0"
+    sheet["D1"] = "0"
+    sheet["A2"] = "a long text to spill"
+    sheet["B2"] = 0
+    path = save(workbook, tmp_path / "zeros.xlsx")
+    read = sheetpeek.read(path)
+    assert read.view.show_zeros is show_zeros
+    laid = read.layout("excel")
+    first, second = laid.rows
+    zero = "0" if show_zeros else ""
+    assert [cell.text for cell in first.cells] == [zero, "zero", "0", "0"]
+    assert second.cells[1].text == zero
+    assert second.runs[0].text == "a long text to spill"
+    assert second.runs[0].clip[2] <= (laid.columns[1].x_pt or 0) + 0.01  # stops at B2
+    assert not {n.code for n in read.notices} & {"view.hide_zeros"}

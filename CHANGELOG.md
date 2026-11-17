@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   not read yet, or that the layout approximates, and `sheetpeek.notices(source, to=...)` adds what
   that output cannot show, without rendering. A notice has a dotted code (`FEATURES` lists them),
   an outcome (`omitted` or `approximated`), a reason, the cells and the output.
-- Reported when a file uses them, until they are drawn: phonetic guides, rich-text runs in inline strings (which openpyxl does not keep), row and column formats, sheet views (hidden zeros, right to left, formulas,
+- Reported when a file uses them, until they are drawn: phonetic guides, rich-text runs in inline strings (which openpyxl does not keep), row and column formats, sheet views (right to left, formulas,
   page layout, split panes), conditional formatting, filter buttons,
   tables, sparklines, slicers, timelines, pictures, charts, shapes, embedded objects, form
   controls, background pictures, notes and threaded comments, tab colors (drawn only on the workbook page), dialog sheets, macro sheets, and any sheet element or extension sheetpeek
@@ -29,6 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `sheetpeek view --notices summary|full|none`, `--strict` (exit status 3 when anything is not
   shown) and `--suppress CODE`.
 - `CellRange.intersection`.
+- Hidden zeros: a sheet saved with "show a zero in cells that have zero value" off
+  (`showZeros="0"`) shows a value equal to 0 as an empty cell under a format without a zero
+  section, as Excel does; the cell still stops text spilling into it.
 - Hyperlinks are drawn. HTML wraps a linked cell's text in an anchor, which adds no color or
   underline of its own, since the cell's format draws a link as in Excel; its `title` is the
   file's tooltip. A link to a cell on the page goes to that cell (the cell gets the id `sp-` and

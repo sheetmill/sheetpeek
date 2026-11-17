@@ -39,7 +39,6 @@ CODES: dict[str, tuple[Outcome, Reason, str]] = {
         "not_implemented",
         "fills and borders of whole rows and columns, on cells the file has no element for",
     ),
-    "view.hide_zeros": ("approximated", "not_implemented", "zeros are shown; Excel hides them"),
     "view.right_to_left": ("approximated", "not_implemented", "drawn left to right"),
     "view.formulas": (
         "approximated",
@@ -442,8 +441,6 @@ def report_style(collector: Collector, code: Code, row: int, column: int) -> Non
 
 
 def _view(collector: Collector, view: ET.Element) -> None:
-    if view.get("showZeros") is not None and not _true(view.get("showZeros")):
-        _report(collector, "view.hide_zeros")
     if _true(view.get("rightToLeft")):
         _report(collector, "view.right_to_left")
     if _true(view.get("showFormulas")):
