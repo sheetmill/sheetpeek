@@ -457,8 +457,8 @@ SLANT_OUTLIERS = {
 def test_text_between_slanted_sides_sits_where_excel_draws_it(tmp_path, name, height, left, right):
     # Captured (rotation suite, slant, 46 cases from 5 to 85 and -15 to -75 degrees): the ink's
     # edges, measured across the line, against the model's (the first and last letters' own
-    # heights). Not compared: the right edge at 20 pt (xlformat measures the text narrower than
-    # Excel), and in a 30 pt row at 45 degrees, where the row clips the text.
+    # heights); the right edge at 20 pt too, now that xlformat measures 20 pt text as Excel does.
+    # Not compared: the right edge in a 30 pt row at 45 degrees, where the row clips the text.
     from capture import rotation
 
     (case,) = [c for c in rotation.cases() + rotation.more_cases() if c.name == name]
@@ -473,7 +473,7 @@ def test_text_between_slanted_sides_sits_where_excel_draws_it(tmp_path, name, he
     across = abs(math.sin(math.radians(run.angle)))
     bound = SLANT_OUTLIERS.get(name, SLANT_BOUND)
     assert abs(lo - left) * across <= bound, (name, lo, left)
-    if case.size == 11.0 and height != 30.0:
+    if height != 30.0:
         assert abs(hi - right) * across <= bound, (name, hi, right)
 
 
@@ -527,3 +527,42 @@ def test_wrapped_angled_text_sits_where_excel_draws_it(tmp_path, name, height, l
     assert abs(min(lo for lo, _ in edges) - left) <= bound, name
     if height > 15:
         assert abs(max(hi for _, hi in edges) - right) <= bound, name
+
+
+FITTED_BOUND = 2.0
+"""Points within which a fitted angled or stacked row lies (medians 0 to 2 at 9 to 20 pt)."""
+FITTED_OUTLIERS = {
+    # At exactly 90 degrees Excel fits rows taller than W + 7 as the text grows, though its ink is
+    # the upright ink; the cause is not captured yet. Model minus Excel.
+    "90 long 14": -4.0,
+    "90 long 20": -9.0,
+    "90 medium 20": -4.0,
+    "90 short 20": -2.0,
+}
+
+
+def _fitted_captures():
+    from pathlib import Path
+
+    path = Path(__file__).parent / "captures" / "rotation.tsv"
+    lines = [line.split("\t") for line in path.read_text(encoding="utf-8").splitlines()]
+    header = next(line for line in lines if line[0] == "group")
+    rows = [dict(zip(header, line, strict=False)) for line in lines if line[0] != "group"]
+    return [(r["name"], float(r["row_height"])) for r in rows if r.get("group") == "height"]
+
+
+@pytest.mark.parametrize(("name", "height"), _fitted_captures())
+def test_a_row_fits_angled_and_stacked_text_as_excel_does(tmp_path, name, height):
+    # Captured (rotation suite, height: three lengths at 15, 45, 75 and 90 degrees, stacked, at 9,
+    # 11, 14 and 20 pt), with xlformat's tables measured at each size.
+    from capture import rotation
+
+    (case,) = [c for c in rotation.cases() + rotation.more_cases() if c.name == name]
+    wb = openpyxl.Workbook()
+    rotation.fill(wb.active, [case])
+    rendered = sheetpeek.read(save(wb, tmp_path / "fitted.xlsx")).layout("excel")
+    gap = _row(rendered, 4).height_pt - height
+    if name in FITTED_OUTLIERS:
+        assert gap == pytest.approx(FITTED_OUTLIERS[name], abs=1.0), (name, gap)
+    else:
+        assert abs(gap) <= FITTED_BOUND, (name, gap)

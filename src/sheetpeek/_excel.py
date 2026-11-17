@@ -218,9 +218,9 @@ def _turned_height(grid: _Grid, cell: Any, p: int, fonts: _Fonts) -> float:
 
     Angled: the text's width times the sine of its angle, its size times the cosine, and
     ``ROTATED_EXTRA``, to the nearest point (captured over three lengths at 15, 45, 75 and 90
-    degrees and 9, 11, 14 and 20 pt; at 14 and 20 pt Excel measures text wider than xlformat's
-    tables); wrapped, justified or distributed angled text leaves the row as it is. Stacked: a
-    font line a character and ``STACKED_EXTRA``.
+    degrees and 9, 11, 14 and 20 pt: within 2 pt below 90 degrees; at exactly 90 Excel's long rows
+    are up to 9 pt taller at 20 pt, not modeled); wrapped, justified or distributed angled text
+    leaves the row as it is. Stacked: a font line a character and ``STACKED_EXTRA``.
     """
     shown = grid.show(cell, [p])
     content = _UNDRAWN.sub("", (shown.full_text or shown.text).replace("\n", ""))

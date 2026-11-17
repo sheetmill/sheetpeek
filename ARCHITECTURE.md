@@ -1196,12 +1196,12 @@ boxes match a rigid rotation of the upright box (captured: 45°, 58.5 × 57.5 pt
   extent: right for positive angles, left for negative ones, both when centered (captured).
 - **Fitted rows:** a row Excel fits grows to `W·|sin θ| + S·|cos θ| + 7` pt, to the nearest
   point, with `W` the text's width and `S` its font size. Captured over three lengths, four angles
-  and four sizes: within 2 pt at 9 and 11 pt (at 90° Excel's row is exactly `W + 7`), but Excel
-  measures larger text wider than xlformat's widths, by about 0.13 pt a character at 14 pt and
-  0.5 at 20 pt, so long text at 20 pt fits rows up to 19 pt taller (a known gap). It is the
-  glyph tables, not the angle: upright text and text at 90° measure the same ink length at 11,
-  14 and 20 pt (77, 99.5 and 145.5 pt for "Rotated text here"; captured, `upright`). A merge does
-  not count, as for wrapped text.
+  and four sizes: with xlformat's tables measured at each size, rows at 15 to 75° are within 2 pt
+  at every size (the median 2 pt short at 20 pt), and upright text's ink ends within 0.8 pt. At
+  exactly 90° Excel fits the row taller than `W + 7` as the text grows: short by up to 1, 2, 4
+  and 9 pt at 9, 11, 14 and 20 pt (the long text), though its 90° ink equals its upright ink
+  (captured, `upright`); the cause is not known and not captured yet. A merge does not count,
+  as for wrapped text.
 - **Wrapped angled text** (wrap, justify or distributed) wraps along the turned direction: a line
   holds what a fitted row of this height would, `W·|sin θ| + S·|cos θ| + 7 ≤ h`, with a word joining
   a line only if the space after it fits too (§4.7); the lines step one font line (15 pt at Calibri
