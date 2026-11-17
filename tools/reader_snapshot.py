@@ -97,7 +97,7 @@ def _sheet(book: Any, name: str) -> dict[str, Any]:
         "links": _digest((c.row, c.column, c.hyperlink) for c in cells if c.hyperlink),
         "notices": sorted(f"{n.code}:{n.count}" for n in sheet.notices),
         "notice_cells": _digest(
-            sorted((n.code, tuple(map(str, n.ranges))) for n in sheet.notices if n.ranges)
+            sorted((n.code, tuple(map(str, n.cells))) for n in sheet.notices if n.cells)
         ),
         "normal": repr(sheet.normal_font),
         "grid": repr((sheet.show_gridlines, sheet.grid_color)),
