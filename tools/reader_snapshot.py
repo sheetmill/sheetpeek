@@ -17,14 +17,32 @@ Run it under ``tests/watchdog.py``: the watchdog bounds the whole process group,
 included, and each read is bounded by ``max_cells`` (2,000,000) besides. ``snap LIST OUT
 [START STOP]`` snapshots lines START to STOP of LIST; ``diff A B [EXAMPLES]`` prints how many
 records differ in each field, with a few examples of each.
+
+Sweeping the whole corpus takes about 10 minutes with 4 workers. Use ``--workers 8`` when no
+Excel capture runs and nothing else is being timed. Re-sweep a baseline only when this tool's
+records change; otherwise diff against the saved one. While iterating on a step, sweep the
+quick tier, and sweep the whole corpus once per step, before its commit:
+
+    python tools/reader_snapshot.py sample list.txt quick.txt a.jsonl b.jsonl ... [--with FIELD]
+    python -m tests.watchdog -- python tools/reader_snapshot.py sweep src quick.txt q.jsonl
+
+``sample LIST OUT SNAPSHOT... [--with FIELD ...] [--random N]`` writes the quick tier's list,
+in LIST's order: every file whose records differ between any two consecutive SNAPSHOTs given
+(pass the snapshots of committed steps, oldest first, so a file that ever differed between
+steps stays in; a try's snapshot with a bug since fixed would add every file it touched), every
+file with a sheet whose FIELD (``runs``, ``outline``, ``links``, ...) is not that field's most
+common value in the first snapshot (the files carrying the feature under change), and N more
+files drawn from the rest of LIST (default 300, a fixed seed, so the tier is the same each time).
 """
 
 from __future__ import annotations
 
 import collections
 import hashlib
+import itertools
 import json
 import os
+import random
 import subprocess
 import sys
 import warnings
@@ -170,8 +188,35 @@ def diff(before: str, after: str, examples: int = 3) -> None:
         print("only one side:", key[0].rsplit("/", 1)[-1], key[1])
 
 
+def sample(
+    listing: str, out: str, snapshots: list[str], fields: list[str], extra: int = 300
+) -> None:
+    """Write the quick tier's list: see the module's docstring."""
+    paths = [p for p in Path(listing).read_text().split("\n") if p]
+    loaded = [_load(path) for path in snapshots]
+    chosen: set[str] = set()
+    for a, b in itertools.pairwise(loaded):
+        for key in a.keys() | b.keys():
+            before, after = a.get(key, {}), b.get(key, {})
+            shared = before.keys() & after.keys() if before and after else {"file"}
+            # Fields one snapshot lacks (an older format) are not differences.
+            if not (before and after) or any(before[f] != after[f] for f in shared):
+                chosen.add(key[0])
+    for field in fields:
+        values = collections.Counter(r.get(field) for r in loaded[0].values() if "sheet" in r)
+        common = values.most_common(1)[0][0] if values else None
+        chosen.update(
+            key[0] for key, r in loaded[0].items() if "sheet" in r and r.get(field) != common
+        )
+    rest = [p for p in paths if p not in chosen]
+    chosen.update(random.Random(0).sample(rest, min(extra, len(rest))))
+    kept = [p for p in paths if p in chosen]
+    Path(out).write_text("".join(f"{p}\n" for p in kept), encoding="utf-8")
+    print(f"{len(kept)} of {len(paths)} files")
+
+
 def main(argv: list[str]) -> None:
-    """The command line: ``snap``, ``sweep`` or ``diff``."""
+    """The command line: ``snap``, ``sweep``, ``diff`` or ``sample``."""
     if len(argv) >= 3 and argv[0] == "snap":
         bounds = [int(v) for v in argv[3:5]]
         snap(argv[1], argv[2], *bounds)
@@ -180,6 +225,18 @@ def main(argv: list[str]) -> None:
         sweep(argv[1], argv[2], argv[3], workers)
     elif len(argv) >= 3 and argv[0] == "diff":
         diff(argv[1], argv[2], int(argv[3]) if len(argv) > 3 else 3)
+    elif len(argv) >= 4 and argv[0] == "sample":
+        snapshots, fields, extra, rest = [], [], 300, argv[3:]
+        while rest:
+            if rest[0] == "--with":
+                fields.append(rest[1])
+                rest = rest[2:]
+            elif rest[0] == "--random":
+                extra = int(rest[1])
+                rest = rest[2:]
+            else:
+                snapshots.append(rest.pop(0))
+        sample(argv[1], argv[2], snapshots, fields, extra)
     else:
         raise SystemExit(__doc__)
 
