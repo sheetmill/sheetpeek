@@ -229,6 +229,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Sheet.warnings` and `RenderedSheet.warnings`, now views of the notices that were warnings
   before. Use `notices`.
 
+### Fixed
+- Built-in number formats are Excel's (xlformat's table, captured from Excel for Mac), no
+  longer openpyxl's: a typed date, which Excel stores as format 14, shows as `1/2/24` where it
+  showed `01-02-24`; formats 44 and 47 are Excel's, and the built-in ids from 50 to 163, read as
+  General before, are the formats Excel gives them.
+
 ## [0.2.0] - 2026-11-04
 
 ### Added

@@ -57,19 +57,45 @@ def zip_text(path, part):
         return archive.read(part).decode()
 
 
-def test_built_in_date_format_14_is_read_as_today(tmp_path):
-    # Pinned on purpose: the built-in codes come from openpyxl's table, which gives id 14 (what
-    # Excel writes for a typed short date) as mm-dd-yy. What Excel for Mac shows for it is not
-    # captured yet; xlformat is to own the built-in table from that capture. When the table
-    # changes, this fails: update it with the capture, and list the change in the changelog.
+def test_built_in_date_format_14_is_excels(tmp_path):
+    # Id 14 is what Excel writes for a typed short date; Excel for Mac shows it as m/d/yy
+    # (xlformat's captured table), where openpyxl's table gave mm-dd-yy.
     wb = openpyxl.Workbook()
     wb.active["A1"] = 45293  # 2024-01-02
     wb.active["A1"].number_format = "mm-dd-yy"  # openpyxl writes it as numFmtId 14
     path = save(wb, tmp_path / "date14.xlsx")
     assert 'numFmtId="14"' in zip_text(path, "xl/styles.xml")
     sheet = sheetpeek.read(path)
-    assert sheet.cell(1, 1).style.number_format == "mm-dd-yy"
-    assert sheetpeek.render(sheet, "text").strip() == "01-02-24"
+    assert sheet.cell(1, 1).style.number_format == "m/d/yy"
+    assert sheetpeek.render(sheet, "text").strip() == "1/2/24"
+
+
+@pytest.mark.parametrize(
+    ("number_format_id", "code"),
+    [
+        (0, "General"),
+        (44, '_($* #,##0.00_);_($* (#,##0.00);_($* "-"??_);_(@_)'),
+        (47, "mm:ss.0"),
+        (50, "m/d/yy"),  # past openpyxl's table, which read it as General
+        (164, "General"),  # a custom id the file does not define
+        (99999, "General"),
+    ],
+)
+def test_built_in_format_ids(tmp_path, number_format_id, code):
+    wb = openpyxl.Workbook()
+    wb.active["A1"] = 1
+    wb.active["A1"].number_format = "0.000"
+    path = save(wb, tmp_path / "ids.xlsx")
+    rewrite(
+        path,
+        "xl/styles.xml",
+        lambda t: re.sub(
+            r'numFmtId="16\d"',
+            f'numFmtId="{number_format_id}"',
+            re.sub(r"<numFmts.*?</numFmts>", "", t),
+        ),
+    )
+    assert sheetpeek.read(path).cell(1, 1).style.number_format == code
 
 
 def test_value_kinds(tmp_path):

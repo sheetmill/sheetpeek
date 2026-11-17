@@ -21,7 +21,6 @@ from typing import IO, Any, overload
 
 import xlformat
 import xlio
-from openpyxl.styles.numbers import BUILTIN_FORMATS
 from openpyxl.utils.datetime import CALENDAR_MAC_1904, CALENDAR_WINDOWS_1900, from_ISO8601, to_excel
 
 from sheetpeek import _style as styles
@@ -631,7 +630,7 @@ class Book:
             cell_format = self._book.styles.cell_formats[index]
             code = cell_format.number_format
             if code is None:
-                code = BUILTIN_FORMATS.get(cell_format.number_format_id, "General")
+                code = _builtin_format(cell_format.number_format_id)
             cell_format = dataclasses.replace(cell_format, number_format=code)
             found = self._styles[index] = styles.resolve(cell_format, self._context)
         return found
@@ -773,3 +772,14 @@ def _rows(structure: Structure, ref: CellRange | None) -> tuple[Row, ...]:
         height, hidden = structure.rows.get(index, (None, False))
         result.append(Row(index, height, hidden, index in structure.listed_rows))
     return tuple(result)
+
+
+def _builtin_format(number_format_id: int) -> str:
+    """The code of a built-in format id, as Excel shows it (xlformat's captured table).
+
+    A custom id the file does not define reads as General (unverified).
+    """
+    try:
+        return xlformat.builtin_format(number_format_id)
+    except ValueError:
+        return "General"
