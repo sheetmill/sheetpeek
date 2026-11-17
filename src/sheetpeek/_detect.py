@@ -21,14 +21,12 @@ import xlio
 
 from sheetpeek._model import CellRange
 from sheetpeek._notices import Collector, Outcome, Reason
-from sheetpeek._structure import PHONETIC, RICH, Structure
 from sheetpeek._style import Code
 
 _MAIN = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
 _REL = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 _MC = "http://schemas.openxmlformats.org/markup-compatibility/2006"
 _DRAWING = "http://schemas.openxmlformats.org/drawingml/2006/main"
-_CHUNK = 1 << 20
 
 # What each reader code reports: outcome, reason, and what is drawn instead (or why not).
 CODES: dict[str, tuple[Outcome, Reason, str]] = {
@@ -156,7 +154,6 @@ class WorkbookInfo:
     kinds: dict[str, str] = field(default_factory=dict)
     """Sheet name → ``worksheet``, ``chartsheet``, ``dialogsheet`` or ``macrosheet``."""
     show_objects: str = "all"
-    strings_part: str | None = None
 
 
 def _related(parts: xlio.Parts, part: str) -> list[tuple[str, str, str, bool]]:
@@ -180,7 +177,7 @@ def _workbook_part(parts: xlio.Parts) -> str:
 
 
 def workbook_info(parts: xlio.Parts) -> WorkbookInfo:
-    """Read sheet kinds, ``showObjects`` and the shared strings part."""
+    """Read sheet kinds and ``showObjects``."""
     part = _workbook_part(parts)
     rels = {rid: (kind, target) for rid, kind, target, _ in _related(parts, part)}
     root = ET.fromstring(parts.read(part))
@@ -193,10 +190,7 @@ def workbook_info(parts: xlio.Parts) -> WorkbookInfo:
         )
     properties = root.find(f"{{{_MAIN}}}workbookPr")
     show_objects = properties.get("showObjects", "all") if properties is not None else "all"
-    strings = next(
-        (target for kind, target in rels.values() if kind.endswith("/sharedStrings")), None
-    )
-    return WorkbookInfo(kinds, show_objects, strings)
+    return WorkbookInfo(kinds, show_objects)
 
 
 def book_notices(collector: Collector, info: WorkbookInfo) -> None:
@@ -216,41 +210,6 @@ def hidden_sheets(collector: Collector, names: list[str], very_hidden: int) -> N
     detail = f"{very_hidden} of them very hidden; {how}" if very_hidden else how
     context: dict[str, str | int | float] = {"very_hidden": very_hidden}
     _report(collector, "sheet.hidden", count=len(names), detail=detail, context=context)
-
-
-def string_marks(parts: xlio.Parts, part: str | None) -> bytes | None:
-    """Per shared string, :data:`RICH` and :data:`PHONETIC` bits; ``None`` when none is set.
-
-    A byte search skips the parse for the many workbooks whose strings have neither.
-    """
-    if part is None or part not in parts:
-        return None
-    found = False
-    tail = b""
-    with parts.open(part) as handle:
-        while chunk := handle.read(_CHUNK):
-            data = tail + chunk
-            if b"<r>" in data or b":r>" in data or b"rPh" in data:
-                found = True
-                break
-            tail = data[-8:]
-    if not found:
-        return None
-    marks = bytearray()
-    with parts.open(part) as handle:
-        for _, element in ET.iterparse(handle):
-            if element.tag.rpartition("}")[2] != "si":
-                continue
-            mark = 0
-            for child in element:
-                local = child.tag.rpartition("}")[2]
-                if local == "r":
-                    mark |= RICH
-                elif local == "rPh":
-                    mark |= PHONETIC
-            marks.append(mark)
-            element.clear()
-    return bytes(marks) if any(marks) else None
 
 
 def visible_style(styles: Any, index: int) -> bool:
@@ -301,39 +260,142 @@ def rule(*names: str) -> Callable[[Rule], Rule]:
     return register
 
 
+# The worksheet's children in the schema's order (CT_Worksheet), which a valid file follows: the
+# rules run in this order, so notices come in the order of the file's elements.
+_ORDER = {
+    name: i
+    for i, name in enumerate(
+        [
+            "sheetPr",
+            "dimension",
+            "sheetViews",
+            "sheetFormatPr",
+            "cols",
+            "sheetData",
+            "sheetCalcPr",
+            "sheetProtection",
+            "protectedRanges",
+            "scenarios",
+            "autoFilter",
+            "sortState",
+            "dataConsolidate",
+            "customSheetViews",
+            "mergeCells",
+            "phoneticPr",
+            "conditionalFormatting",
+            "dataValidations",
+            "hyperlinks",
+            "printOptions",
+            "pageMargins",
+            "pageSetup",
+            "headerFooter",
+            "rowBreaks",
+            "colBreaks",
+            "customProperties",
+            "cellWatches",
+            "ignoredErrors",
+            "smartTags",
+            "drawing",
+            "legacyDrawing",
+            "legacyDrawingHF",
+            "drawingHF",
+            "picture",
+            "oleObjects",
+            "controls",
+            "webPublishItems",
+            "tableParts",
+            "extLst",
+        ]
+    )
+}
+# Children whose rule reads a relationship: found through the sheet's relationships, wherever
+# the element stands (an ``mc:AlternateContent`` included), so an unwrapped one is not run again.
+_BY_RELATIONSHIP = frozenset({"drawing", "legacyDrawing", "picture", "tableParts"})
+
+
 def sheet_notices(
     collector: Collector,
     parts: xlio.Parts,
-    part: str,
-    structure: Structure,
+    sheet: xlio.Sheet,
     info: WorkbookInfo,
     name: str,
     ref: CellRange | None,
 ) -> None:
-    """Report what one sheet uses at sheet level and from its other parts."""
+    """Report what one sheet uses at sheet level and from its other parts.
+
+    What xlio models is read from its models, the rest from ``Sheet.unparsed``; the rules run
+    in the schema's order of the elements.
+    """
     if info.kinds.get(name) == "macrosheet":
         _report(collector, "sheet.macrosheet")
+    part = sheet.part
     context = SheetContext(
         collector,
         parts,
         {rid: (kind, target, external) for rid, kind, target, external in _related(parts, part)},
         info.show_objects != "none",
     )
-    for child in _children(structure.children):
-        local, namespace = _local(child)
-        if namespace != _MAIN:
-            _report(
-                collector,
-                "sheet.unknown_element",
-                detail=f"<{local}>",
-                context={"element": child.tag},
-            )
-        elif local in RULES:
-            RULES[local](context, child)
-        elif local not in _SILENT and local not in _READ:
-            _report(
-                collector, "sheet.unknown_element", detail=f"<{local}>", context={"element": local}
-            )
+    steps: list[tuple[int, Callable[[], None]]] = []
+
+    def at(local: str, step: Callable[[], None]) -> None:
+        steps.append((_ORDER.get(local, len(_ORDER)), step))
+
+    def run(rule: Rule, element: ET.Element) -> Callable[[], None]:
+        return lambda: rule(context, element)
+
+    def unknown(local: str, element: str) -> Callable[[], None]:
+        return lambda: _report(
+            collector, "sheet.unknown_element", detail=f"<{local}>", context={"element": element}
+        )
+
+    properties = sheet.properties.source
+    if properties is not None:
+        at("sheetPr", run(_sheet_properties, properties))
+    views = sheet.views
+    if views and views[0].source is not None:
+        view = views[0].source
+        at("sheetViews", lambda: _view(collector, view))
+    if sheet.autofilter is not None and sheet.autofilter.source is not None:
+        at("autoFilter", run(_filter, sheet.autofilter.source))
+    for found in sheet.conditional_formats:
+        if not found.extension and found.source is not None:
+            at("conditionalFormatting", run(_conditional, found.source))
+    hf = {
+        item.element.get(f"{{{_REL}}}id")
+        for item in sheet.unparsed
+        if item.path == "worksheet/legacyDrawingHF"
+    }
+    related = [r for r in sheet.relationships if not r.external and r.target_part]
+    drawing = next((r for r in related if r.type.endswith("/drawing")), None)
+    if drawing is not None and context.objects:
+        target = drawing.target_part or ""
+        at("drawing", lambda: _drawing(collector, parts, target))
+    vml = next((r for r in related if r.type.endswith("/vmlDrawing") and r.id not in hf), None)
+    if vml is not None and context.objects:
+        target_vml = vml.target_part or ""
+        at("legacyDrawing", lambda: _vml(collector, parts, target_vml))
+    if sheet.background is not None:
+        at("picture", lambda: _report(collector, "picture.background"))
+    if tables := sum(1 for r in related if r.type.endswith("/table")):
+        at("tableParts", lambda: _report(collector, "table", count=tables))
+    for item in sheet.unparsed:
+        if item.path.count("/") != 1:
+            continue  # inside a modeled element: read or ignored with it
+        for child in _children((item.element,)):
+            local, namespace = _local(child)
+            if namespace != _MAIN:
+                at(local, unknown(local, child.tag))
+            elif local in _BY_RELATIONSHIP:
+                continue
+            elif local in RULES:
+                at(local, run(RULES[local], child))
+            elif local not in _SILENT and local not in _READ:
+                at(local, unknown(local, local))
+    if sheet.extensions:
+        elements = [e.element for e in sheet.extensions]
+        at("extLst", lambda: _extensions(collector, elements))
+    for _, step in sorted(steps, key=lambda s: s[0]):
+        step()
     _comments(collector, parts, context.rels, ref)
 
 
@@ -361,31 +423,6 @@ def _conditional(context: SheetContext, child: ET.Element) -> None:
 def _filter(context: SheetContext, child: ET.Element) -> None:
     if child.get("ref"):
         _report(context.collector, "filter.buttons")
-
-
-@rule("tableParts")
-def _tables(context: SheetContext, child: ET.Element) -> None:
-    if tables := sum(1 for _ in child.iter(f"{{{_MAIN}}}tablePart")):
-        _report(context.collector, "table", count=tables)
-
-
-@rule("drawing", "legacyDrawing")
-def _drawings(context: SheetContext, child: ET.Element) -> None:
-    if not context.objects:
-        return
-    target = context.rels.get(child.get(f"{{{_REL}}}id", ""))
-    if target is None or target[2]:
-        return
-    if _local(child)[0] == "drawing":
-        _drawing(context.collector, context.parts, target[1])
-    else:
-        _vml(context.collector, context.parts, target[1])
-
-
-@rule("picture")
-def _background(context: SheetContext, child: ET.Element) -> None:
-    if child.get(f"{{{_REL}}}id"):
-        _report(context.collector, "picture.background")
 
 
 @rule("oleObjects", "controls")
@@ -456,7 +493,7 @@ def _view(collector: Collector, view: ET.Element) -> None:
             _report(collector, "view.panes", context={"state": state})
 
 
-def _extensions(collector: Collector, ext_list: ET.Element) -> None:
+def _extensions(collector: Collector, ext_list: Iterable[ET.Element]) -> None:
     for ext in ext_list:
         if _local(ext)[0] != "ext":
             continue

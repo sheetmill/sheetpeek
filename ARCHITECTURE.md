@@ -43,8 +43,8 @@ CLI views a file and serves a folder of workbooks as HTML.
 
 ```
 xlsx ──read──▶ Sheet ──layout(mode)──▶ RenderedSheet ──backend──▶ text stream
-   openpyxl read-only     source facts,      display text, overflow,     HTML, Markdown,
-   + structure scan       layout-free        spill, visibility           rich, text
+   xlio: one pass of     source facts,      display text, overflow,     HTML, Markdown,
+   the cell stream        layout-free        spill, visibility           rich, text
 ```
 
 A **`Sheet`** holds what the file says, independent of how it will be shown: raw cached values,
@@ -123,7 +123,7 @@ layout fields marked *layout*. The style fields (`number_format` to `indent`) li
 | `rotation`, `stacked` | `int` (−90 to 90), `bool` | `cell.alignment.textRotation`: 0 to 90 as stored, 91 to 180 as 90 − value, 255 stacked | §4.17 |
 | `font.vert_align` | `"superscript" \| "subscript" \| None` | `cell.font.vertAlign` | drawn at 2/3 size, raised or lowered (§4.13) |
 | `runs` | `tuple[TextSpan, ...] \| None` | the shared string's runs (§4.16) | each run's text and resolved `Font`; `None` without runs or when every run is in the cell's font; `value` is their text joined |
-| `hyperlink` | `Hyperlink \| None` | xlio's `<hyperlinks>` and the structure scan's `HYPERLINK()` formulas (§4.10) | `target`, `location`, `tooltip`, `display` (never drawn), `source` (`element` or `formula`) |
+| `hyperlink` | `Hyperlink \| None` | xlio's `<hyperlinks>` and the `HYPERLINK()` formulas in xlio's cell stream (§4.10) | `target`, `location`, `tooltip`, `display` (never drawn), `source` (`element` or `formula`) |
 | *layout* `text` | `str` | xlformat `FormattedCell.text` at the mode's width | what the cell itself shows: `####`, reduced `General`, `*` fills applied; never clipped or spilled |
 | *layout* `full_text` | `str` | `FormattedCell.full_text` | width-less; what copy and paste gives |
 | *layout* `overflow` | `bool` | `FormattedCell.overflow` | `text` is a run of `#` |
@@ -145,7 +145,7 @@ text styles into `Font` and `CellStyle` (§4.13). Rich-text runs inside one cell
 | field | source |
 |---|---|
 | `name`, `state` (`visible`, `hidden`, `very_hidden`) | `ws.title`, `ws.sheet_state` |
-| `used_range` | the structure scan: bounding box of every `<c>` element, from `<row r>` and `<c r>` (positions inferred when `r` is omitted, as the schema allows), widened to cover every merged range, since a merge occupies its cells even where the file has no `<c>` for them; `<dimension>` is never trusted |
+| `used_range` | the cell stream: bounding box of every cell xlio gives (positions inferred when `r` is omitted, as the schema allows), widened to cover every merged range, since a merge occupies its cells even where the file has no `<c>` for them; `<dimension>` is never trusted |
 | `ref` | the requested range, or `used_range` |
 | `merges` | scan: `<mergeCells>` |
 | `columns`: per column `width`, `hidden`, `outline_level`, `collapsed` | xlio: `<cols>` (each `<col>` covers `min` to `max`) |
@@ -320,7 +320,7 @@ reason and context, never one per cell.
 Three producers, one for each stage:
 1. **The reader** (`Sheet.notices`, `_detect.py`) reports what the file uses that the model does
    not carry. Styles are checked once per style, by each aspect in `_style/` (section colors
-   against the workbook palette, rotation); the structure scan marks rich-text and phonetic
+   against the workbook palette, rotation); the cell stream marks rich-text and phonetic
    cells, uncached formulas, row and column styles, and links no
    output can follow (§4.10); the sheet's other children, its drawing, VML, comments and
    threaded comments parts, and the workbook's sheet kinds and print names give the rest.
@@ -626,8 +626,8 @@ unshrunk size (§4.13).
 
 **Captured** (`capture/excel_saved.py`; the saved file is `tests/files/excel_formulas.xlsx`):
 Excel writes a formula returning `""` as `<c t="str"><f>""</f><v/></c>`, `t="str"` with an empty
-value element. The structure scan treats that form as the empty string, which stops a spill;
-openpyxl alone reads it as an empty cell. A formula without a cached value (as openpyxl writes it)
+value element. xlio reads that form as the empty string, which stops a spill; openpyxl alone
+read it as an empty cell. A formula without a cached value (as openpyxl writes it)
 has no `t`. The same file confirms Excel stores `=DATE(1900,2,29)` as serial 60, which the reader
 keeps (§5.3).
 
@@ -1418,38 +1418,36 @@ release.
 
 ### 5.4 Reading strategy
 
-**Now:** xlio reads the cells (`Sheet.cells`), the structure, the styles and the parts; openpyxl
-is not loaded. A structure scan of sheetpeek's own still reads what xlio does not yet give (below).
-§5.1 to §5.3 record the openpyxl reader this replaced. In it, cells were read in openpyxl's read-only mode with date conversion off; normal mode was
-rejected (about 465 bytes per cell, the leap day and some seconds lost, a 100-row preview as slow
-as reading the whole file).
+**Now:** xlio reads the cells, the structure, the styles and the parts; openpyxl is not loaded.
+§5.1 to §5.3 record the openpyxl reader this replaced. In it, cells were read in openpyxl's
+read-only mode with date conversion off; normal mode was rejected (about 465 bytes per cell, the
+leap day and some seconds lost, a 100-row preview as slow as reading the whole file).
 
 xlio reads the sheet format (`<sheetFormatPr>`), `<cols>`, each `<row>`'s height, hidden flag and
-format, `<mergeCells>`, `<hyperlinks>` and the first `<sheetView>`'s gridline settings, each
-value as Excel takes it (`_structure.fill`, `_scan_links.with_elements`). The scan is one pass of `xml.etree.ElementTree.iterparse` over the
-worksheet part. It records:
-- each `<row>`'s `r`, for the rows the file lists, and each `<c>`'s `r`, for the used range;
-- through features' own handlers, the formulas that call `HYPERLINK()` (`_scan_links.py`,
-  §4.10).
+format (a `<row>` that sets nothing included), `<mergeCells>`, `<hyperlinks>` and the first
+`<sheetView>`'s settings, each value as Excel takes it (`_structure.fill`,
+`_scan_links.with_elements`). The cells come from one pass of xlio's stream (`Sheet.cells` with
+runs, in `Book._stream`), which gives at the same time:
+- the bounds of every cell, which with the merged ranges make the used range, and the rows with
+  cells, which with xlio's rows make the rows the file lists (§4.7);
+- formulas without a cached value, strings with runs, shown phonetic guides, and formulas that
+  call `HYPERLINK()` (`_scan_links.add_formula`, §4.10).
 
-Cells are handled at the end of their row, after which the row is cleared. A row's column extent
-comes from its first and last cell, since the schema orders cells by column; each cell is
-touched only to notice a formula without a cached value. The worksheet part's path comes from
-the package itself, not from openpyxl's private `_worksheet_path`: `xl/workbook.xml` maps sheet
-names to relationship ids, and `xl/_rels/workbook.xml.rels` maps those to parts.
+Each sheetpeek cell is built as the stream yields it and kept in its row's list; no `xlio.Cell`
+is kept, and a row's cells share one row number (each cell's own `int` cost 32 bytes a cell).
+With `ref`, only the cells inside it are built, but the whole part is read, since the used range
+needs every cell. The style notices go to a collector of their own, merged after the sheet's own
+notices, so the notices keep the file's order. The sheet's other children reach the detectors as
+xlio's models (`_detect.sheet_notices`), drawings, VML, the background and tables through the
+sheet's relationships, everything else as `Sheet.unparsed`. A test reads files whose
+`<dimension>` is missing, too small and too large, and checks the used range and that no cell is
+dropped.
 
-Measured on the 2-million-cell file:
-- The scan takes 2.40 s at 30 MB peak.
-- `sheetpeek.read` of the whole sheet takes 11.3 s at 309 MB peak. Most of that memory is the
-  model's own grid of cells. Normal mode would need 931 MB before the model is built.
-- A 100-row preview (`ref="A1:T100"`) takes 4.3 s at 38 MB, made up of the shared strings
-  (1.8 s), the scan (2.4 s) and almost nothing for the cells.
-
-The scan still tokenizes the whole part, so a faster preview would need to stop it early. It
-cannot stop at the end of `<sheetData>` because `<mergeCells>` and `<hyperlinks>` follow it.
-A preview doesn't need this yet. A test reads
-files whose `<dimension>` is missing, too small and too large, and checks the used range and that
-no cell is dropped. The read-only iterator is given the scan's bounds explicitly.
+Measured (best of three, each version from its own tree): the 100,000-cell bench sheets read in
+0.46 s (plain) and 0.66 s (features); the largest corpus workbook (42 MB, 15.2 million cells over
+its sheets) in 38 s at 855 MiB peak RSS. Python's live allocations peak as in the openpyxl
+reader; the rest of the RSS is the allocator's, the kept cells allocated between the stream's
+short-lived objects.
 
 ### 5.5 Untrusted files
 
@@ -1899,8 +1897,8 @@ src/sheetpeek/
   _runs_model.py     TextSpan, a run of rich text (§4.16)
   _rendered.py       RenderedSheet, RenderedRow, RenderedCell, RenderedColumn, Gap
   _package.py        ReadLimits, the check before reading (§5.5), sheet name → worksheet part
-  _structure.py      the sheet structure (§5.4): xlio's reading plus a scan for cells and rows
-  _scan_links.py     the scan's hyperlink handlers, and the reader's link notices (§4.10)
+  _structure.py      the sheet structure (§5.4): `Structure`, filled from xlio and the cell stream
+  _scan_links.py     hyperlinks from xlio and the cell stream, and the reader's link notices (§4.10)
   _scan_outline.py   the outline from xlio: its rows, columns and settings
   _read.py           the reader: openpyxl read-only, date conversion off; builds a Sheet
   _style/            a cell's style, one module per aspect: number format, border, fill, font,
@@ -1946,8 +1944,9 @@ reads the worksheet XML and knows nothing of layout.
 
 **Where a feature plugs in.** Each stage has one place per feature, so that features can be
 built side by side with little overlap:
-- **reading the sheet XML:** a handler registered by tag in `_structure.HANDLERS`, keeping what
-  it finds in `Scan.extra` under its own key (rows are cleared only after every row handler);
+- **reading the sheet:** a function that takes the `Structure` and the `xlio.Sheet` and keeps
+  what it reads of xlio's models in `Structure.extra` under its own key (`_scan_outline.with_levels`,
+  `_scan_links.with_elements`); what a feature needs of each cell is taken in `Book._stream`;
 - **reading a style:** the aspect's module in `_style/`, whose `read` gives model fields and
   whose `unread` reports what is not drawn yet; a feature moves from one to the other;
 - **reporting what is not read:** a rule per sheet child in `_detect.RULES`, replaced when the
@@ -2218,8 +2217,8 @@ are read.
 - **Unit tests** (default `pytest`, no Excel needed): workbooks built in the test with openpyxl,
   and written as XML parts directly where cached values, missing attributes or exact XML matter.
   They cover:
-  - the package lookup and the structure scan, compared with openpyxl's normal mode on the same
-    files;
+  - the package lookup and the structure the reader finds, compared with openpyxl's normal mode
+    on the same files;
   - the read-only reader's fast path and its date fallback;
   - wrong or missing `<dimension>`;
   - colors;

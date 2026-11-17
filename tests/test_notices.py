@@ -237,12 +237,14 @@ def build_every_feature(path: Path) -> Path:
         replace_once(
             "</Relationships>",
             f'<Relationship Id="rIdDrw" Type="{REL}/drawing" Target="../drawings/drawing9.xml" />'
+            f'<Relationship Id="rIdPic" Type="{REL}/image" Target="../media/background.png" />'
             f'<Relationship Id="rIdThr" Type="http://schemas.microsoft.com/office/2017/10/'
             'relationships/threadedComment" Target="../threadedComments/thread1.xml" />'
             "</Relationships>",
         ),
     )
     replace_part(path, "xl/drawings/drawing9.xml", DRAWING.encode())
+    replace_part(path, "xl/media/background.png", b"\x89PNG\r\n\x1a\n")
     # Excel gives a chartsheet a drawing; openpyxl cannot read one without its relationships.
     replace_part(
         path,

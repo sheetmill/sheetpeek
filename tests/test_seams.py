@@ -1,7 +1,5 @@
 """The places a feature extends the pipeline, so features can be built side by side."""
 
-import io
-
 import openpyxl
 
 import sheetpeek
@@ -18,23 +16,18 @@ def _workbook(tmp_path):
     return save(wb, tmp_path / "seams.xlsx")
 
 
-def test_a_scan_handler_keeps_what_it_finds_in_extra(monkeypatch):
-    found = []
+def test_a_feature_keeps_what_it_reads_in_extra(tmp_path):
+    # Each feature adds what it reads of the sheet to Structure.extra under its own key, so
+    # features meet only in the reader's pipeline (the outline here).
+    from sheetpeek._notices import Collector
+    from sheetpeek._scan_outline import KEY, with_levels
 
-    def outline(state, element):
-        found.append(element.get("outlineLevel"))
-        state.extra["outline"] = found
-
-    monkeypatch.setitem(
-        _structure.HANDLERS, _structure._ROW, [*_structure.HANDLERS[_structure._ROW], outline]
-    )
-    xml = (
-        b'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>'
-        b'<row r="1" outlineLevel="2"><c r="A1"><v>1</v></c></row></sheetData></worksheet>'
-    )
-    structure = _structure.scan(io.BytesIO(xml))
-    assert structure.extra == {"outline": ["2"]}
-    assert structure.used_range == sheetpeek.CellRange(1, 1, 1, 1)  # the core handler still ran
+    with sheetpeek.open(_workbook(tmp_path)) as book:
+        source = book._book.sheet(0)
+        found, _ = book._stream(source, None, Collector("sheet"))
+        structure = with_levels(_structure.fill(found, source), source)
+    assert structure.extra[KEY].rows == {1: 1}
+    assert structure.used_range == sheetpeek.CellRange(1, 1, 1, 1)
 
 
 def test_a_layout_pass_sees_the_draft(tmp_path, monkeypatch):

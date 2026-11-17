@@ -1,22 +1,22 @@
-"""A sheet's structure (the scan and xlio's reading), against openpyxl's normal mode and XML."""
-
-import zipfile
+"""A sheet's structure (the reader's cell stream and xlio's reading), against openpyxl and XML."""
 
 import openpyxl
 import pytest
-import xlio
 from openpyxl.styles import Alignment
 
+import sheetpeek
 from sheetpeek import CellRange
-from sheetpeek._structure import ColumnSpec, fill, scan
-from tests.workbooks import SHEET1, raw_sheet, save
+from sheetpeek._notices import Collector
+from sheetpeek._structure import ColumnSpec, fill
+from tests.workbooks import raw_sheet, save
 
 
 def scan_file(path):
-    with zipfile.ZipFile(path) as archive, archive.open(SHEET1) as handle:
-        found = scan(handle)
-    with xlio.open(path) as book:
-        return fill(found, book.sheet(0))
+    """The first sheet's structure, as the reader finds it before reading its cells."""
+    with sheetpeek.open(path) as book:
+        source = book._book.sheet(0)
+        found, _ = book._stream(source, None, Collector("sheet"))
+        return fill(found, source)
 
 
 @pytest.fixture
@@ -62,12 +62,12 @@ def test_matches_openpyxl_normal_mode(tmp_path):
 def test_used_range_counts_every_cell_element(scan_xml):
     found = scan_xml(
         '<dimension ref="A1"/><sheetData>'
-        '<row r="3"><c r="C3" s="1"/></row>'
-        '<row r="7"><c r="B7"><v>1</v></c><c r="H7" t="s"><v>0</v></c></row>'
+        '<row r="3"><c r="C3" s="0"/></row>'
+        '<row r="7"><c r="B7"><v>1</v></c><c r="H7" t="inlineStr"><is><t>x</t></is></c></row>'
         '<row r="9" ht="30" customHeight="1"/>'
         "</sheetData>"
     )
-    # A styled cell without a value counts; a row with only a height does not.
+    # A cell element without a value counts; a row with only a height does not.
     assert found.used_range == CellRange.parse("B3:H7")
     assert found.rows == {9: (30.0, False)}
 
@@ -106,16 +106,24 @@ def test_column_specs(scan_xml):
     assert found.columns == (ColumnSpec(2, 4, 3.5, False), ColumnSpec(6, 6, None, True))
 
 
-def test_formulas_returning_the_empty_string(scan_xml):
-    found = scan_xml(
+def test_formulas_returning_the_empty_string(tmp_path):
+    # An empty cached string is the empty string (xlio); a t="str" formula without <v> has no
+    # cached value, as xlio reads it (what Excel shows is not captured).
+    path = raw_sheet(
+        tmp_path / "raw.xlsx",
         "<sheetData><row r='1'>"
         "<c r='A1' t='str'><f>\"\"</f><v></v></c>"
         "<c r='B1' t='str'><f>\"\"</f></c>"
         "<c r='C1'><f>1+1</f><v></v></c>"
-        "</row></sheetData>"
+        "</row></sheetData>",
     )
-    assert found.empty_strings == {(1, 1), (1, 2)}
-    assert found.uncached_formulas == 1
+    assert scan_file(path).uncached_formulas == 2
+    sheet = sheetpeek.read(path)
+    assert [(c.value, c.kind) for c in sheet.cells[0]] == [
+        ("", "text"),
+        (None, "empty"),
+        (None, "empty"),
+    ]
 
 
 def test_formulas_without_cached_values(scan_xml):

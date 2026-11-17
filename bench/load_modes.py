@@ -16,7 +16,6 @@ import subprocess
 import sys
 import tempfile
 import time
-import zipfile
 from pathlib import Path
 
 import openpyxl
@@ -29,8 +28,7 @@ MODES = (
     "normal-data-only-styles",
     "read-only",
     "read-only-styles",
-    "read-only-raw-dates",
-    "structure-scan",
+    "cell-stream",
     "package-check",
 )
 
@@ -77,25 +75,17 @@ def measure(path: Path, mode: str) -> None:
             open_package(handle, ReadLimits(), str(path)).close()
         loaded = time.perf_counter()
         cells = 0
-    elif mode == "structure-scan":
-        from sheetpeek._package import worksheet_parts
-        from sheetpeek._structure import scan
+    elif mode == "cell-stream":
+        import xlio  # sheetpeek's reader: one pass of xlio's cell stream, runs included
 
-        with zipfile.ZipFile(path) as archive:
-            part = next(iter(worksheet_parts(archive).values()))
-            with archive.open(part) as handle:
-                scan(handle)
-        loaded = time.perf_counter()
-        cells = 0
+        with xlio.open(path) as book:
+            loaded = time.perf_counter()
+            cells = sum(1 for _ in book.sheet(0).cells(rich=True))
     else:
         options = {"read_only": True, "data_only": True} if mode.startswith("read-only") else {}
         if mode.startswith("normal-data-only"):
             options = {"data_only": True}
         wb = openpyxl.load_workbook(path, **options)
-        if mode == "read-only-raw-dates":
-            from sheetpeek._read import disable_date_conversion
-
-            assert disable_date_conversion(wb)
         loaded = time.perf_counter()
         styles = mode.endswith("-styles")
         cells = 0

@@ -5,8 +5,8 @@ output). Each writes its workbooks into a directory given as an argument, by def
 one, never into the repository.
 
 - `readonly_features.py`: what openpyxl exposes in normal and read-only mode.
-- `load_modes.py`: time and peak memory of reading a large workbook in each mode, and of
-  sheetpeek's structure scan and package check.
+- `load_modes.py`: time and peak memory of reading a large workbook in each of openpyxl's modes,
+  and of xlio's cell stream (what sheetpeek's reader runs) and sheetpeek's package check.
 - `date_fidelity.py`: how often openpyxl's date conversion changes what a format displays.
 - `html_size.py`: size and time of the HTML output for a 5,000 × 20 sheet, in two cases:
   `plain` (formatted numbers, dates, text that spills, a bold filled header) and `features`

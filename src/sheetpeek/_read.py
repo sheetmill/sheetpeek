@@ -1,9 +1,9 @@
 """Read a worksheet into a :class:`~sheetpeek.Sheet`.
 
-Cells come from openpyxl's read-only mode, which streams the sheet in constant memory, with its
-date conversion switched off so that dates stay the serial numbers Excel stores. What read-only
-mode does not expose (merges, column widths, row heights, the used range) comes from the
-structure scan in ``_structure.py``. ``ARCHITECTURE.md`` §5 has the measurements behind this.
+Everything is read through xlio: the cells from one pass of its stream (``Book._stream``), which
+also gives the used range and the marks the notices need, and the structure, styles and parts
+from its models. Dates stay the serial numbers Excel stores. ``ARCHITECTURE.md`` §5.4 has the
+measurements behind this.
 """
 
 from __future__ import annotations
@@ -30,7 +30,6 @@ from sheetpeek._detect import (
     report_cells,
     report_style,
     sheet_notices,
-    string_marks,
     visible_style,
     workbook_info,
 )
@@ -47,7 +46,7 @@ from sheetpeek._model import (
     Sheet,
     SheetState,
 )
-from sheetpeek._notices import Collector, Notice
+from sheetpeek._notices import CellSet, Collector, Notice
 from sheetpeek._package import (
     LimitError,
     PackageError,
@@ -58,7 +57,8 @@ from sheetpeek._package import (
 )
 from sheetpeek._page import MAX_COLUMN, MAX_ROW, manual_breaks, print_areas
 from sheetpeek._runs_model import TextSpan
-from sheetpeek._scan_links import cell_links, with_elements
+from sheetpeek._scan_links import Found as Links
+from sheetpeek._scan_links import add_formula, cell_links, with_elements, with_formulas
 from sheetpeek._scan_links import report as report_links
 from sheetpeek._scan_outline import read_outline, with_levels
 from sheetpeek._scan_view import sheet_view
@@ -71,7 +71,7 @@ from sheetpeek._sheets import (
     default_sheet,
     from_xlio,
 )
-from sheetpeek._structure import Structure, fill, scan
+from sheetpeek._structure import Structure, fill
 from sheetpeek._style import Code
 from sheetpeek._style import font as font_aspect
 from sheetpeek._view_model import SheetView
@@ -196,7 +196,6 @@ class Book:
             self._theme_fonts = xlio_theme_fonts(self._book.theme)
             self._normal_font = self._read_normal_font()
             self._info = workbook_info(self._book.parts)
-            self._marks = string_marks(self._book.parts, self._info.strings_part)
             self._context = styles.Context(
                 self._cell_color, self._normal_font, self._theme_fonts, self._palette
             )
@@ -389,7 +388,6 @@ class Book:
             raise NotAWorksheetError(f"{name!r} {_NOT_SHOWN[kind]}")
         if listed.kind not in ("worksheet", "macrosheet") or name not in self._parts:
             raise NotAWorksheetError(f"{name!r} is not a worksheet")
-        part = self._parts[name]
         if isinstance(ref, str):
             ref = CellRange.parse(ref)
         if ref is not None and not clip:
@@ -397,10 +395,11 @@ class Book:
         assert self._book is not None
         try:
             with self._xlio_errors():
-                with self._book.parts.open(part) as handle:
-                    structure = scan(handle, self._marks)
                 source = self._book.sheet(name)
+                cell_notes = Collector(name)
+                structure, kept = self._stream(source, ref, cell_notes)
                 structure = with_levels(with_elements(fill(structure, source), source), source)
+                structure = with_formulas(structure, structure.extra.pop(_LINKS))
         except PackageError:
             raise
         except Exception as error:
@@ -418,8 +417,9 @@ class Book:
         notes = Collector(name)
         try:
             with self._xlio_errors():
-                sheet_notices(notes, self._book.parts, part, structure, self._info, name, ref)
-                cells = self._read_cells(name, ref, structure, notes) if ref else ()
+                sheet_notices(notes, self._book.parts, source, self._info, name, ref)
+                notes.extend(cell_notes.notices())  # after the sheet's own, as they were read
+                cells = self._grid(kept, ref, structure, notes) if ref else ()
         except PackageError:
             raise
         except Exception as error:
@@ -465,7 +465,7 @@ class Book:
     def _report_structure(
         self, notes: Collector, structure: Structure, ref: CellRange | None
     ) -> None:
-        """Notices from what the structure scan found: uncached formulas, runs, row styles."""
+        """Notices from what the cell stream found: uncached formulas, runs, row styles."""
         if structure.uncached_formulas:
             ranges, truncated = structure.uncached.ranges()
             notes.extend(
@@ -516,49 +516,119 @@ class Book:
             raise NotAWorksheetError("the workbook has no worksheet to show")
         return found.name
 
-    def _read_cells(
-        self, name: str, ref: CellRange, structure: Structure, notes: Collector
-    ) -> tuple[tuple[Cell, ...], ...]:
-        """The cells of ``ref``, from xlio's stream; positions without a ``<c>`` are empty."""
-        assert self._book is not None
-        links = cell_links(structure, ref)
-        width = ref.max_col - ref.min_col + 1
-        rows: dict[int, list[Cell | None]] = {}
+    def _stream(
+        self, sheet: xlio.Sheet, ref: CellRange | None, notes: Collector
+    ) -> tuple[Structure, dict[int, list[Cell]]]:
+        """One pass of xlio's cell stream: the structure's marks, and the cells, built as read.
+
+        The used range is the bounds of every cell the stream gives (the merges are added by
+        :func:`fill`); the rows with cells are listed. Also found: formulas without a cached
+        value, strings with runs, shown phonetic guides, ``HYPERLINK()`` formulas. The cells
+        inside ``ref`` are built, every cell without one (they all lie inside the used range),
+        each kept in its row's list in file order with no hyperlink yet (:meth:`_grid` adds
+        them); what their styles use and is not read goes to ``notes``. No ``xlio.Cell`` is
+        kept, and a row's cells share one row number.
+        """
+        min_row = min_col = 1 << 30
+        max_row = max_col = 0
+        listed: set[int] = set()
+        uncached, runs, phonetic = CellSet(), CellSet(), CellSet()
+        first_uncached: str | None = None
+        links = Links()
+        rows: dict[int, list[Cell]] = {}
+        line: list[Cell] = []
         current = 0
-        for source in self._book.sheet(name).cells(str(ref), rich=True):
+        for source in sheet.cells(rich=True):
             row, column = source.row, source.column
             if row == current:
                 row = current  # one int per row: each cell's own would cost 32 bytes a cell
             else:
                 current = row
+                if row not in listed:
+                    listed.add(row)
+                    min_row = min(min_row, row)
+                    max_row = max(max_row, row)
+                line = rows.setdefault(row, [])
+            if column < min_col:
+                min_col = column
+            if column > max_col:
+                max_col = column
+            formula = source.formula
+            if formula is not None:
+                if source.type == "none":
+                    uncached.add(row, column)
+                    if first_uncached is None:
+                        first_uncached = f"{CellRange(row, column, row, column)}"
+                add_formula(links, formula, row, column)
+            rich = source.rich
+            if rich is not None:
+                if rich.runs:
+                    runs.add(row, column)
+                if rich.phonetic and source.phonetic and source.type == "s":
+                    phonetic.add(row, column)
+            if ref is not None and not (
+                ref.min_row <= row <= ref.max_row and ref.min_col <= column <= ref.max_col
+            ):
+                continue
             value, kind = self._value(source)
-            if value is None and (row, column) in structure.empty_strings:
-                value, kind = "", "text"
             style, every, text = self._style(source.style)
             for code in every:
                 report_style(notes, code, row, column)
             if text and value is not None:
                 for code in text:
                     report_style(notes, code, row, column)
-            found = rows.get(row)
-            if found is None:
-                found = rows[row] = [None] * width
-            found[column - ref.min_col] = Cell(
-                row,
-                column,
-                value,
-                kind,
-                style,
-                links.get((row, column)),
-                self._runs(source.rich, style.font, source.value) if kind == "text" else None,
+            line.append(
+                Cell(
+                    row,
+                    column,
+                    value,
+                    kind,
+                    style,
+                    None,
+                    self._runs(rich, style.font, source.value) if kind == "text" else None,
+                )
             )
-        grid = tuple(
-            tuple(
-                cell or self._empty(index, ref.min_col + offset, links)
-                for offset, cell in enumerate(rows.get(index) or [None] * width)
-            )
-            for index in range(ref.min_row, ref.max_row + 1)
+        used = CellRange(min_row, min_col, max_row, max_col) if max_row else None
+        listed.update(sheet.rows)
+        structure = Structure(
+            used_range=used,
+            uncached_formulas=uncached.count,
+            first_uncached_formula=first_uncached,
+            listed_rows=frozenset(listed),
+            uncached=uncached,
+            runs=runs,
+            phonetic=phonetic,
+            extra={_LINKS: links},
         )
+        return structure, rows
+
+    def _grid(
+        self,
+        rows: dict[int, list[Cell]],
+        ref: CellRange,
+        structure: Structure,
+        notes: Collector,
+    ) -> tuple[tuple[Cell, ...], ...]:
+        """The cells of ``ref`` from the stream's rows, with their links; others are empty.
+
+        Each row's list is let go once its row is built. A cell the file repeats is the last one.
+        """
+        links = cell_links(structure, ref)
+        first, width = ref.min_col, ref.max_col - ref.min_col + 1
+
+        def line(index: int) -> tuple[Cell, ...]:
+            placed: list[Cell | None] = [None] * width
+            for cell in rows.pop(index, ()):
+                if first <= cell.column <= ref.max_col:
+                    if links and (found := links.get((cell.row, cell.column))) is not None:
+                        cell = dataclasses.replace(cell, hyperlink=found)
+                    placed[cell.column - first] = cell
+            return tuple(
+                cell or self._empty(index, first + offset, links)
+                for offset, cell in enumerate(placed)
+            )
+
+        grid = tuple(line(index) for index in range(ref.min_row, ref.max_row + 1))
         report_links(notes, structure, ref, grid)
         return grid
 
@@ -788,3 +858,7 @@ def _builtin_format(number_format_id: int) -> str:
         return xlformat.builtin_format(number_format_id)
     except ValueError:
         return "General"
+
+
+_LINKS = "_stream_links"
+"""Where :meth:`Book._stream` leaves the ``HYPERLINK()`` formulas, until the elements are read."""

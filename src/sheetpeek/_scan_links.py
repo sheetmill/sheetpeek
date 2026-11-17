@@ -1,7 +1,8 @@
 """Hyperlinks: ``<hyperlink>`` elements and ``HYPERLINK()`` formulas.
 
-xlio reads the elements (:func:`with_elements`); the structure scan's handlers find the formulas.
-Both are kept in ``Structure.extra`` under :data:`KEY`; the reader then gives each cell its
+xlio reads the elements (:func:`with_elements`); the reader finds the formulas in xlio's cell
+stream (:func:`add_formula`). Both are kept in ``Structure.extra`` under :data:`KEY`; the reader
+then gives each cell its
 :class:`~sheetpeek.Hyperlink` and reports what cannot be linked (``ARCHITECTURE.md`` §4.10).
 """
 
@@ -10,7 +11,6 @@ from __future__ import annotations
 import contextlib
 import dataclasses
 import re
-import xml.etree.ElementTree as ET
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
@@ -18,18 +18,15 @@ import xlio
 
 from sheetpeek._hyperlink import LOCAL_TARGETS, Hyperlink, check_target
 from sheetpeek._model import CellRange
-from sheetpeek._structure import Scan, Structure, handler
+from sheetpeek._structure import Structure
 
 if TYPE_CHECKING:
     from sheetpeek._model import Cell
     from sheetpeek._notices import Collector
 
 KEY = "links"
-"""Where the handlers keep what they find, in ``Scan.extra`` and ``Structure.extra``."""
+"""Where what is found is kept, in ``Structure.extra``."""
 
-_NS = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
-_FORMULA = f"{_NS}f"
-_ROW = f"{_NS}row"
 _STRING = re.compile(r'"(?:[^"]|"")*"')
 _CALL = re.compile(r"(?<![\w.])HYPERLINK\s*\(", re.IGNORECASE)
 _LITERAL = re.compile(r'\s*HYPERLINK\s*\(\s*"((?:[^"]|"")*)"\s*[,)]', re.IGNORECASE)
@@ -37,9 +34,9 @@ _LABEL = 24  # characters of a refused scheme kept in a message
 
 
 class Found:
-    """What the handlers found in one worksheet part."""
+    """The links found in one worksheet part."""
 
-    __slots__ = ("computed", "elements", "formulas", "pending", "shared")
+    __slots__ = ("computed", "elements", "formulas", "shared")
 
     def __init__(self) -> None:
         self.elements: list[tuple[CellRange, Hyperlink, bool]] = []
@@ -50,17 +47,8 @@ class Found:
         self.computed: list[tuple[CellRange, str]] = []
         """Cells with a ``HYPERLINK()`` that cannot be linked, and why: ``computed``,
         ``shared`` or ``array``."""
-        self.shared: set[str] = set()
-        """The ``si`` of shared formulas whose master calls ``HYPERLINK()``."""
-        self.pending: dict[int, tuple[ET.Element, str, Hyperlink | None]] = {}
-        """Formulas of the current row, by the element's ``id``, until the row places them."""
-
-
-def _found(state: Scan) -> Found:
-    found = state.extra.get(KEY)
-    if found is None:
-        found = state.extra[KEY] = Found()
-    return found
+        self.shared: set[int | str] = set()
+        """The ``si`` of shared formulas whose master calls ``HYPERLINK()`` (``""`` for none)."""
 
 
 def with_elements(structure: Structure, sheet: xlio.Sheet) -> Structure:
@@ -89,55 +77,43 @@ def with_elements(structure: Structure, sheet: xlio.Sheet) -> Structure:
     return dataclasses.replace(structure, extra={**structure.extra, KEY: found})
 
 
-@handler(_FORMULA)
-def _formula(state: Scan, element: ET.Element) -> None:
-    """A formula that calls ``HYPERLINK()``, placed when its row ends."""
-    text = element.text or ""
-    kind = element.get("t")
+def add_formula(found: Found, formula: xlio.Formula, row: int, column: int) -> None:
+    """Note a cell's formula if it calls ``HYPERLINK()``, in the order of the cell stream.
+
+    A shared formula's master comes before the cells that share it, so they are known by its
+    ``si``.
+    """
+    text = formula.text or ""
+    kind = formula.kind
+    cell = CellRange(row, column, row, column)
     if kind == "shared" and not text.strip():
-        found = state.extra.get(KEY)
-        if found is not None and element.get("si") in found.shared:
-            found.pending[id(element)] = (element, "shared", None)
+        if formula.si is not None and formula.si in found.shared:
+            found.computed.append((cell, "shared"))
         return
     if "HYPERLINK" not in text.upper() or not _CALL.search(_STRING.sub('""', text)):
         return
-    found = _found(state)
     if kind == "shared":
-        found.shared.add(element.get("si") or "")
-        found.pending[id(element)] = (element, "shared", None)
+        found.shared.add(formula.si if formula.si is not None else "")
+        found.computed.append((cell, "shared"))
     elif kind == "array":
-        found.pending[id(element)] = (element, "array", None)
-    elif (target := literal_target(text)) is not None:
-        found.pending[id(element)] = (element, "link", Hyperlink(target, source="formula"))
-    else:
-        found.pending[id(element)] = (element, "computed", None)
-
-
-@handler(_ROW)
-def _row(state: Scan, element: ET.Element) -> None:
-    """Place the row's ``HYPERLINK()`` formulas, before the row is cleared."""
-    found = state.extra.get(KEY)
-    if found is None or not found.pending:
-        return
-    row = state.row_index  # set by the scan's own row handler, which runs first
-    column = 0
-    for cell in element:
-        ref = cell.get("r")
-        column = CellRange.parse(ref).min_col if ref else column + 1
-        formula = cell.find(_FORMULA)
-        entry = found.pending.get(id(formula)) if formula is not None else None
-        if entry is None:
-            continue
-        formula, form, link = entry
-        if link is not None:
-            found.formulas[(row, column)] = link
-            continue
-        cells = CellRange(row, column, row, column)
-        if form == "array" and (span := formula.get("ref")):
+        if formula.ref:
             with contextlib.suppress(ValueError):
-                cells = CellRange.parse(span)
-        found.computed.append((cells, form))
-    found.pending.clear()
+                cell = CellRange.parse(formula.ref)
+        found.computed.append((cell, "array"))
+    elif (target := literal_target(text)) is not None:
+        found.formulas[(row, column)] = Hyperlink(target, source="formula")
+    else:
+        found.computed.append((cell, "computed"))
+
+
+def with_formulas(structure: Structure, found: Found) -> Structure:
+    """``structure`` with the ``HYPERLINK()`` formulas ``found`` in the cell stream."""
+    if not found.formulas and not found.computed:
+        return structure
+    known = structure.extra.get(KEY)
+    if isinstance(known, Found):
+        found.elements = known.elements
+    return dataclasses.replace(structure, extra={**structure.extra, KEY: found})
 
 
 def literal_target(formula: str) -> str | None:
