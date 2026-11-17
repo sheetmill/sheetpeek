@@ -241,6 +241,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rows in a Normal font of Calibri 18 or 24, or Aptos Narrow 18, 20 or 24, are as tall as Excel
   makes them (Calibri 18: 24 pt, 24: 31 pt, from xlformat's captured row model); they took the
   nearest smaller measured size's height (21 pt).
+- A row Excel fits to wrapped text is as tall as Excel makes it: one wrapped line is a point
+  taller than the row (Calibri 11: 16 pt, where it was 15), and wrapped lines beside a larger
+  font add the difference of the two faces' line insets (three Calibri 11 lines beside a 20 pt
+  cell: 50 pt, where it was 48), from xlformat's captured row model.
 - A date cell (`t="d"`) holding 1900-02-29, a day Excel's 1900 date system has, reads as serial
   60; the workbook was refused as unreadable.
 

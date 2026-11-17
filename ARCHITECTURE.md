@@ -592,8 +592,15 @@ at, in order:
 **Rows are fitted to their cells** when Excel opens a file (captured, suite `row_height`): a row
 with a `<row>` element and no `ht`, in a sheet without `customHeight`, takes the largest of those
 heights and of each cell font's height from the table, merged cells included, and of its wrapped
-text, 16 pt per line at Calibri 11 (the line height plus 1; other sizes unverified), merged cells
-excluded. `thickTop` or `thickBottom` together with `customHeight` was not captured. A font not in
+text, merged cells excluded. Wrapped text follows xlformat's row model (`row_metrics`, its
+CAPTURING.md section 2 item 44, Calibri and Aptos Narrow at 9 to 24 pt): k lines in a face of
+height F take k(F + 1) points, so even one wrapped line is a point taller than the row, plus
+max(0, P - p), p the face's line inset and P the largest of the Normal font's and the row's other
+cell fonts' (Calibri 11 has 1, Calibri 20 has 3); Calibri 11 gives 16 pt a line (suite
+`row_height`: 48 and 96 pt for three and six lines). Several wrapped cells in one row take the
+tallest (not captured); rich-text runs and faces or sizes xlformat has not measured keep the line
+height plus 1 a line, without the inset. `thickTop` or `thickBottom` together with
+`customHeight` was not captured. A font not in
 the table uses Calibri's height at the nearest measured size, as xlformat scales widths; that, and
 sizes between the measured ones, are **unverified**.
 

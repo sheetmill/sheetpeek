@@ -152,6 +152,8 @@ def _fitted(
     if not fits_cells(row, sheet):
         return height
     styled = []
+    cell_fonts: list[Font] = []  # fonts of the row's cells that do not wrap
+    wrapped: list[tuple[Font, int]] = []  # each plain wrapped cell's font and lines
     for p in read:
         cell = grid.cell(i, p)
         # A cell with rich-text runs counts its runs' fonts (§4.16).
@@ -178,11 +180,37 @@ def _fitted(
             else:
                 lines = _wrap(str(cell.value), budget, fonts.get(cell.font))
                 height = max(height, wrapped_height(len(lines), cell.font))
+                wrapped.append((cell.font, len(lines)))
+            continue
+        cell_fonts += own
     # Superscript, subscript and accounting underlines grow the row (§4.13); the row fits the
     # unshrunk size of shrunk text, so shrink adds nothing.
     for font, extra in row_extras(styled):
         height = max(height, font_row_height(font) + extra)
-    return height
+    return max(height, _row_model(sheet.normal_font, cell_fonts, wrapped))
+
+
+def _row_model(normal: Font, cell_fonts: list[Font], wrapped: list[tuple[Font, int]]) -> float:
+    """The height xlformat's captured row model gives, or 0 when a font is not measured.
+
+    Wrapped lines take a point each beyond the font's height, one line included, and a larger
+    font in the row adds the difference of the faces' line insets (xlformat's CAPTURING.md
+    section 2 item 44; several wrapped cells in one row are not captured).
+    """
+    if not wrapped:
+        return 0.0  # the fonts alone: the table already gave their heights
+
+    def spec(font: Font) -> xlformat.Font:
+        return xlformat.Font(font.name, font.size, font.bold, font.italic)
+
+    try:
+        return xlformat.row_metrics(
+            spec(normal),
+            cell_fonts=[spec(f) for f in cell_fonts],
+            wrapped=[(spec(f), lines) for f, lines in wrapped],
+        ).height
+    except LookupError:  # a face or size the model has not measured: the table's heights
+        return 0.0
 
 
 def _turned_height(grid: _Grid, cell: Any, p: int, fonts: _Fonts) -> float:

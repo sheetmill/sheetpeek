@@ -95,6 +95,25 @@ def test_indent_wrap_and_vertical_clip(tmp_path):
     assert rendered.rows[1].height == 2
 
 
+def test_wrapped_rows_follow_xlformats_row_model(tmp_path):
+    # xlformat's capture (its CAPTURING.md section 2 item 44): k wrapped lines are k(F + 1), one
+    # included; beside a larger font, plus the difference of the faces' insets p (Calibri 11: 1,
+    # Calibri 20: 3).
+    def build(ws):
+        ws["A1"] = "one"
+        ws["A1"].alignment = Alignment(wrap_text=True)
+        ws["A2"] = "one\ntwo\nthree"
+        ws["A2"].alignment = Alignment(wrap_text=True)
+        ws["B2"] = 1
+        ws["B2"].font = Font(size=20)
+        ws["A3"] = "one"
+        ws["A3"].alignment = Alignment(wrap_text=True)
+        ws["A3"].font = Font(name="Arial", size=11)  # not measured: the table's heights
+
+    rendered = lay_out(tmp_path, build, ref="A1:B3")
+    assert [r.height_pt for r in rendered.rows] == [16, 3 * 16 + 2, 15]
+
+
 def test_rows_fit_their_cells(tmp_path):
     # Captured (suite row_height): a 14 pt cell makes its row 19 pt; a 9 pt one does not shrink
     # it; a stored height wins.

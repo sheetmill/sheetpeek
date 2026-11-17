@@ -61,8 +61,6 @@ def grid_color(color_id: int | None, palette: Sequence[str]) -> str | None:
     return palette[color_id]
 
 
-
-
 def resolve(
     kind: str | None,
     value: str | int | None,
