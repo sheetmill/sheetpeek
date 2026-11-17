@@ -626,7 +626,8 @@ REACHES = {
     },
     "absent": {
         "hidden", "format_refused", "theme_srgb", "theme_system", "hyperlink", "properties",
-        "tab_color", "defined_name", "run_rgb", "hyperlink_refused", "hyperlink_tab", "other_sheet_name",
+        "tab_color", "defined_name", "run_rgb", "hyperlink_refused", "hyperlink_tab",
+        "other_sheet_name",
     },
     "attribute": {
         "normal_font_name", "hyperlink_target", "hyperlink_mailto", "hyperlink_tooltip",
