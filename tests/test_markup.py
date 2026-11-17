@@ -622,12 +622,11 @@ def read_or_refused(path):
 # without valid colors, a hidden cell, a refused format's General, what no backend draws).
 REACHES = {
     "refused": {
-        "date_text", "style_rgb", "palette", "border_rgb", "gradient_rgb", "run_rgb",
-        "error_text", "error_shaped",
+        "date_text", "error_text", "error_shaped",
     },
     "absent": {
         "hidden", "format_refused", "theme_srgb", "theme_system", "hyperlink", "properties",
-        "tab_color", "defined_name", "hyperlink_refused", "hyperlink_tab", "other_sheet_name",
+        "tab_color", "defined_name", "run_rgb", "hyperlink_refused", "hyperlink_tab", "other_sheet_name",
     },
     "attribute": {
         "normal_font_name", "hyperlink_target", "hyperlink_mailto", "hyperlink_tooltip",

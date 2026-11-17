@@ -21,9 +21,8 @@ from typing import IO, Any, overload
 
 import xlformat
 import xlio
-from openpyxl import load_workbook
 from openpyxl.styles.numbers import BUILTIN_FORMATS
-from openpyxl.utils.datetime import CALENDAR_MAC_1904, from_ISO8601, to_excel
+from openpyxl.utils.datetime import CALENDAR_MAC_1904, CALENDAR_WINDOWS_1900, from_ISO8601, to_excel
 
 from sheetpeek import _style as styles
 from sheetpeek._colors import grid_color, resolve, workbook_palette
@@ -80,11 +79,6 @@ from sheetpeek._view_model import SheetView
 
 Source = str | os.PathLike[str] | IO[bytes]
 
-_STATES: dict[str, SheetState] = {
-    "visible": "visible",
-    "hidden": "hidden",
-    "veryHidden": "very_hidden",
-}
 _NOT_SHOWN = {
     "chartsheet": "is a chartsheet; charts are not shown",
     "dialogsheet": "is a dialog sheet (a legacy form); it is not shown",
@@ -189,18 +183,14 @@ class Book:
             name = given if isinstance(given, str) else None
             handle = io.BytesIO(source.read())
         self._handle = handle
-        self._workbook: Any = None
         self._book: xlio.Workbook | None = None
         self._archive: zipfile.ZipFile | None = None
         try:
             self._archive = open_package(handle, self._limits, name)
             self._book = open_workbook(handle, self._limits)
-            handle.seek(0)
-            self._workbook = load_workbook(
-                handle, read_only=True, data_only=True, keep_links=False, rich_text=True
-            )
             self._parts = worksheet_parts(self._archive)
-            self._epoch = self._workbook.epoch
+            date1904 = self._book.properties.date1904
+            self._epoch = CALENDAR_MAC_1904 if date1904 else CALENDAR_WINDOWS_1900
             self._theme = xlio_theme_colors(self._book.theme)
             self._palette: Sequence[str] = workbook_palette(
                 self._book.styles.indexed_colors or None
@@ -268,8 +258,6 @@ class Book:
         """Close the file."""
         if self._book is not None:
             self._book.close()
-        if self._workbook is not None:
-            self._workbook.close()
         if self._archive is not None:
             self._archive.close()
         self._handle.close()
@@ -277,7 +265,7 @@ class Book:
     @property
     def sheet_names(self) -> list[str]:
         """Names of all sheets, hidden ones included, in workbook order."""
-        return list(self._workbook.sheetnames)
+        return [listed.name for listed, _ in self._listing[0]]
 
     @functools.cached_property
     def sheets(self) -> tuple[SheetInfo, ...]:
@@ -295,12 +283,11 @@ class Book:
     def _listing(self) -> tuple[list[tuple[ListedSheet, StatedColor | None]], ListedSheet | None]:
         """The workbook's sheets (the first of a name) with their tab colors, and the active one.
 
-        Only sheets openpyxl lists too, while it reads the cells; it skips a sheet whose part is
-        missing. The active one is the first book view's ``activeTab``, which xlio gives as an
-        index into its own list (a sheet listed without a part counts only as written).
+        A sheet whose part is missing is not listed (xlio). The active one is the first book
+        view's ``activeTab``, which xlio gives as an index into its own list (a sheet listed
+        without a part counts only as written).
         """
         assert self._book is not None
-        present = set(self._workbook.sheetnames)
         listed = [
             (ListedSheet(s.name, _KIND.get(s.kind, "worksheet"), _STATE[s.state], None), s)
             for s in self._book
@@ -308,7 +295,7 @@ class Book:
         kept: dict[str, tuple[ListedSheet, StatedColor | None]] = {}
         with self._xlio_errors():
             for sheet, source in listed:
-                if sheet.name in present and sheet.name not in kept:
+                if sheet.name not in kept:
                     kept[sheet.name] = (sheet, from_xlio(source.properties.tab_color))
             views = self._book.views
         active = views[0].active_tab if views else None
@@ -396,13 +383,13 @@ class Book:
         """
         if name is None:
             name = self._default_sheet_name()
-        if name not in self._workbook.sheetnames:
+        listed = next((s for s, _ in self._listing[0] if s.name == name), None)
+        if listed is None:
             raise KeyError(f"no sheet named {name!r}; the sheets are {self.sheet_names}")
         kind = self._info.kinds.get(name, "worksheet")
         if kind in ("chartsheet", "dialogsheet"):
             raise NotAWorksheetError(f"{name!r} {_NOT_SHOWN[kind]}")
-        worksheet = self._workbook[name]
-        if not hasattr(worksheet, "iter_rows") or name not in self._parts:
+        if listed.kind not in ("worksheet", "macrosheet") or name not in self._parts:
             raise NotAWorksheetError(f"{name!r} is not a worksheet")
         part = self._parts[name]
         if isinstance(ref, str):
@@ -446,7 +433,7 @@ class Book:
         )
         return Sheet(
             name=name,
-            state=_STATES.get(worksheet.sheet_state, "visible"),
+            state=listed.state,
             ref=ref,
             used_range=structure.used_range,
             cells=cells,

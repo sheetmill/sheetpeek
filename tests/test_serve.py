@@ -15,7 +15,7 @@ from sheetpeek import ReadLimits, _serve, cli
 from sheetpeek._package import SERVE_LIMITS
 from sheetpeek._serve import make_server, resolve
 from tests.watchdog import bounded
-from tests.workbooks import SHEET1, replace_part, rewrite, save
+from tests.workbooks import SHEET1, replace_part, replace_sheet_data, rewrite, save
 
 
 @pytest.fixture
@@ -226,12 +226,11 @@ def test_the_index_does_not_show_where_the_folder_is(server, folder):
     assert str(folder.parent) not in body
 
 
-def test_an_error_from_openpyxl_does_not_show_where_the_folder_is(server, folder):
-    # openpyxl's ValueError names the file by its full path.
+def test_a_refusal_does_not_show_where_the_folder_is(server, folder):
     rewrite(
         folder / "book.xlsx",
-        "xl/workbook.xml",
-        lambda text: text.replace('state="visible"', 'state="bogus"', 1),
+        SHEET1,
+        replace_sheet_data('<sheetData><row r="99999999999"><c r="A1"/></row></sheetData>'),
     )
     status, body, _ = get(server, "/view/book.xlsx")
     assert status == 422

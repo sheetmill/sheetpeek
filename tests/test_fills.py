@@ -182,13 +182,13 @@ def test_a_gradient_without_stops_is_no_fill(tmp_path):
     assert spec(tmp_path, GradientFill(stop=())) == (None, None)
 
 
-def test_duplicate_stop_positions_refuse_the_workbook(tmp_path):
-    # openpyxl refuses the whole stylesheet; until sheetpeek reads through the shared xlsx reader
-    # this is a PackageError.
+def test_duplicate_stop_positions_are_read_in_order(tmp_path):
+    # openpyxl refused the whole stylesheet; xlio reads it. What Excel draws for two stops at one
+    # position is not captured yet (unverified).
     path = filled(tmp_path, GradientFill(stop=("FFFFFFFF", "FF0000FF")))
     rewrite(path, STYLES, lambda t: t.replace('<stop position="1"', '<stop position="0"', 1))
-    with pytest.raises(sheetpeek.PackageError, match="cannot read this workbook"):
-        sheetpeek.read(path)
+    stops = sheetpeek.read(path).cell(1, 2).style.fill_spec.stops
+    assert [position for position, _ in stops] == [0.0, 0.0]
 
 
 @pytest.mark.parametrize("value", ["nan", "inf", "-inf"])

@@ -108,7 +108,7 @@ layout fields marked *layout*. The style fields (`number_format` to `indent`) li
 | field | type | source | notes |
 |---|---|---|---|
 | `row`, `column` | `int` | the cell's position | |
-| `value` | `None \| bool \| int \| float \| str \| ExcelError` | `cell.value` in read-only mode with date conversion off (§5.3) | raw cached value; dates stay serial numbers; `xlformat.ExcelError` (a `str` enum, compared with `==`) for `data_type == "e"`, or `str` when the file's text is not shaped like an error code |
+| `value` | `None \| bool \| int \| float \| str \| ExcelError` | xlio's `Sheet.cells(ref, rich=True)`: the value as Excel reads it; a whole number below 2**53 is an `int` | raw cached value; dates stay serial numbers; `xlformat.ExcelError` (a `str` enum, compared with `==`) for `data_type == "e"`, or `str` when the file's text is not shaped like an error code |
 | `kind` | `"empty" \| "number" \| "text" \| "bool" \| "error"` | `cell.data_type` | a date is a `number` whose format is a date format; `d` cells (ISO 8601, rare) become serials |
 | `number_format` | `str` | `cell.number_format` | |
 | `font` | `Font(name, size, bold, italic, underline, strike, color)` | the cell format's font (xlio); a missing name or size inherits the Normal style's | `color` is resolved `RRGGBB`, or `None` for automatic (§3.3) |
@@ -154,7 +154,7 @@ text styles into `Font` and `CellStyle` (§4.13). Rich-text runs inside one cell
 | `default_column_width`, `default_row_height` | scan: `<sheetFormatPr>` (`defaultColWidth`, `baseColWidth`, `defaultRowHeight`) |
 | `show_gridlines` | scan: `<sheetView showGridLines>` |
 | `grid_color` | scan: `<sheetView defaultGridColor colorId>`, through the workbook palette (§4.14) |
-| `normal_font` | the `Normal` entry of `wb._named_styles`, else `wb._fonts[0]`; both are present in read-only mode |
+| `normal_font` | the font of xlio's `Normal` cell style, else the workbook's first font |
 | `date1904` | `wb.epoch == CALENDAR_MAC_1904` |
 | `warnings` | reading and layout: formulas without cached values, approximated fonts, refused number formats, the date fallback (§5.3) |
 | `cells` | a dense row-major grid over `ref` |
@@ -773,9 +773,8 @@ before it the color ran from the last stop's color at 0 (taken as the rule, unve
 draws rectangular bands from the rectangle `left`, `right`, `top`, `bottom` (in the first stop's
 color) out to the cell's edges; all four 0 put the first stop at the top-left corner. A degree
 that is not finite is 0, rectangle values are clamped to 0 to 1, stops are sorted by position,
-and a gradient without stops is no fill (decided, not captured). Duplicate stop positions make
-openpyxl refuse the whole stylesheet, a `PackageError` until sheetpeek reads through the shared
-xlsx reader (§11).
+and a gradient without stops is no fill (decided, not captured). Duplicate stop positions are
+read in order (what Excel draws for them is not captured).
 
 **Fills against gridlines.** A pattern or gradient covers its cell and the gridlines after its
 right and bottom edges, like a solid fill (§3.6); the cell to the right or below paints over that
@@ -1404,10 +1403,11 @@ release.
 
 ### 5.4 Reading strategy
 
-**Decided:** cells are read in read-only mode with date conversion off. A structure scan reads what
-read-only mode drops. Normal mode was rejected: it costs about 465 bytes per cell, loses the leap
-day and some seconds, and makes a 100-row preview of a large file as slow as reading the whole
-file.
+**Now:** xlio reads the cells (`Sheet.cells`), the structure, the styles and the parts; openpyxl
+is not loaded. A structure scan of sheetpeek's own still reads what xlio does not yet give (below).
+§5.1 to §5.3 record the openpyxl reader this replaced. In it, cells were read in openpyxl's read-only mode with date conversion off; normal mode was
+rejected (about 465 bytes per cell, the leap day and some seconds lost, a 100-row preview as slow
+as reading the whole file).
 
 xlio reads the sheet format (`<sheetFormatPr>`), `<cols>`, each `<row>`'s height, hidden flag and
 format, `<mergeCells>`, `<hyperlinks>` and the first `<sheetView>`'s gridline settings, each
