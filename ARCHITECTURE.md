@@ -1,14 +1,13 @@
 # Architecture
 
 Rules about Excel's layout cite the capture that pins them (§4); a rule no capture has pinned yet
-is marked **unverified**. Facts about openpyxl (§5) were measured
-with openpyxl 3.1.5 on Python 3.11, macOS, Apple M4 Pro, with the scripts in `bench/`
-(`readonly_features.py`, `load_modes.py`, `date_fidelity.py`), which rerun them;
+is marked **unverified**. The reader's figures (§5) were measured on Python 3.11, macOS, Apple
+M4 Pro, with the scripts in `bench/` (`load_modes.py`, `date_fidelity.py`), which rerun them;
 `bench/html_size.py` measures the HTML output (§7.3).
 
 ## 1. Scope and principles
 
-sheetpeek reads an xlsx with openpyxl and shows a sheet the way Excel shows it, in four output
+sheetpeek reads an xlsx through xlio (§5) and shows a sheet the way Excel shows it, in four output
 formats: HTML, Markdown, `rich` (terminal) and plain text (fixed-width and delimited). A small
 CLI views a file and serves a folder of workbooks as HTML.
 
@@ -97,7 +96,7 @@ xlformat does not measure is measured as Calibri at the same size, with a warnin
 ## 3. The render model
 
 All classes are frozen dataclasses with slots, importable from `sheetpeek`. Coordinates are
-1-based, as in openpyxl and Excel.
+1-based, as in Excel.
 
 ### 3.1 What a cell carries
 
@@ -144,20 +143,20 @@ text styles into `Font` and `CellStyle` (§4.13). Rich-text runs inside one cell
 
 | field | source |
 |---|---|
-| `name`, `state` (`visible`, `hidden`, `very_hidden`) | `ws.title`, `ws.sheet_state` |
+| `name`, `state` (`visible`, `hidden`, `very_hidden`) | xlio: the workbook's `<sheet name state>` |
 | `used_range` | the cell stream: bounding box of every cell xlio gives (positions inferred when `r` is omitted, as the schema allows), widened to cover every merged range, since a merge occupies its cells even where the file has no `<c>` for them; `<dimension>` is never trusted |
 | `ref` | the requested range, or `used_range` |
-| `merges` | scan: `<mergeCells>` |
+| `merges` | xlio: `<mergeCells>` |
 | `columns`: per column `width`, `hidden`, `outline_level`, `collapsed` | xlio: `<cols>` (each `<col>` covers `min` to `max`) |
 | `rows`: per row `height` in points, `hidden`, `outline_level`, `collapsed` | xlio: `ht`, `hidden`, `outlineLevel`, `collapsed` of `<row>` |
 | `outline` (`Outline`, or `None` when no row or column has a level) | xlio: `<outlinePr summaryBelow summaryRight>`, `showOutlineSymbols` of the first `<sheetView>` when it states one, else of `<outlinePr>`; the deepest row and column levels in the sheet; the levels of the rows and columns just outside `ref` (§4.11) |
-| `default_column_width`, `default_row_height` | scan: `<sheetFormatPr>` (`defaultColWidth`, `baseColWidth`, `defaultRowHeight`) |
-| `show_gridlines` | scan: `<sheetView showGridLines>` |
-| `grid_color` | scan: `<sheetView defaultGridColor colorId>`, through the workbook palette (§4.14) |
+| `default_column_width`, `default_row_height` | xlio: `<sheetFormatPr>` (`defaultColWidth`, `baseColWidth`, `defaultRowHeight`) |
+| `show_gridlines` | xlio: `<sheetView showGridLines>` |
+| `grid_color` | xlio: `<sheetView defaultGridColor colorId>`, through the workbook palette (§4.14) |
 | `palette` | xlio: `<indexedColors>` as the indexed colors take it (64 entries, the default's for an entry missing or not a color), `None` without it (§4.14) |
 | `normal_font` | the font of xlio's `Normal` cell style, else the workbook's first font |
-| `date1904` | `wb.epoch == CALENDAR_MAC_1904` |
-| `warnings` | reading and layout: formulas without cached values, approximated fonts, refused number formats, the date fallback (§5.3) |
+| `date1904` | xlio: `<workbookPr date1904>` |
+| `warnings` | reading and layout: formulas without cached values, approximated fonts, refused number formats |
 | `cells` | a dense row-major grid over `ref` |
 
 Column widths are kept as the file states them (file units, §6.4). Hidden rows and columns stay in
@@ -361,8 +360,8 @@ element states something Excel draws differently from its default:
   so that none is missed;
 - anything else among a sheet's children, or an unknown extension URI, is reported as
   `sheet.unknown_element` or `sheet.unknown_extension`;
-- dialog sheets, which openpyxl loads as worksheets, and macro sheets are told apart by their
-  relationship type from the workbook and reported.
+- dialog sheets and macro sheets are told apart by their relationship type from the workbook
+  and reported.
 - a chartsheet or dialog sheet is reported once for the workbook (`Book.notices`), and the
   workbook page reports the hidden sheets it leaves out (`sheet.hidden`, §4.15).
 
@@ -527,8 +526,7 @@ empty cells that share that alignment (route A; `layout` row 155 for a centered 
 - **The anchor's text sits by its vertical alignment**: top, center and bottom as set, and **at the
   bottom by default** (`layout` rows 152 to 154). Horizontally it is placed across the whole merge
   (row 155).
-- openpyxl drops covered cells' values on load: they come back as `MergedCell` with value `None`
-  (measured).
+- A value the file gives a covered cell is read but not drawn: the layout draws the anchor only.
 
 The merged width for xlformat is the sum of the merge's visible columns, and the gaps between
 them in `characters` mode. **Captured** (suite `merge_width`, 150 cells: five numbers alone and
@@ -536,8 +534,8 @@ merged over two to four columns, or over three with the middle one hidden, at si
 widths, read with `string value`): `excel` mode shows what Excel shows in every cell.
 
 **Captured** (`layout` rows 172 and 173): **the whole merged area shows the anchor's fill, and a
-covered cell's own fill is ignored**, also when the anchor has none. (openpyxl's normal mode drops
-a covered cell's style on load; the read-only reader keeps it, and the layout ignores it.)
+covered cell's own fill is ignored**, also when the anchor has none. The reader keeps a covered
+cell's style, and the layout ignores it.
 
 **Assumed:** a merge whose anchor lies outside the range read shows no text (there is nothing to
 capture: the anchor is in the sheet, only not read). Wrapped text in a vertical merge flows over
@@ -626,10 +624,9 @@ unshrunk size (§4.13).
 
 **Captured** (`capture/excel_saved.py`; the saved file is `tests/files/excel_formulas.xlsx`):
 Excel writes a formula returning `""` as `<c t="str"><f>""</f><v/></c>`, `t="str"` with an empty
-value element. xlio reads that form as the empty string, which stops a spill; openpyxl alone
-read it as an empty cell. A formula without a cached value (as openpyxl writes it)
-has no `t`. The same file confirms Excel stores `=DATE(1900,2,29)` as serial 60, which the reader
-keeps (§5.3).
+value element. xlio reads that form as the empty string, which stops a spill. A formula without
+a cached value (as openpyxl writes it) has no `t`. The same file confirms Excel stores
+`=DATE(1900,2,29)` as serial 60, which the reader keeps (§5.3).
 
 ### 4.9 Captures
 
@@ -976,7 +973,7 @@ the default palette entry by entry: indices 0 to 7 no longer repeat 8 to 15 (cap
 palette that recolors index 10 leaves fill index 2 red). Fill and font colors follow it (captured
 for indices 10 and 17). Excel caps the list at 64 entries; a shorter list keeps the default for
 the rest, and an entry that is not a color reads as the default's (both unverified). A
-`<colors>` without `indexedColors` keeps the default palette (openpyxl reads it as empty).
+`<colors>` without `indexedColors` keeps the default palette.
 Automatic colors (captured): a fill in indexed 64 is no fill, a fill index past the palette (81)
 is black, and a font in `auto` or indexed 64 is the automatic black.
 
@@ -1031,20 +1028,17 @@ unverified on Microsoft 365; the tests that rest on them (`tests/test_workbook.p
 rules live in `_sheets.py` and `backends/html/_workbook.py`.
 
 **The sheet list** (`Book.sheets`, a `SheetInfo` per sheet, in workbook order):
-- **Kind** from the relationship type of the workbook's `<sheet>`, never from openpyxl, which
-  branches only on chartsheets and loads a dialog sheet as an empty worksheet: `worksheet`,
+- **Kind** from the relationship type of the workbook's `<sheet>`: `worksheet`,
   `chartsheet`, `dialogsheet`, or `macrosheet` (Microsoft's `xlMacrosheet` and
   `xlIntlMacrosheet`). A type that names none is a worksheet.
 - **State** from `sheet@state`: `visible`, `hidden`, `very_hidden`; anything else is visible.
-- **Tab color** from `sheetPr/tabColor`, read from the head of the sheet's part (openpyxl's
-  read-only sheets do not parse `sheetPr`); the parse stops at the end of `sheetPr` or at the
-  first other child, so no cell is read for it. Resolved like any color (§3.3); `auto` and no
-  color are `None`, since `auto` draws an uncolored tab (captured). When several of `indexed`,
-  `theme`, `auto` and `rgb` are given, they are taken in openpyxl's order, as every other color
-  is (which one Excel takes is unverified). An index or theme number is an `unsignedInt`
-  (`[0-9]{1,9}`, else none); a tint that is not a finite number is 0, and one past ±1 is
-  clamped.
-- Sheets whose part is missing are left out, as openpyxl leaves them out, so `Book.sheets` and
+- **Tab color** from `sheetPr/tabColor` (xlio's sheet properties), so no cell is read for it.
+  Resolved like any color (§3.3); `auto` and no color are `None`, since `auto` draws an
+  uncolored tab (captured). When several of `indexed`, `theme`, `auto` and `rgb` are given,
+  they are taken in that order, as every other color is (which one Excel takes is unverified).
+  An index or theme number is an `unsignedInt` (`[0-9]{1,9}`, else none); a tint that is not
+  a finite number is 0, and one past ±1 is clamped.
+- Sheets whose part is missing are left out (xlio does not list them), so `Book.sheets` and
   `Book.sheet_names` agree; a second sheet of one name is left out too.
 
 **Which sheets read.** Worksheets and macro sheets; a macro sheet's cells are cells, and it is
@@ -1166,8 +1160,7 @@ bold reports a bold run too.
 |---|---|---|---|
 | approximated: drawn in the cell's font, since characters mode keeps one font for each cell's text | omitted | with `emphasis=True` each run's bold and italic as `**` and `*` (shown); otherwise omitted | omitted |
 
-**Phonetic guides** (`rPh`, `phoneticPr`) stay out of scope and reported (`text.phonetic`):
-openpyxl drops them in every mode.
+**Phonetic guides** (`rPh`, `phoneticPr`) stay out of scope and reported (`text.phonetic`).
 
 ### 4.17 Rotated and stacked text
 
@@ -1348,80 +1341,68 @@ the freeze line and drawn with it over everything else, in the frozen copies too
 that of Excel's page break preview (unverified: not captured). The other outputs draw nothing
 and report nothing for breaks.
 
-## 5. openpyxl facts that constrain the design
+## 5. Reading
 
-All measured with openpyxl 3.1.5 (`bench/`).
+sheetpeek reads a workbook through xlio (`xlio==0.3.*`), the family's xlsx reader, after a check
+of its own (§5.5). openpyxl is not imported at run time; the tests and the documentation's
+examples build workbooks with it.
 
-### 5.1 What read-only mode gives up
+### 5.1 What the reader takes from xlio
 
-`load_workbook(read_only=True)` returns `ReadOnlyWorksheet`, which has **no** `merged_cells`,
-`column_dimensions`, `row_dimensions`, `sheet_format`, `dimensions`, `freeze_panes`,
-`sheet_view` or `conditional_formatting` (each an `AttributeError`). **Styles survive**:
-`ReadOnlyCell` has `number_format`, `font`, `fill`, `alignment` and `border`, identical to normal
-mode in the probe. Workbook-level facts survive too: `epoch`, sheet states, the Normal style and
-the theme XML. `max_row` and `max_column` come from the file's `<dimension>` element. Empty
-positions come back as `EmptyCell`, which has no `coordinate` and no style. `iter_rows` with
-explicit bounds pads leading and inner empty rows but stops after the last row holding data,
-whatever `max_row` says, so the reader pads the remaining rows itself.
+- **The workbook** (`xlio.open`): the sheet list with each sheet's kind, state and tab color, the
+  first book view's active tab, the date system, the defined names (print areas and titles,
+  §4.18), the theme's colors and fonts, the indexed palette, and the cell formats with their
+  fonts, fills, borders and alignment, read by the cell's style index.
+- **Each sheet's structure**: the sheet format, `<cols>`, every `<row>` with its height, hidden
+  flag, outline level and format, `<mergeCells>`, `<hyperlinks>`, the first `<sheetView>`, the
+  outline settings, and the sheet's relationships and unparsed children, which the detectors
+  read (§3.7).
+- **Each sheet's cells**, in one pass of `Sheet.cells(rich=True)` (§5.4): value, type, style
+  index, formula text and rich-text runs.
 
-Two writer facts matter for tests:
-- openpyxl writes an uncached formula as `<f>…</f><v></v>`, an empty value element rather than
-  none.
-- openpyxl drops a column width of 0, treating it as unset.
+Values arrive as Excel reads them: numbers as doubles (a whole number below 2^53 in magnitude
+becomes an `int` in `Cell.value`), booleans, error codes (an error rich value behind `vm` wins
+over the cached value), and text with OOXML's `_xHHHH_` escapes decoded (§5.6). A `t="d"` cell,
+ISO 8601 text, becomes its date serial (§5.3).
+
+Two facts about openpyxl as a writer matter for the tests that build workbooks with it:
+- it writes an uncached formula as `<f>…</f><v></v>`, an empty value element rather than none;
+- it drops a column width of 0, treating it as unset.
 
 ### 5.2 Memory and time
 
-A workbook of 100,000 rows × 20 columns is 2,000,000 cells: floats with a number format, strings,
-datetimes and integers, with bold and a fill on every 50th row. It is 19.7 MB on disk and
-108.7 MB of XML. The table gives peak RSS of a fresh process that reads every cell (`import
-openpyxl` alone is 28 MB):
+`bench/load_modes.py` writes a workbook of 100,000 rows × 20 columns, 2,000,000 cells: floats
+with a number format, strings, datetimes and integers, with bold and a fill on every 50th row.
+It is 18.8 MB on disk. Best of three, each in a fresh process (Python 3.11, Apple M4 Pro):
 
-| mode | load | iterate | total | peak RSS |
-|---|---|---|---|---|
-| normal | 6.86 s | 0.62 s | 7.49 s | 931 MB |
-| normal, `data_only` | 6.74 s | 0.62 s | 7.36 s | 933 MB |
-| normal, `data_only`, styles read per cell | 6.67 s | 3.96 s | 10.63 s | 931 MB |
-| read-only, `data_only` | 1.71 s | 4.86 s | 6.58 s | 37 MB |
-| read-only, styles read per cell | 1.78 s | 6.21 s | 7.99 s | 38 MB |
-| read-only, date conversion off | 1.71 s | 4.44 s | 6.16 s | 38 MB |
+| what | time | peak RSS |
+|---|---|---|
+| sheetpeek's package check (§5.5) | 0.13 s | 39 MB |
+| xlio's cell stream alone, every cell | 4.57 s | 36 MB |
+| `sheetpeek.open(path).sheet()`, the whole sheet as a `Sheet` | 8.50 s | 384 MB |
+| openpyxl's read-only mode, for comparison | 6.54 s | 39 MB |
+| openpyxl's normal mode, for comparison | 7.46 s | 928 MB |
 
-The first 100 rows in read-only mode take 1.76 s, most of it loading the shared strings (500,000
-distinct strings in this file). In normal mode, every request pays the full load. Normal mode
-costs about 465 bytes per cell. Read-only mode's memory does not grow with the sheet.
+The stream holds one row at a time; a `Sheet` holds every cell of the range read, so its memory
+grows with the range (`max_cells`, §5.5, bounds it). On the largest corpus workbook (42 MB,
+15.2 million cells over its sheets, every sheet read) the reader takes 39 s at 845 MiB peak RSS.
 
-### 5.3 Dates lose information in openpyxl's conversion
+### 5.3 Dates stay serials
 
-openpyxl turns a number under a date format into a `datetime`, `time` or `timedelta`, rounded to
-the millisecond (`openpyxl.utils.datetime.from_excel`):
+A date is a number under a date format, and the reader keeps the number: xlformat formats the
+serial itself. Converting through `datetime` would lose information, as openpyxl's conversion
+showed (`bench/date_fidelity.py`):
 
-- Serials 59 and 60 both become `1900-02-28`. Excel shows serial 60 as `1900-02-29`, and xlformat
-  reproduces that (quirk `leap_year_1900`) only if it gets the serial.
-- 106 of 200,000 random serials shown with `hh:mm:ss` display a different second after the round
-  trip through `datetime` (`28139.378153931324`: `09:04:32` from the serial, `09:04:33` from the
-  `datetime`). The rate is 42 for `hh:mm:ss.000` and 110 for `[h]:mm:ss`; `h:mm` showed none.
+- serials 59 and 60 both become `1900-02-28`, where Excel shows serial 60 as `1900-02-29`, which
+  xlformat reproduces (quirk `leap_year_1900`) only from the serial;
+- rounding to the millisecond changes the displayed second of 106 in 200,000 random serials under
+  `hh:mm:ss` (`28139.378153931324`: `09:04:32` from the serial, `09:04:33` from the `datetime`).
 
-The conversion happens in openpyxl's worksheet reader when the cell's style id is in
-`wb._date_formats` (`wb._timedelta_formats` selects `timedelta`). In read-only mode, worksheets are
-parsed lazily, so emptying both sets after `load_workbook` returns and before iterating gives the
-raw serials (measured).
-
-**Run-time detection and fallback.** The reader checks that both attributes exist and are sets
-before relying on them. If not, it reads openpyxl's converted values and turns each `datetime`,
-`date`, `time` or `timedelta` back into a serial (`openpyxl.utils.datetime.to_excel`), and the
-sheet records one warning that dates may be off by a millisecond and that serial 60 shows as
-February 28. The tests pin both paths:
-- the fast path returns serial 60 and `28139.378153931324` unchanged;
-- the fallback, forced by hiding the attributes, returns the converted serials and the warning.
-
-openpyxl has no upper version bound. One CI job runs the tests against the latest openpyxl
-release.
+A `t="d"` cell holds ISO 8601 text, which Excel reads as a date serial. `_dates.iso_serial` turns
+it into one, in the 1900 or 1904 system as the workbook says (1900-02-29 is 60), with the forms
+ECMA-376 lists and the `PT..H..M..S` durations.
 
 ### 5.4 Reading strategy
-
-**Now:** xlio reads the cells, the structure, the styles and the parts; openpyxl is not loaded.
-§5.1 to §5.3 record the openpyxl reader this replaced. In it, cells were read in openpyxl's
-read-only mode with date conversion off; normal mode was rejected (about 465 bytes per cell, the
-leap day and some seconds lost, a 100-row preview as slow as reading the whole file).
 
 xlio reads the sheet format (`<sheetFormatPr>`), `<cols>`, each `<row>`'s height, hidden flag and
 format (a `<row>` that sets nothing included), `<mergeCells>`, `<hyperlinks>` and the first
@@ -1443,19 +1424,18 @@ sheet's relationships, everything else as `Sheet.unparsed`. A test reads files w
 `<dimension>` is missing, too small and too large, and checks the used range and that no cell is
 dropped.
 
-Measured (best of three, each version from its own tree): the 100,000-cell bench sheets read in
-0.46 s (plain) and 0.66 s (features); the largest corpus workbook (42 MB, 15.2 million cells over
-its sheets) in 38 s at 855 MiB peak RSS. Python's live allocations peak as in the openpyxl
-reader; the rest of the RSS is the allocator's, the kept cells allocated between the stream's
+Measured (best of three, each in a fresh process): the 100,000-cell sheets of `bench/html_size.py`
+read in 0.46 s (plain) and 0.66 s (features); the largest corpus workbook as in §5.2. On its
+largest sheet, Python's live allocations peak at the level of the reader before xlio (648 MiB);
+the rest of the RSS is the allocator's, the kept cells allocated between the stream's
 short-lived objects.
 
 ### 5.5 Untrusted files
 
 **Refusals come before anything parses the file**, in `_package.open_package`, which `Book` calls
-before `load_workbook`. openpyxl opens its own `ZipFile`, reads most parts whole and offers no
-hook, so guards around sheetpeek's own reads would not cover it. It does use the same `zipfile`
-on the same bytes, so a check of every entry covers whatever it reads, including what it reads
-lazily and whichever part it decides is the workbook.
+before `xlio.open`. xlio reads the parts itself, some whole, with the same `zipfile` on the same
+bytes, so a check of every entry covers whatever it reads, including what it reads lazily and
+whichever part it decides is the workbook.
 
 **The check**, `_package.check_package`:
 1. From the central directory, with nothing decompressed: the number of parts, each part's size
@@ -1470,9 +1450,9 @@ on Python 3.11 to 3.14 and for all four methods, and a CRC of the prefix makes t
 But `ZipFile.read` decompresses first and cuts afterward: a 1 MB deflated part stating 1,000 bytes
 peaks at 2.07 GB in 0.3 s, up to the 2 GiB `ZipExtFile.MAX_N` allows, and bzip2 and LZMA, which
 take no output limit at all, do the same without that bound. `ZipFile.open` with a bounded read
-stays at 18 MB, but openpyxl calls `read` for most parts. Measured with `bench/load_modes.py` on
-the workbook of §5.2 (108.7 MB of XML), the whole check takes 0.08 s at 31 MB peak, against 4.3 s
-for a preview. Once it has passed, every later read, openpyxl's included, can rely on the sizes.
+stays at 18 MB, but a reader that calls `read` gets the first behavior. Measured with
+`bench/load_modes.py` on the workbook of §5.2, the whole check takes 0.13 s at 39 MB peak. Once
+it has passed, every later read, xlio's included, can rely on the sizes.
 
 **A DTD is refused, in every part, under any name.** expat itself reads the prolog
 (`StartDoctypeDeclHandler`, stopping at the first start element, within 1 MiB), so a comment
@@ -1480,17 +1460,15 @@ before the DTD, UTF-16 and any other encoding the parsers accept are seen as the
 them; a part's name decides nothing, because `[Content_Types].xml` and the relationships name the
 parts. Without a DTD there are no entities, which removes:
 - expat's own defense as a dependency. Amplification limits exist only from expat 2.4: under
-  2.2.8 a billion-laughs part was still growing when stopped at 4 GB after 60 s. The parser also
-  differs by what is installed, since openpyxl switches to lxml or defusedxml when they are
-  present;
+  2.2.8 a billion-laughs part was still growing when stopped at 4 GB after 60 s;
 - what that defense allows. It is a ratio, not a cap: a 36 KB file with one large entity used 90
   times expands to a 3 GiB string, 5.9 GB peak.
 
-External entities were never fetched (file and HTTP, general, parameter and external subset, with
-and without lxml and defusedxml), and a refused DTD keeps it so. A part expat cannot read at all,
-such as an image, passes: no parser that would expand an entity accepts it (lxml reads UTF-32,
-which expat cannot, and leaves its entities unexpanded). An encoding expat refuses by name is
-refused here too, because lxml may accept it.
+External entities are not fetched (file and HTTP, general, parameter and external subset), and a
+refused DTD keeps it so. A part expat cannot read at all, such as an image, passes: no parser
+that would expand an entity accepts it (lxml reads UTF-32, which expat cannot, and leaves its
+entities unexpanded). An encoding expat refuses by name is refused here too, because another
+parser may accept it.
 
 **What Excel does** (suite `package`, `CAPTURING.md`): it opens none of these. A `<!DOCTYPE>`, a
 bzip2 or LZMA part, a name used twice and all three kinds of false size give error -50 with alerts
@@ -1536,9 +1514,9 @@ costs nothing per point.
 | `max_cells` | 100,000,000 | 1,048,576 (one full column) |
 
 **`max_cells` is a grid area**, not a count of populated cells. It is enforced before anything is
-allocated, on what is actually read: `ref` when given, otherwise the used range from the structure
-scan, never `<dimension>`. Without it, a 4.6 KB file with a merge `A1:XFD1048576`, a cell at
-`XFD1048576` or a row past Excel's last one reaches 6 GB in 30 s, and so does
+allocated, on what is actually read: `ref` when given, otherwise the used range from the cell
+stream and the merges, never `<dimension>`. Without it, a 4.6 KB file with a merge
+`A1:XFD1048576` or a cell at `XFD1048576` reaches 6 GB in 30 s, and so does
 `?ref=A1:XFD1048576` on an ordinary file. It applies again to the layout, through `Sheet.max_cells`:
 one 32,767-character string, which Excel allows, spills over 3,710 columns, so `A1:A1000` of that
 sheet is 3.7 million rendered cells, 2.3 GB. Empty columns past the range are therefore neither
@@ -1556,9 +1534,9 @@ what the limits allow:
 | styles or theme, 256 MiB of elements, parsed whole | 0.3 MiB | 29 s, 10 s | 6.5 GB |
 | worksheet, 1 GiB of one-cell rows | 3.0 MiB | 169 s | 2.6 GB |
 
-A lower limit only for parts parsed whole was ruled out: which parts those are is openpyxl's
-internal detail (chartsheets and drawings among them), and it finds the workbook part differently
-from sheetpeek, so a split could be evaded. The library's defaults stop what could hardly be read
+A lower limit only for parts parsed whole was ruled out: which parts those are is the reader's
+internal detail (styles, the theme and drawings among them), so a split would follow every
+change in it. The library's defaults stop what could hardly be read
 anyway and do not make it safe on a small machine: 100 million rendered cells take tens of GB. A
 service lowers them, as `serve` does.
 
@@ -1593,37 +1571,28 @@ remains a link in cmark-gfm whatever is escaped: the same text, as `mailto:`.
 
 **One open file.** `Book` opens a path once, for the check and for every read after it, so a path
 swapped after the check is not what gets read. A file overwritten in place during a read still
-could be, and `Book` is for one thread at a time. openpyxl's check of the file's extension is
-therefore not reached; `_package.open_package` gives the same advice for `.xls` and `.xlsb`,
-looking at the content first and the name second.
+could be, and `Book` is for one thread at a time. `_package.open_package` gives advice for `.xls`
+and `.xlsb`, looking at the content first and the name second.
 
 **Errors.** `PackageError` is a `ValueError`, and `LimitError` a `PackageError`, as in xlrecalc; the
-classes are separate, since sheetpeek does not yet depend on xlrecalc. Whatever openpyxl raises on a
-file it cannot read becomes a `PackageError` with the original as its cause, and its message drops
-the file's folder, since openpyxl's own names the full path and `serve` shows messages to clients. A
-path that cannot be opened keeps its `OSError`. **Measured for no false refusals:** 15,935 workbooks
-in two public corpora (the Enron spreadsheets and xlcalculator's test workbooks) all pass the check,
-at about 1 ms each; `sheetpeek.open` and openpyxl agree on every one (2 files openpyxl cannot read,
-for a print title of `#N/A`).
+classes are separate, since sheetpeek does not yet depend on xlrecalc. xlio's refusals become
+sheetpeek's: its `LimitError` a `LimitError`, its `PackageError` a `PackageError` ("cannot read
+this workbook: ...") with the original as its cause and the file's folder dropped from the
+message, since `serve` shows messages to clients. A path that cannot be opened keeps its
+`OSError`. **Measured for no false refusals:** the 15,935 workbooks of two public corpora (the
+Enron spreadsheets and xlcalculator's test workbooks) all pass the check, at about 1 ms each, and
+all open.
 
-### 5.6 Text as openpyxl returns it
+### 5.6 Text as xlio returns it
 
-openpyxl's read-only mode leaves OOXML's `_xHHHH_` escapes undecoded in cell text, inline strings
-and cached text results. Excel decodes them (`layout` rows 190 to 193, and xlrecalc's capture of
-the same rule): `_x0041_` is `A`, hex digits in either case, `_x005F_x0041_` the text `_x0041_`, and
-three digits no escape. `_read.unescape` decodes every text value as `Cell.value` takes it.
+xlio decodes OOXML's `_xHHHH_` escapes in cell text, shared and inline strings and cached text
+results, as Excel does (`layout` rows 190 to 193, and xlrecalc's capture of the same rule):
+`_x0041_` is `A`, hex digits in either case, `_x005F_x0041_` the text `_x0041_`, and three digits
+no escape. A `<t>` without `xml:space="preserve"` loses its leading and trailing whitespace, as in
+Excel (xlrecalc's capture `whitespace`). Escaped UTF-16 surrogates join into the character they
+spell; a lone one, which no output can encode, becomes the replacement character.
 
-Two deviations, reported by count in pytest's "captures" summary and pinned by a test, come from
-what openpyxl has already done. Both are rare, and reading the shared strings without openpyxl
-would fix both:
-- **`x005F_` in shared strings.** Its shared-string reader removes `x005F_` wherever it occurs, so
-  `_x005F_x0041_` arrives as `_x0041_` and decodes to `A` where Excel shows `_x0041_`, and
-  `x005F_keep` shows as `keep`. Inline strings keep it (row 191).
-- **Whitespace without `xml:space="preserve"`.** Excel drops leading and trailing whitespace there
-  (xlrecalc's capture `whitespace`). openpyxl keeps it and does not say what the element said.
-
-Rich text is read with openpyxl's `rich_text=True`, which keeps the runs of shared strings and
-loses those of inline strings (§4.16).
+Rich text keeps its runs in shared and inline strings alike (§4.16).
 
 ## 6. The xlformat seam
 
@@ -1640,7 +1609,7 @@ xlformat.format_cell(value, number_format, font=cell_font,
                      normal_font=normal_font, date1904=...)             # none mode
 ```
 
-- `value` is the raw serial for dates (§5.3), never openpyxl's `datetime`.
+- `value` is the raw serial for dates (§5.3), never a `datetime`.
 - `w` is the column width in dialog units, from the file width through xlformat's conversion
   (§6.4).
 - For a merge anchor, `w` is the merged width (§4.4).
@@ -1661,10 +1630,9 @@ xlformat.format_cell(value, number_format, font=cell_font,
   tells which families are measured. Character mode was rejected because it counts a comma like a
   digit, which makes HTML disagree with Excel on more cells than a proportional approximation
   does.
-- **`ValueError` / `TypeError`** (a value no format shows, such as the infinity openpyxl reads from
-  `<v>1E400</v>`, or an unexpected type): shown as `str(value)`, left-aligned, with one warning
-  per format string naming the first cell. When a refused format's `General` retry fails so, the
-  warning names `General`.
+- **`ValueError` / `TypeError`** (a value no format shows, or an unexpected type): shown as
+  `str(value)`, left-aligned, with one warning per format string naming the first cell. When a
+  refused format's `General` retry fails so, the warning names `General`.
 
 ### 6.3 Error values
 
@@ -1900,7 +1868,7 @@ src/sheetpeek/
   _structure.py      the sheet structure (§5.4): `Structure`, filled from xlio and the cell stream
   _scan_links.py     hyperlinks from xlio and the cell stream, and the reader's link notices (§4.10)
   _scan_outline.py   the outline from xlio: its rows, columns and settings
-  _read.py           the reader: openpyxl read-only, date conversion off; builds a Sheet
+  _read.py           the reader: xlio's models and cell stream into a Sheet (§5.4)
   _style/            a cell's style, one module per aspect: number format, border, fill, font,
                      alignment
   _detect.py         what a file uses that the model does not carry: one rule per sheet child
@@ -1937,10 +1905,11 @@ bench/               scripts that rerun §5 and §7.3's figures; README.md recor
 docs/                Sphinx, as in xlformat
 ```
 
-**The reader is isolated.** Only `_read.py` imports openpyxl (a test enforces it), and only the
-package's entry points import `_read.py`. Everything else works on sheetpeek's own model, so a
-later reader can replace the openpyxl one without touching layout or backends. `_structure.py`
-reads the worksheet XML and knows nothing of layout.
+**The reader is isolated.** The reading modules (`_read.py`, `_structure.py`, the `_scan_*`
+modules, `_detect.py`, `_sheets.py`, `_page.py`) take xlio's models; nothing imports openpyxl (a
+test enforces it), and only the package's entry points import `_read.py`. Everything else works
+on sheetpeek's own model, so layout and backends do not know the reader. `_structure.py` knows
+nothing of layout.
 
 **Where a feature plugs in.** Each stage has one place per feature, so that features can be
 built side by side with little overlap:
@@ -2019,8 +1988,10 @@ sheetpeek already use openpyxl.
 
 ### 8.3 Dependencies
 
-- `openpyxl>=3.1`, no upper bound (§5.3).
+- `xlio==0.3.*` (§5): the family's reader, internal to the family, pinned to a minor.
 - `xlformat>=0.4,<1` (§6.4), imported normally: it is required.
+- openpyxl is a dev dependency only: the tests and the documentation's examples build workbooks
+  with it, and the tests that need it are left out without it.
 - Extra `sheetpeek[rich]`: `rich>=13`.
 
 ## 9. Planned options
@@ -2217,9 +2188,8 @@ are read.
 - **Unit tests** (default `pytest`, no Excel needed): workbooks built in the test with openpyxl,
   and written as XML parts directly where cached values, missing attributes or exact XML matter.
   They cover:
-  - the package lookup and the structure the reader finds, compared with openpyxl's normal mode
-    on the same files;
-  - the read-only reader's fast path and its date fallback;
+  - the package lookup and the structure the reader finds;
+  - dates kept as serials, and `t="d"` cells read as Excel reads them (§5.3);
   - wrong or missing `<dimension>`;
   - colors;
   - each layout rule, on the characters each column draws (`tests/test_layout.py`), with the
@@ -2227,7 +2197,7 @@ are read.
   - each backend's output for one workbook that exercises the layout, compared with golden
     files in `tests/golden/` (regenerated on purpose with `SHEETPEEK_UPDATE_GOLDEN=1`, then read
     before committing);
-  - the command line, and that only the reader imports openpyxl;
+  - the command line, and that nothing in the package imports openpyxl;
   - crafted packages (`tests/test_limits.py`), built in the test and never committed, and the
     forms a real package may take: zip64, data descriptors, a prefixed archive, stored parts;
   - that a guard's regression costs a failed test and not the machine's memory
@@ -2248,7 +2218,8 @@ are read.
   A `--tier=fast` option can be added when a suite is large enough to need it.
 - **Extras:** CI runs the suite with `rich` installed and without it. Tests needing `rich` skip via
   `pytest.importorskip`. Doc examples are doctests.
-- **Latest openpyxl:** one CI job upgrades openpyxl to the newest release before testing.
+- **Latest openpyxl:** one CI job upgrades openpyxl, which builds the test workbooks, to the
+  newest release before testing.
 - **Real-world files:** workbooks saved by Excel for Mac (later Windows and LibreOffice) under
   `tests/files/`, a few KB each. The first, `excel_formulas.xlsx`, holds Excel's own cached
   formula results (§4.8).
@@ -2258,23 +2229,20 @@ are read.
 1. **The middle tier:** filter and sort buttons, tables with the differential-format layer,
    conditional formatting, pictures and their placement, notes and comments, the print
    settings not yet drawn (titles, headers and footers); then pivot
-   tables. Most of it needs parts that
-   openpyxl's read-only mode does not expose.
-2. **The shared xlsx reader:** sheetpeek moves from openpyxl onto the shared reader, in
-   development as a package of its own; `_read.py` is the only module that changes (§8.1).
-3. **Recalculation** through `xlrecalc`, which becomes a required dependency: what a formula
+   tables. Their parts come from xlio; those it does not read yet (pivot tables) are on its list.
+2. **Recalculation** through `xlrecalc`, which becomes a required dependency: what a formula
    cell shows on opening, and conditional formats driven by formulas, as Excel evaluates them.
    Charts, possibly as a package of their own. Planned options (§9) as they are asked for.
-4. **Excel for Windows and the Mac.** The platform is a setting, with Excel for Windows as the
+3. **Excel for Windows and the Mac.** The platform is a setting, with Excel for Windows as the
    default (most Excel users have it) and Excel for Mac kept; the sibling packages take the same
    setting. Parity on both platforms comes before a beta: every rule measured on the Mac is
    measured on Windows too, and where the two differ each platform gets its own. To measure on
    Windows: column widths, row heights and glyph tables (xlformat measures the Mac only so far),
    and the automatic gridline gray, which the HTML backend draws (`--sheetpeek-grid`) and the
    capture controls take per platform.
-5. **After 1.0:** a PDF backend drawing from the `excel` mode geometry (§2.1), possibly as an
+4. **After 1.0:** a PDF backend drawing from the `excel` mode geometry (§2.1), possibly as an
    optional extra.
-6. **Other viewers and refinements**, logged here as they stop paying on the Mac:
+5. **Other viewers and refinements**, logged here as they stop paying on the Mac:
    - Linux viewers, and Chrome and Firefox for the HTML technique (only WebKit is measured);
    - a glyph-spacing correction for Aptos Narrow, for which no free metric-compatible font is
      known;
