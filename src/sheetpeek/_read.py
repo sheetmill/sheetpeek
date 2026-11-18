@@ -704,6 +704,9 @@ class Book:
                 code = _builtin_format(cell_format.number_format_id)
             cell_format = dataclasses.replace(cell_format, number_format=code)
             found = self._styles[index] = styles.resolve(cell_format, self._context)
+            # By identity: a theme-1 style and an uncolored one compare equal, since Font.color
+            # reads both as automatic. Interning equal styles would mark the uncolored one too;
+            # test_table_layout's equal-style test fails if that happens.
             if font_aspect.theme_one(cell_format.font):
                 self._theme_one[id(found[0])] = found[0]
         return found

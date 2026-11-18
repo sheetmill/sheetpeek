@@ -223,3 +223,20 @@ def test_a_later_element_replaces_an_earlier_bottom_line(tmp_path):
     assert borders is not None
     assert borders.horizontal[1] == (Side("thin", "0000FF"),) * 3
     assert borders.horizontal[2] == (Side("thick", "000000"),) * 3
+
+
+def test_an_uncolored_style_equal_to_a_theme_1_style_keeps_its_own_color(tmp_path):
+    # B1 keeps the default font (theme 1); C1's font is the same but without a color. Their
+    # styles compare equal, so the record of theme-1 styles must go by the style's identity:
+    # were equal styles ever shared, C1 would take the header's white as well.
+    styles = pytest.importorskip("openpyxl.styles")
+
+    def own(ws):
+        ws["C1"].font = styles.Font(name="Calibri", sz=11, family=2, scheme="minor")
+
+    path = book(tmp_path, edit=own)
+    sheet = sheetpeek.read(path)
+    assert sheet.cell(1, 3).style == sheet.cell(1, 2).style
+    found = displayed(path)
+    assert found[(1, 2)].font.color == "FFFFFF"
+    assert found[(1, 3)].font.color is None
