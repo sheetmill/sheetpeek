@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import re
 import warnings
-from collections.abc import Iterator
+from collections.abc import Iterator, Mapping
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Literal, TypeAlias
 
@@ -355,6 +355,9 @@ class Sheet:
     """What the file uses that sheetpeek does not read yet (:class:`~sheetpeek.Notice`)."""
     max_cells: int | None = field(default=None, repr=False, compare=False)
     """The largest grid its layout may build (:class:`~sheetpeek.ReadLimits`), or ``None``."""
+    _theme_one: Mapping[int, CellStyle] = field(default_factory=dict, repr=False, compare=False)
+    """The cell styles whose font color is an untinted theme 1, by ``id``, which a
+    table style's font color shows through (§4.20). ``Font.color`` reads it as automatic."""
 
     @property
     def warnings(self) -> tuple[str, ...]:

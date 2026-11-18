@@ -133,8 +133,9 @@ layout fields marked *layout*. The style fields (`number_format` to `indent`) li
 | *layout* `lines` | `tuple[str, ...]` | §3.5 | what is drawn **in this column**: one string of the column's width per line of the row (`characters`), or the cell's text (`none`) |
 | *layout* `source` | `(row, column) \| None` | §3.5 | the cell whose text `lines` shows: this cell, a spilling neighbor, or a merge anchor |
 | *layout* `button` | `FilterButtonState \| None` | `Sheet.autofilters` (§4.19) | the glyph of the filter button on a header cell; each output sizes it |
-| *layout* `fill` | `str \| None` | the cell's own fill; the anchor's for a merged cell | the background of this column, also under text spilled into it |
+| *layout* `fill` | `str \| None` | the cell's displayed fill; the anchor's own for a merged cell | the background of this column, also under text spilled into it |
 | *layout* `font`, `color` | | the source cell's font, and its section color else its font color | the style of the text drawn here |
+| *layout* `display_style` | `CellStyle` | the cell's own style over a table's (§4.20) | the style the cell is displayed in; `cell.style` itself where nothing stacks |
 
 **Borders and fills** are read into `CellStyle.borders` and `CellStyle.fill_spec` (§4.12), and
 text styles into `Font` and `CellStyle` (§4.13). Rich-text runs inside one cell are read into
@@ -1404,7 +1405,28 @@ theme 1 (automatic and a font without a color included), bold, italic, underline
 strikethrough set. Its own border sides replace the formats' sides one side at a time; the font
 name and size are always its own. A cell with nothing beneath it keeps its style object.
 
-**Drawn:** to come with the layout pass and the screen suite `tables`; unverified until then.
+**The layout pass** (`_pass_tables.py`, before the cells, since a table's bold changes text
+widths and spill; unverified until the screen suite `tables` captures it). Each table with a
+style found among `Sheet.table_styles` lays its elements over their regions, in ECMA-376's order:
+the whole table; column stripes over the data rows, banded from the first column; row stripes
+over the data rows, banded from the first data row **counting visible rows only**, `size` rows
+of the first stripe and then of the second (one row when the second has no element); the last
+and the first column whole; the header and totals rows by their counts; the corner cells only
+with their column's flag. Each stripe band is a region: a region's outer sides lie on its
+outline and its `horizontal` and `vertical` sides on its inner boundaries. **A later element
+wins per edge segment, whatever the line's weight**; a cell's own side facing a segment, from
+either of the two cells, replaces the table's line there, and between the cells the borders pass
+then applies §4.12's rule. A table without style info, without a name, or naming a style that is
+neither the workbook's nor a preset draws nothing (Excel's behavior for the last is to be
+probed). Which font colors count as the cell's own is decided from the file's font record: the
+reader keeps the styles whose font color is an untinted theme 1.
+
+The result is `RenderedCell.display_style`, what Excel's `Range.DisplayFormat` reports: the
+cell's own style with the table's stacked beneath it, the very `cell.style` object where nothing
+stacks, and one shared object for every cell with the same style, formats and sides. The cell
+pass lays out from it (fonts, fills) and the borders pass, the HTML fill layer and the census
+read it; `RenderedCell.fill`, `font` and `color` follow it. A merge shows its anchor's own fill,
+a table's beneath it not stacked (unverified). A sheet without tables pays one empty check.
 
 ## 5. Reading
 
@@ -1948,6 +1970,8 @@ src/sheetpeek/
   _pass_outline.py   the outline pass: groups, buttons and dots (§4.11)
   _pass_borders.py   the borders pass: one resolved side per edge, the diagonals (§4.12)
   _pass_buttons.py   the filter-button pass: which header cells draw one, and its glyph (§4.19)
+  _pass_tables.py    the tables pass: the style each table cell is displayed in (§4.20)
+  _dxf.py            a cell's own style stacked over differential formats (§4.20)
   _excel.py          excel mode: geometry in points, text runs, clips
   _rows.py           row heights (§4.7) and baselines
   _text_styles.py    superscript, subscript, underlines, shrink to fit, direction (§4.13)

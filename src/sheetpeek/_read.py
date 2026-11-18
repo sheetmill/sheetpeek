@@ -16,7 +16,7 @@ import os
 import re
 import zipfile
 from collections.abc import Iterator, Sequence
-from types import TracebackType
+from types import MappingProxyType, TracebackType
 from typing import IO, Any, overload
 
 import xlformat
@@ -198,6 +198,8 @@ class Book:
             raise
         self._default_style = CellStyle("General", self._normal_font)
         self._styles: dict[Any, tuple[CellStyle, tuple[Code, ...], tuple[Code, ...]]] = {}
+        self._theme_one: dict[int, CellStyle] = {}
+        """The styles whose font color is an untinted theme 1, by ``id`` (``Sheet._theme_one``)."""
         self._run_cache: dict[int, tuple[Any, Font, tuple[TextSpan, ...] | None]] = {}
 
     def _unreadable(self, error: Exception) -> PackageError:
@@ -453,6 +455,7 @@ class Book:
             table_styles=table_styles,
             notices=notes.notices(),
             max_cells=self._limits.max_cells,
+            _theme_one=MappingProxyType(dict(self._theme_one)) if tables else {},
         )
 
     def _report_structure(
@@ -701,6 +704,8 @@ class Book:
                 code = _builtin_format(cell_format.number_format_id)
             cell_format = dataclasses.replace(cell_format, number_format=code)
             found = self._styles[index] = styles.resolve(cell_format, self._context)
+            if font_aspect.theme_one(cell_format.font):
+                self._theme_one[id(found[0])] = found[0]
         return found
 
     def _cell_color(self, color: Any) -> str | None:

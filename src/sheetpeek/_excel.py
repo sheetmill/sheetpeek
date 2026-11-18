@@ -109,7 +109,15 @@ def lay_out(draft: Draft) -> tuple[tuple[RenderedColumn, ...], tuple[RenderedRow
     widths = [_points(c, metrics) for c in every]
     added = set(range(len(before))) | set(range(len(before) + len(columns), len(every)))
     grid = _Grid(
-        sheet, rows, every, [0] * len(every), added, 0, False, _Formatter(sheet, notes, fonts)
+        sheet,
+        rows,
+        every,
+        [0] * len(every),
+        added,
+        0,
+        False,
+        _Formatter(sheet, notes, fonts),
+        draft.display_styles,
     )
 
     blocks: dict[tuple[int, int], float | None] = {}
@@ -357,7 +365,7 @@ class _Points:
                 show = shown.get(position, _Shown())
                 cells.append(
                     RenderedCell(
-                        cell=cell,
+                        cell=grid.file_cell(i, p),
                         text=show.text,
                         full_text=show.full_text,
                         overflow=show.overflow,
@@ -370,6 +378,7 @@ class _Points:
                         fill=grid.anchor_fill(merge) if merge else cell.fill,
                         font=None,
                         color=None,
+                        display_style=cell.style,
                     )
                 )
             row_runs = tuple(_shifted(run, x0) for run in runs.get(i, ()))

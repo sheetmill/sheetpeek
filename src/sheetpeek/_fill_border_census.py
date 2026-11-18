@@ -12,13 +12,14 @@ if TYPE_CHECKING:
 
 
 def fill_style(sheet: Sheet, rendered: RenderedCell) -> CellStyle | None:
-    """The style whose fill a laid-out cell shows: its own, or its merge anchor's.
+    """The style whose fill a laid-out cell shows: its displayed style, or its merge anchor's.
 
-    ``None`` for a merge whose anchor lies outside the range read.
+    A merge shows its anchor's own style, a table's beneath it not stacked (unverified). ``None``
+    for a merge whose anchor lies outside the range read.
     """
     merge = rendered.merge
     if merge is None:
-        return rendered.cell.style
+        return rendered.display_style
     ref = sheet.ref
     if ref is None or (merge.min_row, merge.min_col) not in ref:
         return None
@@ -34,7 +35,7 @@ def fill_border_codes(sheet: Sheet, rendered: RenderedCell) -> list[str]:
         codes.append("fill" if spec.kind == "solid" else "fill.pattern")
     elif isinstance(spec, Gradient):
         codes.append("fill.gradient")
-    borders = rendered.cell.style.borders
+    borders = rendered.display_style.borders
     if borders is None:
         return codes
     sides = [s for s in borders.sides if s is not None]

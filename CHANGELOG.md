@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   its `TableStyleInfo`) and `Sheet.table_styles` the styles they name, the workbook's own or
   Excel's presets (`TableStyle`, `TableStyleElement`), each element's `DifferentialFormat`
   holding only what the file sets, its colors resolved through the theme.
+- `RenderedCell.display_style`: the style a cell is displayed in, what Excel's
+  `Range.DisplayFormat` reports: the cell's own style with its table's style stacked beneath
+  it (the whole table, stripes over visible rows, first and last column, header and totals rows
+  and their corners, and their lines), the cell's own fill, font color, bold, italic, underline,
+  strikethrough and sides winning; `cell.style` itself where nothing stacks. `RenderedCell.fill`,
+  `font` and `color` follow it.
 - Filters are read: `Sheet.autofilters` holds the sheet's filter and each table's
   (`AutoFilter`, with `FilterColumn` and `SortCondition`), and the layout marks each header cell
   that draws a filter button with its glyph (`RenderedCell.button`: `plain`, `filtered`,

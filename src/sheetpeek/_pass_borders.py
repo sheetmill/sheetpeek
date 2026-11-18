@@ -27,7 +27,7 @@ def borders_pass(draft: Draft) -> None:
     if draft.mode != "excel":
         return
     rows = draft.rows
-    if not any(c.cell.style.borders is not None for row in rows for c in row.cells):
+    if not any(c.display_style.borders is not None for row in rows for c in row.cells):
         return
     grid = [row.cells for row in rows]
     count, width = len(grid), len(draft.columns)
@@ -42,7 +42,7 @@ def borders_pass(draft: Draft) -> None:
         """Side ``side`` (left, right, top, bottom) of grid cell (i, p), if it is in the grid."""
         if not (0 <= i < count and 0 <= p < width) or (i, p) in at:
             return None
-        borders = grid[i][p].cell.style.borders
+        borders = grid[i][p].display_style.borders
         return borders.sides[side] if borders is not None else None
 
     horizontal = []
@@ -95,7 +95,7 @@ def _slanted(draft: Draft) -> tuple[SlantedBorders, ...]:
     found = []
     for i, row in enumerate(draft.rows):
         for p, rendered in enumerate(row.cells):
-            style = rendered.cell.style
+            style = rendered.display_style
             borders = style.borders
             if rendered.merge is not None or borders is None or not slants(style):
                 continue
@@ -117,7 +117,7 @@ def _diagonals(draft: Draft) -> tuple[Diagonal, ...]:
                 area = areas.setdefault(merge, [i, p, i, p])
                 area[2], area[3] = i, p
                 continue
-            borders = rendered.cell.style.borders
+            borders = rendered.display_style.borders
             if borders is not None and borders.diagonal is not None:
                 found.append(
                     Diagonal(

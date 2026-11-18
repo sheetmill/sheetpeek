@@ -12,7 +12,7 @@ from __future__ import annotations
 import re
 import textwrap
 from collections.abc import Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any
 
 import xlformat
@@ -23,6 +23,7 @@ from sheetpeek._package import LimitError
 from sheetpeek._pass_borders import borders_pass
 from sheetpeek._pass_buttons import buttons_pass
 from sheetpeek._pass_outline import outline_pass
+from sheetpeek._pass_tables import tables_pass
 from sheetpeek._rendered import (
     Alignment,
     Gap,
@@ -121,6 +122,9 @@ class Draft:
     gap: int = 0
     extra: dict[str, Any] = field(default_factory=dict)
     """What features' own passes add, by feature."""
+    display_styles: dict[tuple[int, int], CellStyle] = field(default_factory=dict)
+    """The style a cell is displayed in where it is not its own (``RenderedCell.display_style``),
+    by (row, column): a table's, stacked beneath the cell's own."""
 
 
 Pass = Callable[[Draft], None]
@@ -164,6 +168,7 @@ def _cells(draft: Draft) -> None:
         gap,
         characters,
         _Formatter(sheet, draft.notes, draft.fonts),
+        draft.display_styles,
     )
     draft.rows, kept = grid.render()
     draft.columns = tuple(
@@ -176,13 +181,15 @@ _TYPED = frozenset({"outline", "borders"})
 """Pass results that have a typed field of their own on ``RenderedSheet``."""
 
 PASSES: list[Pass] = [
+    tables_pass,
     _cells,
     borders_pass,
     outline_pass,
     buttons_pass,
 ]
 """The layout's passes, in order. A feature adds its own here: borders after the cells (they
-depend on spill), chrome such as outline symbols after the geometry."""
+depend on spill), chrome such as outline symbols after the geometry. Tables come first: their
+bold changes text widths and spill."""
 
 
 def finish(
@@ -439,8 +446,12 @@ class _Grid:
         gap: int,
         characters: bool,
         formatter: _Formatter,
+        display: dict[tuple[int, int], CellStyle] | None = None,
     ) -> None:
         self.sheet = sheet
+        self.display = display or {}
+        """Displayed styles that are not the cells' own (``Draft.display_styles``)."""
+        self.shown_cells: dict[tuple[int, int], Cell] = {}
         self.rows = rows
         self.columns = columns
         self.added = added  # positions of the empty columns added past the range
@@ -474,9 +485,29 @@ class _Grid:
                         self.merge_of[(row, col)] = merge
 
     def cell(self, i: int, p: int) -> Cell:
+        """The cell at grid position (i, p), in its displayed style."""
+        if p in self.added:
+            return Cell(self.rows[i].index, self.columns[p].index, None, "empty", self.empty_style)
+        return self.at(self.rows[i].index, self.columns[p].index)
+
+    def file_cell(self, i: int, p: int) -> Cell:
+        """The cell at grid position (i, p) as the file states it."""
         if p in self.added:
             return Cell(self.rows[i].index, self.columns[p].index, None, "empty", self.empty_style)
         return self.sheet.cell(self.rows[i].index, self.columns[p].index)
+
+    def at(self, row: int, column: int) -> Cell:
+        """The cell at a sheet position inside the range, in its displayed style."""
+        cell = self.sheet.cell(row, column)
+        if not self.display:
+            return cell
+        style = self.display.get((row, column))
+        if style is None:
+            return cell
+        shown = self.shown_cells.get((row, column))
+        if shown is None:
+            shown = self.shown_cells[(row, column)] = replace(cell, style=style)
+        return shown
 
     def block_width(self, cols: list[int]) -> int:
         return sum(self.widths[p] for p in cols) + self.gap * (len(cols) - 1)
@@ -556,7 +587,7 @@ class _Grid:
         ref = self.sheet.ref
         if not rows or not cols or ref is None or (merge.min_row, merge.min_col) not in ref:
             return None  # nothing visible, or the anchor lies outside the range read
-        anchor = self.sheet.cell(merge.min_row, merge.min_col)
+        anchor = self.at(merge.min_row, merge.min_col)
         return _Origin(anchor, self.show(anchor, cols), rows, cols, False)
 
     # Rendering ----------------------------------------------------------------------------
@@ -608,7 +639,7 @@ class _Grid:
                 fill = self.anchor_fill(merge) if merge else cell.fill
                 cells.append(
                     RenderedCell(
-                        cell=cell,
+                        cell=self.file_cell(i, p),
                         text=show.text,
                         full_text=show.full_text,
                         overflow=show.overflow,
@@ -621,6 +652,7 @@ class _Grid:
                         fill=fill,
                         font=cell.font if origin else None,
                         color=(show.format_color or cell.font.color) if origin else None,
+                        display_style=cell.style,
                     )
                 )
             result.append(RenderedRow(row.index, row, 1, tuple(cells), ()))
@@ -630,6 +662,8 @@ class _Grid:
         ref = self.sheet.ref
         if ref is None or (merge.min_row, merge.min_col) not in ref:
             return None
+        # A merge draws its anchor's own fill, a table's beneath it not stacked (unverified;
+        # the HTML fill layer does the same, _fill_border_census.fill_style).
         return self.sheet.cell(merge.min_row, merge.min_col).fill
 
     def content_lines(self, origin: _Origin) -> list[str]:
@@ -810,7 +844,7 @@ class _Canvas:
                 own = by_cell.get(position)
                 cells.append(
                     RenderedCell(
-                        cell=cell,
+                        cell=grid.file_cell(i, p),
                         text=show.text,
                         full_text=show.full_text,
                         overflow=show.overflow,
@@ -823,6 +857,7 @@ class _Canvas:
                         fill=grid.anchor_fill(merge) if merge else cell.fill,
                         font=origin.cell.font if origin else None,
                         color=_ink(origin),
+                        display_style=cell.style,
                     )
                 )
             gaps = []

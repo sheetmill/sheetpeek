@@ -45,7 +45,7 @@ def to_font(
     # Theme color 1 ("Text 1") is what Excel's own default font uses for ordinary text, so
     # untinted it means the default foreground, like an automatic color. The theme wins over
     # rgb and auto, as indexed wins over the theme.
-    if color is not None and color.indexed is None and color.theme == 1 and not color.tint:
+    if theme_one(font):
         color = None
     stored = font.name or normal.name
     scheme = _SCHEMES.get(font.scheme)
@@ -62,6 +62,16 @@ def to_font(
         scheme=scheme,
         stored_name=stored if name != stored else None,
     )
+
+
+def theme_one(font: Any) -> bool:
+    """Whether an ``xlio.Font``'s color is theme color 1, untinted, as Excel's default font's is.
+
+    Such a color lets a table style's font color through where any other, automatic and a font
+    without a color included, is the cell's own (§4.20, unverified).
+    """
+    color = getattr(font, "color", None)
+    return color is not None and color.indexed is None and color.theme == 1 and not color.tint
 
 
 _VERT_ALIGN: dict[Any, VerticalTextPosition] = {
