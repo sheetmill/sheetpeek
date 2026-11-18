@@ -87,10 +87,9 @@ sheetpeek serve reports/                  # every workbook under reports/ as HTM
 column's position and width and each text's position in points, in `characters` mode the
 characters each column draws. The documentation's usage page has examples.
 
-Cells are read with openpyxl's read-only mode, so memory does not grow with the file while it is
-read. The parts read-only mode leaves out, such as merges, widths and the used range, come from a
-separate scan of the sheet's XML. `ref="A1:H40"` reads part of a sheet, and `sheetpeek.open`
-reads several sheets with one load.
+Workbooks are read with [xlio](https://github.com/sheetmill/xlio), in one pass over each sheet's
+cells, with values as Excel reads them. `ref="A1:H40"` keeps part of a sheet (the whole sheet is
+still read, for its used range), and `sheetpeek.open` reads several sheets with one load.
 
 A file from someone you do not trust is checked before anything parses it, and `limits=` sets what
 a read may cost; the documentation's usage page has the details. `sheetpeek serve` has no
@@ -106,11 +105,13 @@ pip install sheetpeek
 pip install "sheetpeek[rich]"   # with styled terminal output
 ```
 
-Python 3.11 or later. Depends on `openpyxl` and `xlformat`.
+Python 3.11 or later. Depends on `xlio` and `xlformat`. The examples here build their workbooks
+with openpyxl (`pip install openpyxl`), which sheetpeek itself does not need.
 
 ## Related packages
 
 sheetpeek is part of the [sheetmill](https://github.com/sheetmill) project, with
+[xlio](https://github.com/sheetmill/xlio), which reads and writes the workbooks,
 [xlformat](https://github.com/sheetmill/xlformat), which applies Excel number formats, and
 [xlrecalc](https://github.com/sheetmill/xlrecalc), a formula engine.
 

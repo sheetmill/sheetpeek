@@ -169,6 +169,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   100,000-cell bench sheets (`bench/html_size.py`, measured together) a plain sheet reads in 0.42
   s against 0.2.0's 0.52 s; a sheet using the newer features in 0.64 s against 0.52 s, since
   rich text, hyperlinks and the rest are now read.
+- openpyxl is no longer a dependency (0.2.0 required it): nothing in sheetpeek imports it. The
+  README's and the documentation's examples build their workbooks with it, so they need it
+  installed.
 - Files Excel opens that 0.2.0 refused are read: a color whose `rgb` is not hex (read as Excel
   reads it), an unknown sheet state (visible), a `zoomScale` that is not a whole number (100,
   unverified). Of the 15,966 workbooks of the comparison corpus (every xlsx and xlsm in it), two

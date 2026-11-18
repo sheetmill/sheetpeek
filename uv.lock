@@ -1110,7 +1110,6 @@ wheels = [
 name = "sheetpeek"
 source = { editable = "." }
 dependencies = [
-    { name = "openpyxl" },
     { name = "xlformat" },
     { name = "xlio" },
 ]
@@ -1128,6 +1127,7 @@ capture = [
 dev = [
     { name = "markdown-it-py", extra = ["linkify"] },
     { name = "mypy" },
+    { name = "openpyxl" },
     { name = "pytest" },
     { name = "rich" },
     { name = "ruff" },
@@ -1145,7 +1145,6 @@ docs = [
 
 [package.metadata]
 requires-dist = [
-    { name = "openpyxl", specifier = ">=3.1" },
     { name = "rich", marker = "extra == 'rich'", specifier = ">=13" },
     { name = "xlformat", specifier = ">=0.4,<1" },
     { name = "xlio", specifier = "==0.3.*" },
@@ -1160,6 +1159,7 @@ capture = [
 dev = [
     { name = "markdown-it-py", extras = ["linkify"], specifier = ">=3" },
     { name = "mypy", specifier = ">=1.13" },
+    { name = "openpyxl", specifier = ">=3.1" },
     { name = "pytest", specifier = ">=8" },
     { name = "rich", specifier = ">=13" },
     { name = "ruff", specifier = ">=0.8" },

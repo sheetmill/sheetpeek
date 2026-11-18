@@ -17,6 +17,8 @@ PAGES = [ROOT / "README.md", *sorted((ROOT / "docs").glob("*.md"))]
 def test_examples(page: Path) -> None:
     # Drop the code fences so a closing ``` is not read as expected output.
     lines = page.read_text().splitlines()
+    if any("import" in line and "openpyxl" in line for line in lines if line.startswith(">>>")):
+        pytest.importorskip("openpyxl")  # the example builds its workbook with it
     text = "\n".join(line for line in lines if not line.startswith("```"))
     test = doctest.DocTestParser().get_doctest(text, {}, page.name, str(page), 0)
     runner = doctest.DocTestRunner(optionflags=doctest.ELLIPSIS)

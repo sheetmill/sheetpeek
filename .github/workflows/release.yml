@@ -73,6 +73,7 @@ jobs:
           /tmp/env/bin/python -I -c "from importlib.metadata import requires; print('\n'.join(r for r in requires('sheetpeek') if 'extra ==' not in r))" > /tmp/requirements.txt
           cat /tmp/requirements.txt
           uv pip install -p /tmp/env -r /tmp/requirements.txt
+          uv pip install -p /tmp/env openpyxl  # builds the check's workbook; not a dependency
           SHEETPEEK_VERSION="${version}" /tmp/env/bin/python -I - <<'PY'
           import os, pathlib, tempfile
           import openpyxl, sheetpeek
