@@ -24,6 +24,7 @@ if TYPE_CHECKING:
     from sheetpeek._notices import Notice
     from sheetpeek._rendered import Mode, RangeEdge, RenderedSheet, SpillEdge
     from sheetpeek._runs_model import TextSpan
+    from sheetpeek._table_model import Table, TableStyle
 
 CellKind: TypeAlias = Literal["empty", "number", "text", "bool", "error"]
 HorizontalAlignment: TypeAlias = Literal[
@@ -345,6 +346,11 @@ class Sheet:
     autofilters: tuple[AutoFilter, ...] = ()
     """The sheet's filter, then each table's, that touch ``ref``; their header cells draw
     filter buttons (§4.19)."""
+    tables: tuple[Table, ...] = ()
+    """The sheet's tables that touch ``ref``, in file order (§4.20)."""
+    table_styles: tuple[TableStyle, ...] = ()
+    """The styles those tables name, the workbook's own or Excel's presets, colors resolved
+    through the workbook's theme (§4.20)."""
     notices: tuple[Notice, ...] = field(default=())
     """What the file uses that sheetpeek does not read yet (:class:`~sheetpeek.Notice`)."""
     max_cells: int | None = field(default=None, repr=False, compare=False)
@@ -359,6 +365,13 @@ class Sheet:
         from sheetpeek._notices import LEGACY
 
         return tuple(n.message for n in self.notices if n.code in LEGACY)
+
+    def table_style(self, name: str) -> TableStyle | None:
+        """The style of that name among :attr:`table_styles`, or ``None``."""
+        for style in self.table_styles:
+            if style.name == name:
+                return style
+        return None
 
     def cell(self, row: int, column: int) -> Cell:
         """The cell at a sheet position inside ``ref``.

@@ -68,6 +68,14 @@ from sheetpeek._rendered import (
 )
 from sheetpeek._runs_model import TextSpan
 from sheetpeek._sheets import NotAWorksheetError, SheetInfo
+from sheetpeek._table_model import (
+    DifferentialFormat,
+    Table,
+    TableStyle,
+    TableStyleElement,
+    TableStyleElementType,
+    TableStyleInfo,
+)
 from sheetpeek._text_model import TextRule
 from sheetpeek._view_model import SheetView
 from sheetpeek.backends import Backend, notices, register_backend, render
@@ -91,6 +99,7 @@ __all__ = [
     "CellValue",
     "Column",
     "Diagonal",
+    "DifferentialFormat",
     "Feature",
     "Fill",
     "FilterButtonState",
@@ -134,6 +143,11 @@ __all__ = [
     "SortCondition",
     "SpillEdge",
     "Support",
+    "Table",
+    "TableStyle",
+    "TableStyleElement",
+    "TableStyleElementType",
+    "TableStyleInfo",
     "TextRule",
     "TextRun",
     "TextSpan",

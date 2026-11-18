@@ -61,6 +61,7 @@ from sheetpeek._read_links import Found as Links
 from sheetpeek._read_links import add_formula, cell_links, with_elements, with_formulas
 from sheetpeek._read_links import report as report_links
 from sheetpeek._read_outline import read_outline, with_levels
+from sheetpeek._read_tables import read_tables
 from sheetpeek._read_view import sheet_view
 from sheetpeek._runs_model import TextSpan
 from sheetpeek._sheets import (
@@ -404,6 +405,9 @@ class Book:
             with self._xlio_errors():
                 sheet_notices(notes, self._book.parts, source, self._info, name, ref)
                 autofilters = read_autofilters(source, ref)
+                tables, table_styles = read_tables(
+                    source, ref, self._book.styles.table_style, self._context
+                )
                 notes.extend(cell_notes.notices())  # after the sheet's own, as they were read
                 cells = self._grid(kept, ref, structure, notes) if ref else ()
         except PackageError:
@@ -445,6 +449,8 @@ class Book:
             row_breaks=row_breaks,
             column_breaks=column_breaks,
             autofilters=autofilters,
+            tables=tables,
+            table_styles=table_styles,
             notices=notes.notices(),
             max_cells=self._limits.max_cells,
         )

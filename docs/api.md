@@ -66,6 +66,20 @@ Everything below is importable from `sheetpeek`.
    :members:
 .. autoclass:: sheetpeek.SortCondition
    :members:
+.. autoclass:: sheetpeek.Table
+   :members:
+.. autoclass:: sheetpeek.TableStyleInfo
+   :members:
+.. autoclass:: sheetpeek.TableStyle
+   :members:
+.. autoclass:: sheetpeek.TableStyleElement
+   :members:
+.. autoclass:: sheetpeek.DifferentialFormat
+   :members:
+.. py:data:: sheetpeek.TableStyleElementType
+
+   Where a :class:`TableStyleElement` applies, one of the 13 types a table uses, in the order
+   that stacks them.
 .. py:data:: sheetpeek.SortBy
 
    What a :class:`SortCondition` sorts by: ``"value"``, ``"cellColor"``, ``"fontColor"`` or

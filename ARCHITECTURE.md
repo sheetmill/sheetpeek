@@ -1388,6 +1388,16 @@ glyphs, the hidden buttons and the sizes, `tests/test_filters.py`; the rest is u
 The layout marks each header cell with its glyph (`RenderedCell.button`, `_pass_buttons.py`);
 each output draws it at its own size.
 
+### 4.20 Tables and table styles
+
+**Read** (`_read_tables.py`, from xlio): each table part as a `Table` (`ref`, header and totals
+row counts, its `TableStyleInfo`), and the styles the tables name as `TableStyle`s, the
+workbook's own first and then Excel's 60 presets, which xlio ships with Ecma's notice. Each
+element's `DifferentialFormat` keeps only what its `<dxf>` sets; its colors are resolved through
+the workbook's theme, and a solid fill takes the `bgColor`.
+
+**Drawn:** to come with the layout pass and the screen suite `tables`; unverified until then.
+
 ## 5. Reading
 
 sheetpeek reads a workbook through xlio (`xlio==0.3.*`), the family's xlsx reader, after a check

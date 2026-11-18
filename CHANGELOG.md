@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Tables are read: `Sheet.tables` holds each table (`Table`: its range, header and totals rows,
+  its `TableStyleInfo`) and `Sheet.table_styles` the styles they name, the workbook's own or
+  Excel's presets (`TableStyle`, `TableStyleElement`), each element's `DifferentialFormat`
+  holding only what the file sets, its colors resolved through the theme.
 - Filters are read: `Sheet.autofilters` holds the sheet's filter and each table's
   (`AutoFilter`, with `FilterColumn` and `SortCondition`), and the layout marks each header cell
   that draws a filter button with its glyph (`RenderedCell.button`: `plain`, `filtered`,
