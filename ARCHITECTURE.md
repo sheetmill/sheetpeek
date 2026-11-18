@@ -732,8 +732,12 @@ reported as `outline.cut` (decided).
 screen-fixed**: identical at zoom 100 and 200, in Excel's screen points (spt). HTML draws a screen
 point as 4/3 CSS px, rounded to whole px: the cells' scale at zoom 100, at which Excel for Mac
 shows one sheet point as one screen point, so the gutter keeps its proportion to the
-rows. Line widths (bars, borders, strokes) stay in CSS px, as gridlines and cell borders do. The
-filter buttons follow the same rule (§4.19).
+rows. **The rule for everything Excel draws at a fixed screen size:** objects Excel sizes against
+the grid, which a reader compares with the cells (the gutter's lanes and buttons, the filter
+buttons, §4.19), take 4/3 CSS px a screen point; line widths (bars, borders, strokes, gridlines,
+underlines, dashes) and textures (pattern tiles, §4.12) take 1 CSS px a screen point. Excel draws
+tiles and dashes on whole screen points, and a tile is a texture of single-point dots: scaled by
+4/3 it could not be drawn crisply, and its period is not measured against a cell.
 - The row gutter is left of the row headings, `2 + 12 × (depth + 1) + 3` spt wide (53 at depth
   3; 71 px); the column gutter is above the column headings, by the same rule (41 at depth 2;
   55 px). Lane `n` starts at `2 + 12 × (n − 1)` spt.
