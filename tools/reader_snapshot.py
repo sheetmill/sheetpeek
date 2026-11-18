@@ -19,21 +19,19 @@ included, and each read is bounded by ``max_cells`` (2,000,000) besides. ``snap 
 [START STOP]`` snapshots lines START to STOP of LIST; ``diff A B [EXAMPLES]`` prints how many
 records differ in each field, with a few examples of each.
 
-Sweeping the whole corpus takes about 10 minutes with 4 workers. Use ``--workers 8`` when no
-Excel capture runs and nothing else is being timed. Re-sweep a baseline only when this tool's
-records change; otherwise diff against the saved one. While iterating on a step, sweep the
-quick tier, and sweep the whole corpus once per step, before its commit:
+A snapshot depends on this tool's records as well as on the reader, so two snapshots compare
+only when taken with the same version of the tool. A sweep of about 16,000 workbooks takes
+about 10 minutes with 4 workers.
+
+``sample LIST OUT SNAPSHOT... [--with FIELD ...] [--random N]`` writes a smaller list, a quick
+tier, in LIST's order: every file whose records differ between any two consecutive SNAPSHOTs
+given (oldest first), every file with a sheet whose FIELD (``runs``, ``outline``, ``links``,
+...) is not that field's most common value in the first snapshot (the files carrying a
+feature), and N more files drawn from the rest of LIST (default 300, with a fixed seed, so the
+tier is the same each time):
 
     python tools/reader_snapshot.py sample list.txt quick.txt a.jsonl b.jsonl ... [--with FIELD]
     python -m tests.watchdog -- python tools/reader_snapshot.py sweep src quick.txt q.jsonl
-
-``sample LIST OUT SNAPSHOT... [--with FIELD ...] [--random N]`` writes the quick tier's list,
-in LIST's order: every file whose records differ between any two consecutive SNAPSHOTs given
-(pass the snapshots of committed steps, oldest first, so a file that ever differed between
-steps stays in; a try's snapshot with a bug since fixed would add every file it touched), every
-file with a sheet whose FIELD (``runs``, ``outline``, ``links``, ...) is not that field's most
-common value in the first snapshot (the files carrying the feature under change), and N more
-files drawn from the rest of LIST (default 300, a fixed seed, so the tier is the same each time).
 """
 
 from __future__ import annotations
