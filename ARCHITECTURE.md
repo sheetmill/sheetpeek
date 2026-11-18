@@ -1396,6 +1396,14 @@ workbook's own first and then Excel's 60 presets, which xlio ships with Ecma's n
 element's `DifferentialFormat` keeps only what its `<dxf>` sets; its colors are resolved through
 the workbook's theme, and a solid fill takes the `bgColor`.
 
+**Stacking** (`_dxf.py`, unverified until the screen suite `tables` captures it): the formats
+that apply to a cell stack in order, a later one's property winning (fill, font color, bold,
+italic, underline, strikethrough); the cell's own style lies over them property by property,
+winning where it differs from the default: a fill, a font color other than an explicit untinted
+theme 1 (automatic and a font without a color included), bold, italic, underline or
+strikethrough set. Its own border sides replace the formats' sides one side at a time; the font
+name and size are always its own. A cell with nothing beneath it keeps its style object.
+
 **Drawn:** to come with the layout pass and the screen suite `tables`; unverified until then.
 
 ## 5. Reading
