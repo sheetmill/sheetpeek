@@ -34,9 +34,9 @@ CLI views a file and serves a folder of workbooks as HTML.
   (fonts, fills, borders, alignment, rich-text runs), hyperlinks, outlines, theme fonts and the
   workbook palette, gridline colors and headings, sheet kinds, states and tab colors, rotated and
   stacked text, the zoom, frozen panes, hidden zeros, the print area and manual page breaks
-  (§4.18). In scope and not built yet: tables, filter buttons, conditional formatting, notes and
-  comments, pictures, the other sheet-view parts, the other print settings, pivot tables; charts
-  possibly as a package of their own (§11). Out of scope: editing and any interactive UI.
+  (§4.18), filter and sort buttons (§4.19). In scope and not built yet: tables, conditional
+  formatting, notes and comments, pictures, the other sheet-view parts, the other print settings,
+  pivot tables; charts possibly as a package of their own (§11). Out of scope: editing and any interactive UI.
 
 ## 2. Pipeline
 
@@ -132,6 +132,7 @@ layout fields marked *layout*. The style fields (`number_format` to `indent`) li
 | *layout* `spill` | `tuple[int, int]` | §4.1 | visible columns the cell's own text reaches to the left and to the right |
 | *layout* `lines` | `tuple[str, ...]` | §3.5 | what is drawn **in this column**: one string of the column's width per line of the row (`characters`), or the cell's text (`none`) |
 | *layout* `source` | `(row, column) \| None` | §3.5 | the cell whose text `lines` shows: this cell, a spilling neighbor, or a merge anchor |
+| *layout* `button` | `FilterButtonState \| None` | `Sheet.autofilters` (§4.19) | the glyph of the filter button on a header cell; each output sizes it |
 | *layout* `fill` | `str \| None` | the cell's own fill; the anchor's for a merged cell | the background of this column, also under text spilled into it |
 | *layout* `font`, `color` | | the source cell's font, and its section color else its font color | the style of the text drawn here |
 
@@ -153,6 +154,7 @@ text styles into `Font` and `CellStyle` (§4.13). Rich-text runs inside one cell
 | `default_column_width`, `default_row_height` | xlio: `<sheetFormatPr>` (`defaultColWidth`, `baseColWidth`, `defaultRowHeight`) |
 | `show_gridlines` | xlio: `<sheetView showGridLines>` |
 | `grid_color` | xlio: `<sheetView defaultGridColor colorId>`, through the workbook palette (§4.14) |
+| `autofilters` (`AutoFilter`s, the sheet's then each table's, that touch `ref`) | xlio: the sheet's `<autoFilter>` and each table's, their `filterColumn` flags and criteria, and the `sortState` inside or beside them (§4.19) |
 | `palette` | xlio: `<indexedColors>` as the indexed colors take it (64 entries, the default's for an entry missing or not a color), `None` without it (§4.14) |
 | `normal_font` | the font of xlio's `Normal` cell style, else the workbook's first font |
 | `date1904` | xlio: `<workbookPr date1904>` |
@@ -1898,6 +1900,7 @@ src/sheetpeek/
   _model.py          Sheet, Cell, CellStyle, Column, Row, CellRange, Font
   _hyperlink.py      Hyperlink; the scheme check and place lookup every output shares (§4.10)
   _outline_model.py  Outline, OutlineMark, RenderedOutline (§4.11)
+  _filter_model.py   AutoFilter, FilterColumn, SortCondition, FilterButtonState (§4.19)
   _fill_border_model.py  Pattern, Gradient, Side, Borders, RenderedBorders; the conflict rule (§4.12)
   _fill_border_census.py fills and borders in the census; the style that draws a cell's fill
   _text_model.py     TextRule, the lines drawn with text (§4.13)
@@ -1907,6 +1910,7 @@ src/sheetpeek/
   _structure.py      the sheet structure (§5.4): `Structure`, filled from xlio and the cell stream
   _read_links.py     hyperlinks from xlio and the cell stream, and the reader's link notices (§4.10)
   _read_outline.py   the outline from xlio: its rows, columns and settings
+  _read_filters.py   the sheet's and tables' filters from xlio (§4.19)
   _read.py           the reader: xlio's models and cell stream into a Sheet (§5.4)
   _style/            a cell's style, one module per aspect: number format, border, fill, font,
                      alignment
@@ -1918,6 +1922,7 @@ src/sheetpeek/
                      the ordered layout passes
   _pass_outline.py   the outline pass: groups, buttons and dots (§4.11)
   _pass_borders.py   the borders pass: one resolved side per edge, the diagonals (§4.12)
+  _pass_buttons.py   the filter-button pass: which header cells draw one, and its glyph (§4.19)
   _excel.py          excel mode: geometry in points, text runs, clips
   _rows.py           row heights (§4.7) and baselines
   _text_styles.py    superscript, subscript, underlines, shrink to fit, direction (§4.13)
@@ -1927,11 +1932,13 @@ src/sheetpeek/
     __init__.py      Backend protocol, registry, render(), notices()
     _support.py      what each output shows of each feature (§3.7)
     _outline_text.py the outline gutter in characters, for rich and text
+    _buttons_text.py the filter buttons in characters (a ▾), for rich and text
     text.py  rich.py  markdown.py  delimited.py
     html/            __init__ (backend, page), _css, _table (grid, fills, gridlines),
                      _text (runs), _headings, _links (anchors, ids), _outline (the gutter), _notices
                      _patterns (the fill layer), _borders (the border layer)
-                     _workbook (render_workbook: the workbook page, §4.15)
+                     _workbook (render_workbook: the workbook page, §4.15),
+                     _buttons (the filter buttons, §4.19)
   cli.py             `sheetpeek view`, `sheetpeek serve`
   _serve.py          the server behind `sheetpeek serve`
   _carlito.py        Carlito's advance widths, generated by tools/carlito_widths.py
