@@ -269,3 +269,25 @@ def test_frozen_header_rows_carry_their_buttons(tmp_path):
     page = html(book(tmp_path, build))
     # The sheet once and the frozen row's copy: each draws both buttons.
     assert len(BUTTON.findall(page)) == 4
+
+
+# --- characters
+
+
+def test_text_and_rich_mark_each_header_cell_in_its_last_character(tmp_path):
+    from sheetpeek.backends import TextBackend
+
+    path = book(tmp_path, lambda ws: setattr(ws.auto_filter, "ref", "A1:B4"))
+    sheet = sheetpeek.read(path)
+    header = sheetpeek.render(sheet, TextBackend(), on_notice="ignore").splitlines()[0]
+    # Default columns of 8 characters and 1-character gaps: the filter's two columns end at
+    # characters 8 and 17, each with its mark; C and D have none.
+    assert header[7] == header[16] == "▾"
+    assert header.count("▾") == 2
+    assert header.startswith("h1")
+    plain = sheetpeek.render(sheet, TextBackend(buttons="none"), on_notice="ignore")
+    assert "▾" not in plain
+    (notice,) = sheetpeek.notices(sheet, to="text")
+    assert (notice.code, notice.outcome) == ("filter.buttons", "approximated")
+    pytest.importorskip("rich")
+    assert sheetpeek.render(sheet, "rich", on_notice="ignore").splitlines()[0][16] == "▾"

@@ -41,6 +41,12 @@ def _filter_buttons(buttons: str) -> Support:
     return SHOWN
 
 
+def _filter_buttons_characters(buttons: str) -> Support:
+    if buttons == "none":
+        return _omit("option", "buttons='none' leaves the filter buttons out")
+    return _approx("a ▾ in the header cell's last character, whatever the column's state")
+
+
 def _outline_characters(buttons: str) -> Support:
     if buttons == "none":
         return _omit("option", "buttons='none' leaves the outline gutter out")
@@ -151,7 +157,7 @@ def rich(
         "link.local": SHOWN if local_links else _local(),
         **_characters(headings=headings),
         "outline": _outline_characters(buttons),
-        "filter.buttons": _omit("not_implemented", "filter buttons are not drawn yet"),
+        "filter.buttons": _filter_buttons_characters(buttons),
     }
 
 
@@ -188,7 +194,7 @@ def text(*, headings: bool, buttons: str = "static") -> dict[str, Support]:
         "link.local": plain,
         **_characters(headings=headings),
         "outline": _outline_characters(buttons),
-        "filter.buttons": _omit("not_implemented", "filter buttons are not drawn yet"),
+        "filter.buttons": _filter_buttons_characters(buttons),
     }
 
 

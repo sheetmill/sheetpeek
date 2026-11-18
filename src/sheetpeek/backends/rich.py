@@ -12,6 +12,7 @@ from sheetpeek._hyperlink import external_url
 from sheetpeek._notices import Support
 from sheetpeek._rendered import Mode, RenderedSheet
 from sheetpeek.backends import _support
+from sheetpeek.backends._buttons_text import with_button
 from sheetpeek.backends._outline_text import Gutter
 
 if TYPE_CHECKING:
@@ -34,8 +35,9 @@ class RichBackend:
         row_headings: Add Excel's row numbers before each row.
         buttons: ``"static"`` (the default) draws the outline gutter in characters before
             the row headings and above the column headings, as Excel draws it beside its
-            headings; ``"none"`` leaves it out. A sheet's outline is drawn only when the file
-            shows outline symbols.
+            headings, and a ``▾`` in the last character of each filter's header cells;
+            ``"none"`` leaves both out. A sheet's outline is drawn only when the file shows
+            outline symbols.
         color_system: Passed to ``rich.console.Console`` (``"auto"``, ``"truecolor"``, ...).
         force_terminal: Passed to ``rich.console.Console``; ``None`` detects.
         local_links: Also link ``file:`` URLs and relative, UNC and drive-letter paths, which
@@ -118,6 +120,7 @@ class RichBackend:
                 if p < len(sheet.columns) - 1:
                     heading.append(self.separator, style=dim)
             yield heading
+        buttons = self.buttons != "none"
         for row in sheet.rows:
             for line in range(row.height):
                 text = Text(no_wrap=True, end="\n")
@@ -128,7 +131,10 @@ class RichBackend:
                     text.append(number.rjust(label) + self.separator, style=dim)
                 for p, cell in enumerate(row.cells):
                     style = _style(cell.font, cell.color, cell.fill)
-                    links.append(text, cell.lines[line], style, cell.source)
+                    chars = cell.lines[line]
+                    if buttons and cell.button is not None:
+                        chars = with_button(cell, line, row.height, chars)
+                    links.append(text, chars, style, cell.source)
                     if p < len(row.gaps):
                         gap = row.gaps[p]
                         crossing = gap.lines[line]

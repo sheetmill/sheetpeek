@@ -8,6 +8,7 @@ from typing import Literal, TextIO
 from sheetpeek._notices import Support
 from sheetpeek._rendered import Mode, RenderedSheet
 from sheetpeek.backends import _support
+from sheetpeek.backends._buttons_text import with_button
 from sheetpeek.backends._outline_text import Gutter
 
 Buttons = Literal["none", "static"]
@@ -25,8 +26,9 @@ class TextBackend:
         row_headings: Add Excel's row numbers before each row.
         buttons: ``"static"`` (the default) draws the outline gutter in characters before
             the row headings and above the column headings, as Excel draws it beside its
-            headings; ``"none"`` leaves it out. A sheet's outline is drawn only when the file
-            shows outline symbols.
+            headings, and a ``▾`` in the last character of each filter's header cells;
+            ``"none"`` leaves both out. A sheet's outline is drawn only when the file shows
+            outline symbols.
     """
 
     name = "text"
@@ -74,11 +76,15 @@ class TextBackend:
                 c.letter.center(c.width or 0)[: c.width or 0] for c in sheet.columns
             )
             yield prefix + letters
+        buttons = self.buttons != "none"
         for row in sheet.rows:
             for line in range(row.height):
                 parts = []
                 for p, cell in enumerate(row.cells):
-                    parts.append(cell.lines[line])
+                    chars = cell.lines[line]
+                    if buttons and cell.button is not None:
+                        chars = with_button(cell, line, row.height, chars)
+                    parts.append(chars)
                     if p < len(row.gaps):
                         crossing = row.gaps[p].lines[line]
                         parts.append(crossing if crossing is not None else self.separator)
