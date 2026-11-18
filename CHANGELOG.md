@@ -174,8 +174,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   installed.
 - Files Excel opens that 0.2.0 refused are read: a color whose `rgb` is not hex (read as Excel
   reads it), an unknown sheet state (visible), a `zoomScale` that is not a whole number (100,
-  unverified). Of the 15,966 workbooks of the comparison corpus (every xlsx and xlsm in it), two
-  refused for a print titles name of `#N/A` now open.
+  unverified). Of 15,935 public workbooks (the Enron spreadsheets and xlcalculator's test
+  workbooks), two refused for a print titles name of `#N/A` now open.
 - Files Excel refuses are refused (`PackageError`): a cell past row 1,048,576, and an error code
   Excel does not read in a cell's value (`#SPILL!` there, an unknown code); 0.2.0 read both.
 - Values read as Excel reads them: a number too large for a double is `#NULL!` (0.2.0: infinity);
@@ -190,7 +190,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   wider column padding: its columns without a stored width are wider (2 pt at Calibri 20).
 - `Cell.value` of a whole number is an `int` only below 2**53 in magnitude, a `float` above:
   it comes from the stored double, not the file's digits, so `9995806932108624` (one value in
-  a corpus of 15,966 workbooks) is now `9995806932108624.0`. The rendered text is the same.
+  those 15,935 workbooks) is now `9995806932108624.0`. The rendered text is the same.
 - HTML draws each sheet at the zoom saved with it, as Excel opens it, where 0.2.0 drew every
   sheet at 100 %: a sheet saved at another zoom renders at another size. Pass
   `HTMLBackend(zoom=100)` (or `sheetpeek view --zoom 100`) for 0.2.0's size.

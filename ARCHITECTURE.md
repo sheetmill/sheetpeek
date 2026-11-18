@@ -1384,8 +1384,9 @@ It is 18.8 MB on disk. Best of three, each in a fresh process (Python 3.11, Appl
 | openpyxl's normal mode, for comparison | 7.46 s | 928 MB |
 
 The stream holds one row at a time; a `Sheet` holds every cell of the range read, so its memory
-grows with the range (`max_cells`, §5.5, bounds it). On the largest corpus workbook (42 MB,
-15.2 million cells over its sheets, every sheet read) the reader takes 39 s at 845 MiB peak RSS.
+grows with the range (`max_cells`, §5.5, bounds it). On the largest of the 15,935 public
+workbooks of §5.5 (42 MB, 15.2 million cells over its sheets, every sheet read) the reader takes
+39 s at 845 MiB peak RSS.
 
 ### 5.3 Dates stay serials
 
@@ -1425,7 +1426,7 @@ sheet's relationships, everything else as `Sheet.unparsed`. A test reads files w
 dropped.
 
 Measured (best of three, each in a fresh process): the 100,000-cell sheets of `bench/html_size.py`
-read in 0.46 s (plain) and 0.66 s (features); the largest corpus workbook as in §5.2. On its
+read in 0.46 s (plain) and 0.66 s (features); the largest public workbook as in §5.2. On its
 largest sheet, Python's live allocations peak at the level of the reader before xlio (648 MiB);
 the rest of the RSS is the allocator's, the kept cells allocated between the stream's
 short-lived objects.
