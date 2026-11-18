@@ -138,7 +138,7 @@ class TextRun:
     x: float
     """The left edge of the first glyph's advance."""
     y: float
-    """The baseline, where Excel's screen puts it (angled text: where Excel prints it)."""
+    """The baseline, where Excel's screen puts it, or for angled text where Excel prints it."""
     width: float
     """The sum of Excel's glyph advances (``xlformat.text_width``)."""
     clip: tuple[float, float, float, float]
