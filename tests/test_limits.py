@@ -199,6 +199,17 @@ def test_a_false_size_is_refused(book, change):
         sheetpeek.read(book)
 
 
+@pytest.mark.parametrize("part", ["docProps/app.xml", "xl/never-read.bin"])
+def test_a_false_size_is_refused_in_a_part_no_reader_opens(book, part):
+    # xlio refuses a false size in the parts it reads; the check covers every entry, so a part
+    # that a later reader might open is refused too.
+    data = b"<x/>" + b" " * (1 << 20)
+    replace_part(book, part, data)
+    state_size(book, part, 4, zlib.crc32(data[:4]))
+    with pytest.raises(PackageError, match="the archive states"):
+        sheetpeek.read(book)
+
+
 @pytest.mark.parametrize("method", [zipfile.ZIP_BZIP2, zipfile.ZIP_LZMA])
 def test_other_compression_methods_are_refused(book, method):
     # ZipFile.read gives these no limit on the output at all.
