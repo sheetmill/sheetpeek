@@ -1360,8 +1360,8 @@ and report nothing for breaks.
 
 **Read** (`_read_filters.py`, from xlio): the sheet's `autoFilter` and each table's (a table
 with a header row), as `Sheet.autofilters` (`AutoFilter`, `FilterColumn`, `SortCondition`).
-Excel does not apply the criteria on opening: the rows the file saved as hidden are what shows
-(captured), so the criteria matter only for the button. A column's `colId` counts from the
+Excel is taken not to apply the criteria on opening: the rows the file saved as hidden are what
+shows (unverified), so the criteria matter only for the button. A column's `colId` counts from the
 range's first column; one past the range is left out.
 
 **Drawn** (the screen suite `filters`, Microsoft 365 16.115, zoom 100 and 200, captures the
