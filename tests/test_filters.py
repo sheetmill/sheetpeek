@@ -1,7 +1,8 @@
 """Filter and sort buttons: what the reader keeps and which header cells draw which glyph.
 
-ARCHITECTURE.md §4.19. The screen suite ``filters`` is to capture these rules; until then
-they are unverified.
+ARCHITECTURE.md §4.19. The capture tests at the end compare the layout with the screen suite
+``filters`` (``tests/captures/filters.tsv``, Microsoft 365 16.115); the other rules are
+unverified.
 """
 
 from __future__ import annotations
@@ -291,3 +292,55 @@ def test_text_and_rich_mark_each_header_cell_in_its_last_character(tmp_path):
     assert (notice.code, notice.outcome) == ("filter.buttons", "approximated")
     pytest.importorskip("rich")
     assert sheetpeek.render(sheet, "rich", on_notice="ignore").splitlines()[0][16] == "▾"
+
+
+# --- the screen capture (suite filters, Microsoft 365 16.115)
+
+
+def _captured():
+    from pathlib import Path
+
+    path = Path(__file__).parent / "captures" / "filters.tsv"
+    lines = [line.split("\t") for line in path.read_text(encoding="utf-8").splitlines()]
+    rows = [line for line in lines if line[0] and not line[0].startswith("#")]
+    header, body = rows[0], rows[1:]
+    return [dict(zip(header, row, strict=False)) for row in body]
+
+
+@pytest.mark.excel
+def test_each_state_draws_its_own_glyph_as_captured():
+    # Cells sheetpeek gives one state share Excel's glyph, and different states differ, at
+    # each zoom and button size (Excel's bitmaps differ between 15 and 17 screen points):
+    # filtered with an ascending sort is a glyph of its own, a descending sort by cell color
+    # draws the descending arrow, sorts by font color or icon the ascending one.
+    expected = pytest.importorskip("capture.filters").EXPECTED
+    for zoom in ("100", "200"):
+        rows = [r for r in _captured() if r["zoom"] == zoom]
+        assert len(rows) == len(expected)
+        glyphs = {r["cell"]: r.get("glyph") or None for r in rows}
+        assert {c for c, g in glyphs.items() if g is None} == {
+            c for c, s in expected.items() if s is None
+        }
+        sizes = {r["cell"]: r.get("box_w") for r in rows}
+        by_state: dict[tuple[str, str | None], set[str | None]] = {}
+        for cell, state in expected.items():
+            if state is not None:
+                by_state.setdefault((state, sizes[cell]), set()).add(glyphs[cell])
+        assert all(len(ids) == 1 for ids in by_state.values()), by_state
+        assert len({next(iter(ids)) for ids in by_state.values()}) == len(by_state), by_state
+
+
+@pytest.mark.excel
+def test_the_button_is_as_large_as_the_row_up_to_17_screen_points_as_captured():
+    # The square is min(row height at the zoom, 17) screen points, its right edge on the cell's
+    # boundary, its bottom on the row's bottom gridline when it fills the row and 1 above it
+    # otherwise: the rule HTML draws (backends/html/_buttons.py).
+    for row in _captured():
+        if not row.get("box_w"):
+            continue
+        height = (30 if row["cell"].endswith("9") else 15) * int(row["zoom"]) / 100
+        size = min(height, 17)
+        gap = 0 if size == height else 1
+        assert (float(row["box_w"]), float(row["box_h"])) == (size, size), row
+        assert (float(row["right_gap"]), float(row["bottom_gap"])) == (0, gap), row
+        assert float(row["top"]) == height - gap - size, row

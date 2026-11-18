@@ -53,8 +53,8 @@ def buttons_pass(draft: Draft) -> None:
 def state(autofilter: AutoFilter, column: int) -> FilterButtonState:
     """The glyph of a column's button: filtered, sorted (each level draws its arrow), or both.
 
-    A sort by cell color draws the ascending arrow (captured); one by font color or icon, and a
-    descending sort by color, follow the order (unverified).
+    A sort by cell color, font color or icon draws the arrow its order gives, and filtered with
+    either order is a glyph of its own (captured, suite ``filters``).
     """
     filtered = autofilter.column(column).filtered
     for condition in autofilter.sort_conditions:

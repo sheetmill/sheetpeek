@@ -1360,7 +1360,8 @@ Excel does not apply the criteria on opening: the rows the file saved as hidden 
 (captured), so the criteria matter only for the button. A column's `colId` counts from the
 range's first column; one past the range is left out.
 
-**Drawn** (unverified until the screen suite `filters` captures it, §10):
+**Drawn** (the screen suite `filters`, Microsoft 365 16.115, zoom 100 and 200, captures the
+glyphs, the hidden buttons and the sizes, `tests/test_filters.py`; the rest is unverified):
 - one button per column of the range's first row, merged or empty header cells included, each at
   its own column's cell (a header merged down into the data keeps it on the header row); none
   where the column's `hiddenButton` or `showButton="0"` is set (they draw alike), none for a
@@ -1369,14 +1370,16 @@ range's first column; one past the range is left out.
   without the header row draws none, as `range_edge` cuts the rest;
 - four glyphs: plain; filtered, whatever the criteria; sorted, an arrow up or down on every
   sorted column; filtered and sorted, the arrow with the funnel (filtered with an ascending sort
-  is unverified). A sort by cell color draws the ascending arrow; by font color or icon, and a
-  descending sort by color, follow the order (unverified). A left-to-right sort (`columnSort`)
-  draws no arrow (unverified). The sheet's `sortState` counts inside its `autoFilter` and, as a
-  table's does, beside it (unverified for the sheet);
-- a square of min(row height × zoom, 17) screen points at the cell's bottom right, drawn over the
-  header text; screen-sized, so it does not scale with the zoom (HTML: 4/3 CSS px a screen
-  point, as the outline gutter, §4.11); face a gradient from 254 to 245
-  gray, outline 1 screen point of black at 40 % over whatever is behind it.
+  is a glyph of its own, captured). A sort by cell color, font color or icon draws the arrow its
+  order gives (captured: cell color descending, font color and icon ascending). A left-to-right
+  sort (`columnSort`) draws no arrow (unverified). The sheet's `sortState` counts inside its
+  `autoFilter` and, as a table's does, beside it (unverified for the sheet);
+- a square of min(row height × zoom, 17) screen points, its right edge on the cell's right
+  boundary, filling the row down to its bottom gridline, or 1 screen point above it when the row
+  is taller (captured: top 12 in a 30 point row); drawn over the header text; screen-sized, so it
+  does not scale with the zoom (HTML: 4/3 CSS px a screen point, as the outline gutter, §4.11);
+  face a gradient from 254 to 245 gray, outline 1 screen point of black at 40 % over whatever is
+  behind it.
 
 The layout marks each header cell with its glyph (`RenderedCell.button`, `_pass_buttons.py`);
 each output draws it at its own size.

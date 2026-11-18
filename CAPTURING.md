@@ -198,6 +198,7 @@ Excel makes of them. A case that hangs ends the run and nothing is written.
 | `error_width` | 56 | seven error values at eight widths, read with `string value` |
 | `row_height` | 55 | row heights of rows without `ht`, per Normal font and size (Calibri and Aptos Narrow at 9 to 16 pt), without `<sheetFormatPr>`, with openpyxl's, and with `customHeight`, other stored heights, `zeroHeight`, `thickTop` and `thickBottom`; rows fitted to a cell font, a styled empty cell, wrapped text and merges |
 | `borders` | 352 | route C, the screen: the 13 border line styles on four sides: device rows, dash runs, darkest ink, at zoom 100 and 200 |
+| `filters` | 30 | route C, the screen: filter and sort buttons on the sheet's filter and two tables: box, gaps, glyph (bitmap id), at zoom 100 and 200 |
 | `fills` | 82 | route C, the screen: the 19 pattern types in two color pairs: tile, share, extent, gridlines between patterned cells, at zoom 100 and 200 |
 | `text_style` | 234 | route C, the screen: vertical and horizontal alignment, distributed included, indent, reading order; shrink to fit; underlines, strike, super- and subscript; the width a wrapped line may take; lone distributed words |
 | `rotation` | 157 | route C, the screen: slanted borders and the text between them, anchoring, alignment, fitted heights, turned wrapping, upright widths at 9 to 20 pt |

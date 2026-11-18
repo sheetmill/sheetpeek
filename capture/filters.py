@@ -33,7 +33,7 @@ import openpyxl
 from openpyxl.styles import PatternFill
 from openpyxl.styles.differential import DifferentialStyle
 from openpyxl.worksheet import filters
-from openpyxl.worksheet.table import Table
+from openpyxl.worksheet.table import Table, TableColumn
 
 CASES = {
     "C4": "plain",
@@ -79,6 +79,11 @@ def _values(ws: Any, top: int, left: int, names: list[str]) -> None:
             ws.cell(top + r, left + k, r * (k + 1))
 
 
+def _columns(names: list[str]) -> list[TableColumn]:
+    """A table's columns, named as their header cells: Excel refuses a table whose names differ."""
+    return [TableColumn(id=k + 1, name=name) for k, name in enumerate(names)]
+
+
 def fill(ws: Any) -> list[tuple[str, str]]:
     """Lay the filters out on a worksheet; each header cell with its case."""
     wb = ws.parent
@@ -106,7 +111,7 @@ def fill(ws: Any) -> list[tuple[str, str]]:
     wb._differential_styles.append(DifferentialStyle(fill=PatternFill(bgColor="FFFF0000")))
     _values(ws, 4, 12, ["cell", "font", "icon", "both"])
     sorts = Table(displayName="Sorts", ref="L4:O6")
-    sorts._initialise_columns()
+    sorts.tableColumns = _columns(["cell", "font", "icon", "both"])
     sorts.autoFilter = filters.AutoFilter(
         ref="L4:O6",
         filterColumn=[filters.FilterColumn(colId=3, filters=filters.Filters(filter=["2"]))],
@@ -124,7 +129,7 @@ def fill(ws: Any) -> list[tuple[str, str]]:
     _values(ws, 9, 12, ["plain", "filtered", "up"])
     ws.row_dimensions[9].height = 30
     tall = Table(displayName="Tall", ref="L9:N11")
-    tall._initialise_columns()
+    tall.tableColumns = _columns(["plain", "filtered", "up"])
     tall.autoFilter = filters.AutoFilter(
         ref="L9:N11",
         filterColumn=[filters.FilterColumn(colId=1, filters=filters.Filters(filter=["2"]))],
