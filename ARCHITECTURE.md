@@ -720,21 +720,24 @@ inside the edge gets its button. A group whose summary is outside the range draw
 reported as `outline.cut` (decided).
 
 **Geometry** (captured; drawn by the HTML backend, `backends/html/_outline.py`). **Every size is
-screen-fixed**: identical at zoom 100 and 200, so one screen point is one CSS pixel at any page
-scale (decided), like the gridlines.
-- The row gutter is left of the row headings, `2 + 12 × (depth + 1) + 3` px wide (53 at depth 3);
-  the column gutter is above the column headings, by the same rule (41 at depth 2). Lane `n`
-  starts at `2 + 12 × (n − 1)`.
-- A bar is 2 px wide, 3 px into its lane, and starts 2 px below the first detail row's top (or
-  past the first detail column's left edge), at any row height, with a 6 × 2 px tick toward the
-  headings; it runs into the summary's button. With summaries above or left, it ends 2 px short
-  of the last detail row's far edge, where the tick is.
-- − and + buttons are 12 × 12 px, filling the lane, rounded, white, with a 1 px border; their
-  strokes are 6 px long and 1 px thick. **A button is centered on its row**, its top at
-  `1 + ⌈(h − 1 − 12) / 2⌉` for a row `h` px high (2 in 15, 10 in 30, 25 in 60), so it does not
-  follow the row height.
-- A dot is 2 × 2 px, centered on its row at the bar's x.
-- The level buttons are 12 × 12 px, one per lane: the row levels across the column-heading band,
+screen-fixed**: identical at zoom 100 and 200, in Excel's screen points (spt). HTML draws a screen
+point as 4/3 CSS px, rounded to whole px: the cells' scale at zoom 100, at which Excel for Mac
+shows one sheet point as one screen point, so the gutter keeps its captured proportion to the
+rows. Line widths (bars, borders, strokes) stay in CSS px, as gridlines and cell borders do. The
+filter buttons follow the same rule (§4.19).
+- The row gutter is left of the row headings, `2 + 12 × (depth + 1) + 3` spt wide (53 at depth
+  3; 71 px); the column gutter is above the column headings, by the same rule (41 at depth 2;
+  55 px). Lane `n` starts at `2 + 12 × (n − 1)` spt.
+- A bar is 2 px wide, 3 spt into its lane, and starts 2 spt below the first detail row's top (or
+  past the first detail column's left edge), at any row height, with a 6 spt tick toward the
+  headings, 2 px thick; it runs into the summary's button. With summaries above or left, it ends
+  2 spt short of the last detail row's far edge, where the tick is.
+- − and + buttons are 12 × 12 spt, filling the lane, rounded, white, with a 1 px border; their
+  strokes are 6 spt long and 1 px thick. **A button is centered on its row**, its top at
+  `1 + ⌈(h − 1 − b) / 2⌉` for a row `h` high and a button `b` (in spt: 2 in 15, 10 in 30, 25 in
+  60; the 1 is the row's gridline), so it does not follow the row height.
+- A dot is 2 × 2 spt, centered on its row at the bar's x.
+- The level buttons are 12 × 12 spt, one per lane: the row levels across the column-heading band,
   centered in its height; the column levels down the row-heading column, centered in its width.
 - Colors in the dark appearance: gutter 85, bars 153, button border 51 (gray levels). The light
   appearance is not captured.
@@ -1369,7 +1372,8 @@ range's first column; one past the range is left out.
   draws no arrow (unverified). The sheet's `sortState` counts inside its `autoFilter` and, as a
   table's does, beside it (unverified for the sheet);
 - a square of min(row height × zoom, 17) screen points at the cell's bottom right, drawn over the
-  header text; screen-sized, so it does not scale with the zoom; face a gradient from 254 to 245
+  header text; screen-sized, so it does not scale with the zoom (HTML: 4/3 CSS px a screen
+  point, as the outline gutter, §4.11); face a gradient from 254 to 245
   gray, outline 1 screen point of black at 40 % over whatever is behind it.
 
 The layout marks each header cell with its glyph (`RenderedCell.button`, `_pass_buttons.py`);

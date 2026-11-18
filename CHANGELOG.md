@@ -64,7 +64,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   shows the symbols, the depths). The layout derives the groups and gives
   `RenderedSheet.outline`, the bars, ticks, dots and buttons of each row and column
   (`RenderedOutline`, `OutlineMark`). The HTML backend draws Excel's outline gutter beside the
-  headings, at Excel's screen sizes in CSS pixels, with level buttons when both headings are
+  headings, at Excel's screen sizes (4/3 CSS pixels a screen point, the cells' scale, so it keeps
+  its proportion to the rows; its lines 1 and 2 px), with level buttons when both headings are
   drawn; `rich` and plain text draw it in characters; Markdown, CSV and TSV report it as not
   shown. A range that cuts a group reports the button it leaves out (`outline.cut`). A level is read as
   Excel reads it: modulo 8, and one that is not decimal digits as none.

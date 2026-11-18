@@ -263,29 +263,32 @@ def gutter_cells(text):
 
 
 def test_the_gutter_is_sized_by_depth(book):
-    # Captured: 2 + 12 x (depth + 1) + 3 screen points, one CSS px each: 53 for 3 levels, 41
-    # for 2, the same at every zoom.
+    # Captured: 2 + 12 x (depth + 1) + 3 screen points; at 4/3 CSS px each, rounded, 3 + 16 x
+    # (depth + 1) + 4: 71 for 3 levels, 55 for 2, the same at every zoom.
     text = html(book)
-    assert text.count('<col style="width:53px">') == 1
-    assert '<tr style="height:41px">' in text
+    first = re.search(r'<col style="width:(\d+)px">', text)
+    assert first is not None
+    assert first[1] == "71"
+    assert '<tr style="height:55px">' in text
 
 
 def test_bars_ticks_dots_and_buttons_are_placed_as_captured(book):
     cells = {i: cell for i, (_, cell) in enumerate(gutter_cells(html(book)), 1)}
-    # row 4: the bar 2 px wide, 3 into lane 1 (x = 5), from 2 px below the row's top, with a
-    # 6 x 2 tick; a 2 x 2 dot in lane 2 (x = 17), centered on the 20 px row
-    assert '<i style="left:5px;top:2px;width:2px;height:18px"></i>' in cells[4]
-    assert '<i style="left:5px;top:2px;width:6px;height:2px"></i>' in cells[4]
-    assert '<i style="left:17px;top:10px;width:2px;height:2px"></i>' in cells[4]
-    # row 7: the level-3 group's minus button fills lane 3 (x = 26), centered on the row, the
-    # bar running into it
-    assert '<i style="left:29px;top:0px;width:2px;height:5px"></i>' in cells[7]
-    assert '<b class="sp-olbutton" style="left:26px;top:5px">' in cells[7]
+    # Screen points at 4/3 CSS px, rounded; line widths stay in px. Row 4: the bar 2 px wide,
+    # 4 into lane 1 (x = 3 + 4), from 3 px below the row's top, with an 8 x 2 tick; a 3 x 3 dot
+    # in lane 2 (x = 3 + 16 + 4), centered below the 20 px row's 1 px gridline
+    assert '<i style="left:7px;top:3px;width:2px;height:17px"></i>' in cells[4]
+    assert '<i style="left:7px;top:3px;width:8px;height:2px"></i>' in cells[4]
+    assert '<i style="left:23px;top:9px;width:3px;height:3px"></i>' in cells[4]
+    # row 7: the level-3 group's minus button fills lane 3 (x = 3 + 32), centered on the row,
+    # the bar running into it
+    assert '<i style="left:39px;top:0px;width:2px;height:3px"></i>' in cells[7]
+    assert '<b class="sp-olbutton" style="left:35px;top:3px">' in cells[7]
     # row 11 (the ninth drawn): a plus with no bar in lane 2
     plus = cells[9]
     assert plus.count("<i ") == 3
-    assert "left:14px;top:5px" in plus
-    assert "left:17px" not in plus
+    assert "left:19px;top:3px" in plus
+    assert "left:23px" not in plus
 
 
 @pytest.mark.parametrize(("height", "top"), [(15, 2), (30, 10), (60, 25)])
