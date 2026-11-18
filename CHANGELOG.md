@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Filters are read: `Sheet.autofilters` holds the sheet's filter and each table's
+  (`AutoFilter`, with `FilterColumn` and `SortCondition`), and the layout marks each header cell
+  that draws a filter button with its glyph (`RenderedCell.button`: `plain`, `filtered`,
+  `ascending`, `descending`, `filtered_ascending`, `filtered_descending`), as Excel draws them:
+  one per column, none where the file hides it or on a hidden column or row, a sort arrow on every
+  sorted column.
 - Notices: nothing a workbook uses is dropped silently. `Sheet.notices` and
   `RenderedSheet.notices` hold a `Notice` for each kind of thing the file uses that sheetpeek does
   not read yet, or that the layout approximates, and `sheetpeek.notices(source, to=...)` adds what

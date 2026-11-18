@@ -56,6 +56,7 @@ from sheetpeek._package import (
     worksheet_parts,
 )
 from sheetpeek._page import MAX_COLUMN, MAX_ROW, manual_breaks, print_areas
+from sheetpeek._read_filters import read_autofilters
 from sheetpeek._read_links import Found as Links
 from sheetpeek._read_links import add_formula, cell_links, with_elements, with_formulas
 from sheetpeek._read_links import report as report_links
@@ -402,6 +403,7 @@ class Book:
         try:
             with self._xlio_errors():
                 sheet_notices(notes, self._book.parts, source, self._info, name, ref)
+                autofilters = read_autofilters(source, ref)
                 notes.extend(cell_notes.notices())  # after the sheet's own, as they were read
                 cells = self._grid(kept, ref, structure, notes) if ref else ()
         except PackageError:
@@ -442,6 +444,7 @@ class Book:
             print_area_problem=area_problem,
             row_breaks=row_breaks,
             column_breaks=column_breaks,
+            autofilters=autofilters,
             notices=notes.notices(),
             max_cells=self._limits.max_cells,
         )

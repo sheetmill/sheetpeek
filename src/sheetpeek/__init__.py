@@ -19,6 +19,13 @@ from sheetpeek._fill_border_model import (
     Side,
     SlantedBorders,
 )
+from sheetpeek._filter_model import (
+    AutoFilter,
+    FilterButtonState,
+    FilterColumn,
+    SortBy,
+    SortCondition,
+)
 from sheetpeek._hyperlink import Hyperlink, LinkSource
 from sheetpeek._model import (
     Cell,
@@ -72,6 +79,7 @@ __all__ = [
     "FEATURES",
     "SHOWN",
     "Alignment",
+    "AutoFilter",
     "Backend",
     "Book",
     "BorderStyle",
@@ -85,6 +93,8 @@ __all__ = [
     "Diagonal",
     "Feature",
     "Fill",
+    "FilterButtonState",
+    "FilterColumn",
     "Font",
     "Gap",
     "Gradient",
@@ -120,6 +130,8 @@ __all__ = [
     "SheetView",
     "Side",
     "SlantedBorders",
+    "SortBy",
+    "SortCondition",
     "SpillEdge",
     "Support",
     "TextRule",

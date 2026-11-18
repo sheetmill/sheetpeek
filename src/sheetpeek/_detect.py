@@ -45,7 +45,6 @@ CODES: dict[str, tuple[Outcome, Reason, str]] = {
     "view.page_layout": ("approximated", "not_implemented", "drawn as the Normal view"),
     "view.panes": ("omitted", "not_implemented", ""),
     "cf": ("omitted", "not_implemented", ""),
-    "filter.buttons": ("omitted", "not_implemented", ""),
     "table": ("omitted", "not_implemented", "table styles and buttons not drawn"),
     "sparkline": ("omitted", "not_implemented", ""),
     "slicer": ("omitted", "not_implemented", ""),
@@ -115,7 +114,7 @@ _SILENT = frozenset(
 _READ = frozenset(
     {
         "sheetPr", "sheetViews", "sheetFormatPr", "cols", "mergeCells", "hyperlinks", "sheetData",
-        "rowBreaks", "colBreaks",
+        "rowBreaks", "colBreaks", "autoFilter",
     }
 )  # fmt: skip
 """Children the model reads. Page breaks are read and, like the print area, not reported: Excel's
@@ -355,8 +354,6 @@ def sheet_notices(
     if views and views[0].source is not None:
         view = views[0].source
         at("sheetViews", lambda: _view(collector, view))
-    if sheet.autofilter is not None and sheet.autofilter.source is not None:
-        at("autoFilter", run(_filter, sheet.autofilter.source))
     for found in sheet.conditional_formats:
         if not found.extension and found.source is not None:
             at("conditionalFormatting", run(_conditional, found.source))
@@ -417,12 +414,6 @@ def _sheet_views(context: SheetContext, child: ET.Element) -> None:
 def _conditional(context: SheetContext, child: ET.Element) -> None:
     if rules := sum(1 for _ in child.iter(f"{{{_MAIN}}}cfRule")):
         _report(context.collector, "cf", count=rules)
-
-
-@rule("autoFilter")
-def _filter(context: SheetContext, child: ET.Element) -> None:
-    if child.get("ref"):
-        _report(context.collector, "filter.buttons")
 
 
 @rule("oleObjects", "controls")

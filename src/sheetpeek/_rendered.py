@@ -15,6 +15,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Literal, TypeAlias
 
 from sheetpeek._fill_border_model import RenderedBorders
+from sheetpeek._filter_model import FilterButtonState
 from sheetpeek._model import Cell, CellRange, Font, Row, column_letter
 from sheetpeek._outline_model import RenderedOutline
 from sheetpeek._runs_model import TextSpan
@@ -88,6 +89,9 @@ class RenderedCell:
     """Font of the text drawn here (the source cell's), or ``None`` when blank."""
     color: str | None
     """The color of the text drawn here, the source's section color or else its font color."""
+    button: FilterButtonState | None = None
+    """The glyph of the filter button drawn on this header cell, else ``None`` (§4.19). Its
+    size, the row's height at the zoom up to 17 screen points, is the output's to work out."""
 
     @property
     def row(self) -> int:

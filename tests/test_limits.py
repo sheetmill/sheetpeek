@@ -376,6 +376,11 @@ ODD_FIELDS = {
         '<sheetView workbookViewId="0"><pane ySplit="{0}" xSplit="{0}" state="frozen"/>',
     ),
     "page break": ("</worksheet>", '<rowBreaks><brk id="{}" man="1"/></rowBreaks></worksheet>'),
+    "filter column": (
+        "</sheetData>",
+        '</sheetData><autoFilter ref="A1:B2"><filterColumn colId="{}"/></autoFilter>',
+    ),
+    "filter row": ("</sheetData>", '</sheetData><autoFilter ref="A1:B{}"/>'),
 }
 
 

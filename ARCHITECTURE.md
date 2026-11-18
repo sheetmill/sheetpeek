@@ -1347,6 +1347,34 @@ the freeze line and drawn with it over everything else, in the frozen copies too
 that of Excel's page break preview (unverified: not captured). The other outputs draw nothing
 and report nothing for breaks.
 
+### 4.19 Filter and sort buttons
+
+**Read** (`_read_filters.py`, from xlio): the sheet's `autoFilter` and each table's (a table
+with a header row), as `Sheet.autofilters` (`AutoFilter`, `FilterColumn`, `SortCondition`).
+Excel does not apply the criteria on opening: the rows the file saved as hidden are what shows
+(captured), so the criteria matter only for the button. A column's `colId` counts from the
+range's first column; one past the range is left out.
+
+**Drawn** (unverified until the screen suite `filters` captures it, §10):
+- one button per column of the range's first row, merged or empty header cells included, each at
+  its own column's cell (a header merged down into the data keeps it on the header row); none
+  where the column's `hiddenButton` or `showButton="0"` is set (they draw alike), none for a
+  table without `autoFilter`, none on a hidden column or header row;
+- a range read that cuts the header row keeps the buttons of the header cells inside it; one
+  without the header row draws none, as `range_edge` cuts the rest;
+- four glyphs: plain; filtered, whatever the criteria; sorted, an arrow up or down on every
+  sorted column; filtered and sorted, the arrow with the funnel (filtered with an ascending sort
+  is unverified). A sort by cell color draws the ascending arrow; by font color or icon, and a
+  descending sort by color, follow the order (unverified). A left-to-right sort (`columnSort`)
+  draws no arrow (unverified). The sheet's `sortState` counts inside its `autoFilter` and, as a
+  table's does, beside it (unverified for the sheet);
+- a square of min(row height × zoom, 17) screen points at the cell's bottom right, drawn over the
+  header text; screen-sized, so it does not scale with the zoom; face a gradient from 254 to 245
+  gray, outline 1 screen point of black at 40 % over whatever is behind it.
+
+The layout marks each header cell with its glyph (`RenderedCell.button`, `_pass_buttons.py`);
+each output draws it at its own size.
+
 ## 5. Reading
 
 sheetpeek reads a workbook through xlio (`xlio==0.3.*`), the family's xlsx reader, after a check

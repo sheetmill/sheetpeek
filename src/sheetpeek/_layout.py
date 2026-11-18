@@ -21,6 +21,7 @@ from sheetpeek._model import Cell, CellRange, CellStyle, Column, Font, Row, Shee
 from sheetpeek._notices import Collector, Notice, visible
 from sheetpeek._package import LimitError
 from sheetpeek._pass_borders import borders_pass
+from sheetpeek._pass_buttons import buttons_pass
 from sheetpeek._pass_outline import outline_pass
 from sheetpeek._rendered import (
     Alignment,
@@ -178,6 +179,7 @@ PASSES: list[Pass] = [
     _cells,
     borders_pass,
     outline_pass,
+    buttons_pass,
 ]
 """The layout's passes, in order. A feature adds its own here: borders after the cells (they
 depend on spill), chrome such as outline symbols after the geometry."""

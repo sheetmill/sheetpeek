@@ -16,6 +16,7 @@ from sheetpeek._fill_border_census import fill_border_codes
 from sheetpeek._hyperlink import Hyperlink, classify
 from sheetpeek._model import CellRange, Font
 from sheetpeek._notices import FEATURES, CellSet, Notice, Outcome, Reason, Support, describe
+from sheetpeek._pass_buttons import presence as buttons_presence
 from sheetpeek._pass_outline import presence as outline_presence
 
 if TYPE_CHECKING:
@@ -114,6 +115,7 @@ def census(
         "grid.color": 1 if sheet.show_gridlines and sheet.grid_color else 0,
         "headings.hidden": 0 if sheet.show_headings else 1,
         "outline": outline_presence(rendered),
+        "filter.buttons": buttons_presence(rendered),
     }
     for code, count in sheet_level.items():
         if count:

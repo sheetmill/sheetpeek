@@ -174,6 +174,7 @@ for _code, _name, _level in (
     ("gridlines.hidden", "hidden gridlines", "sheet"),
     ("headings.hidden", "hidden row and column headings", "sheet"),
     ("outline", "outline symbols", "sheet"),
+    ("filter.buttons", "filter buttons", "sheet"),
 ):
     _register(_code, _name, _level, "census")
 
@@ -191,7 +192,6 @@ for _code, _name, _level in (
     ("view.page_layout", "page layout and page break views", "sheet"),
     ("view.panes", "split panes", "sheet"),
     ("cf", "conditional formatting", "sheet"),
-    ("filter.buttons", "filter buttons", "sheet"),
     ("table", "tables", "sheet"),
     ("sparkline", "sparklines", "sheet"),
     ("slicer", "slicers", "sheet"),

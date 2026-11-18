@@ -91,6 +91,7 @@ def html(
         "gridlines.hidden": SHOWN,
         "headings.hidden": _headings(headings),
         "outline": _outline_html(buttons, level_buttons),
+        "filter.buttons": _omit("not_implemented", "filter buttons are not drawn yet"),
     }
 
 
@@ -144,6 +145,7 @@ def rich(
         "link.local": SHOWN if local_links else _local(),
         **_characters(headings=headings),
         "outline": _outline_characters(buttons),
+        "filter.buttons": _omit("not_implemented", "filter buttons are not drawn yet"),
     }
 
 
@@ -180,6 +182,7 @@ def text(*, headings: bool, buttons: str = "static") -> dict[str, Support]:
         "link.local": plain,
         **_characters(headings=headings),
         "outline": _outline_characters(buttons),
+        "filter.buttons": _omit("not_implemented", "filter buttons are not drawn yet"),
     }
 
 
@@ -225,6 +228,7 @@ def markdown(*, emphasis: bool, letters: bool, local_links: bool = False) -> dic
         "gridlines.hidden": plain,
         "headings.hidden": _headings(letters),
         "outline": plain,
+        "filter.buttons": plain,
     }
 
 
@@ -269,4 +273,5 @@ def delimited() -> dict[str, Support]:
         "gridlines.hidden": plain,
         "headings.hidden": SHOWN,
         "outline": plain,
+        "filter.buttons": plain,
     }

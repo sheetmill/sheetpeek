@@ -20,6 +20,7 @@ from sheetpeek._outline_model import Outline
 from sheetpeek._view_model import SheetView
 
 if TYPE_CHECKING:
+    from sheetpeek._filter_model import AutoFilter
     from sheetpeek._notices import Notice
     from sheetpeek._rendered import Mode, RangeEdge, RenderedSheet, SpillEdge
     from sheetpeek._runs_model import TextSpan
@@ -341,6 +342,9 @@ class Sheet:
     """Rows a manual page break falls below."""
     column_breaks: tuple[int, ...] = ()
     """Columns a manual page break falls right of."""
+    autofilters: tuple[AutoFilter, ...] = ()
+    """The sheet's filter, then each table's, that touch ``ref``; their header cells draw
+    filter buttons (§4.19)."""
     notices: tuple[Notice, ...] = field(default=())
     """What the file uses that sheetpeek does not read yet (:class:`~sheetpeek.Notice`)."""
     max_cells: int | None = field(default=None, repr=False, compare=False)
