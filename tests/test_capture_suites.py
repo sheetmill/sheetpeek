@@ -9,7 +9,7 @@ import dataclasses
 
 import openpyxl
 import pytest
-from capture import borders, fills, text_style
+from capture import borders, fills, filters, text_style
 from capture.screen import png
 from capture.screen.run import Capture
 from capture.screen.window import GRIDLINE, NO_GRIDLINE, Grid, locate, nominal_scale
@@ -164,6 +164,21 @@ def test_the_text_style_workbook_reads_back_as_built(tmp_path):
     assert align.cell(16, 7).style.justify_last_line
     assert align.cell(26, 5).style.reading_order == 2
     assert align.cell(10, 3).style.v_align == "distributed"
+
+
+def test_the_filter_workbook_reads_back_as_built(tmp_path):
+    # Every header cell's glyph as sheetpeek lays it out is the suite's expectation, which the
+    # capture then checks against Excel.
+    path = tmp_path / "filters.xlsx"
+    assert len(filters.build(path)) == len(filters.CASES)
+    rendered = sheetpeek.read(path).layout("excel")
+    found = {
+        f"{get_column_letter(c.column)}{c.row}": c.button
+        for row in rendered.rows
+        for c in row.cells
+        if f"{get_column_letter(c.column)}{c.row}" in filters.CASES
+    }
+    assert found == filters.EXPECTED
 
 
 def test_every_case_names_a_distinct_cell_in_its_group():
