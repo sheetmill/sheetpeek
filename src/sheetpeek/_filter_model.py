@@ -26,8 +26,8 @@ class FilterColumn:
     column: int
     """The sheet column, 1-based (the file's ``colId`` counts from the range's first column)."""
     button: bool = True
-    """Whether Excel draws the column's button: not with ``hiddenButton`` or ``showButton="0"``,
-    which draw alike."""
+    """Whether Excel draws the column's button, which ``hiddenButton`` and ``showButton="0"``
+    both prevent."""
     filtered: bool = False
     """Whether criteria of any kind are set; every kind draws the same button."""
 
@@ -40,7 +40,7 @@ class SortCondition:
     """The sheet column sorted, 1-based."""
     descending: bool = False
     sort_by: SortBy = "value"
-    """What the column is sorted by: values, cell color, font color or icon."""
+    """What the column is sorted by, its values, cell color, font color or icon."""
 
 
 @dataclass(frozen=True, slots=True)

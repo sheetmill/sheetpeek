@@ -60,6 +60,16 @@ Everything below is importable from `sheetpeek`.
    :members:
 .. autoclass:: sheetpeek.Outline
    :members:
+.. autoclass:: sheetpeek.AutoFilter
+   :members:
+.. autoclass:: sheetpeek.FilterColumn
+   :members:
+.. autoclass:: sheetpeek.SortCondition
+   :members:
+.. py:data:: sheetpeek.SortBy
+
+   What a :class:`SortCondition` sorts by: ``"value"``, ``"cellColor"``, ``"fontColor"`` or
+   ``"icon"``.
 .. autoclass:: sheetpeek.CellRange
    :members: parse, rows, columns, intersects
 ```
@@ -101,6 +111,10 @@ Everything below is importable from `sheetpeek`.
 
    What an :class:`OutlineMark` draws: ``"start"``, ``"bar"``, ``"open"``, ``"closed"`` or
    ``"dot"``.
+.. py:data:: sheetpeek.FilterButtonState
+
+   The glyph of a filter button (:attr:`RenderedCell.button`): ``"plain"``, ``"filtered"``,
+   ``"ascending"``, ``"descending"``, ``"filtered_ascending"`` or ``"filtered_descending"``.
 ```
 
 ## Rendering
