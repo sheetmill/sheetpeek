@@ -33,7 +33,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `RenderedSheet.notices` hold a `Notice` for each kind of thing the file uses that sheetpeek does
   not read yet, or that the layout approximates, and `sheetpeek.notices(source, to=...)` adds what
   that output cannot show, without rendering. A notice has a dotted code (`FEATURES` lists them),
-  an outcome (`omitted` or `approximated`), a reason, the cells and the output.
+  an outcome (`omitted` or `approximated`), a reason, the cells and the output. What an output
+  loses nothing by leaving out is not reported: a black font color (the text an output without
+  colors draws) and a white solid fill (its paper), whatever sets them, a table style included.
 - Reported when a file uses them, until they are drawn: phonetic guides, row and column formats, sheet views (right to left, formulas,
   page layout, split panes), conditional formatting, filter buttons,
   sparklines, slicers, timelines, pictures, charts, shapes, embedded objects, form

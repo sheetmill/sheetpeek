@@ -732,3 +732,29 @@ def test_border_sides_of_style_none_draw_nothing_on_rows(tmp_path):
         return text.replace('style="thin"', 'style="none"')
 
     assert _row_column_notice(tmp_path, style_row={"border": side}, edit=edit) is None
+
+
+def test_black_text_and_white_fills_are_not_reported_where_an_output_draws_them_so(tmp_path):
+    # An output without colors draws black text on white paper: an explicit black font color or
+    # a white solid fill loses nothing there. Any other color is reported, in runs too.
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws["A1"] = "black"
+    ws["A1"].font = Font(color="FF000000")
+    ws["A2"] = "white"
+    ws["A2"].fill = PatternFill("solid", fgColor="FFFFFFFF")
+    ws["A3"] = CellRichText(["a", TextBlock(InlineFont(color="FF000000", b=True), "b")])
+    quiet = save(wb, tmp_path / "quiet.xlsx")
+    assert {"font.color", "fill"}.isdisjoint(codes(sheetpeek.notices(quiet, "text")))
+    ws["B1"] = "red"
+    ws["B1"].font = Font(color="FFFF0000")
+    ws["B2"] = "yellow"
+    ws["B2"].fill = PatternFill("solid", fgColor="FFFFFF00")
+    ws["B3"] = CellRichText(["a", TextBlock(InlineFont(color="FF0000FF"), "b")])
+    loud = save(wb, tmp_path / "loud.xlsx")
+    found = {n.code: n for n in sheetpeek.notices(loud, "text")}
+    assert found["font.color"].cells == (
+        sheetpeek.CellRange.parse("B1"),
+        sheetpeek.CellRange.parse("B3"),
+    )
+    assert found["fill"].cells == (sheetpeek.CellRange.parse("B2"),)

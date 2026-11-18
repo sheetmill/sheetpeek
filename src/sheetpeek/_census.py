@@ -13,6 +13,7 @@ from functools import lru_cache
 from typing import TYPE_CHECKING, Any
 
 from sheetpeek._fill_border_census import fill_border_codes
+from sheetpeek._fill_border_model import BLACK
 from sheetpeek._hyperlink import Hyperlink, classify
 from sheetpeek._model import CellRange, Font
 from sheetpeek._notices import FEATURES, CellSet, Notice, Outcome, Reason, Support, describe
@@ -157,7 +158,7 @@ def _font_codes(normal: Font, font: Font) -> tuple[str, ...]:
         found.append("font.strike")
     if font.vert_align is not None:
         found.append("font.vert_align")
-    if font.color is not None:
+    if font.color not in (None, BLACK):  # black is what an output without colors draws
         found.append("font.color")
     return tuple(found)
 

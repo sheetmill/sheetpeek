@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from sheetpeek._fill_border_model import Gradient, Pattern
+from sheetpeek._fill_border_model import WHITE, Gradient, Pattern
 
 if TYPE_CHECKING:
     from sheetpeek._model import CellStyle, Sheet
@@ -32,7 +32,10 @@ def fill_border_codes(sheet: Sheet, rendered: RenderedCell) -> list[str]:
     style = fill_style(sheet, rendered)
     spec = style.fill_spec if style is not None else None
     if isinstance(spec, Pattern):
-        codes.append("fill" if spec.kind == "solid" else "fill.pattern")
+        if spec.kind != "solid":
+            codes.append("fill.pattern")
+        elif spec.foreground != WHITE:  # white is the paper an output without fills draws on
+            codes.append("fill")
     elif isinstance(spec, Gradient):
         codes.append("fill.gradient")
     borders = rendered.display_style.borders

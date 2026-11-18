@@ -339,7 +339,9 @@ Three producers, one for each stage:
    features the model carries that the laid-out cells use; each backend declares a `Support` per
    census code (`backends/_support.py`, the six tables side by side), and its notices are the
    census filtered through that table. A code a backend does not declare is reported as omitted,
-   so a third-party backend without a table reports everything.
+   so a third-party backend without a table reports everything. The census counts the displayed
+   style (§4.20), and leaves out what an output without colors draws anyway: a black font color
+   and a white solid fill are not counted, whatever sets them.
 
 **A file is reported for what it uses, not what it contains.** A detector fires only when the
 element states something Excel draws differently from its default:
