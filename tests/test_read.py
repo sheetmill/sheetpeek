@@ -326,6 +326,10 @@ def test_sheet_selection(tmp_path):
         assert book.sheet("Secret").state == "very_hidden"
         with pytest.raises(KeyError, match="no sheet named 'Missing'"):
             book.sheet("Missing")
+        # Without case, as Excel compares sheet names; the sheet keeps the file's spelling.
+        assert book.sheet("shown").name == "Shown"
+        assert book.sheet("SECRET").state == "very_hidden"
+    assert sheetpeek.read(path, "hIDDEN").name == "Hidden"
 
 
 def test_file_object_and_1904(tmp_path):

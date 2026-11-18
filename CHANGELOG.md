@@ -163,6 +163,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   with a solid blue line, as Excel's page break preview draws them. Off by default.
 
 ### Changed
+- Sheet names are looked up without case, as Excel compares them: `Book.sheet("data")` and
+  `read(path, "DATA")` find a sheet named `Data` (and keep its spelling), where 0.2.0 raised
+  `KeyError`.
 - Requires xlformat 0.4. Through it, a workbook whose Normal font is 18 pt or more gets Excel's
   wider column padding: its columns without a stored width are wider (2 pt at Calibri 20).
 - `Cell.value` of a whole number is an `int` only below 2**53 in magnitude, a `float` above:

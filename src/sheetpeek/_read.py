@@ -380,9 +380,10 @@ class Book:
         """
         if name is None:
             name = self._default_sheet_name()
-        listed = next((s for s, _ in self._listing[0] if s.name == name), None)
+        listed = _find_sheet([s for s, _ in self._listing[0]], name)
         if listed is None:
             raise KeyError(f"no sheet named {name!r}; the sheets are {self.sheet_names}")
+        name = listed.name  # the file's own spelling
         kind = self._info.kinds.get(name, "worksheet")
         if kind in ("chartsheet", "dialogsheet"):
             raise NotAWorksheetError(f"{name!r} {_NOT_SHOWN[kind]}")
@@ -862,3 +863,12 @@ def _builtin_format(number_format_id: int) -> str:
 
 _LINKS = "_stream_links"
 """Where :meth:`Book._stream` leaves the ``HYPERLINK()`` formulas, until the elements are read."""
+
+
+def _find_sheet(sheets: list[ListedSheet], name: str) -> ListedSheet | None:
+    """The sheet called ``name``, compared without case as Excel compares sheet names."""
+    exact = next((s for s in sheets if s.name == name), None)
+    if exact is not None:
+        return exact
+    folded = name.casefold()
+    return next((s for s in sheets if s.name.casefold() == folded), None)
