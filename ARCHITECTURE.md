@@ -2234,16 +2234,17 @@ are read.
 2. **Recalculation** through `xlrecalc`, which becomes a required dependency: what a formula
    cell shows on opening, and conditional formats driven by formulas, as Excel evaluates them.
    Charts, possibly as a package of their own. Planned options (§9) as they are asked for.
-3. **Excel for Windows and the Mac.** The platform is a setting, with Excel for Windows as the
-   default (most Excel users have it) and Excel for Mac kept; the sibling packages take the same
-   setting. Parity on both platforms comes before a beta: every rule measured on the Mac is
+3. **Excel for Windows and the Mac.** The platform becomes a setting, with Excel for Windows as
+   the default (most Excel users have it) and Excel for Mac kept; xlformat, which measures the
+   Mac only so far, takes it where the platforms turn out to differ, and xlrecalc and xlio
+   likewise. Parity on both platforms comes before a beta: every rule measured on the Mac is
    measured on Windows too, and where the two differ each platform gets its own. To measure on
    Windows: column widths, row heights and glyph tables (xlformat measures the Mac only so far),
    and the automatic gridline gray, which the HTML backend draws (`--sheetpeek-grid`) and the
    capture controls take per platform.
 4. **After 1.0:** a PDF backend drawing from the `excel` mode geometry (§2.1), possibly as an
    optional extra.
-5. **Other viewers and refinements**, logged here as they stop paying on the Mac:
+5. **Other viewers and refinements**, logged here until they are taken up:
    - Linux viewers, and Chrome and Firefox for the HTML technique (only WebKit is measured);
    - a glyph-spacing correction for Aptos Narrow, for which no free metric-compatible font is
      known;

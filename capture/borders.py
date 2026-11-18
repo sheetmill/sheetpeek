@@ -7,7 +7,9 @@
 Each of the 13 ``ST_BorderStyle`` line styles is drawn black on all four sides of one cell (20
 characters wide, 40 pt high), the cells apart, in columns C, E, G and I by rows 4, 6, 8 and 10;
 a 14th cell with no border is the gridline control. One window, at zoom 100 and 200; the second
-marker is K12, so at zoom 200 the window must be about 1650 points wide to show it.
+marker is K12, which at zoom 200 shows in a window about 1650 points wide. A narrower window
+needs only the first marker at zoom 100 and 200, where Excel draws at the nominal scale
+(`CAPTURING.md`, "One marker, on a small screen").
 
 Measured on each edge, 12 image pixels clear of the corners: every device row (across the line)
 that carries ink, as its offset from the cell's boundary in points (0 is the first pixel after

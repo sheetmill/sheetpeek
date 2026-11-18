@@ -9,7 +9,9 @@ FFFFFF) in rows 4, 8, 12 and 16, and blue on yellow (0000FF on FFFF00) two rows 
 C, E, G, I and K (12 characters wide, rows 24 pt) with narrow columns between. ``none`` is the
 control: an unstyled cell. Row 20 holds ``darkUp`` in the adjacent cells C20, D20 and E20, for
 the tile's anchoring and the gridlines between patterned cells. One window, at zoom 100 and 200;
-the second marker is M22, so at zoom 200 the window must be about 1350 points wide to show it.
+the second marker is M22, which at zoom 200 shows in a window about 1350 points wide. A narrower
+window needs only the first marker at zoom 100 and 200, where Excel draws at the nominal scale
+(`CAPTURING.md`, "One marker, on a small screen").
 
 Measured per cell, 4 image pixels inside its edges: each pixel classed as foreground or
 background (nearest color); the foreground's share; the repeating tile's period in points across
