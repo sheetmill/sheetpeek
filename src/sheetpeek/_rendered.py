@@ -91,10 +91,11 @@ class RenderedCell:
     """The color of the text drawn here, the source's section color or else its displayed font
     color."""
     display_style: CellStyle
-    """The style the cell is displayed in, what Excel's ``Range.DisplayFormat`` reports: the
-    cell's own style with any table style (and, later, conditional format) stacked beneath it
-    (§4.20). It is ``cell.style`` itself when nothing stacks, so callers may compare the two with
-    ``is``; ``cell.style`` stays the file's own format."""
+    """The style the cell is displayed in, as Excel's ``Range.DisplayFormat`` reports it.
+
+    It is the cell's own style with any table style (and, later, conditional format) stacked
+    beneath it (§4.20). It is ``cell.style`` itself when nothing stacks, so callers may compare
+    the two with ``is``; ``cell.style`` stays the file's own format."""
     button: FilterButtonState | None = None
     """The glyph of the filter button drawn on this header cell, else ``None`` (§4.19). Its
     size, the row's height at the zoom up to 17 screen points, is the output's to work out."""
