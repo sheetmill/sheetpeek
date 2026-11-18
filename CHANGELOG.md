@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   not read yet, or that the layout approximates, and `sheetpeek.notices(source, to=...)` adds what
   that output cannot show, without rendering. A notice has a dotted code (`FEATURES` lists them),
   an outcome (`omitted` or `approximated`), a reason, the cells and the output.
-- Reported when a file uses them, until they are drawn: phonetic guides, rich-text runs in inline strings (which openpyxl does not keep), row and column formats, sheet views (right to left, formulas,
+- Reported when a file uses them, until they are drawn: phonetic guides, row and column formats, sheet views (right to left, formulas,
   page layout, split panes), conditional formatting, filter buttons,
   tables, sparklines, slicers, timelines, pictures, charts, shapes, embedded objects, form
   controls, background pictures, notes and threaded comments, tab colors (drawn only on the workbook page), dialog sheets, macro sheets, and any sheet element or extension sheetpeek
@@ -108,8 +108,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Sheet.palette`: the workbook's own indexed palette, `None` when it has none. A number format's
   `[ColorN]` is drawn from it, as Excel draws it, where 0.2.0 drew Excel's default palette; the
   eight named colors (`[Red]`) keep their standard colors.
-- Rich-text runs are drawn, from captures of Excel for Mac. A run without properties takes the
-  cell's font, and a run with properties takes nothing from it. In `excel` mode each run is
+- Rich-text runs are drawn, in shared and inline strings, from captures of Excel for Mac. A run
+  without properties takes the cell's font, and a run with properties takes nothing from it. In `excel` mode each run is
   measured in its own font for spill, `####`, wrapping and shrink to fit, and each line takes the
   height of its largest run. HTML draws a nested span per run on one baseline, superscript and
   subscript runs raised and lowered; Markdown with `emphasis=True` marks each run's bold and
@@ -163,6 +163,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   with a solid blue line, as Excel's page break preview draws them. Off by default.
 
 ### Changed
+- Workbooks are read through xlio (`xlio==0.3.*`, a new dependency), in one pass of each sheet's
+  cells, where 0.2.0 read them through openpyxl's read-only mode; values are read as Excel reads
+  them (the entries below), and none of openpyxl's warnings reach the caller. On the
+  100,000-cell bench sheets (`bench/html_size.py`, measured together) a plain sheet reads in 0.42
+  s against 0.2.0's 0.52 s; a sheet using the newer features in 0.64 s against 0.52 s, since
+  rich text, hyperlinks and the rest are now read.
+- Files Excel opens that 0.2.0 refused are read: a color whose `rgb` is not hex (read as Excel
+  reads it), an unknown sheet state (visible), a `zoomScale` that is not a whole number (100,
+  unverified). Of the 15,966 workbooks of the comparison corpus (every xlsx and xlsm in it), two
+  refused for a print titles name of `#N/A` now open.
+- Files Excel refuses are refused (`PackageError`): a cell past row 1,048,576, and an error code
+  Excel does not read in a cell's value (`#SPILL!` there, an unknown code); 0.2.0 read both.
+- Values read as Excel reads them: a number too large for a double is `#NULL!` (0.2.0: infinity);
+  `<c t="str"><v/></c>` is the empty string, which stops a spill (0.2.0: an empty cell); in shared
+  strings `_x005F_` escapes an underscore (`a_x005F_x0041_b` reads `a_x0041_b`, where 0.2.0 read
+  `aAb`) and a `<t>` without `xml:space="preserve"` loses its outer spaces; a cell whose value
+  metadata points at an error rich value shows that error (`#CALC!`) over its cached value.
 - Sheet names are looked up without case, as Excel compares them: `Book.sheet("data")` and
   `read(path, "DATA")` find a sheet named `Data` (and keep its spelling), where 0.2.0 raised
   `KeyError`.
@@ -190,9 +207,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `sheetpeek: warning: ...` lines before it.
 - `Sheet` and `RenderedSheet` take `notices` in place of their `warnings` field; `warnings` is a
   read-only property.
-- openpyxl's warning that it drops a sheet extension (conditional formatting, sparklines,
-  slicers and others it does not read) is no longer passed on to the caller while sheetpeek reads a
-  sheet; those extensions are reported as notices instead.
+- Sheet extensions (conditional formatting, sparklines, slicers and others not drawn) are reported
+  as notices.
 - `CellStyle.fill` of a pattern fill is the blend of its two colors by the pattern's share,
   not its foreground: a `gray0625` fill, 6.25 % black dots, was shown as solid black. A
   gradient's is its midpoint color, where it was no fill.
