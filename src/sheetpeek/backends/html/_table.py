@@ -8,6 +8,7 @@ from sheetpeek._model import CellRange
 from sheetpeek._rendered import RenderedCell, RenderedSheet, TextRun
 from sheetpeek.backends.html import (
     _borders,
+    _buttons,
     _headings,
     _links,
     _outline,
@@ -230,6 +231,7 @@ class Page:
                 for run in row.runs:
                     self._runs.setdefault(holder.get(run.source, (i, 0)), []).append(run)
         runs = self._runs
+        buttons = self._buttons(spans) if self.backend.buttons != "none" else {}
         edge = None
         if columns is not None and columns < len(sheet.columns):
             edge = sheet.columns[columns].x_pt or 0
@@ -250,7 +252,11 @@ class Page:
                     if (i, p) != (top, left):
                         continue  # covered by its merge
                     colspan, rowspan = right - left + 1, bottom - top + 1
-                out.write(self.cell(i, p, cell, colspan, rowspan, runs.get((i, p), ())))
+                out.write(
+                    self.cell(
+                        i, p, cell, colspan, rowspan, runs.get((i, p), ()), buttons.get((i, p), "")
+                    )
+                )
             if beyond:
                 out.write(f"<td>{self.text(beyond)}</td>")  # past the copy's edge, clipped
             out.write("</tr>\n")
@@ -263,6 +269,7 @@ class Page:
         colspan: int,
         rowspan: int,
         runs: list[TextRun] | tuple[()],
+        buttons: str = "",
     ) -> str:
         rows = self.sheet.rows
         style = []
@@ -293,7 +300,26 @@ class Page:
             attrs += f' colspan="{colspan}"'
         if rowspan > 1:
             attrs += f' rowspan="{rowspan}"'
-        return f"<td{attrs}>{self.text(runs) if runs else ''}</td>"
+        return f"<td{attrs}>{self.text(runs) if runs else ''}{buttons}</td>"
+
+    def _buttons(self, spans: _Spans) -> dict[tuple[int, int], str]:
+        """The filter buttons to write in each cell, by grid position (§4.19).
+
+        A covered column's go into its merge's first cell; each comes after the text it covers.
+        """
+        found: dict[tuple[int, int], str] = {}
+        columns = self.sheet.columns
+        for i, row in enumerate(self.sheet.rows):
+            for p, cell in enumerate(row.cells):
+                if cell.button is None:
+                    continue
+                where = (i, p)
+                if cell.merge is not None:
+                    top, left, _, _ = spans[cell.merge]
+                    where = (top, left)
+                markup = _buttons.button(self, row, columns[p], cell.button)
+                found[where] = found.get(where, "") + markup
+        return found
 
     def text(self, runs: list[TextRun] | tuple[()]) -> str:
         """A cell's runs, each linked cell's inside its anchor."""

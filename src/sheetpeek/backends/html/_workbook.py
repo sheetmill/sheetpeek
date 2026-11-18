@@ -24,6 +24,7 @@ from sheetpeek._package import LimitError, ReadLimits
 from sheetpeek._rendered import RenderedSheet
 from sheetpeek._sheets import SheetInfo
 from sheetpeek.backends.html import HTMLBackend
+from sheetpeek.backends.html._buttons import css as buttons_css
 from sheetpeek.backends.html._css import CSS
 from sheetpeek.backends.html._links import BookLinks
 from sheetpeek.backends.html._notices import write_notices
@@ -190,6 +191,7 @@ class _WorkbookPage:
     def write(self, out: TextIO) -> None:
         backend = self.backend
         shared = {outline_css(p.sheet, backend) for p in self.pages.values()}
+        shared |= {buttons_css(p.sheet, backend) for p in self.pages.values()}
         shared |= {panes_css(p.sheet, backend) for p in self.pages.values()}
         css = CSS + "".join(sorted(shared - {""}))
         css += "".join(p.css() for p in self.pages.values()) + _BOOK_CSS + self.tab_css()

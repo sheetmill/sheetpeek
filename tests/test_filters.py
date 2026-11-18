@@ -6,6 +6,8 @@ they are unverified.
 
 from __future__ import annotations
 
+import re
+
 import pytest
 
 import sheetpeek
@@ -193,3 +195,77 @@ def test_a_table_without_a_filter_or_header_row_draws_none(tmp_path):
 def test_the_census_counts_the_buttons(tmp_path):
     path = book(tmp_path, lambda ws: setattr(ws.auto_filter, "ref", "A1:D4"))
     assert sheetpeek.read(path).layout("excel").features["filter.buttons"].count == 4
+
+
+# --- HTML
+
+BUTTON = re.compile(
+    r'<span class="sp-fb" style="left:(\d+)px;top:(\d+)px;width:(\d+)px;height:(\d+)px">'
+)
+
+
+def html(path, **options):
+    from sheetpeek.backends import HTMLBackend
+
+    return sheetpeek.render(sheetpeek.read(path), HTMLBackend(**options), on_notice="ignore")
+
+
+def test_a_button_fills_a_15_pt_row_and_stops_at_17_screen_points(tmp_path):
+    def build(ws):
+        ws.auto_filter.ref = "A1:B4"
+        ws.auto_filter.filterColumn.append(
+            filters.FilterColumn(colId=1, filters=filters.Filters(filter=["2"]))
+        )
+
+    path = book(tmp_path, build)
+    page = html(path)
+    first, second = BUTTON.findall(page)
+    # Each button's right edge on its column's right gridline, 20 px (15 pt) square.
+    columns = sheetpeek.read(path).layout("excel").columns
+    rights = [round((c.x_pt + c.width_pt) * 4 / 3) for c in columns[:2]]
+    assert first == (str(rights[0] - 20), "0", "20", "20")
+    assert second == (str(rights[1] - 20), "0", "20", "20")
+    assert 'aria-label="filter button"' in page
+    assert 'aria-label="filter button: filtered"' in page
+    assert ".sheetpeek .sp-fb" in page
+    # A 30 pt row: 17 screen points (23 px), 1 px above the row's bottom gridline (captured).
+    openpyxl_book = openpyxl.load_workbook(path)
+    openpyxl_book.active.row_dimensions[1].height = 30
+    tall = save(openpyxl_book, tmp_path / "tall.xlsx")
+    assert BUTTON.findall(html(tall))[0] == (str(rights[0] - 23), "16", "23", "23")
+    # Zoom 200: the 15 pt row is 30 screen points, so the button is the largest; it does not
+    # grow with the page.
+    assert BUTTON.findall(html(path, zoom=200))[0][2:] == ("23", "23")
+
+
+def test_buttons_none_leaves_them_out(tmp_path):
+    path = book(tmp_path, lambda ws: setattr(ws.auto_filter, "ref", "A1:B4"))
+    page = html(path, buttons="none")
+    assert "sp-fb" not in page
+    notices = sheetpeek.notices(
+        sheetpeek.read(path), to=sheetpeek.backends.HTMLBackend(buttons="none")
+    )
+    assert [n.code for n in notices] == ["filter.buttons"]
+    assert sheetpeek.notices(sheetpeek.read(path), to="html") == ()
+
+
+def test_a_merged_headers_buttons_are_drawn_in_its_first_cell(tmp_path):
+    def build(ws):
+        ws.auto_filter.ref = "A1:C4"
+        ws.merge_cells("A1:B1")
+
+    page = html(book(tmp_path, build))
+    first_cell = re.search(r'<td colspan="2">(.*?)</td>', page)
+    assert first_cell is not None
+    assert first_cell[1].count("sp-fb") == 2
+    assert len(BUTTON.findall(page)) == 3
+
+
+def test_frozen_header_rows_carry_their_buttons(tmp_path):
+    def build(ws):
+        ws.auto_filter.ref = "A1:B4"
+        ws.freeze_panes = "A2"
+
+    page = html(book(tmp_path, build))
+    # The sheet once and the frozen row's copy: each draws both buttons.
+    assert len(BUTTON.findall(page)) == 4

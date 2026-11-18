@@ -54,10 +54,12 @@ True
 - `notices=True` adds, after the sheet, a collapsed list of what the page does not show; off by
   default.
 - `buttons="static"` (the default) or `"none"`: whether to draw Excel's buttons, which do nothing
-  on a static page. For now this is the outline of grouped rows and columns: a gutter before the
-  row headings and above the column headings, with its bars, dots and − and + buttons, drawn at
-  Excel's screen sizes in CSS pixels, and the level buttons when both headings are drawn. A sheet's
-  outline is drawn only when the file shows outline symbols.
+  on a static page: the outline of grouped rows and columns, a gutter before the row headings and
+  above the column headings with its bars, dots and − and + buttons, drawn at Excel's screen sizes
+  in CSS pixels, and the level buttons when both headings are drawn (a sheet's outline is drawn
+  only when the file shows outline symbols); and the filter buttons on the header cells of a
+  sheet's or a table's filter, each showing whether its column is filtered or sorted, as large as
+  the row up to 17 of Excel's screen points, which keep their proportion to the cells.
 - `zoom=None` (the default) draws each sheet at the zoom saved with it, as Excel opens it; a
   whole percent from 10 to 400 overrides it. Cells, text and the headings scale; gridlines,
   border lines, pattern tiles, underlines and the outline's symbols keep their size in CSS

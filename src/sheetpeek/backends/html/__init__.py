@@ -23,6 +23,7 @@ from sheetpeek._notices import Notice, Support, merge
 from sheetpeek._rendered import Mode, RenderedSheet
 from sheetpeek._view_model import MAX_ZOOM, MIN_ZOOM
 from sheetpeek.backends import _support
+from sheetpeek.backends.html._buttons import css as buttons_css
 from sheetpeek.backends.html._css import CSS
 from sheetpeek.backends.html._notices import write_notices
 from sheetpeek.backends.html._outline import css as outline_css
@@ -138,7 +139,10 @@ class HTMLBackend:
     def render(self, sheet: RenderedSheet, out: TextIO, /) -> None:
         """Write the page or the fragment to ``out``."""
         page = Page(sheet, self)
-        stylesheet = f"{CSS}{outline_css(sheet, self)}{panes_css(sheet, self)}{page.css()}"
+        stylesheet = (
+            f"{CSS}{outline_css(sheet, self)}{buttons_css(sheet, self)}"
+            f"{panes_css(sheet, self)}{page.css()}"
+        )
         self._head(sheet, stylesheet, out)
         write_sheet(page, out)
         if self.notices:
@@ -177,6 +181,7 @@ class HTMLBackend:
         """
         pages = [Page(s, self, scope=f"sp-{k}", tag=letters(k) + "-") for k, s in enumerate(sheets)]
         shared = {outline_css(s, self) for s in sheets} | {panes_css(s, self) for s in sheets}
+        shared |= {buttons_css(s, self) for s in sheets}
         stylesheet = CSS + "".join(sorted(shared - {""})) + "".join(p.css() for p in pages)
         stylesheet += ".sp-area + .sp-area { margin-top: 16px; }\n"
         self._head(sheets[0], stylesheet, out)

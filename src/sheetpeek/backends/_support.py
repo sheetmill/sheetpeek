@@ -35,6 +35,12 @@ def _outline_html(buttons: str, level_buttons: bool) -> Support:
     return SHOWN
 
 
+def _filter_buttons(buttons: str) -> Support:
+    if buttons == "none":
+        return _omit("option", "buttons='none' leaves the filter buttons out")
+    return SHOWN
+
+
 def _outline_characters(buttons: str) -> Support:
     if buttons == "none":
         return _omit("option", "buttons='none' leaves the outline gutter out")
@@ -91,7 +97,7 @@ def html(
         "gridlines.hidden": SHOWN,
         "headings.hidden": _headings(headings),
         "outline": _outline_html(buttons, level_buttons),
-        "filter.buttons": _omit("not_implemented", "filter buttons are not drawn yet"),
+        "filter.buttons": _filter_buttons(buttons),
     }
 
 
