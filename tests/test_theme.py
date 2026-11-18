@@ -1,7 +1,7 @@
 """Theme fonts, the workbook palette, the grid color and the headings (ARCHITECTURE.md §4.14).
 
-Expected values come from captures (Excel 16.114.4 for Mac, dark appearance), unverified
-on Microsoft 365; the light heading colors were measured on Microsoft 365.
+Expected values are unverified (dark appearance unless a test says otherwise): no capture of them
+is in this repository yet.
 """
 
 import re
@@ -54,7 +54,7 @@ def build(tmp_path, cells, name="book.xlsx", palette=None):
 
 
 def custom_palette():
-    """The capture's palette: index 10 ([Red]'s and [Color3]'s slot) teal, 17 ([Color10]) brown."""
+    """The case's palette: index 10 ([Red]'s and [Color3]'s slot) teal, 17 ([Color10]) brown."""
     colors = [f"00{c}" for c in DEFAULT_PALETTE]
     colors[10], colors[17] = f"00{TEAL}", f"00{BROWN}"
     return colors
@@ -64,7 +64,7 @@ def custom_palette():
 
 
 def test_a_scheme_font_is_drawn_in_the_theme_typeface(tmp_path):
-    # Excel 16.114 capture: Calibri-minor and Times-New-Roman-minor both draw the theme's Courier
+    # Unverified: Calibri-minor and Times-New-Roman-minor both draw the theme's Courier
     # New; Calibri-major draws Georgia; Calibri without a scheme stays Calibri.
     path = build(
         tmp_path,
@@ -85,7 +85,7 @@ def test_a_scheme_font_is_drawn_in_the_theme_typeface(tmp_path):
 
 
 def test_the_normal_font_follows_the_theme(tmp_path):
-    # Excel 16.114 capture: the Normal style's Calibri (minor) is replaced as well, so the default
+    # Unverified: the Normal style's Calibri (minor) is replaced as well, so the default
     # column takes the theme font's digits (61 pt for Courier New). xlformat has no glyph table
     # for Courier New, so it is measured as Calibri and reported.
     path = themed(build(tmp_path, {"A1": (1, {})}))
@@ -125,7 +125,7 @@ def test_an_empty_theme_typeface_keeps_the_stored_name(tmp_path):
 
 
 def test_indexed_colors_follow_the_workbook_palette(tmp_path):
-    # Excel 16.114 capture: fill and font indexed 10 and font 17 follow the palette; fill indexed 2
+    # Unverified: fill and font indexed 10 and font 17 follow the palette; fill indexed 2
     # stays red (0 to 7 do not mirror 8 to 15 once a palette is written); fill indexed 64 is no
     # fill; fill 81, past the palette, is black; font indexed 64 is the automatic black.
     path = build(
@@ -185,7 +185,7 @@ def test_a_colors_element_without_indexed_colors_keeps_the_default_palette(tmp_p
 
 
 def test_a_section_color_follows_the_workbook_palette(tmp_path):
-    # Excel 16.114 capture: [Color10] follows the palette (brown here); [Red] keeps red, though
+    # Unverified: [Color10] follows the palette (brown here); [Red] keeps red, though
     # the palette makes its slot teal; [Color3] is that slot.
     path = build(
         tmp_path,
@@ -248,7 +248,7 @@ def grid_book(tmp_path, color_id="10", palette=None, default="0", gridlines=True
 
 
 def test_the_grid_color_is_the_workbook_palette_entry(tmp_path):
-    # Excel 16.114 capture: colorId 10 with index 10 teal draws teal gridlines.
+    # Unverified: colorId 10 with index 10 teal draws teal gridlines.
     assert sheetpeek.read(grid_book(tmp_path, palette=custom_palette())).grid_color == TEAL
     assert sheetpeek.read(grid_book(tmp_path, color_id="12")).grid_color == "0000FF"
 
@@ -257,7 +257,7 @@ def test_the_grid_color_is_the_workbook_palette_entry(tmp_path):
     ("color_id", "default"), [("64", "0"), ("10", "1"), ("65", "0"), ("99999", "0")]
 )
 def test_an_automatic_grid_color_is_none(tmp_path, color_id, default):
-    # 64 is the automatic gray (capture on Excel 16.114); past 64: unverified, automatic.
+    # 64 is the automatic gray (unverified); past 64: unverified, automatic.
     assert sheetpeek.read(grid_book(tmp_path, color_id, default=default)).grid_color is None
 
 
@@ -290,7 +290,7 @@ def test_html_draws_the_grid_color_one_device_pixel_wide(tmp_path):
 
 
 def test_a_fill_covers_a_colored_gridline(tmp_path):
-    # Excel 16.114 capture: a white fill hides the colored gridline, as it hides the gray one.
+    # Unverified: a white fill hides the colored gridline, as it hides the gray one.
     text = sheetpeek.render(sheetpeek.read(grid_book(tmp_path, fill=True)), "html")
     assert '<td style="background:#FFFFFF;border-color:#FFFFFF">' in text
 
@@ -343,7 +343,7 @@ def test_text_draws_no_grid_color(tmp_path):
 
 
 def test_heading_bands_at_calibri_11():
-    # Excel 16.114 capture at zoom 100 and 200: the column band 21 pt; the row band 16 + 3 pt a
+    # Unverified, at zoom 100 and 200: the column band 21 pt; the row band 16 + 3 pt a
     # digit of the last visible row (22, 25 and 28 pt with 2, 3 and 4 digits).
     assert bands(11.0, 2) == (22.0, 21.0)
     assert bands(11.0, 3) == (25.0, 21.0)
@@ -351,7 +351,7 @@ def test_heading_bands_at_calibri_11():
 
 
 def test_heading_bands_grow_with_the_normal_font():
-    # Excel 16.114 capture at Calibri 20: column band 25 pt, row band 36 pt with 2 digits. Other
+    # Unverified, at Calibri 20: column band 25 pt, row band 36 pt with 2 digits. Other
     # sizes follow a line through the two (unverified), positive at every size Excel accepts.
     assert bands(20.0, 2) == pytest.approx((36.0, 25.0))
     for size in (1.0, 409.0):
@@ -360,7 +360,7 @@ def test_heading_bands_grow_with_the_normal_font():
         assert column > 0
 
 
-def test_html_headings_take_the_captured_sizes(tmp_path):
+def test_html_headings_take_the_expected_sizes(tmp_path):
     path = build(tmp_path, {"A1": (1, {}), "A10": (10, {})})
     text = sheetpeek.render(
         sheetpeek.read(path), HTMLBackend(column_headings=True, row_headings=True)

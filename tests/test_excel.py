@@ -62,7 +62,7 @@ def test_spill_both_ways_and_competing(tmp_path):
 
 
 def test_merged_width_formats_the_anchor(tmp_path):
-    # Route A: a number too wide for one column shows in full merged over three (§4.4).
+    # Suite merge_width: a number too wide for one column shows in full merged over three (§4.4).
     def build(ws):
         ws["A1"] = ws["A2"] = 123456789
         ws["A1"].number_format = ws["A2"].number_format = "#,##0.00"

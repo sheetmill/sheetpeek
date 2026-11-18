@@ -1,7 +1,7 @@
 """Hyperlinks: what the reader takes from a file, what each output draws, and what it refuses.
 
-The look of a link is the cell's format alone, and ``display`` is never drawn: capture on Excel
-16.114 (Excel 16 for Mac, Office 2021), unverified on Microsoft 365.
+The look of a link is the cell's format alone, and ``display`` is never drawn
+(unverified: no capture in this repository yet).
 """
 
 import re
@@ -122,8 +122,7 @@ def test_a_hyperlink_formula_with_a_literal_target_links(tmp_path):
         "",
     )
     cell = sheetpeek.read(path).cell(1, 1)
-    # The cached value is shown, not the friendly name in the formula (capture on Excel 16.114,
-    # unverified on Microsoft 365).
+    # The cached value is shown, not the friendly name in the formula (unverified).
     assert cell.value == "shown"
     assert cell.hyperlink == Hyperlink('https://example.com/?q="x', source="formula")
 
@@ -323,7 +322,7 @@ def test_an_anchor_wraps_the_cells_text_and_adds_no_look(tmp_path):
         ]
     ]
     # display is never drawn, and the anchor adds no look: the cell's format draws a link
-    # (Excel 16.114, unverified on Microsoft 365).
+    # (unverified).
     assert "other" not in page
     # The anchor holds the run whole, clip window and all, which spills over the neighbors.
     assert re.search(
@@ -405,7 +404,7 @@ def test_a_refused_target_is_text_and_never_echoed(tmp_path):
 
 
 def test_an_empty_linked_cell_gets_no_anchor(tmp_path):
-    # Excel shows nothing in it (Excel 16.114, unverified on Microsoft 365).
+    # Excel shows nothing in it (unverified).
     path = linked_sheet(
         tmp_path,
         row(1, text_cell("A1", "x")),

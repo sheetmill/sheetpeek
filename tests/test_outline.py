@@ -1,7 +1,7 @@
 """Outlines: levels and settings read, groups and symbols laid out, the gutter in each output.
 
-The expected symbols and sizes come from captures (Excel 16 for Mac, Office 2021,
-dark appearance), unverified on Microsoft 365 (ARCHITECTURE.md §4.11).
+The expected symbols and sizes are unverified: no capture of them is in this repository yet
+(ARCHITECTURE.md §4.11).
 """
 
 import re
@@ -17,7 +17,7 @@ from sheetpeek.backends import HTMLBackend, MarkdownBackend, TextBackend
 from sheetpeek.backends.html._outline import _centered
 from tests.workbooks import SHEET1, replace_once, rewrite, save
 
-# The captured sheet: row -> (level, hidden, collapsed); summaries below and right.
+# The sheet: row -> (level, hidden, collapsed); summaries below and right.
 ROWS = {
     4: (1, False, False),
     5: (2, False, False),
@@ -42,7 +42,7 @@ COLUMNS = {
 }
 
 
-def captured(path, *, below=True, right=True):
+def outline_sheet(path, *, below=True, right=True):
     wb = openpyxl.Workbook()
     ws = wb.active
     for row in range(1, 21):
@@ -68,7 +68,7 @@ def by_index(marks):
 
 @pytest.fixture
 def book(tmp_path):
-    return captured(tmp_path / "outline.xlsx")
+    return outline_sheet(tmp_path / "outline.xlsx")
 
 
 # --- reading
@@ -84,7 +84,7 @@ def test_levels_collapsed_flags_and_settings_are_read(book):
 
 
 def test_the_depth_is_the_deepest_level_in_the_whole_sheet(book):
-    # Captured: Excel derives the depth from the rows; openpyxl writes no outlineLevelRow.
+    # Unverified: Excel derives the depth from the rows; openpyxl writes no outlineLevelRow.
     assert "outlineLevelRow" not in _part(book)
     sheet = sheetpeek.read(book, ref="A1:B3")
     assert sheet.outline is not None
@@ -170,8 +170,8 @@ def test_groups_from_levels():
     assert groups([]) == []
 
 
-def test_the_captured_symbols(book):
-    # Excel 16.114 capture: buttons on rows 7, 8, 11, 12 and 17, + on the collapsed groups' rows 11
+def test_the_expected_symbols(book):
+    # Unverified: buttons on rows 7, 8, 11, 12 and 17, + on the collapsed groups' rows 11
     # and 17; a dot on each visible detail row in the lane after its level unless a button is
     # there (rows 4, 5, 6); lane 3 holds the level-3 group.
     outline = sheetpeek.read(book).layout("excel").outline
@@ -197,8 +197,8 @@ def test_the_captured_symbols(book):
 
 
 def test_summaries_above_and_left_mirror_the_symbols(tmp_path):
-    # Captured for columns (the button on the left, the tick at the far end); taken as the same
-    # for rows (unverified).
+    # For columns (the button on the left, the tick at the far end), and taken as the same for
+    # rows (unverified).
     wb = openpyxl.Workbook()
     ws = wb.active
     for row in range(1, 6):
@@ -263,7 +263,7 @@ def gutter_cells(text):
 
 
 def test_the_gutter_is_sized_by_depth(book):
-    # Captured: 2 + 12 x (depth + 1) + 3 screen points; at 4/3 CSS px each, rounded, 3 + 16 x
+    # Unverified: 2 + 12 x (depth + 1) + 3 screen points; at 4/3 CSS px each, rounded, 3 + 16 x
     # (depth + 1) + 4: 71 for 3 levels, 55 for 2, the same at every zoom.
     text = html(book)
     first = re.search(r'<col style="width:(\d+)px">', text)
@@ -272,7 +272,7 @@ def test_the_gutter_is_sized_by_depth(book):
     assert '<tr style="height:55px">' in text
 
 
-def test_bars_ticks_dots_and_buttons_are_placed_as_captured(book):
+def test_bars_ticks_dots_and_buttons_are_placed_as_expected(book):
     cells = {i: cell for i, (_, cell) in enumerate(gutter_cells(html(book)), 1)}
     # Screen points at 4/3 CSS px, rounded; line widths stay in px. Row 4: the bar 2 px wide,
     # 4 into lane 1 (x = 3 + 4), from 3 px below the row's top, with an 8 x 2 tick; a 3 x 3 dot
@@ -293,7 +293,7 @@ def test_bars_ticks_dots_and_buttons_are_placed_as_captured(book):
 
 @pytest.mark.parametrize(("height", "top"), [(15, 2), (30, 10), (60, 25)])
 def test_a_button_is_centered_on_its_row(height, top):
-    # Captured: 2 into a 15 pt row, 10 into 30, 25 into 60 (screen points).
+    # Unverified: 2 into a 15 pt row, 10 into 30, 25 into 60 (screen points).
     assert _centered(height, 12) == top
 
 
@@ -330,7 +330,7 @@ def test_a_page_without_an_outline_carries_none_of_its_markup(tmp_path):
     assert "--sheetpeek-outline" not in text
 
 
-def test_the_dark_gutter_colors_are_the_captured_ones(book):
+def test_the_dark_gutter_colors_are_the_expected_ones(book):
     text = html(book, color_scheme="dark")
     for color in ("#555555", "#999999", "#333333"):  # gutter 85, bars 153, button border 51
         assert color in text

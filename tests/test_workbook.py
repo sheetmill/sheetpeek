@@ -1,7 +1,7 @@
 """The sheet list, tab colors and the workbook page (ARCHITECTURE.md §4.15).
 
-Which tabs Excel shows and how it draws a tab color are captures (Excel 16.114.4 for
-Mac, Office 2021, dark appearance, zoom 100): visible sheets only, in file order; an inactive
+Which tabs Excel shows and how it draws a tab color are unverified (no capture in this repository
+yet): visible sheets only, in file order; an inactive
 colored tab filled solid with white text; the active one a gradient to a light tint of its color;
 ``auto`` drawn as an uncolored tab.
 """
@@ -28,7 +28,7 @@ RELS = "xl/_rels/workbook.xml.rels"
 
 
 def tabs_book(path):
-    """The capture's sheets: four colored tabs and a plain one, a hidden and a very hidden one."""
+    """The case's sheets: four colored tabs and a plain one, a hidden and a very hidden one."""
     wb = openpyxl.Workbook()
     first = wb.active
     first.title = "Active"
@@ -120,8 +120,8 @@ def nav(markup):
 def test_sheets_list_kind_state_and_tab_color(tabs):
     with sheetpeek.open(tabs) as book:
         found = [(s.name, s.kind, s.state, s.tab_color) for s in book.sheets]
-    # Theme accent1 of the default theme is 4F81BD and indexed 12 is 0000FF, as the capture read
-    # them on the tabs; auto draws an uncolored tab (capture on Excel 16.114).
+    # Theme accent1 of the default theme is 4F81BD and indexed 12 is 0000FF, as drawn on the
+    # tabs, and auto draws an uncolored tab (unverified).
     assert found == [
         ("Active", "worksheet", "visible", "FF0000"),
         ("Theme", "worksheet", "visible", "4F81BD"),
@@ -234,7 +234,7 @@ def test_a_one_sheet_render_reports_the_tab_color_as_an_option(tabs):
 def test_the_page_has_a_tab_for_each_visible_sheet_in_file_order(tabs):
     markup = page(tabs)
     labels = re.findall(r">([^<]+)</a>", nav(markup))
-    assert labels == ["Active", "Theme", "Index", "Auto", "Plain"]  # capture on Excel 16.114
+    assert labels == ["Active", "Theme", "Index", "Auto", "Plain"]  # unverified
     assert re.findall(r'<section id="(sp-\d+)"', markup) == [f"sp-{i}" for i in range(1, 6)]
     assert ">hidden<" not in markup
     assert ">secret<" not in markup
@@ -274,7 +274,7 @@ def test_hidden_sheets_and_hidden_rows_are_separate_options(tmp_path):
 def test_tab_colors_as_excel_draws_them(tabs):
     markup = page(tabs)
     # Inactive: filled solid with white text. Active: a gradient from near white to a light
-    # tint, with Excel's green text. Auto: an uncolored tab (capture on Excel 16.114).
+    # tint, with Excel's green text. Auto: an uncolored tab (unverified).
     assert ".sp-book > nav a.sp-t-b { background: #4F81BD; color: #ffffff; }" in markup
     assert ".sp-book > nav a.sp-t-c { background: #0000FF; color: #ffffff; }" in markup
     assert "sp-t-d" not in markup  # auto

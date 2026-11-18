@@ -21,7 +21,7 @@ def read(part: Any, context: Context) -> dict[str, Any]:
 def to_borders(part: Any, context: Context) -> Borders | None:
     """An ``xlio.Border`` as the model's :class:`Borders`.
 
-    xlio reads ``start`` and ``end`` as ``left`` and ``right`` where those are absent (captured).
+    xlio reads ``start`` and ``end`` as ``left`` and ``right`` where those are absent (unverified).
     A diagonal counts only with a style and a direction, as Excel draws it.
     """
     if part is None:
@@ -41,7 +41,7 @@ def to_borders(part: Any, context: Context) -> Borders | None:
 
 
 def side(source: Any, context: Context) -> Side | None:
-    """One side: ``None`` without a style Excel draws. An automatic color is black (captured)."""
+    """One side: ``None`` without a style Excel draws. An automatic color is black (unverified)."""
     style = source.style if source is not None else None
     if style not in _STYLES:
         return None

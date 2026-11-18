@@ -2,8 +2,8 @@
 
 Superscript and subscript, the underlines, strikethrough, shrink to fit and the text's direction.
 
-Every number here is a capture (Excel 16.114 and, by the screen suite ``text_style``, 16.115;
-Calibri 11 unless stated); sizes other than those captured are scaled from them, unverified.
+Every number here is from the screen suite ``text_style`` (Calibri 11 unless stated); sizes
+other than those captured are scaled from them, unverified.
 """
 
 from __future__ import annotations

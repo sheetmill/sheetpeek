@@ -1,7 +1,7 @@
 """Fills: pattern and gradient fills read, their one color, the census, and the HTML fill layer.
 
-The expected tiles, shares and colors come from captures on Excel 16.114 and 16.115 (the screen
-suite ``fills``), the gradient angles from captures on Excel 16.114 only (ARCHITECTURE.md §4.12).
+The expected tiles, shares and colors come from the screen suite ``fills``; the gradient angles
+are unverified (ARCHITECTURE.md §4.12).
 """
 
 import math
@@ -19,7 +19,7 @@ from tests.workbooks import rewrite, save
 
 STYLES = "xl/styles.xml"
 
-# The captured foreground shares, in percent (capture on Excel 16.114, suite fills on 16.115).
+# The captured foreground shares, in percent (suite fills).
 SHARES = {
     "mediumGray": 50,
     "darkGray": 75,
@@ -89,7 +89,7 @@ def test_solid_draws_its_foreground(tmp_path):
 
 
 def test_solid_with_only_a_background_draws_black(tmp_path):
-    # A missing fgColor is automatic, black (capture on Excel 16.114).
+    # A missing fgColor is automatic, black (unverified).
     assert spec(tmp_path, PatternFill("solid", bgColor="FFFF0000"))[1] == "000000"
 
 
@@ -153,7 +153,7 @@ def test_a_path_gradient_is_read(tmp_path):
 
 
 def test_before_a_first_stop_past_0_the_color_runs_from_the_last_stop():
-    # One capture on Excel 16.114 (stops white at 0.25, blue at 0.75): blue at 0, white at 0.25.
+    # Unverified (stops white at 0.25, blue at 0.75): blue at 0, white at 0.25.
     found = Gradient("linear", ((0.25, "FFFFFF"), (0.75, "0000FF")))
     assert found.color_at(0) == "0000FF"
     assert found.color_at(0.25) == "FFFFFF"

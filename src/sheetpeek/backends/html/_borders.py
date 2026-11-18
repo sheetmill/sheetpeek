@@ -70,7 +70,7 @@ _TILES: dict[str, tuple[str, ...] | None] = {
     "mediumDashDotDot": (_DASH_DOT_DOT,) * 4,
     "slantDashDot": (_DASH_DOT,) * 4,
 }
-# Diagonals: stroke width and dashes in CSS px; hair is drawn as thin (captured).
+# Diagonals: stroke width and dashes in CSS px; hair is drawn as thin (unverified).
 _DIAGONAL: dict[str, tuple[float, str]] = {
     "thin": (1, ""),
     "hair": (1, ""),

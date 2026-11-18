@@ -103,7 +103,7 @@ def test_unmeasured_normal_font(tmp_path):
 
 
 def test_spill_right_over_empty_and_fill_only_neighbors(tmp_path):
-    # A neighbor holding only a fill does not stop spilled text (checked by eye, §4.1).
+    # A neighbor holding only a fill does not stop spilled text (layout rows 174 and 175, §4.1).
     def build(ws):
         ws["A1"] = LONG
         ws["A2"] = LONG
@@ -143,7 +143,7 @@ def test_spill_stops_at_a_formula_returning_the_empty_string(tmp_path):
 
 
 def test_spill_left_and_both_ways(tmp_path):
-    # Directions checked by eye (§4.1); how far each reaches is not yet measured.
+    # Directions as in the layout capture (§4.1); how far each reaches is not yet measured.
     def build(ws):
         ws["C1"] = LONG
         ws["C1"].alignment = Alignment(horizontal="right")
@@ -286,7 +286,7 @@ def test_numbers_overflow_and_do_not_spill(tmp_path):
 
 
 def test_errors_overflow_to_hashes(tmp_path):
-    # Route A: at width 3 an error shows ##-style overflow, like a number (§4.2).
+    # Suite error_width: at width 3 an error shows ##-style overflow, like a number (§4.2).
     path = raw_sheet(
         tmp_path / "e.xlsx",
         "<cols><col min='1' max='1' width='3.7109375' customWidth='1'/></cols>"
@@ -367,7 +367,7 @@ def test_refused_format_falls_back_to_general(tmp_path):
 
 
 def test_merge_uses_the_merged_width(tmp_path):
-    # Route A: a number too wide for one column shows in full merged over three (§4.4).
+    # Suite merge_width: a number too wide for one column shows in full merged over three (§4.4).
     def build(ws):
         ws["A1"] = 123456789
         ws["A1"].number_format = "#,##0.00"

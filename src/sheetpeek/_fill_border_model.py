@@ -1,9 +1,8 @@
 """Fills and borders: what a cell's ``fillId`` and ``borderId`` resolve to, and Excel's rules.
 
-The rules are ``ARCHITECTURE.md`` §4.12, from captures: the pattern tiles on Excel 16.114 and
-16.115 (the screen suite ``fills``); the colors a pattern's automatic colors take, the conflict
-order of border styles and the tie between two colors on Excel 16.114 only, unverified on
-Microsoft 365.
+The rules are ``ARCHITECTURE.md`` §4.12: the pattern tiles are captured by the screen suite
+``fills``; the colors a pattern's automatic colors take, the conflict order of border styles and
+the tie between two colors are unverified.
 """
 
 from __future__ import annotations
@@ -91,7 +90,7 @@ STYLES: tuple[BorderStyle, ...] = (
     "hair",
 )
 """Every border style, strongest first: the order in which one side wins over another
-(captured: weight first, then this fixed order within a weight)."""
+(unverified: weight first, then this fixed order within a weight)."""
 
 _RANK = {style: rank for rank, style in enumerate(STYLES)}
 BLACK = "000000"
@@ -167,8 +166,7 @@ class Gradient:
         """The color at ``t`` from 0 to 1 along the gradient.
 
         Past the last stop the last color holds. Before a first stop placed after 0 the color runs
-        from the last stop's color at 0 to the first stop's (one capture on Excel 16.114,
-        unverified as a general rule).
+        from the last stop's color at 0 to the first stop's (unverified).
         """
         stops = self.stops
         first_position, first = stops[0]
@@ -234,7 +232,7 @@ def winner(a: Side | None, b: Side | None) -> Side | None:
     """The side Excel draws where two cells' sides meet: never both, never by position.
 
     The stronger style wins (:data:`STYLES`); of one style, the darker color by Rec. 601 luma
-    (captured on 11 pairs); of equal luma, the larger ``RRGGBB`` (unverified).
+    and of equal luma the larger ``RRGGBB`` (both unverified).
     """
     if a is None or b is None:
         return a or b

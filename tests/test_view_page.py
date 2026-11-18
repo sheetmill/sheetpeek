@@ -204,7 +204,7 @@ def test_print_titles_are_not_reported(book):  # noqa: F811
 def test_a_sheet_that_hides_zeros_shows_them_as_excel_does(tmp_path, show_zeros):
     # xlformat's capture "a sheet that hides zeros": a value equal to 0 under a format without a
     # zero section shows nothing; a zero section still shows; only the stored value counts. The
-    # hidden zero's cell still blocks spill (captured on Excel 16.114 only).
+    # hidden zero's cell still blocks spill (unverified).
     workbook = openpyxl.Workbook()
     sheet = workbook.active
     sheet.sheet_view.showZeros = show_zeros

@@ -1,6 +1,6 @@
 """The borders pass: one resolved side per edge of the laid-out grid, and the diagonals.
 
-The rules (``ARCHITECTURE.md`` §4.12, captures on Excel 16.114 only): where two cells' sides
+The rules (``ARCHITECTURE.md`` §4.12, unverified): where two cells' sides
 meet, one is drawn whole, by :func:`~sheetpeek._fill_border_model.winner`; each cell keeps its own
 sides, also inside a merge, whose inner sides are dropped; an unmerged angled cell's own sides slant
 with its text (§4.17) and leave the upright grid; a vertical side that spilled text crosses is not

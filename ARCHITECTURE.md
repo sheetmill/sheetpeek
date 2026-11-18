@@ -222,7 +222,7 @@ backend.
 ### 3.5 Spill is recorded per column
 
 Spilled text is drawn over each neighbor's own fill, and the spilling cell's fill stays in its
-own column (checked by eye, §4). So the model does not record a spill as one span. In
+own column (`layout` rows 174 and 175, §4.1). So the model does not record a spill as one span. In
 `characters` mode the layout places every text on a character canvas per row, then cuts the
 canvas back into columns.
 
@@ -395,6 +395,9 @@ Four sources of evidence, all Excel 16 for Mac with Calibri 11 (openpyxl's defau
   `colspan`, hidden rows and columns, each cell's displayed text. It does not record left spill or
   what is painted, and its clip points are simplified.
 - **Checked by eye** (the route A workbook open in Excel, 2026-10-28).
+
+Route A's export and the checks by eye are not kept in this repository, so a rule resting on them
+alone is marked unverified; the rules below cite the committed suite that covers them.
 - **Route B** (`capture/layout.py`, suite `layout`, 200 rows; later runs reproduced the earlier
   rows exactly): Excel's PDF export,
   read with pdfminer.six. Excel prints each gridline as a 1 pt rectangle and leaves a vertical
@@ -437,11 +440,13 @@ the known deviations by count on every run. It compares `excel` mode with every 
   edge, through a glyph. Left text keeps its start, right text its end, centered text its middle.
   There is no ellipsis.
 
-Also captured by route A and checked by eye:
-- A number, a formula returning `""`, a single space or a formula returning `0` in the neighbor
-  stops the spill. A neighbor holding only a fill does not: the text is drawn over the neighbor's
-  own fill, and the spilling cell's fill stays in its own column.
-- Wrapped text does not spill; Excel grew the row to 96 pt. A cell in a hidden row still spills.
+Also:
+- A number in the neighbor stops the spill (`layout` rows 120 to 122); a formula returning `""`,
+  a single space or a formula returning `0` stops it too (unverified). A neighbor holding only a
+  fill does not: the text is drawn over the neighbor's own fill, and the spilling cell's fill
+  stays in its own column (rows 174 and 175).
+- Wrapped text does not spill (rows 156 to 175); the height Excel fits such a row to is §4.7's.
+  A cell in a hidden row still spills (unverified).
 
 **How the `characters` layout follows this:** a spill takes whole columns as far as the text needs,
 centered text takes a column on each side at once, and hidden columns are crossed. Excel's points
@@ -461,7 +466,7 @@ character.
 - **A line break in a cell without wrapping is not drawn**: the lines are joined without a space
   (`first linesecond line`), and the joined text spills like any other.
 - **Spilled text is drawn over a filled neighbor's fill, and a filled cell's fill stays in its
-  own column** (rows 174 and 175; checked by eye earlier).
+  own column** (rows 174 and 175).
 - A filled cell hides the gridlines on its edges, so a missing gridline next to a fill is not
   evidence of spill.
 
@@ -491,7 +496,7 @@ Layout computes spill in the mode's units: points with xlformat's glyph measure 
 
 ### 4.2 `####` for values that do not fit
 
-**Captured** (route A, `string value`; `layout` rows 130 to 136):
+**Captured** (`layout` rows 130 to 136, suite `error_width`):
 - **Every error value overflows to `#` like a number** at every width from 1 to 8 (suite
   `error_width`, 56 cells, no deviation in `excel` mode). At width 3, `#DIV/0!`,
   `#N/A`, `TRUE` and `1234567` all show `##`, as xlformat formats an
@@ -512,23 +517,24 @@ none.
 
 ### 4.3 Default alignment by value type
 
-**Captured** (route A; `layout` rows 137 and 138): numbers right, text left, `TRUE` center,
+**Captured** (`layout` rows 137 and 138): numbers right, text left, `TRUE` center,
 `#DIV/0!` center, as xlformat aligns them.
 
-**12345 stored as a number with the `@` format is left-aligned** (checked by eye; `layout` row 137
+**12345 stored as a number with the `@` format is left-aligned** (`layout` row 137
 puts it 3 pt from the left gridline). xlformat's `FormattedCell.align` is `left` for a number
 under any format with only a text section, such as `@` or `@" units"`, and the layout takes it
 as it is (§6.4).
 
 Explicit alignments override the default. `center_across` centers the text across the following
-empty cells that share that alignment (route A; `layout` row 155 for a centered merge).
+empty cells that share that alignment (`layout` row 179; row 155 for a centered merge).
 
 ### 4.4 Merged cells
 
 **Captured:**
 - **Width-dependent formatting uses the merged width.** 123456789 under `#,##0.00` shows
-  `#########` in one default column but `123,456,789.00` merged over A:C (route A).
-- A merge across a hidden column (D13:F13 with E hidden) spans the visible columns (route A).
+  `#########` in one default column but `123,456,789.00` merged over A:C (suite `merge_width`).
+- A merge across a hidden column (D13:F13 with E hidden) spans the visible columns (suite
+  `merge_width`).
 - **The anchor's text sits by its vertical alignment**: top, center and bottom as set, and **at the
   bottom by default** (`layout` rows 152 to 154). Horizontally it is placed across the whole merge
   (row 155).
@@ -640,15 +646,16 @@ Captured so far, in `tests/captures/`: by print (route B) `layout` (§3.6, §4.1
 from Excel `theme_colors` (§3.3), `merge_width` and `error_width` (§4.2, §4.4, no deviation),
 `row_height` (§4.7) and `package` (§5.5); on the screen (route C) `borders` and `fills` (§4.12),
 `text_style` (§4.7, §4.13) and `rotation` (§4.17). All are Excel 16.115 (Microsoft 365). The
-rules of §4.10, §4.11, §4.14 to §4.16 rest on captures on Excel 16.114 that are not in
-`tests/captures/`. What still waits for the screen: the gridline and heading colors, the heading
+rules of §4.10, §4.11, §4.14 to §4.16 have no capture here yet and are marked unverified until
+screen suites capture them on Microsoft 365; so are the parts of §4.12 and §4.18 that say so. What
+still waits for the screen: the gridline and heading colors, the heading
 sizes, the text insets and the baselines of angled text, which come from print, and the 15 pt
 rows that print 14 pt apart.
 
 ### 4.10 Hyperlinks
 
-**Captures** (Excel 16.114 for Mac, Office 2021): the rules below are captured on Excel 16.114 only,
-unverified on Microsoft 365 until a screen suite here captures them again.
+**Unverified:** no capture of the rules below is in this repository yet; a screen suite will
+capture them on Microsoft 365.
 
 - **A link has no look of its own.** A linked cell in the Normal style is drawn as plain text;
   one in the Hyperlink or Followed Hyperlink cell style takes that style's font color (the file's
@@ -687,19 +694,19 @@ What sheetpeek decides (not Excel's behavior):
 
 ### 4.11 Outlines
 
-**Captures** (Excel 16 for Mac, Office Home & Business 2021, dark appearance; one run of a sheet
-with rows 4 to 17 grouped up to level 3 and columns D to J up to level 2, at zoom 100 and 200, and
-one with summary columns on the left). Every rule here is captured on Excel 16.114 only, unverified
-on Microsoft 365; the tests that rest on them say so.
+**Unverified:** no capture of the rules here is in this repository yet; the tests that rest on
+them say so. The cases a screen suite will capture: a sheet with rows 4 to 17 grouped up to level
+3 and columns D to J up to level 2, at zoom 100 and 200, and one with summary columns on the left;
+the row and column numbers below refer to it.
 
 **Groups from levels** (`_pass_outline.py`). For each level `L` from 1 to the deepest, a group is
 a maximal run of rows whose `outline_level` is at least `L`; its summary row is the row after the
 run (`summaryBelow`, the default) or the row before it. Its button is − while any of its detail
-rows is visible, and + when all are hidden or the summary row has `collapsed` (captured: rows 11
+rows is visible, and + when all are hidden or the summary row has `collapsed` (unverified: rows 11
 and 17 show only a +, rows 7, 8 and 12 a −). Hidden detail rows draw nothing. Each visible
-detail row gets a dot in the lane after its own level, unless a button is there (captured: rows 4,
-5 and 6). Columns follow the same rule with `summaryRight` (captured mirrored for summaries on the
-left: the button on the summary column, the tick at the far end of the last detail column).
+detail row gets a dot in the lane after its own level, unless a button is there (unverified: rows 4,
+5 and 6). Columns follow the same rule with `summaryRight` (unverified, mirrored for summaries on
+the left: the button on the summary column, the tick at the far end of the last detail column).
 Summary rows above are taken as mirrored the same way (unverified). The result is
 `RenderedSheet.outline`, a `RenderedOutline` of `OutlineMark`s (index, lane, kind) for the rows
 and columns laid out.
@@ -707,7 +714,7 @@ and columns laid out.
 **What the reader takes from the file.** `outlineLevel` and `collapsed` of `<row>` and `<col>`;
 `summaryBelow` and `summaryRight` of `<outlinePr>`; `showOutlineSymbols` of the first
 `<sheetView>`, which wins over `<outlinePr>`'s. **The depth is the deepest level found in the
-whole sheet** (captured: without `outlineLevelRow` Excel draws the same gutter as with it), so the
+whole sheet** (unverified: without `outlineLevelRow` Excel draws the same gutter as with it), so the
 declared `outlineLevelRow` and `outlineLevelCol` are not read, though Excel refuses a file that
 declares 8 to 255 (xlio refuses it too). Office allows levels 0 to 7; xlio reads a level as Excel
 does (captured in xlio): modulo 8, and one that is not decimal digits as none. With
@@ -721,10 +728,10 @@ the levels of the row and column just outside the range (`Outline.rows_beyond`,
 inside the edge gets its button. A group whose summary is outside the range draws no button,
 reported as `outline.cut` (decided).
 
-**Geometry** (captured; drawn by the HTML backend, `backends/html/_outline.py`). **Every size is
+**Geometry** (unverified; drawn by the HTML backend, `backends/html/_outline.py`). **Every size is
 screen-fixed**: identical at zoom 100 and 200, in Excel's screen points (spt). HTML draws a screen
 point as 4/3 CSS px, rounded to whole px: the cells' scale at zoom 100, at which Excel for Mac
-shows one sheet point as one screen point, so the gutter keeps its captured proportion to the
+shows one sheet point as one screen point, so the gutter keeps its proportion to the
 rows. Line widths (bars, borders, strokes) stay in CSS px, as gridlines and cell borders do. The
 filter buttons follow the same rule (§4.19).
 - The row gutter is left of the row headings, `2 + 12 × (depth + 1) + 3` spt wide (53 at depth
@@ -755,12 +762,10 @@ shown.
 
 ### 4.12 Fills and borders
 
-**Captures:** every rule below was captured on the screen of Excel 16.114 for Mac (Office 2021)
-at zoom 100 and 200. The pattern tiles and colors and the line styles' geometry were captured
-again on Excel 16.115 (Microsoft 365) by the screen suites `fills` and `borders`
-(`tests/captures/fills.tsv`, `borders.tsv`); where 16.115 differs, the rule says so and follows
-16.115. The rest (gradients, automatic colors, conflicts and ties, merges, spill, diagonals) is
-captured on Excel 16.114 only, unverified on Microsoft 365. The model is in
+**Captures:** the pattern tiles and colors and the line styles' geometry are captured on Excel
+16.115 (Microsoft 365) by the screen suites `fills` and `borders` (`tests/captures/fills.tsv`,
+`borders.tsv`). The rest (gradients, automatic colors, conflicts and ties, merges, spill,
+diagonals) has no capture in this repository yet and is unverified. The model is in
 `_fill_border_model.py`, the reading in `_style/fill.py` and `_style/border.py`, the layout in
 `_pass_borders.py`, the drawing in `backends/html/_patterns.py` and `backends/html/_borders.py`.
 
@@ -770,8 +775,7 @@ one.
 - Each pattern is a bitmap tile in two colors only: `fgColor` draws the set pixels, `bgColor` the
   rest (`TILES`, one tile pixel a whole screen point; `gray0625` is 8 × 4 with two set pixels).
   The tiles are fixed in screen points, the same at zoom 100 and 200, and anchored at the sheet's
-  origin, not at each cell (Excel 16.115, screen suite `fills`; 16.114 drew a tile pixel as one
-  device pixel, half a screen point).
+  origin, not at each cell (Excel 16.115, screen suite `fills`).
 - Colors: `solid` draws `fgColor`; a missing `fgColor` is black, so `solid` with only `bgColor`
   draws black; a pattern without colors, with automatic ones, or with indexed 64 and 65, is black
   on white; one color given, the other takes its default (fg black, bg white). A `solid` fill in
@@ -804,8 +808,7 @@ direction; Excel draws nothing otherwise.
 - **Lines are fixed in screen points**, the same at every zoom (CSS px in HTML): thin 1 on the
   gridline; medium 2 from 1 before it; thick 3 from 1 before it; double 1, a white 1, 1, from 1
   before it; hair 1 on 1 off; dotted 2 on 2 off; dashed 3 on 1 off, all in whole screen points with
-  no stagger between device rows (Excel 16.115, screen suite `borders`; 16.114 drew hair as a
-  device-pixel checkerboard, dotted 1/1 staggered and dashed 1.5/0.5); dashDot 9, 3, 3, 3;
+  no stagger between device rows (Excel 16.115, screen suite `borders`); dashDot 9, 3, 3, 3;
   dashDotDot 9, 3, 3, 3, 3, 3; the medium dashes the same at 2 wide; slantDashDot 2 wide, 11, 1, 5,
   1 with slanted antialiased gaps. **Every gap is white**, also over a fill: no gridline shows under
   any border. Sides of one cell meet square.
@@ -855,10 +858,8 @@ plain text, Markdown, CSV and TSV show neither fills nor borders.
 
 ### 4.13 Text styles
 
-**Captures** (Excel 16 for Mac, Office Home & Business 2021, Calibri 11 at zoom 100
-and 200, measured on the screen image at 2 image pixels a screen point), captured again on
-Excel 16.115 (Microsoft 365) by the screen suite `text_style` (`tests/captures/text_style.tsv`);
-where 16.115 differs, the rule says so and follows 16.115. Sizes other than those captured are
+**Captures:** the screen suite `text_style` (`tests/captures/text_style.tsv`, Excel 16.115,
+Microsoft 365, Calibri 11 at zoom 100 and 200). Sizes other than those captured are
 scaled from them, unverified. The rules live in `_text_styles.py` and `_excel.py`.
 
 **Superscript and subscript** (`Font.vert_align`). The whole cell's text is drawn at 2/3 of its
@@ -876,8 +877,8 @@ model gives each run its `TextRule`s (`TextRun.rules`): where a line starts and 
 of the first line, in points, offset from the run's baseline by the 11 pt captures scaled with
 the drawn size (unverified at other sizes). A second line is 2 screen pt below the first.
 - Single: 1 pt below the baseline; double: 0 pt, and a second line. Both run from the text's
-  start to 1 pt past its end (Excel 16.115, screen suite `text_style`, Calibri 11; 16.114 ended
-  them with the text). Accounting underlines and strikethrough end as below.
+  start to 1 pt past its end (Excel 16.115, screen suite `text_style`, Calibri 11).
+  Accounting underlines and strikethrough end as below.
 - Single accounting: 3 pt below the baseline; double accounting a second line. **On text they
   span the cell**, from 3 pt after its left gridline to 2 pt before the next one, even under
   two letters in a 213 pt cell; a merge spans the merge, wrapped text gets one line per line,
@@ -925,8 +926,8 @@ height for eight drawn, where sheetpeek fits 128 to the lines drawn (a known dev
 case). **Indent moves both ends in** (captured: 12 pt for indent 2). `justifyLastLine`
 is read (`CellStyle.justify_last_line`) and changes nothing: distributed already spreads the last
 line (captured). A row Excel fits grows to the lines distributed text draws, with the wrap flag
-or without it: two lines of Calibri 11 take 32 pt (Excel 16.115, screen suite `text_style`;
-16.114 gave 48). Justify and the vertical spreads do not count in fitting (unverified).
+or without it: two lines of Calibri 11 take 32 pt (Excel 16.115, screen suite `text_style`).
+Justify and the vertical spreads do not count in fitting (unverified).
 
 **Indent** is 6 pt a level (§4.6) on the side the alignment resolves to, `general` included:
 right-aligned text and numbers end `2 + 6n` pt before the next gridline (captured as ink 3, 9
@@ -957,9 +958,10 @@ has `direction: rtl`.
 
 ### 4.14 Theme fonts, palette, grid color and headings
 
-**Captures** (Excel 16.114.4 for Mac, Office Home & Business 2021, dark appearance, zoom 100 and
-200), captured on Excel 16.114 only, unverified on Microsoft 365 but for the light heading colors,
-measured on Microsoft 365. The tests that rest on them (`tests/test_theme.py`) say so.
+**Unverified:** no capture of the rules here is in this repository yet (the theme's colors and
+tints excepted: suite `theme_colors`, §3.3); the tests that rest on them (`tests/test_theme.py`)
+say so. The figures below are for the dark appearance at zoom 100 and 200 unless they say
+otherwise.
 
 **Theme fonts.** A font with `scheme="minor"` or `"major"` is drawn in the theme's Latin typeface
 (`a:minorFont/a:latin`, `a:majorFont/a:latin`) whatever name it stores: Calibri-minor and
@@ -967,28 +969,28 @@ Times-New-Roman-minor both draw the theme's Courier New, at its width, and Calib
 Georgia; a font without a scheme keeps its own name. The reader resolves this when it reads the
 font (`_style/font.py`): `Font.name` is the typeface Excel draws, `Font.scheme` and
 `Font.stored_name` keep what the file says. **The Normal font follows the theme too**, so the
-default column takes the theme font's digits (captured: 61 pt for Courier New, against 53 pt for
+default column takes the theme font's digits (unverified: 61 pt for Courier New, against 53 pt for
 Calibri 11), and so does every width in `excel` mode. A typeface without xlformat glyph tables is
 measured as Calibri at the same size, with `font.no_metrics` (§6.2), so such a theme's widths are
 approximate. Without a theme, or with an empty typeface, the stored name is drawn (unverified).
 - **Other scripts:** East Asian text in a minor font is drawn in the theme's script font (`Jpan`,
-  captured), not the system fallback. sheetpeek reads the Latin typeface only, so a page draws
+  unverified), not the system fallback. sheetpeek reads the Latin typeface only, so a page draws
   such text in the browser's fallback for that typeface. A `@font-face` family per theme
   collection with a `unicode-range` per script would draw it exactly (measured equal to a
   fallback list in WebKit); it needs the theme's script fonts in the model and a table from ISO
   15924 codes to ranges, and is not built.
 
 **The workbook palette** (`_colors.workbook_palette`). `styles.xml`'s `indexedColors` replaces
-the default palette entry by entry: indices 0 to 7 no longer repeat 8 to 15 (captured: a written
-palette that recolors index 10 leaves fill index 2 red). Fill and font colors follow it (captured
+the default palette entry by entry: indices 0 to 7 no longer repeat 8 to 15 (unverified: a written
+palette that recolors index 10 leaves fill index 2 red). Fill and font colors follow it (unverified,
 for indices 10 and 17). Excel caps the list at 64 entries; a shorter list keeps the default for
 the rest, and an entry that is not a color reads as the default's (both unverified). A
 `<colors>` without `indexedColors` keeps the default palette.
-Automatic colors (captured): a fill in indexed 64 is no fill, a fill index past the palette (81)
+Automatic colors (unverified): a fill in indexed 64 is no fill, a fill index past the palette (81)
 is black, and a font in `auto` or indexed 64 is the automatic black.
 
 **Number-format colors.** `[ColorN]` draws the workbook palette's index `N + 7`; the eight named
-colors (`[Red]`, `[Blue]`) draw their default colors whatever the palette (captured; Excel's
+colors (`[Red]`, `[Blue]`) draw their default colors whatever the palette (unverified; Excel's
 `display format` reports palette indices 2 and 4 for `[Red]` and `[Blue]` instead, so the screen
 was taken as the truth). The reader gives the sheet the workbook's palette (`Sheet.palette`, the
 same palette its indexed fill, font and border colors are drawn in, `None` when the file has none)
@@ -996,11 +998,11 @@ and the layout draws a section color through `xlformat.section_rgb` with it. Quo
 escaped characters are not section colors.
 
 **The grid color** (`Sheet.grid_color`). `<sheetView defaultGridColor="0" colorId>` draws the
-gridlines in the workbook palette's entry `colorId` (captured: teal for index 10 of a palette
-that makes it teal); 64, the default, is the automatic gray (captured). An index past the palette
+gridlines in the workbook palette's entry `colorId` (unverified: teal for index 10 of a palette
+that makes it teal); 64, the default, is the automatic gray (unverified). An index past the palette
 or a malformed one is automatic (unverified). The colored gridline is **1 device pixel wide**,
-half the default line's 2, at any zoom; a fill covers it as it covers the gray one (captured); the
-headings keep their colors (captured). The first `<sheetView>` is read, as for gridlines.
+half the default line's 2, at any zoom; a fill covers it as it covers the gray one (unverified); the
+headings keep their colors (unverified). The first `<sheetView>` is read, as for gridlines.
 - **HTML:** a generated class `sp-g-RRGGBB` on the wrapper sets `--sheetpeek-grid` and draws the
   cells' gridlines 0.5 CSS px wide: one device pixel on a 2× display, as Excel draws it; a 1×
   display rounds it (decided). Measured in WebKit's snapshots: at 2× the line is one device pixel
@@ -1012,15 +1014,14 @@ headings keep their colors (captured). The first `<sheetView>` is read, as for g
 **Headings.** Excel's heading bands are sheet units: they scale with the zoom, so the page draws
 them in points like the cells (`backends/html/_headings.py`).
 - At Calibri 11 the column band is 21 pt high and the row band `16 + 3 × digits` pt wide, the
-  digits of the last row in the window (captured with 2, 3 and 4 digits: 22, 25 and 28 pt). The
+  digits of the last row in the window (unverified, with 2, 3 and 4 digits: 22, 25 and 28 pt). The
   page uses the last row it draws (decided: a page shows every row).
 - The bands grow with the Normal font: at Calibri 20 the column band is 25 pt and the row band 36
-  pt with 2 digits (captured). Other sizes follow the line through the two (unverified), which
+  pt with 2 digits (unverified). Other sizes follow the line through the two (unverified), which
   stays positive at every size Excel accepts (1 to 409 pt).
-- Colors: the dark appearance's are captured (paper 22, text 255, separators 86); the light
-  appearance's were measured on Microsoft 365 (paper 247, separators 224,223,221, text the
-  darkest pixel of its glyphs, 94) and stay provisional until the light appearance is captured
-  with the rest. The size of the headings' text is not captured.
+- Colors (unverified): the dark appearance's paper 22, text 255, separators 86; the light
+  appearance's paper 247, separators 224,223,221, text 94 (the darkest pixel of its glyphs).
+  The size of the headings' text is not captured.
 - The headings options do not follow the file's `showRowColHeaders` (`headings.hidden`, §3.7).
 
 **Other outputs** (decided; each declared in `backends/_support.py`):
@@ -1032,9 +1033,8 @@ them in points like the cells (`backends/html/_headings.py`).
 
 ### 4.15 Sheets and the workbook page
 
-**Captures** (Excel 16.114.4 for Mac, Office 2021, dark appearance, zoom 100, measured on the screen
-image): which tabs the strip shows and how a tab color is drawn, captured on Excel 16.114 only,
-unverified on Microsoft 365; the tests that rest on them (`tests/test_workbook.py`) say so. The
+**Unverified:** which tabs the strip shows and how a tab color is drawn have no capture in this
+repository yet; the tests that rest on them (`tests/test_workbook.py`) say so. The
 rules live in `_sheets.py` and `backends/html/_workbook.py`.
 
 **The sheet list** (`Book.sheets`, a `SheetInfo` per sheet, in workbook order):
@@ -1044,7 +1044,7 @@ rules live in `_sheets.py` and `backends/html/_workbook.py`.
 - **State** from `sheet@state`: `visible`, `hidden`, `very_hidden`; anything else is visible.
 - **Tab color** from `sheetPr/tabColor` (xlio's sheet properties), so no cell is read for it.
   Resolved like any color (§3.3); `auto` and no color are `None`, since `auto` draws an
-  uncolored tab (captured). When several of `indexed`, `theme`, `auto` and `rgb` are given,
+  uncolored tab (unverified). When several of `indexed`, `theme`, `auto` and `rgb` are given,
   they are taken in that order, as every other color is (which one Excel takes is unverified).
   An index or theme number is an `unsignedInt` (`[0-9]{1,9}`, else none); a tint that is not
   a finite number is 0, and one past ±1 is clamped.
@@ -1059,7 +1059,7 @@ reported (`sheet.macrosheet`, approximated). A chartsheet or dialog sheet raises
 the workbook's own `<sheet>` list) when it is a visible worksheet or macro sheet; else the first
 visible one; else the first readable one, hidden or not; with none, `NotAWorksheetError`.
 
-**The tab strip** (captured): Excel shows the visible sheets only, in file order; hidden and very
+**The tab strip** (unverified): Excel shows the visible sheets only, in file order; hidden and very
 hidden sheets have no tab. An inactive colored tab is filled solid with the color, with white
 text; the active tab is a vertical gradient from near white to a light tint of the color (two
 samples fit 10 % and 40 % of the color mixed with white, an inference), with bold text in
@@ -1106,9 +1106,9 @@ in its sheet list instead of linking it.
 
 ### 4.16 Rich-text runs
 
-**Captures** (Excel 16 for Mac, Office Home & Business 2021, Calibri 11, zoom 100, measured on the
-screen image): every rule here is captured on Excel 16.114 only, unverified on Microsoft 365, and
-the tests that rest on them (`tests/test_runs.py`) say so. The code is `_read.py` (reading),
+**Unverified:** no capture of the rules here is in this repository yet (cases in Calibri 11 at zoom
+100), and the tests that rest on them (`tests/test_runs.py`) say so. The code is `_read.py`
+(reading),
 `_runs.py` and `_excel.py` (layout), `backends/html/_text.py` and `backends/markdown.py`.
 
 **Reading.** A cell's string can hold runs, each with its own font (`<r>` with `<rPr>`), in a
@@ -1121,26 +1121,26 @@ write, reads as the text of both, drawn in the cell's font (what Excel shows is 
 `Cell.value` their text joined; escapes (§5.6) are decoded in each run. Adjacent runs in one font
 are joined, empty ones dropped, and a text whose every run is in the cell's font has no runs
 (`None`). **A run without properties takes the cell's font; a run with properties takes nothing
-from it** (captured: in a 16 pt red cell, a run whose properties hold only bold is drawn
+from it** (unverified: in a 16 pt red cell, a run whose properties hold only bold is drawn
 11 pt and black): what its properties leave out is the default, and a missing name or size the
-Normal font's (unverified: the capture's Normal font is Calibri 11, which is also the fixed
+Normal font's (unverified; the case's Normal font is Calibri 11, which is also the fixed
 default).
 
 **Layout** (`excel` mode). The text is measured run by run, each in its own font at its drawn
 size, for spill, `####`, wrapping, shrink to fit and alignment:
-- **Widths add per run** (captured: a bold 16 pt run in an 11 pt text ends 15 pt further,
+- **Widths add per run** (unverified: a bold 16 pt run in an 11 pt text ends 15 pt further,
   166 pt past the cell's right edge against 151, and spills one column more).
-- **Each line takes the height of its largest run** (captured: one 20 pt run in an 11 pt cell fits
+- **Each line takes the height of its largest run** (unverified: one 20 pt run in an 11 pt cell fits
   the row to 26 pt, as a 20 pt cell, and the small runs sit on the large run's baseline). Wrapped
-  lines are each their largest run's row height plus 1 (captured: "aaa" / "BBB" / "ccc ddd" with
+  lines are each their largest run's row height plus 1 (unverified: "aaa" / "BBB" / "ccc ddd" with
   "BBB" at 20 pt is 16 + 27 + 16 = 59 pt; the 27 for a 20 pt line is inferred from this one
-  capture). Calibri 20's 26 pt joined the row-height table (§4.7) from the 20 pt run case. The
-  baseline at 20 pt is 5 pt above the cell's bottom, as the capture shows and as for a 20 pt cell
-  (§3.6). Wrapped lines are drawn their largest run's line pitch apart, the point each adds to a
-  fitted row lying below the last (unverified for mixed sizes).
+  case). Calibri 20's 26 pt is in the row-height table (§4.7). The baseline at 20 pt is 5 pt
+  above the cell's bottom, as for a 20 pt cell (§3.6). Wrapped lines are drawn their largest
+  run's line pitch apart, the point each adds to a fitted row lying below the last (unverified
+  for mixed sizes).
 - A fitted row counts its runs' fonts in place of the cell's (unverified when every run is
   smaller than the cell's font).
-- **Superscript and subscript runs** follow §4.13 (captured: rows of 17 pt, as whole cells),
+- **Superscript and subscript runs** follow §4.13 (unverified: rows of 17 pt, as whole cells),
   each run raised or lowered on its own; the cell's own font counts only through the runs that
   take it.
 - Underlines and strikethrough are drawn per run; an accounting underline under text spans the
@@ -1288,7 +1288,7 @@ sheet, or not a plain range (a formula) is left out and named in `Sheet.print_ar
 `rowBreaks` and `colBreaks` give `Sheet.row_breaks` and `Sheet.column_breaks`: a `brk id` counts
 boundaries from zero, so `id="10"` falls below row 10; only manual breaks (`man="1"`) are kept.
 
-**What Excel's Normal view draws** (captured on Excel 16.114 only, unverified on Microsoft 365):
+**What Excel's Normal view draws** (unverified: no capture in this repository yet):
 neither the print area nor page breaks; a frozen pane as a line one screen point wide, gray 155,
 over borders and fills, with the frozen rows and columns kept in place while the rest scrolls;
 with `showZeros="0"`, an empty cell where a value shows as zero, which still blocks spill. So a
@@ -2154,7 +2154,7 @@ header, and each column's alignment comes from the first body row.
 
 **Light or dark** (`color_scheme`, in the HTML backend). An explicit argument, default light, never
 read from the OS. In `excel` mode it changes only the headings, because Excel 16 for Mac keeps its
-cells white in dark mode (checked by eye).
+cells white in dark mode (the screen suites, captured in the dark appearance).
 - *Alternatives:* a later HTML `auto` through CSS `prefers-color-scheme`.
 - *Scope:* document.
 

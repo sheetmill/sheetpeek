@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from sheetpeek.backends.html._table import Page
 
 FREEZE_LINE = "9b9b9b"
-"""Excel's freeze line, gray 155, one screen point wide (captured on Excel 16.114 only)."""
+"""Excel's freeze line, gray 155, one screen point wide (unverified)."""
 
 CSS = f"""\
 .sheetpeek {{ --sheetpeek-freeze: #{FREEZE_LINE}; }}

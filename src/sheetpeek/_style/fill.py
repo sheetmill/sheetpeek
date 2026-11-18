@@ -44,8 +44,8 @@ def to_fill(part: Any, context: Context) -> Fill | None:
         fg = color(part.foreground, context)
         bg = color(part.background, context, background=True)
         if kind == "solid":
-            # A solid fill in the system foreground color is no fill (captured for indexed 64;
-            # automatic taken alike, unverified).
+            # A solid fill in the system foreground color is no fill (indexed 64; automatic
+            # taken alike; both unverified).
             return Pattern("solid", fg) if fg is not None else None
         return Pattern(kind, fg, bg)
     stops = sorted((unit(stop.position), color(stop.color, context)) for stop in part.stops)
@@ -63,7 +63,7 @@ def to_fill(part: Any, context: Context) -> Fill | None:
 
 
 def color(source: Any, context: Context, *, background: bool = False) -> str | None:
-    """A fill color as ``RRGGBB``, or ``None`` for automatic (captures on Excel 16.114).
+    """A fill color as ``RRGGBB``, or ``None`` for automatic (unverified, §4.12).
 
     Indexed 64 is automatic, 65 white, and an index past the palette black. A missing color
     element, or one without attributes, is read as ``00000000`` (unverified; the reading of

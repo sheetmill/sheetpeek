@@ -115,7 +115,7 @@ def test_resolve_gives_only_colors():
     assert resolve("rgb", "FFABCDEF", 0.0, (), ()) == "ABCDEF"
 
 
-# Capture on Excel 16.114, unverified on Microsoft 365 (14 cells' own fills, read exactly): files
+# Unverified (no capture in this repository yet): files
 # store a tint as a 16-bit fraction, and Excel draws the stored form as the round
 # tint it stands for.
 STORED_TINTS = [
@@ -136,7 +136,7 @@ def test_a_stored_tint_draws_as_its_round_value(rgb, stored, round_):
 
 
 def test_a_third_of_the_way_to_white_from_black():
-    # Excel 16.114 capture: tint 0.333333 on black is 555555 (lightness 80 of 240, not 79).
+    # Unverified: tint 0.333333 on black is 555555 (lightness 80 of 240, not 79).
     assert apply_tint("000000", 0.333333) == "555555"
 
 

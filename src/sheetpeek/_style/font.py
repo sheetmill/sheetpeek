@@ -39,7 +39,7 @@ def to_font(
     """An ``xlio.Font`` as the model's :class:`~sheetpeek.Font`.
 
     ``theme_fonts`` holds the theme's Latin typefaces, ``{"major": ..., "minor": ...}``: a font
-    of either scheme is drawn in that typeface, whatever name it stores (captured on Excel 16.114).
+    of either scheme is drawn in that typeface, whatever name it stores (unverified, §4.14).
     """
     color = font.color
     # Theme color 1 ("Text 1") is what Excel's own default font uses for ordinary text, so

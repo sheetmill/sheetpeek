@@ -34,8 +34,8 @@ _AUTOMATIC_GRID = 64
 def workbook_palette(custom: Sequence[str | None] | None) -> tuple[str, ...]:
     """The palette a workbook's indexed colors take: its ``indexedColors``, else the default.
 
-    Each written entry is used as it stands, so indices 0 to 7 no longer repeat 8 to 15 (captured,
-    Excel 16.114). Entries past 64 are dropped, as Excel caps the list; a shorter list takes the
+    Each written entry is used as it stands, so indices 0 to 7 no longer repeat 8 to 15
+    (unverified). Entries past 64 are dropped, as Excel caps the list; a shorter list takes the
     default for the indices it leaves out (unverified: Excel writes all 64). An entry that is not
     a color reads as the default's.
     """
@@ -53,8 +53,8 @@ def workbook_palette(custom: Sequence[str | None] | None) -> tuple[str, ...]:
 def grid_color(color_id: int | None, palette: Sequence[str]) -> str | None:
     """The gridline color of ``<sheetView defaultGridColor="0" colorId>``, or ``None`` (gray).
 
-    Captured on Excel 16.114: the color is the workbook palette's entry, and 64 is the automatic
-    gray. An index past the palette is taken as automatic too (unverified; Excel caps it at 64).
+    Unverified: the color is the workbook palette's entry, and 64 is the automatic gray. An index
+    past the palette is taken as automatic too (Excel caps it at 64).
     """
     if color_id is None or not 0 <= color_id < min(len(palette), _AUTOMATIC_GRID):
         return None
@@ -107,8 +107,8 @@ def apply_tint(rgb: str, tint: float) -> str:
 
     ECMA-376's tint on the lightness, in Windows' integer HLS (scale 240): darkening multiplies
     the lightness by ``1 + tint``, lightening moves it ``tint`` of the way to white, and the
-    result is truncated after adding a small tolerance (captured, suite ``theme_colors``, and a
-    probe on Excel 16.114 of 14 cells). Files store a tint as a 16-bit fraction (0.6 as
+    result is truncated after adding a small tolerance (captured, suite ``theme_colors``; the
+    stored-fraction tolerance unverified). Files store a tint as a 16-bit fraction (0.6 as
     0.59999389...), which would otherwise land a lightness just below a whole number; any
     tolerance from 0.0055 to 0.2 fits every captured cell.
     """

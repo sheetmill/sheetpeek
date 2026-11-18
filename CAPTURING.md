@@ -87,7 +87,7 @@ font as its Normal style, a number in A1, an empty cell element in row 3, an emp
 no element for rows 2 and 100, and `<sheetFormatPr>` written into the XML exactly as the case
 gives it, or left out. It also reads back the font Excel applied to A1, which shows that Excel
 did not substitute the theme font. The capture writes `tests/captures/row_height.tsv`; three runs
-reproduced every common row. Facts from it (Excel 16.114):
+reproduced every common row. Facts from it (Excel 16.115, `tests/captures/row_height.tsv`):
 
 - **The font height.** A row without `ht` takes the Normal font's height: Calibri 9 to 16 give
   12, 14, 15, 16, 19 and 21 pt; Aptos Narrow gives 13, 14, 15, 16, 19 and 22 pt.
@@ -179,7 +179,7 @@ holding 111 in A1, each in its own `osascript` under `gtimeout`; a stopped run h
 restored by `capture/restore_alerts.applescript`. A control opens first and last, and an outcome
 counts only between two that open. The only DTD ever given to Excel is a minimal
 `<!DOCTYPE worksheet>`, with no entity and no external reference. With alerts off, error -50 means
-Excel would refuse the file or offer to repair it. Facts from it (Excel 16.114): both controls open
+Excel would refuse the file or offer to repair it. Facts from it (Excel 16.115, `tests/captures/package.tsv`): both controls open
 and read 111; a `<!DOCTYPE>`, a bzip2 or LZMA worksheet part, a worksheet part named twice, and a
 central-directory size that is too small, too large, or that of the part's XML with its CRC, with
 spaces following, all give -50.

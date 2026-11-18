@@ -653,8 +653,8 @@ class Book:
         """A string's runs in their fonts; ``None`` when every run is in ``font``.
 
         A run without properties takes the cell's font. A run with properties stands alone: what
-        they leave out is the default, not the cell's (Excel 16.114), and a missing name or
-        size the Normal font's (unverified). Adjacent runs in one font are joined.
+        they leave out is the default, not the cell's, and a missing name or size the
+        Normal font's (both unverified). Adjacent runs in one font are joined.
         """
         if rich is None or not rich.runs:
             return None

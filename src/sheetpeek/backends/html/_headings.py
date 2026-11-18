@@ -10,8 +10,8 @@ if TYPE_CHECKING:
     from sheetpeek.backends.html import HTMLBackend
     from sheetpeek.backends.html._table import Page
 
-# Heading bands in sheet points, so they scale with the page like the cells (§4.14). Excel 16.114
-# captures at Normal fonts Calibri 11 and 20: the column band is 21 and 25 pt; the row band is
+# Heading bands in sheet points, so they scale with the page like the cells (§4.14), unverified.
+# At Normal fonts Calibri 11 and 20: the column band is 21 and 25 pt; the row band is
 # 16 + 3 pt a digit of the last row at 11 (2, 3 and 4 digits), and 36 pt with 2 digits at 20.
 _SIZES = (11.0, 20.0)
 _COLUMN_BAND = (21.0, 25.0)

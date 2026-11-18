@@ -1,7 +1,7 @@
 """Borders: sides read, conflicts resolved in the layout, and the HTML border layer.
 
-The line geometry comes from captures on Excel 16.114 and 16.115 (the screen suite ``borders``);
-the order, ties, merges and spill from captures on Excel 16.114 only (ARCHITECTURE.md §4.12).
+The line geometry comes from the screen suite ``borders``; the order, ties, merges and spill are
+unverified (ARCHITECTURE.md §4.12).
 A default column here is 71 or 70 px wide (53 pt) and a row 20 px (15 pt).
 """
 
@@ -55,7 +55,7 @@ def test_sides_are_read_with_their_styles_and_colors(tmp_path):
     borders = sheetpeek.read(path).cell(1, 1).style.borders
     assert borders.left == Line("thin", "FF0000")
     assert borders.bottom == Line("double", None)
-    assert borders.bottom.drawn_color == "000000"  # automatic is black (captured)
+    assert borders.bottom.drawn_color == "000000"  # automatic is black (unverified)
     assert (borders.right, borders.top, borders.diagonal) == (None, None, None)
 
 
@@ -96,7 +96,7 @@ def test_the_stronger_style_wins_in_either_order():
 
 @pytest.mark.parametrize(
     ("darker", "lighter"),
-    [  # the 11 captured pairs
+    [  # 11 pairs (unverified)
         ("FF0000", "00FF00"),
         ("0000FF", "00FF00"),
         ("000000", "0000FF"),
@@ -226,7 +226,7 @@ def test_a_hidden_column_s_sides_do_not_compete(tmp_path):
         },
         hidden=["B"],
     )
-    # A and C meet on one edge: their thick sides compete, blue being darker (captured).
+    # A and C meet on one edge: their thick sides compete, blue being darker (unverified).
     assert resolved(path).vertical[0][1] == Line("thick", "0000FF")
 
 
@@ -358,7 +358,7 @@ def test_a_diagonal_is_a_line_from_corner_to_corner(tmp_path):
     ((name, style),) = lines(page)
     assert geometry(style) == (0, 0, 72, 21)
     body = rules(page)[name]
-    # Hair is drawn as thin (captured).
+    # Hair is drawn as thin (unverified).
     assert "%3Cline x1='0' y1='0' x2='72' y2='21' stroke='%23FF0000' stroke-width='1'/%3E" in body
 
 

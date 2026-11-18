@@ -40,9 +40,8 @@ def _font_faces() -> str:
     return "".join(rules)
 
 
-# Heading colors (§4.14). Dark: Excel 16.114 (paper 22, text 255, separators 86). Light:
-# measured on Microsoft 365 (paper 247, separators 224,223,221, text the darkest pixel of its
-# anti-aliased glyphs, 94), provisional until the light appearance is captured with the rest.
+# Heading colors (§4.14, unverified). Dark: paper 22, text 255, separators 86. Light: paper 247,
+# separators 224,223,221, text 94 (the darkest pixel of its anti-aliased glyphs).
 
 # Calibri's and Carlito's vertical metrics in em: ascent and descent, and where the baseline
 # sits in a 1 em line box (half the leading above the ascent).
