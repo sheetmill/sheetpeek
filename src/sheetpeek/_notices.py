@@ -192,7 +192,6 @@ for _code, _name, _level in (
     ("view.page_layout", "page layout and page break views", "sheet"),
     ("view.panes", "split panes", "sheet"),
     ("cf", "conditional formatting", "sheet"),
-    ("table", "tables", "sheet"),
     ("sparkline", "sparklines", "sheet"),
     ("slicer", "slicers", "sheet"),
     ("timeline", "timelines", "sheet"),

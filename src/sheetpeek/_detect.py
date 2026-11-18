@@ -45,7 +45,6 @@ CODES: dict[str, tuple[Outcome, Reason, str]] = {
     "view.page_layout": ("approximated", "not_implemented", "drawn as the Normal view"),
     "view.panes": ("omitted", "not_implemented", ""),
     "cf": ("omitted", "not_implemented", ""),
-    "table": ("omitted", "not_implemented", "table styles and buttons not drawn"),
     "sparkline": ("omitted", "not_implemented", ""),
     "slicer": ("omitted", "not_implemented", ""),
     "timeline": ("omitted", "not_implemented", ""),
@@ -114,7 +113,7 @@ _SILENT = frozenset(
 _READ = frozenset(
     {
         "sheetPr", "sheetViews", "sheetFormatPr", "cols", "mergeCells", "hyperlinks", "sheetData",
-        "rowBreaks", "colBreaks", "autoFilter",
+        "rowBreaks", "colBreaks", "autoFilter", "tableParts",
     }
 )  # fmt: skip
 """Children the model reads. Page breaks are read and, like the print area, not reported: Excel's
@@ -373,8 +372,6 @@ def sheet_notices(
         at("legacyDrawing", lambda: _vml(collector, parts, target_vml))
     if sheet.background is not None:
         at("picture", lambda: _report(collector, "picture.background"))
-    if tables := sum(1 for r in related if r.type.endswith("/table")):
-        at("tableParts", lambda: _report(collector, "table", count=tables))
     for item in sheet.unparsed:
         if item.path.count("/") != 1:
             continue  # inside a modeled element: read or ignored with it

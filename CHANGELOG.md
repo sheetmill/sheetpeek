@@ -17,7 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   it (the whole table, stripes over visible rows, first and last column, header and totals rows
   and their corners, and their lines), the cell's own fill, font color, bold, italic, underline,
   strikethrough and sides winning; `cell.style` itself where nothing stacks. `RenderedCell.fill`,
-  `font` and `color` follow it.
+  `font` and `color` follow it. HTML draws table styles; rich draws their bold and approximates
+  their fills and colors; text, Markdown, CSV and TSV report them as the fills, bold, colors and
+  lines they cannot show.
 - Filters are read: `Sheet.autofilters` holds the sheet's filter and each table's
   (`AutoFilter`, with `FilterColumn` and `SortCondition`), and the layout marks each header cell
   that draws a filter button with its glyph (`RenderedCell.button`: `plain`, `filtered`,
@@ -34,7 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   an outcome (`omitted` or `approximated`), a reason, the cells and the output.
 - Reported when a file uses them, until they are drawn: phonetic guides, row and column formats, sheet views (right to left, formulas,
   page layout, split panes), conditional formatting, filter buttons,
-  tables, sparklines, slicers, timelines, pictures, charts, shapes, embedded objects, form
+  sparklines, slicers, timelines, pictures, charts, shapes, embedded objects, form
   controls, background pictures, notes and threaded comments, tab colors (drawn only on the workbook page), dialog sheets, macro sheets, and any sheet element or extension sheetpeek
   does not recognize. A file is reported for what it uses, not what it contains: margins, page
   setup, protection and validation, which draw nothing, are never reported. A linked picture is

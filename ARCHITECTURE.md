@@ -34,8 +34,8 @@ CLI views a file and serves a folder of workbooks as HTML.
   (fonts, fills, borders, alignment, rich-text runs), hyperlinks, outlines, theme fonts and the
   workbook palette, gridline colors and headings, sheet kinds, states and tab colors, rotated and
   stacked text, the zoom, frozen panes, hidden zeros, the print area and manual page breaks
-  (§4.18), filter and sort buttons (§4.19). In scope and not built yet: tables, conditional
-  formatting, notes and comments, pictures, the other sheet-view parts, the other print settings,
+  (§4.18), filter and sort buttons (§4.19), table styles (§4.20). In scope and not built yet:
+  conditional formatting, notes and comments, pictures, the other sheet-view parts, the other print settings,
   pivot tables; charts possibly as a package of their own (§11). Out of scope: editing and any interactive UI.
 
 ## 2. Pipeline
@@ -1427,6 +1427,13 @@ stacks, and one shared object for every cell with the same style, formats and si
 pass lays out from it (fonts, fills) and the borders pass, the HTML fill layer and the census
 read it; `RenderedCell.fill`, `font` and `color` follow it. A merge shows its anchor's own fill,
 a table's beneath it not stacked (unverified). A sheet without tables pays one empty check.
+
+**Outputs.** No output has code of its own for tables: each draws `display_style` through what
+it already draws, and the census counts the displayed style, so what an output cannot show of a
+table is reported under the codes of what it draws (`fill`, `font.bold`, `font.color`,
+`border`). HTML draws all of it; rich draws the bold and approximates the fills and colors;
+text, Markdown, CSV and TSV report them. There is no `table` notice: a table's filter buttons
+are `filter.buttons` (§4.19).
 
 ## 5. Reading
 

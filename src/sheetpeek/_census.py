@@ -57,7 +57,7 @@ def census(
     for rendered_row in rendered.rows:
         for rendered_cell in rendered_row.cells:
             cell = rendered_cell.cell
-            style = cell.style
+            style = rendered_cell.display_style  # a table's style counts as the cell's
             row, column = cell.row, cell.column
             for code in fill_border_codes(sheet, rendered_cell):
                 add(code, row, column)

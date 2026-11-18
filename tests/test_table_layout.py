@@ -240,3 +240,35 @@ def test_an_uncolored_style_equal_to_a_theme_1_style_keeps_its_own_color(tmp_pat
     found = displayed(path)
     assert found[(1, 2)].font.color == "FFFFFF"
     assert found[(1, 3)].font.color is None
+
+
+def notices(path, to):
+    found = []
+    output = sheetpeek.render(path, to, on_notice=found.append)
+    return output, {n.code: n for n in found}
+
+
+def test_html_draws_the_table_and_reports_nothing_of_it(tmp_path):
+    page, found = notices(book(tmp_path, showRowStripes=True), "html")
+    assert BLUE in page.upper()
+    assert STRIPE in page.upper()
+    assert found == {}
+
+
+@pytest.mark.parametrize("to", ["text", "markdown", "csv"])
+def test_text_outputs_report_the_tables_fills_bold_and_lines(tmp_path, to):
+    _, found = notices(book(tmp_path, showRowStripes=True), to)
+    for code in ("fill", "font.bold", "border"):
+        assert found[code].outcome == "omitted"
+    assert found["fill"].cells == (
+        sheetpeek.CellRange.parse("A1:C2"),
+        sheetpeek.CellRange.parse("A4:C4"),
+    )
+    assert "table" not in found
+
+
+def test_rich_draws_the_tables_bold_and_approximates_its_fills(tmp_path):
+    pytest.importorskip("rich")
+    _, found = notices(book(tmp_path, showRowStripes=True), "rich")
+    assert "font.bold" not in found
+    assert found["fill"].outcome == "approximated"
