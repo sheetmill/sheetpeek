@@ -20,7 +20,7 @@ def test_a_feature_keeps_what_it_reads_in_extra(tmp_path):
     # Each feature adds what it reads of the sheet to Structure.extra under its own key, so
     # features meet only in the reader's pipeline (the outline here).
     from sheetpeek._notices import Collector
-    from sheetpeek._scan_outline import KEY, with_levels
+    from sheetpeek._read_outline import KEY, with_levels
 
     with sheetpeek.open(_workbook(tmp_path)) as book:
         source = book._book.sheet(0)

@@ -56,12 +56,12 @@ from sheetpeek._package import (
     worksheet_parts,
 )
 from sheetpeek._page import MAX_COLUMN, MAX_ROW, manual_breaks, print_areas
+from sheetpeek._read_links import Found as Links
+from sheetpeek._read_links import add_formula, cell_links, with_elements, with_formulas
+from sheetpeek._read_links import report as report_links
+from sheetpeek._read_outline import read_outline, with_levels
+from sheetpeek._read_view import sheet_view
 from sheetpeek._runs_model import TextSpan
-from sheetpeek._scan_links import Found as Links
-from sheetpeek._scan_links import add_formula, cell_links, with_elements, with_formulas
-from sheetpeek._scan_links import report as report_links
-from sheetpeek._scan_outline import read_outline, with_levels
-from sheetpeek._scan_view import sheet_view
 from sheetpeek._sheets import (
     ListedSheet,
     NotAWorksheetError,

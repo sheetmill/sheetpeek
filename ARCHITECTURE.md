@@ -1265,7 +1265,7 @@ in `rich` and text, omitted in Markdown and CSV, which show the full text).
 
 ### 4.18 Sheet view and page layout
 
-**Read.** The first `<sheetView>` gives `Sheet.view` (`SheetView`, `_scan_view.py`):
+**Read.** The first `<sheetView>` gives `Sheet.view` (`SheetView`, `_read_view.py`):
 the saved zoom (`zoomScale`, 100 when absent; a value outside Excel's 10 to 400 or not whole is
 100, unverified), `showZeros`, and a frozen pane's rows and columns (`ySplit`, `xSplit` of a pane
 whose state is `frozen` or `frozenSplit`) from the view's top-left cell; a `split` pane is kept
@@ -1408,12 +1408,12 @@ ECMA-376 lists and the `PT..H..M..S` durations.
 xlio reads the sheet format (`<sheetFormatPr>`), `<cols>`, each `<row>`'s height, hidden flag and
 format (a `<row>` that sets nothing included), `<mergeCells>`, `<hyperlinks>` and the first
 `<sheetView>`'s settings, each value as Excel takes it (`_structure.fill`,
-`_scan_links.with_elements`). The cells come from one pass of xlio's stream (`Sheet.cells` with
+`_read_links.with_elements`). The cells come from one pass of xlio's stream (`Sheet.cells` with
 runs, in `Book._stream`), which gives at the same time:
 - the bounds of every cell, which with the merged ranges make the used range, and the rows with
   cells, which with xlio's rows make the rows the file lists (§4.7);
 - formulas without a cached value, strings with runs, shown phonetic guides, and formulas that
-  call `HYPERLINK()` (`_scan_links.add_formula`, §4.10).
+  call `HYPERLINK()` (`_read_links.add_formula`, §4.10).
 
 Each sheetpeek cell is built as the stream yields it and kept in its row's list; no `xlio.Cell`
 is kept, and a row's cells share one row number (each cell's own `int` cost 32 bytes a cell).
@@ -1867,8 +1867,8 @@ src/sheetpeek/
   _rendered.py       RenderedSheet, RenderedRow, RenderedCell, RenderedColumn, Gap
   _package.py        ReadLimits, the check before reading (§5.5), sheet name → worksheet part
   _structure.py      the sheet structure (§5.4): `Structure`, filled from xlio and the cell stream
-  _scan_links.py     hyperlinks from xlio and the cell stream, and the reader's link notices (§4.10)
-  _scan_outline.py   the outline from xlio: its rows, columns and settings
+  _read_links.py     hyperlinks from xlio and the cell stream, and the reader's link notices (§4.10)
+  _read_outline.py   the outline from xlio: its rows, columns and settings
   _read.py           the reader: xlio's models and cell stream into a Sheet (§5.4)
   _style/            a cell's style, one module per aspect: number format, border, fill, font,
                      alignment
@@ -1906,7 +1906,7 @@ bench/               scripts that rerun §5 and §7.3's figures; README.md recor
 docs/                Sphinx, as in xlformat
 ```
 
-**The reader is isolated.** The reading modules (`_read.py`, `_structure.py`, the `_scan_*`
+**The reader is isolated.** The reading modules (`_read.py`, `_structure.py`, the `_read_*`
 modules, `_detect.py`, `_sheets.py`, `_page.py`) take xlio's models; nothing imports openpyxl (a
 test enforces it), and only the package's entry points import `_read.py`. Everything else works
 on sheetpeek's own model, so layout and backends do not know the reader. `_structure.py` knows
@@ -1915,8 +1915,8 @@ nothing of layout.
 **Where a feature plugs in.** Each stage has one place per feature, so that features can be
 built side by side with little overlap:
 - **reading the sheet:** a function that takes the `Structure` and the `xlio.Sheet` and keeps
-  what it reads of xlio's models in `Structure.extra` under its own key (`_scan_outline.with_levels`,
-  `_scan_links.with_elements`); what a feature needs of each cell is taken in `Book._stream`;
+  what it reads of xlio's models in `Structure.extra` under its own key (`_read_outline.with_levels`,
+  `_read_links.with_elements`); what a feature needs of each cell is taken in `Book._stream`;
 - **reading a style:** the aspect's module in `_style/`, whose `read` gives model fields and
   whose `unread` reports what is not drawn yet; a feature moves from one to the other;
 - **reporting what is not read:** a rule per sheet child in `_detect.RULES`, replaced when the

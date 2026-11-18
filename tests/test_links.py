@@ -14,7 +14,7 @@ import pytest
 import sheetpeek
 from sheetpeek import CellRange, Hyperlink
 from sheetpeek._hyperlink import check_target, location_cell
-from sheetpeek._scan_links import literal_target
+from sheetpeek._read_links import literal_target
 from sheetpeek.backends import HTMLBackend, MarkdownBackend
 from tests.watchdog import bounded
 from tests.workbooks import raw_sheet, replace_part, save
