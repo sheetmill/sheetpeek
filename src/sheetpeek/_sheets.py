@@ -69,7 +69,7 @@ class ListedSheet:
 def from_xlio(color: Any) -> StatedColor | None:
     """An ``xlio.Color`` as a :class:`StatedColor`.
 
-    Its attributes are taken in openpyxl's order, indexed, theme, auto, rgb, as
+    Its attributes are taken in the order indexed, theme, auto, rgb, as
     :func:`stated_color` takes them.
     """
     if color is None:

@@ -83,24 +83,7 @@ _NOT_SHOWN = {
     "dialogsheet": "is a dialog sheet (a legacy form); it is not shown",
 }
 _EXACT = 2**53  # whole numbers below this are exact as floats
-_ESCAPE = re.compile(r"_x([0-9A-Fa-f]{4})_")
 _SURROGATE = re.compile("[\ud800-\udfff]")
-
-
-def unescape(text: str) -> str:
-    """Decode OOXML's ``_xHHHH_`` escapes, as Excel does; openpyxl leaves them (§5.6).
-
-    ``_x000D_`` is a carriage return and ``_x005F_x0041_`` the text ``_x0041_``: the first escape
-    is consumed whole, so the rest is not read as another. Escaped UTF-16 surrogates become the
-    character they spell, and a lone one the replacement character, since text holding one
-    cannot be encoded for output.
-    """
-    if "_x" not in text:
-        return text
-    decoded = _ESCAPE.sub(lambda m: chr(int(m[1], 16)), text)
-    if _SURROGATE.search(decoded):
-        return decoded.encode("utf-16", "surrogatepass").decode("utf-16", "replace")
-    return decoded
 
 
 def book_file_name(book: Book) -> str | None:
@@ -205,7 +188,7 @@ class Book:
         except xlio.LimitError as error:
             self.close()
             raise LimitError(str(error)) from None
-        except Exception as error:  # openpyxl raises many kinds on a file it cannot read
+        except Exception as error:  # a malformed part can raise more than xlio's own errors
             self.close()
             raise self._unreadable(error) from error
         except BaseException:
@@ -714,8 +697,8 @@ class Book:
     def _cell_color(self, color: Any) -> str | None:
         """An ``xlio.Color`` as ``RRGGBB`` or ``None``.
 
-        A color element without attributes is read as ``00000000``, black (unverified;
-        openpyxl's reading, kept).
+        A color element without attributes is read as ``00000000``, black (unverified; the
+        reading of 0.2.0, kept).
         """
         stated = from_xlio(color)
         if stated is None and color is not None:
@@ -727,8 +710,7 @@ class Book:
         if color is None:
             return None
         kind = getattr(color, "type", None)
-        # openpyxl returns an error text, not a value, when a field of another type is read, so
-        # only the field named by ``type`` is touched.
+        # Only the field named by ``type`` is meaningful; the others are not read.
         value = getattr(color, kind, None) if kind in ("rgb", "indexed", "theme") else None
         return resolve(kind, value, getattr(color, "tint", 0.0) or 0.0, self._theme, self._palette)
 

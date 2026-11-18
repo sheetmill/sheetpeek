@@ -49,8 +49,8 @@ jobs:
       - run: uv pip uninstall rich
       - run: uv run --no-sync pytest
 
-  # openpyxl has no upper bound and sheetpeek relies on details of its reader, so the newest
-  # release is tested on every run, not only the locked one.
+  # openpyxl builds the test workbooks and has no upper bound, so the newest release is tested
+  # on every run, not only the locked one.
   test-latest-openpyxl:
     runs-on: ubuntu-latest
     steps:
@@ -63,7 +63,8 @@ jobs:
       - run: uv run --no-sync python -c "import openpyxl; print('openpyxl', openpyxl.__version__)"
       - run: uv run --no-sync pytest
 
-  # openpyxl changes parser when these are installed, and they change what a crafted file does.
+  # Neither sheetpeek nor xlio uses these parsers; openpyxl, which builds the test workbooks,
+  # switches to them when they are installed. The suite must pass either way.
   test-optional-parsers:
     runs-on: ubuntu-latest
     steps:

@@ -52,7 +52,7 @@ uv run --with fonttools python tools/carlito_widths.py \
 ## Checks to run before proposing a change
 
 All of these must pass. CI runs the same set on Python 3.11 to 3.14, plus a run without the
-optional `rich` extra and a run against the newest openpyxl release. Prefix each with `uv run`
+optional `rich` extra and a run against the newest release of openpyxl (which builds the test workbooks). Prefix each with `uv run`
 on the uv route.
 
 ```bash

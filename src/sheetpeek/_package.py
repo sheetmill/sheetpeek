@@ -2,7 +2,7 @@
 
 ``check_package`` runs before anything parses the file (ARCHITECTURE.md §5.5): it holds the
 archive to ``ReadLimits``, makes every part's stated size true, and refuses a DTD in any part.
-Afterwards every read of the package, openpyxl's included, sees sizes it can rely on.
+Afterwards every read of the package, xlio's included, sees sizes it can rely on.
 """
 
 from __future__ import annotations

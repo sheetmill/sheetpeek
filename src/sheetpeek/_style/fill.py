@@ -66,8 +66,8 @@ def color(source: Any, context: Context, *, background: bool = False) -> str | N
     """A fill color as ``RRGGBB``, or ``None`` for automatic (captures on Excel 16.114).
 
     Indexed 64 is automatic, 65 white, and an index past the palette black. A missing color
-    element, or one without attributes, is read as ``00000000`` (unverified; openpyxl's reading,
-    kept): for a foreground that is black, and a background in it is automatic (white).
+    element, or one without attributes, is read as ``00000000`` (unverified; the reading of
+    0.2.0, kept): for a foreground that is black, and a background in it is automatic (white).
     """
     if source is None or (
         source.indexed is None and source.theme is None and not source.auto and source.rgb is None

@@ -223,7 +223,7 @@ def _view(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
         message = error.args[0] if error.args else str(error)
         _say(err, f"sheetpeek: {message}")
         return 1
-    except Exception as error:  # an unreadable file: openpyxl and zipfile raise many kinds
+    except Exception as error:  # an unreadable file: xlio and zipfile raise many kinds
         _say(err, f"sheetpeek: cannot read {args.file}: {error}")
         return 1
     backend = _backend(args, out)

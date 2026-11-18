@@ -1,6 +1,6 @@
 """The source model: what a worksheet says, before any layout.
 
-Everything here is immutable. Coordinates are 1-based, as in openpyxl and Excel. Colors are
+Everything here is immutable. Coordinates are 1-based, as in Excel. Colors are
 ``RRGGBB`` strings, or ``None`` for Excel's automatic color.
 """
 

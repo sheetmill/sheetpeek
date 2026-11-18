@@ -77,8 +77,8 @@ def test_1900_02_29_does_not_exist_in_the_1904_system():
     ],
 )
 @pytest.mark.parametrize("date1904", [False, True])
-def test_the_serials_openpyxl_gave(text, date1904):
-    # The reader took these from openpyxl before; the values stay.
+def test_the_serials_agree_with_openpyxl(text, date1904):
+    # openpyxl's conversion, written independently, gives the same serials.
     dates = pytest.importorskip("openpyxl.utils.datetime")
     epoch = dates.CALENDAR_MAC_1904 if date1904 else dates.CALENDAR_WINDOWS_1900
     expected = dates.to_excel(dates.from_ISO8601(text), epoch)
