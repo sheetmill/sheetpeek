@@ -37,10 +37,19 @@ from sheetpeek._rendered import RenderedCell, RenderedColumn, RenderedRow, TextR
 from sheetpeek._rows import (
     fits_cells,
     font_row_height,
+    print_baseline_offsets,
     row_height,
     wrapped_height,
 )
-from sheetpeek._runs import Text, drawn_spans, fitted_height, line_metrics, runs_shrink_step, wrap
+from sheetpeek._runs import (
+    Text,
+    drawn_spans,
+    fitted_height,
+    line_font,
+    line_metrics,
+    runs_shrink_step,
+    wrap,
+)
 from sheetpeek._runs_model import TextSpan
 from sheetpeek._text_model import TextDirection, TextRule
 from sheetpeek._text_styles import (
@@ -601,7 +610,11 @@ class _Points:
         bottom = self.ys[origin.rows[-1]] + self.heights[origin.rows[-1]]
         text, spans, wraps = self._turned_text(origin)
         end = len(text.text)
-        pitch, above, below = line_metrics(text.fonts(0, end) if spans else [cell.font], 1)
+        # The angled model's insets were fitted to the rotation suite's screen captures with
+        # these offsets (§4.17), so it keeps them.
+        pitch, above, below = print_baseline_offsets(
+            line_font(text.fonts(0, end)) if spans else cell.font
+        )
         angle = style.rotation
         cos, sin = math.cos(math.radians(angle)), math.sin(math.radians(angle))
         if wraps:
@@ -882,8 +895,10 @@ def _baselines(
 
     ``metrics`` holds each line's height, its baseline below its top and its baseline above its
     bottom (``line_metrics``). Lines that do not fit start at the top: a custom-height row shows
-    its first line (captured, layout rows 161 to 168; unverified for centered text). Spread
-    lines go evenly from the top position to the bottom one (§4.13).
+    its first line (captured, layout rows 161 to 168; unverified for centered text). A centered
+    block sits midway between its top and bottom placements, and spread lines go evenly from the
+    top position to the bottom one (§4.13), each a whole number of points below the first: a
+    half point is dropped (captured, suite ``text_style``, group ``align``).
     """
     heights = [m[0] for m in metrics]
     total = sum(heights)
@@ -893,9 +908,10 @@ def _baselines(
     elif v_align in _SPREAD and n > 1:
         first = top + metrics[0][1]
         pitch = (bottom - metrics[-1][2] - first) / (n - 1)
-        return [first + k * pitch for k in range(n)]
+        return [first + math.floor(k * pitch) for k in range(n)]
     elif v_align in ("center", "distributed"):
-        line_top = top + math.floor((bottom - top - total) / 2)
+        at_bottom = bottom - metrics[-1][2] - metrics[-1][1] - sum(heights[:-1])
+        line_top = top + math.floor((at_bottom - top) / 2)
     elif v_align == "bottom":
         line_top = bottom - metrics[-1][2] - metrics[-1][1] - sum(heights[:-1])
     else:  # justify, one line: at the top

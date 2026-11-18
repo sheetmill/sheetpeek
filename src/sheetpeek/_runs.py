@@ -116,17 +116,16 @@ def line_font(fonts: list[Font]) -> Font:
 
 
 def line_metrics(fonts: list[Font], lines: int) -> tuple[float, float, float]:
-    """(line height, baseline below its top, baseline above its bottom) of a line in ``fonts``.
+    """(line pitch, baseline below its top, baseline above its bottom) of a line in ``fonts``.
 
-    Wrapped lines are 1 pt further apart than the font's row height (§4.7), and an accounting
-    underline adds room under the text (§4.13).
+    Excel's screen (``baseline_offsets``): wrapped lines are the font's row height apart, the
+    point each adds to a fitted row lying below the last (§4.7); an accounting underline adds
+    room under the text (§4.13). ``lines`` is the block's number of lines.
     """
-    height, above, below = baseline_offsets(line_font(fonts))
+    pitch, above, below = baseline_offsets(line_font(fonts))
     if any(accounting(f) for f in fonts):
         below += ACCOUNTING_EXTRA
-    if lines > 1:
-        height += WRAPPED_LEADING
-    return height, above, below
+    return pitch, above, below
 
 
 def wrap(text: str, budget: float, width: Callable[[int, int], float]) -> list[tuple[int, int]]:
@@ -167,8 +166,9 @@ def wrap(text: str, budget: float, width: Callable[[int, int], float]) -> list[t
 
 
 def fitted_height(text: Text, lines: list[tuple[int, int]]) -> float:
-    """The height a fitted row gives the text's lines: each line its largest run's (captured)."""
-    return sum(line_metrics(text.fonts(a, b), len(lines))[0] for a, b in lines)
+    """The height a fitted row gives the text's lines: each its largest run's, +1 pt if several."""
+    extra = WRAPPED_LEADING if len(lines) > 1 else 0.0
+    return sum(line_metrics(text.fonts(a, b), len(lines))[0] + extra for a, b in lines)
 
 
 def runs_shrink_step(text: Text, budget: float, steps: int) -> int:

@@ -87,9 +87,10 @@ def test_indent_wrap_and_vertical_clip(tmp_path):
     assert rendered.rows[0].runs[0].x == 3 + 2 * 6  # one digit per indent level (§4.6)
     lines = rendered.rows[1].runs
     assert [r.text for r in lines] == ["one two", "three"]
-    # Excel fits the row to two wrapped lines, 16 pt each (captured, suite row_height).
+    # Excel fits the row to two wrapped lines, 16 pt each (captured, suite row_height), and
+    # draws them 15 pt apart (captured, suite text_style).
     assert rendered.rows[1].height_pt == 32
-    assert lines[1].y - lines[0].y == 16
+    assert lines[1].y - lines[0].y == 15
     assert lines[1].y == 15 + 32 - 3  # bottom-aligned
     assert lines[0].clip[1:4:2] == (16, 47)
     assert rendered.rows[1].height == 2
@@ -127,7 +128,7 @@ def test_rows_fit_their_cells(tmp_path):
     rendered = lay_out(tmp_path, build, ref="A1:A3")
     assert [r.height_pt for r in rendered.rows] == [19, 15, 15]
     # In a row too short for its text, a line starts at the top (ARCHITECTURE.md §3.6).
-    assert rendered.rows[2].runs[0].y == 19 + 15 + 14  # Calibri 14: 14 pt below the top
+    assert rendered.rows[2].runs[0].y == 19 + 15 + 15  # Calibri 14: 15 pt below the top
 
 
 def test_hidden_column_is_crossed(tmp_path):

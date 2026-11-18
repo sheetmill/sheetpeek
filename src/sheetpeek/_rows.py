@@ -77,12 +77,37 @@ def wrapped_height(lines: int, font: Font) -> float:
 
 
 def baseline_offsets(font: Font) -> tuple[float, float, float]:
-    """(line height, baseline below the line's top, baseline above the line's bottom).
+    """(line pitch, baseline below a top-aligned line's top, baseline above a bottom one's bottom).
 
-    Provisional, from print at Calibri 11 (``layout`` rows 1 and 152 to 154): a 15 pt line with
-    its baseline 11 pt below the top of a top-aligned block and 3 pt above the bottom of a
-    bottom-aligned one. Other fonts scale the 11 with their line height.
+    Excel's screen, from xlformat's ``vertical_metrics`` (its CAPTURING.md section 2 item 47:
+    Calibri and Aptos Narrow at 9 to 24 points; this repository's suite ``text_style`` agrees):
+    Calibri 11 has its baseline 12 pt below the top and 3 pt above the bottom, and wrapped lines
+    15 pt apart. Another size takes the nearest measured size's, another face Calibri's
+    (unverified).
+    """
+    metrics = _screen(*_measured(font))
+    return metrics.line_pitch, metrics.baseline_from_top, metrics.baseline_from_bottom
+
+
+def print_baseline_offsets(font: Font) -> tuple[float, float, float]:
+    """``baseline_offsets`` as Excel prints, kept for a print or PDF output.
+
+    From the PDF export at Calibri 11 (``layout`` rows 1 and 152 to 154): a 15 pt line with its
+    baseline 11 pt below the top of a top-aligned block and 3 pt above the bottom of a
+    bottom-aligned one, wrapped lines 16 pt apart; other fonts scale the 11 with their line
+    height. The print is not the screen (rows 15 pt in the file print 14 pt apart).
     """
     line = font_row_height(font)
     above = round(line * 11 / 15)
     return line, float(above), line - above - 1
+
+
+def _measured(font: Font) -> tuple[str, int]:
+    """The measured face and size nearest to ``font``: Calibri for a face not measured."""
+    family = "Aptos Narrow" if font.name.lower() == "aptos narrow" else "Calibri"
+    return family, min(_MEASURED_SIZES, key=lambda s: (abs(s - font.size), s))
+
+
+@lru_cache(maxsize=64)
+def _screen(family: str, size: int) -> xlformat.VerticalMetrics:
+    return xlformat.vertical_metrics(xlformat.Font(family, size))

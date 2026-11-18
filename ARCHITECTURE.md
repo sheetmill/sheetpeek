@@ -274,10 +274,14 @@ text outside is cut through a glyph), `align` (the point a different font keeps 
 An angled run has an `angle` (degrees counterclockwise) and is turned about `(x, y)`, the start
 of its baseline, with its rules; its `clip` stays upright (§4.17).
 
-- **Baselines** (provisional, from print at Calibri 11; `layout` baselines): a line box is the
-  font's row height (15 pt at Calibri 11) with its baseline 11 pt below its top. A bottom-aligned
-  line sits 3 pt above the block's bottom gridline, a top-aligned one 11 pt below its top, a
-  centered one at `floor((H − n × line) / 2) + 11`. Lines that do not fit the block start at the
+- **Baselines** (the screen; suite `text_style`, group `align`, Calibri 11 in 60 pt rows), from
+  `xlformat.vertical_metrics` for the line's font (the nearest measured size, Calibri for a face
+  not measured, unverified): a top-aligned line's baseline is 12 pt below the block's top, a
+  bottom-aligned one 3 pt above its bottom gridline, wrapped lines 15 pt apart (the font's
+  height), and a centered block midway between the two, a half point dropped. Print differs: a
+  top-aligned baseline 11 pt below the top, lines 16 pt apart (`layout` rows 1 and 152 to 154);
+  `_rows.print_baseline_offsets` keeps those for a print output, and angled text keeps them,
+  since its insets were fitted with them (§4.17). Lines that do not fit the block start at the
   top, so a custom-height row shows its first line (captured, rows 161 to 168).
 - **Glyphs** sit at `x` plus the running sum of `xlformat.glyph_widths`, in whole points, as Excel
   draws them: outside the competing spills, all 3,480 glyphs of 185 `layout` runs are within
@@ -636,8 +640,8 @@ from Excel `theme_colors` (§3.3), `merge_width` and `error_width` (§4.2, §4.4
 `text_style` (§4.7, §4.13) and `rotation` (§4.17). All are Excel 16.115 (Microsoft 365). The
 rules of §4.10, §4.11, §4.14 to §4.16 rest on captures on Excel 16.114 that are not in
 `tests/captures/`. What still waits for the screen: the gridline and heading colors, the heading
-sizes, the text insets and baselines, which come from print, and the 15 pt rows that print 14 pt
-apart.
+sizes, the text insets and the baselines of angled text, which come from print, and the 15 pt
+rows that print 14 pt apart.
 
 ### 4.10 Hyperlinks
 
@@ -898,8 +902,9 @@ merge's edge (captured once, doubtful). The baseline stays where unshrunk text w
 
 **Vertical justify and distributed** wrap text whose wrap flag is off (captured: the file still
 says it does not wrap). One line sits at the top (justify) or the center (distributed). Several
-lines spread from the top position to the bottom one with an even pitch: the first baseline 11
-pt below the top, the last 3 pt above the bottom at Calibri 11. Lines that do not fit start at the
+lines spread from the top position to the bottom one with an even pitch, each a whole number of
+points below the first: the first baseline 12 pt below the top, the last 3 pt above the bottom at
+Calibri 11, and the middle one of three in a 60 pt row at 34 (suite `text_style`). Lines that do not fit start at the
 top, as other wrapped text. Characters mode spreads them in whole lines, and does what Excel does
 with one line.
 
@@ -1125,8 +1130,9 @@ size, for spill, `####`, wrapping, shrink to fit and alignment:
   lines are each their largest run's row height plus 1 (captured: "aaa" / "BBB" / "ccc ddd" with
   "BBB" at 20 pt is 16 + 27 + 16 = 59 pt; the 27 for a 20 pt line is inferred from this one
   capture). Calibri 20's 26 pt joined the row-height table (§4.7) from the 20 pt run case. The
-  baseline at 20 pt follows §3.6's scaled rule, 6 pt above the cell's bottom where the capture shows
-  5, as it does for a 20 pt cell.
+  baseline at 20 pt is 5 pt above the cell's bottom, as the capture shows and as for a 20 pt cell
+  (§3.6). Wrapped lines are drawn their largest run's line pitch apart, the point each adds to a
+  fitted row lying below the last (unverified for mixed sizes).
 - A fitted row counts its runs' fonts in place of the cell's (unverified when every run is
   smaller than the cell's font).
 - **Superscript and subscript runs** follow §4.13 (captured: rows of 17 pt, as whole cells),
@@ -1990,7 +1996,7 @@ sheetpeek already use openpyxl.
 ### 8.3 Dependencies
 
 - `xlio==0.3.*` (§5): the family's reader, internal to the family, pinned to a minor.
-- `xlformat>=0.4,<1` (§6.4), imported normally: it is required.
+- `xlformat>=0.4.1,<1` (§6.4), imported normally: it is required.
 - openpyxl is a dev dependency only: the tests and the documentation's examples build workbooks
   with it, and the tests that need it are left out without it.
 - Extra `sheetpeek[rich]`: `rich>=13`.

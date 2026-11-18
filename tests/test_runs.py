@@ -214,10 +214,12 @@ def test_each_wrapped_line_takes_its_largest_runs_height(excel):
     row = row_of(excel, 12)
     assert [r.text for r in row.runs] == ["aaa", "BBB", "ccc ddd"]
     assert row.height_pt == 59
+    # Lines are their largest run's line pitch apart (15 and 26 pt), each baseline its own font's
+    # distance below the line's top (12 and 21 pt); not captured for mixed sizes (unverified).
     baselines = [r.y - row.y_pt for r in row.runs]
     assert [b - a for a, b in itertools.pairwise(baselines)] == [
-        16 - 11 + 19,
-        27 - 19 + 11,
+        15 - 12 + 21,
+        26 - 21 + 12,
     ]
 
 

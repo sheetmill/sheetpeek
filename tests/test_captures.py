@@ -361,8 +361,9 @@ def test_excel_runs_match_excel(excel):
 
 @pytest.mark.excel
 def test_excel_baselines(excel):
-    # Provisional, from print: a bottom-aligned line sits 3 pt above the next row's gridline and a
-    # top-aligned one (or one too tall for its row) 11 pt below the top (ARCHITECTURE.md §3.6).
+    # Print puts a bottom-aligned line 3 pt above the next row's gridline and a top-aligned one
+    # (or one too tall for its row) 11 pt below the top. The layout follows the screen, which
+    # puts the top-aligned line 1 pt lower (suite text_style, ARCHITECTURE.md §3.6).
     checked = 0
     for number, _, _ in captured_rows():
         row = excel.rows[number - 1]
@@ -377,15 +378,15 @@ def test_excel_baselines(excel):
                 ):
                     checked += 1
                     from_bottom = row.y_pt + row.height_pt - run.y
-                    assert from_bottom == PRINT_PITCH - baseline or run.y - row.y_pt == baseline
+                    assert from_bottom == PRINT_PITCH - baseline or run.y - row.y_pt == baseline + 1
     assert checked > 150
     # A merge over three rows (layout rows 152 to 154): top, center and bottom alignment. The
     # capture's merge is 42 pt high in print and the layout's 45 pt.
     runs = {r.text: r.y - excel.rows[151].y_pt for r in excel.rows[151].runs}
     assert captured_baselines(152) == [11.0]
-    assert runs["top"] == 11
+    assert runs["top"] == 11 + 1
     assert captured_baselines(153) == [10.0]  # 14 + 10 = 24 = floor((42 - 15) / 2) + 11
-    assert runs["center"] == (45 - 15) // 2 + 11
+    assert runs["center"] == (45 - 3 - 12) // 2 + 12  # midway between 12 and 42
     assert captured_baselines(154) == [11.0, 11.0]  # 28 + 11 = 39 = 42 - 3
     assert runs["bottom"] == runs["default"] == 45 - 3
 

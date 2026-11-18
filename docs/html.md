@@ -231,5 +231,6 @@ come from Excel's screen. The heading sizes and colors and the grid color come f
 screen too; the light headings' colors are provisional. The heading bands are in points, so they
 scale with the page like the cells, and grow with the Normal font's size. A sheet's own grid
 color draws its gridlines half a CSS pixel wide, one device pixel on a high-density display, as
-Excel draws it. The text's insets and baseline come from Excel's print layout and are provisional
-until they are measured on screen.
+Excel draws it. The text's baseline comes from Excel's screen; its insets, and the baseline of
+angled text, come from Excel's print layout and are provisional until they are measured on
+screen.

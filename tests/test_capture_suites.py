@@ -270,6 +270,32 @@ def test_distributed_lines_sit_where_excel_draws_them(tmp_path):
             assert abs(left + width - end) <= 1.5, (row["name"], end, left + width)
 
 
+def test_lines_sit_at_the_baselines_excel_draws(tmp_path):
+    # Captured (text_style group align, zoom 100, Calibri 11 in rows of 60 pt): top, center,
+    # justify, distributed and bottom, one line, three lines and a long unwrapped text. A line's
+    # baseline is the bottom of its ink, less the descender (2 pt) on the line with a "g". The
+    # screen puts a top-aligned baseline 12 pt below the row's top and a bottom-aligned one 3 pt
+    # above its bottom, lines 15 pt apart; print has 11 and 3 (layout rows 152 to 154).
+    captured = {
+        cell: row
+        for cell, row in _text_style_cases("align").items()
+        if row["name"].startswith("vertical ")
+    }
+    assert len(captured) == 15
+    _drawn_lines(tmp_path, "align")
+    rendered = sheetpeek.read(tmp_path / "text_style.xlsx", "Align").layout("excel")
+    ours: dict[str, set[float]] = {}
+    for row in rendered.rows:
+        for run in row.runs:
+            r, c = run.source
+            ours.setdefault(f"{get_column_letter(c)}{r}", set()).add(run.y - row.y_pt)
+    for cell, row in captured.items():
+        bands = [tuple(map(float, b.split("+"))) for b in row["line_tops"].split()]
+        descent = 2.0 if "g" in row["text"] else 0.0
+        theirs = [top + height - descent for top, height in bands]
+        assert sorted(ours[cell]) == theirs, (row["name"], sorted(ours[cell]), theirs)
+
+
 # --- grids and platforms
 
 

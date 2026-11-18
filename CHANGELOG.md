@@ -186,7 +186,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sheet names are looked up without case, as Excel compares them: `Book.sheet("data")` and
   `read(path, "DATA")` find a sheet named `Data` (and keep its spelling), where 0.2.0 raised
   `KeyError`.
-- Requires xlformat 0.4. Through it, a workbook whose Normal font is 18 pt or more gets Excel's
+- Requires xlformat 0.4.1. Through it, a workbook whose Normal font is 18 pt or more gets Excel's
   wider column padding: its columns without a stored width are wider (2 pt at Calibri 20).
 - `Cell.value` of a whole number is an `int` only below 2**53 in magnitude, a `float` above:
   it comes from the stored double, not the file's digits, so `9995806932108624` (one value in
@@ -230,6 +230,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A workbook palette replaces the default entry by entry; a `<colors>` element without
   `indexedColors` keeps the default palette instead of drawing indexed colors black.
 - A row fitted to a Calibri 20 cell is 26 pt, as Excel fits it, instead of Calibri 16's 21.
+- Text sits where Excel's screen puts it (`excel` mode, so HTML), from xlformat's vertical
+  metrics, where it followed Excel's print layout: at Calibri 11 a top-aligned line's baseline is
+  12 pt below the cell's top (was 11) and wrapped lines are 15 pt apart (were 16); a centered line
+  in a 60 pt row sits at 34 pt (was 33). Bottom-aligned text is where it was. Angled text keeps
+  its placement.
 - A row Excel fits grows to the lines of horizontally distributed text, which wraps when drawn
   (two lines of Calibri 11 take 32 pt); it was not fitted to them.
 - A dialog sheet is no longer drawn as a blank worksheet: `Book.sheet()` raises

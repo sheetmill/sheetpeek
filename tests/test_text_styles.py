@@ -331,7 +331,7 @@ def test_characters_mode_clips_shrunk_text_and_keeps_hashes(tmp_path):
 # Vertical justify and distributed (capture on Excel 16.114, suite text_style on 16.115).
 
 
-@pytest.mark.parametrize(("v_align", "baseline"), [("justify", 11), ("distributed", 33)])
+@pytest.mark.parametrize(("v_align", "baseline"), [("justify", 12), ("distributed", 34)])
 def test_one_line_is_at_top_or_center(tmp_path, v_align, baseline):
     def build(ws):
         ws.row_dimensions[1].height = 60
@@ -339,7 +339,7 @@ def test_one_line_is_at_top_or_center(tmp_path, v_align, baseline):
         ws["A1"].alignment = Alignment(vertical=v_align)
 
     (run,) = runs_of(lay_out(tmp_path, build), 1)
-    assert run.y == baseline  # top: 11 below the top; center: floor((60 - 15) / 2) + 11
+    assert run.y == baseline  # top: 12 below the top; center: floor((60 - 3 - 12) / 2) + 12
 
 
 @pytest.mark.parametrize("v_align", ["justify", "distributed"])
@@ -352,10 +352,10 @@ def test_lines_spread_from_the_top_position_to_the_bottom_one(tmp_path, v_align)
         ws["B1"].alignment = Alignment(vertical=v_align)
 
     rendered = lay_out(tmp_path, build)
-    assert [r.y for r in runs_of(rendered, 1, 1)] == [11, 34, 57]  # top 11, bottom 60 - 3
+    assert [r.y for r in runs_of(rendered, 1, 1)] == [12, 34, 57]  # top 12, bottom 60 - 3
     wrapped = runs_of(rendered, 1, 2)
     assert len(wrapped) > 1
-    assert (wrapped[0].y, wrapped[-1].y) == (11, 57)
+    assert (wrapped[0].y, wrapped[-1].y) == (12, 57)
     assert rendered.notices == ()
 
 
