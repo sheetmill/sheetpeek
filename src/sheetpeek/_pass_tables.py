@@ -3,16 +3,15 @@
 A table draws its style's elements over regions of its range (§4.20): the whole table, row and
 column stripes over the data rows, the first and last column, the header and totals rows and
 their corner cells. The elements stack in ECMA-376's order (:data:`ELEMENT_ORDER`), a later one
-winning property by property and edge segment by edge segment, whatever a line's weight. Row
-stripes count visible rows only. A region's outer sides draw on its outline and its
+winning property by property and edge segment by edge segment, whatever a line's weight.
+Stripes count visible rows and columns only. A region's outer sides draw on its outline and its
 ``horizontal`` and ``vertical`` sides on its inner boundaries; each stripe band is a region. A
 cell's own side on a segment, from either cell, replaces the table's line there; between the
 cells the borders pass's rule then decides as for any two sides.
 
 The result, ``Draft.display_styles``, maps a position to the style :func:`_dxf.stack` gives;
 positions it leaves out are displayed in their own style. It runs before the cells, since a
-table's bold changes text widths and spill. All of it is unverified until the screen suite
-``tables`` captures it.
+table's bold changes text widths and spill. The screen suite ``tables`` captures all of it.
 """
 
 from __future__ import annotations
@@ -44,9 +43,11 @@ def tables_pass(draft: Draft) -> None:
     ref = sheet.ref
     if ref is None or not sheet.tables:
         return
+    from sheetpeek._layout import _column_hidden as column_hidden
     from sheetpeek._layout import _row_hidden as row_hidden
 
     hidden = {row.index for row in sheet.rows if row_hidden(row, sheet)}
+    hidden_columns = {column.index for column in sheet.columns if column_hidden(column)}
     formats: dict[Position, list[DifferentialFormat]] = {}
     above: dict[Position, Side] = {}  # the line along the top of the cell at a position
     left: dict[Position, Side] = {}  # the line along its left side
@@ -54,7 +55,7 @@ def tables_pass(draft: Draft) -> None:
         style = _style_of(table, sheet)
         if style is None:
             continue
-        for kind, region in regions(table, style, hidden):
+        for kind, region in regions(table, style, hidden, hidden_columns):
             element = style.element(kind)
             if element is None:
                 continue
@@ -71,11 +72,15 @@ def _style_of(table: Table, sheet: Sheet) -> TableStyle | None:
 
 
 def regions(
-    table: Table, style: TableStyle, hidden: set[int]
+    table: Table,
+    style: TableStyle,
+    hidden: set[int],
+    hidden_columns: frozenset[int] | set[int] = frozenset(),
 ) -> list[tuple[TableStyleElementType, CellRange]]:
     """Each element's regions on the table, in the order that stacks them.
 
-    ``hidden`` holds the hidden rows, which row stripes do not count.
+    ``hidden`` and ``hidden_columns`` hold the hidden rows and columns, which stripes do not
+    count.
     """
     info = table.style
     assert info is not None
@@ -91,7 +96,7 @@ def regions(
     if data_top <= data_bottom:
         if info.show_column_stripes:
             bands = _bands(
-                list(range(first, last + 1)),
+                [c for c in range(first, last + 1) if c not in hidden_columns],
                 size("firstColumnStripe"),
                 size("secondColumnStripe"),
             )
@@ -193,7 +198,7 @@ def _stacked(
     left: dict[Position, Side],
 ) -> dict[Position, CellStyle]:
     """The displayed style of every position a table format or line reaches."""
-    theme_one = sheet._theme_one
+    normal_color = sheet._normal_color
     done: dict[_Key, CellStyle] = {}
     result: dict[Position, CellStyle] = {}
     positions = set(formats)
@@ -213,7 +218,7 @@ def _stacked(
             _segment(sheet, ref, above, (row + 1, column), across=True),
         )
         found = formats.get(position, [])
-        own_color = theme_one.get(id(own)) is not own
+        own_color = normal_color.get(id(own)) is not own
         key = (id(own), tuple(id(f) for f in found), own_color, sides)
         drawn = done.get(key)
         if drawn is None:

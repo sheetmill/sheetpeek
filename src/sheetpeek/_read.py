@@ -198,8 +198,13 @@ class Book:
             raise
         self._default_style = CellStyle("General", self._normal_font)
         self._styles: dict[Any, tuple[CellStyle, tuple[Code, ...], tuple[Code, ...]]] = {}
-        self._theme_one: dict[int, CellStyle] = {}
-        """The styles whose font color is an untinted theme 1, by ``id`` (``Sheet._theme_one``)."""
+        self._normal_color: dict[int, CellStyle] = {}
+        """Styles whose font color is the Normal style's, by ``id`` (``Sheet._normal_color``)."""
+        self._normal_key = (
+            font_aspect.color_key(self._normal_font_part()) if self._book is not None else None
+        )
+        # A position without a <c> shows the Normal style, as a table's empty cells do.
+        self._normal_color[id(self._default_style)] = self._default_style
         self._run_cache: dict[int, tuple[Any, Font, tuple[TextSpan, ...] | None]] = {}
 
     def _unreadable(self, error: Exception) -> PackageError:
@@ -455,7 +460,7 @@ class Book:
             table_styles=table_styles,
             notices=notes.notices(),
             max_cells=self._limits.max_cells,
-            _theme_one=MappingProxyType(dict(self._theme_one)) if tables else {},
+            _normal_color=MappingProxyType(dict(self._normal_color)) if tables else {},
         )
 
     def _report_structure(
@@ -704,11 +709,11 @@ class Book:
                 code = _builtin_format(cell_format.number_format_id)
             cell_format = dataclasses.replace(cell_format, number_format=code)
             found = self._styles[index] = styles.resolve(cell_format, self._context)
-            # By identity: a theme-1 style and an uncolored one compare equal, since Font.color
-            # reads both as automatic. Interning equal styles would mark the uncolored one too;
-            # test_table_layout's equal-style test fails if that happens.
-            if font_aspect.theme_one(cell_format.font):
-                self._theme_one[id(found[0])] = found[0]
+            # By identity: a style whose font color is the Normal style's and one with another
+            # color can compare equal (Font.color reads theme 1 and automatic alike). Interning
+            # equal styles would mark both; test_table_layout's equal-style test fails if so.
+            if font_aspect.color_key(cell_format.font) == self._normal_key:
+                self._normal_color[id(found[0])] = found[0]
         return found
 
     def _cell_color(self, color: Any) -> str | None:
@@ -733,6 +738,13 @@ class Book:
 
     def _read_normal_font(self) -> Font:
         """The Normal style's font; else the first font; else Calibri 11."""
+        font = self._normal_font_part()
+        if font is None:
+            return font_aspect.FALLBACK
+        return font_aspect.to_font(font, font_aspect.FALLBACK, self._cell_color, self._theme_fonts)
+
+    def _normal_font_part(self) -> Any:
+        """The Normal style's ``xlio.Font``; else the first font; else ``None``."""
         assert self._book is not None
         found = self._book.styles
         font = next(
@@ -745,9 +757,7 @@ class Book:
         )
         if font is None and found.fonts:
             font = found.fonts[0]
-        if font is None:
-            return font_aspect.FALLBACK
-        return font_aspect.to_font(font, font_aspect.FALLBACK, self._cell_color, self._theme_fonts)
+        return font
 
 
 def whole_characters(text: str) -> str:

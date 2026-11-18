@@ -4,13 +4,13 @@ A table style (§4.20), and later a conditional format, draws through :class:`Di
 records: partial formats, of which only what each sets applies. :func:`stack` takes them in the
 order that stacks them, a later format's property winning over an earlier one's, and lays the
 cell's own :class:`CellStyle` over the result property by property: the cell's own wins where it
-differs from the default (a fill; a font color other than an explicit theme 1, automatic
-included; bold, italic, underline or strikethrough set), and the cell's own border sides replace
+differs from the default (a fill; a font color other than the Normal style's; bold, italic,
+underline or strikethrough set), and the cell's own border sides replace
 the formats' sides one side at a time. The font's name and size are always the cell's, since a
 differential format in a table style sets neither.
 
-Unverified until the screen suite ``tables`` captures them: the whole rule, and in particular
-underline and strikethrough taken alike with bold and italic.
+Captured by the screen suite ``tables`` (``ARCHITECTURE.md`` §4.20), underline and
+strikethrough taken alike with bold and italic included.
 """
 
 from __future__ import annotations
@@ -36,9 +36,8 @@ def stack(
         style: The cell's own style, as the file states it.
         formats: The differential formats that apply to the cell, bottom first: a later one's
             property wins over an earlier one's.
-        own_color: Whether the cell's font color is its own: any color but an explicit,
-            untinted theme 1, so automatic and a font without a color included (both draw
-            black over a table's white header text). ``style.font.color`` cannot tell, since
+        own_color: Whether the cell's font color is its own: any color other than the Normal
+            style's font color as the file states it. ``style.font.color`` cannot tell, since
             it reads theme 1 and automatic alike as ``None``.
         sides: The sides the formats draw on this cell's edges, already placed (a format's
             ``horizontal`` and ``vertical`` lines inside its region, its outer sides on the
