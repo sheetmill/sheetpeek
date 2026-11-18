@@ -13,7 +13,7 @@ from __future__ import annotations
 import importlib
 import sys
 
-SUITES = ("rotation", "borders", "fills", "text_style", "filters")
+SUITES = ("rotation", "borders", "fills", "text_style", "filters", "tables")
 
 
 def main(argv: list[str]) -> int:

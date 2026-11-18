@@ -95,7 +95,7 @@ on readCells(xlName, cellRefs)
 	set saved to AppleScript's text item delimiters
 	set AppleScript's text item delimiters to ","
 	set output to ""
-	set propertyNames to {"fill", "pattern", "font_color", "bold", "italic", "underline", "font_name", "font_size", "number_format", "h_align", "v_align", "wrap", "orientation", "indent", "shrink"}
+	set propertyNames to {"fill", "pattern", "font_color", "bold", "italic", "underline", "strike", "font_name", "font_size", "number_format", "h_align", "v_align", "wrap", "orientation", "indent", "shrink"}
 	set edges to {"top", "bottom", "left", "right", "diag_down", "diag_up"}
 	tell application "Microsoft Excel"
 		set xlWs to worksheet 1 of workbook xlName
@@ -133,6 +133,7 @@ on cellProperty(target, propertyName)
 			if propertyName is "bold" then return (bold of font object of target) as string
 			if propertyName is "italic" then return (italic of font object of target) as string
 			if propertyName is "underline" then return (underline of font object of target) as string
+			if propertyName is "strike" then return (strikethrough of font object of target) as string
 			if propertyName is "font_name" then return (name of font object of target) as string
 			if propertyName is "font_size" then return (font size of font object of target) as string
 			if propertyName is "number_format" then return (number format of target) as string
