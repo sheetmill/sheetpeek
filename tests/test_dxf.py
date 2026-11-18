@@ -1,6 +1,6 @@
 """The differential-format layer: a cell's own style over the partial formats beneath it.
 
-The rules are ARCHITECTURE.md §4.20's, unverified until the screen suite ``tables`` captures them.
+The rules are ARCHITECTURE.md §4.20's, captured by the screen suite ``tables``.
 """
 
 import pytest

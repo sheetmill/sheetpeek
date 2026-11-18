@@ -14,9 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   holding only what the file sets, its colors resolved through the theme.
 - `RenderedCell.display_style`: the style a cell is displayed in, what Excel's
   `Range.DisplayFormat` reports: the cell's own style with its table's style stacked beneath
-  it (the whole table, stripes over visible rows, first and last column, header and totals rows
-  and their corners, and their lines), the cell's own fill, font color, bold, italic, underline,
-  strikethrough and sides winning; `cell.style` itself where nothing stacks. `RenderedCell.fill`,
+  it (the whole table, stripes over visible rows and columns, first and last column, header and
+  totals rows and their corners, and their lines), the cell's own fill, bold, italic, underline,
+  strikethrough, sides, and a font color other than the Normal style's winning; `cell.style`
+  itself where nothing stacks. Tested against Excel 16.115 (Microsoft 365) on all 60 presets and
+  the rules around them, 2,724 cells and their edges. `RenderedCell.fill`,
   `font` and `color` follow it. HTML draws table styles; rich draws their bold and approximates
   their fills and colors; text, Markdown, CSV and TSV report them as the fills, bold, colors and
   lines they cannot show.

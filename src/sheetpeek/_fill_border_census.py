@@ -14,8 +14,9 @@ if TYPE_CHECKING:
 def fill_style(sheet: Sheet, rendered: RenderedCell) -> CellStyle | None:
     """The style whose fill a laid-out cell shows: its displayed style, or its merge anchor's.
 
-    A merge shows its anchor's own style, a table's beneath it not stacked (unverified). ``None``
-    for a merge whose anchor lies outside the range read.
+    A merge shows its anchor's own style, a table's beneath it not stacked (Excel refuses a file
+    with a merge inside a table, §4.20). ``None`` for a merge whose anchor lies outside the range
+    read.
     """
     merge = rendered.merge
     if merge is None:

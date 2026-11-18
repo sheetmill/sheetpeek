@@ -1399,19 +1399,31 @@ workbook's own first and then Excel's 60 presets, which xlio ships with Ecma's n
 element's `DifferentialFormat` keeps only what its `<dxf>` sets; its colors are resolved through
 the workbook's theme, and a solid fill takes the `bgColor`.
 
-**Stacking** (`_dxf.py`, unverified until the screen suite `tables` captures it): the formats
-that apply to a cell stack in order, a later one's property winning (fill, font color, bold,
-italic, underline, strikethrough); the cell's own style lies over them property by property,
-winning where it differs from the default: a fill, a font color other than an explicit untinted
-theme 1 (automatic and a font without a color included), bold, italic, underline or
-strikethrough set. Its own border sides replace the formats' sides one side at a time; the font
+**Captures:** the screen suite `tables` (`tests/captures/tables.tsv`, Excel 16.115, Microsoft
+365, zoom 100; `tests/test_table_captures.py`): each table cell's display format, read exactly,
+and the device pixels across its edges, for Excel's 60 presets under the default theme, eight
+under a second theme, a workbook style of all 13 elements in order, thin later lines against a
+thick earlier one, stripe sizes, a hidden row and a hidden column inside stripes, each style
+option alone, a table without a header row, and the cell's own fills, fonts, font colors and
+sides over a table, with the Normal style's font in eight colors. 2,724 cells and their edges
+agree with the rules below, but for one known deviation (theme color 1, below).
+
+**Stacking** (`_dxf.py`): the formats that apply to a cell stack in order, a later one's
+property winning (fill, font color, bold, italic, underline, strikethrough); the cell's own style
+lies over them property by property, winning where it differs from the Normal style: a fill, a
+font color other than the Normal style's font color as the file states it (so with Excel's
+default Normal font, theme 1, an automatic color or a font without a color is the cell's own and
+draws black over a white header, while a Normal font without a color, automatic, tinted or red
+lets the table's color through cells in that font), bold, italic, underline or strikethrough
+set. Its own border sides replace the formats' sides one side at a time; the font
 name and size are always its own. A cell with nothing beneath it keeps its style object.
 
 **The layout pass** (`_pass_tables.py`, before the cells, since a table's bold changes text
-widths and spill; unverified until the screen suite `tables` captures it). Each table with a
+widths and spill). Each table with a
 style found among `Sheet.table_styles` lays its elements over their regions, in ECMA-376's order:
 the whole table; column stripes over the data rows, banded from the first column; row stripes
-over the data rows, banded from the first data row **counting visible rows only**, `size` rows
+over the data rows, banded from the first data row; **both count visible rows and columns
+only**, `size` rows
 of the first stripe and then of the second (one row when the second has no element); the last
 and the first column whole; the header and totals rows by their counts; the corner cells only
 with their column's flag. Each stripe band is a region: a region's outer sides lie on its
@@ -1419,16 +1431,22 @@ outline and its `horizontal` and `vertical` sides on its inner boundaries. **A l
 wins per edge segment, whatever the line's weight**; a cell's own side facing a segment, from
 either of the two cells, replaces the table's line there, and between the cells the borders pass
 then applies §4.12's rule. A table without style info, without a name, or naming a style that is
-neither the workbook's nor a preset draws nothing (Excel's behavior for the last is to be
-probed). Which font colors count as the cell's own is decided from the file's font record: the
-reader keeps the styles whose font color is an untinted theme 1.
+neither the workbook's nor a preset draws nothing, as Excel draws it (group `unknown`). Which
+font colors count as the cell's own is decided from the file's font records: the reader keeps
+the styles whose font color is the Normal style's, and a position without a `<c>`, which shows
+the Normal style, counts as one of them.
+
+**Known deviation:** theme color 1 untinted is drawn as automatic black (§3.3), where Excel
+draws the theme's dark 1: the same in Excel's own themes, `1F3864` under the suite's second
+theme (12 cells).
 
 The result is `RenderedCell.display_style`, what Excel's `Range.DisplayFormat` reports: the
 cell's own style with the table's stacked beneath it, the very `cell.style` object where nothing
 stacks, and one shared object for every cell with the same style, formats and sides. The cell
 pass lays out from it (fonts, fills) and the borders pass, the HTML fill layer and the census
-read it; `RenderedCell.fill`, `font` and `color` follow it. A merge shows its anchor's own fill,
-a table's beneath it not stacked (unverified). A sheet without tables pays one empty check.
+read it; `RenderedCell.fill`, `font` and `color` follow it. A merge inside a table makes Excel
+refuse the file (group `merge`); sheetpeek shows it, the merge in its anchor's own fill, a
+table's beneath it not stacked. A sheet without tables pays one empty check.
 
 **Outputs.** No output has code of its own for tables: each draws `display_style` through what
 it already draws, and the census counts the displayed style, so what an output cannot show of a

@@ -41,8 +41,11 @@ Measured for every table cell: Excel's display format (fill, font color, bold, i
 underline, strikethrough, font name; exact, from ``display format``), and across every edge of
 the cell, at the segment's middle, the colors of the device pixels from 3 screen points before
 the boundary to 3 after it, averaged over 5 pixels along the segment, as hex, so that each edge
-can be classified afterwards (none, gridline, thin, medium, thick, double; their colors).
-``read`` writes ``tests/captures/tables.tsv``, one row per group, cell and zoom.
+can be classified afterwards (none, gridline, thin, medium, thick, double; their colors), as
+runs of one color (``FFFFFFx6 D4D4D4x2 FFFFFFx4``: the boundary lies after the sixth pixel).
+A cell's bottom and right edges are its neighbor's top and left, so they are written only on a
+table's last row and column. ``read`` writes ``tests/captures/tables.tsv``, one row per group,
+cell and zoom.
 """
 
 from __future__ import annotations
@@ -86,7 +89,7 @@ FONT_COLORS = {
 SECOND_THEME = {
     "dk1": "1F3864", "lt1": "FFF2CC", "dk2": "7030A0", "lt2": "E2EFDA",
     "accent1": "C00000", "accent2": "00B050", "accent3": "7030A0",
-    "accent4": "FFC000", "accent5": "00B0F0", "accent6": "FF00FF",
+    "accent4": "FFC000", "accent5": "00B0F0", "accent6": "7F6000",
 }  # fmt: skip
 GROUPS = (
     "unknown",
@@ -529,6 +532,37 @@ def _strip(cap: Any, cell: str, edge: str) -> str:
     return " ".join(found)
 
 
+def runs(strip: str) -> str:
+    """A strip as runs of one color, ``RRGGBBxN`` each: ``FFFFFFx6 D4D4D4x2 FFFFFFx4``."""
+    found: list[list[Any]] = []
+    for color in strip.split():
+        if found and found[-1][0] == color:
+            found[-1][1] += 1
+        else:
+            found.append([color, 1])
+    return " ".join(f"{color}x{count}" for color, count in found)
+
+
+def strip(text: str) -> list[str]:
+    """The colors of a strip written by :func:`runs`, one per device pixel."""
+    found = []
+    for run in text.split():
+        color, _, count = run.partition("x")
+        found.extend([color] * int(count))
+    return found
+
+
+def _outline(placed: list[Placed]) -> dict[str, tuple[int, int]]:
+    """Each table's last row and column."""
+    found: dict[str, tuple[int, int]] = {}
+    for p in placed:
+        cell = openpyxl.utils.cell.coordinate_from_string(p.cell)
+        row, column = cell[1], openpyxl.utils.column_index_from_string(cell[0])
+        last = found.get(p.table, (0, 0))
+        found[p.table] = (max(last[0], row), max(last[1], column))
+    return found
+
+
 def _mean(pixels: list[tuple[int, int, int]]) -> str:
     return "".join(f"{round(sum(p[i] for p in pixels) / len(pixels)):02X}" for i in range(3))
 
@@ -546,8 +580,16 @@ def write() -> None:
             continue
         first = first or header(out)
         placed = fill(openpyxl.Workbook().active, group).cells
+        outline = _outline(placed)
         for cap in load(out):
             for p in placed:
+                letters, row = openpyxl.utils.cell.coordinate_from_string(p.cell)
+                last_row, last_column = outline[p.table]
+                edges = ["top", "left"]
+                if row == last_row:
+                    edges.append("bottom")
+                if openpyxl.utils.column_index_from_string(letters) == last_column:
+                    edges.append("right")
                 record = {
                     "group": p.group,
                     "table": p.table,
@@ -556,7 +598,7 @@ def write() -> None:
                     "zoom": str(cap.zoom),
                 }
                 record |= {key: cap.value(p.cell, read) or "" for key, read in READS.items()}
-                record |= {f"edge_{e}": _strip(cap, p.cell, e) for e in EDGES}
+                record |= {f"edge_{e}": runs(_strip(cap, p.cell, e)) for e in edges}
                 records.append(record)
     with open(OUTPUT, "w", encoding="utf-8") as out:
         for key, value in first.items():

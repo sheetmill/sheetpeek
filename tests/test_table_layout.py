@@ -1,9 +1,10 @@
 """Tables in the layout: the style each table cell is displayed in (ARCHITECTURE.md §4.20).
 
-The regions, the stacking and the own-format rule are unverified until the screen suite
-``tables`` captures them. TableStyleMedium2 under openpyxl's default theme: the whole table thin
-95B3D7 lines with black text, the header bold white on 4F81BD, the first row stripe and first
-column stripe DCE6F1, the first and last column bold, the totals row bold over a double 4F81BD top.
+The regions, the stacking and the own-format rule are captured by the screen suite ``tables``
+(``tests/test_table_captures.py``). TableStyleMedium2 under openpyxl's default theme: the whole
+table thin 95B3D7 lines with black text, the header bold white on 4F81BD, the first row stripe
+and first column stripe DCE6F1, the first and last column bold, the totals row bold over a
+double 4F81BD top.
 """
 
 from __future__ import annotations
@@ -96,7 +97,8 @@ def test_the_cells_own_format_wins_property_by_property(tmp_path):
     found = displayed(book(tmp_path, edit=own))
     assert (found[(1, 1)].fill, found[(1, 1)].font.color) == ("FF0000", "FFFFFF")
     assert (found[(1, 2)].fill, found[(1, 2)].font.color) == (BLUE, "00B050")
-    # Automatic is the cell's own and draws black; the default font's theme 1 lets white through.
+    # Automatic differs from the Normal font's theme 1, so it is the cell's own and draws black;
+    # the Normal font's own color lets white through.
     assert found[(1, 3)].font.color is None
     assert found[(1, 3)].font.bold
 
@@ -226,9 +228,9 @@ def test_a_later_element_replaces_an_earlier_bottom_line(tmp_path):
 
 
 def test_an_uncolored_style_equal_to_a_theme_1_style_keeps_its_own_color(tmp_path):
-    # B1 keeps the default font (theme 1); C1's font is the same but without a color. Their
-    # styles compare equal, so the record of theme-1 styles must go by the style's identity:
-    # were equal styles ever shared, C1 would take the header's white as well.
+    # B1 keeps the default font (theme 1, the Normal font's color); C1's font is the same but
+    # without a color. Their styles compare equal, so the record of styles in the Normal font's
+    # color must go by identity: were equal styles ever shared, C1 would take the white too.
     styles = pytest.importorskip("openpyxl.styles")
 
     def own(ws):

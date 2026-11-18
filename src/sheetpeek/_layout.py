@@ -662,8 +662,8 @@ class _Grid:
         ref = self.sheet.ref
         if ref is None or (merge.min_row, merge.min_col) not in ref:
             return None
-        # A merge draws its anchor's own fill, a table's beneath it not stacked (unverified;
-        # the HTML fill layer does the same, _fill_border_census.fill_style).
+        # A merge draws its anchor's own fill, a table's beneath it not stacked (Excel refuses a
+        # merge inside a table, §4.20; the HTML fill layer does the same, fill_style).
         return self.sheet.cell(merge.min_row, merge.min_col).fill
 
     def content_lines(self, origin: _Origin) -> list[str]:
