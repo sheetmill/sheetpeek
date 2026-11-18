@@ -1,7 +1,7 @@
 """Tables and table styles: what the reader keeps (ARCHITECTURE.md §4.20).
 
-The styles' colors resolve through openpyxl's default theme (Office 2007's), as Excel resolves
-them; the screen suite ``tables`` is to capture how Excel draws them.
+The styles' colors resolve through the workbook's theme, here openpyxl's default (Office 2007's);
+that Excel draws them so is unverified until the screen suite ``tables`` captures it.
 """
 
 from __future__ import annotations
