@@ -661,7 +661,7 @@ a cached value (as openpyxl writes it) has no `t`. The same file confirms Excel 
 Captured so far, in `tests/captures/`: by print (route B) `layout` (§3.6, §4.1 to §4.7); read
 from Excel `theme_colors` and `theme_colors_more` (§3.3), `merge_width` and `error_width` (§4.2,
 §4.4, no deviation), `row_height` (§4.7), `package` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14), `headings_grid`
-(§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10, the look), `merges_spill` and `border_conflicts` (§4.12), `text_style` (§4.7, §4.13), `rotation` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
+(§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10, the look), `merges_spill`, `border_conflicts` and `gradients` (§4.12), `text_style` (§4.7, §4.13), `rotation` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
 Excel 16.115 (Microsoft 365). The rules of §4.10, §4.11, §4.15, §4.16 and §4.14's theme fonts
 and palette have no capture here yet and are marked unverified until screen suites capture them
 on Microsoft 365; so are the parts of §4.12, §4.14 and §4.18 that say so. What still waits for
@@ -810,13 +810,14 @@ one.
 **Gradient fills.** `linear` runs along `degree`, clockwise from left to right, **taken in the
 unit cell**: on a `w × h` box the drawn angle is `90° + atan2(w sin d, h cos d)` in CSS terms, and
 the corners take the end stops, as CSS `linear-gradient` normalizes them; colors interpolate
-linearly in sRGB. Past the last stop the last color holds. One case had its first stop at 0.25:
-before it the color ran from the last stop's color at 0 (taken as the rule, unverified). `path`
-draws rectangular bands from the rectangle `left`, `right`, `top`, `bottom` (in the first stop's
-color) out to the cell's edges; all four 0 put the first stop at the top-left corner. A degree
-that is not finite is 0, rectangle values are clamped to 0 to 1, stops are sorted by position,
-and a gradient without stops is no fill (decided, not captured). Duplicate stop positions are
-read in order (what Excel draws for them is not captured).
+linearly in sRGB (`gradients`, zoom 100 and 200). A first stop past 0 is reached from black at
+0, and a last stop before 1 runs to black at 1 (`Gradient.drawn`). `path` draws rectangular bands
+from the rectangle `left`, `right`, `top`, `bottom` (in the first color drawn) out to the cell's
+edges; all four 0 put the first stop at the top-left corner. A degree that is not finite is 0,
+rectangle values are clamped to 0 to 1, stops are sorted by position, and a gradient without
+stops is solid black. Stops at one position keep the file's order: the last of them ends the
+stretch before it and the first starts the stretch after (red then blue at 0 runs red to black;
+white 0, red 0.5, blue 0.5 runs white to blue, then red to black).
 
 **Fills against gridlines.** A pattern or gradient covers its cell and the gridlines after its
 right and bottom edges, like a solid fill (§3.6); the cell to the right or below paints over that

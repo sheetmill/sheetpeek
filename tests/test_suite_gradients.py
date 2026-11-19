@@ -78,7 +78,8 @@ def drawn(path):
     sheet = sheetpeek.read(path)
     found = {}
     ordered = sorted(suite.cases(group), key=lambda c: _rc(c.cell))
-    filled = [c for c in ordered if sheet.cell(*_rc(c.cell)).style.fill_spec is not None]
+    # a gradient is a box of the fill layer; a solid fill (no stops: black) is the cell's own
+    filled = [c for c in ordered if isinstance(sheet.cell(*_rc(c.cell)).style.fill_spec, Gradient)]
     assert len(filled) == len(boxes), group  # the layer writes its boxes row by row
     for case in ordered:
         found[case.cell] = None
@@ -151,7 +152,8 @@ def test_the_gradient_workbooks_read_back_as_built(built):
         for case in suite.cases(group):
             spec = sheet.cell(*_rc(case.cell)).style.fill_spec
             if not case.stops:
-                assert spec is None, case.name  # no stops: no fill (decided, not captured)
+                # no stops: solid black, as Excel draws it (captured)
+                assert spec == sheetpeek.Pattern("solid", "000000"), case.name
                 continue
             assert isinstance(spec, Gradient), case.name
             assert spec.kind == case.kind, case.name
@@ -217,17 +219,21 @@ def test_no_case_draws_near_the_marker_color():
 def test_paint_follows_sheetpeeks_gradient_along_the_axis(built):
     # The evaluator of sheetpeek's CSS against sheetpeek's model (Gradient.color_at) along the
     # axis of the 0 and 90 degree cases. sheetpeek's box is the cell and its far gridline, a
-    # pixel more, so on the 57 px box of a 42 pt row the colors move by up to 255 / 57 levels.
+    # pixel more, so on the 57 px box of a 42 pt row the colors move by up to 255 / 57 levels
+    # where one stretch spans the box, and by that over the stretch's share where it is shorter
+    # (black at 0 to a first stop at 0.25: 4 times as many).
     sheet = sheetpeek.read(built / "gradients_main.xlsx")
     for case in suite.cases("main"):
         if case.kind != "linear" or case.degree not in (None, "90"):
             continue
         spec = sheet.cell(*_rc(case.cell)).style.fill_spec
         found = suite.EXPECTED["main"][case.cell]
+        shortest = min(p1 - p0 for (p0, _), (p1, _) in itertools.pairwise(spec.drawn) if p1 > p0)
         for f in suite.fractions(suite.PROFILE):
             at = (f, 0.5) if case.degree is None else (0.5, f)
             drawn_rgb, model = _rgb(paint(found, *at)), _rgb(spec.color_at(f))
-            assert max(abs(a - b) for a, b in zip(drawn_rgb, model, strict=True)) <= 5, case.name
+            off = max(abs(a - b) for a, b in zip(drawn_rgb, model, strict=True))
+            assert off <= 5 / shortest, case.name
 
 
 def test_paint_draws_a_path_from_its_rectangle_out():
@@ -502,11 +508,12 @@ def test_a_degree_not_finite_is_0(captured, specs):
 
 
 @pytest.mark.excel
-def test_a_gradient_without_stops_draws_nothing(captured):
+def test_a_gradient_without_stops_draws_black(captured):
     rows = _group(captured, "no_stops")
+    assert rows
     for (_, cell, _), row in rows.items():
         colors = row["grid"].replace("/", " ").split()
-        assert all(_near(c, "FFFFFF", 8) for c in colors), (cell, row["name"])
+        assert all(_near(c, "000000", 8) for c in colors), (cell, row["name"])
 
 
 @pytest.mark.excel

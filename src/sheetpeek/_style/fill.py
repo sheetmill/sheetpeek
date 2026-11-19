@@ -54,8 +54,8 @@ def to_fill(part: Any, context: Context) -> Fill | None:
         ((unit(stop.position), color(stop.color, context)) for stop in part.stops),
         key=lambda stop: stop[0],
     )
-    if not stops:  # nothing to draw; what Excel does is not captured
-        return None
+    if not stops:  # Excel draws a gradient without stops black (screen suite gradients)
+        return Pattern("solid", BLACK)
     return Gradient(
         "path" if part.type == "path" else "linear",
         tuple((position, found or BLACK) for position, found in stops),

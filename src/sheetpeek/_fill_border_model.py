@@ -150,8 +150,9 @@ class Gradient:
 
     ``linear`` runs along ``degree``, clockwise from left to right and taken in the unit cell;
     ``path`` runs from the rectangle ``left``, ``right``, ``top``, ``bottom`` (fractions of the
-    cell, in the first stop's color) out to the cell's edges in rectangular bands. ``stops`` are
-    ``(position, RRGGBB)`` in order of position, positions from 0 to 1.
+    cell, in the first color drawn) out to the cell's edges in rectangular bands. ``stops`` are
+    ``(position, RRGGBB)`` in order of position (stops at one position in the file's order),
+    positions from 0 to 1; :attr:`drawn` gives them as Excel draws them.
     """
 
     kind: Literal["linear", "path"]
@@ -162,20 +163,29 @@ class Gradient:
     top: float = 0.0
     bottom: float = 0.0
 
-    def color_at(self, t: float) -> str:
-        """The color at ``t`` from 0 to 1 along the gradient.
+    @property
+    def drawn(self) -> tuple[tuple[float, str], ...]:
+        """The stops as Excel draws them (screen suite ``gradients``).
 
-        Past the last stop the last color holds. Before a first stop placed after 0 the color runs
-        from the last stop's color at 0 to the first stop's (unverified).
+        A first stop past 0 is reached from black at 0, and a last stop before 1 runs to black at
+        1. Of stops at one position, the last in the file ends the stretch before it and the
+        first starts the stretch after, so each such group is reversed.
         """
-        stops = self.stops
-        first_position, first = stops[0]
-        if t < first_position:
-            last = stops[-1][1]
-            return blend(first, last, t / first_position)
+        found: list[tuple[float, str]] = []
+        for _, group in itertools.groupby(self.stops, key=lambda stop: stop[0]):
+            found.extend(reversed(list(group)))
+        if found[0][0] > 0:
+            found.insert(0, (0.0, BLACK))
+        if found[-1][0] < 1:
+            found.append((1.0, BLACK))
+        return tuple(found)
+
+    def color_at(self, t: float) -> str:
+        """The color at ``t`` from 0 to 1 along the gradient (:attr:`drawn`)."""
+        stops = self.drawn
         for (p0, c0), (p1, c1) in itertools.pairwise(stops):
-            if p0 <= t <= p1:
-                return c0 if p1 == p0 else blend(c1, c0, (t - p0) / (p1 - p0))
+            if p0 <= t <= p1 and p1 > p0:
+                return blend(c1, c0, (t - p0) / (p1 - p0))
         return stops[-1][1]
 
     @property

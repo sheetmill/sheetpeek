@@ -155,12 +155,21 @@ def test_a_path_gradient_is_read(tmp_path):
     )
 
 
-def test_before_a_first_stop_past_0_the_color_runs_from_the_last_stop():
-    # Unverified (stops white at 0.25, blue at 0.75): blue at 0, white at 0.25.
+def test_stops_inside_0_and_1_run_from_and_to_black():
+    # Captured (gradients; stops white at 0.25, blue at 0.75): black at 0 and at 1.
     found = Gradient("linear", ((0.25, "FFFFFF"), (0.75, "0000FF")))
-    assert found.color_at(0) == "0000FF"
+    assert found.color_at(0) == "000000"
     assert found.color_at(0.25) == "FFFFFF"
-    assert found.color_at(1) == "0000FF"
+    assert found.color_at(0.75) == "0000FF"
+    assert found.color_at(1) == "000000"
+
+
+def test_stops_at_one_position_end_the_stretch_before_in_the_last_and_start_after_in_the_first():
+    # Captured (gradients): white 0, red 0.5, blue 0.5 runs white to blue, then red to black.
+    found = Gradient("linear", ((0.0, "FFFFFF"), (0.5, "FF0000"), (0.5, "0000FF")))
+    assert found.color_at(0.4999) == blend("0000FF", "FFFFFF", 0.4999 / 0.5)
+    assert found.color_at(0.5001) == blend("000000", "FF0000", 0.0001 / 0.5)
+    assert found.drawn == ((0.0, "FFFFFF"), (0.5, "0000FF"), (0.5, "FF0000"), (1.0, "000000"))
 
 
 def test_stops_are_taken_in_order_of_position(tmp_path):
@@ -180,14 +189,14 @@ def test_stops_are_taken_in_order_of_position(tmp_path):
     )
 
 
-def test_a_gradient_without_stops_is_no_fill(tmp_path):
-    # Nothing to draw (what Excel does is not captured); the guard keeps it from failing.
-    assert spec(tmp_path, GradientFill(stop=())) == (None, None)
+def test_a_gradient_without_stops_is_black(tmp_path):
+    # Captured (gradients): Excel draws it solid black, linear or path.
+    assert spec(tmp_path, GradientFill(stop=())) == (Pattern("solid", "000000"), "000000")
 
 
 def test_duplicate_stop_positions_are_read_in_order(tmp_path):
-    # openpyxl refused the whole stylesheet; xlio reads it. What Excel draws for two stops at one
-    # position is not captured yet (unverified).
+    # openpyxl refused the whole stylesheet; xlio reads it. Kept in the file's order, which
+    # decides what Excel draws (Gradient.drawn, captured).
     path = filled(tmp_path, GradientFill(stop=("FFFFFFFF", "FF0000FF")))
     rewrite(path, STYLES, lambda t: t.replace('<stop position="1"', '<stop position="0"', 1))
     stops = sheetpeek.read(path).cell(1, 2).style.fill_spec.stops
@@ -308,9 +317,9 @@ def test_a_linear_gradient_takes_its_angle_in_the_unit_cell(degree):
     assert "#FFFFFF 0%,#0000FF 100%" in found
 
 
-def test_a_linear_gradient_starting_past_0_ramps_from_its_last_color():
+def test_a_linear_gradient_inside_0_and_1_ramps_from_and_to_black():
     found = gradient_css(Gradient("linear", ((0.25, "FFFFFF"), (0.75, "0000FF"))), 120, 45)
-    assert "#0000FF 0%,#FFFFFF 25%,#0000FF 75%" in found
+    assert "#000000 0%,#FFFFFF 25%,#0000FF 75%,#000000 100%" in found
 
 
 def test_a_path_gradient_is_four_bands(tmp_path):

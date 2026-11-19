@@ -174,10 +174,7 @@ def inside(boxes: list[str], at: list[tuple[int, int]], window: tuple[float, flo
 
 def gradient(spec: Gradient, width: int, height: int) -> str:
     """The declarations that draw a gradient on a box of ``width`` by ``height`` px."""
-    stops = list(spec.stops)
-    if stops[0][0] > 0:
-        # Before a first stop past 0 the color runs from the last stop's (one capture).
-        stops.insert(0, (0.0, stops[-1][1]))
+    stops = list(spec.drawn)
     if spec.kind == "linear":
         radians = math.radians(spec.degree)
         angle = 90 + math.degrees(math.atan2(width * math.sin(radians), height * math.cos(radians)))
@@ -209,7 +206,7 @@ def path_svg(spec: Gradient, stops: list[tuple[float, str]], w: int, h: int) -> 
     )
     inner = (
         f"<rect x='{left:g}' y='{top:g}' width='{right - left:g}' height='{bottom - top:g}' "
-        f"fill='#{spec.stops[0][1]}'/>"
+        f"fill='#{stops[0][1]}'/>"
         if right > left and bottom > top
         else ""
     )
