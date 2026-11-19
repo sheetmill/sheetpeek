@@ -1,0 +1,16 @@
+# excel: 16.115
+# build: 16.115.26110837
+# edition: Microsoft 365
+# channel: Current
+# macos: 26.5.1
+# appearance: dark
+# date: 2026-11-19
+# suite: color_kinds
+cell	attributes	fill	font_color	border_color
+C2	theme="5"	C0504D	C0504D	C0504D
+D2	rgb="FF0070C0"	0070C0	0070C0	0070C0
+E2	indexed="17"	008000	008000	008000
+C4	theme="5" rgb="FF0070C0"	C0504D	C0504D	C0504D
+D4	rgb="FF0070C0" indexed="17"	0070C0	0070C0	0070C0
+E4	theme="5" indexed="17"	C0504D	C0504D	C0504D
+F4	auto="1" rgb="FF0070C0"	0070C0	0070C0	0070C0

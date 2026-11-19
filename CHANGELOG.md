@@ -177,8 +177,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Census codes `text.rotation`, `text.stacked` and `border.slanted`, which every output declares.
 - `Book.sheets`: every sheet in workbook order as a `SheetInfo` (name, kind, state, tab color).
   Kinds come from the workbook's relationship types: `worksheet`, `chartsheet`, `dialogsheet`,
-  `macrosheet`. Tab colors are `RRGGBB` through the palette and theme; `auto` is `None`; a tab
-  color stating several kinds takes the one Excel draws (theme, then rgb, then indexed).
+  `macrosheet`. Tab colors are `RRGGBB` through the palette and theme; `auto` is `None`.
 - `sheetpeek.render_workbook()`: every sheet on one static HTML page, with Excel's tab strip
   below the sheets, or above them with `tabs="top"` (visible sheets in file order, tab colors as
   Excel draws them; hidden sheets with `hidden_sheets=True`, hidden rows and columns with
@@ -341,6 +340,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   text and vertically justified or distributed text fit their rows to the lines drawn, with the
   wrap flag or without it; an accounting underline under wrapped text is drawn once, under the
   last line (captured, suite `text_style_more`).
+- A cell or tab color that states two kinds takes the one Excel draws: theme before rgb, rgb
+  before indexed, rgb over `auto` (captured, suites `color_kinds` and `tab_strip`), where indexed
+  came first.
 - Rows in a Normal or cell font of Calibri or Aptos Narrow 13, 15, 17 or 22 are as tall as Excel
   makes them (captured, suite `row_height_more`: Calibri 17, 20, 23 and 29 pt, where they were
   16, 19, 21 and 21), and so are wrapped lines in them.

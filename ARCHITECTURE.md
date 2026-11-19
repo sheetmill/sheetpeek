@@ -172,7 +172,9 @@ leave them out by default and show them with an option.
 
 xlio returns a font, fill or border color as a `Color` holding every attribute the file states
 (`rgb`, `theme`, `indexed`, `auto`, `tint`). Where a file states more than one, the reader takes
-them in the order indexed, theme, auto, rgb (`_sheets.from_xlio`). A color element without
+the one Excel draws: theme before rgb, rgb before indexed, theme before indexed, and rgb over
+`auto`, in a fill, a font and a border (`color_kinds`) as on a tab (`tab_strip`); `auto` against
+theme or indexed is not captured and comes last (`_sheets.from_xlio`). A color element without
 attributes is read as `00000000`: black in a font, a border and a fill's foreground, and a fill's
 background in it is white (`auto_colors`).
 
@@ -666,7 +668,7 @@ a cached value (as openpyxl writes it) has no `t`. The same file confirms Excel 
 
 Captured so far, in `tests/captures/`: by print (route B) `layout` (§3.6, §4.1 to §4.7); read
 from Excel `theme_colors` and `theme_colors_more` (§3.3), `merge_width` and `error_width` (§4.2,
-§4.4, no deviation), `row_height` and `row_height_more` (§4.7), `package` and `package_more` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14), `theme_fonts_palette`
+§4.4, no deviation), `row_height` and `row_height_more` (§4.7), `color_kinds` (§3.3), `package` and `package_more` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14), `theme_fonts_palette`
 and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts`, `gradients` and `diagonals` (§4.12), `text_style` and `text_style_more` (§4.7, §4.13), `runs` (§4.16), `tab_strip` (§4.15), `outline` (§4.11), `rotation` and `rotation_more` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
 Excel 16.115 (Microsoft 365). Every section here rests on one of them; what no capture covers
 is marked unverified where it is stated, as are the parts of §4.12, §4.14 and §4.18 that say so. What still waits for
@@ -1106,10 +1108,7 @@ Which tabs the strip shows and how a tab color is drawn are captured by the suit
 - **State** from `sheet@state`: `visible`, `hidden`, `very_hidden`; anything else is visible.
 - **Tab color** from `sheetPr/tabColor` (xlio's sheet properties), so no cell is read for it.
   Resolved like any color (§3.3); `auto` and no color are `None`, since `auto` draws an
-  uncolored tab. When several kinds are given, Excel draws theme before rgb, rgb before indexed,
-  theme before indexed and rgb over `auto` (`_sheets.tab_color_from_xlio`); `auto` against theme
-  or indexed is not captured and comes last. This is not the order §3.3 takes for cell colors,
-  which no capture here covers.
+  uncolored tab. When several kinds are given, the one Excel draws, as for any color (§3.3).
   An index or theme number is an `unsignedInt` (`[0-9]{1,9}`, else none); a tint that is not
   a finite number is 0, and one past ±1 is clamped.
 - Sheets whose part is missing are left out (xlio does not list them), so `Book.sheets` and

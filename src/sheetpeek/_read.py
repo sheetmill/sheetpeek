@@ -75,7 +75,6 @@ from sheetpeek._sheets import (
     StatedColor,
     default_sheet,
     from_xlio,
-    tab_color_from_xlio,
 )
 from sheetpeek._structure import Structure, fill
 from sheetpeek._style import Code
@@ -317,7 +316,7 @@ class Book:
                 if sheet.name not in kept:
                     kept[sheet.name] = (
                         sheet,
-                        tab_color_from_xlio(source.properties.tab_color),
+                        from_xlio(source.properties.tab_color),
                     )
             views = self._book.views
         active = views[0].active_tab if views else None

@@ -67,30 +67,12 @@ class ListedSheet:
 
 
 def from_xlio(color: Any) -> StatedColor | None:
-    """An ``xlio.Color`` as a :class:`StatedColor`.
+    """An ``xlio.Color`` as a :class:`StatedColor`, its attributes in the order Excel draws them.
 
-    Its attributes are taken in the order indexed, theme, auto, rgb, as
-    :func:`stated_color` takes them.
-    """
-    if color is None:
-        return None
-    if color.indexed is not None:
-        return StatedColor("indexed", indexed=color.indexed, tint=color.tint)
-    if color.theme is not None:
-        return StatedColor("theme", theme=color.theme, tint=color.tint)
-    if color.auto:
-        return StatedColor("auto", tint=color.tint)
-    if color.rgb is not None:
-        return StatedColor("rgb", rgb=color.rgb, tint=color.tint)
-    return None
-
-
-def tab_color_from_xlio(color: Any) -> StatedColor | None:
-    """A ``tabColor`` as a :class:`StatedColor`, its attributes in the order Excel draws them.
-
-    Where a tab color states more than one kind, Excel draws theme before rgb, rgb before indexed
-    and theme before indexed, and rgb over ``auto`` (captured, ``tab_strip``); ``auto`` against
-    theme or indexed is not captured and comes last. Cell colors keep :func:`from_xlio`'s order.
+    Where a color states more than one kind, Excel draws theme before rgb, rgb before indexed
+    and theme before indexed, and rgb over ``auto``, in a cell's fill, font and border
+    (captured, ``color_kinds``) and on a tab (``tab_strip``); ``auto`` against theme or indexed
+    is not captured and comes last.
     """
     if color is None:
         return None
