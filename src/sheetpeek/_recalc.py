@@ -149,14 +149,24 @@ class Recalc:
         return self._answer
 
     def engine(self) -> xlrecalc.Workbook | None:
-        """The engine, loaded on first use; ``None`` when xlrecalc cannot load the book."""
+        """The engine, loaded and recalculated on first use; ``None`` when xlrecalc fails.
+
+        Everything Excel would compute on opening is computed at once, as Excel does, and each
+        value is then read as it stands: asked for one by one, each stale cell would be a
+        recalculation of its own, and in xlrecalc 0.4 each such recalculation goes over every
+        cell that rests on a value it keeps (a workbook with a function it does not compute
+        took hours).
+        """
         if self._engine is None and self.error is None:
             try:
-                self._engine = xlrecalc.load(
+                engine = xlrecalc.load(
                     self._source(), recalc_on_load=self.mode, limits=self._limits
                 )
+                engine.recalculate()
             except Exception as error:
                 self.error = _reason(error)
+            else:
+                self._engine = engine
         return self._engine
 
 

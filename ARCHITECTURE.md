@@ -1736,8 +1736,11 @@ only. Feeding ends as soon as the answer is `"all"`. The answer is the whole wor
 volatile cell or a formula without a value on one sheet changes what another shows. A range
 without formulas asks nothing, and `"none"` keeps every cached value without an engine.
 Otherwise one engine per `Book`, loaded on first use (`xlrecalc.load`, which reads every
-worksheet again), gives the value of each formula cell of the range and of each cell an array
-formula or data table fills there. xlrecalc reads the book's own open file through a view with
+worksheet again) and recalculated at once, the whole workbook's share as Excel computes it on
+opening, gives the value of each formula cell of the range and of each cell an array formula or
+data table fills there. Asked for cell by cell instead, each stale cell is a recalculation of its
+own, and each goes over every cell that rests on a value xlrecalc keeps: a corpus workbook with a
+function xlrecalc does not compute took over an hour that way, and five seconds this way. xlrecalc reads the book's own open file through a view with
 a position of its own (`_recalc.FileView`), so what it computes is what was checked; it is
 given the file, not its path.
 
@@ -1751,6 +1754,17 @@ cached values, since xlrecalc computes worksheets only. An array formula fills t
 file records for it: a dynamic array that would spill further is not grown. Computed values take
 the model's types as read ones do (§3): a whole number below 2**53 an `int`, an error an
 `xlformat.ExcelError`.
+
+**Measured** (every sheet of a book read, best of three, each in a fresh process, against the
+reader before recalculation, measured together). The largest public workbook (§5.2; 10
+formulas, an older `calcId`, so Excel recalculates it all): 37.7 s and 864 MiB before, 56.8 s and
+967 MiB under `"excel"`, 55.0 s and 889 MiB under `"never"`. Nearly all of the difference is the
+workbook read a second time: xlrecalc's load reads every sheet again (19.2 s alone), and under
+`"never"`, where the workbook part does not settle the answer, the formula-only pass does
+(17.6 s). A workbook openpyxl wrote, 100,000 rows of 4 formulas with no values: 2.7 s and
+175 MiB before, 8.4 s and 318 MiB (load 2.5 s, the rest computing 400,001 formulas). The same
+workbook with its values and marked as Excel saves it, where nothing is recalculated but every
+formula is given to the check: 2.7 s and 167 MiB before, 3.3 s and 189 MiB.
 
 ## 6. The xlformat seam
 

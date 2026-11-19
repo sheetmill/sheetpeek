@@ -324,3 +324,34 @@ def test_the_command_line_takes_the_mode(tmp_path):
     with pytest.raises(SystemExit):
         parser.parse_args(["view", str(path), "--recalc-on-load", "sometimes"])
     assert parser.parse_args(["serve", ".", "--recalc-on-load", "never"]).recalc_on_load == "never"
+
+
+def test_the_engine_recalculates_once_then_reads(tmp_path, monkeypatch):
+    # Asked for cell by cell, each stale cell would be a recalculation of its own; with a
+    # function xlrecalc does not compute, xlrecalc 0.4 then took hours on a workbook.
+    runs = []
+    recalculate = xlrecalc.Workbook.recalculate
+
+    def counted(self, *args, **kwargs):
+        runs.append(args)
+        return recalculate(self, *args, **kwargs)
+
+    monkeypatch.setattr(xlrecalc.Workbook, "recalculate", counted)
+    cells = [A1, '<c r="B1"><f>CUBEVALUE("x")</f><v>1</v></c>']
+    cells += [f'<c r="{c}1"><f>B1+A1</f><v>0</v></c>' for c in "CDEFG"]
+    cells += [f'<c r="{c}1"><f>A1*2</f><v>0</v></c>' for c in "HIJKL"]
+    sheet = sheetpeek.read(book(tmp_path, row(1, *cells), by_excel=False))
+    # Resting on B1, which xlrecalc keeps: their cached values; the others computed.
+    assert [sheet.cell(1, c).value for c in range(3, 13)] == [0] * 5 + [4] * 5
+    assert len(runs) == 1
+
+
+def test_a_failure_in_the_recalculation_keeps_every_cached_value(tmp_path, monkeypatch):
+    def fail(self, *args, **kwargs):
+        raise RuntimeError("inside")
+
+    monkeypatch.setattr(xlrecalc.Workbook, "recalculate", fail)
+    sheet = sheetpeek.read(book(tmp_path, row(1, A1, STALE), by_excel=False))
+    assert sheet.cell(1, 2).value == 99
+    (notice,) = notices(sheet)
+    assert "xlrecalc could not read the workbook: inside" in notice.message
