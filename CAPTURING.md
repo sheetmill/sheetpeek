@@ -156,7 +156,8 @@ outline symbols are fixed in screen units, so they are reported in screen points
 
 `python -m capture.screen run SUITE ...` runs suites one at a time (one Excel, never two
 captures at once); `read SUITE ...` measures saved captures again from `capture/build/<suite>/`
-without Excel. Each suite writes `tests/captures/<suite>.tsv`. The suites: `rotation` (angled
+without Excel. Each suite writes `tests/captures/<suite>.tsv`, gzipped as `<suite>.tsv.gz` when
+it is large (`tables`). The suites: `rotation` (angled
 and stacked text: which borders slant, where general text is anchored, fitted heights over
 lengths and sizes; cases measured by row height alone are read without a capture), and the
 cell-style suites `borders`, `fills` and `text_style`, `filters` (filter and sort buttons) and
@@ -204,5 +205,6 @@ Excel makes of them. A case that hangs ends the run and nothing is written.
 | `filters` | 30 | route C, the screen: filter and sort buttons on the sheet's filter and two tables: box, gaps, glyph (bitmap id), at zoom 100 and 200 |
 | `fills` | 82 | route C, the screen: the 19 pattern types in two color pairs: tile, share, extent, gridlines between patterned cells, at zoom 100 and 200 |
 | `text_style` | 234 | route C, the screen: vertical and horizontal alignment, distributed included, indent, reading order; shrink to fit; underlines, strike, super- and subscript; the width a wrapped line may take; lone distributed words |
+| `tables` | 2,726 | route C, the screen: table styles, all 60 presets and the rules around them: each table cell's display format, read exactly, and the device pixels across each of its edges, at zoom 100; Excel's refusal of a merge inside a table |
 | `rotation` | 157 | route C, the screen: slanted borders and the text between them, anchoring, alignment, fitted heights, turned wrapping, upright widths at 9 to 20 pt |
 | `package` | 68 | a control, a minimal `<!DOCTYPE>`, bzip2 and LZMA parts, a part named twice, three kinds of false size, widths, heights, font sizes and sheet defaults no sheet can have, a control |

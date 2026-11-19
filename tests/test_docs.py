@@ -77,3 +77,14 @@ def test_module_references_resolve(reference):
         assert (PACKAGE / f"{module}.py").is_file(), f"{module}.py"
     else:
         assert name in names(PACKAGE / f"{module}.py"), f"{module}.{name}"
+
+
+def test_every_capture_is_listed():
+    # Each file in tests/captures/ is a row of CAPTURING.md's Suites table and named in §4.9.
+    capturing = (ROOT / "CAPTURING.md").read_text(encoding="utf-8")
+    start = ARCHITECTURE.index("### 4.9 Captures")
+    section = ARCHITECTURE[start : ARCHITECTURE.index("\n### ", start + 1)]
+    for path in sorted((ROOT / "tests" / "captures").iterdir()):
+        suite = path.name.split(".")[0]
+        assert f"| `{suite}` |" in capturing, suite
+        assert f"`{suite}`" in section, suite
