@@ -112,7 +112,7 @@ def scaled(font: xlformat.Font, scale: float) -> xlformat.Font:
 def shrink_step(text: str, font: xlformat.Font, budget: float) -> int:
     """The step ``k`` of shrink to fit: the largest from 1 to 7 at which the text fits ``budget``.
 
-    7 when it fits unshrunk; 1 when nothing fits, the text then clipped (unverified).
+    7 when it fits unshrunk; 1 when nothing fits, the text then clipped (decided, §4.13).
     """
     for k in range(SHRINK_STEPS, 0, -1):
         if xlformat.text_width(text, font=scaled(font, k / SHRINK_STEPS)) <= budget:

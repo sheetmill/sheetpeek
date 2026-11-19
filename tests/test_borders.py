@@ -96,7 +96,7 @@ def test_the_stronger_style_wins_in_either_order():
 
 @pytest.mark.parametrize(
     ("darker", "lighter"),
-    [  # 11 pairs (unverified)
+    [  # the luma rule (unverified)
         ("FF0000", "00FF00"),
         ("0000FF", "00FF00"),
         ("000000", "0000FF"),

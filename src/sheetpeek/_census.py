@@ -129,8 +129,9 @@ def census(
 def _boxed(borders: Any) -> bool:
     """Whether a cell has a side border, which Excel slants with angled text (§4.17).
 
-    Excel slants all four together (captured); which sides alone trigger it is unverified, so
-    any side counts.
+    Excel slants them with all four sides, left alone, bottom alone, left and right, and top and
+    bottom (captured, ``rotation``'s ``slant`` group); right alone and top alone are
+    unverified, so any side counts.
     """
     if borders is None:
         return False
