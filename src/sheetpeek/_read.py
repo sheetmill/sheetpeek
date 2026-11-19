@@ -448,6 +448,7 @@ class Book:
             show_gridlines=structure.show_gridlines,
             show_headings=structure.show_headings,
             grid_color=grid_color(structure.grid_color_id, self._palette),
+            theme_colors=self._theme,
             palette=self._own_palette,
             outline=outline,
             view=self._view(name),
@@ -772,8 +773,14 @@ def whole_characters(text: str) -> str:
 
 
 def _drawn(font: Font) -> Font:
-    """A font as drawn: what the file stored for a theme font (scheme, name) does not count."""
-    return dataclasses.replace(font, scheme=None, stored_name=None) if font.scheme else font
+    """A font as drawn, black for automatic.
+
+    What the file stored for a theme font (scheme, name) and the theme color a color comes from
+    do not count.
+    """
+    return dataclasses.replace(
+        font, scheme=None, stored_name=None, theme_color=None, color=font.color or "000000"
+    )
 
 
 def open(  # noqa: A001 - the module-level open() of gzip, tarfile, shelve

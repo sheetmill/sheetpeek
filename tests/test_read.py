@@ -262,12 +262,14 @@ def test_styles(tmp_path):
     )
     assert (b1.font.name, b1.font.size, b1.font.color) == ("Calibri", 11.0, "95B3D7")
     assert c1.font.color == "FF0000"
-    # The default font's color is theme 1 ("Text 1"): the default foreground, like automatic.
-    assert d1.font.color is None
+    # The default font's color is theme 1 ("Text 1"), the theme's dark 1: black here.
+    assert (d1.font.color, d1.font.theme_color) == ("000000", 1)
     assert (d1.fill, d1.style.h_align, d1.style.v_align) == (None, "general", "bottom")
     assert e1.number_format == "#,##0.00"
     # openpyxl's Normal font is the theme's body font, Calibri (§4.14).
-    assert sheet.normal_font == sheetpeek.Font("Calibri", 11.0, scheme="minor")
+    assert sheet.normal_font == sheetpeek.Font(
+        "Calibri", 11.0, color="000000", scheme="minor", theme_color=1
+    )
 
 
 def test_styles_are_shared(tmp_path):
@@ -287,7 +289,7 @@ def test_normal_font_from_the_workbook(tmp_path):
     # Without its scheme: a theme font would be drawn in the theme's typeface (§4.14).
     rewrite(path, "xl/styles.xml", replace_once('<scheme val="minor" />', ""))
     sheet = sheetpeek.read(path)
-    assert sheet.normal_font == sheetpeek.Font("Arial", 10.0)
+    assert sheet.normal_font == sheetpeek.Font("Arial", 10.0, color="000000", theme_color=1)
     assert sheet.cell(1, 1).font.name == "Arial"
 
 

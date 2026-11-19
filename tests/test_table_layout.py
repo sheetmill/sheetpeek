@@ -227,21 +227,23 @@ def test_a_later_element_replaces_an_earlier_bottom_line(tmp_path):
     assert borders.horizontal[2] == (Side("thick", "000000"),) * 3
 
 
-def test_an_uncolored_style_equal_to_a_theme_1_style_keeps_its_own_color(tmp_path):
-    # B1 keeps the default font (theme 1, the Normal font's color); C1's font is the same but
-    # without a color. Their styles compare equal, so the record of styles in the Normal font's
-    # color must go by identity: were equal styles ever shared, C1 would take the white too.
+def test_a_style_equal_to_the_normal_ones_keeps_its_own_font_color(tmp_path):
+    # B1 keeps the default font (theme 1, the Normal font's color); C1's is theme 1 at a tint too
+    # small to change black, so it is not the Normal font's color, yet the two styles compare
+    # equal. The record of styles in the Normal font's color must go by identity: were equal
+    # styles ever shared, C1 would take the header's white too.
     styles = pytest.importorskip("openpyxl.styles")
 
     def own(ws):
-        ws["C1"].font = styles.Font(name="Calibri", sz=11, family=2, scheme="minor")
+        color = styles.Color(theme=1, tint=1e-6)
+        ws["C1"].font = styles.Font(name="Calibri", sz=11, family=2, scheme="minor", color=color)
 
     path = book(tmp_path, edit=own)
     sheet = sheetpeek.read(path)
     assert sheet.cell(1, 3).style == sheet.cell(1, 2).style
     found = displayed(path)
     assert found[(1, 2)].font.color == "FFFFFF"
-    assert found[(1, 3)].font.color is None
+    assert found[(1, 3)].font.color == "000000"
 
 
 def notices(path, to):

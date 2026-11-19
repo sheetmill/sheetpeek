@@ -42,11 +42,8 @@ def to_font(
     of either scheme is drawn in that typeface, whatever name it stores (unverified, §4.14).
     """
     color = font.color
-    # Theme color 1 ("Text 1") is what Excel's own default font uses for ordinary text, so
-    # untinted it means the default foreground, like an automatic color. The theme wins over
-    # rgb and auto, as indexed wins over the theme.
-    if color is not None and color.indexed is None and color.theme == 1 and not color.tint:
-        color = None
+    # Indexed wins over the theme, and the theme over rgb and auto.
+    theme = color.theme if color is not None and color.indexed is None else None
     stored = font.name or normal.name
     scheme = _SCHEMES.get(font.scheme)
     name = (theme_fonts or {}).get(scheme or "") or stored
@@ -61,6 +58,7 @@ def to_font(
         vert_align=_VERT_ALIGN.get(font.vert_align),
         scheme=scheme,
         stored_name=stored if name != stored else None,
+        theme_color=theme,
     )
 
 

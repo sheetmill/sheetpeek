@@ -109,6 +109,8 @@ class RichBackend:
         prefix = " " * gutter.width + (" " * label + self.separator if self.row_headings else "")
         # A grid color draws the separators, Excel's gridlines, in that color (approximated).
         grid = sheet.sheet.grid_color if sheet.sheet.show_gridlines else None
+        themes = sheet.sheet.theme_colors
+        dark = themes[1] if len(themes) > 1 else None
         if sheet.columns:
             for band in gutter.column_lines(sheet.columns, self.separator):
                 yield Text(prefix + band, style=dim, end="\n")
@@ -130,7 +132,7 @@ class RichBackend:
                     number = str(row.index) if line == 0 else ""
                     text.append(number.rjust(label) + self.separator, style=dim)
                 for p, cell in enumerate(row.cells):
-                    style = _style(cell.font, cell.color, cell.fill)
+                    style = _style(cell.font, _ink(cell.font, cell.color, dark), cell.fill)
                     chars = cell.lines[line]
                     if buttons and cell.button is not None:
                         chars = with_button(cell, line, row.height, chars)
@@ -141,7 +143,7 @@ class RichBackend:
                         if crossing is not None:
                             # Text crossing a gap comes from the cell both neighbors show.
                             after = row.cells[p + 1].source if p + 1 < len(row.cells) else None
-                            style = _style(gap.font, gap.color, gap.fill)
+                            style = _style(gap.font, _ink(gap.font, gap.color, dark), gap.fill)
                             links.append(
                                 text, crossing, style, cell.source if after == cell.source else None
                             )
@@ -180,6 +182,17 @@ class _Links:
         text.append(chars[:start], style=style)
         text.append(core, style=style + link)
         text.append(chars[end:], style=style)
+
+
+def _ink(font: Font | None, color: str | None, dark: str | None) -> str | None:
+    """The text's color, or ``None`` for the terminal's own.
+
+    Untinted theme color 1 ("Text 1", Excel's default font color) is ordinary text, so it
+    follows the terminal (ARCHITECTURE.md §3.3).
+    """
+    if font is not None and font.theme_color == 1 and color == dark:
+        return None
+    return color
 
 
 def _style(font: Font | None, color: str | None, fill: str | None) -> Any:

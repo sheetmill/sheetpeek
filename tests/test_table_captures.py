@@ -36,13 +36,7 @@ LINE_AT = {
 """Where each line's device pixels lie in a strip (at 2 pixels a point, the boundary after 6)."""
 TOLERANCE = 8
 """Per channel: the screen's color conversion moves saturated colors (00B050 shows as 06B050)."""
-KNOWN = {
-    ("theme", "font_color"): (
-        12,
-        "theme color 1 untinted is drawn as automatic black (§3.3); the second theme's dark 1 "
-        "is 1F3864",
-    ),
-}
+KNOWN: dict[tuple[str, str], tuple[int, str]] = {}
 """Known deviations: (group, property) to (count, reason)."""
 
 
@@ -153,6 +147,23 @@ def test_every_table_cell_is_displayed_as_excel_displays_it(compared):
         f"{sum(len(v) for v in differences.values())} known deviations: "
         + "; ".join(f"{group} {key} {n} ({reason})" for (group, key), (n, reason) in KNOWN.items())
     )
+
+
+def test_html_draws_theme_color_1_in_the_themes_dark_1(tmp_path):
+    # The second theme's dark 1 is 1F3864, as Excel draws the default font's text (theme 1):
+    # the page must not fall back to automatic black for it.
+    tables = pytest.importorskip("capture.tables")
+    path = tmp_path / "theme.xlsx"
+    wb = openpyxl.Workbook()
+    tables.fill(wb.active, "theme")
+    wb.save(path)
+    tables.postprocess("theme")(path)
+    sheet = sheetpeek.read(path)
+    assert sheet.theme_colors[1] == tables.SECOND_THEME["dk1"] == "1F3864"
+    page = sheetpeek.render(sheet, "html")
+    assert "color:#1F3864" in page
+    (dark,) = [r for r in _records() if r["group"] == "theme" and r["cell"] == "J29"]
+    assert _hex(dark["font_color"]) == "1F3864"  # Excel's display format for that cell
 
 
 def test_every_group_is_captured():

@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- `Font.theme_color`, the theme color a font color comes from (Excel's `Font.ThemeColor`), and
+  `Sheet.theme_colors`, the workbook theme's twelve colors.
 - Tables are read: `Sheet.tables` holds each table (`Table`: its range, header and totals rows,
   its `TableStyleInfo`) and `Sheet.table_styles` the styles they name, the workbook's own or
   Excel's presets (`TableStyle`, `TableStyleElement`), each element's `DifferentialFormat`
@@ -189,6 +191,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   with a solid blue line, as Excel's page break preview draws them. Off by default.
 
 ### Changed
+- `Font.color` of a theme color 1 font ("Text 1", Excel's default font color) is its RGB, the
+  theme's dark 1 (`000000` in Excel's themes), where it was `None` like automatic: `Font.color`
+  is the color Excel draws, and the new `Font.theme_color` says which theme color it comes from.
+  HTML draws such text in the theme's dark 1, as Excel does under a theme whose dark 1 is not
+  black; rich still shows it as the terminal's default text. Automatic stays `None`.
 - Workbooks are read through xlio (`xlio==0.3.*`, a new dependency), in one pass of each sheet's
   cells, where 0.2.0 read them through openpyxl's read-only mode; values are read as Excel reads
   them (the entries below), and none of openpyxl's warnings reach the caller. On the

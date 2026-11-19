@@ -62,7 +62,7 @@ def run(page: Page, run: TextRun) -> str:
         style.append(f"font:{_font(run.font, drawn)}")
     if run.direction == "rtl":
         style.append("direction:rtl")
-    if run.color:
+    if run.color and run.color != "000000":  # the page's ink (--sheetpeek-ink) is black
         style.append(f"color:#{run.color}")
     if spacing:
         style.append(f"letter-spacing:{_number(spacing)}pt")

@@ -91,7 +91,7 @@ def test_the_normal_font_follows_the_theme(tmp_path):
     path = themed(build(tmp_path, {"A1": (1, {})}))
     sheet = sheetpeek.read(path)
     assert sheet.normal_font == ModelFont(
-        "Courier New", 11.0, scheme="minor", stored_name="Calibri"
+        "Courier New", 11.0, color="000000", scheme="minor", stored_name="Calibri", theme_color=1
     )
     assert sheet.cell(1, 1).font.name == "Courier New"
     rendered = sheet.layout("excel")
@@ -383,3 +383,44 @@ def test_heading_colors(tmp_path, scheme, colors):
     block = text[text.index(selector) :].split("}")[0]
     for name, color in zip(("paper", "ink", "grid"), colors, strict=True):
         assert f"--sheetpeek-heading-{name}: {color};" in block
+
+
+def test_theme_color_1_is_the_themes_dark_1_and_automatic_stays_automatic(tmp_path):
+    # Font.color is the color Excel draws, Font.theme_color the theme color it comes from, as
+    # Excel's Font.Color and Font.ThemeColor report them; rich keeps untinted theme 1 as the
+    # terminal's default text (ARCHITECTURE.md §3.3).
+    pytest.importorskip("openpyxl")
+    tables = pytest.importorskip("capture.tables")
+    styles = pytest.importorskip("openpyxl.styles")
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws["A1"] = "theme 1"
+    ws["A2"] = "auto"
+    ws["A2"].font = styles.Font(name="Calibri", sz=11, color=styles.Color(auto=True))
+    ws["A3"] = "tinted"
+    ws["A3"].font = styles.Font(name="Calibri", sz=11, color=styles.Color(theme=1, tint=0.5))
+    path = tmp_path / "dark.xlsx"
+    wb.save(path)
+    tables.second_theme(path)
+    sheet = sheetpeek.read(path)
+    fonts = [sheet.cell(r, 1).font for r in (1, 2, 3)]
+    assert [(f.color, f.theme_color) for f in fonts] == [
+        ("1F3864", 1),
+        (None, None),
+        (fonts[2].color, 1),
+    ]
+    assert fonts[2].color not in (None, "1F3864")
+    # HTML draws what Excel draws: the plain cell's text in dark 1, nothing else on the page so.
+    alone = tmp_path / "alone.xlsx"
+    single = openpyxl.Workbook()
+    single.active["A1"] = "theme 1"
+    single.save(alone)
+    tables.second_theme(alone)
+    assert "color:#1F3864" in sheetpeek.render(alone, "html")
+    pytest.importorskip("rich")
+    from sheetpeek.backends.rich import RichBackend
+
+    shown = sheetpeek.render(sheet, RichBackend(color_system="truecolor"))
+    lines = shown.splitlines()
+    assert "\x1b[38;2;31;56;100m" not in lines[0]  # untinted theme 1: the terminal's own color
+    assert "\x1b[38;2;" in lines[2]  # the tinted one keeps its color

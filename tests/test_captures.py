@@ -423,19 +423,19 @@ THEME_CAPTURE = Path(__file__).with_name("captures") / "theme_colors.tsv"
 
 @pytest.mark.excel
 def test_theme_colors_match_excel(tmp_path):
-    # Every theme index 0 to 11 with eight tints, as a fill and as a font color. The font color
-    # of theme 1 without tint ("Text 1") is automatic by design (ARCHITECTURE.md §3.3).
+    # Every theme index 0 to 11 with eight tints, as a fill and as a font color, each font
+    # reporting its theme index (Excel's Font.ThemeColor).
     from capture.theme_colors import build
 
     sheet = sheetpeek.read(build(tmp_path / "theme_colors.xlsx"))
     lines = THEME_CAPTURE.read_text(encoding="utf-8").splitlines()
     records = [line.split("\t") for line in lines if line and not line.startswith("#")][1:]
     deviations = {}
-    for address, theme, tint, fill, font in records:
+    for address, theme, _tint, fill, font in records:
         position = sheetpeek.CellRange.parse(address)
         cell = sheet.cell(position.min_row, position.min_col)
-        automatic = (theme, float(tint)) == ("1", 0.0)
-        if cell.fill != fill or cell.font.color != (None if automatic else font):
+        drawn = (cell.fill, cell.font.color, cell.font.theme_color)
+        if drawn != (fill, font, int(theme)):
             deviations[address] = (cell.fill, fill, cell.font.color, font)
     assert len(records) == 96
     REPORT["theme colors"] = (

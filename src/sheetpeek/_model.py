@@ -158,7 +158,11 @@ def _parse_cell(text: str, ref: str) -> tuple[int, int]:
 
 @dataclass(frozen=True, slots=True)
 class Font:
-    """A cell's font. ``color`` is ``RRGGBB``, or ``None`` for automatic."""
+    """A cell's font. ``color`` is ``RRGGBB``, or ``None`` for automatic.
+
+    ``color`` and ``theme_color`` mirror Excel's ``Font.Color`` and ``Font.ThemeColor``: the color
+    Excel draws, and the theme color the file names for it, if any.
+    """
 
     name: str
     size: float
@@ -169,6 +173,8 @@ class Font:
     ``doubleAccounting``."""
     strike: bool = False
     color: str | None = None
+    """The color Excel draws, ``RRGGBB`` (a theme color resolved through the workbook's theme, its
+    tint applied), or ``None`` for automatic."""
     vert_align: VerticalTextPosition | None = None
     """``superscript`` or ``subscript``: the whole cell's text drawn at two thirds of the size,
     raised or lowered (``ARCHITECTURE.md`` §4.13); ``None`` on the baseline."""
@@ -177,6 +183,9 @@ class Font:
     whose ``name`` is then the theme's typeface (§4.14); ``None`` for a font named for itself."""
     stored_name: str | None = None
     """The name the file stores, when Excel draws another (a theme font); else ``None``."""
+    theme_color: int | None = None
+    """The theme color ``color`` comes from, tinted or not, by the index the file uses (0 light 1,
+    1 dark 1, 2 light 2, 3 dark 2, then the accents and links); ``None`` for any other color."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -325,6 +334,10 @@ class Sheet:
     grid_color: str | None = None
     """The gridlines' color, ``RRGGBB`` from the workbook palette (``<sheetView
     defaultGridColor="0" colorId>``), or ``None`` for Excel's automatic gray (§4.14)."""
+    theme_colors: tuple[str, ...] = ()
+    """The workbook theme's twelve colors, ``RRGGBB``, by the index a color's ``theme`` names
+    (``Font.theme_color``): 0 light 1, 1 dark 1, 2 light 2, 3 dark 2, accents 1 to 6, the link
+    and the followed link; empty without a theme."""
     palette: tuple[str, ...] | None = None
     """The workbook's indexed palette when the file has its own (``<indexedColors>``), as its
     indexed colors are drawn: 64 ``RRGGBB`` entries, one the file lacks or cannot be read taken

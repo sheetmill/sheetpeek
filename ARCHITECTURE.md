@@ -110,7 +110,7 @@ layout fields marked *layout*. The style fields (`number_format` to `indent`) li
 | `value` | `None \| bool \| int \| float \| str \| ExcelError` | xlio's `Sheet.cells(ref, rich=True)`: the value as Excel reads it; a whole number below 2**53 is an `int` | raw cached value; dates stay serial numbers; `xlformat.ExcelError` (a `str` enum, compared with `==`) for `data_type == "e"`, or `str` when the file's text is not shaped like an error code |
 | `kind` | `"empty" \| "number" \| "text" \| "bool" \| "error"` | `cell.data_type` | a date is a `number` whose format is a date format; `d` cells (ISO 8601, rare) become serials |
 | `number_format` | `str` | `cell.number_format` | |
-| `font` | `Font(name, size, bold, italic, underline, strike, color)` | the cell format's font (xlio); a missing name or size inherits the Normal style's | `color` is resolved `RRGGBB`, or `None` for automatic (§3.3) |
+| `font` | `Font(name, size, bold, italic, underline, strike, color, ..., theme_color)` | the cell format's font (xlio); a missing name or size inherits the Normal style's | `color` is resolved `RRGGBB`, or `None` for automatic; `theme_color` the theme index it comes from (§3.3) |
 | `fill` | `str \| None` | `fgColor` of a `solid` pattern fill, resolved | other patterns map to their foreground color, a documented approximation; gradients are ignored |
 | `fill_spec` | `Pattern \| Gradient \| None` | `cell.fill` (§4.12) | the fill itself: a pattern's kind and two colors, or a gradient's kind, angle, rectangle and stops; `fill` is its one color |
 | `borders` | `Borders \| None` | `cell.border` (§4.12) | four `Side`s (style, color) and the diagonal with its two flags; `start` and `end` read as `left` and `right` |
@@ -156,6 +156,7 @@ text styles into `Font` and `CellStyle` (§4.13). Rich-text runs inside one cell
 | `show_gridlines` | xlio: `<sheetView showGridLines>` |
 | `grid_color` | xlio: `<sheetView defaultGridColor colorId>`, through the workbook palette (§4.14) |
 | `autofilters` (`AutoFilter`s, the sheet's then each table's, that touch `ref`) | xlio: the sheet's `<autoFilter>` and each table's, their `filterColumn` flags and criteria, and the `sortState` inside or beside them (§4.19) |
+| `theme_colors` | xlio: the theme's `clrScheme`, by the index a color's `theme` names (§3.3) | twelve `RRGGBB`, empty without a readable theme |
 | `palette` | xlio: `<indexedColors>` as the indexed colors take it (64 entries, the default's for an entry missing or not a color), `None` without it (§4.14) |
 | `normal_font` | the font of xlio's `Normal` cell style, else the workbook's first font |
 | `date1904` | xlio: `<workbookPr date1904>` |
@@ -186,10 +187,16 @@ attributes is read as `00000000`, black (unverified).
   the lightness in Windows' integer HLS on a scale of 240 (`ColorRGBToHLS`), the result
   truncated, with grays rounded back. Floating-point HLS was off by one or two in a channel in 43
   of the 96 cells; the integer arithmetic reproduces all of them.
-- `auto` or missing: `None`, the backend's default foreground. A dark terminal then shows light
-  text, deliberately, because black text in a workbook means default text.
-- A font color of theme 1 without tint is also `None`. Excel's own default font is stored as
-  theme 1 ("Text 1"), so in practice it means ordinary text, not a chosen black.
+- `auto` or missing: `None`, the backend's default foreground (black on the HTML page).
+- A font's theme color is also kept as `Font.theme_color`, tinted or not, so `Font.color` and
+  `Font.theme_color` mirror Excel's `Font.Color` and `Font.ThemeColor`. Theme color 1 ("Text
+  1", what Excel's own default font is stored as) is the theme's dark 1 as the theme defines it:
+  black in Excel's themes (a `sysClr` such as `windowText` resolves to its `lastClr`), `1F3864`
+  under the `tables` suite's second theme, where HTML draws it so (§4.20). **rich** keeps it as
+  the terminal's default text, its approximation: a font of `theme_color` 1 whose color is the
+  theme's dark 1 (`Sheet.theme_colors[1]`, so untinted) follows the terminal, and a dark
+  terminal shows it light, because Excel's default text is ordinary text there, not a chosen
+  black. HTML writes no color for black run text, the page's ink (`--sheetpeek-ink`).
 
 The number format's `[ColorN]` is drawn from the workbook's palette (`Sheet.palette`, §4.14), as
 Excel draws it.
@@ -1406,7 +1413,7 @@ under a second theme, a workbook style of all 13 elements in order, thin later l
 thick earlier one, stripe sizes, a hidden row and a hidden column inside stripes, each style
 option alone, a table without a header row, and the cell's own fills, fonts, font colors and
 sides over a table, with the Normal style's font in eight colors. 2,724 cells and their edges
-agree with the rules below, but for one known deviation (theme color 1, below).
+agree with the rules below; one file Excel refuses, a merge inside a table, is shown (below).
 
 **Stacking** (`_dxf.py`): the formats that apply to a cell stack in order, a later one's
 property winning (fill, font color, bold, italic, underline, strikethrough); the cell's own style
@@ -1435,10 +1442,6 @@ neither the workbook's nor a preset draws nothing, as Excel draws it (group `unk
 font colors count as the cell's own is decided from the file's font records: the reader keeps
 the styles whose font color is the Normal style's, and a position without a `<c>`, which shows
 the Normal style, counts as one of them.
-
-**Known deviation:** theme color 1 untinted is drawn as automatic black (§3.3), where Excel
-draws the theme's dark 1: the same in Excel's own themes, `1F3864` under the suite's second
-theme (12 cells).
 
 The result is `RenderedCell.display_style`, what Excel's `Range.DisplayFormat` reports: the
 cell's own style with the table's stacked beneath it, the very `cell.style` object where nothing
