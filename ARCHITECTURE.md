@@ -155,7 +155,7 @@ text styles into `Font` and `CellStyle` (§4.13). Rich-text runs inside one cell
 | `default_column_width`, `default_row_height` | xlio: `<sheetFormatPr>` (`defaultColWidth`, `baseColWidth`, `defaultRowHeight`) |
 | `show_gridlines` | xlio: `<sheetView showGridLines>` |
 | `grid_color` | xlio: `<sheetView defaultGridColor colorId>`, through the workbook palette (§4.14) |
-| `autofilters` (`AutoFilter`s, the sheet's then each table's, that touch `ref`) | xlio: the sheet's `<autoFilter>` and each table's, their `filterColumn` flags and criteria, and the `sortState` inside or beside them (§4.19) |
+| `autofilters` (`AutoFilter`s, the sheet's then each table's, that touch `ref`) | xlio: the sheet's `<autoFilter>` and each table's, their `filterColumn` flags and criteria, and the `sortState` inside them, and a table's beside its `autoFilter` (§4.19) |
 | `tables` (`Table`s that touch `ref`) and `table_styles` (the `TableStyle`s they name) | xlio: each `<tablePart>`'s range, header and totals row counts and `tableStyleInfo`; the styles from the workbook's own, then Excel's 60 presets, each element's `<dxf>` as a `DifferentialFormat` of only what it sets (§4.20) |
 | `theme_colors` | xlio: the theme's `clrScheme`, twelve `RRGGBB` by the index a color's `theme` names, empty without a readable theme (§3.3) |
 | `palette` | xlio: `<indexedColors>` as the indexed colors take it (64 entries, the default's for an entry missing or not a color), `None` without it (§4.14) |
@@ -659,7 +659,7 @@ a cached value (as openpyxl writes it) has no `t`. The same file confirms Excel 
 Captured so far, in `tests/captures/`: by print (route B) `layout` (§3.6, §4.1 to §4.7); read
 from Excel `theme_colors` and `theme_colors_more` (§3.3), `merge_width` and `error_width` (§4.2,
 §4.4, no deviation), `row_height` (§4.7), `package` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14), `headings_grid`
-(§4.14), `spill_neighbors` (§4.1, §4.2), `text_style` (§4.7, §4.13), `rotation` (§4.17), `filters` (§4.19) and `tables` (§4.20). All are
+(§4.14), `spill_neighbors` (§4.1, §4.2), `text_style` (§4.7, §4.13), `rotation` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
 Excel 16.115 (Microsoft 365). The rules of §4.10, §4.11, §4.15, §4.16 and §4.14's theme fonts
 and palette have no capture here yet and are marked unverified until screen suites capture them
 on Microsoft 365; so are the parts of §4.12, §4.14 and §4.18 that say so. What still waits for
@@ -1388,12 +1388,13 @@ and report nothing for breaks.
 
 **Read** (`_read_filters.py`, from xlio): the sheet's `autoFilter` and each table's (a table
 with a header row), as `Sheet.autofilters` (`AutoFilter`, `FilterColumn`, `SortCondition`).
-Excel is taken not to apply the criteria on opening: the rows the file saved as hidden are what
-shows (unverified), so the criteria matter only for the button. A column's `colId` counts from the
+Excel does not apply the criteria on opening: the rows the file saved as hidden are what shows
+(`filters_more`), so the criteria matter only for the button. A column's `colId` counts from the
 range's first column; one past the range is left out.
 
-**Drawn** (the screen suite `filters`, Microsoft 365 16.115, zoom 100 and 200, captures the
-glyphs, the hidden buttons and the sizes, `tests/test_filters.py`; the rest is unverified):
+**Drawn** (the screen suites `filters` and `filters_more`, Microsoft 365 16.115, zoom 100 and
+200, capture the glyphs, the hidden buttons, merged, empty and hidden headers and the sizes,
+`tests/test_filters.py`, `tests/test_suite_filters_more.py`):
 - one button per column of the range's first row, merged or empty header cells included, each at
   its own column's cell (a header merged down into the data keeps it on the header row); none
   where the column's `hiddenButton` or `showButton="0"` is set (they draw alike), none for a
@@ -1404,8 +1405,10 @@ glyphs, the hidden buttons and the sizes, `tests/test_filters.py`; the rest is u
   down, an arrow on every sorted column; filtered and sorted up, and filtered and sorted down,
   the arrow with the funnel (captured). A sort by cell color, font color or icon draws the arrow its
   order gives (captured: cell color descending, font color and icon ascending). A left-to-right
-  sort (`columnSort`) draws no arrow (unverified). The sheet's `sortState` counts inside its
-  `autoFilter` and, as a table's does, beside it (unverified for the sheet);
+  sort (`columnSort`) draws no arrow, though Excel refuses the file, inside the sheet's
+  `autoFilter` or in a table (`filters_more`; a named deviation, as a merge inside a table). The
+  sheet's `sortState` counts inside its `autoFilter`, not beside it; a table's counts beside its
+  `autoFilter` (`filters_more`, `filters`);
 - a square of min(row height × zoom, 17) screen points, its right edge on the cell's right
   boundary, filling the row down to its bottom gridline, or 1 screen point above it when the row
   is taller (captured: top 12 in a 30 point row); drawn over the header text; screen-sized, so it

@@ -1,0 +1,58 @@
+# excel: 16.115
+# build: 16.115.26110837
+# edition: Microsoft 365
+# channel: Current
+# macos: 26.5.1
+# appearance: dark
+# date: 2026-11-19
+# display_scale: 2.000
+# zooms: 100,200
+# colors: captures converted to sRGB (sips --matchTo sRGB Profile.icc)
+# platform: mac
+# suite: filters_more
+group	zoom	cell	case	size	box_w	box_h	right_gap	bottom_gap	top	glyph	glyph_w	glyph_h	glyph_color
+main		A4	row height	15									
+main		A5	row height	15									
+main		A6	row height	15									
+main		A7	row height	0									
+main		A8	row height	15									
+main		A9	row height	15									
+main		A12	row height	0									
+main		A13	row height	15									
+main		A14	row height	15									
+main		G1	column width	0									
+main	100	C4	merged across, first column		15	15	0	0	0	f8e50ed1	7	4.5	7F7F7F
+main	100	D4	merged across, second column		15	15	0	0	0	f8e50ed1	7	4.5	7F7F7F
+main	100	E4	merged down, header row		15	15	0	0	0	f8e50ed1	7	4.5	7F7F7F
+main	100	E5	merged down, data row										
+main	100	F4	empty header		15	15	0	0	0	f8e50ed1	7	4.5	7F7F7F
+main	100	H4	values filter, criteria not applied		15	15	0	0	0	0ad63e19	10.5	7	7A7A7A
+main	100	I4	plain		15	15	0	0	0	f8e50ed1	7	4.5	7F7F7F
+main	100	L4	table, plain		15	15	0	0	0	f8e50ed1	7	4.5	7F7F7F
+main	100	M4	table, plain		15	15	0	0	0	f8e50ed1	7	4.5	7F7F7F
+main	100	N4	table, plain		15	15	0	0	0	f8e50ed1	7	4.5	7F7F7F
+main	100	L13	below a hidden header row										
+main	100	M13	below a hidden header row										
+main	200	C4	merged across, first column		17	17	0	1	12	91c8efe9	8	5	7B7B7B
+main	200	D4	merged across, second column		17	17	0	1	12	91c8efe9	8	5	7B7B7B
+main	200	E4	merged down, header row		17	17	0	1	12	91c8efe9	8	5	7B7B7B
+main	200	E5	merged down, data row										
+main	200	F4	empty header		17	17	0	1	12	91c8efe9	8	5	7B7B7B
+main	200	H4	values filter, criteria not applied		17	17	0	1	12	5f52b166	12.5	8	797979
+main	200	I4	plain		17	17	0	1	12	91c8efe9	8	5	7B7B7B
+main	200	L4	table, plain		17	17	0	1	12	91c8efe9	8	5	7B7B7B
+main	200	M4	table, plain		17	17	0	1	12	91c8efe9	8	5	7B7B7B
+main	200	N4	table, plain		17	17	0	1	12	91c8efe9	8	5	7B7B7B
+main	200	L13	below a hidden header row		2.5	12	6.5	7	11	61d181a3	0.5	10	000000
+main	200	M13	below a hidden header row										
+beside		A4	row height	15									
+beside		A5	row height	15									
+beside		A6	row height	15									
+beside	100	C4	plain, sortState beside		15	15	0	0	0	f8e50ed1	7	4.5	7F7F7F
+beside	100	D4	sorted descending, sortState beside		15	15	0	0	0	f8e50ed1	7	4.5	7F7F7F
+beside	100	E4	plain, sortState beside		15	15	0	0	0	f8e50ed1	7	4.5	7F7F7F
+beside	200	C4	plain, sortState beside		17	17	0	1	12	91c8efe9	8	5	7B7B7B
+beside	200	D4	sorted descending, sortState beside		17	17	0	1	12	91c8efe9	8	5	7B7B7B
+beside	200	E4	plain, sortState beside		17	17	0	1	12	91c8efe9	8	5	7B7B7B
+lr_sheet			refused: Microsoft Excel got an error: Parameter error. (-2700)										
+lr_table			refused: Microsoft Excel got an error: Parameter error. (-2700)										

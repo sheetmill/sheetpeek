@@ -2,9 +2,10 @@
 
 xlio reads the elements; this keeps what the buttons need. A column's ``colId`` counts from the
 filter range's first column; one that falls outside the range is left out. A sort condition's
-column is its ``ref``'s first. A sort's ``columnSort`` (left to right) draws no arrow
-(unverified). The sheet's ``sortState`` counts inside its ``autoFilter`` (captured) or beside it
-(unverified, as a table's beside its ``autoFilter`` is captured).
+column is its ``ref``'s first. A sort's ``columnSort`` (left to right) draws no arrow; Excel
+refuses such a file, inside the sheet's ``autoFilter`` or in a table (``filters_more``). The
+sheet's ``sortState`` counts inside its ``autoFilter`` and not beside it (``filters_more``); a
+table's counts beside its ``autoFilter`` (``filters``).
 """
 
 from __future__ import annotations
@@ -24,7 +25,7 @@ def read_autofilters(source: xlio.Sheet, ref: CellRange | None) -> tuple[AutoFil
     if ref is None:
         return ()
     found: list[AutoFilter] = []
-    sheet_filter = _filter(source.autofilter, None, source.sort_state)
+    sheet_filter = _filter(source.autofilter, None, None)
     if sheet_filter is not None:
         found.append(sheet_filter)
     for table in source.tables:

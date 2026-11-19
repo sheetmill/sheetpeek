@@ -92,7 +92,7 @@ EXPECTED: dict[tuple[str, str], str | None] = {
     ("main", "E5"): None, ("main", "F4"): "plain", ("main", "H4"): "filtered",
     ("main", "I4"): "plain", ("main", "L4"): "plain", ("main", "M4"): "plain",
     ("main", "N4"): "plain", ("main", "L13"): None, ("main", "M13"): None,
-    ("beside", "C4"): "plain", ("beside", "D4"): "descending", ("beside", "E4"): "plain",
+    ("beside", "C4"): "plain", ("beside", "D4"): "plain", ("beside", "E4"): "plain",
     **{(g, c): "plain" for g in ("lr_sheet", "lr_table") for c in ("C4", "D4", "E4")},
 }  # fmt: skip
 """sheetpeek's glyph for each case cell; ``None`` draws no button."""

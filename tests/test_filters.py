@@ -1,8 +1,8 @@
 """Filter and sort buttons: what the reader keeps and which header cells draw which glyph.
 
 ARCHITECTURE.md §4.19. The capture tests at the end compare the layout with the screen suite
-``filters`` (``tests/captures/filters.tsv``, Microsoft 365 16.115); the other rules are
-unverified.
+``filters`` (``tests/captures/filters.tsv``, Microsoft 365 16.115); the suite ``filters_more``
+has its own (``tests/test_suite_filters_more.py``).
 """
 
 from __future__ import annotations
@@ -122,13 +122,14 @@ def test_a_sort_beside_the_filter_and_a_left_to_right_sort(tmp_path):
         SHEET,
         replace_once('<autoFilter ref="A1:D4" />', f'<autoFilter ref="A1:D4" />{beside}'),
     )
-    assert sheetpeek.read(path).layout("excel").cell(1, 2).button == "descending"  # unverified
+    # Beside the sheet's filter a sort does not count (captured, filters_more).
+    assert sheetpeek.read(path).layout("excel").cell(1, 2).button == "plain"
     rewrite(
         path,
         SHEET,
         replace_once('<sortState ref="A2:D4">', '<sortState ref="A2:D4" columnSort="1">'),
     )
-    assert sheetpeek.read(path).layout("excel").cell(1, 2).button == "plain"  # unverified
+    assert sheetpeek.read(path).layout("excel").cell(1, 2).button == "plain"  # Excel refuses it
 
 
 def test_no_button_on_a_hidden_column_or_header_row(tmp_path):

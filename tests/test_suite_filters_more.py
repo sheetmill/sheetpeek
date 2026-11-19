@@ -213,6 +213,18 @@ def _glyphs():
     return found
 
 
+NARROWEST_BUTTON = 10
+"""Screen points: a button is min(row height x zoom, 17) square, 15 or 17 here. A narrower mark
+is the cell's own text (L13's right-aligned "1", 2.5 points wide in black at zoom 200, where
+the measurer looks for a box)."""
+
+
+def _button_width(record):
+    """The button's width, or ``None`` where the record holds no button."""
+    width = float(record["box_w"]) if record.get("box_w") else 0.0
+    return width if width >= NARROWEST_BUTTON else None
+
+
 def _buttons(group):
     found, refused = _captured()
     if group in refused:
@@ -236,8 +248,7 @@ def test_each_case_draws_the_glyph_sheetpeek_gives_it_as_captured(group):
     for record in records:
         state = filters_more.EXPECTED[(group, record["cell"])]
         if state is None:
-            assert not record.get("box_w"), record
-            assert not record.get("glyph"), record
+            assert _button_width(record) is None, record
             continue
         assert record.get("glyph") == glyphs[(state, record["zoom"], record["box_w"])], record
 
@@ -249,7 +260,7 @@ def test_each_button_is_as_large_as_the_row_up_to_17_screen_points_as_captured(g
     # no deviation): every case row is 15 pt, so the square is 15 at zoom 100 and 17 at 200,
     # its right edge on its own column's boundary (each column of a header merged across too).
     for record in _buttons(group):
-        if not record.get("box_w"):
+        if _button_width(record) is None:
             continue
         height = 15 * int(record["zoom"]) / 100
         size = min(height, 17)

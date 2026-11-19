@@ -2,7 +2,7 @@
 
 The names follow Excel's and xlio's: an :class:`AutoFilter` is the sheet's filter or a table's,
 with a :class:`FilterColumn` for each column that says anything and the :class:`SortCondition`
-of its sort. Excel is taken not to apply the criteria when it opens a file (unverified): the
+of its sort. Excel does not apply the criteria when it opens a file (``filters_more``): the
 rows the file saved as hidden are what shows, so the criteria matter only for the button.
 """
 
