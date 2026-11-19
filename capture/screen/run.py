@@ -335,11 +335,13 @@ def read_only(
     edition: str | None = None,
     folder: str = "sheetpeek-capture",
     name: str = "capture",
+    postprocess: Callable[[Path], None] | None = None,
 ) -> list[tuple[str, str, str]]:
     """Open a built workbook and read what Excel shows for ``cells``, without a capture.
 
     For what Excel's own reads settle (row heights, the text a cell shows): no window has to
-    hold the cells. Writes ``formats.tsv`` to ``out`` as ``capture`` does.
+    hold the cells. Writes ``formats.tsv`` to ``out`` as ``capture`` does; ``postprocess`` edits
+    the saved workbook before Excel opens it, as in ``capture``.
     """
     from openpyxl import Workbook
 
@@ -355,6 +357,8 @@ def read_only(
         wb = Workbook()
         build(wb.active)
         wb.save(path)
+        if postprocess is not None:
+            postprocess(path)
         with session:
             rows = session.read_cells(cells)
     finally:
