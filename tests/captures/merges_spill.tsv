@@ -1,0 +1,153 @@
+# excel: 16.115
+# build: 16.115.26110837
+# edition: Microsoft 365
+# channel: Current
+# macos: 26.5.1
+# appearance: dark
+# date: 2026-11-19
+# display_scale: 2.000
+# zooms: 100,200
+# colors: captures converted to sRGB (sips --matchTo sRGB Profile.icc)
+# platform: mac
+# suite: merges_spill
+zoom	kind	case	cell	edge	statement	color	coverage	rows	pattern	shows
+100	edge	mixed	C4	top	outline: the outer sides of the edge cells, each on its own segment	red	1.000	-1 -0.5 0 0.5 1 1.5	solid	red
+100	edge	mixed	D4	top	outline: the outer sides of the edge cells, each on its own segment	green	1.000	-1 -0.5 0 0.5	solid	green
+100	edge	mixed	E4	top	outline: the outer sides of the edge cells, each on its own segment	blue	1.000	0 0.5	solid	blue
+100	edge	mixed	C5	bottom	outline: the outer sides of the edge cells, each on its own segment	green	1.000	-1 -0.5 0 0.5 1 1.5	solid	green
+100	edge	mixed	D5	bottom	outline: the outer sides of the edge cells, each on its own segment	red	1.000	-1 -0.5 0 0.5	solid	red
+100	edge	mixed	E5	bottom	outline: the outer sides of the edge cells, each on its own segment	red	1.000	0 0.5	solid	red
+100	edge	mixed	C4	left	outline: the outer sides of the edge cells, each on its own segment	red	1.000	-1 -0.5 0 0.5 1 1.5	solid	red
+100	edge	mixed	C5	left	outline: the outer sides of the edge cells, each on its own segment	blue	1.000	-1 -0.5 1 1.5	solid	white
+100	edge	mixed	E4	right	outline: the outer sides of the edge cells, each on its own segment	red	1.000	-1 -0.5 0 0.5	solid	red
+100	edge	mixed	E5	right	outline: the outer sides of the edge cells, each on its own segment	blue	1.000	-1 -0.5 0 0.5 1 1.5	solid	blue
+100	edge	mixed	C4	right	sides inside the merge are not drawn		0			white
+100	edge	mixed	D4	right	sides inside the merge are not drawn		0			white
+100	edge	mixed	C5	right	sides inside the merge are not drawn		0			white
+100	edge	mixed	D5	right	sides inside the merge are not drawn		0			white
+100	edge	mixed	C4	bottom	sides inside the merge are not drawn		0			white
+100	edge	mixed	D4	bottom	sides inside the merge are not drawn		0			white
+100	edge	mixed	E4	bottom	sides inside the merge are not drawn		0			white
+100	edge	anchor_only	C8	top	the anchor's sides only on its own segments	red	1.000	-1 -0.5 0 0.5 1 1.5	solid	red
+100	edge	anchor_only	D8	top	the anchor's sides only on its own segments		0			grid
+100	edge	anchor_only	E8	top	the anchor's sides only on its own segments		0			grid
+100	edge	anchor_only	C8	left	the anchor's sides only on its own segments	red	1.000	-1 -0.5 0 0.5 1 1.5	solid	red
+100	edge	anchor_only	C9	left	the anchor's sides only on its own segments		0			grid
+100	edge	anchor_only	E8	right	the anchor's sides only on its own segments		0			grid
+100	edge	anchor_only	E9	right	the anchor's sides only on its own segments		0			grid
+100	edge	anchor_only	C9	bottom	the anchor's sides only on its own segments		0			grid
+100	edge	anchor_only	D9	bottom	the anchor's sides only on its own segments		0			grid
+100	edge	anchor_only	E9	bottom	the anchor's sides only on its own segments		0			grid
+100	edge	anchor_only	C8	right	sides inside the merge are not drawn		0			white
+100	edge	anchor_only	C8	bottom	sides inside the merge are not drawn		0			white
+100	edge	neighbor	H4	top	a neighbor's side competes with each segment	blue	1.000	-1 -0.5 0 0.5 1 1.5	solid	blue
+100	edge	neighbor	I4	top	a neighbor's side competes with each segment	red	1.000	-1 -0.5 0 0.5 1 1.5	solid	red
+100	edge	neighbor	H4	left	a neighbor's side competes with each segment	red	1.000	-1 -0.5 0 0.5	solid	red
+100	edge	neighbor	H5	left	a neighbor's side competes with each segment	blue	1.000	-1 -0.5 0 0.5 1 1.5	solid	blue
+100	edge	neighbor	I4	right	a neighbor's side competes with each segment	blue	1.000	-1 -0.5 0 0.5	solid	blue
+100	edge	neighbor	I5	right	a neighbor's side competes with each segment	red	1.000	-1 -0.5 0 0.5	solid	red
+100	edge	neighbor	H5	bottom	a neighbor's side competes with each segment	blue	1.000	-1 -0.5 0 0.5 1 1.5	solid	blue
+100	edge	neighbor	I5	bottom	a neighbor's side competes with each segment	red	1.000	-1 -0.5 0 0.5	solid	red
+100	edge	spill_borders	C14	right	spilled text removes every vertical border it crosses, over the whole row height	green	0.125			white
+100	edge	spill_borders	D14	right	spilled text removes every vertical border it crosses, over the whole row height	green	0.125			white
+100	edge	spill_borders	E14	right	spilled text removes every vertical border it crosses, over the whole row height	green	0.208			white
+100	edge	spill_borders	G14	left	where the spill stops at a value, that cell's facing side is drawn	red	1.000	-1 -0.5 0 0.5	solid	red
+100	edge	spill_borders	D14	top	the horizontal sides of the cells spilled text crosses stay	green	1.000	-1 -0.5 0 0.5	solid	green
+100	edge	spill_borders	D14	bottom	the horizontal sides of the cells spilled text crosses stay	red	1.000	-1 -0.5 0 0.5 1 1.5	solid	red
+100	edge	spill_borders	E14	bottom	the horizontal sides of the cells spilled text crosses stay	blue	1.000	-1 -0.5 0 0.5	solid	blue
+100	edge	spill_borders	F14	top	the horizontal sides of the cells spilled text crosses stay	red	1.000	0 0.5	solid	red
+100	edge	spill_fills	C16	right	spilled text removes every vertical border it crosses, over the whole row height	green	0.333			sky
+100	edge	spill_fills	D16	right	spilled text removes every vertical border it crosses, over the whole row height	green	0.125			sky
+100	edge	spill_fills	E16	right	a side past the spill's last column stays	blue	1.000	0 0.5	solid	blue
+100	edge	spill_fills	D16	top	the horizontal sides of the cells spilled text crosses stay		0			sky
+100	edge	spill_fills	C16	bottom	the horizontal sides of the cells spilled text crosses stay	green	0.236			gold
+100	edge	spill_right	D18	right	spilled text removes every vertical border it crosses, over the whole row height	green	0.375			white
+100	edge	spill_right	E18	right	spilled text removes every vertical border it crosses, over the whole row height	green	0.167			white
+100	edge	spill_right	C18	right	where the spill stops at a value, that cell's facing side is drawn	green	1.000	-1 -0.5 0 0.5	solid	green
+100	edge	spill_right	F18	right	a side past the spill's last column stays	blue	1.000	0 0.5	solid	blue
+100	edge	spill_center	D20	right	spilled text removes every vertical border it crosses, over the whole row height	green	0.125			white
+100	edge	spill_center	E20	right	spilled text removes every vertical border it crosses, over the whole row height	green	0.250			white
+100	edge	spill_center	D20	left	a side past the spill's last column stays	red	1.000	0 0.5	solid	red
+100	edge	spill_center	F20	right	a side past the spill's last column stays	green	1.000	0 0.5	solid	green
+100	edge	spill_center	D20	top	the horizontal sides of the cells spilled text crosses stay	blue	1.000	0 0.5	solid	blue
+100	edge	spill_center	F20	bottom	the horizontal sides of the cells spilled text crosses stay	red	1.000	-1 -0.5 0 0.5	solid	red
+100	edge	spill_end	C22	right	spilled text removes every vertical border it crosses, over the whole row height	green	0.167			white
+100	edge	spill_end	D22	right	a side past the spill's last column stays	red	1.000	-1 -0.5 0 0.5 1 1.5	solid	red
+100	diagonal	merge_diagonal	H8:J9	up	a merge's diagonals are its anchor's, across the whole merge	red	1			
+100	diagonal	merge_diagonal	H8:J9	down	a merge's diagonals are its anchor's, across the whole merge	red	1			
+100	diagonal	merge_diagonal	H8:H8	up	a merge's diagonals are its anchor's, across the whole merge	red	0.5			
+100	diagonal	merge_diagonal	H8:H8	down	a merge's diagonals are its anchor's, across the whole merge	red	0.25			
+100	diagonal	covered_diagonal	D12:D12	up	a covered cell's diagonal is not drawn	green	0			
+100	diagonal	covered_diagonal	D12:D12	down	a covered cell's diagonal is not drawn	green	0			
+100	diagonal	covered_diagonal	C11:D12	up	a covered cell's diagonal is not drawn	green	0			
+100	diagonal	covered_diagonal	C11:D12	down	a covered cell's diagonal is not drawn	green	0			
+200	edge	mixed	C4	top	outline: the outer sides of the edge cells, each on its own segment	red	1.000	-0.5 -0.25 0 0.25 0.5 0.75	solid	red
+200	edge	mixed	D4	top	outline: the outer sides of the edge cells, each on its own segment	green	1.000	-0.5 -0.25 0 0.25	solid	green
+200	edge	mixed	E4	top	outline: the outer sides of the edge cells, each on its own segment	blue	1.000	0 0.25	solid	blue
+200	edge	mixed	C5	bottom	outline: the outer sides of the edge cells, each on its own segment	green	1.000	-0.5 -0.25 0 0.25 0.5 0.75	solid	green
+200	edge	mixed	D5	bottom	outline: the outer sides of the edge cells, each on its own segment	red	1.000	-0.5 -0.25 0 0.25	solid	red
+200	edge	mixed	E5	bottom	outline: the outer sides of the edge cells, each on its own segment	red	1.000	0 0.25	solid	red
+200	edge	mixed	C4	left	outline: the outer sides of the edge cells, each on its own segment	red	1.000	-0.5 -0.25 0 0.25 0.5 0.75	solid	red
+200	edge	mixed	C5	left	outline: the outer sides of the edge cells, each on its own segment	blue	1.000	-0.5 -0.25 0.5 0.75	solid	white
+200	edge	mixed	E4	right	outline: the outer sides of the edge cells, each on its own segment	red	1.000	-0.5 -0.25 0 0.25	solid	red
+200	edge	mixed	E5	right	outline: the outer sides of the edge cells, each on its own segment	blue	1.000	-0.5 -0.25 0 0.25 0.5 0.75	solid	blue
+200	edge	mixed	C4	right	sides inside the merge are not drawn		0			white
+200	edge	mixed	D4	right	sides inside the merge are not drawn		0			white
+200	edge	mixed	C5	right	sides inside the merge are not drawn		0			white
+200	edge	mixed	D5	right	sides inside the merge are not drawn		0			white
+200	edge	mixed	C4	bottom	sides inside the merge are not drawn		0			white
+200	edge	mixed	D4	bottom	sides inside the merge are not drawn		0			white
+200	edge	mixed	E4	bottom	sides inside the merge are not drawn		0			white
+200	edge	anchor_only	C8	top	the anchor's sides only on its own segments	red	1.000	-0.5 -0.25 0 0.25 0.5 0.75	solid	red
+200	edge	anchor_only	D8	top	the anchor's sides only on its own segments		0			grid
+200	edge	anchor_only	E8	top	the anchor's sides only on its own segments		0			grid
+200	edge	anchor_only	C8	left	the anchor's sides only on its own segments	red	1.000	-0.5 -0.25 0 0.25 0.5 0.75	solid	red
+200	edge	anchor_only	C9	left	the anchor's sides only on its own segments		0			grid
+200	edge	anchor_only	E8	right	the anchor's sides only on its own segments		0			grid
+200	edge	anchor_only	E9	right	the anchor's sides only on its own segments		0			grid
+200	edge	anchor_only	C9	bottom	the anchor's sides only on its own segments		0			grid
+200	edge	anchor_only	D9	bottom	the anchor's sides only on its own segments		0			grid
+200	edge	anchor_only	E9	bottom	the anchor's sides only on its own segments		0			grid
+200	edge	anchor_only	C8	right	sides inside the merge are not drawn		0			white
+200	edge	anchor_only	C8	bottom	sides inside the merge are not drawn		0			white
+200	edge	neighbor	H4	top	a neighbor's side competes with each segment	blue	1.000	-0.5 -0.25 0 0.25 0.5 0.75	solid	blue
+200	edge	neighbor	I4	top	a neighbor's side competes with each segment	red	1.000	-0.5 -0.25 0 0.25 0.5 0.75	solid	red
+200	edge	neighbor	H4	left	a neighbor's side competes with each segment	red	1.000	-0.5 -0.25 0 0.25	solid	red
+200	edge	neighbor	H5	left	a neighbor's side competes with each segment	blue	1.000	-0.5 -0.25 0 0.25 0.5 0.75	solid	blue
+200	edge	neighbor	I4	right	a neighbor's side competes with each segment	blue	1.000	-0.5 -0.25 0 0.25	solid	blue
+200	edge	neighbor	I5	right	a neighbor's side competes with each segment	red	1.000	-0.5 -0.25 0 0.25	solid	red
+200	edge	neighbor	H5	bottom	a neighbor's side competes with each segment	blue	1.000	-0.5 -0.25 0 0.25 0.5 0.75	solid	blue
+200	edge	neighbor	I5	bottom	a neighbor's side competes with each segment	red	1.000	-0.5 -0.25 0 0.25	solid	red
+200	edge	spill_borders	C14	right	spilled text removes every vertical border it crosses, over the whole row height	green	0.111			white
+200	edge	spill_borders	D14	right	spilled text removes every vertical border it crosses, over the whole row height	green	0.125			white
+200	edge	spill_borders	E14	right	spilled text removes every vertical border it crosses, over the whole row height	green	0.139			white
+200	edge	spill_borders	G14	left	where the spill stops at a value, that cell's facing side is drawn	red	1.000	-0.5 -0.25 0 0.25	solid	red
+200	edge	spill_borders	D14	top	the horizontal sides of the cells spilled text crosses stay	green	1.000	-0.5 -0.25 0 0.25	solid	green
+200	edge	spill_borders	D14	bottom	the horizontal sides of the cells spilled text crosses stay	red	1.000	-0.5 -0.25 0 0.25 0.5 0.75	solid	red
+200	edge	spill_borders	E14	bottom	the horizontal sides of the cells spilled text crosses stay	blue	1.000	-0.5 -0.25 0 0.25	solid	blue
+200	edge	spill_borders	F14	top	the horizontal sides of the cells spilled text crosses stay	red	1.000	0 0.25	solid	red
+200	edge	spill_fills	C16	right	spilled text removes every vertical border it crosses, over the whole row height	green	0.069			sky
+200	edge	spill_fills	D16	right	spilled text removes every vertical border it crosses, over the whole row height	green	0.139			sky
+200	edge	spill_fills	E16	right	a side past the spill's last column stays	blue	1.000	0 0.25	solid	blue
+200	edge	spill_fills	D16	top	the horizontal sides of the cells spilled text crosses stay		0			sky
+200	edge	spill_fills	C16	bottom	the horizontal sides of the cells spilled text crosses stay	green	0.003			gold
+200	edge	spill_right	D18	right	spilled text removes every vertical border it crosses, over the whole row height	green	0.056			white
+200	edge	spill_right	E18	right	spilled text removes every vertical border it crosses, over the whole row height	green	0.097			white
+200	edge	spill_right	C18	right	where the spill stops at a value, that cell's facing side is drawn	green	1.000	-0.5 -0.25 0 0.25	solid	green
+200	edge	spill_right	F18	right	a side past the spill's last column stays	blue	1.000	0 0.25	solid	blue
+200	edge	spill_center	D20	right	spilled text removes every vertical border it crosses, over the whole row height	green	0.056			white
+200	edge	spill_center	E20	right	spilled text removes every vertical border it crosses, over the whole row height	green	0.014			white
+200	edge	spill_center	D20	left	a side past the spill's last column stays	red	1.000	0 0.25	solid	red
+200	edge	spill_center	F20	right	a side past the spill's last column stays	green	1.000	0 0.25	solid	green
+200	edge	spill_center	D20	top	the horizontal sides of the cells spilled text crosses stay	blue	1.000	0 0.25	solid	blue
+200	edge	spill_center	F20	bottom	the horizontal sides of the cells spilled text crosses stay	red	1.000	-0.5 -0.25 0 0.25	solid	red
+200	edge	spill_end	C22	right	spilled text removes every vertical border it crosses, over the whole row height	green	0.028			white
+200	edge	spill_end	D22	right	a side past the spill's last column stays	red	1.000	-0.5 -0.25 0 0.25 0.5 0.75	solid	red
+200	diagonal	merge_diagonal	H8:J9	up	a merge's diagonals are its anchor's, across the whole merge	red	0.5			
+200	diagonal	merge_diagonal	H8:J9	down	a merge's diagonals are its anchor's, across the whole merge	red	0.5			
+200	diagonal	merge_diagonal	H8:H8	up	a merge's diagonals are its anchor's, across the whole merge	red	0			
+200	diagonal	merge_diagonal	H8:H8	down	a merge's diagonals are its anchor's, across the whole merge	red	0			
+200	diagonal	covered_diagonal	D12:D12	up	a covered cell's diagonal is not drawn	green	0			
+200	diagonal	covered_diagonal	D12:D12	down	a covered cell's diagonal is not drawn	green	0			
+200	diagonal	covered_diagonal	C11:D12	up	a covered cell's diagonal is not drawn	green	0			
+200	diagonal	covered_diagonal	C11:D12	down	a covered cell's diagonal is not drawn	green	0			

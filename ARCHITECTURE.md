@@ -661,7 +661,7 @@ a cached value (as openpyxl writes it) has no `t`. The same file confirms Excel 
 Captured so far, in `tests/captures/`: by print (route B) `layout` (§3.6, §4.1 to §4.7); read
 from Excel `theme_colors` and `theme_colors_more` (§3.3), `merge_width` and `error_width` (§4.2,
 §4.4, no deviation), `row_height` (§4.7), `package` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14), `headings_grid`
-(§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10, the look), `text_style` (§4.7, §4.13), `rotation` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
+(§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10, the look), `merges_spill` (§4.12), `text_style` (§4.7, §4.13), `rotation` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
 Excel 16.115 (Microsoft 365). The rules of §4.10, §4.11, §4.15, §4.16 and §4.14's theme fonts
 and palette have no capture here yet and are marked unverified until screen suites capture them
 on Microsoft 365; so are the parts of §4.12, §4.14 and §4.18 that say so. What still waits for
@@ -842,7 +842,9 @@ direction; Excel draws nothing otherwise.
 - **Merges:** borders stay per cell. The merge's outline is the outer sides of its edge cells,
   each on its own segment, the anchor's only on its own; sides inside the merge are not drawn;
   a neighbor's side competes with each segment by the rule above. A merge's diagonals are its
-  anchor's, across the whole merge; a covered cell's diagonal is not drawn.
+  anchor's, across the whole merge; a covered cell's diagonal is not drawn (`merges_spill`; at
+  zoom 200 Excel drew only the left half of a 3 by 2 merge's diagonals, from its left corners to
+  its center, in the one window captured: not modeled).
 - **Spilled text removes every vertical border it crosses**, over the whole row height, on
   either cell, while the horizontal sides of the cells it crosses stay. Where the spill stops at
   a value, that cell's left side is drawn. So the borders pass runs after the cells and reads
