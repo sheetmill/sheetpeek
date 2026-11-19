@@ -1,7 +1,7 @@
 """Hyperlinks: what the reader takes from a file, what each output draws, and what it refuses.
 
-The look of a link is the cell's format alone, and ``display`` is never drawn
-(unverified: no capture in this repository yet).
+The look of a link is the cell's format alone, and ``display`` is never drawn (captured,
+screen suite ``links``).
 """
 
 import re
@@ -324,7 +324,7 @@ def test_an_anchor_wraps_the_cells_text_and_adds_no_look(tmp_path):
         ]
     ]
     # display is never drawn, and the anchor adds no look: the cell's format draws a link
-    # (unverified).
+    # (captured, links).
     assert "other" not in page
     # The anchor holds the run whole, clip window and all, which spills over the neighbors.
     assert re.search(
@@ -406,7 +406,7 @@ def test_a_refused_target_is_text_and_never_echoed(tmp_path):
 
 
 def test_an_empty_linked_cell_gets_no_anchor(tmp_path):
-    # Excel shows nothing in it (unverified).
+    # Excel shows nothing in it (captured, links).
     path = linked_sheet(
         tmp_path,
         row(1, text_cell("A1", "x")),

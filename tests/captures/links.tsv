@@ -1,0 +1,31 @@
+# excel: 16.115
+# build: 16.115.26110837
+# edition: Microsoft 365
+# channel: Current
+# macos: 26.5.1
+# appearance: dark
+# date: 2026-11-18
+# display_scale: 2.000
+# zooms: 100
+# colors: captures converted to sRGB (sips --matchTo sRGB Profile.icc)
+# platform: mac
+# suite: links
+kind	name	cell	zoom	text	ink_pixels	ink_color	ink_left	ink_right	ink_top	ink_bottom	rules	rule_top	rule_thickness	display_font_color	display_underline	own_font_color	own_underline	active	sheet	links_count	formula	link_address	link_sub_address	followed	after_sheet	after_cell
+look	Normal, linked	C4	100	Hyperlink text	797	000000	3.5	66.5	4.5	14	0			0,0,0	underline style none	0,0,0	underline style none									
+look	Hyperlink style, linked	E4	100	Hyperlink text	1050	008002	3	67	4	14	1	13	1	0,128,0	underline style single	0,128,0	underline style single									
+look	Followed Hyperlink style, linked	G4	100	Hyperlink text	1028	BF5000	3	67	4	14	1	13	1	192,80,0	underline style single	192,80,0	underline style single									
+look	Hyperlink style, no link	C6	100	Hyperlink text	1050	008002	3	67	4	14	1	13	1	0,128,0	underline style single	0,128,0	underline style single									
+look	Followed Hyperlink style, no link	E6	100	Hyperlink text	1028	BF5000	3	67	4	14	1	13	1	192,80,0	underline style single	192,80,0	underline style single									
+look	Hyperlink style, own plain font, linked	G6	100	Hyperlink text	797	000000	3.5	66.5	4.5	14	0			0,0,0	underline style none	0,0,0	underline style none									
+look	Normal, display unlike the value	C8	100	v	56	000000	3	8	6.5	12	1	9.5	1	0,0,0	underline style none	0,0,0	underline style none									
+look	Hyperlink style, display unlike the value	E8	100	v	77	008002	3	8	6.5	14	2	13	1	0,128,0	underline style single	0,128,0	underline style single									
+look	empty, linked with a display	G8	100		0	none					0			0,0,0	underline style none	0,0,0	underline style none									
+look	HYPERLINK() with a friendly name	C10	100	Friendly name	756	000000	3.5	67	4.5	14	0			0,0,0	underline style none	0,0,0	underline style none									
+look	HYPERLINK() without a friendly name	E10	100	#Third!B8	606	000000	3	47.5	4.5	12	0			0,0,0	underline style none	0,0,0	underline style none									
+look	element and HYPERLINK()	G10	100	Formula text	654	000000	3.5	60.5	4.5	12	0			0,0,0	underline style none	0,0,0	underline style none									
+look	empty merge, linked with a display	C12	100		0	none					0			0,0,0	underline style none	0,0,0	underline style none									
+follow	location with a sheet (control)	C4																Links	Links	1	Hyperlink text	missing value	Third!E6	ERR Microsoft Excel got an error: Parameter error.	Links	$A$1
+follow	location without a sheet, its own sheet active	B2																Second	Second	1	to B5	missing value	B5	ERR Microsoft Excel got an error: Parameter error.	Second	$A$1
+follow	location without a sheet, the first sheet active	B2																Links	Second	1	to B5	missing value	B5	ERR Microsoft Excel got an error: Parameter error.	Links	$A$1
+follow	HYPERLINK() alone	C10																Links	Links	0	=HYPERLINK("#Third!B7","Friendly name")			ERR The object you are trying to access does not exist	Links	$A$1
+follow	element and HYPERLINK()	G10																Links	Links	1	=HYPERLINK("#Third!D4","Formula text")	missing value	Second!C3	ERR Microsoft Excel got an error: Parameter error.	Links	$A$1
