@@ -250,6 +250,40 @@ KNOWN_DEVIATIONS = {
     "font_size_minus_2": "a font size outside the row-height table (rows only)",
 }
 
+PINNED = {
+    # xlio's ``_structure.column_width`` makes a finite width past 1e30 0; Excel keeps 1e100,
+    # 1e200 and 1e300 at one point (1e308 is 0, captured ``package``).
+    **dict.fromkeys(("width_1e100", "width_1e200", "width_1e300"), "xlio: 0 past 1e30"),
+    # Excel opens a baseColWidth of 255 with columns of 10 characters (65 pt), neither 255 nor
+    # the 8 of an absent one; xlio keeps 255 (1,535 pt). 256 and past are refused by both.
+    "base_width_255": "xlio: baseColWidth 255 kept",
+    # sheetpeek's row table stops at 24 pt and takes its height (31) for larger fonts; Excel
+    # gives a 409 pt Normal font its tallest row, 409.5. The default column (1,761 pt) is
+    # xlformat's digit at 409 pt, 26 pt wider than sheetpeek's.
+    "font_size_409": "row table past 24 pt; xlformat's digit at 409 pt",
+    # xlio refuses a font size past 409; Excel opens 409.5, reports size 409 and lays it out
+    # wider than 409 (1,769 pt).
+    "font_size_409.5": "xlio: refuses 409.5",
+    # xlformat has no Arial glyph table and measures Arial as Calibri: a digit of 5 pt, not 6,
+    # and Calibri's row (§4.7). Every Arial 10 case differs from there.
+    **dict.fromkeys(
+        ("arial_10", "arial_10_width_minus_1", "arial_10_width_1e6", "arial_10_width_1e30"),
+        "xlformat: Arial measured as Calibri",
+    ),
+    # xlio wraps a width modulo 65,536 points at a fixed 6 pt digit (Calibri 11's); Excel wraps
+    # it at the Normal font's digit: 1e6 at Calibri 14 (7 pt) is 7e6 mod 65,536 = 53,184 pt.
+    **dict.fromkeys(
+        ("calibri_14_width_minus_1", "calibri_14_width_1e6"), "xlio: 6 pt digit for every font"
+    ),
+}
+"""Cases where sheetpeek differs from Excel for a reason recorded here, most of them in a sibling
+package. Each comparison asserts exactly these, so a new difference fails, and so does a fixed
+one (unpin it)."""
+
+
+def _pinned(captured, prefixes):
+    return {n for n in PINNED if n in captured and n.startswith(prefixes)}
+
 
 @pytest.fixture(scope="module")
 def captured():
@@ -313,7 +347,7 @@ def test_where_a_huge_width_becomes_0(captured, taken):
     # 1e308 is 0; 1e100, 1e200 and 1e300 tell where 0 starts.
     deviations = _compare(captured, taken, ("width_", "control"))
     _report("package_more widths", "package_more, huge widths and the controls", 5, deviations)
-    assert deviations == {}
+    assert set(deviations) == _pinned(captured, ("width_", "control")), deviations
 
 
 @pytest.mark.excel
@@ -322,7 +356,7 @@ def test_default_and_base_widths_at_their_edges(captured, taken):
     # 255, 256 and 299 tell where the refusal starts and what a width there is.
     deviations = _compare(captured, taken, ("default_width_", "base_width_"))
     _report("package_more sheet widths", "package_more, sheet default widths", 8, deviations)
-    assert deviations == {}
+    assert set(deviations) == _pinned(captured, ("default_width_", "base_width_")), deviations
 
 
 @pytest.mark.excel
@@ -331,19 +365,18 @@ def test_font_sizes_at_their_edges(captured, taken):
     # the edge, and -2 and -10 tell whether any size below -1 is its magnitude.
     deviations = _compare(captured, taken, ("font_size_",))
     _report("package_more font sizes", "package_more, font sizes", 5, deviations)
-    assert deviations == {}
+    assert set(deviations) == _pinned(captured, ("font_size_",)), deviations
 
 
 @pytest.mark.excel
 def test_the_digit_of_other_normal_fonts(captured, taken):
-    # Rule package_limits (§5.5, ``<col width>``): kept in points modulo 65,536 at 6 pt a digit,
-    # captured with Calibri 11 only. Arial 10 and Calibri 14 have other digits: Excel's points
-    # say whether the 6 pt digit is a constant or the Normal font's. Excel's font name confirms
-    # the Normal font took.
+    # Rule package_limits (§5.5, ``<col width>``): kept in points modulo 65,536 at the Normal
+    # font's digit, as Calibri 14's 7 pt shows (xlio's 6 pt for every font is pinned). Excel's
+    # font name confirms the Normal font took.
     for prefix, font in (("arial_10", "Arial"), ("calibri_14", "Calibri")):
         for name, record in captured.items():
             if name.startswith(prefix):
                 assert record["font name"] == font, name
     deviations = _compare(captured, taken, ("arial_10", "calibri_14"))
     _report("package_more normal fonts", "package_more, other Normal fonts", 8, deviations)
-    assert deviations == {}
+    assert set(deviations) == _pinned(captured, ("arial_10", "calibri_14")), deviations

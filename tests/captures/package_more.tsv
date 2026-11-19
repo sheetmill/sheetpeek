@@ -1,0 +1,39 @@
+# excel: 16.115
+# build: 16.115.26110837
+# edition: Microsoft 365
+# channel: Current
+# macos: 26.5.1
+# appearance: dark
+# date: 2026-11-19
+# suite: package_more
+# one workbook a case, opened with alerts off; opened: A1 (111), the number
+# of sheets, column width (characters) and width (points) of A and B, the
+# heights of rows 1 and 2, A1's font size and name; refused: the error number
+# under A1; method: AppleScript, no window
+case	outcome	A1	sheets	width A	width A pt	height 1	width B	width B pt	height 2	font size	font name
+control	opened	111.0	1	8.0	53.0	15.0	8.0	53.0	15.0	11	Calibri
+width_1e100	opened	111.0	1	0.09	1.0	15.0	8.0	53.0	15.0	11	Calibri
+width_1e200	opened	111.0	1	0.09	1.0	15.0	8.0	53.0	15.0	11	Calibri
+width_1e300	opened	111.0	1	0.09	1.0	15.0	8.0	53.0	15.0	11	Calibri
+default_width_255	opened	111.0	1	254.17	1530.0	15.0	254.17	1530.0	15.0	11	Calibri
+default_width_256	refused	-50
+default_width_299	refused	-50
+default_width_300	refused	-50
+base_width_255	opened	111.0	1	10.0	65.0	15.0	10.0	65.0	15.0	11	Calibri
+base_width_256	refused	-50
+base_width_299	refused	-50
+base_width_300	refused	-50
+font_size_409	opened	111.0	1	8.0	1761.0	409.5	8.0	1761.0	409.5	409	Calibri
+font_size_409.5	opened	111.0	1	8.0	1769.0	409.5	8.0	1769.0	409.5	409	Calibri
+font_size_410	refused	-50
+font_size_minus_2	opened	111.0	1	8.0	11.0	7.0	8.0	11.0	7.0	2	Calibri
+font_size_minus_10	opened	111.0	1	8.0	45.0	14.0	8.0	45.0	14.0	10	Calibri
+arial_10	opened	111.0	1	8.0	53.0	13.0	8.0	53.0	13.0	10	Arial
+arial_10_width_minus_1	opened	111.0	1	1.0921E+4	6.5531E+4	13.0	8.0	53.0	13.0	10	Arial
+arial_10_width_1e6	opened	111.0	1	6036.5	3.6224E+4	13.0	8.0	53.0	13.0	10	Arial
+arial_10_width_1e30	opened	111.0	1	0.09	1.0	13.0	8.0	53.0	13.0	10	Arial
+calibri_14	opened	111.0	1	8.0	61.0	19.0	8.0	61.0	19.0	14	Calibri
+calibri_14_width_minus_1	opened	111.0	1	9360.71	6.553E+4	19.0	8.0	61.0	19.0	14	Calibri
+calibri_14_width_1e6	opened	111.0	1	7597.0	5.3184E+4	19.0	8.0	61.0	19.0	14	Calibri
+calibri_14_width_1e30	opened	111.0	1	0.08	1.0	19.0	8.0	61.0	19.0	14	Calibri
+control_again	opened	111.0	1	8.0	53.0	15.0	8.0	53.0	15.0	11	Calibri

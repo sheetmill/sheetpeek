@@ -665,7 +665,7 @@ a cached value (as openpyxl writes it) has no `t`. The same file confirms Excel 
 
 Captured so far, in `tests/captures/`: by print (route B) `layout` (§3.6, §4.1 to §4.7); read
 from Excel `theme_colors` and `theme_colors_more` (§3.3), `merge_width` and `error_width` (§4.2,
-§4.4, no deviation), `row_height` and `row_height_more` (§4.7), `package` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14), `theme_fonts_palette`
+§4.4, no deviation), `row_height` and `row_height_more` (§4.7), `package` and `package_more` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14), `theme_fonts_palette`
 and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts` and `gradients` (§4.12), `text_style` (§4.7, §4.13), `rotation` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
 Excel 16.115 (Microsoft 365). The rules of §4.11, §4.15 and §4.16 have no
 capture here yet and are marked unverified until screen suites capture them
@@ -1646,24 +1646,33 @@ repair. A DTD stays refused whatever Excel does.
 `_structure.py` and `size` in `_style/font.py` take them as Excel does, and refuse what Excel
 refuses:
 
-- **`<col width>`** is kept in points modulo 65,536, at 6 pt a digit: 256 and 1e4 are as usual,
-  1e6 is 6036.5 units, -1 is 10921, -100 is 10822 (a negative one with one more point). From 1e9 to
-  1e30 it is one point (0.09 units). NaN, either infinity and 1e308 are 0, a hidden column.
+- **`<col width>`** is kept in points modulo 65,536, at the Normal font's digit (6 pt at Calibri
+  11): 256 and 1e4 are as usual, 1e6 is 6036.5 units, -1 is 10921, -100 is 10822 (a negative one
+  with one more point). From 1e9 to 1e300 it is one point (0.09 units). NaN, either infinity and
+  1e308 are 0, a hidden column.
 - **`<row ht>`** is its magnitude: -0.5 is 0.5, -100 is 100. Past 409.5 it wraps in twips modulo
   65,536 and is capped there: 410, 1e6, 1e9 and 1e30 are 409.5, and 1e4 is 169.5. NaN and either
   infinity are ignored, and 1e308 is 0.
-- **Font size** is its magnitude from 1 to 409: -1 is size 1. 0, 0.5, -0.5, 410, 1e6, 1e30, 1e308,
-  NaN and infinity are refused.
-- **`defaultColWidth`:** NaN and infinity are ignored, and 1e308 makes every column 0. Negative
-  numbers, 300, 1e30 and `99999999999` are refused.
-- **`baseColWidth`:** 300 is refused; -1 and `99999999999` are ignored.
+- **Font size** is its magnitude from 1 to 409.5: -1 is size 1, -2 and -10 their magnitudes, and
+  409.5 is shown as 409 but laid out wider. 0, 0.5, -0.5, 410, 1e6, 1e30, 1e308, NaN and infinity
+  are refused.
+- **`defaultColWidth`:** NaN and infinity are ignored, and 1e308 makes every column 0. 255 is
+  kept (1,530 pt at Calibri 11). Negative numbers, 256 and past, 1e30 and `99999999999` are
+  refused.
+- **`baseColWidth`:** 256 and past are refused; -1 and `99999999999` are ignored, and 255 gives
+  columns of 10 characters.
 - **`defaultRowHeight`:** NaN and infinity are refused. Without `customHeight` a number is ignored,
   as ever (§4.7). With it, -1 is 1 pt, and 1e308 acts as `zeroHeight`.
 
-**Unverified:** the 6 pt digit, since every case has Calibri 11 as its Normal font; where 0 starts
-between 1e30 and 1e308; the edges at 255 to 300 (`defaultColWidth`, `baseColWidth`) and 409 to 410
-(font size); and whether a font size below -1 is its magnitude, as -1 is. Known deviation: a row of
-font size 1 is 4 pt in Excel, and sizes under 9 are outside the row-height table (§4.7).
+The suite `package_more` settles the edges (Excel 16.115). xlio reads these numbers, and where it
+does not yet take them as Excel does, sheetpeek shows its reading, a known deviation: a width wraps
+at a 6 pt digit whatever the Normal font, where Excel wraps at the Normal font's own (under
+Calibri 14, 7 pt: 1e6 is 53,184 pt and -1 is 65,530, where sheetpeek shows 76,453); a width past 1e30 is 0 where Excel keeps one point up to
+1e300; a `baseColWidth` of 255 is kept; a font size of 409.5 is refused. Where 0 starts between
+1e300 and 1e308 is not captured. Known deviations of sheetpeek's own: a row of font size 1 is 4 pt
+in Excel, and sizes under 9 are outside the row-height table (§4.7); past 24 pt the table gives
+24's height, where Excel gives a 409 pt Normal font its tallest row, 409.5; and Arial is measured
+as Calibri (§4.7).
 
 **A column in `characters` mode is at most 255 characters**, Excel's own limit, whatever its width
 in points. Each character costs about 10 bytes in every row while the rows are built (the canvas),

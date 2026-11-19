@@ -101,7 +101,7 @@ _SCHEMES: dict[Any, Literal["major", "minor"]] = {"major": "major", "minor": "mi
 
 
 def size(value: float) -> float:
-    """A font size as Excel takes it: its magnitude, from 1 to 409, or refused (captured)."""
+    """A font size as Excel takes it: its magnitude, from 1 to 409.5, or refused (captured)."""
     points = abs(float(value))
     if not _SMALLEST <= points <= _LARGEST:  # NaN compares false
         raise PackageError(f"a font size of {value}, which Excel refuses")
