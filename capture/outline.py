@@ -222,9 +222,10 @@ EXPECTED: dict[str, Any] = {
         },
     },
     **dict.fromkeys(
-        ("declared", "declared_small", "view_on_props_off", "flag_yes"), "the same as main"
+        ("declared", "declared_small", "props_off", "view_on_props_off", "flag_yes"),
+        "the same as main",
     ),
-    **dict.fromkeys(("view_off", "props_off", "view_off_props_on")),
+    **dict.fromkeys(("view_off", "view_off_props_on")),
 }  # fmt: skip
 """What sheetpeek lays out for each group: per row and column, ``lane:kind`` of each mark (the
 gutters' lanes, rows and columns); ``"the same as main"``; ``None`` draws no outline."""
@@ -647,8 +648,10 @@ def _piece(
     sb0, sb1 = min(b for _, b in strokes), max(b for _, b in strokes) + 1
     piece.stroke = _mode(list(strokes.values()))
     piece.stroke_size = f"{sa1 - sa0},{sb1 - sb0}"  # image pixels; written in points
-    tall, wide = sb1 - sb0, sa1 - sa0
-    piece.kind = "plus" if tall >= wide / 2 and tall > 2 else "minus"
+    # A plus strokes both ways, a minus one way: compare the extents without the gutter's axis
+    # (across and along swap between the row and the column gutters).
+    short, long = sorted((sb1 - sb0, sa1 - sa0))
+    piece.kind = "plus" if short >= long / 2 and short > 2 else "minus"
     return piece
 
 

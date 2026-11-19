@@ -87,12 +87,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   an empty cell is reported (`link.empty_cell`), and so is a link to another sheet or a defined
   name, which HTML shows as a link that goes nowhere (`link.elsewhere`).
 - Outlines (grouped rows and columns). `Row` and `Column` carry `outline_level` and `collapsed`,
-  and `Sheet.outline` an `Outline` (summaries below or above, right or left, whether the file
-  shows the symbols, the depths). The layout derives the groups and gives
+  and `Sheet.outline` an `Outline` (summaries below or above, right or left, whether the sheet
+  view shows the symbols, the depths; Excel ignores `<outlinePr showOutlineSymbols>`). The layout derives the groups and gives
   `RenderedSheet.outline`, the bars, ticks, dots and buttons of each row and column
   (`RenderedOutline`, `OutlineMark`). The HTML backend draws Excel's outline gutter beside the
   headings, at Excel's screen sizes (4/3 CSS pixels a screen point, the cells' scale, so it keeps
-  its proportion to the rows; its lines 1 and 2 px), with level buttons when both headings are
+  its proportion to the rows; its lines 1 and 2 px), in its colors in either appearance, with
+  level buttons when both headings are
   drawn; `rich` and plain text draw it in characters; Markdown, CSV and TSV report it as not
   shown. A range that cuts a group reports the button it leaves out (`outline.cut`). A level is read as
   Excel reads it: modulo 8, and one that is not decimal digits as none.

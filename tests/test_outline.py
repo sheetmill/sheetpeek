@@ -1,7 +1,7 @@
 """Outlines: levels and settings read, groups and symbols laid out, the gutter in each output.
 
-The expected symbols and sizes are unverified: no capture of them is in this repository yet
-(ARCHITECTURE.md §4.11).
+The expected symbols and sizes are the suite outline's (ARCHITECTURE.md §4.11;
+tests/test_suite_outline.py compares them).
 """
 
 import re
@@ -84,7 +84,7 @@ def test_levels_collapsed_flags_and_settings_are_read(book):
 
 
 def test_the_depth_is_the_deepest_level_in_the_whole_sheet(book):
-    # Unverified: Excel derives the depth from the rows; openpyxl writes no outlineLevelRow.
+    # Captured (outline): Excel derives the depth from the rows; openpyxl writes no outlineLevelRow.
     assert "outlineLevelRow" not in _part(book)
     sheet = sheetpeek.read(book, ref="A1:B3")
     assert sheet.outline is not None
@@ -113,14 +113,14 @@ def _part(path):
     ("view", "properties", "shown"),
     [
         (None, None, True),
-        (None, "0", False),
+        (None, "0", True),  # Excel ignores <outlinePr>'s flag (captured, outline)
         ("0", None, False),
         ("1", "0", True),  # the sheet view wins
         ("0", "1", False),
         ("false", None, False),
-        (None, "false", False),
+        (None, "false", True),
         ("true", "0", True),
-        ("yes", "0", True),  # stated, not a boolean: xlio's default, shown (unverified)
+        ("yes", "0", True),  # stated, not a boolean: xlio's default, shown, as Excel draws it
     ],
 )
 def test_show_outline_symbols(book, view, properties, shown):
@@ -171,7 +171,7 @@ def test_groups_from_levels():
 
 
 def test_the_expected_symbols(book):
-    # Unverified: buttons on rows 7, 8, 11, 12 and 17, + on the collapsed groups' rows 11
+    # Captured (outline): buttons on rows 7, 8, 11, 12 and 17, + on the collapsed groups' rows 11
     # and 17; a dot on each visible detail row in the lane after its level unless a button is
     # there (rows 4, 5, 6); lane 3 holds the level-3 group.
     outline = sheetpeek.read(book).layout("excel").outline
@@ -197,8 +197,8 @@ def test_the_expected_symbols(book):
 
 
 def test_summaries_above_and_left_mirror_the_symbols(tmp_path):
-    # For columns (the button on the left, the tick at the far end), and taken as the same for
-    # rows (unverified).
+    # For columns (the button on the left, the tick at the far end), and the same for rows
+    # (captured, outline).
     wb = openpyxl.Workbook()
     ws = wb.active
     for row in range(1, 6):
@@ -263,8 +263,8 @@ def gutter_cells(text):
 
 
 def test_the_gutter_is_sized_by_depth(book):
-    # Unverified: 2 + 12 x (depth + 1) + 3 screen points; at 4/3 CSS px each, rounded, 3 + 16 x
-    # (depth + 1) + 4: 71 for 3 levels, 55 for 2, the same at every zoom.
+    # Captured (outline): 2 + 12 x (depth + 1) + 3 screen points; at 4/3 CSS px each,
+    # rounded, 3 + 16 x (depth + 1) + 4: 71 for 3 levels, 55 for 2, the same at every zoom.
     text = html(book)
     first = re.search(r'<col style="width:(\d+)px">', text)
     assert first is not None
@@ -293,7 +293,7 @@ def test_bars_ticks_dots_and_buttons_are_placed_as_expected(book):
 
 @pytest.mark.parametrize(("height", "top"), [(15, 2), (30, 10), (60, 25)])
 def test_a_button_is_centered_on_its_row(height, top):
-    # Unverified: 2 into a 15 pt row, 10 into 30, 25 into 60 (screen points).
+    # Captured (outline): 2 into a 15 pt row, 10 into 30, 25 into 60 (screen points).
     assert _centered(height, 12) == top
 
 

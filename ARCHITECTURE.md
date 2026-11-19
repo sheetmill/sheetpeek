@@ -666,10 +666,9 @@ a cached value (as openpyxl writes it) has no `t`. The same file confirms Excel 
 Captured so far, in `tests/captures/`: by print (route B) `layout` (§3.6, §4.1 to §4.7); read
 from Excel `theme_colors` and `theme_colors_more` (§3.3), `merge_width` and `error_width` (§4.2,
 §4.4, no deviation), `row_height` and `row_height_more` (§4.7), `package` and `package_more` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14), `theme_fonts_palette`
-and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts` and `gradients` (§4.12), `text_style` (§4.7, §4.13), `runs` (§4.16), `tab_strip` (§4.15), `rotation` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
-Excel 16.115 (Microsoft 365). The rules of §4.11 have no
-capture here yet and are marked unverified until screen suites capture them
-on Microsoft 365; so are the parts of §4.12, §4.14 and §4.18 that say so. What still waits for
+and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts` and `gradients` (§4.12), `text_style` (§4.7, §4.13), `runs` (§4.16), `tab_strip` (§4.15), `outline` (§4.11), `rotation` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
+Excel 16.115 (Microsoft 365). Every section here rests on one of them; what no capture covers
+is marked unverified where it is stated, as are the parts of §4.12, §4.14 and §4.18 that say so. What still waits for
 the screen: the text insets and the baselines of angled text, which come from print, and the 15 pt rows that print
 14 pt apart.
 
@@ -716,33 +715,34 @@ What sheetpeek decides (not Excel's behavior):
 
 ### 4.11 Outlines
 
-**Unverified:** no capture of the rules here is in this repository yet; the tests that rest on
-them say so. The cases a screen suite will capture: a sheet with rows 4 to 17 grouped up to level
-3 and columns D to J up to level 2, at zoom 100 and 200, and one with summary columns on the left;
-the row and column numbers below refer to it.
+The rules here are captured by the suite `outline` (Excel 16.115, the screen, dark and light, zoom
+100 and 200): a sheet with rows 4 to 17 grouped up to level 3 and columns D to J up to level 2,
+summaries above and left, rows of 15, 30 and 60 pt, and `showOutlineSymbols` on the view and on
+`<outlinePr>`; the row and column numbers below refer to its first sheet.
 
 **Groups from levels** (`_pass_outline.py`). For each level `L` from 1 to the deepest, a group is
 a maximal run of rows whose `outline_level` is at least `L`; its summary row is the row after the
 run (`summaryBelow`, the default) or the row before it. Its button is − while any of its detail
-rows is visible, and + when all are hidden or the summary row has `collapsed` (unverified: rows 11
-and 17 show only a +, rows 7, 8 and 12 a −). Hidden detail rows draw nothing. Each visible
-detail row gets a dot in the lane after its own level, unless a button is there (unverified: rows 4,
-5 and 6). Columns follow the same rule with `summaryRight` (unverified, mirrored for summaries on
-the left: the button on the summary column, the tick at the far end of the last detail column).
-Summary rows above are taken as mirrored the same way (unverified). The result is
+rows is visible, and + when all are hidden or the summary row has `collapsed` (rows 11 and 17 show
+only a +, rows 7, 8 and 12 a −). Hidden detail rows draw nothing. Each visible
+detail row gets a dot in the lane after its own level, unless a button is there (rows 4, 5
+and 6). Columns follow the same rule with `summaryRight`, mirrored for summaries on the left: the
+button on the summary column, the tick at the far end of the last detail column. Summary rows
+above are mirrored the same way. The result is
 `RenderedSheet.outline`, a `RenderedOutline` of `OutlineMark`s (index, lane, kind) for the rows
 and columns laid out.
 
 **What the reader takes from the file.** `outlineLevel` and `collapsed` of `<row>` and `<col>`;
 `summaryBelow` and `summaryRight` of `<outlinePr>`; `showOutlineSymbols` of the first
-`<sheetView>`, which wins over `<outlinePr>`'s. **The depth is the deepest level found in the
-whole sheet** (unverified: without `outlineLevelRow` Excel draws the same gutter as with it), so the
+`<sheetView>`, shown when it states none: Excel ignores `<outlinePr showOutlineSymbols>`, off or
+on. **The depth is the deepest level found in the whole sheet** (without `outlineLevelRow` Excel
+draws the same gutter as with it, and with one declared smaller too), so the
 declared `outlineLevelRow` and `outlineLevelCol` are not read, though Excel refuses a file that
 declares 8 to 255 (xlio refuses it too). Office allows levels 0 to 7; xlio reads a level as Excel
 does (captured in xlio): modulo 8, and one that is not decimal digits as none. With
-`showOutlineSymbols="0"` nothing is drawn and nothing is reported (taken as given, unverified).
-xlio reads all of it, and tells a stated `showOutlineSymbols` from one left out; a stated value
-other than `0`, `1`, `false` and `true` reads as shown, as xlio reads every flag (unverified).
+`showOutlineSymbols="0"` nothing is drawn and nothing is reported. xlio reads all of it, and tells
+a stated `showOutlineSymbols` from one left out; a stated value other than `0`, `1`, `false` and
+`true` reads as shown, as xlio reads every flag, and as Excel draws `yes`.
 
 **A range that cuts a group** still draws the bars of its rows inside the range. The model keeps
 the levels of the row and column just outside the range (`Outline.rows_beyond`,
@@ -750,7 +750,7 @@ the levels of the row and column just outside the range (`Outline.rows_beyond`,
 inside the edge gets its button. A group whose summary is outside the range draws no button,
 reported as `outline.cut` (decided).
 
-**Geometry** (unverified; drawn by the HTML backend, `backends/html/_outline.py`). **Every size is
+**Geometry** (drawn by the HTML backend, `backends/html/_outline.py`). **Every size is
 screen-fixed**: identical at zoom 100 and 200, in Excel's screen points (spt). HTML draws a screen
 point as 4/3 CSS px, rounded to whole px: the cells' scale at zoom 100, at which Excel for Mac
 shows one sheet point as one screen point, so the gutter keeps its proportion to the
@@ -766,19 +766,20 @@ tiles and dashes on whole screen points, and a tile is a texture of single-point
 - A bar is 2 px wide, 3 spt into its lane, and starts 2 spt below the first detail row's top (or
   past the first detail column's left edge), at any row height, with a 6 spt tick toward the
   headings, 2 px thick; it runs into the summary's button. With summaries above or left, it ends
-  2 spt short of the last detail row's far edge, where the tick is.
+  2 spt short of the last detail row's far edge, and the tick fills those 2 spt.
 - − and + buttons are 12 × 12 spt, filling the lane, rounded, white, with a 1 px border; their
   strokes are 6 spt long and 1 px thick. **A button is centered on its row**, its top at
   `1 + ⌈(h − 1 − b) / 2⌉` for a row `h` high and a button `b` (in spt: 2 in 15, 10 in 30, 25 in
   60; the 1 is the row's gridline), so it does not follow the row height.
 - A dot is 2 × 2 spt, centered on its row at the bar's x.
 - The level buttons are 12 × 12 spt, one per lane: the row levels across the column-heading band,
-  centered in its height; the column levels down the row-heading column, centered in its width.
-- Colors in the dark appearance: gutter 85, bars 153, button border 51 (gray levels). The light
-  appearance is not captured.
+  centered in its height; the column levels down the row-heading column, centered in its width,
+with no gridline term: their top at `⌈(h − b) / 2⌉` (5 in bands of 21 and 22).
+- Colors (gray levels): the gutter 85 in the dark appearance and 230 in the light one; bars,
+  ticks and dots 153 in both; a button's border 51 dark and 138 light, its paper white and its
+  stroke 51 in both.
 
-Not captured: the light appearance's colors, the exact end of the tick on the column side, the
-gutter with the headings off, and summaries above.
+Not captured: the gutter with the headings off.
 
 **Other outputs.** `rich` and plain text draw a gutter of characters, one per lane before each
 row and one line per lane above the columns: `│` and `─` for bars, `┌`, `└` or `┐` for a bar's

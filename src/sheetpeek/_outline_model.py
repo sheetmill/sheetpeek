@@ -29,8 +29,8 @@ class Outline:
     summary_right: bool = True
     """``<outlinePr summaryRight>``: a group's summary column is right of its details, else left."""
     show_symbols: bool = True
-    """``showOutlineSymbols`` of the first ``<sheetView>`` when it states one, else of
-    ``<outlinePr>``: whether Excel draws the outline symbols."""
+    """``showOutlineSymbols`` of the first ``<sheetView>``, shown when it states none: whether
+    Excel draws the outline symbols. Excel ignores ``<outlinePr showOutlineSymbols>``."""
     row_depth: int = 0
     """The deepest row outline level in the sheet, 0 to 7."""
     column_depth: int = 0

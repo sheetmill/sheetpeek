@@ -27,14 +27,15 @@ _MARGIN, _LANE, _END = 3, 16, 4
 _BAR, _INSET, _START, _TICK = 2, 4, 3, 8
 _BUTTON, _DOT = 16, 3
 
-# Colors (unverified): the dark appearance's gutter 85, bars 153, button border 51; the light
-# ones are placeholders.
+# Colors (captured, outline): the gutter, its bars, ticks and dots, a button's border, paper and
+# minus or plus stroke, in the light appearance and the dark one.
 _CSS = """\
 .sheetpeek {
-  --sheetpeek-outline-paper: #eeeeee;
-  --sheetpeek-outline-ink: #a6a6a6;
-  --sheetpeek-outline-button: #808080;
+  --sheetpeek-outline-paper: #e6e6e6;
+  --sheetpeek-outline-ink: #999999;
+  --sheetpeek-outline-button: #8a8a8a;
   --sheetpeek-outline-button-paper: #ffffff;
+  --sheetpeek-outline-stroke: #333333;
 }
 .sheetpeek[data-color-scheme="dark"] {
   --sheetpeek-outline-paper: #555555;
@@ -53,10 +54,10 @@ _CSS = """\
   border: 1px solid var(--sheetpeek-outline-button); border-radius: 2px;
   background: var(--sheetpeek-outline-button-paper);
 }
-.sheetpeek .sp-olbutton i { background: var(--sheetpeek-outline-button); }
+.sheetpeek .sp-olbutton i { background: var(--sheetpeek-outline-stroke); }
 .sheetpeek .sp-ollevel {
   font: 11px/14px system-ui, sans-serif; text-align: center; font-weight: normal;
-  color: var(--sheetpeek-outline-button);
+  color: var(--sheetpeek-outline-stroke);
 }
 """
 
@@ -104,8 +105,8 @@ def _segments(marks: list[OutlineMark], length: int, summary_after: bool) -> lis
         elif mark.kind == "start" and summary_after:
             found += [(x, _START, _BAR, length - _START, 0), (x, _START, _TICK, _BAR, 0)]
         elif mark.kind == "start":
-            end = length - _START
-            found += [(x, 0, _BAR, end, 0), (x, end - _BAR, _TICK, _BAR, 0)]
+            end = length - _START  # summaries above or left: Excel's tick ends at the edge
+            found += [(x, 0, _BAR, end, 0), (x, end, _TICK, _BAR, 0)]
         elif mark.kind == "open":
             if summary_after:
                 found.append((x, 0, _BAR, button, 0))
@@ -144,7 +145,9 @@ def _levels(count: int, along: int, rows: bool) -> str:
     parts = []
     for k in range(count):
         lane = _MARGIN + _LANE * k
-        middle = _centered(along, _BUTTON)
+        # centered on the headings' band with no gridline term, rounded down the band: Excel's
+        # buttons sit 5 points into bands of 21 and 22 (captured, outline)
+        middle = -(-(along - _BUTTON) // 2)
         left, top = (lane, middle) if rows else (middle, lane)
         parts.append(f'<b class="sp-ollevel" style="left:{left}px;top:{top}px">{k + 1}</b>')
     return "".join(parts)

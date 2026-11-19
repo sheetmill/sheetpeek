@@ -3,7 +3,8 @@
 xlio reads the levels and collapsed flags of rows and columns, as Excel takes them (a level is
 kept modulo 8; one that is not decimal digits is none), ``summaryBelow`` and ``summaryRight``,
 and ``showOutlineSymbols`` with whether the file states it (:func:`with_levels`). The symbols
-show as the first ``<sheetView>`` says when it states it, else as ``<outlinePr>`` says. All is
+show as the first ``<sheetView>`` says when it states it, else they show: Excel ignores
+``<outlinePr showOutlineSymbols>`` (captured, outline). All is
 kept in ``Structure.extra["outline"]``; :func:`read_outline` puts it into the model's rows and
 columns and builds the sheet's :class:`~sheetpeek.Outline`.
 """
@@ -35,7 +36,6 @@ class Found:
     summary_below: bool = True
     summary_right: bool = True
     symbols_view: bool | None = None
-    symbols_properties: bool | None = None
 
 
 def with_levels(structure: Structure, sheet: xlio.Sheet) -> Structure:
@@ -54,8 +54,6 @@ def with_levels(structure: Structure, sheet: xlio.Sheet) -> Structure:
     properties = sheet.properties
     found.summary_below = properties.summary_below
     found.summary_right = properties.summary_right
-    if properties.show_outline_symbols_text is not None:
-        found.symbols_properties = properties.show_outline_symbols
     views = sheet.views
     if views and views[0].show_outline_symbols_text is not None:
         found.symbols_view = views[0].show_outline_symbols
@@ -99,9 +97,7 @@ def read_outline(
     column_depth = max((level for _, _, level, _ in found.columns), default=0)
     if not row_depth and not column_depth:
         return rows, columns, None
-    symbols = found.symbols_view
-    if symbols is None:
-        symbols = found.symbols_properties
+    symbols = True if found.symbols_view is None else found.symbols_view
     beyond_rows = beyond_columns = (0, 0)
     if ref is not None:
         beyond_rows = (found.rows.get(ref.min_row - 1, 0), found.rows.get(ref.max_row + 1, 0))

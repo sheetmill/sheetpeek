@@ -52,8 +52,8 @@ def expected_pieces(marks, length, after):
         elif kind == "start" and after:
             found += [("tick", x, START, TICK, BAR), ("bar", x, START + BAR, BAR, length - 4)]
         elif kind == "start":
-            end = length - START
-            found += [("bar", x, 0, BAR, end - BAR), ("tick", x, end - BAR, TICK, BAR)]
+            end = length - START  # the tick ends at the row's edge (captured, summaries)
+            found += [("bar", x, 0, BAR, end), ("tick", x, end, TICK, BAR)]
         elif kind == "open":
             if after and button:
                 found.append(("bar", x, 0, BAR, button))
@@ -120,9 +120,8 @@ def test_every_group_builds_and_reads_back_as_built(tmp_path):
             group.below,
             group.right,
         )
+        # the view alone decides: Excel ignores <outlinePr showOutlineSymbols> (captured)
         shown = {None: True, "0": False, "1": True, "yes": True}[group.view]
-        if group.view is None and group.props == "0":
-            shown = False
         assert sheet.outline.show_symbols is shown, name
 
 
@@ -475,13 +474,48 @@ def test_level_buttons_one_a_lane_centered_on_the_headings_as_captured():
             if key[3] != "levels":
                 continue
             count = lanes[0] if key[4] == "rows" else lanes[1]
-            levels = sorted(found, key=lambda r: float(r["across"]))
-            assert [r["kind"] for r in levels] == ["level"] * count, key
-            for k, r in enumerate(levels):
-                assert _close(float(r["across"]), MARGIN + LANE * k), (key, r)
-                assert _close(float(r["across_size"]), BUTTON), (key, r)
-                assert _close(float(r["along_size"]), BUTTON), (key, r)
-                assert _close(float(r["along"]), centered(float(r["size"]), BUTTON)), (key, r)
+            levels = _level_buttons(found)
+            assert len(levels) == count, (key, levels)
+            size = float(found[0]["size"])
+            for k, (across, along, wide, long) in enumerate(levels):
+                assert _close(across, MARGIN + LANE * k), (key, k, levels)
+                assert _close(wide, BUTTON), (key, k, levels)
+                assert _close(long, BUTTON), (key, k, levels)
+                # the headings' band has no gridline term (gutter buttons do: centered)
+                assert _close(along, math.ceil((size - BUTTON) / 2)), (key, k, levels)
+
+
+def _level_buttons(found):
+    """The level buttons as (across, along, across size, along size), one per lane.
+
+    The measuring cuts them unlike the gutter's buttons, which stand apart: in the dark
+    appearance buttons that touch read as one piece (48 points for four), and in the light one
+    each reads as its 1.5-point top highlight and its body. So a piece a whole number of
+    buttons wide is split into buttons, and the pieces of one lane are joined.
+    """
+    lanes = {}
+    for r in found:
+        if r["kind"] != "level":
+            continue
+        across, along = float(r["across"]), float(r["along"])
+        wide, long = float(r["across_size"]), float(r["along_size"])
+        for k in range(max(1, round(wide / LANE))):
+            start = across + LANE * k
+            box = lanes.setdefault(round(start), [start, along, along + long])
+            box[1], box[2] = min(box[1], along), max(box[2], along + long)
+    return [
+        (start, top, _width(found, start), bottom - top)
+        for start, top, bottom in sorted(lanes.values())
+    ]
+
+
+def _width(found, start):
+    """The width of the level button whose lane starts at ``start``."""
+    for r in found:
+        across, wide = float(r["across"]), float(r["across_size"])
+        if r["kind"] == "level" and across - 1 <= start < across + wide - 1:
+            return wide / max(1, round(wide / LANE))
+    return 0.0
 
 
 def _css_colors(appearance):
@@ -512,7 +546,9 @@ def test_the_gutter_colors_in_each_appearance_as_captured(appearance):
         pytest.skip(f"the {appearance} appearance is not captured yet")
     want = _css_colors(appearance)
     gutters = [r for r in records if r["axis"] == "gutter" and r["index"] == "rows"]
-    bars = [r for r in records if r["kind"] in ("bar", "tick", "dot")]
+    # not the level band, where the light appearance's buttons read with half-point slivers
+    # between them (see _level_buttons)
+    bars = [r for r in records if r["kind"] in ("bar", "tick", "dot") and r["axis"] != "levels"]
     buttons = [r for r in records if r["kind"] in ("minus", "plus")]
     assert gutters
     assert bars
@@ -521,4 +557,4 @@ def test_the_gutter_colors_in_each_appearance_as_captured(appearance):
     assert all(_same(r["ink"], want["ink"]) for r in bars), {r["ink"] for r in bars}
     assert all(_same(r["ink"], want["button"]) for r in buttons), {r["ink"] for r in buttons}
     assert all(_same(r["paper"], want["button-paper"]) for r in buttons)
-    assert all(_same(r["stroke"], want["button"]) for r in buttons)
+    assert all(_same(r["stroke"], want["stroke"]) for r in buttons)
