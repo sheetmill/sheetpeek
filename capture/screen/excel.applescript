@@ -260,11 +260,11 @@ on followLink(xlName, activeName, sheetName, cellRef)
 		try
 			activate object worksheet activeName of xlWb
 			select range "A1" of worksheet activeName of xlWb
-			set before to (name of active sheet) as string
+			set sheetBefore to (name of active sheet) as string
 		on error errText
-			set before to "ERR " & errText
+			set sheetBefore to "ERR " & errText
 		end try
-		set output to output & "active.before" & us & before & rs
+		set output to output & "active.before" & us & sheetBefore & rs
 		try
 			set xlCell to range cellRef of worksheet sheetName of xlWb
 		on error errText
