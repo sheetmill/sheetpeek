@@ -40,8 +40,9 @@ def _font_faces() -> str:
     return "".join(rules)
 
 
-# Heading colors (§4.14, unverified). Dark: paper 22, text 255, separators 86. Light: paper 247,
-# separators 224,223,221, text 94 (the darkest pixel of its anti-aliased glyphs).
+# Heading colors (§4.14, captured, headings_grid). Dark: paper 22, text 255, separators 86.
+# Light: paper 247, separators 224,223,221 (next to the cells, where they fade in from the
+# paper), text 94 (the darkest pixel of its anti-aliased glyphs).
 
 # Calibri's and Carlito's vertical metrics in em: ascent and descent, and where the baseline
 # sits in a 1 em line box (half the leading above the ascent).

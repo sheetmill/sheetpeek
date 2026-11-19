@@ -657,13 +657,12 @@ a cached value (as openpyxl writes it) has no `t`. The same file confirms Excel 
 
 Captured so far, in `tests/captures/`: by print (route B) `layout` (§3.6, §4.1 to §4.7); read
 from Excel `theme_colors` and `theme_colors_more` (§3.3), `merge_width` and `error_width` (§4.2,
-§4.4, no deviation), `row_height` (§4.7), `package` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14),
-`text_style` (§4.7, §4.13), `rotation` (§4.17), `filters` (§4.19) and `tables` (§4.20). All are
-Excel 16.115 (Microsoft 365). The rules of §4.10, §4.11, §4.14 to §4.16 (but §4.14's theme
-colors, which `theme_colors` captures) have no capture here yet and are marked unverified until
-screen suites capture them on Microsoft 365; so are the parts of §4.12 and §4.18 that say so.
-What still waits for the screen: the gridline and heading colors, the heading sizes, the text
-insets and the baselines of angled text, which come from print, and the 15 pt rows that print
+§4.4, no deviation), `row_height` (§4.7), `package` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14), `headings_grid`
+(§4.14), `text_style` (§4.7, §4.13), `rotation` (§4.17), `filters` (§4.19) and `tables` (§4.20). All are
+Excel 16.115 (Microsoft 365). The rules of §4.10, §4.11, §4.15, §4.16 and §4.14's theme fonts
+and palette have no capture here yet and are marked unverified until screen suites capture them
+on Microsoft 365; so are the parts of §4.12, §4.14 and §4.18 that say so. What still waits for
+the screen: the text insets and the baselines of angled text, which come from print, and the 15 pt rows that print
 14 pt apart.
 
 ### 4.10 Hyperlinks
@@ -1018,30 +1017,42 @@ and the layout draws a section color through `xlformat.section_rgb` with it. Quo
 escaped characters are not section colors.
 
 **The grid color** (`Sheet.grid_color`). `<sheetView defaultGridColor="0" colorId>` draws the
-gridlines in the workbook palette's entry `colorId` (unverified: teal for index 10 of a palette
-that makes it teal); 64, the default, is the automatic gray (unverified). An index past the palette
-or a malformed one is automatic (unverified). The colored gridline is **1 device pixel wide**,
-half the default line's 2, at any zoom; a fill covers it as it covers the gray one (unverified); the
-headings keep their colors (unverified). The first `<sheetView>` is read, as for gridlines.
+gridlines in the workbook palette's entry `colorId` (teal for index 10 of a palette that makes it
+teal); 64, the default, is the automatic gray, and so is a malformed one (`x`). Excel refuses a
+file whose `colorId` is 65 or past the palette (99999) (`headings_grid`). The colored gridline is **one
+device pixel's worth** of the color, half the default line's 2: Excel anti-aliases it over two
+pixels, 0.4 and 0.6 of the color over white (the heavier second at zoom 100, first at 200). A
+fill covers it as it covers the gray one; the headings keep their colors. The first
+`<sheetView>` is read, as for gridlines.
 - **HTML:** a generated class `sp-g-RRGGBB` on the wrapper sets `--sheetpeek-grid` and draws the
   cells' gridlines 0.5 CSS px wide: one device pixel on a 2× display, as Excel draws it; a 1×
   display rounds it (decided). Measured in WebKit's snapshots: at 2× the line is one device pixel
   in the full color, against the gray line's two; at 1× both are one pixel; over 30 columns every
   line stays within one device pixel of the gray grid's, with no drift. WebKit draws it on the
-  first of the gray line's two pixels, Excel on the second, at zoom 100. A sheet that hides its
+  first of the gray line's two pixels; Excel's heavier pixel is the second at zoom 100. A sheet
+  that hides its
   gridlines draws no grid color.
 
-**Headings.** Excel's heading bands are sheet units: they scale with the zoom, so the page draws
-them in points like the cells (`backends/html/_headings.py`).
-- At Calibri 11 the column band is 21 pt high and the row band `16 + 3 × digits` pt wide, the
-  digits of the last row in the window (unverified, with 2, 3 and 4 digits: 22, 25 and 28 pt). The
-  page uses the last row it draws (decided: a page shows every row).
-- The bands grow with the Normal font: at Calibri 20 the column band is 25 pt and the row band 36
-  pt with 2 digits (unverified). Other sizes follow the line through the two (unverified), which
-  stays positive at every size Excel accepts (1 to 409 pt).
-- Colors (unverified): the dark appearance's paper 22, text 255, separators 86; the light
-  appearance's paper 247, separators 224,223,221, text 94 (the darkest pixel of its glyphs).
-  The size of the headings' text is not captured.
+**Headings.** Excel's heading bands are sheet units at zoom 50, 100 and 150: they scale with the
+zoom there, so the page draws them in points like the cells (`backends/html/_headings.py`;
+`headings_grid`, Calibri 11 at zoom 50, 75, 100, 150, 200 and 400).
+- At Calibri 11 the column band is 21 pt high and the row band `max(22, 4 + 6 × digits)` pt
+  wide, the digits of the last row in the window (2 to 7 digits: 22, 22, 28, 34 and 46 pt for 2,
+  3, 4, 5 and 7). The page uses the last row it draws (decided: a page shows every row).
+- At zoom 75, 200 and 400 Excel's bands have the same shape, `max(minimum, pad + advance ×
+  digits)` in screen points, but its digit advance is not a fixed share of the zoom (3, 4, 6, 9,
+  11 and 22 screen points at 50, 75, 100, 150, 200 and 400): the row band is up to 6 pt narrower
+  in sheet points than sheetpeek's at 75 and 4.5 pt at 200 and 400 (7 digits; 0.5 pt at 2 and
+  3), the column band within 0.75 pt. A known deviation: sheetpeek scales the zoom-100 bands.
+- The bands grow with the Normal font (2 digits, zoom 100): the row band 21, 22, 25, 36, 50 and
+  64 pt and the column band 21, 21, 21, 25, 36 and 46 pt for Calibri 8, 11, 14, 20, 28 and 36;
+  Aptos Narrow 11 as Calibri 11. Sizes between follow the line through the two nearest, beyond
+  them the last segment's, and the digit term scales with the size (all three unverified); the
+  bands stay positive at every size Excel accepts (1 to 409 pt).
+- Colors: the dark appearance's paper 22, text 255, separators 86; the light appearance's paper
+  247 next to the cells (a gradient from 253 at the band's outer edge), text 94 (the darkest
+  pixel of its glyphs), separators fading in from the paper to 224,223,221 next to the cells,
+  drawn in that color. The size of the headings' text is not captured.
 - The headings options do not follow the file's `showRowColHeaders` (`headings.hidden`, §3.7).
 
 **Other outputs** (decided; each declared in `backends/_support.py`):

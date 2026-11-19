@@ -23,9 +23,10 @@ refuses to start in the other appearance. The groups:
   entry 10 is teal (``008080``), 12 under the default palette (blue), 64, 65, 99999, and ``x``
   (written into the XML; schema-invalid); ``grid_default`` has neither attribute. Each holds
   C4 filled white, E4 yellow and the yellow block G4:H5, and leaves C8 and its neighbors empty.
-- ``rows_*`` (Calibri 11, zoom 100 and 200): the window scrolled so its top row is 100, 1000,
-  10000, 1000000 and 9990 (``rows_4_5``: the first rows have 4 digits, the last 5).
-  ``grid_*`` give the 2-digit case (rows 1 to about 70).
+- ``rows_*`` (Calibri 11, zoom 50, 75, 100, 150, 200 and 400): the window scrolled so its top
+  row is 100, 1000, 10000, 1000000 and 9990 (``rows_4_5``: the first rows have 4 digits, the
+  last 5), and 10 (``rows_2``: 2 digits where the window ends before row 100, 3 where it does
+  not). ``grid_*`` give the 2-digit case at zoom 100 and 200 too (rows 1 to about 70).
 - ``font_*`` (zoom 100): the Normal style's font Calibri 8, 14, 20, 28 and 36 (the theme's minor
   font) and Aptos Narrow 11, with no ``<sheetFormatPr>``, so Excel sizes rows and columns from it.
 
@@ -71,6 +72,8 @@ from openpyxl.utils.indexed_list import IndexedList
 TEAL = "008080"
 """Palette entry 10 in ``grid_10_teal`` (red in the default palette)."""
 CALIBRI_11 = ("Calibri", 11.0)
+BAND_ZOOMS = (50, 75, 100, 150, 200, 400)
+"""The zooms of the ``rows_*`` groups: the bands' digit term per zoom."""
 
 
 @dataclass(frozen=True)
@@ -101,11 +104,12 @@ GROUPS = (
     Group("grid_64", 64, zooms=(100,), grid=True),
     Group("grid_65", 65, zooms=(100,), grid=True),
     Group("grid_99999", 99999, zooms=(100,), grid=True),
-    Group("rows_3", top_row=100),
-    Group("rows_4", top_row=1000),
-    Group("rows_5", top_row=10000),
-    Group("rows_7", top_row=1000000),
-    Group("rows_4_5", top_row=9990),
+    Group("rows_3", top_row=100, zooms=BAND_ZOOMS),
+    Group("rows_4", top_row=1000, zooms=BAND_ZOOMS),
+    Group("rows_5", top_row=10000, zooms=BAND_ZOOMS),
+    Group("rows_7", top_row=1000000, zooms=BAND_ZOOMS),
+    Group("rows_4_5", top_row=9990, zooms=BAND_ZOOMS),
+    Group("rows_2", top_row=10, zooms=BAND_ZOOMS),
     *(
         Group(f"font_calibri_{size}", font=("Calibri", float(size)), zooms=(100,))
         for size in (8, 14, 20, 28, 36)
@@ -138,11 +142,11 @@ EXPECTED_DIGITS = {"rows_3": 3, "rows_4": 4, "rows_5": 5, "rows_7": 7, "rows_4_5
 """The digits of the last row the window shows, as built; 2 for the other groups while the
 window shows fewer than 100 rows (the capture records Excel's visible range)."""
 EXPECTED_BANDS = {
-    ("Calibri", 11.0, 2): (22.0, 21.0), ("Calibri", 11.0, 3): (25.0, 21.0),
-    ("Calibri", 11.0, 4): (28.0, 21.0), ("Calibri", 11.0, 5): (31.0, 21.0),
-    ("Calibri", 11.0, 7): (37.0, 21.0), ("Calibri", 8.0, 2): (17.33, 19.67),
-    ("Calibri", 14.0, 2): (26.67, 22.33), ("Calibri", 20.0, 2): (36.0, 25.0),
-    ("Calibri", 28.0, 2): (48.44, 28.56), ("Calibri", 36.0, 2): (60.89, 32.11),
+    ("Calibri", 11.0, 2): (22.0, 21.0), ("Calibri", 11.0, 3): (22.0, 21.0),
+    ("Calibri", 11.0, 4): (28.0, 21.0), ("Calibri", 11.0, 5): (34.0, 21.0),
+    ("Calibri", 11.0, 7): (46.0, 21.0), ("Calibri", 8.0, 2): (21.0, 21.0),
+    ("Calibri", 14.0, 2): (25.0, 21.0), ("Calibri", 20.0, 2): (36.0, 25.0),
+    ("Calibri", 28.0, 2): (50.0, 36.0), ("Calibri", 36.0, 2): (64.0, 46.0),
     ("Aptos Narrow", 11.0, 2): (22.0, 21.0),
 }  # fmt: skip
 """sheetpeek's row band width and column band height in sheet points, by Normal font and
@@ -400,10 +404,12 @@ def _headings(cap: Any, group: Group) -> dict[str, str]:
     x_walk = round(cap.grid.x(first["left"])) + WALK_INSET
     image = cap.image
     paper = image.pixel(x_cells - 1, y_quarter)
-    left = x_cells - 1
+    # Each walk starts a few pixels inside its band: at some zooms the boundary line lies a
+    # pixel or two off the rounded boundary, and a walk started on it stops at once.
+    left = x_cells - WALK_INSET
     while left > 0 and _close(image.pixel(left - 1, y_walk), image.pixel(left, y_walk), WALK_STEP):
         left -= 1
-    top = y_cells - 1
+    top = y_cells - WALK_INSET
     while top > 0 and _close(image.pixel(x_walk, top - 1), image.pixel(x_walk, top), WALK_STEP):
         top -= 1
     row_px, col_px = x_cells - left, y_cells - top
@@ -415,6 +421,8 @@ def _headings(cap: Any, group: Group) -> dict[str, str]:
         the cells where it is a gradient (the light appearance's fade in from the paper)."""
         for k in spans:
             found = [image.pixel(k, j) if vertical else image.pixel(j, k) for j in across]
+            if not found:
+                return ""
             inner = found[-1]
             if _close(inner, paper):
                 continue

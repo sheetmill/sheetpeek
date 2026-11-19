@@ -55,8 +55,9 @@ def workbook_palette(custom: Sequence[str | None] | None) -> tuple[str, ...]:
 def grid_color(color_id: int | None, palette: Sequence[str]) -> str | None:
     """The gridline color of ``<sheetView defaultGridColor="0" colorId>``, or ``None`` (gray).
 
-    Unverified: the color is the workbook palette's entry, and 64 is the automatic gray. An index
-    past the palette is taken as automatic too (Excel caps it at 64).
+    The color is the workbook palette's entry, and 64 is the automatic gray (captured,
+    ``headings_grid``). Excel refuses a file whose ``colorId`` is 65 or past the palette (99999);
+    sheetpeek takes them as automatic, as it does a malformed one, which Excel draws gray.
     """
     if color_id is None or not 0 <= color_id < min(len(palette), _AUTOMATIC_GRID):
         return None

@@ -10,25 +10,37 @@ if TYPE_CHECKING:
     from sheetpeek.backends.html import HTMLBackend
     from sheetpeek.backends.html._table import Page
 
-# Heading bands in sheet points, so they scale with the page like the cells (§4.14), unverified.
-# At Normal fonts Calibri 11 and 20: the column band is 21 and 25 pt; the row band is
-# 16 + 3 pt a digit of the last row at 11 (2, 3 and 4 digits), and 36 pt with 2 digits at 20.
-_SIZES = (11.0, 20.0)
-_COLUMN_BAND = (21.0, 25.0)
-_ROW_BAND_BASE, _ROW_BAND_DIGIT = 16.0, 3.0
-_ROW_BAND_GROWTH = 36.0 / 22.0  # at 20 pt, over 11 pt, with 2 digits
+# Heading bands in sheet points, so they scale with the page like the cells (§4.14; screen suite
+# headings_grid). At the Normal font's size, with row numbers of 2 digits: the row band's width
+# and the column band's height, at the captured sizes (Calibri 8 to 36; Aptos Narrow 11 as
+# Calibri 11); between them both follow the line through the two nearest, beyond them the last
+# segment's (unverified).
+_SIZES = (8.0, 11.0, 14.0, 20.0, 28.0, 36.0)
+_ROW_BAND = (21.0, 22.0, 25.0, 36.0, 50.0, 64.0)
+_COLUMN_BAND = (21.0, 21.0, 21.0, 25.0, 36.0, 46.0)
+# At Calibri 11 the row band is max(22, 4 + 6 x digits) pt: from 4 digits on it widens 6 pt a
+# digit. At other sizes the digit term scales with the size (unverified).
+_DIGIT, _BASE_SIZE, _FREE_DIGITS = 6.0, 11.0, 3
+
+
+def _along(size: float, values: tuple[float, ...]) -> float:
+    """``values`` at ``size``: on the line through the two nearest captured sizes."""
+    k = min(max(1, sum(1 for s in _SIZES if s <= size)), len(_SIZES) - 1)
+    x0, x1, y0, y1 = _SIZES[k - 1], _SIZES[k], values[k - 1], values[k]
+    return y0 + (size - x0) * (y1 - y0) / (x1 - x0)
 
 
 def bands(normal_size: float, digits: int) -> tuple[float, float]:
     """The row band's width and the column band's height in points.
 
-    They follow the Normal font's size and the digits of the last row shown. Between and beyond
-    the two captured sizes both grow linearly with the size (unverified); they stay positive
-    over every size Excel accepts (1 to 409 pt).
+    They follow the Normal font's size and the digits of the last row shown. Below the smallest
+    captured size both keep its bands; they stay positive over every size Excel accepts (1 to
+    409 pt).
     """
-    t = (normal_size - _SIZES[0]) / (_SIZES[1] - _SIZES[0])
-    column = _COLUMN_BAND[0] + t * (_COLUMN_BAND[1] - _COLUMN_BAND[0])
-    row = (_ROW_BAND_BASE + _ROW_BAND_DIGIT * digits) * (1 + t * (_ROW_BAND_GROWTH - 1))
+    size = max(normal_size, _SIZES[0])
+    column = _along(size, _COLUMN_BAND)
+    row = _along(size, _ROW_BAND)
+    row += max(0, digits - _FREE_DIGITS) * _DIGIT * size / _BASE_SIZE
     return row, column
 
 

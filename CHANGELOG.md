@@ -278,9 +278,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   is right-aligned in every output, as Excel aligns it.
 - Vertically justified text in `characters` mode is placed at the top, and distributed text
   centered or spread, instead of at the bottom; both wrap.
-- HTML headings take Excel's sizes: the column band 21 pt and the row band 16 pt plus 3 pt a digit
-  of the last row, at Calibri 11, growing with the Normal font's size. Their colors are Excel's:
-  dark `#161616`, `#ffffff` and `#565656`; light `#f7f7f7`, `#5e5e5e` and `#e0dfdd`.
+- HTML headings take Excel's sizes (captured, screen suite `headings_grid`): the column band
+  21 pt and the row band 22 pt, from 4 digits in the last row 4 pt plus 6 pt a digit, at
+  Calibri 11 and zoom 50, 100 and 150, growing with the Normal font's size (captured at Calibri
+  8 to 36). At zoom 75, 200 and 400 Excel's row band is up to 6 pt narrower, a known deviation.
+  Their colors are Excel's: dark `#161616`, `#ffffff` and `#565656`; light `#f7f7f7`, `#5e5e5e`
+  and `#e0dfdd`.
 - A workbook palette replaces the default entry by entry; a `<colors>` element without
   `indexedColors` keeps the default palette instead of drawing indexed colors black.
 - A row fitted to a Calibri 20 cell is 26 pt, as Excel fits it, instead of Calibri 16's 21.

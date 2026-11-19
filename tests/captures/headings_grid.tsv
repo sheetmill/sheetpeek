@@ -1,0 +1,189 @@
+# excel: 16.115
+# build: 16.115.26110837
+# edition: Microsoft 365
+# channel: Current
+# macos: 26.5.1
+# date: 2026-11-19
+# display_scale: 2.000
+# colors: captures converted to sRGB (sips --matchTo sRGB Profile.icc)
+# platform: mac
+# light excel: 16.115
+# light build: 16.115.26110837
+# light macos: 26.5.1
+# light date: 2026-11-19
+# suite: headings_grid
+group	appearance	zoom	kind	item	cell	side	font	color_id	top_row	visible	row_band	col_band	row_band_px	col_band_px	band_left_px	paper	separator_row	separator_col	text_row	text_col	edge_row	edge_col	strip
+grid_default	dark	100	headings				Calibri 11		1	$A$1:$AV$72	22	21	44	42	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+grid_default	dark	100	edge	open	C8	right	Calibri 11																FFFFFFx6 D4D4D4x2 FFFFFFx4
+grid_default	dark	100	edge	open	C8	bottom	Calibri 11																FFFFFFx6 D4D4D4x2 FFFFFFx4
+grid_default	dark	100	edge	white	C4	left	Calibri 11																FFFFFFx12
+grid_default	dark	100	edge	white	C4	right	Calibri 11																FFFFFFx12
+grid_default	dark	100	edge	white	C4	top	Calibri 11																FFFFFFx12
+grid_default	dark	100	edge	white	C4	bottom	Calibri 11																FFFFFFx12
+grid_default	dark	100	edge	yellow	E4	left	Calibri 11																FFFFFFx6 FFFF00x6
+grid_default	dark	100	edge	yellow	E4	right	Calibri 11																FFFF00x8 FFFFFFx4
+grid_default	dark	100	edge	yellow	E4	top	Calibri 11																FFFFFFx6 FFFF00x6
+grid_default	dark	100	edge	yellow	E4	bottom	Calibri 11																FFFF00x8 FFFFFFx4
+grid_default	dark	100	edge	yellow block	G4	right	Calibri 11																FFFF00x12
+grid_default	dark	100	edge	yellow block	G4	bottom	Calibri 11																FFFF00x12
+grid_default	dark	200	headings				Calibri 11		1	$A$1:$X$35	21.5	21.5	86	86	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+grid_default	dark	200	edge	open	C8	right	Calibri 11																FFFFFFx6 D4D4D4x2 FFFFFFx4
+grid_default	dark	200	edge	open	C8	bottom	Calibri 11																FFFFFFx6 D4D4D4x2 FFFFFFx4
+grid_default	dark	200	edge	white	C4	left	Calibri 11																FFFFFFx12
+grid_default	dark	200	edge	white	C4	right	Calibri 11																FFFFFFx12
+grid_default	dark	200	edge	white	C4	top	Calibri 11																FFFFFFx12
+grid_default	dark	200	edge	white	C4	bottom	Calibri 11																FFFFFFx12
+grid_default	dark	200	edge	yellow	E4	left	Calibri 11																FFFFFFx6 FFFF00x6
+grid_default	dark	200	edge	yellow	E4	right	Calibri 11																FFFF00x8 FFFFFFx4
+grid_default	dark	200	edge	yellow	E4	top	Calibri 11																FFFFFFx6 FFFF00x6
+grid_default	dark	200	edge	yellow	E4	bottom	Calibri 11																FFFF00x8 FFFFFFx4
+grid_default	dark	200	edge	yellow block	G4	right	Calibri 11																FFFF00x12
+grid_default	dark	200	edge	yellow block	G4	bottom	Calibri 11																FFFF00x12
+grid_10_teal	dark	100	headings				Calibri 11	10	1	$A$1:$AV$72	22	21	44	42	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+grid_10_teal	dark	100	edge	open	C8	right	Calibri 11	10															FFFFFFx6 99CCCCx1 66B3B3x1 FFFFFFx4
+grid_10_teal	dark	100	edge	open	C8	bottom	Calibri 11	10															FFFFFFx6 99CCCCx1 66B3B3x1 FFFFFFx4
+grid_10_teal	dark	100	edge	white	C4	left	Calibri 11	10															FFFFFFx12
+grid_10_teal	dark	100	edge	white	C4	right	Calibri 11	10															FFFFFFx12
+grid_10_teal	dark	100	edge	white	C4	top	Calibri 11	10															FFFFFFx12
+grid_10_teal	dark	100	edge	white	C4	bottom	Calibri 11	10															FFFFFFx12
+grid_10_teal	dark	100	edge	yellow	E4	left	Calibri 11	10															FFFFFFx6 FFFF00x6
+grid_10_teal	dark	100	edge	yellow	E4	right	Calibri 11	10															FFFF00x8 FFFFFFx4
+grid_10_teal	dark	100	edge	yellow	E4	top	Calibri 11	10															FFFFFFx6 FFFF00x6
+grid_10_teal	dark	100	edge	yellow	E4	bottom	Calibri 11	10															FFFF00x8 FFFFFFx4
+grid_10_teal	dark	100	edge	yellow block	G4	right	Calibri 11	10															FFFF00x12
+grid_10_teal	dark	100	edge	yellow block	G4	bottom	Calibri 11	10															FFFF00x12
+grid_10_teal	dark	200	headings				Calibri 11	10	1	$A$1:$X$35	21.5	21.5	86	86	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+grid_10_teal	dark	200	edge	open	C8	right	Calibri 11	10															FFFFFFx6 66B3B3x1 99CCCCx1 FFFFFFx4
+grid_10_teal	dark	200	edge	open	C8	bottom	Calibri 11	10															FFFFFFx6 66B3B3x1 99CCCCx1 FFFFFFx4
+grid_10_teal	dark	200	edge	white	C4	left	Calibri 11	10															FFFFFFx12
+grid_10_teal	dark	200	edge	white	C4	right	Calibri 11	10															FFFFFFx12
+grid_10_teal	dark	200	edge	white	C4	top	Calibri 11	10															FFFFFFx12
+grid_10_teal	dark	200	edge	white	C4	bottom	Calibri 11	10															FFFFFFx12
+grid_10_teal	dark	200	edge	yellow	E4	left	Calibri 11	10															FFFFFFx6 FFFF00x6
+grid_10_teal	dark	200	edge	yellow	E4	right	Calibri 11	10															FFFF00x8 FFFFFFx4
+grid_10_teal	dark	200	edge	yellow	E4	top	Calibri 11	10															FFFFFFx6 FFFF00x6
+grid_10_teal	dark	200	edge	yellow	E4	bottom	Calibri 11	10															FFFF00x8 FFFFFFx4
+grid_10_teal	dark	200	edge	yellow block	G4	right	Calibri 11	10															FFFF00x12
+grid_10_teal	dark	200	edge	yellow block	G4	bottom	Calibri 11	10															FFFF00x12
+grid_12	dark	100	headings				Calibri 11	12	1	$A$1:$AV$72	22	21	44	42	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+grid_12	dark	100	edge	open	C8	right	Calibri 11	12															FFFFFFx6 9999FFx1 6666FFx1 FFFFFFx4
+grid_12	dark	100	edge	open	C8	bottom	Calibri 11	12															FFFFFFx6 9999FFx1 6666FFx1 FFFFFFx4
+grid_12	dark	100	edge	white	C4	left	Calibri 11	12															FFFFFFx12
+grid_12	dark	100	edge	white	C4	right	Calibri 11	12															FFFFFFx12
+grid_12	dark	100	edge	white	C4	top	Calibri 11	12															FFFFFFx12
+grid_12	dark	100	edge	white	C4	bottom	Calibri 11	12															FFFFFFx12
+grid_12	dark	100	edge	yellow	E4	left	Calibri 11	12															FFFFFFx6 FFFF00x6
+grid_12	dark	100	edge	yellow	E4	right	Calibri 11	12															FFFF00x8 FFFFFFx4
+grid_12	dark	100	edge	yellow	E4	top	Calibri 11	12															FFFFFFx6 FFFF00x6
+grid_12	dark	100	edge	yellow	E4	bottom	Calibri 11	12															FFFF00x8 FFFFFFx4
+grid_12	dark	100	edge	yellow block	G4	right	Calibri 11	12															FFFF00x12
+grid_12	dark	100	edge	yellow block	G4	bottom	Calibri 11	12															FFFF00x12
+grid_12	dark	200	headings				Calibri 11	12	1	$A$1:$X$35	21.5	21.5	86	86	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+grid_12	dark	200	edge	open	C8	right	Calibri 11	12															FFFFFFx6 6666FFx1 9999FFx1 FFFFFFx4
+grid_12	dark	200	edge	open	C8	bottom	Calibri 11	12															FFFFFFx6 6666FFx1 9999FFx1 FFFFFFx4
+grid_12	dark	200	edge	white	C4	left	Calibri 11	12															FFFFFFx12
+grid_12	dark	200	edge	white	C4	right	Calibri 11	12															FFFFFFx12
+grid_12	dark	200	edge	white	C4	top	Calibri 11	12															FFFFFFx12
+grid_12	dark	200	edge	white	C4	bottom	Calibri 11	12															FFFFFFx12
+grid_12	dark	200	edge	yellow	E4	left	Calibri 11	12															FFFFFFx6 FFFF00x6
+grid_12	dark	200	edge	yellow	E4	right	Calibri 11	12															FFFF00x8 FFFFFFx4
+grid_12	dark	200	edge	yellow	E4	top	Calibri 11	12															FFFFFFx6 FFFF00x6
+grid_12	dark	200	edge	yellow	E4	bottom	Calibri 11	12															FFFF00x8 FFFFFFx4
+grid_12	dark	200	edge	yellow block	G4	right	Calibri 11	12															FFFF00x12
+grid_12	dark	200	edge	yellow block	G4	bottom	Calibri 11	12															FFFF00x12
+grid_64	dark	100	headings				Calibri 11	64	1	$A$1:$AV$72	22	21	44	42	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+grid_64	dark	100	edge	open	C8	right	Calibri 11	64															FFFFFFx6 D4D4D4x2 FFFFFFx4
+grid_64	dark	100	edge	open	C8	bottom	Calibri 11	64															FFFFFFx6 D4D4D4x2 FFFFFFx4
+grid_64	dark	100	edge	white	C4	left	Calibri 11	64															FFFFFFx12
+grid_64	dark	100	edge	white	C4	right	Calibri 11	64															FFFFFFx12
+grid_64	dark	100	edge	white	C4	top	Calibri 11	64															FFFFFFx12
+grid_64	dark	100	edge	white	C4	bottom	Calibri 11	64															FFFFFFx12
+grid_64	dark	100	edge	yellow	E4	left	Calibri 11	64															FFFFFFx6 FFFF00x6
+grid_64	dark	100	edge	yellow	E4	right	Calibri 11	64															FFFF00x8 FFFFFFx4
+grid_64	dark	100	edge	yellow	E4	top	Calibri 11	64															FFFFFFx6 FFFF00x6
+grid_64	dark	100	edge	yellow	E4	bottom	Calibri 11	64															FFFF00x8 FFFFFFx4
+grid_64	dark	100	edge	yellow block	G4	right	Calibri 11	64															FFFF00x12
+grid_64	dark	100	edge	yellow block	G4	bottom	Calibri 11	64															FFFF00x12
+grid_65			refused	Microsoft Excel got an error: Parameter error. (-2700)																			
+grid_99999			refused	Microsoft Excel got an error: Parameter error. (-2700)																			
+rows_3	dark	50	headings				Calibri 11		100	$A$100:$CQ$234	21.098	19.18	22	20	0	161616	565656	565656	FFFFFF	FFFFFF	3A3A3Ax1 454545x1 181818x1 161616x3 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+rows_3	dark	75	headings				Calibri 11		100	$A$100:$BL$197	21.505	21.505	32	32	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+rows_3	dark	100	headings				Calibri 11		100	$A$100:$AV$171	22	21	44	42	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+rows_3	dark	150	headings				Calibri 11		100	$A$100:$AF$145	21.691	21.033	66	64	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+rows_3	dark	200	headings				Calibri 11		100	$A$100:$X$134	21.5	21.5	86	86	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+rows_3	dark	400	headings				Calibri 11		100	$A$100:$L$116	21.75	21.75	174	174	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+rows_4	dark	50	headings				Calibri 11		1000	$A$1000:$CQ$1134	26.852	19.18	28	20	0	161616	565656	565656	FFFFFF	FFFFFF	3A3A3Ax1 454545x1 181818x1 161616x3 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+rows_4	dark	75	headings				Calibri 11		1000	$A$1000:$BL$1097	24.193	21.505	36	32	0	161616	565656	565656	FFFFFF	FFFFFF	646464x1 333333x1 161616x4 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+rows_4	dark	100	headings				Calibri 11		1000	$A$1000:$AV$1071	28	21	56	42	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+rows_4	dark	150	headings				Calibri 11		1000	$A$1000:$AF$1045	27.606	21.033	84	64	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+rows_4	dark	200	headings				Calibri 11		1000	$A$1000:$X$1034	25	21.5	100	86	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+rows_4	dark	400	headings				Calibri 11		1000	$A$1000:$L$1016	25	21.75	200	174	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+rows_5	dark	50	headings				Calibri 11		10000	$A$10000:$CQ$10134	32.606	19.18	34	20	0	161616	565656	565656	FFFFFF	FFFFFF	3A3A3Ax1 454545x1 181818x1 161616x3 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+rows_5	dark	75	headings				Calibri 11		10000	$A$10000:$BL$10097	29.569	21.505	44	32	0	161616	565656	565656	FFFFFF	FFFFFF	646464x1 333333x1 161616x4 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+rows_5	dark	100	headings				Calibri 11		10000	$A$10000:$AV$10071	34	21	68	42	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+rows_5	dark	150	headings				Calibri 11		10000	$A$10000:$AF$10045	33.522	21.033	102	64	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+rows_5	dark	200	headings				Calibri 11		10000	$A$10000:$X$10034	30.5	21.5	122	86	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+rows_5	dark	400	headings				Calibri 11		10000	$A$10000:$L$10016	30.5	21.75	244	174	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+rows_7	dark	50	headings				Calibri 11		1000000	$A$1000000:$CP$1000134	44.113	19.18	46	20	0	161616	565656	565656	FFFFFF	FFFFFF	3A3A3Ax1 454545x1 181818x1 161616x3 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+rows_7	dark	75	headings				Calibri 11		1000000	$A$1000000:$BL$1000097	40.321	21.505	60	32	0	161616	565656	565656	FFFFFF	FFFFFF	646464x1 333333x1 161616x4 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+rows_7	dark	100	headings				Calibri 11		1000000	$A$1000000:$AV$1000071	46	21	92	42	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+rows_7	dark	150	headings				Calibri 11		1000000	$A$1000000:$AF$1000045	45.353	21.691	138	66	0	161616	565656		FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x4 BCBBBAx2 D4D4D4x2 FFFFFFx4	
+rows_7	dark	200	headings				Calibri 11		1000000	$A$1000000:$X$1000034	41.5	21	166	84	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x8 BCBBBAx2 FFFFFFx2	
+rows_7	dark	400	headings				Calibri 11		1000000	$A$1000000:$L$1000016	41.5	22	332	176	0	161616	565656		FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x4 BCBBBAx2 D4D4D4x2 FFFFFFx4	
+rows_4_5	dark	50	headings				Calibri 11		9990	$A$9990:$CQ$10124	32.606	19.18	34	20	0	161616	565656	565656	FFFFFF	FFFFFF	181818x1 161616x5 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+rows_4_5	dark	75	headings				Calibri 11		9990	$A$9990:$BL$10087	29.569	21.505	44	32	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+rows_4_5	dark	100	headings				Calibri 11		9990	$A$9990:$AV$10061	34	21	68	42	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+rows_4_5	dark	150	headings				Calibri 11		9990	$A$9990:$AF$10035	33.522	21.033	102	64	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+rows_4_5	dark	200	headings				Calibri 11		9990	$A$9990:$X$10024	30.5	21.5	122	86	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+rows_4_5	dark	400	headings				Calibri 11		9990	$A$9990:$L$10006	30.5	21.75	244	174	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+rows_2	dark	50	headings				Calibri 11		10	$A$10:$CQ$144	21.098	19.18	22	20	0	161616	565656	565656	FFFFFF	FFFFFF	181818x1 161616x5 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+rows_2	dark	75	headings				Calibri 11		10	$A$10:$BL$107	21.505	21.505	32	32	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+rows_2	dark	100	headings				Calibri 11		10	$A$10:$AV$81	22	21	44	42	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+rows_2	dark	150	headings				Calibri 11		10	$A$10:$AF$55	21.691	21.033	66	64	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+rows_2	dark	200	headings				Calibri 11		10	$A$10:$X$44	21.5	21.5	86	86	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+rows_2	dark	400	headings				Calibri 11		10	$A$10:$L$26	21.75	21.75	174	174	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+font_calibri_8	dark	100	headings				Calibri 8		1	$A$1:$BH$68	21	21	42	42	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+font_calibri_14	dark	100	headings				Calibri 14		1	$A$1:$AH$67	25	21	50	42	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+font_calibri_20	dark	100	headings				Calibri 20		1	$A$1:$X$66	36	25	72	50	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+font_calibri_28	dark	100	headings				Calibri 28		1	$A$1:$Q$64	50	36	100	72	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+font_calibri_36	dark	100	headings				Calibri 36		1	$A$1:$N$62	64	46	128	92	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+font_aptos_narrow_11	dark	100	headings				Aptos Narrow 11		1	$A$1:$AN$67	22	21	44	42	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+grid_x	dark	100	headings				Calibri 11	x	1	$A$1:$AV$72	22	21	44	42	0	161616	565656	565656	FFFFFF	FFFFFF	161616x6 BCBBBAx2 FFFFFFx4	161616x6 BCBBBAx2 FFFFFFx4	
+grid_x	dark	100	edge	open	C8	right	Calibri 11	x															FFFFFFx6 D4D4D4x2 FFFFFFx4
+grid_x	dark	100	edge	open	C8	bottom	Calibri 11	x															FFFFFFx6 D4D4D4x2 FFFFFFx4
+grid_x	dark	100	edge	white	C4	left	Calibri 11	x															FFFFFFx12
+grid_x	dark	100	edge	white	C4	right	Calibri 11	x															FFFFFFx12
+grid_x	dark	100	edge	white	C4	top	Calibri 11	x															FFFFFFx12
+grid_x	dark	100	edge	white	C4	bottom	Calibri 11	x															FFFFFFx12
+grid_x	dark	100	edge	yellow	E4	left	Calibri 11	x															FFFFFFx6 FFFF00x6
+grid_x	dark	100	edge	yellow	E4	right	Calibri 11	x															FFFF00x8 FFFFFFx4
+grid_x	dark	100	edge	yellow	E4	top	Calibri 11	x															FFFFFFx6 FFFF00x6
+grid_x	dark	100	edge	yellow	E4	bottom	Calibri 11	x															FFFF00x8 FFFFFFx4
+grid_x	dark	100	edge	yellow block	G4	right	Calibri 11	x															FFFF00x12
+grid_x	dark	100	edge	yellow block	G4	bottom	Calibri 11	x															FFFF00x12
+grid_default	light	100	headings				Calibri 11		1	$A$1:$AV$72	22	21	44	42	0	F7F7F7	DEDDDB	DEDDDB	5E5E5E	5E5E5E	F8F8F8x5 F7F7F7x1 BCBBBAx2 FFFFFFx4	F8F8F8x3 F7F7F7x1 F8F8F8x1 F7F7F7x1 BCBBBAx2 FFFFFFx4	
+grid_default	light	100	edge	open	C8	right	Calibri 11																FFFFFFx6 D4D4D4x2 FFFFFFx4
+grid_default	light	100	edge	open	C8	bottom	Calibri 11																FFFFFFx6 D4D4D4x2 FFFFFFx4
+grid_default	light	100	edge	white	C4	left	Calibri 11																FFFFFFx12
+grid_default	light	100	edge	white	C4	right	Calibri 11																FFFFFFx12
+grid_default	light	100	edge	white	C4	top	Calibri 11																FFFFFFx12
+grid_default	light	100	edge	white	C4	bottom	Calibri 11																FFFFFFx12
+grid_default	light	100	edge	yellow	E4	left	Calibri 11																FFFFFFx6 FFFF00x6
+grid_default	light	100	edge	yellow	E4	right	Calibri 11																FFFF00x8 FFFFFFx4
+grid_default	light	100	edge	yellow	E4	top	Calibri 11																FFFFFFx6 FFFF00x6
+grid_default	light	100	edge	yellow	E4	bottom	Calibri 11																FFFF00x8 FFFFFFx4
+grid_default	light	100	edge	yellow block	G4	right	Calibri 11																FFFF00x12
+grid_default	light	100	edge	yellow block	G4	bottom	Calibri 11																FFFF00x12
+grid_10_teal	light	100	headings				Calibri 11	10	1	$A$1:$AV$72	22	21	44	42	0	F7F7F7	DEDDDB	DEDDDB	5E5E5E	5E5E5E	F8F8F8x5 F7F7F7x1 BCBBBAx2 FFFFFFx4	F8F8F8x3 F7F7F7x1 F8F8F8x1 F7F7F7x1 BCBBBAx2 FFFFFFx4	
+grid_10_teal	light	100	edge	open	C8	right	Calibri 11	10															FFFFFFx6 99CCCCx1 66B3B3x1 FFFFFFx4
+grid_10_teal	light	100	edge	open	C8	bottom	Calibri 11	10															FFFFFFx6 99CCCCx1 66B3B3x1 FFFFFFx4
+grid_10_teal	light	100	edge	white	C4	left	Calibri 11	10															FFFFFFx12
+grid_10_teal	light	100	edge	white	C4	right	Calibri 11	10															FFFFFFx12
+grid_10_teal	light	100	edge	white	C4	top	Calibri 11	10															FFFFFFx12
+grid_10_teal	light	100	edge	white	C4	bottom	Calibri 11	10															FFFFFFx12
+grid_10_teal	light	100	edge	yellow	E4	left	Calibri 11	10															FFFFFFx6 FFFF00x6
+grid_10_teal	light	100	edge	yellow	E4	right	Calibri 11	10															FFFF00x8 FFFFFFx4
+grid_10_teal	light	100	edge	yellow	E4	top	Calibri 11	10															FFFFFFx6 FFFF00x6
+grid_10_teal	light	100	edge	yellow	E4	bottom	Calibri 11	10															FFFF00x8 FFFFFFx4
+grid_10_teal	light	100	edge	yellow block	G4	right	Calibri 11	10															FFFF00x12
+grid_10_teal	light	100	edge	yellow block	G4	bottom	Calibri 11	10															FFFF00x12

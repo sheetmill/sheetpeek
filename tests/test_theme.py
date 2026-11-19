@@ -249,7 +249,7 @@ def grid_book(tmp_path, color_id="10", palette=None, default="0", gridlines=True
 
 
 def test_the_grid_color_is_the_workbook_palette_entry(tmp_path):
-    # Unverified: colorId 10 with index 10 teal draws teal gridlines.
+    # colorId 10 with index 10 teal draws teal gridlines (captured, headings_grid).
     assert sheetpeek.read(grid_book(tmp_path, palette=custom_palette())).grid_color == TEAL
     assert sheetpeek.read(grid_book(tmp_path, color_id="12")).grid_color == "0000FF"
 
@@ -258,7 +258,8 @@ def test_the_grid_color_is_the_workbook_palette_entry(tmp_path):
     ("color_id", "default"), [("64", "0"), ("10", "1"), ("65", "0"), ("99999", "0")]
 )
 def test_an_automatic_grid_color_is_none(tmp_path, color_id, default):
-    # 64 is the automatic gray (unverified); past 64: unverified, automatic.
+    # 64 is the automatic gray (captured); Excel refuses 65 and 99999, which sheetpeek reads
+    # as automatic (headings_grid).
     assert sheetpeek.read(grid_book(tmp_path, color_id, default=default)).grid_color is None
 
 
@@ -344,17 +345,19 @@ def test_text_draws_no_grid_color(tmp_path):
 
 
 def test_heading_bands_at_calibri_11():
-    # Unverified, at zoom 100 and 200: the column band 21 pt; the row band 16 + 3 pt a
-    # digit of the last visible row (22, 25 and 28 pt with 2, 3 and 4 digits).
+    # Captured (headings_grid): the column band 21 pt; the row band max(22, 4 + 6 x digits) pt,
+    # the digits of the last visible row.
     assert bands(11.0, 2) == (22.0, 21.0)
-    assert bands(11.0, 3) == (25.0, 21.0)
+    assert bands(11.0, 3) == (22.0, 21.0)
     assert bands(11.0, 4) == (28.0, 21.0)
+    assert bands(11.0, 7) == (46.0, 21.0)
 
 
 def test_heading_bands_grow_with_the_normal_font():
-    # Unverified, at Calibri 20: column band 25 pt, row band 36 pt with 2 digits. Other
-    # sizes follow a line through the two (unverified), positive at every size Excel accepts.
+    # Captured at Calibri 8 to 36 with 2 digits (Calibri 20: 36 and 25 pt). Other sizes follow
+    # the line through the two nearest (unverified), positive at every size Excel accepts.
     assert bands(20.0, 2) == pytest.approx((36.0, 25.0))
+    assert bands(17.0, 2) == pytest.approx((30.5, 23.0))  # halfway between 14 and 20
     for size in (1.0, 409.0):
         row, column = bands(size, 7)
         assert row > 0

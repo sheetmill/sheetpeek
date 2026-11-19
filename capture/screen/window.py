@@ -26,6 +26,8 @@ from capture.screen import png
 from capture.screen.session import excel_windows
 
 MARKER = "FF00FF"
+MARKER_HEIGHT = 12
+"""Image pixels a marker region spans at least, top to bottom (inclusive bounds)."""
 """Magenta: absent from Excel's chrome and from the test content."""
 
 POINT_PIXELS = {"mac": 1.0, "windows": 96 / 72}
@@ -119,11 +121,11 @@ def marker_boxes(image: png.Image) -> list[tuple[int, int, int, int]]:
     for group in groups:
         ys = [y for x in group for y in xs[x]]
         box = (group[0], min(ys), group[-1], max(ys))
-        # A marker is a cell's full height (at least 20 px at zoom 100 on a 2x display), though
-        # an object may cover most of its width (a shown note leaves a 12 px sliver). Microsoft
-        # 365's floating Copilot button, when it is on, is a 15 x 10 px magenta-ish region at the
-        # bottom right (Excel 16.115): too short to pass.
-        if box[3] - box[1] >= 20:
+        # A marker is a cell's full height (at least 20 px at zoom 100 on a 2x display, 15 at
+        # zoom 50), though an object may cover most of its width (a shown note leaves a 12 px
+        # sliver). Microsoft 365's floating Copilot button, when it is on, is a 15 x 10 px
+        # magenta-ish region at the bottom right (Excel 16.115): too short to pass.
+        if box[3] - box[1] >= MARKER_HEIGHT:
             boxes.append(box)
     return boxes
 

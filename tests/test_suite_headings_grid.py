@@ -300,10 +300,30 @@ def _captured_groups(rows):
     return refused, [r for r in rows if r["kind"] != "refused"]
 
 
+def _share(pixel, color):
+    """How much of ``color`` over white ``pixel`` holds, by its channels farthest from white,
+    or ``None`` where the channels disagree by more than the conversion's rounding."""
+    shares = [
+        (255 - p) / (255 - c)
+        for p, c in zip(_rgb(pixel), _rgb(color), strict=True)
+        if 255 - c >= 64
+    ]
+    if max(shares) - min(shares) > SHARE_TOLERANCE:
+        return None
+    return sum(shares) / len(shares)
+
+
+SHARE_TOLERANCE = 0.05
+"""Of a pixel's share of the color, per channel and of a line's total: the captured lines' two
+pixels are 0.40 and 0.60 of teal (008080) and of blue (0000FF) to within 0.01."""
+
+
 @pytest.mark.excel
 def test_the_grid_color_is_drawn_in_the_palette_entry_one_device_pixel_wide(built):
-    # Unverified until captured: colorId draws the palette's entry 1 device pixel wide at zoom
-    # 100 and 200; 64, past the palette and malformed are the automatic gray, 2 pixels wide.
+    # colorId draws the palette's entry, one device pixel's worth: Excel anti-aliases it over two
+    # pixels, 0.4 and 0.6 of the color (the heavier second at zoom 100, first at 200), where
+    # sheetpeek draws one pixel in the full color. 64, past the palette and malformed are the
+    # automatic gray, 2 pixels wide.
     refused, rows = _captured_groups(_captured())
     gray = "".join(f"{c:02X}" for c in GRIDLINE["mac"])
     for row in rows:
@@ -315,8 +335,10 @@ def test_the_grid_color_is_drawn_in_the_palette_entry_one_device_pixel_wide(buil
             assert len(line) == 2, row
             assert all(_near(c, gray, COLOR_TOLERANCE) for c in line), row
         else:
-            assert len(line) == 1, row
-            assert _near(line[0], expected, COLOR_TOLERANCE), row
+            shares = [_share(c, expected) for c in line]
+            assert 1 <= len(line) <= 2, row
+            assert None not in shares, row
+            assert abs(sum(shares) - 1) <= SHARE_TOLERANCE, row
     assert refused <= set(headings_grid.REFUSALS)
 
 
@@ -366,8 +388,8 @@ def test_the_headings_keep_their_colors_under_a_grid_color():
 
 @pytest.mark.excel
 def test_the_heading_colors_are_sheetpeeks():
-    # Unverified until captured: dark paper 22, text 255, separators 86; light paper 247,
-    # separators 224,223,221, text 94 (the pixel of the glyphs farthest from the paper).
+    # Dark paper 22, text 255, separators 86; light paper 247, separators 224,223,221 next to
+    # the cells, text 94 (the pixel of the glyphs farthest from the paper).
     _, rows = _captured_groups(_captured())
     expected = _css_colors()
     found = set()
@@ -398,29 +420,65 @@ def _tolerance(zoom):
     return 100 / (2 * int(zoom))
 
 
+SCALE_ZOOMS = ("50", "100", "150")
+"""Zooms where Excel's bands are sheetpeek's, in sheet units."""
+NARROWER_ZOOMS = {"75": 6.0, "200": 4.5, "400": 4.5}
+"""Zooms where Excel's row band is narrower than sheetpeek's, by at most this many sheet
+points (7 digits; 0.5 at 2 and 3): Excel sizes the heading digits at the zoom, an advance that
+is not a fixed share of the zoom (3, 4, 6, 9, 11 and 22 screen points at 50, 75, 100, 150, 200
+and 400), where sheetpeek scales the zoom-100 band. A known deviation."""
+BAND_PIXELS = 1
+"""Device pixels between a captured band and sheetpeek's: the bands end on device pixels (the
+column band at zoom 150 is 64 where 21 pt makes 63)."""
+COLUMN_OUTLIER = ("rows_7", 3)
+"""The column band of the 7-digit window is 2 device pixels off the other windows' at zoom 150,
+200 and 400 (66, 84, 176 against 64, 86, 174), cause not found; its row band is not."""
+
+
+def _pixels(row, points):
+    """Sheet points as the device pixels of a capture at its zoom on a 2x display."""
+    return points * int(row["zoom"]) / 100 * 2
+
+
 @pytest.mark.excel
 def test_the_bands_follow_the_last_row_in_the_window_at_calibri_11():
-    # Unverified until captured: the column band 21 pt; the row band 16 + 3 pt a digit of the
-    # last row in Excel's visible range, at zoom 100 and 200.
+    # The column band 21 pt; the row band max(22, 4 + 6 x digits) pt, the digits of the last row
+    # in Excel's visible range, at zoom 50, 100 and 150.
     _, rows = _captured_groups(_captured())
-    compared = 0
+    compared = set()
     for row, _, size in _band_rows(rows, ("Calibri",)):
-        if size != 11:
+        if size != 11 or row["zoom"] not in SCALE_ZOOMS:
             continue
         digits = len(str(headings_grid.last_row(row["visible"])))
         expected = bands(size, digits)
-        tolerance = _tolerance(row["zoom"])
-        assert float(row["row_band"]) == pytest.approx(expected[0], abs=tolerance), row
-        assert float(row["col_band"]) == pytest.approx(expected[1], abs=tolerance), row
-        compared += 1
-    assert compared
+        assert abs(int(row["row_band_px"]) - _pixels(row, expected[0])) <= BAND_PIXELS, row
+        column = COLUMN_OUTLIER[1] if row["group"] == COLUMN_OUTLIER[0] else BAND_PIXELS
+        assert abs(int(row["col_band_px"]) - _pixels(row, expected[1])) <= column, row
+        compared.add((row["zoom"], digits))
+    assert {d for _, d in compared} == {2, 3, 4, 5, 7}
+    assert {z for z, _ in compared} == set(SCALE_ZOOMS)
+
+
+@pytest.mark.excel
+def test_at_other_zooms_the_row_band_is_narrower_within_the_known_deviation():
+    _, rows = _captured_groups(_captured())
+    compared = set()
+    for row, _, size in _band_rows(rows, ("Calibri",)):
+        if size != 11 or row["zoom"] not in NARROWER_ZOOMS:
+            continue
+        digits = len(str(headings_grid.last_row(row["visible"])))
+        expected = _pixels(row, bands(size, digits)[0])
+        short = (expected - int(row["row_band_px"])) / _pixels(row, 1)
+        assert 0 <= short <= NARROWER_ZOOMS[row["zoom"]], (row, short)
+        compared.add(row["zoom"])
+    assert compared == set(NARROWER_ZOOMS)
 
 
 @pytest.mark.excel
 def test_the_row_band_takes_the_last_rows_digits_not_the_first_rows():
     _, rows = _captured_groups(_captured())
     for row in rows:
-        if row["group"] == "rows_4_5" and row["kind"] == "headings":
+        if row["group"] == "rows_4_5" and row["kind"] == "headings" and row["zoom"] in SCALE_ZOOMS:
             assert len(str(headings_grid.last_row(row["visible"]))) == 5, row
             assert abs(float(row["row_band"]) - bands(11.0, 5)[0]) < abs(
                 float(row["row_band"]) - bands(11.0, 4)[0]
@@ -429,8 +487,7 @@ def test_the_row_band_takes_the_last_rows_digits_not_the_first_rows():
 
 @pytest.mark.excel
 def test_the_bands_grow_with_the_normal_font():
-    # Unverified until captured: Calibri 20's bands are 36 and 25 pt with 2 digits, other
-    # sizes on the line through Calibri 11's and 20's; Aptos Narrow 11 as Calibri 11.
+    # Calibri 8 to 36 with 2 digits, sheetpeek's table; Aptos Narrow 11 as Calibri 11.
     _, rows = _captured_groups(_captured())
     compared = 0
     for row, _, size in _band_rows(rows, ("Calibri", "Aptos Narrow")):

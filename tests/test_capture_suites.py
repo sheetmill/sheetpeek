@@ -310,3 +310,28 @@ def test_the_borders_control_takes_its_platforms_gridline_or_is_skipped(capsys):
     assert GRIDLINE["windows"] is None  # stated once a capture here records it
     assert control("windows") == []
     assert NO_GRIDLINE in capsys.readouterr().out
+
+
+# --- markers
+
+
+def _magenta(*boxes):
+    """A white image with magenta boxes ``(x0, y0, x1, y1)``, end exclusive."""
+    from capture.screen import png
+
+    width, height = 200, 120
+    rows = [bytearray(b"\xff" * (width * 3)) for _ in range(height)]
+    for x0, y0, x1, y1 in boxes:
+        for y in range(y0, y1):
+            for x in range(x0, x1):
+                rows[y][3 * x : 3 * x + 3] = b"\xff\x00\xff"
+    return png.Image(width, height, 3, rows, "sRGB")
+
+
+def test_a_marker_at_zoom_50_is_found_and_the_copilot_button_is_not():
+    from capture.screen.window import marker_boxes
+
+    # A marker cell at zoom 50 on a 2x display spans 15 pixels down (7.5 pt); Microsoft 365's
+    # floating Copilot button is a 15 x 10 px magenta-ish region.
+    image = _magenta((10, 10, 58, 25), (100, 40, 148, 55), (170, 100, 185, 110))
+    assert marker_boxes(image) == [(10, 10, 57, 24), (100, 40, 147, 54)]
