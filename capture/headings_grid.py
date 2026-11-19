@@ -159,6 +159,11 @@ ALONG = 5
 """Device pixels averaged along a boundary."""
 PAPER_TOLERANCE = 3
 """How far (per channel) a pixel may be from the heading paper and still count as paper."""
+WALK_INSET = 3
+"""Device pixels inside a row's top or a column's left where the band walks run."""
+WALK_STEP = 1
+"""How far (per channel) one pixel of a band walk may be from the last: the light paper's
+gradient steps by 1, the white above it by 2 at its edge."""
 ROOT = Path(__file__).resolve().parents[1]
 BUILD_DIR = ROOT / "capture" / "build" / "headings_grid"
 OUTPUT = ROOT / "tests" / "captures" / "headings_grid.tsv"
@@ -379,30 +384,42 @@ def _headings(cap: Any, group: Group) -> dict[str, str]:
     """The bands' sizes and the headings' colors in one capture."""
     first = cap.geometry[group.markers[0]]
     _, marker_row = coordinate_from_string(group.markers[0])
-    sheet_top = first["top"] - (marker_row - group.top_row) * first["height"]
+    # Excel's geometry puts row 1's top at 0 pt. A window scrolled to a later row is reached
+    # through rows of the marker's height: those groups lay every row at the default height,
+    # where the font groups' rows differ (their empty rows keep the file's default height).
+    sheet_top = 0.0
+    if group.top_row != 1:
+        sheet_top = first["top"] - (marker_row - group.top_row) * first["height"]
     x_cells = round(cap.grid.x(0))  # column A's left boundary: the window starts at column A
     y_cells = round(cap.grid.y(sheet_top))
     y_quarter = round(cap.grid.y(first["top"] + first["height"] / 4))
     x_quarter = round(cap.grid.x(first["left"] + first["width"] / 4))
+    # The walks run just inside the marker row's top and column B's left, where no heading
+    # glyph reaches, and step while neighbors match: the light appearance's paper is a gradient.
+    y_walk = round(cap.grid.y(first["top"])) + WALK_INSET
+    x_walk = round(cap.grid.x(first["left"])) + WALK_INSET
     image = cap.image
     paper = image.pixel(x_cells - 1, y_quarter)
     left = x_cells - 1
-    while left > 0 and _close(image.pixel(left - 1, y_quarter), paper):
+    while left > 0 and _close(image.pixel(left - 1, y_walk), image.pixel(left, y_walk), WALK_STEP):
         left -= 1
     top = y_cells - 1
-    while top > 0 and _close(image.pixel(x_quarter, top - 1), paper):
+    while top > 0 and _close(image.pixel(x_walk, top - 1), image.pixel(x_walk, top), WALK_STEP):
         top -= 1
     row_px, col_px = x_cells - left, y_cells - top
     row_height = first["height"] * cap.scale
     column_width = first["width"] * cap.scale
 
     def lines(spans: range, across: range, vertical: bool) -> str:
+        """The first separator across a band: its one color, or the color at its end next to
+        the cells where it is a gradient (the light appearance's fade in from the paper)."""
         for k in spans:
-            found = {image.pixel(k, j) if vertical else image.pixel(j, k) for j in across}
-            if len(found) == 1:
-                (color,) = found
-                if not _close(color, paper):
-                    return _hex(color)
+            found = [image.pixel(k, j) if vertical else image.pixel(j, k) for j in across]
+            inner = found[-1]
+            if _close(inner, paper):
+                continue
+            if len(set(found)) == 1 or all(_luma(c) >= _luma(inner) for c in found):
+                return _hex(inner)
         return ""
 
     def farthest(xs: range, ys: range) -> str:

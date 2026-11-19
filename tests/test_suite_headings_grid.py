@@ -195,6 +195,48 @@ def test_the_bands_and_heading_colors_read_from_the_window():
     assert set(record) <= set(headings_grid.COLUMNS)
 
 
+def gray(v):
+    return (v, v, v)
+
+
+def test_the_light_bands_are_measured_across_their_gradient():
+    # The light appearance's paper steps by 1 from 253 to 247 toward the cells, below white
+    # chrome; its separators fade in from the paper to 221 next to the cells.
+    window = Window("grid_default")
+    for y in range(CHROME_BOTTOM):
+        window.paint(0, y, window.width, y + 1, gray(255))
+    for y in range(CHROME_BOTTOM, ORIGIN_Y):
+        window.paint(ORIGIN_X + 2, y, window.width, y + 1, gray(253 - (y - CHROME_BOTTOM) // 7))
+    for x in range(ORIGIN_X):
+        window.paint(x, CHROME_BOTTOM, x + 1, window.height, gray(253 - x // 7))
+    for k in range(12):
+        y = ORIGIN_Y + 30 * k + 28
+        for x in range(ORIGIN_X):
+            window.paint(x, y, x + 1, y + 2, gray(252 - 31 * x // (ORIGIN_X - 1)))
+        x = ORIGIN_X + 96 * k + 94
+        for y in range(CHROME_BOTTOM, ORIGIN_Y):
+            shade = 252 - 31 * (y - CHROME_BOTTOM) // (ORIGIN_Y - CHROME_BOTTOM - 1)
+            window.paint(x, y, x + 2, y + 1, gray(shade))
+    window.paint(18, ORIGIN_Y + 40, 24, ORIGIN_Y + 50, gray(94))  # "2"
+    window.paint(ORIGIN_X + 140, 34, ORIGIN_X + 146, 48, gray(94))  # "B"
+    (record, *_) = headings_grid.measure(window.capture(), "grid_default", "light")
+    assert (record["row_band"], record["col_band"], record["band_left_px"]) == ("22", "21", "0")
+    assert record["paper"] == "F7F7F7"
+    assert (record["separator_row"], record["separator_col"]) == ("DEDEDE", "DEDEDE")
+    assert (record["text_row"], record["text_col"]) == ("5E5E5E", "5E5E5E")
+
+
+def test_the_column_band_ends_at_row_1_when_the_rows_differ_in_height():
+    # A font group's empty rows keep the file's default height, its marker row the font's:
+    # Excel's geometry puts row 1's top at 0 pt, whatever the marker row's height.
+    window = Window("font_calibri_20")
+    capture = window.capture()
+    first = window.group.markers[0]
+    capture.geometry[first] = capture.geometry[first] | {"top": 15.0, "height": 26.0}
+    (record,) = headings_grid.measure(capture, "font_calibri_20")
+    assert (record["row_band"], record["col_band"]) == ("22", "21")
+
+
 def test_a_scrolled_window_measures_from_its_top_row():
     window = Window("rows_4_5", visible="$A$9990:$AQ$10059")
     (record,) = headings_grid.measure(window.capture(), "rows_4_5")
