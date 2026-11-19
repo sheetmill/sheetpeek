@@ -1,7 +1,7 @@
 """One generated workbook open in Excel for Mac, for a screen capture.
 
 Every request goes through ``excel.applescript``, one request a call (count, open, close, view,
-save, read), so each call does one visible thing and can be inspected on its own.
+scroll, save, read), so each call does one visible thing and can be inspected on its own.
 ``ExcelSession`` refuses to start unless Excel answers, holds no workbook and shows no window
 of its own (About, Preferences, a dialog), since any other window spoils a window capture.
 It opens the workbook, keeps the display awake, and on every exit path
@@ -212,6 +212,14 @@ class ExcelSession:
         The selection outline and its highlighted headings then sit outside the captured area.
         """
         return self.ask("view", self.name, park, str(zoom))
+
+    def scroll(self, row: int) -> str:
+        """Scroll the window so ``row`` is its top row, column A at its left.
+
+        Returns the address of the window's visible range (``$A$9990:$AQ$10059``), as Excel
+        gives it: rows and columns shown in part count.
+        """
+        return self.ask("scroll", self.name, str(row))
 
     def read_cells(self, cells: list[str]) -> list[tuple[str, str, str]]:
         """(cell, property, value) for every cell: display format, own format, borders, geometry.

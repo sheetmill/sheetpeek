@@ -123,11 +123,14 @@ def capture(
     folder: str = "sheetpeek-capture",
     name: str = "capture",
     postprocess: Callable[[Path], None] | None = None,
+    top_row: int | None = None,
 ) -> list[Capture]:
     """Run one capture session; write ``formats.tsv`` and ``window_<zoom>.png`` (sRGB) to ``out``.
 
     ``postprocess(path)``, if given, edits the saved workbook before Excel opens it: for XML that
     openpyxl cannot write (``x14`` extensions, threaded comments). Use ``patch_part`` for that.
+    ``top_row``, if given, scrolls each view so that row is the window's top row, and keeps the
+    window's visible range as read ``("window", "visible.<zoom>", address)``.
     """
     from openpyxl import Workbook
     from openpyxl.styles import PatternFill
@@ -155,6 +158,8 @@ def capture(
             rows = session.read_cells(cells)
             for zoom in zooms:
                 session.view(PARK, zoom)
+                if top_row is not None:
+                    rows.append(("window", f"visible.{zoom}", session.scroll(top_row)))
                 raw = out / f"window_{zoom}_display.png"
                 window, shot = capture_window(path.stem, raw)
                 shots.append((zoom, window, raw))

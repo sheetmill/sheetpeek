@@ -6,6 +6,8 @@
 --   alerts                     turn display alerts back on
 --   view NAME PARK ZOOM        bring the workbook forward, set the zoom, select PARK (a cell off
 --                              the measured area) and scroll back to A1
+--   scroll NAME ROW            scroll the active window so ROW is its top row (column A at the
+--                              left); returns the address of the window's visible range
 --   save NAME PATH             save the workbook as PATH (Excel's own file)
 --   read NAME CELL...          what Excel shows for each cell: its display format, its own
 --                              format, its borders and its geometry, one record a property
@@ -24,6 +26,8 @@ on run argv
 		return my closeBook(item 2 of argv)
 	else if request is "view" then
 		return my viewBook(item 2 of argv, item 3 of argv, (item 4 of argv) as integer)
+	else if request is "scroll" then
+		return my scrollBook(item 2 of argv, (item 3 of argv) as integer)
 	else if request is "save" then
 		return my saveBook(item 2 of argv, item 3 of argv)
 	else if request is "read" then
@@ -74,6 +78,15 @@ on viewBook(xlName, park, zoomLevel)
 		return (zoom of active window) as string
 	end tell
 end viewBook
+
+on scrollBook(xlName, topRow)
+	tell application "Microsoft Excel"
+		activate object workbook xlName
+		set scroll row of active window to topRow
+		set scroll column of active window to 1
+		return (get address of (visible range of active window)) as string
+	end tell
+end scrollBook
 
 on saveBook(xlName, xlPath)
 	tell application "Microsoft Excel"
