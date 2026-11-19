@@ -666,8 +666,8 @@ a cached value (as openpyxl writes it) has no `t`. The same file confirms Excel 
 Captured so far, in `tests/captures/`: by print (route B) `layout` (§3.6, §4.1 to §4.7); read
 from Excel `theme_colors` and `theme_colors_more` (§3.3), `merge_width` and `error_width` (§4.2,
 §4.4, no deviation), `row_height` and `row_height_more` (§4.7), `package` and `package_more` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14), `theme_fonts_palette`
-and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts` and `gradients` (§4.12), `text_style` (§4.7, §4.13), `rotation` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
-Excel 16.115 (Microsoft 365). The rules of §4.11, §4.15 and §4.16 have no
+and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts` and `gradients` (§4.12), `text_style` (§4.7, §4.13), `runs` (§4.16), `rotation` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
+Excel 16.115 (Microsoft 365). The rules of §4.11 and §4.15 have no
 capture here yet and are marked unverified until screen suites capture them
 on Microsoft 365; so are the parts of §4.12, §4.14 and §4.18 that say so. What still waits for
 the screen: the text insets and the baselines of angled text, which come from print, and the 15 pt rows that print
@@ -1161,8 +1161,8 @@ in its sheet list instead of linking it.
 
 ### 4.16 Rich-text runs
 
-**Unverified:** no capture of the rules here is in this repository yet (cases in Calibri 11 at zoom
-100), and the tests that rest on them (`tests/test_runs.py`) say so. The code is `_read.py`
+The rules here are captured by the suite `runs` (Excel 16.115, zoom 100), except where marked;
+its known deviations are named below. The code is `_read.py`
 (reading),
 `_runs.py` and `_excel.py` (layout), `backends/html/_text.py` and `backends/markdown.py`.
 
@@ -1170,40 +1170,43 @@ in its sheet list instead of linking it.
 shared string (where Excel writes them) or an inline one (what openpyxl writes). xlio gives both
 with `Sheet.cells(rich=True)`: each run's text and its `xlio.Font`, or no font for a run without
 properties. A string holding both a `<t>` and runs, which the schema allows and Excel does not
-write, reads as the text of both, drawn in the cell's font (what Excel shows is unverified).
+write, reads as the text of both, drawn in the cell's font: a known deviation, as Excel keeps the
+`<t>` as a run in the cell's font and each run with its own (`runs`); xlio gives the runs without
+the `<t>`.
 
 **The model.** `Cell.runs` holds the runs as `TextSpan`s (text and fully resolved `Font`), and
 `Cell.value` their text joined; escapes (§5.6) are decoded in each run. Adjacent runs in one font
 are joined, empty ones dropped, and a text whose every run is in the cell's font has no runs
 (`None`). **A run without properties takes the cell's font; a run with properties takes nothing
-from it** (unverified: in a 16 pt red cell, a run whose properties hold only bold is drawn
-11 pt and black): what its properties leave out is the default, and a missing name or size the
-Normal font's (unverified; the case's Normal font is Calibri 11, which is also the fixed
-default).
+from it** (in a 16 pt red cell, a run whose properties hold only bold is drawn 11 pt and
+black): what its properties leave out is the default, and a missing name or size the Normal
+font's (captured under an Arial 14 Normal font).
 
 **Layout** (`excel` mode). The text is measured run by run, each in its own font at its drawn
 size, for spill, `####`, wrapping, shrink to fit and alignment:
-- **Widths add per run** (unverified: a bold 16 pt run in an 11 pt text ends 15 pt further,
+- **Widths add per run** (a bold 16 pt run in an 11 pt text ends 15 pt further,
   166 pt past the cell's right edge against 151, and spills one column more).
-- **Each line takes the height of its largest run** (unverified: one 20 pt run in an 11 pt cell fits
+- **Each line takes the height of its largest run** (one 20 pt run in an 11 pt cell fits
   the row to 26 pt, as a 20 pt cell, and the small runs sit on the large run's baseline). Wrapped
-  lines are each their largest run's row height plus 1 (unverified: "aaa" / "BBB" / "ccc ddd" with
-  "BBB" at 20 pt is 16 + 27 + 16 = 59 pt; the 27 for a 20 pt line is inferred from this one
-  case). Calibri 20's 26 pt is in the row-height table (§4.7). The baseline at 20 pt is 5 pt
+  lines are each their largest run's row height plus 1 ("aaa" / "BBB" / "ccc ddd" with "BBB" at
+  20 pt is 16 + 27 + 16 = 59 pt). With "BBB" at 28 pt, past the row table's 24 (§4.7), Excel's
+  row is 70 pt and sheetpeek's 64, a known deviation. Calibri 20's 26 pt is in the row-height table (§4.7). The baseline at 20 pt is 5 pt
   above the cell's bottom, as for a 20 pt cell (§3.6). Wrapped lines are drawn their largest
-  run's line pitch apart, the point each adds to a fitted row lying below the last (unverified
-  for mixed sizes).
-- A fitted row counts its runs' fonts in place of the cell's (unverified when every run is
-  smaller than the cell's font).
-- **Superscript and subscript runs** follow §4.13 (unverified: rows of 17 pt, as whole cells),
+  run's line pitch apart, the point each adds to a fitted row lying below the last.
+- A fitted row counts its runs' fonts and the cell's own, even when every run is smaller: 9 pt
+  runs in a 20 pt cell fit the row to 26 pt. Where Excel places the small runs in that row is not
+  modeled (unverified): their baseline is 8 pt above the bottom, sheetpeek's 3.
+- **Superscript and subscript runs** follow §4.13 (rows of 17 pt, as whole cells),
   each run raised or lowered on its own; the cell's own font counts only through the runs that
   take it.
 - Underlines and strikethrough are drawn per run; an accounting underline under text spans the
   cell once per line, whichever runs have it.
 - `fill` repeats the runs; justified and distributed words keep the runs they cut.
-- The number format's section color replaces each run's color, as it replaces a cell's
-  (unverified). A text section that adds characters (`@" more"`) shows other text, which is drawn
-  in the cell's font (unverified).
+- The number format's section color replaces each run's color, as it replaces a cell's (`[Red]@`).
+  Under a one-section format such as `[Blue]General`, Excel draws text in the section's color too,
+  runs included; xlformat gives text no color there, so sheetpeek keeps the runs' own, a known
+  deviation. A text section that adds characters (`@" more"`) shows other text, which is drawn
+  in the cell's font.
 
 A `TextRun` of a cell with runs carries `spans`: each piece of its line as a `TextSpan` with its
 width, drawn size (`scale`) and baseline shift; the run's own `scale` is then the step of shrink

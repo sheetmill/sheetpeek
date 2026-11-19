@@ -174,10 +174,11 @@ def _fitted(
     wrapped: list[tuple[Font, int]] = []  # each plain wrapped cell's font and lines
     for p in read:
         cell = grid.cell(i, p)
-        # A cell with rich-text runs counts its runs' fonts (§4.16).
+        # A cell with rich-text runs counts its runs' fonts and its own, even when every run is
+        # smaller (captured, runs: 9 pt runs in a 20 pt cell fit the row to 26 pt; §4.16).
         spans = drawn_spans(cell, _UNDRAWN.sub("", str(cell.value))) if cell.runs else None
         own = [span.font for span in spans] if spans else [cell.font]
-        height = max(height, *map(fonts.row_height, own))
+        height = max(height, *map(fonts.row_height, own), fonts.row_height(cell.font))
         if cell.kind != "empty":
             styled += [f for f in own if f.vert_align or accounting(f)]
         # A merged cell's font counts, its wrapped lines do not (captured).

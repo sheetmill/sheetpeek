@@ -233,6 +233,19 @@ def _floats(text):
     return [float(part) for part in text.split()]
 
 
+PAST_THE_TABLE = {"C12": {"row_height": 70.0, "baselines": (15.0, 47.0, 67.0)}}
+"""A 28 pt run in a wrapped line, past the row table's 24 pt: sheetpeek gives it 24 pt's line and
+baseline (row 64, baselines 15, 43, 61), where Excel's line is 4 pt taller with its baseline 4 pt
+lower. A known deviation of sizes past 24 (ARCHITECTURE §4.7), pinned here at Excel's values so a
+change on either side shows."""
+
+
+SMALL_RUNS_BASELINE = {"C14": (18.0,)}
+"""9 pt runs in a 20 pt cell: the row is the cell font's 26 pt in both, but Excel puts the runs'
+baseline 8 pt above the bottom where sheetpeek puts it 3 pt above (23), a 9 pt line's place. Where
+Excel places small runs in a taller row is not modeled (unverified, ARCHITECTURE §4.16)."""
+
+
 @pytest.mark.excel
 def test_runs_fit_rows_as_captured():
     # Excel's row height (its own read, exact) against sheetpeek's for every case of the main
@@ -240,6 +253,10 @@ def test_runs_fit_rows_as_captured():
     # counts the runs' fonts and not the cell's (C14), superscript and subscript runs (J22, J24).
     captured = _captured()["main"]
     for cell, expected in runs.EXPECTED["main"].items():
+        if cell in PAST_THE_TABLE:
+            assert float(captured[cell]["row_height"]) == PAST_THE_TABLE[cell]["row_height"]
+            assert expected["row_height"] != PAST_THE_TABLE[cell]["row_height"], "unpin " + cell
+            continue
         assert float(captured[cell]["row_height"]) == expected["row_height"], cell
 
 
@@ -252,6 +269,11 @@ def test_wrapped_and_mixed_lines_sit_on_the_baselines_excel_draws():
         bands = _spans(captured[cell]["line_tops"])
         bottoms = [top + height for top, height in bands]
         expected = runs.EXPECTED["main"][cell]["baselines"]
+        if cell in PAST_THE_TABLE:
+            expected = PAST_THE_TABLE[cell]["baselines"]
+        if cell in SMALL_RUNS_BASELINE:
+            assert expected != SMALL_RUNS_BASELINE[cell], "unpin " + cell
+            expected = SMALL_RUNS_BASELINE[cell]
         assert len(bottoms) == len(expected), (cell, bottoms, expected)
         assert bottoms == pytest.approx(expected, abs=0.5), cell
     # The small runs sit on the large run's baseline, as a cell of the large size draws them.
@@ -292,6 +314,19 @@ def _word(record, k):
     }
 
 
+UPSTREAM = {
+    # Excel draws text under a one-section [Blue]General in blue, runs included; xlformat gives
+    # text no section color there (only a text section's color), so sheetpeek keeps the runs'.
+    ("main", "J28"): (("Calibri 11", "0000FF", 0.0), ("Calibri 11", "0000FF", 0.0)),
+    # A <t> beside runs: Excel keeps the <t> as a run in the cell's font and the run with its own
+    # properties (11 pt bold black). xlio gives the runs without the <t>, its text first, so
+    # sheetpeek draws the whole text in the cell's font.
+    ("text_and_runs", "C4"): (("Calibri 16", "FF0000", 0.0), ("Calibri 11 bold", "000000", 0.0)),
+}
+"""Words drawn as Excel draws them where a sibling package does not give sheetpeek the means yet:
+compared at Excel's fonts and colors, and each must still differ from sheetpeek's (unpin it)."""
+
+
 @pytest.mark.excel
 @pytest.mark.parametrize("group", runs.GROUPS)
 def test_each_word_is_drawn_in_the_font_and_color_sheetpeek_gives_it(group):
@@ -318,6 +353,9 @@ def test_each_word_is_drawn_in_the_font_and_color_sheetpeek_gives_it(group):
             continue
         record = captured[case.cell]
         expected = runs.EXPECTED[group][case.cell]["words"]
+        if (group, case.cell) in UPSTREAM:
+            assert expected != UPSTREAM[group, case.cell], "unpin " + case.cell
+            expected = UPSTREAM[group, case.cell]
         assert record["text"] == runs.EXPECTED[group][case.cell]["text"], case.name
         assert len(record["words"].split()) == len(expected), case.name
         first = _word(record, 0)
@@ -325,9 +363,18 @@ def test_each_word_is_drawn_in_the_font_and_color_sheetpeek_gives_it(group):
             word = _word(record, k)
             reference = _word(captured[references[font]], 0)
             where = (case.name, k, font)
-            assert word["width"] == pytest.approx(reference["width"], abs=0.5), where
+            # Ink is counted by its distance from the background, and a colored glyph's edge
+            # pixels lie nearer white than a black one's: the red 16 pt words lose half a point
+            # at the left and a fifth of their area (17 pt and 74 against the black reference's
+            # 18 and 93.5), with the same top and bottom. Their width is compared within a point
+            # and their area not at all; black words as above.
+            black = word["color"] == "000000"
+            assert word["width"] == pytest.approx(reference["width"], abs=0.5 if black else 1), (
+                where
+            )
             assert word["height"] == pytest.approx(reference["height"], abs=0.5), where
-            assert word["area"] == pytest.approx(reference["area"], rel=0.12), where
+            if black:
+                assert word["area"] == pytest.approx(reference["area"], rel=0.12), where
             rgb = tuple(int(word["color"][i : i + 2], 16) for i in (0, 2, 4))
             assert nearest(rgb, PALETTE) == color, where
             assert word["bottom"] - first["bottom"] == pytest.approx(shift, abs=0.5), where

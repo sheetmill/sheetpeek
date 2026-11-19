@@ -1,6 +1,6 @@
 """Rich-text runs: read from shared strings, measured and drawn per run (ARCHITECTURE.md §4.16).
 
-The expected layouts (zoom 100) are unverified: no capture of them is in this repository yet.
+The expected layouts (zoom 100) are the suite runs' (tests/test_suite_runs.py compares them).
 Excel writes runs in shared strings; openpyxl writes inline strings, whose runs its read-only
 reader drops, so the workbooks here move their runs into shared strings.
 """
@@ -69,9 +69,9 @@ def test_runs_are_read_with_their_fonts(tmp_path):
     cell = sheetpeek.read(path).cell(1, 1)
     assert cell.value == "plain bold!"
     red = ModelFont("Calibri", 16.0, color="FF0000")
-    # Unverified: a run without properties takes the cell's 16 pt red; a run whose
-    # properties hold only bold takes nothing from the cell, and is drawn 11 pt and black. The
-    # Normal font's name and size where a run states none are unverified.
+    # Captured (runs): a run without properties takes the cell's 16 pt red; a run whose
+    # properties hold only bold takes nothing from the cell, and is drawn 11 pt and black. A run
+    # stating no name or size takes the Normal font's.
     assert cell.runs == (
         TextSpan("plain ", red),
         TextSpan("bold", ModelFont("Calibri", 11.0, bold=True)),
@@ -139,7 +139,7 @@ def shared_strings_again(path):
 
 def test_a_string_with_text_outside_its_runs_shows_in_the_cell_font(tmp_path):
     # The schema allows a <t> before runs, which Excel does not write. xlio reads the text of
-    # both; sheetpeek draws it in the cell's font. What Excel shows is unverified.
+    # both; sheetpeek draws it in the cell's font. Excel keeps the runs (runs): a known deviation.
     cell = sheetpeek.read(book(tmp_path, nothing, {"A1": "<t>top</t>" + run("runs", "<b/>")}))
     assert (cell.cell(1, 1).value, cell.cell(1, 1).runs) == ("topruns", None)
 
@@ -188,7 +188,7 @@ def excel(tmp_path):
 
 
 def test_a_larger_run_fits_the_row_as_a_cell_of_its_size(excel):
-    # Unverified: one 20 pt run in an 11 pt cell gives a 26 pt row, the same as a
+    # Captured (runs): one 20 pt run in an 11 pt cell gives a 26 pt row, the same as a
     # 20 pt cell, and the small runs sit on the large run's baseline.
     small, large = row_of(excel, 4), row_of(excel, 6)
     assert small.height_pt == large.height_pt == 26
@@ -198,7 +198,7 @@ def test_a_larger_run_fits_the_row_as_a_cell_of_its_size(excel):
 
 
 def test_widths_add_per_run_for_spill(excel):
-    # Unverified: the bold 16 pt run makes the text reach 15 pt further (ink ends
+    # Captured (runs): the bold 16 pt run makes the text reach 15 pt further (ink ends
     # 166 pt past C's right edge, against 151 pt), one column more; the row fits Calibri 16.
     ((spanned,), (plain,)) = runs_of(excel, 8), runs_of(excel, 10)
     assert spanned.width - plain.width == pytest.approx(15, abs=2)
@@ -209,12 +209,12 @@ def test_widths_add_per_run_for_spill(excel):
 
 
 def test_each_wrapped_line_takes_its_largest_runs_height(excel):
-    # Unverified: "aaa" / "BBB" / "ccc ddd", the row 59 pt = 16 + 27 + 16.
+    # Captured (runs): "aaa" / "BBB" / "ccc ddd", the row 59 pt = 16 + 27 + 16.
     row = row_of(excel, 12)
     assert [r.text for r in row.runs] == ["aaa", "BBB", "ccc ddd"]
     assert row.height_pt == 59
     # Lines are their largest run's line pitch apart (15 and 26 pt), each baseline its own font's
-    # distance below the line's top (12 and 21 pt); not captured for mixed sizes (unverified).
+    # distance below the line's top (12 and 21 pt), as captured (runs).
     baselines = [r.y - row.y_pt for r in row.runs]
     assert [b - a for a, b in itertools.pairwise(baselines)] == [
         15 - 12 + 21,
@@ -223,7 +223,7 @@ def test_each_wrapped_line_takes_its_largest_runs_height(excel):
 
 
 def test_superscript_and_subscript_runs(excel):
-    # Unverified: rows of 17 pt, as whole cells in superscript or subscript.
+    # Captured (runs): rows of 17 pt, as whole cells in superscript or subscript.
     assert row_of(excel, 16).height_pt == row_of(excel, 18).height_pt == 17
     (formula,) = runs_of(excel, 16)
     plain, raised = formula.spans

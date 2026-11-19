@@ -152,7 +152,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rich-text runs are drawn, in shared and inline strings, from captures of Excel for Mac. A run
   without properties takes the cell's font, and a run with properties takes nothing from it. In `excel` mode each run is
   measured in its own font for spill, `####`, wrapping and shrink to fit, and each line takes the
-  height of its largest run. HTML draws a nested span per run on one baseline, superscript and
+  height of its largest run; a fitted row takes the cell's own font too. HTML draws a nested span per run on one baseline, superscript and
   subscript runs raised and lowered; Markdown with `emphasis=True` marks each run's bold and
   italic.
 - `Cell.runs`, the runs of a cell's text, and `TextRun.spans`, each piece of a line with its
