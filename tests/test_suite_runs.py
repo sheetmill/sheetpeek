@@ -269,8 +269,9 @@ def test_widths_add_per_run_as_captured():
     reach = {}
     for cell in ("C4", "C6"):
         expected = runs.EXPECTED["main"][cell]
-        # ink_right is measured from I's right edge, six default columns (6 * 48 pt) past C's
-        ink = float(captured[cell]["ink_right"]) + 6 * 48
+        # ink_right is measured from I's right edge, six default columns past C's (53 pt each,
+        # captured, ARCHITECTURE §4.1)
+        ink = float(captured[cell]["ink_right"]) + 6 * 53
         assert expected["reach"] - 2 <= ink <= expected["reach"] + 0.5, (cell, ink)
         hidden = captured[cell]["hidden_gridlines"]
         assert hidden == "1" * expected["spill"] + "0" * (6 - expected["spill"]), (cell, hidden)
