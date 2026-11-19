@@ -1,0 +1,56 @@
+# excel: 16.115
+# build: 16.115.26110837
+# edition: Microsoft 365
+# channel: Current
+# macos: 26.5.1
+# appearance: dark
+# date: 2026-11-19
+# display_scale: 2.000
+# zooms: 100
+# colors: captures converted to sRGB (sips --matchTo sRGB Profile.icc)
+# platform: mac
+# suite: rotation_more
+group	name	cell	rotation	row_height	ink_left	ink_right	ink_top	ink_bottom	border_left_25	border_right_25	border_left_75	border_right_75	top_from	top_to	bottom_from	bottom_to	edge_left	edge_right	edge_top	edge_bottom	lines	rule_start	rule_end	rule_offset	orientation	text
+stacked	stacked left	E4	255	47.0	7	-107	5	42													7:-107;8:-107.5;8.5:-107.5				orientation vertical	Abc
+stacked	stacked right	E6	255	47.0	107	-7	5	42													107:-7;108:-7.5;108.5:-7.5				orientation vertical	Abc
+stacked	stacked center	E8	255	47.0	57	-57	5	42													57:-57;58:-57.5;58.5:-57.5				orientation vertical	Abc
+stacked	stacked general	E10	255	47.0	57	-57	5	42													57:-57;58:-57.5;58.5:-57.5				orientation vertical	Abc
+trigger	45 r	E4	45	69.0	17	22.5	8	65.5	105	106.5	70	71.5													45	Rotated text here
+trigger	45 t	E6	45	69.0	17	22.5	8	65.5					69	122											45	Rotated text here
+neighbor	45 lrtb thick neighbors	E8	45	69.0	17	22.5	8	65.5	50.5	108	15.5	73	69	122	-0.5	57	0	0	0	3					45	Rotated text here
+merge	45 lrtb merged across	E10	45	70.0	6	-41.5	8	65.5	0	107	0	107	0	107	0	107									45	Rotated text here
+merge	45 lrtb merged down	E12	45	40.0	6	0	18.5	65.5	0	54	0	54	0	54	0	54									45	Rotated text here
+top	15 lrtb vertical top	E4	15	45.0	83	105.5	9	33.5	128.5	185.5	41.5	98	168	221	0	54									15	Rotated text here
+top	30 lrtb vertical top	E6	30	90.0	89.5	106	9	51	117.5	172.5	39	94	156	209	0	54									30	Rotated text here
+top	60 lrtb vertical top	E8	60	90.0	17.5	8	6.5	75	39	93	13	67	52	105	0	54									60	Rotated text here
+top	75 lrtb vertical top	E10	75	90.0	9.5	-17.5	5.5	80.5	17.5	71.5	6	60	24	77	0	54									75	Rotated text here
+top	-45 lrtb vertical top	E12	135	90.0	-44.5	-40	7	65.5	-68	-13.5	-23	31.5	-90	-37	0	54									-45	Rotated text here
+negative	-15 lrtb left	E4	105	38.0	-66.5	-44.5	8	33.5	-111	-54.5	-38.5	18	-142	-89	0	54									-15	Rotated text here
+negative	-15 lrtb center	E6	105	38.0	-70.5	-48.5	7	33.5	-111	-54.5	-38.5	18	-142	-89	0	54									-15	Rotated text here
+negative	-15 lrtb right	E8	105	38.0	-78.5	-56.5	7	33.5	-111	-54.5	-38.5	18	-142	-89	0	54									-15	Rotated text here
+negative	-45 lrtb left	E10	135	69.0	-50.5	-46	7	65.5	-52.5	2	-17.5	37	-69	-16	0	54									-45	Rotated text here
+negative	-45 lrtb center	E12	135	69.0	-37.5	-33	7	65.5	-52.5	2	-17.5	37	-69	-16	0	54									-45	Rotated text here
+negative	-45 lrtb right	E4	135	69.0	-23.5	-19	7	65.5	-52.5	2	-17.5	37	-69	-16	0	54									-45	Rotated text here
+negative	-75 lrtb left	E6	165	84.0	-13.5	-42	5.5	81.5	-16.5	37	-5.5	48.5	-23	30	0	54									-75	Rotated text here
+negative	-75 lrtb center	E8	165	84.0	1.5	-27	5.5	81.5	-16.5	37	-5.5	48.5	-23	30	0	54									-75	Rotated text here
+negative	-75 lrtb right	E10	165	84.0	18.5	-10	5.5	81.5	-16.5	37	-5.5	48.5	-23	30	0	54									-75	Rotated text here
+vertical	45 vertical justify	E12	45	90.0	6	11.5	29	86.5																	45	Rotated text here
+vertical	45 lrtb vertical justify	E4	45	90.0	17	22.5	29	86.5	67.5	122	22.5	77	90	143	0	54									45	Rotated text here
+vertical	45 vertical distributed	E6	45	90.0	6	11.5	29	86.5																	45	Rotated text here
+vertical	45 lrtb vertical distributed	E8	45	90.0	17	22.5	29	86.5	67.5	122	22.5	77	90	143	0	54									45	Rotated text here
+underline	45 accounting text	E10	45	71.0	6	14.5	10	70.5														0.353553	-1.76777	4.94863	45	Rotated text here
+underline	90 accounting text	E12	90	85.0	35.5	-5	5	84														-2	-1	4.75	orientation upward	Rotated text here
+underline	45 accounting number	E4	45	64.0	6.5	6.5	11.5	63.5														0.353553	2.84217e-14	4.94843	45	12345678901
+underline	90 accounting number	E6	90	73.0	36	-5	6	72														-2	0	4.75	orientation upward	12345678901
+spread	15 fill	E8	15	38.0	5	2	15	33.5																	15	Rotated text here
+spread	75 fill	E10	75	84.0	6.5	-20.5	5.5	80.5																	75	Rotated text here
+spread	-45 fill	E12	135	69.0	2	-8	19.5	65.5																	-45	Rotated text here
+spread	90 fill	E4	90	85.0	5.5	-40	5	82																	orientation upward	Rotated text here
+spread	15 justify	E6	15	40.0	5	27.5	11	35.5																	15	Rotated text here
+spread	75 justify	E8	75	90.0	6.5	-20.5	11.5	86.5																	75	Rotated text here
+spread	-45 justify	E10	135	75.0	-12.5	-8	13	71.5																	-45	Rotated text here
+spread	90 justify	E12	90	90.0	5.5	-40	10	87																	orientation upward	Rotated text here
+spread	15 distributed	E4	15	40.0	5	27.5	11	35.5																	15	Rotated text here
+spread	75 distributed	E6	75	90.0	6.5	-20.5	11.5	86.5																	75	Rotated text here
+spread	-45 distributed	E8	135	75.0	-12.5	-8	13	71.5																	-45	Rotated text here
+spread	90 distributed	E10	90	90.0	21.5	-24	10	87																	orientation upward	Rotated text here

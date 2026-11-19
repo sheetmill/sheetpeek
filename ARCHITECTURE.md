@@ -667,7 +667,7 @@ a cached value (as openpyxl writes it) has no `t`. The same file confirms Excel 
 Captured so far, in `tests/captures/`: by print (route B) `layout` (§3.6, §4.1 to §4.7); read
 from Excel `theme_colors` and `theme_colors_more` (§3.3), `merge_width` and `error_width` (§4.2,
 §4.4, no deviation), `row_height` and `row_height_more` (§4.7), `package` and `package_more` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14), `theme_fonts_palette`
-and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts`, `gradients` and `diagonals` (§4.12), `text_style` and `text_style_more` (§4.7, §4.13), `runs` (§4.16), `tab_strip` (§4.15), `outline` (§4.11), `rotation` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
+and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts`, `gradients` and `diagonals` (§4.12), `text_style` and `text_style_more` (§4.7, §4.13), `runs` (§4.16), `tab_strip` (§4.15), `outline` (§4.11), `rotation` and `rotation_more` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
 Excel 16.115 (Microsoft 365). Every section here rests on one of them; what no capture covers
 is marked unverified where it is stated, as are the parts of §4.12, §4.14 and §4.18 that say so. What still waits for
 the screen: the text insets and the baselines of angled text, which come from print, and the 15 pt rows that print
@@ -1261,7 +1261,8 @@ boxes match a rigid rotation of the upright box (captured: 45°, 58.5 × 57.5 pt
   pt, fitted to the capture: every captured ink edge is within 1.1 pt. Center centers the box on
   the cell (captured at 45°); right puts it against the right inset (captured at 45°). An indent
   moves the box in by 6 pt a level (captured: 12 pt for 2, left and right). Fill, justify and
-  distributed are placed as left (captured at 45°).
+  distributed are placed as left (captured at 45°; at 15°, 75°, −45° and 90° Excel places them
+  elsewhere, up to 25 pt off, a known deviation, `rotation_more`).
 - **Vertical:** bottom puts the box's lowest corner on the cell's bottom, top its highest on the
   top, center centers it (captured in a 90 pt row at 45°). A box taller than its row
   stays bottom-aligned and is clipped at the row; nothing is drawn in the row above (captured,
@@ -1294,8 +1295,8 @@ boxes match a rigid rotation of the upright box (captured: 45°, 58.5 × 57.5 pt
   without its column's width.
 
 **Stacked text** draws one upright character a line, a font line apart (captured: 15 pt at
-Calibri 11), centered for general text (captured); left and right sit at the insets
-(**unverified**). The lines are placed by the vertical alignment as wrapped lines are, clipped at
+Calibri 11), centered for general text (captured); left and right sit at the insets, a known deviation:
+Excel's stacked characters sit up to 4 pt from there, centered ones 1 pt (`rotation_more`). The lines are placed by the vertical alignment as wrapped lines are, clipped at
 the cell. A fitted row grows to a line a character plus 2 pt (captured: nine cases of 3 to 8
 characters at 9, 14 and 20 pt, all exact).
 
@@ -1316,11 +1317,12 @@ horizontally, `6n` pt (`SLANT_INSETS`). How high the text sits is as without bor
 height, column width and length changes it. Against the capture, with each end letter's own height,
 the ink edges lie within 1.5 pt across the line (median 0.6) but for three cases: top alignment at
 45° (2.5; the height is placed as without borders, which puts this case within 0.6 there, so Excel
-moves top-aligned text between slanted sides differently, one case, **unverified**), −60° (1.9; the
+moves top-aligned text between slanted sides differently: a known deviation at 15° to 75° and
+−45°, up to 19 pt across the line at 15°, `rotation_more`), −60° (1.9; the
 unbordered placement is 1 pt off at that angle) and 20 pt (1.7; the insets are fitted at 11 pt). At
 20 pt Excel's wider text (xlformat's tables, the `upright` cases) puts the far edge up to 4.7 pt
-further. At negative angles only general alignment (to the right) is captured; left, center and
-right there are taken as the mirror of the positive angles (**unverified**). The right side lies one
+further. At negative angles left, center and right are the mirror of the positive angles at −45°
+(`rotation_more`); left at −75° is placed elsewhere in Excel, a known deviation. The right side lies one
 column width right of the left side (the measured gaps, 56.5, 54.5 and 54 pt at 15°, 45° and 90° in
 a 53 pt column, are that width plus a 1 pt line's run across a row, `1/|sin θ|`); the top border
 lies along the cell's top edge, shifted `h·cot θ` with the box, over the neighbors' cells, and the
@@ -1328,12 +1330,14 @@ gridlines stay (seen in the crops).
 
 The layout records each unmerged angled cell's own sides as `SlantedBorders` (`shift_pt` is `h·cot
 θ`), takes them out of the upright grid, where a neighbor's own side on a shared edge is still drawn
-(unverified), and keeps the columns the box reaches, as for spill, within the columns the layout
+(a known deviation: Excel does not draw a neighbor's thick side there as sheetpeek does,
+`rotation_more`), and keeps the columns the box reaches, as for spill, within the columns the layout
 adds for spill; HTML draws the four sides as lines in one SVG, clipped to the sheet, and the text
 between them as above. Against the capture, each side's center lies within 1.05 pt of Excel's,
 measured across the line (at 15°; 39 cases from 5° to 85° and −15° to −75°, rows of 15 to 120 pt,
 columns of 4 to 20 characters, every alignment and size captured). A merge's borders stay upright
-and its text is placed as without borders (unverified), reported as `border.slanted` (approximated);
+and its text is placed as without borders, a known deviation (`rotation_more`: Excel places it
+elsewhere, across and down), reported as `border.slanted` (approximated);
 an unmerged cell is drawn as captured and not reported.
 
 **HTML** turns the run with `transform: rotate()` about the start of its baseline, and its
