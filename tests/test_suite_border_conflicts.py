@@ -318,6 +318,14 @@ def test_the_references_are_told_apart(group):
             assert score >= 1, (orientation, style, nearest, score)
 
 
+MIXED_LINES = {
+    "h hair/slantDashDot": "a hair bottom side over a slantDashDot top side draws a line that is "
+    "neither (distance 10.68 from slantDashDot, the nearer); the other placement draws "
+    "slantDashDot alone (0.08), the order's answer",
+}
+"""Edges not compared, each with its reason."""
+
+
 @pytest.mark.excel
 def test_the_stronger_style_wins_as_captured():
     # The style order (§4.12, "Conflicts"): every pair of the 13 styles, black, both orders and
@@ -326,7 +334,7 @@ def test_the_stronger_style_wins_as_captured():
     captured = _group("styles")
     wrong, mixed = [], []
     for edge in bc.edges("styles"):
-        if edge.kind != "style":
+        if edge.kind != "style" or edge.name in MIXED_LINES:
             continue
         record = captured[edge.name]
         if float(record["distance"]) >= 1:
@@ -338,6 +346,13 @@ def test_the_stronger_style_wins_as_captured():
 
 
 @pytest.mark.excel
+@pytest.mark.xfail(
+    strict=True,
+    reason="16.115: Excel's rule for two colors of one style is not found. Rec. 601 luma, "
+    "sheetpeek's, fits 28 of the 68 cases; the larger RRGGBB, the largest channel and the red "
+    "channel fit 60, Rec. 709 luma 56; no single measure fits all. A known deviation, not yet "
+    "modeled",
+)
 def test_the_darker_color_wins_as_captured():
     # Rec. 601 luma, equal luma to the larger RRGGBB, theme, tinted and indexed colors compared
     # after resolution (§4.12, "Conflicts"). The drawn color is the nearer of the two sides'
@@ -373,13 +388,28 @@ def test_sides_across_a_hidden_column_or_row_compete_as_captured():
         assert _far(record["color"], color) <= 24, (edge.name, record["color"])
 
 
+START_OVER_LEFT = {
+    "start thick, left thin: left": "thick",
+    "end thick, right dashed: right": "thick",
+}
+"""Where a side has both, Excel draws start over left and end over right; xlio reads left and
+right first (a known deviation until xlio reads them as Excel does)."""
+
+
+@pytest.mark.excel
+def test_where_both_are_given_excel_draws_start_and_end_as_captured():
+    captured = _group("start_end")
+    for name, drawn in START_OVER_LEFT.items():
+        assert captured[name]["drawn"] == drawn, (name, captured[name]["drawn"])
+
+
 @pytest.mark.excel
 def test_start_and_end_are_drawn_as_left_and_right_as_captured():
     # A border's start and end where left and right are absent; left and right where both are
     # given (§4.12, "Borders"). A refusal of the crafted file skips this test.
     captured = _group("start_end")
     for edge in bc.edges("start_end"):
-        if edge.kind == "ref":
+        if edge.kind == "ref" or edge.name in START_OVER_LEFT:
             continue
         record = captured[edge.name]
         assert record["drawn"] == bc.expected(edge).split()[0], (edge.name, record["drawn"])

@@ -661,7 +661,7 @@ a cached value (as openpyxl writes it) has no `t`. The same file confirms Excel 
 Captured so far, in `tests/captures/`: by print (route B) `layout` (§3.6, §4.1 to §4.7); read
 from Excel `theme_colors` and `theme_colors_more` (§3.3), `merge_width` and `error_width` (§4.2,
 §4.4, no deviation), `row_height` (§4.7), `package` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14), `headings_grid`
-(§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10, the look), `merges_spill` (§4.12), `text_style` (§4.7, §4.13), `rotation` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
+(§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10, the look), `merges_spill` and `border_conflicts` (§4.12), `text_style` (§4.7, §4.13), `rotation` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
 Excel 16.115 (Microsoft 365). The rules of §4.10, §4.11, §4.15, §4.16 and §4.14's theme fonts
 and palette have no capture here yet and are marked unverified until screen suites capture them
 on Microsoft 365; so are the parts of §4.12, §4.14 and §4.18 that say so. What still waits for
@@ -824,7 +824,9 @@ gridline with its own fill. A pattern shows its pattern on the gridlines it cove
 
 **Borders.** `CellStyle.borders` is a `Borders` of four `Side`s (13 styles, a color or `None`
 for automatic, which is black), and a diagonal with its `diagonal_up` and `diagonal_down` flags.
-`start` and `end` are read as `left` and `right`. A diagonal is read only with a style and a
+`start` and `end` are read as `left` and `right` where those are absent (xlio). Where a side has
+both, Excel draws `start` and `end` (`border_conflicts`), sheetpeek `left` and `right`: a known
+deviation until xlio reads them as Excel does. A diagonal is read only with a style and a
 direction; Excel draws nothing otherwise.
 - **Lines are fixed in screen points**, the same at every zoom (CSS px in HTML): thin 1 on the
   gridline; medium 2 from 1 before it; thick 3 from 1 before it; double 1, a white 1, 1, from 1
@@ -836,9 +838,13 @@ direction; Excel draws nothing otherwise.
 - **Conflicts:** where two cells' sides meet, one is drawn whole, in its own style and color,
   never both and never mixed. The stronger style wins: **double > thick > medium > mediumDashed >
   mediumDashDot > slantDashDot > mediumDashDotDot > thin > dashed > dotted > dashDot > dashDotDot >
-  hair** (unverified). Of one style, **the darker color wins, by Rec. 601 luma**, never the
-  position (unverified). Two colors of equal luma: the larger `RRGGBB` (unverified). Colors are compared after
-  resolution to RGB (unverified for theme and indexed colors).
+  hair** (`border_conflicts`: every pair, both orders and orientations; a hair bottom side over a
+  slantDashDot top side draws a line that is neither, the one exception). Of one style, never the
+  position, one color wins; **which one is not found**: sheetpeek takes the darker by Rec. 601
+  luma and, of equal luma, the larger `RRGGBB`, which fits 28 of the suite's 68 cases; the larger
+  `RRGGBB` alone fits 60, Rec. 709 luma 56, and no single measure fits all (a known deviation, not
+  yet modeled; black against a color is not among the cases). Colors are compared after resolution
+  to RGB.
 - **Merges:** borders stay per cell. The merge's outline is the outer sides of its edge cells,
   each on its own segment, the anchor's only on its own; sides inside the merge are not drawn;
   a neighbor's side competes with each segment by the rule above. A merge's diagonals are its

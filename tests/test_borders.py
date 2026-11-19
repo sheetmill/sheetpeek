@@ -96,7 +96,7 @@ def test_the_stronger_style_wins_in_either_order():
 
 @pytest.mark.parametrize(
     ("darker", "lighter"),
-    [  # the luma rule (unverified)
+    [  # the luma rule (a known deviation: Excel's own rule is not found, border_conflicts)
         ("FF0000", "00FF00"),
         ("0000FF", "00FF00"),
         ("000000", "0000FF"),
@@ -117,7 +117,7 @@ def test_a_tie_goes_to_the_darker_color(darker, lighter):
 
 
 def test_equal_luma_goes_to_the_larger_rgb():
-    # Unverified: no capture has two colors of equal luma.
+    # border_conflicts: Excel took the larger RRGGBB in all four equal-luma pairs.
     a, b = Line("thin", "003223"), Line("thin", "1400F0")
     assert winner(a, b) == b == winner(b, a)
 

@@ -1,0 +1,453 @@
+# excel: 16.115
+# build: 16.115.26110837
+# edition: Microsoft 365
+# channel: Current
+# macos: 26.5.1
+# appearance: dark
+# date: 2026-11-18
+# display_scale: 2.000
+# zooms: 100
+# colors: captures converted to sRGB (sips --matchTo sRGB Profile.icc)
+# platform: mac
+# suite: border_conflicts
+group	kind	name	zoom	cell	side	first	second	offsets	pattern	ons	offs	short_seq	coverage	solid	color	drawn	distance
+start_end	start_end	start thick: left	100	C4	left		thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+start_end	start_end	start thick: right	100	C4	right											none	0.00
+start_end	start_end	end medium: left	100	C6	left											none	0.00
+start_end	start_end	end medium: right	100	C6	right	medium		-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+start_end	start_end	start thick, left thin: left	100	C8	left		thin	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+start_end	start_end	start thick, left thin: right	100	C8	right											none	0.00
+start_end	start_end	end thick, right dashed: left	100	C10	left											none	0.00
+start_end	start_end	end thick, right dashed: right	100	C10	right	dashed		-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+start_end	start_end	start double, end mediumDashed: left	100	C12	left		double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+start_end	start_end	start double, end mediumDashed: right	100	C12	right	mediumDashed		-1 -0.5 0 0.5	irregular: off 3 on 9 off 3	9	3	0	0.79	0.79	000000	mediumDashed	0.16
+start_end	ref	ref v thin	100	E4	left		thin	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+start_end	ref	ref v medium	100	E6	left		medium	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+start_end	ref	ref v thick	100	E8	left		thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+start_end	ref	ref v double	100	E10	left		double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+start_end	ref	ref v dashed	100	E12	left		dashed	0 0.5	on 3 off 1	3	1	3	0.75	0.75	000000	dashed	0.00
+start_end	ref	ref v mediumDashed	100	E14	left		mediumDashed	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.75	0.75	000000	mediumDashed	0.00
+styles	ref	ref h thin	100	C4	top		thin	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+styles	ref	ref v thin	100	C4	left		thin	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+styles	ref	ref h medium	100	D4	top		medium	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	ref	ref v medium	100	C5	left		medium	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	ref	ref h thick	100	E4	top		thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	ref	ref v thick	100	C6	left		thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	ref	ref h double	100	F4	top		double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	ref	ref v double	100	C7	left		double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	ref	ref h hair	100	G4	top		hair	0 0.5	on 1 off 1	1	1	3	0.50	0.50	000000	hair	0.00
+styles	ref	ref v hair	100	C8	left		hair	0 0.5	on 1 off 1	1	1	3	0.50	0.50	000000	hair	0.00
+styles	ref	ref h dotted	100	H4	top		dotted	0 0.5	on 2 off 2	2	2	3	0.50	0.50	000000	dotted	0.00
+styles	ref	ref v dotted	100	C9	left		dotted	0 0.5	on 2 off 2	2	2	3	0.50	0.50	000000	dotted	0.00
+styles	ref	ref h dashed	100	I4	top		dashed	0 0.5	on 3 off 1	3	1	3	0.75	0.75	000000	dashed	0.00
+styles	ref	ref v dashed	100	C10	left		dashed	0 0.5	on 3 off 1	3	1	3	0.75	0.75	000000	dashed	0.00
+styles	ref	ref h dashDot	100	J4	top		dashDot	0 0.5	on 9 off 3 on 3 off 3	3 9	3	1	0.69	0.69	000000	dashDot	0.00
+styles	ref	ref v dashDot	100	C11	left		dashDot	0 0.5	on 9 off 3 on 3 off 3	3 9	3	1	0.66	0.66	000000	dashDot	0.00
+styles	ref	ref h dashDotDot	100	K4	top		dashDotDot	0 0.5	irregular: off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3 on 9 off 3	3 9	3	2	0.62	0.62	000000	dashDotDot	0.00
+styles	ref	ref v dashDotDot	100	C12	left		dashDotDot	0 0.5	irregular: on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3 on 9	3 9	3	2	0.61	0.61	000000	dashDotDot	0.00
+styles	ref	ref h mediumDashed	100	L4	top		mediumDashed	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.75	0.75	000000	mediumDashed	0.00
+styles	ref	ref v mediumDashed	100	C13	left		mediumDashed	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.80	0.80	000000	mediumDashed	0.00
+styles	ref	ref h mediumDashDot	100	M4	top		mediumDashDot	-1 -0.5 0 0.5	on 9 off 3 on 3 off 3	3 9	3	1	0.69	0.69	000000	mediumDashDot	0.00
+styles	ref	ref v mediumDashDot	100	C14	left		mediumDashDot	-1 -0.5 0 0.5	on 3 off 3 on 9 off 3	3 9	3	1	0.70	0.70	000000	mediumDashDot	0.00
+styles	ref	ref h mediumDashDotDot	100	N4	top		mediumDashDotDot	-1 -0.5 0 0.5	irregular: off 3 on 3 off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3	3 9	3	2	0.62	0.62	000000	mediumDashDotDot	0.00
+styles	ref	ref v mediumDashDotDot	100	C15	left		mediumDashDotDot	-1 -0.5 0 0.5	irregular: on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3 on 9	3 9	3	2	0.61	0.61	000000	mediumDashDotDot	0.00
+styles	ref	ref h slantDashDot	100	O4	top		slantDashDot	-1 -0.5 0 0.5	solid	4 10	2	0	1.00	0.75	000000	slantDashDot	0.00
+styles	ref	ref v slantDashDot	100	C16	left		slantDashDot	-1 -0.5 0 0.5	solid	4 10	2	0	1.00	0.78	000000	slantDashDot	0.00
+styles	style	v thin|medium	100	C4	right	thin	medium	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	v thin|thick	100	D4	right	thin	thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	v thin|double	100	E4	right	thin	double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	v thin|hair	100	F4	right	thin	hair	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+styles	style	v thin|dotted	100	G4	right	thin	dotted	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+styles	style	v thin|dashed	100	H4	right	thin	dashed	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+styles	style	v thin|dashDot	100	I4	right	thin	dashDot	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+styles	style	v thin|dashDotDot	100	J4	right	thin	dashDotDot	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+styles	style	v thin|mediumDashed	100	K4	right	thin	mediumDashed	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.80	0.80	000000	mediumDashed	0.00
+styles	style	v thin|mediumDashDot	100	L4	right	thin	mediumDashDot	-1 -0.5 0 0.5	irregular: off 3 on 3 off 3 on 9 off 3 on 3 off 3	3 9	3	1	0.73	0.73	000000	mediumDashDot	0.12
+styles	style	v thin|mediumDashDotDot	100	M4	right	thin	mediumDashDotDot	-1 -0.5 0 0.5	irregular: off 3 on 3 off 3 on 3 off 3 on 9 off 3 on 3 off 3	3 9	3	2	0.66	0.66	000000	mediumDashDotDot	0.20
+styles	style	v thin|slantDashDot	100	N4	right	thin	slantDashDot	-1 -0.5 0 0.5	solid	4 10	2	0	1.00	0.80	000000	slantDashDot	0.04
+styles	style	v medium|thin	100	O4	right	medium	thin	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	v medium|thick	100	C5	right	medium	thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	v medium|double	100	D5	right	medium	double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	v medium|hair	100	E5	right	medium	hair	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	v medium|dotted	100	F5	right	medium	dotted	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	v medium|dashed	100	G5	right	medium	dashed	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	v medium|dashDot	100	H5	right	medium	dashDot	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	v medium|dashDotDot	100	I5	right	medium	dashDotDot	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	v medium|mediumDashed	100	J5	right	medium	mediumDashed	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	v medium|mediumDashDot	100	K5	right	medium	mediumDashDot	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	v medium|mediumDashDotDot	100	L5	right	medium	mediumDashDotDot	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	v medium|slantDashDot	100	M5	right	medium	slantDashDot	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	v thick|thin	100	N5	right	thick	thin	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	v thick|medium	100	O5	right	thick	medium	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	v thick|double	100	C6	right	thick	double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	v thick|hair	100	D6	right	thick	hair	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	v thick|dotted	100	E6	right	thick	dotted	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	v thick|dashed	100	F6	right	thick	dashed	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	v thick|dashDot	100	G6	right	thick	dashDot	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	v thick|dashDotDot	100	H6	right	thick	dashDotDot	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	v thick|mediumDashed	100	I6	right	thick	mediumDashed	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	v thick|mediumDashDot	100	J6	right	thick	mediumDashDot	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	v thick|mediumDashDotDot	100	K6	right	thick	mediumDashDotDot	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	v thick|slantDashDot	100	L6	right	thick	slantDashDot	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	v double|thin	100	M6	right	double	thin	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	v double|medium	100	N6	right	double	medium	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	v double|thick	100	O6	right	double	thick	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	v double|hair	100	C7	right	double	hair	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	v double|dotted	100	D7	right	double	dotted	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	v double|dashed	100	E7	right	double	dashed	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	v double|dashDot	100	F7	right	double	dashDot	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	v double|dashDotDot	100	G7	right	double	dashDotDot	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	v double|mediumDashed	100	H7	right	double	mediumDashed	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	v double|mediumDashDot	100	I7	right	double	mediumDashDot	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	v double|mediumDashDotDot	100	J7	right	double	mediumDashDotDot	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	v double|slantDashDot	100	K7	right	double	slantDashDot	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	v hair|thin	100	L7	right	hair	thin	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+styles	style	v hair|medium	100	M7	right	hair	medium	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	v hair|thick	100	N7	right	hair	thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	v hair|double	100	O7	right	hair	double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	v hair|dotted	100	C8	right	hair	dotted	0 0.5	on 2 off 2	2	2	3	0.50	0.50	000000	dotted	0.00
+styles	style	v hair|dashed	100	D8	right	hair	dashed	0 0.5	on 3 off 1	3	1	3	0.75	0.75	000000	dashed	0.00
+styles	style	v hair|dashDot	100	E8	right	hair	dashDot	0 0.5	on 3 off 3 on 9 off 3	3 9	3	1	0.64	0.64	000000	dashDot	0.08
+styles	style	v hair|dashDotDot	100	F8	right	hair	dashDotDot	0 0.5	irregular: off 3 on 3 off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3	3 9	3	2	0.59	0.59	000000	dashDotDot	0.08
+styles	style	v hair|mediumDashed	100	G8	right	hair	mediumDashed	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.73	0.73	000000	mediumDashed	0.28
+styles	style	v hair|mediumDashDot	100	H8	right	hair	mediumDashDot	-1 -0.5 0 0.5	on 3 off 3 on 9 off 3	3 9	3	1	0.64	0.64	000000	mediumDashDot	0.24
+styles	style	v hair|mediumDashDotDot	100	I8	right	hair	mediumDashDotDot	-1 -0.5 0 0.5	irregular: off 3 on 3 off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3	3 9	3	2	0.59	0.59	000000	mediumDashDotDot	0.08
+styles	style	v hair|slantDashDot	100	J8	right	hair	slantDashDot	-1 -0.5 0 0.5	solid	4 10	2	0	1.00	0.77	000000	slantDashDot	0.02
+styles	style	v dotted|thin	100	K8	right	dotted	thin	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+styles	style	v dotted|medium	100	L8	right	dotted	medium	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	v dotted|thick	100	M8	right	dotted	thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	v dotted|double	100	N8	right	dotted	double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	v dotted|hair	100	O8	right	dotted	hair	0 0.5	on 2 off 2	2	2	3	0.50	0.50	000000	dotted	0.00
+styles	style	v dotted|dashed	100	C9	right	dotted	dashed	0 0.5	on 3 off 1	3	1	3	0.75	0.75	000000	dashed	0.00
+styles	style	v dotted|dashDot	100	D9	right	dotted	dashDot	0 0.5	on 2 off 2	2	2	3	0.50	0.50	000000	dotted	0.00
+styles	style	v dotted|dashDotDot	100	E9	right	dotted	dashDotDot	0 0.5	on 2 off 2	2	2	3	0.50	0.50	000000	dotted	0.00
+styles	style	v dotted|mediumDashed	100	F9	right	dotted	mediumDashed	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.73	0.73	000000	mediumDashed	0.28
+styles	style	v dotted|mediumDashDot	100	G9	right	dotted	mediumDashDot	-1 -0.5 0 0.5	on 3 off 3 on 9 off 3	3 9	3	1	0.61	0.61	000000	mediumDashDot	0.36
+styles	style	v dotted|mediumDashDotDot	100	H9	right	dotted	mediumDashDotDot	-1 -0.5 0 0.5	irregular: on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3 on 9	3 9	3	2	0.61	0.61	000000	mediumDashDotDot	0.00
+styles	style	v dotted|slantDashDot	100	I9	right	dotted	slantDashDot	-1 -0.5 0 0.5	solid	4 10	2	0	1.00	0.75	000000	slantDashDot	0.06
+styles	style	v dashed|thin	100	J9	right	dashed	thin	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+styles	style	v dashed|medium	100	K9	right	dashed	medium	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	v dashed|thick	100	L9	right	dashed	thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	v dashed|double	100	M9	right	dashed	double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	v dashed|hair	100	N9	right	dashed	hair	0 0.5	on 3 off 1	3	1	3	0.75	0.75	000000	dashed	0.00
+styles	style	v dashed|dotted	100	O9	right	dashed	dotted	0 0.5	on 3 off 1	3	1	3	0.75	0.75	000000	dashed	0.00
+styles	style	v dashed|dashDot	100	C10	right	dashed	dashDot	0 0.5	on 3 off 1	3	1	3	0.75	0.75	000000	dashed	0.00
+styles	style	v dashed|dashDotDot	100	D10	right	dashed	dashDotDot	0 0.5	on 3 off 1	3	1	3	0.75	0.75	000000	dashed	0.00
+styles	style	v dashed|mediumDashed	100	E10	right	dashed	mediumDashed	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.80	0.80	000000	mediumDashed	0.00
+styles	style	v dashed|mediumDashDot	100	F10	right	dashed	mediumDashDot	-1 -0.5 0 0.5	on 9 off 3 on 3 off 3	3 9	3	1	0.66	0.66	000000	mediumDashDot	0.16
+styles	style	v dashed|mediumDashDotDot	100	G10	right	dashed	mediumDashDotDot	-1 -0.5 0 0.5	irregular: off 3 on 3 off 3 on 3 off 3 on 9 off 3 on 3 off 3	3 9	3	2	0.66	0.66	000000	mediumDashDotDot	0.20
+styles	style	v dashed|slantDashDot	100	H10	right	dashed	slantDashDot	-1 -0.5 0 0.5	solid	4 10	2	0	1.00	0.75	000000	slantDashDot	0.06
+styles	style	v dashDot|thin	100	I10	right	dashDot	thin	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+styles	style	v dashDot|medium	100	J10	right	dashDot	medium	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	v dashDot|thick	100	K10	right	dashDot	thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	v dashDot|double	100	L10	right	dashDot	double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	v dashDot|hair	100	M10	right	dashDot	hair	0 0.5	on 9 off 3 on 3 off 3	3 9	3	1	0.66	0.66	000000	dashDot	0.00
+styles	style	v dashDot|dotted	100	N10	right	dashDot	dotted	0 0.5	on 2 off 2	2	2	3	0.50	0.50	000000	dotted	0.00
+styles	style	v dashDot|dashed	100	O10	right	dashDot	dashed	0 0.5	on 3 off 1	3	1	3	0.75	0.75	000000	dashed	0.00
+styles	style	v dashDot|dashDotDot	100	C11	right	dashDot	dashDotDot	0 0.5	on 9 off 3 on 3 off 3	3 9	3	1	0.66	0.66	000000	dashDot	0.00
+styles	style	v dashDot|mediumDashed	100	D11	right	dashDot	mediumDashed	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.73	0.73	000000	mediumDashed	0.28
+styles	style	v dashDot|mediumDashDot	100	E11	right	dashDot	mediumDashDot	-1 -0.5 0 0.5	on 9 off 3 on 3 off 3	3 9	3	1	0.66	0.66	000000	mediumDashDot	0.16
+styles	style	v dashDot|mediumDashDotDot	100	F11	right	dashDot	mediumDashDotDot	-1 -0.5 0 0.5	irregular: off 3 on 3 off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3	3 9	3	2	0.59	0.59	000000	mediumDashDotDot	0.08
+styles	style	v dashDot|slantDashDot	100	G11	right	dashDot	slantDashDot	-1 -0.5 0 0.5	solid	4 10	2	0	1.00	0.77	000000	slantDashDot	0.02
+styles	style	v dashDotDot|thin	100	H11	right	dashDotDot	thin	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+styles	style	v dashDotDot|medium	100	I11	right	dashDotDot	medium	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	v dashDotDot|thick	100	J11	right	dashDotDot	thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	v dashDotDot|double	100	K11	right	dashDotDot	double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	v dashDotDot|hair	100	L11	right	dashDotDot	hair	0 0.5	irregular: off 3 on 3 off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3	3 9	3	2	0.59	0.59	000000	dashDotDot	0.08
+styles	style	v dashDotDot|dotted	100	M11	right	dashDotDot	dotted	0 0.5	on 2 off 2	2	2	3	0.50	0.50	000000	dotted	0.00
+styles	style	v dashDotDot|dashed	100	N11	right	dashDotDot	dashed	0 0.5	on 3 off 1	3	1	3	0.75	0.75	000000	dashed	0.00
+styles	style	v dashDotDot|dashDot	100	O11	right	dashDotDot	dashDot	0 0.5	on 9 off 3 on 3 off 3	3 9	3	1	0.66	0.66	000000	dashDot	0.00
+styles	style	v dashDotDot|mediumDashed	100	C12	right	dashDotDot	mediumDashed	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.73	0.73	000000	mediumDashed	0.28
+styles	style	v dashDotDot|mediumDashDot	100	D12	right	dashDotDot	mediumDashDot	-1 -0.5 0 0.5	on 9 off 3 on 3 off 3	3 9	3	1	0.68	0.68	000000	mediumDashDot	0.08
+styles	style	v dashDotDot|mediumDashDotDot	100	E12	right	dashDotDot	mediumDashDotDot	-1 -0.5 0 0.5	irregular: on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3 on 9	3 9	3	2	0.61	0.61	000000	mediumDashDotDot	0.00
+styles	style	v dashDotDot|slantDashDot	100	F12	right	dashDotDot	slantDashDot	-1 -0.5 0 0.5	solid	4 10	2	0	1.00	0.78	000000	slantDashDot	0.00
+styles	style	v mediumDashed|thin	100	G12	right	mediumDashed	thin	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.73	0.73	000000	mediumDashed	0.28
+styles	style	v mediumDashed|medium	100	H12	right	mediumDashed	medium	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	v mediumDashed|thick	100	I12	right	mediumDashed	thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	v mediumDashed|double	100	J12	right	mediumDashed	double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	v mediumDashed|hair	100	K12	right	mediumDashed	hair	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.73	0.73	000000	mediumDashed	0.28
+styles	style	v mediumDashed|dotted	100	L12	right	mediumDashed	dotted	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.73	0.73	000000	mediumDashed	0.28
+styles	style	v mediumDashed|dashed	100	M12	right	mediumDashed	dashed	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.73	0.73	000000	mediumDashed	0.28
+styles	style	v mediumDashed|dashDot	100	N12	right	mediumDashed	dashDot	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.73	0.73	000000	mediumDashed	0.28
+styles	style	v mediumDashed|dashDotDot	100	O12	right	mediumDashed	dashDotDot	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.73	0.73	000000	mediumDashed	0.28
+styles	style	v mediumDashed|mediumDashDot	100	C13	right	mediumDashed	mediumDashDot	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.80	0.80	000000	mediumDashed	0.00
+styles	style	v mediumDashed|mediumDashDotDot	100	D13	right	mediumDashed	mediumDashDotDot	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.80	0.80	000000	mediumDashed	0.00
+styles	style	v mediumDashed|slantDashDot	100	E13	right	mediumDashed	slantDashDot	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.80	0.80	000000	mediumDashed	0.00
+styles	style	v mediumDashDot|thin	100	F13	right	mediumDashDot	thin	-1 -0.5 0 0.5	irregular: off 3 on 3 off 3 on 9 off 3 on 3 off 3	3 9	3	1	0.73	0.73	000000	mediumDashDot	0.12
+styles	style	v mediumDashDot|medium	100	G13	right	mediumDashDot	medium	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	v mediumDashDot|thick	100	H13	right	mediumDashDot	thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	v mediumDashDot|double	100	I13	right	mediumDashDot	double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	v mediumDashDot|hair	100	J13	right	mediumDashDot	hair	-1 -0.5 0 0.5	irregular: off 3 on 3 off 3 on 9 off 3 on 3 off 3	3 9	3	1	0.73	0.73	000000	mediumDashDot	0.12
+styles	style	v mediumDashDot|dotted	100	K13	right	mediumDashDot	dotted	-1 -0.5 0 0.5	irregular: off 3 on 3 off 3 on 9 off 3 on 3 off 3	3 9	3	1	0.73	0.73	000000	mediumDashDot	0.12
+styles	style	v mediumDashDot|dashed	100	L13	right	mediumDashDot	dashed	-1 -0.5 0 0.5	irregular: off 3 on 3 off 3 on 9 off 3 on 3 off 3	3 9	3	1	0.73	0.73	000000	mediumDashDot	0.12
+styles	style	v mediumDashDot|dashDot	100	M13	right	mediumDashDot	dashDot	-1 -0.5 0 0.5	irregular: off 3 on 3 off 3 on 9 off 3 on 3 off 3	3 9	3	1	0.73	0.73	000000	mediumDashDot	0.12
+styles	style	v mediumDashDot|dashDotDot	100	N13	right	mediumDashDot	dashDotDot	-1 -0.5 0 0.5	irregular: off 3 on 3 off 3 on 9 off 3 on 3 off 3	3 9	3	1	0.73	0.73	000000	mediumDashDot	0.12
+styles	style	v mediumDashDot|mediumDashed	100	O13	right	mediumDashDot	mediumDashed	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.80	0.80	000000	mediumDashed	0.00
+styles	style	v mediumDashDot|mediumDashDotDot	100	C14	right	mediumDashDot	mediumDashDotDot	-1 -0.5 0 0.5	on 3 off 3 on 9 off 3	3 9	3	1	0.70	0.70	000000	mediumDashDot	0.00
+styles	style	v mediumDashDot|slantDashDot	100	D14	right	mediumDashDot	slantDashDot	-1 -0.5 0 0.5	on 3 off 3 on 9 off 3	3 9	3	1	0.70	0.70	000000	mediumDashDot	0.00
+styles	style	v mediumDashDotDot|thin	100	E14	right	mediumDashDotDot	thin	-1 -0.5 0 0.5	irregular: off 3 on 3 off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3	3 9	3	2	0.59	0.59	000000	mediumDashDotDot	0.08
+styles	style	v mediumDashDotDot|medium	100	F14	right	mediumDashDotDot	medium	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	v mediumDashDotDot|thick	100	G14	right	mediumDashDotDot	thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	v mediumDashDotDot|double	100	H14	right	mediumDashDotDot	double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	v mediumDashDotDot|hair	100	I14	right	mediumDashDotDot	hair	-1 -0.5 0 0.5	irregular: off 3 on 3 off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3	3 9	3	2	0.59	0.59	000000	mediumDashDotDot	0.08
+styles	style	v mediumDashDotDot|dotted	100	J14	right	mediumDashDotDot	dotted	-1 -0.5 0 0.5	irregular: off 3 on 3 off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3	3 9	3	2	0.59	0.59	000000	mediumDashDotDot	0.08
+styles	style	v mediumDashDotDot|dashed	100	K14	right	mediumDashDotDot	dashed	-1 -0.5 0 0.5	irregular: off 3 on 3 off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3	3 9	3	2	0.59	0.59	000000	mediumDashDotDot	0.08
+styles	style	v mediumDashDotDot|dashDot	100	L14	right	mediumDashDotDot	dashDot	-1 -0.5 0 0.5	irregular: off 3 on 3 off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3	3 9	3	2	0.59	0.59	000000	mediumDashDotDot	0.08
+styles	style	v mediumDashDotDot|dashDotDot	100	M14	right	mediumDashDotDot	dashDotDot	-1 -0.5 0 0.5	irregular: off 3 on 3 off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3	3 9	3	2	0.59	0.59	000000	mediumDashDotDot	0.08
+styles	style	v mediumDashDotDot|mediumDashed	100	N14	right	mediumDashDotDot	mediumDashed	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.73	0.73	000000	mediumDashed	0.28
+styles	style	v mediumDashDotDot|mediumDashDot	100	O14	right	mediumDashDotDot	mediumDashDot	-1 -0.5 0 0.5	on 3 off 3 on 9 off 3	3 9	3	1	0.70	0.70	000000	mediumDashDot	0.00
+styles	style	v mediumDashDotDot|slantDashDot	100	C15	right	mediumDashDotDot	slantDashDot	-1 -0.5 0 0.5	solid	4 10	2	0	1.00	0.80	000000	slantDashDot	0.04
+styles	style	v slantDashDot|thin	100	D15	right	slantDashDot	thin	-1 -0.5 0 0.5	solid	4 10	2	0	1.00	0.80	000000	slantDashDot	0.04
+styles	style	v slantDashDot|medium	100	E15	right	slantDashDot	medium	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	v slantDashDot|thick	100	F15	right	slantDashDot	thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	v slantDashDot|double	100	G15	right	slantDashDot	double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	v slantDashDot|hair	100	H15	right	slantDashDot	hair	-1 -0.5 0 0.5	solid	4 10	2	0	1.00	0.80	000000	slantDashDot	0.04
+styles	style	v slantDashDot|dotted	100	I15	right	slantDashDot	dotted	-1 -0.5 0 0.5	solid	4 10	2	0	1.00	0.80	000000	slantDashDot	0.04
+styles	style	v slantDashDot|dashed	100	J15	right	slantDashDot	dashed	-1 -0.5 0 0.5	solid	4 10	2	0	1.00	0.80	000000	slantDashDot	0.04
+styles	style	v slantDashDot|dashDot	100	K15	right	slantDashDot	dashDot	-1 -0.5 0 0.5	solid	4 10	2	0	1.00	0.80	000000	slantDashDot	0.04
+styles	style	v slantDashDot|dashDotDot	100	L15	right	slantDashDot	dashDotDot	-1 -0.5 0 0.5	solid	4 10	2	0	1.00	0.80	000000	slantDashDot	0.04
+styles	style	v slantDashDot|mediumDashed	100	M15	right	slantDashDot	mediumDashed	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.73	0.73	000000	mediumDashed	0.28
+styles	style	v slantDashDot|mediumDashDot	100	N15	right	slantDashDot	mediumDashDot	-1 -0.5 0 0.5	on 3 off 3 on 9 off 3	3 9	3	1	0.66	0.66	000000	mediumDashDot	0.16
+styles	style	v slantDashDot|mediumDashDotDot	100	O15	right	slantDashDot	mediumDashDotDot	-1 -0.5 0 0.5	solid	4 10	2	0	1.00	0.80	000000	slantDashDot	0.04
+styles	style	h thin/medium	100	C4	bottom	thin	medium	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	h thin/thick	100	D4	bottom	thin	thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	h thin/double	100	E4	bottom	thin	double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	h thin/hair	100	F4	bottom	thin	hair	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+styles	style	h thin/dotted	100	G4	bottom	thin	dotted	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+styles	style	h thin/dashed	100	H4	bottom	thin	dashed	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+styles	style	h thin/dashDot	100	I4	bottom	thin	dashDot	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+styles	style	h thin/dashDotDot	100	J4	bottom	thin	dashDotDot	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+styles	style	h thin/mediumDashed	100	K4	bottom	thin	mediumDashed	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.75	0.75	000000	mediumDashed	0.00
+styles	style	h thin/mediumDashDot	100	L4	bottom	thin	mediumDashDot	-1 -0.5 0 0.5	on 3 off 3 on 9 off 3	3 9	3	1	0.62	0.62	000000	mediumDashDot	0.28
+styles	style	h thin/mediumDashDotDot	100	M4	bottom	thin	mediumDashDotDot	-1 -0.5 0 0.5	irregular: off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3 on 9 off 3	3 9	3	2	0.62	0.62	000000	mediumDashDotDot	0.00
+styles	style	h thin/slantDashDot	100	N4	bottom	thin	slantDashDot	-1 -0.5 0 0.5	solid	4 10	2	0	1.00	0.79	000000	slantDashDot	0.08
+styles	style	h medium/thin	100	O4	bottom	medium	thin	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	h medium/thick	100	P4	bottom	medium	thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	h medium/double	100	C5	bottom	medium	double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	h medium/hair	100	D5	bottom	medium	hair	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	h medium/dotted	100	E5	bottom	medium	dotted	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	h medium/dashed	100	F5	bottom	medium	dashed	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	h medium/dashDot	100	G5	bottom	medium	dashDot	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	h medium/dashDotDot	100	H5	bottom	medium	dashDotDot	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	h medium/mediumDashed	100	I5	bottom	medium	mediumDashed	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	h medium/mediumDashDot	100	J5	bottom	medium	mediumDashDot	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	h medium/mediumDashDotDot	100	K5	bottom	medium	mediumDashDotDot	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	h medium/slantDashDot	100	L5	bottom	medium	slantDashDot	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	h thick/thin	100	M5	bottom	thick	thin	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	h thick/medium	100	N5	bottom	thick	medium	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	h thick/double	100	O5	bottom	thick	double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	h thick/hair	100	P5	bottom	thick	hair	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	h thick/dotted	100	C6	bottom	thick	dotted	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	h thick/dashed	100	D6	bottom	thick	dashed	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	h thick/dashDot	100	E6	bottom	thick	dashDot	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	h thick/dashDotDot	100	F6	bottom	thick	dashDotDot	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	h thick/mediumDashed	100	G6	bottom	thick	mediumDashed	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	h thick/mediumDashDot	100	H6	bottom	thick	mediumDashDot	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	h thick/mediumDashDotDot	100	I6	bottom	thick	mediumDashDotDot	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	h thick/slantDashDot	100	J6	bottom	thick	slantDashDot	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	h double/thin	100	K6	bottom	double	thin	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	h double/medium	100	L6	bottom	double	medium	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	h double/thick	100	M6	bottom	double	thick	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	h double/hair	100	N6	bottom	double	hair	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	h double/dotted	100	O6	bottom	double	dotted	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	h double/dashed	100	P6	bottom	double	dashed	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	h double/dashDot	100	C7	bottom	double	dashDot	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	h double/dashDotDot	100	D7	bottom	double	dashDotDot	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	h double/mediumDashed	100	E7	bottom	double	mediumDashed	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	h double/mediumDashDot	100	F7	bottom	double	mediumDashDot	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	h double/mediumDashDotDot	100	G7	bottom	double	mediumDashDotDot	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	h double/slantDashDot	100	H7	bottom	double	slantDashDot	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	h hair/thin	100	I7	bottom	hair	thin	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+styles	style	h hair/medium	100	J7	bottom	hair	medium	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	h hair/thick	100	K7	bottom	hair	thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	h hair/double	100	L7	bottom	hair	double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	h hair/dotted	100	M7	bottom	hair	dotted	0 0.5	on 2 off 2	2	2	3	0.50	0.50	000000	dotted	0.00
+styles	style	h hair/dashed	100	N7	bottom	hair	dashed	0 0.5	on 3 off 1	3	1	3	0.75	0.75	000000	dashed	0.00
+styles	style	h hair/dashDot	100	O7	bottom	hair	dashDot	0 0.5	on 3 off 3 on 9 off 3	3 9	3	1	0.62	0.62	000000	dashDot	0.28
+styles	style	h hair/dashDotDot	100	P7	bottom	hair	dashDotDot	0 0.5	irregular: off 3 on 3 off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3	3 9	3	2	0.62	0.62	000000	dashDotDot	0.00
+styles	style	h hair/mediumDashed	100	C8	bottom	hair	mediumDashed	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.75	0.75	000000	mediumDashed	0.00
+styles	style	h hair/mediumDashDot	100	D8	bottom	hair	mediumDashDot	-1 -0.5 0 0.5	on 9 off 3 on 3 off 3	3 9	3	1	0.69	0.69	000000	mediumDashDot	0.00
+styles	style	h hair/mediumDashDotDot	100	E8	bottom	hair	mediumDashDotDot	-1 -0.5 0 0.5	irregular: off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3 on 9 off 3	3 9	3	2	0.62	0.62	000000	mediumDashDotDot	0.00
+styles	style	h hair/slantDashDot	100	F8	bottom	hair	slantDashDot	-1.5 -1 -0.5 0 0.5	solid	4 10	2	0	0.81	0.60	000000	slantDashDot	10.68
+styles	style	h dotted/thin	100	G8	bottom	dotted	thin	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+styles	style	h dotted/medium	100	H8	bottom	dotted	medium	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	h dotted/thick	100	I8	bottom	dotted	thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	h dotted/double	100	J8	bottom	dotted	double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	h dotted/hair	100	K8	bottom	dotted	hair	0 0.5	on 2 off 2	2	2	3	0.50	0.50	000000	dotted	0.00
+styles	style	h dotted/dashed	100	L8	bottom	dotted	dashed	0 0.5	on 3 off 1	3	1	3	0.75	0.75	000000	dashed	0.00
+styles	style	h dotted/dashDot	100	M8	bottom	dotted	dashDot	0 0.5	on 2 off 2	2	2	3	0.50	0.50	000000	dotted	0.00
+styles	style	h dotted/dashDotDot	100	N8	bottom	dotted	dashDotDot	0 0.5	on 2 off 2	2	2	3	0.50	0.50	000000	dotted	0.00
+styles	style	h dotted/mediumDashed	100	O8	bottom	dotted	mediumDashed	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.75	0.75	000000	mediumDashed	0.00
+styles	style	h dotted/mediumDashDot	100	P8	bottom	dotted	mediumDashDot	-1 -0.5 0 0.5	on 9 off 3 on 3 off 3	3 9	3	1	0.69	0.69	000000	mediumDashDot	0.00
+styles	style	h dotted/mediumDashDotDot	100	C9	bottom	dotted	mediumDashDotDot	-1 -0.5 0 0.5	irregular: off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3 on 9 off 3	3 9	3	2	0.62	0.62	000000	mediumDashDotDot	0.00
+styles	style	h dotted/slantDashDot	100	D9	bottom	dotted	slantDashDot	-1 -0.5 0 0.5	solid	4 10	2	0	1.00	0.79	000000	slantDashDot	0.08
+styles	style	h dashed/thin	100	E9	bottom	dashed	thin	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+styles	style	h dashed/medium	100	F9	bottom	dashed	medium	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	h dashed/thick	100	G9	bottom	dashed	thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	h dashed/double	100	H9	bottom	dashed	double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	h dashed/hair	100	I9	bottom	dashed	hair	0 0.5	on 3 off 1	3	1	3	0.75	0.75	000000	dashed	0.00
+styles	style	h dashed/dotted	100	J9	bottom	dashed	dotted	0 0.5	on 3 off 1	3	1	3	0.75	0.75	000000	dashed	0.00
+styles	style	h dashed/dashDot	100	K9	bottom	dashed	dashDot	0 0.5	on 3 off 1	3	1	3	0.75	0.75	000000	dashed	0.00
+styles	style	h dashed/dashDotDot	100	L9	bottom	dashed	dashDotDot	0 0.5	on 3 off 1	3	1	3	0.75	0.75	000000	dashed	0.00
+styles	style	h dashed/mediumDashed	100	M9	bottom	dashed	mediumDashed	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.75	0.75	000000	mediumDashed	0.00
+styles	style	h dashed/mediumDashDot	100	N9	bottom	dashed	mediumDashDot	-1 -0.5 0 0.5	on 3 off 3 on 9 off 3	3 9	3	1	0.69	0.69	000000	mediumDashDot	0.00
+styles	style	h dashed/mediumDashDotDot	100	O9	bottom	dashed	mediumDashDotDot	-1 -0.5 0 0.5	irregular: off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3 on 9 off 3	3 9	3	2	0.62	0.62	000000	mediumDashDotDot	0.00
+styles	style	h dashed/slantDashDot	100	P9	bottom	dashed	slantDashDot	-1 -0.5 0 0.5	solid	4 10	2	0	1.00	0.79	000000	slantDashDot	0.08
+styles	style	h dashDot/thin	100	C10	bottom	dashDot	thin	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+styles	style	h dashDot/medium	100	D10	bottom	dashDot	medium	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	h dashDot/thick	100	E10	bottom	dashDot	thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	h dashDot/double	100	F10	bottom	dashDot	double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	h dashDot/hair	100	G10	bottom	dashDot	hair	0 0.5	on 9 off 3 on 3 off 3	3 9	3	1	0.69	0.69	000000	dashDot	0.00
+styles	style	h dashDot/dotted	100	H10	bottom	dashDot	dotted	0 0.5	on 2 off 2	2	2	3	0.50	0.50	000000	dotted	0.00
+styles	style	h dashDot/dashed	100	I10	bottom	dashDot	dashed	0 0.5	on 3 off 1	3	1	3	0.75	0.75	000000	dashed	0.00
+styles	style	h dashDot/dashDotDot	100	J10	bottom	dashDot	dashDotDot	0 0.5	on 9 off 3 on 3 off 3	3 9	3	1	0.69	0.69	000000	dashDot	0.00
+styles	style	h dashDot/mediumDashed	100	K10	bottom	dashDot	mediumDashed	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.75	0.75	000000	mediumDashed	0.00
+styles	style	h dashDot/mediumDashDot	100	L10	bottom	dashDot	mediumDashDot	-1 -0.5 0 0.5	on 3 off 3 on 9 off 3	3 9	3	1	0.62	0.62	000000	mediumDashDot	0.28
+styles	style	h dashDot/mediumDashDotDot	100	M10	bottom	dashDot	mediumDashDotDot	-1 -0.5 0 0.5	irregular: off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3 on 9 off 3	3 9	3	2	0.62	0.62	000000	mediumDashDotDot	0.00
+styles	style	h dashDot/slantDashDot	100	N10	bottom	dashDot	slantDashDot	-1 -0.5 0 0.5	solid	4 10	2	0	1.00	0.79	000000	slantDashDot	0.08
+styles	style	h dashDotDot/thin	100	O10	bottom	dashDotDot	thin	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+styles	style	h dashDotDot/medium	100	P10	bottom	dashDotDot	medium	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	h dashDotDot/thick	100	C11	bottom	dashDotDot	thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	h dashDotDot/double	100	D11	bottom	dashDotDot	double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	h dashDotDot/hair	100	E11	bottom	dashDotDot	hair	0 0.5	irregular: off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3 on 9 off 3	3 9	3	2	0.62	0.62	000000	dashDotDot	0.00
+styles	style	h dashDotDot/dotted	100	F11	bottom	dashDotDot	dotted	0 0.5	on 2 off 2	2	2	3	0.50	0.50	000000	dotted	0.00
+styles	style	h dashDotDot/dashed	100	G11	bottom	dashDotDot	dashed	0 0.5	on 3 off 1	3	1	3	0.75	0.75	000000	dashed	0.00
+styles	style	h dashDotDot/dashDot	100	H11	bottom	dashDotDot	dashDot	0 0.5	on 3 off 3 on 9 off 3	3 9	3	1	0.69	0.69	000000	dashDot	0.00
+styles	style	h dashDotDot/mediumDashed	100	I11	bottom	dashDotDot	mediumDashed	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.75	0.75	000000	mediumDashed	0.00
+styles	style	h dashDotDot/mediumDashDot	100	J11	bottom	dashDotDot	mediumDashDot	-1 -0.5 0 0.5	on 9 off 3 on 3 off 3	3 9	3	1	0.69	0.69	000000	mediumDashDot	0.00
+styles	style	h dashDotDot/mediumDashDotDot	100	K11	bottom	dashDotDot	mediumDashDotDot	-1 -0.5 0 0.5	irregular: off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3 on 9 off 3	3 9	3	2	0.62	0.62	000000	mediumDashDotDot	0.00
+styles	style	h dashDotDot/slantDashDot	100	L11	bottom	dashDotDot	slantDashDot	-1 -0.5 0 0.5	solid	4 10	2	0	1.00	0.75	000000	slantDashDot	0.00
+styles	style	h mediumDashed/thin	100	M11	bottom	mediumDashed	thin	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.75	0.75	000000	mediumDashed	0.00
+styles	style	h mediumDashed/medium	100	N11	bottom	mediumDashed	medium	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	h mediumDashed/thick	100	O11	bottom	mediumDashed	thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	h mediumDashed/double	100	P11	bottom	mediumDashed	double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	h mediumDashed/hair	100	C12	bottom	mediumDashed	hair	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.75	0.75	000000	mediumDashed	0.00
+styles	style	h mediumDashed/dotted	100	D12	bottom	mediumDashed	dotted	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.75	0.75	000000	mediumDashed	0.00
+styles	style	h mediumDashed/dashed	100	E12	bottom	mediumDashed	dashed	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.75	0.75	000000	mediumDashed	0.00
+styles	style	h mediumDashed/dashDot	100	F12	bottom	mediumDashed	dashDot	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.75	0.75	000000	mediumDashed	0.00
+styles	style	h mediumDashed/dashDotDot	100	G12	bottom	mediumDashed	dashDotDot	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.75	0.75	000000	mediumDashed	0.00
+styles	style	h mediumDashed/mediumDashDot	100	H12	bottom	mediumDashed	mediumDashDot	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.75	0.75	000000	mediumDashed	0.00
+styles	style	h mediumDashed/mediumDashDotDot	100	I12	bottom	mediumDashed	mediumDashDotDot	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.75	0.75	000000	mediumDashed	0.00
+styles	style	h mediumDashed/slantDashDot	100	J12	bottom	mediumDashed	slantDashDot	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.75	0.75	000000	mediumDashed	0.00
+styles	style	h mediumDashDot/thin	100	K12	bottom	mediumDashDot	thin	-1 -0.5 0 0.5	on 3 off 3 on 9 off 3	3 9	3	1	0.69	0.69	000000	mediumDashDot	0.00
+styles	style	h mediumDashDot/medium	100	L12	bottom	mediumDashDot	medium	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	h mediumDashDot/thick	100	M12	bottom	mediumDashDot	thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	h mediumDashDot/double	100	N12	bottom	mediumDashDot	double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	h mediumDashDot/hair	100	O12	bottom	mediumDashDot	hair	-1 -0.5 0 0.5	on 3 off 3 on 9 off 3	3 9	3	1	0.62	0.62	000000	mediumDashDot	0.28
+styles	style	h mediumDashDot/dotted	100	P12	bottom	mediumDashDot	dotted	-1 -0.5 0 0.5	on 9 off 3 on 3 off 3	3 9	3	1	0.69	0.69	000000	mediumDashDot	0.00
+styles	style	h mediumDashDot/dashed	100	C13	bottom	mediumDashDot	dashed	-1 -0.5 0 0.5	on 3 off 3 on 9 off 3	3 9	3	1	0.62	0.62	000000	mediumDashDot	0.28
+styles	style	h mediumDashDot/dashDot	100	D13	bottom	mediumDashDot	dashDot	-1 -0.5 0 0.5	on 9 off 3 on 3 off 3	3 9	3	1	0.69	0.69	000000	mediumDashDot	0.00
+styles	style	h mediumDashDot/dashDotDot	100	E13	bottom	mediumDashDot	dashDotDot	-1 -0.5 0 0.5	on 3 off 3 on 9 off 3	3 9	3	1	0.69	0.69	000000	mediumDashDot	0.00
+styles	style	h mediumDashDot/mediumDashed	100	F13	bottom	mediumDashDot	mediumDashed	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.75	0.75	000000	mediumDashed	0.00
+styles	style	h mediumDashDot/mediumDashDotDot	100	G13	bottom	mediumDashDot	mediumDashDotDot	-1 -0.5 0 0.5	on 9 off 3 on 3 off 3	3 9	3	1	0.69	0.69	000000	mediumDashDot	0.00
+styles	style	h mediumDashDot/slantDashDot	100	H13	bottom	mediumDashDot	slantDashDot	-1 -0.5 0 0.5	on 3 off 3 on 9 off 3	3 9	3	1	0.69	0.69	000000	mediumDashDot	0.00
+styles	style	h mediumDashDotDot/thin	100	I13	bottom	mediumDashDotDot	thin	-1 -0.5 0 0.5	irregular: off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3 on 9 off 3	3 9	3	2	0.62	0.62	000000	mediumDashDotDot	0.00
+styles	style	h mediumDashDotDot/medium	100	J13	bottom	mediumDashDotDot	medium	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	h mediumDashDotDot/thick	100	K13	bottom	mediumDashDotDot	thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	h mediumDashDotDot/double	100	L13	bottom	mediumDashDotDot	double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	h mediumDashDotDot/hair	100	M13	bottom	mediumDashDotDot	hair	-1 -0.5 0 0.5	irregular: off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3 on 9 off 3	3 9	3	2	0.62	0.62	000000	mediumDashDotDot	0.00
+styles	style	h mediumDashDotDot/dotted	100	N13	bottom	mediumDashDotDot	dotted	-1 -0.5 0 0.5	irregular: off 3 on 3 off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3	3 9	3	2	0.62	0.62	000000	mediumDashDotDot	0.00
+styles	style	h mediumDashDotDot/dashed	100	O13	bottom	mediumDashDotDot	dashed	-1 -0.5 0 0.5	irregular: off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3 on 9 off 3	3 9	3	2	0.62	0.62	000000	mediumDashDotDot	0.00
+styles	style	h mediumDashDotDot/dashDot	100	P13	bottom	mediumDashDotDot	dashDot	-1 -0.5 0 0.5	irregular: off 3 on 3 off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3	3 9	3	2	0.62	0.62	000000	mediumDashDotDot	0.00
+styles	style	h mediumDashDotDot/dashDotDot	100	C14	bottom	mediumDashDotDot	dashDotDot	-1 -0.5 0 0.5	irregular: off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3 on 9 off 3	3 9	3	2	0.62	0.62	000000	mediumDashDotDot	0.00
+styles	style	h mediumDashDotDot/mediumDashed	100	D14	bottom	mediumDashDotDot	mediumDashed	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.75	0.75	000000	mediumDashed	0.00
+styles	style	h mediumDashDotDot/mediumDashDot	100	E14	bottom	mediumDashDotDot	mediumDashDot	-1 -0.5 0 0.5	on 3 off 3 on 9 off 3	3 9	3	1	0.69	0.69	000000	mediumDashDot	0.00
+styles	style	h mediumDashDotDot/slantDashDot	100	F14	bottom	mediumDashDotDot	slantDashDot	-1 -0.5 0 0.5	solid	4 10	2	0	1.00	0.75	000000	slantDashDot	0.00
+styles	style	h slantDashDot/thin	100	G14	bottom	slantDashDot	thin	-1 -0.5 0 0.5	solid	4 10	2	0	1.00	0.79	000000	slantDashDot	0.08
+styles	style	h slantDashDot/medium	100	H14	bottom	slantDashDot	medium	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+styles	style	h slantDashDot/thick	100	I14	bottom	slantDashDot	thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+styles	style	h slantDashDot/double	100	J14	bottom	slantDashDot	double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+styles	style	h slantDashDot/hair	100	K14	bottom	slantDashDot	hair	-1 -0.5 0 0.5	solid	4 10	2	0	1.00	0.79	000000	slantDashDot	0.08
+styles	style	h slantDashDot/dotted	100	L14	bottom	slantDashDot	dotted	-1 -0.5 0 0.5	solid	4 10	2	0	1.00	0.75	000000	slantDashDot	0.00
+styles	style	h slantDashDot/dashed	100	M14	bottom	slantDashDot	dashed	-1 -0.5 0 0.5	solid	4 10	2	0	1.00	0.79	000000	slantDashDot	0.08
+styles	style	h slantDashDot/dashDot	100	N14	bottom	slantDashDot	dashDot	-1 -0.5 0 0.5	solid	4 10	2	0	1.00	0.79	000000	slantDashDot	0.08
+styles	style	h slantDashDot/dashDotDot	100	O14	bottom	slantDashDot	dashDotDot	-1 -0.5 0 0.5	solid	4 10	2	0	1.00	0.75	000000	slantDashDot	0.00
+styles	style	h slantDashDot/mediumDashed	100	P14	bottom	slantDashDot	mediumDashed	-1 -0.5 0 0.5	on 9 off 3	9	3	0	0.75	0.75	000000	mediumDashed	0.00
+styles	style	h slantDashDot/mediumDashDot	100	C15	bottom	slantDashDot	mediumDashDot	-1 -0.5 0 0.5	on 3 off 3 on 9 off 3	3 9	3	1	0.62	0.62	000000	mediumDashDot	0.28
+styles	style	h slantDashDot/mediumDashDotDot	100	D15	bottom	slantDashDot	mediumDashDotDot	-1 -0.5 0 0.5	solid	4 10	2	0	1.00	0.79	000000	slantDashDot	0.08
+colors	ref	ref h thin	100	C4	top		thin	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+colors	ref	ref v thin	100	C4	left		thin	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+colors	ref	ref h medium	100	D4	top		medium	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+colors	ref	ref v medium	100	C5	left		medium	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+colors	ref	ref h thick	100	E4	top		thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+colors	ref	ref v thick	100	C6	left		thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+colors	ref	ref h double	100	F4	top		double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+colors	ref	ref v double	100	C7	left		double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+colors	ref	ref h dashed	100	G4	top		dashed	0 0.5	on 3 off 1	3	1	3	0.75	0.75	000000	dashed	0.00
+colors	ref	ref v dashed	100	C8	left		dashed	0 0.5	on 3 off 1	3	1	3	0.78	0.78	000000	dashed	0.00
+colors	ref	ref h hair	100	H4	top		hair	0 0.5	on 1 off 1	1	1	3	0.50	0.50	000000	hair	0.00
+colors	ref	ref v hair	100	C9	left		hair	0 0.5	on 1 off 1	1	1	3	0.50	0.50	000000	hair	0.00
+colors	color	v 601 vs 709: 40C080|FF8000	100	C4	right	thin 40C080	thin FF8000	0 0.5	solid			0	1.00	1.00	FF8002	thin	0.00
+colors	color	v 601 vs 709: FF8000|40C080	100	D4	right	thin FF8000	thin 40C080	0 0.5	solid			0	1.00	1.00	FF8002	thin	0.00
+colors	color	v 601 vs 709: 00FF00|40C0C0	100	E4	right	thin 00FF00	thin 40C0C0	0 0.5	solid			0	1.00	1.00	03FF00	thin	0.00
+colors	color	v 601 vs 709: 40C0C0|00FF00	100	F4	right	thin 40C0C0	thin 00FF00	0 0.5	solid			0	1.00	1.00	03FF00	thin	0.00
+colors	color	v 601 vs max: 004080|A00000	100	G4	right	thin 004080	thin A00000	0 0.5	solid			0	1.00	1.00	A00001	thin	0.00
+colors	color	v 601 vs max: A00000|004080	100	H4	right	thin A00000	thin 004080	0 0.5	solid			0	1.00	1.00	A00001	thin	0.00
+colors	color	v 601 vs max and L*: 604080|FF0000	100	C5	right	thin 604080	thin FF0000	0 0.5	solid			0	1.00	1.00	FF0000	thin	0.00
+colors	color	v 601 vs max and L*: FF0000|604080	100	D5	right	thin FF0000	thin 604080	0 0.5	solid			0	1.00	1.00	FF0000	thin	0.00
+colors	color	v 601 vs mean: 80A080|FF8000	100	E5	right	thin 80A080	thin FF8000	0 0.5	solid			0	1.00	1.00	FF8002	thin	0.00
+colors	color	v 601 vs mean: FF8000|80A080	100	F5	right	thin FF8000	thin 80A080	0 0.5	solid			0	1.00	1.00	FF8002	thin	0.00
+colors	color	v 601 vs mean: 00FF40|A0A060	100	G5	right	thin 00FF40	thin A0A060	0 0.5	solid			0	1.00	1.00	A0A060	thin	0.00
+colors	color	v 601 vs mean: A0A060|00FF40	100	H5	right	thin A0A060	thin 00FF40	0 0.5	solid			0	1.00	1.00	A0A060	thin	0.00
+colors	color	v 601 vs L*: 00C0C0|80A040	100	C6	right	thin 00C0C0	thin 80A040	0 0.5	solid			0	1.00	1.00	7FA040	thin	0.00
+colors	color	v 601 vs L*: 80A040|00C0C0	100	D6	right	thin 80A040	thin 00C0C0	0 0.5	solid			0	1.00	1.00	7FA040	thin	0.00
+colors	color	v equal luma: 003223|1400F0	100	E6	right	thin 003223	thin 1400F0	0 0.5	solid			0	1.00	1.00	1400F0	thin	0.00
+colors	color	v equal luma: 1400F0|003223	100	F6	right	thin 1400F0	thin 003223	0 0.5	solid			0	1.00	1.00	1400F0	thin	0.00
+colors	color	v equal luma: 2D5A69|FA0505	100	G6	right	thin 2D5A69	thin FA0505	0 0.5	solid			0	1.00	1.00	FA0604	thin	0.00
+colors	color	v equal luma: FA0505|2D5A69	100	H6	right	thin FA0505	thin 2D5A69	0 0.5	solid			0	1.00	1.00	FA0604	thin	0.00
+colors	color	v equal luma: 23B923|3787F0	100	C7	right	thin 23B923	thin 3787F0	0 0.5	solid			0	1.00	1.00	3787F0	thin	0.00
+colors	color	v equal luma: 3787F0|23B923	100	D7	right	thin 3787F0	thin 23B923	0 0.5	solid			0	1.00	1.00	3787F0	thin	0.00
+colors	color	v equal luma: 5055B9|D22D32	100	E7	right	thin 5055B9	thin D22D32	0 0.5	solid			0	1.00	1.00	D22D32	thin	0.00
+colors	color	v equal luma: D22D32|5055B9	100	F7	right	thin D22D32	thin 5055B9	0 0.5	solid			0	1.00	1.00	D22D32	thin	0.00
+colors	color	v theme vs darker rgb: theme4|F84800	100	G7	right	thin theme4	thin F84800	0 0.5	solid			0	1.00	1.00	F84800	thin	0.00
+colors	color	v theme vs darker rgb: F84800|theme4	100	H7	right	thin F84800	thin theme4	0 0.5	solid			0	1.00	1.00	F84800	thin	0.00
+colors	color	v theme vs lighter rgb: theme4|F85800	100	C8	right	thin theme4	thin F85800	0 0.5	solid			0	1.00	1.00	F85800	thin	0.00
+colors	color	v theme vs lighter rgb: F85800|theme4	100	D8	right	thin F85800	thin theme4	0 0.5	solid			0	1.00	1.00	F85800	thin	0.00
+colors	color	v tinted theme vs darker rgb: theme4+0.4|60F000	100	E8	right	thin theme4+0.4	thin 60F000	0 0.5	solid			0	1.00	1.00	60F000	thin	0.00
+colors	color	v tinted theme vs darker rgb: 60F000|theme4+0.4	100	F8	right	thin 60F000	thin theme4+0.4	0 0.5	solid			0	1.00	1.00	60F000	thin	0.00
+colors	color	v tinted theme vs lighter rgb: theme4+0.4|E8B800	100	G8	right	thin theme4+0.4	thin E8B800	0 0.5	solid			0	1.00	1.00	E7B800	thin	0.00
+colors	color	v tinted theme vs lighter rgb: E8B800|theme4+0.4	100	H8	right	thin E8B800	thin theme4+0.4	0 0.5	solid			0	1.00	1.00	E7B800	thin	0.00
+colors	color	v indexed vs darker rgb: indexed10|0848F8	100	C9	right	thin indexed10	thin 0848F8	0 0.5	solid			0	1.00	1.00	FF0000	thin	0.00
+colors	color	v indexed vs darker rgb: 0848F8|indexed10	100	D9	right	thin 0848F8	thin indexed10	0 0.5	solid			0	1.00	1.00	FF0000	thin	0.00
+colors	color	v indexed vs lighter rgb: indexed10|1050F8	100	E9	right	thin indexed10	thin 1050F8	0 0.5	solid			0	1.00	1.00	FF0000	thin	0.00
+colors	color	v indexed vs lighter rgb: 1050F8|indexed10	100	F9	right	thin 1050F8	thin indexed10	0 0.5	solid			0	1.00	1.00	FF0000	thin	0.00
+colors	color	h 601 vs 709: 40C080/FF8000	100	C4	bottom	thin 40C080	thin FF8000	0 0.5	solid			0	1.00	1.00	FF8002	thin	0.00
+colors	color	h 601 vs 709: FF8000/40C080	100	D4	bottom	thin FF8000	thin 40C080	0 0.5	solid			0	1.00	1.00	FF8002	thin	0.00
+colors	color	h 601 vs 709: 00FF00/40C0C0	100	E4	bottom	thin 00FF00	thin 40C0C0	0 0.5	solid			0	1.00	1.00	03FF00	thin	0.00
+colors	color	h 601 vs 709: 40C0C0/00FF00	100	F4	bottom	thin 40C0C0	thin 00FF00	0 0.5	solid			0	1.00	1.00	03FF00	thin	0.00
+colors	color	h 601 vs max: 004080/A00000	100	G4	bottom	thin 004080	thin A00000	0 0.5	solid			0	1.00	1.00	A00001	thin	0.00
+colors	color	h 601 vs max: A00000/004080	100	H4	bottom	thin A00000	thin 004080	0 0.5	solid			0	1.00	1.00	A00001	thin	0.00
+colors	color	h 601 vs max and L*: 604080/FF0000	100	I4	bottom	thin 604080	thin FF0000	0 0.5	solid			0	1.00	1.00	FF0000	thin	0.00
+colors	color	h 601 vs max and L*: FF0000/604080	100	C5	bottom	thin FF0000	thin 604080	0 0.5	solid			0	1.00	1.00	FF0000	thin	0.00
+colors	color	h 601 vs mean: 80A080/FF8000	100	D5	bottom	thin 80A080	thin FF8000	0 0.5	solid			0	1.00	1.00	FF8002	thin	0.00
+colors	color	h 601 vs mean: FF8000/80A080	100	E5	bottom	thin FF8000	thin 80A080	0 0.5	solid			0	1.00	1.00	FF8002	thin	0.00
+colors	color	h 601 vs mean: 00FF40/A0A060	100	F5	bottom	thin 00FF40	thin A0A060	0 0.5	solid			0	1.00	1.00	A0A060	thin	0.00
+colors	color	h 601 vs mean: A0A060/00FF40	100	G5	bottom	thin A0A060	thin 00FF40	0 0.5	solid			0	1.00	1.00	A0A060	thin	0.00
+colors	color	h 601 vs L*: 00C0C0/80A040	100	H5	bottom	thin 00C0C0	thin 80A040	0 0.5	solid			0	1.00	1.00	7FA040	thin	0.00
+colors	color	h 601 vs L*: 80A040/00C0C0	100	I5	bottom	thin 80A040	thin 00C0C0	0 0.5	solid			0	1.00	1.00	7FA040	thin	0.00
+colors	color	h equal luma: 003223/1400F0	100	C6	bottom	thin 003223	thin 1400F0	0 0.5	solid			0	1.00	1.00	1400F0	thin	0.00
+colors	color	h equal luma: 1400F0/003223	100	D6	bottom	thin 1400F0	thin 003223	0 0.5	solid			0	1.00	1.00	1400F0	thin	0.00
+colors	color	h equal luma: 2D5A69/FA0505	100	E6	bottom	thin 2D5A69	thin FA0505	0 0.5	solid			0	1.00	1.00	FA0604	thin	0.00
+colors	color	h equal luma: FA0505/2D5A69	100	F6	bottom	thin FA0505	thin 2D5A69	0 0.5	solid			0	1.00	1.00	FA0604	thin	0.00
+colors	color	h equal luma: 23B923/3787F0	100	G6	bottom	thin 23B923	thin 3787F0	0 0.5	solid			0	1.00	1.00	3787F0	thin	0.00
+colors	color	h equal luma: 3787F0/23B923	100	H6	bottom	thin 3787F0	thin 23B923	0 0.5	solid			0	1.00	1.00	3787F0	thin	0.00
+colors	color	h equal luma: 5055B9/D22D32	100	I6	bottom	thin 5055B9	thin D22D32	0 0.5	solid			0	1.00	1.00	D22D32	thin	0.00
+colors	color	h equal luma: D22D32/5055B9	100	C7	bottom	thin D22D32	thin 5055B9	0 0.5	solid			0	1.00	1.00	D22D32	thin	0.00
+colors	color	h theme vs darker rgb: theme4/F84800	100	D7	bottom	thin theme4	thin F84800	0 0.5	solid			0	1.00	1.00	F84800	thin	0.00
+colors	color	h theme vs darker rgb: F84800/theme4	100	E7	bottom	thin F84800	thin theme4	0 0.5	solid			0	1.00	1.00	F84800	thin	0.00
+colors	color	h theme vs lighter rgb: theme4/F85800	100	F7	bottom	thin theme4	thin F85800	0 0.5	solid			0	1.00	1.00	F85800	thin	0.00
+colors	color	h theme vs lighter rgb: F85800/theme4	100	G7	bottom	thin F85800	thin theme4	0 0.5	solid			0	1.00	1.00	F85800	thin	0.00
+colors	color	h tinted theme vs darker rgb: theme4+0.4/60F000	100	H7	bottom	thin theme4+0.4	thin 60F000	0 0.5	solid			0	1.00	1.00	60F000	thin	0.00
+colors	color	h tinted theme vs darker rgb: 60F000/theme4+0.4	100	I7	bottom	thin 60F000	thin theme4+0.4	0 0.5	solid			0	1.00	1.00	60F000	thin	0.00
+colors	color	h tinted theme vs lighter rgb: theme4+0.4/E8B800	100	C8	bottom	thin theme4+0.4	thin E8B800	0 0.5	solid			0	1.00	1.00	E7B800	thin	0.00
+colors	color	h tinted theme vs lighter rgb: E8B800/theme4+0.4	100	D8	bottom	thin E8B800	thin theme4+0.4	0 0.5	solid			0	1.00	1.00	E7B800	thin	0.00
+colors	color	h indexed vs darker rgb: indexed10/0848F8	100	E8	bottom	thin indexed10	thin 0848F8	0 0.5	solid			0	1.00	1.00	FF0000	thin	0.00
+colors	color	h indexed vs darker rgb: 0848F8/indexed10	100	F8	bottom	thin 0848F8	thin indexed10	0 0.5	solid			0	1.00	1.00	FF0000	thin	0.00
+colors	color	h indexed vs lighter rgb: indexed10/1050F8	100	G8	bottom	thin indexed10	thin 1050F8	0 0.5	solid			0	1.00	1.00	FF0000	thin	0.00
+colors	color	h indexed vs lighter rgb: 1050F8/indexed10	100	H8	bottom	thin 1050F8	thin indexed10	0 0.5	solid			0	1.00	1.00	FF0000	thin	0.00
+colors	hidden	column thick red, double hidden, thick blue	100	K4	right	thick FF0000	thick 0000FF	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	0000FF	thick	0.00
+colors	hidden	row thick red, double hidden, thick blue	100	C12	bottom	thick FF0000	thick 0000FF	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	0000FF	thick	0.00
+colors	hidden	column medium, double hidden, thin	100	K6	right	medium	thin	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+colors	hidden	row medium, double hidden, thin	100	E12	bottom	medium	thin	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+colors	hidden	column thin, thick hidden, dashed	100	K8	right	thin	dashed	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+colors	hidden	row thin, thick hidden, dashed	100	G12	bottom	thin	dashed	0 0.5	solid			0	1.00	1.00	000000	thin	0.00

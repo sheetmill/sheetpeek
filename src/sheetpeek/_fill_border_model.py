@@ -90,7 +90,7 @@ STYLES: tuple[BorderStyle, ...] = (
     "hair",
 )
 """Every border style, strongest first: the order in which one side wins over another
-(unverified: weight first, then this fixed order within a weight)."""
+(weight first, then this fixed order within a weight; captured, ``border_conflicts``)."""
 
 _RANK = {style: rank for rank, style in enumerate(STYLES)}
 BLACK = "000000"
@@ -231,8 +231,9 @@ def luma(color: str) -> float:
 def winner(a: Side | None, b: Side | None) -> Side | None:
     """The side Excel draws where two cells' sides meet: never both, never by position.
 
-    The stronger style wins (:data:`STYLES`); of one style, the darker color by Rec. 601 luma
-    and of equal luma the larger ``RRGGBB`` (both unverified).
+    The stronger style wins (:data:`STYLES`, captured); of one style, the darker color by Rec.
+    601 luma and of equal luma the larger ``RRGGBB``: a known deviation, as Excel's own color
+    rule is not found (``border_conflicts``: luma fits 28 of 68 cases, no single measure all).
     """
     if a is None or b is None:
         return a or b
