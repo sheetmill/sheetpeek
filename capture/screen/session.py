@@ -27,6 +27,8 @@ HERE = Path(__file__).resolve().parent
 SCRIPT = HERE / "excel.applescript"
 WINDOWS = HERE / "windows.js"
 WINDOW_GRACE = 10.0
+SETTLE = 5.0
+"""Seconds between a session's checks and its opening the workbook."""
 """Seconds a window with no workbook may stay on screen before a session refuses to start."""
 CONTAINER = Path.home() / "Library/Containers/com.microsoft.Excel/Data/Documents"
 """Excel is sandboxed: a workbook it opens by script lives here, so no "Grant Access" shows."""
@@ -172,6 +174,9 @@ class ExcelSession:
         self.preflight()
         # The display stays awake while Excel is driven: unexplained hangs came with it off.
         self._awake = subprocess.Popen(["caffeinate", "-d", "-i", "-w", str(os.getpid())])
+        # Opened within a second of closing the last one, a workbook met "Parameter error"
+        # (-2700) though Excel opened it later: give Excel a moment between workbooks.
+        time.sleep(SETTLE)
         try:
             self.ask("open", str(self.path))
         except BaseException:
