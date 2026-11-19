@@ -228,7 +228,8 @@ def test_paint_follows_sheetpeeks_gradient_along_the_axis(built):
             continue
         spec = sheet.cell(*_rc(case.cell)).style.fill_spec
         found = suite.EXPECTED["main"][case.cell]
-        shortest = min(p1 - p0 for (p0, _), (p1, _) in itertools.pairwise(spec.drawn) if p1 > p0)
+        stops = itertools.pairwise(spec.drawn_stops)
+        shortest = min(p1 - p0 for (p0, _), (p1, _) in stops if p1 > p0)
         for f in suite.fractions(suite.PROFILE):
             at = (f, 0.5) if case.degree is None else (0.5, f)
             drawn_rgb, model = _rgb(paint(found, *at)), _rgb(spec.color_at(f))

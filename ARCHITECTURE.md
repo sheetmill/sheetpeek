@@ -811,7 +811,7 @@ one.
 unit cell**: on a `w × h` box the drawn angle is `90° + atan2(w sin d, h cos d)` in CSS terms, and
 the corners take the end stops, as CSS `linear-gradient` normalizes them; colors interpolate
 linearly in sRGB (`gradients`, zoom 100 and 200). A first stop past 0 is reached from black at
-0, and a last stop before 1 runs to black at 1 (`Gradient.drawn`). `path` draws rectangular bands
+0, and a last stop before 1 runs to black at 1 (`Gradient.drawn_stops`). `path` draws rectangular bands
 from the rectangle `left`, `right`, `top`, `bottom` (in the first color drawn) out to the cell's
 edges; all four 0 put the first stop at the top-left corner. A degree that is not finite is 0,
 rectangle values are clamped to 0 to 1, stops are sorted by position, and a gradient without

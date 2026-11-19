@@ -169,7 +169,7 @@ def test_stops_at_one_position_end_the_stretch_before_in_the_last_and_start_afte
     found = Gradient("linear", ((0.0, "FFFFFF"), (0.5, "FF0000"), (0.5, "0000FF")))
     assert found.color_at(0.4999) == blend("0000FF", "FFFFFF", 0.4999 / 0.5)
     assert found.color_at(0.5001) == blend("000000", "FF0000", 0.0001 / 0.5)
-    assert found.drawn == ((0.0, "FFFFFF"), (0.5, "0000FF"), (0.5, "FF0000"), (1.0, "000000"))
+    assert found.drawn_stops == ((0.0, "FFFFFF"), (0.5, "0000FF"), (0.5, "FF0000"), (1.0, "000000"))
 
 
 def test_stops_are_taken_in_order_of_position(tmp_path):
@@ -196,7 +196,7 @@ def test_a_gradient_without_stops_is_black(tmp_path):
 
 def test_duplicate_stop_positions_are_read_in_order(tmp_path):
     # openpyxl refused the whole stylesheet; xlio reads it. Kept in the file's order, which
-    # decides what Excel draws (Gradient.drawn, captured).
+    # decides what Excel draws (Gradient.drawn_stops, captured).
     path = filled(tmp_path, GradientFill(stop=("FFFFFFFF", "FF0000FF")))
     rewrite(path, STYLES, lambda t: t.replace('<stop position="1"', '<stop position="0"', 1))
     stops = sheetpeek.read(path).cell(1, 2).style.fill_spec.stops

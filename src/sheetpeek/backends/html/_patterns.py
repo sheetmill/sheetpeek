@@ -174,7 +174,7 @@ def inside(boxes: list[str], at: list[tuple[int, int]], window: tuple[float, flo
 
 def gradient(spec: Gradient, width: int, height: int) -> str:
     """The declarations that draw a gradient on a box of ``width`` by ``height`` px."""
-    stops = list(spec.drawn)
+    stops = list(spec.drawn_stops)
     if spec.kind == "linear":
         radians = math.radians(spec.degree)
         angle = 90 + math.degrees(math.atan2(width * math.sin(radians), height * math.cos(radians)))

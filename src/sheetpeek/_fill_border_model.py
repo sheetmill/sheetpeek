@@ -152,7 +152,7 @@ class Gradient:
     ``path`` runs from the rectangle ``left``, ``right``, ``top``, ``bottom`` (fractions of the
     cell, in the first color drawn) out to the cell's edges in rectangular bands. ``stops`` are
     ``(position, RRGGBB)`` in order of position (stops at one position in the file's order),
-    positions from 0 to 1; :attr:`drawn` gives them as Excel draws them.
+    positions from 0 to 1; :attr:`drawn_stops` gives them as Excel draws them.
     """
 
     kind: Literal["linear", "path"]
@@ -164,12 +164,13 @@ class Gradient:
     bottom: float = 0.0
 
     @property
-    def drawn(self) -> tuple[tuple[float, str], ...]:
-        """The stops as Excel draws them (screen suite ``gradients``).
+    def drawn_stops(self) -> tuple[tuple[float, str], ...]:
+        """The stops as Excel draws them (screen suite ``gradients``), for any output to draw.
 
-        A first stop past 0 is reached from black at 0, and a last stop before 1 runs to black at
-        1. Of stops at one position, the last in the file ends the stretch before it and the
-        first starts the stretch after, so each such group is reversed.
+        Normalized: black is implied at 0 before a first stop past 0, and at 1 after a last stop
+        before 1; of stops at one position, the last in the file ends the stretch before it and
+        the first starts the stretch after, so each such group is reversed. A gradient without
+        stops is never a ``Gradient``: the reader makes it a solid black ``Pattern``.
         """
         found: list[tuple[float, str]] = []
         for _, group in itertools.groupby(self.stops, key=lambda stop: stop[0]):
@@ -181,8 +182,8 @@ class Gradient:
         return tuple(found)
 
     def color_at(self, t: float) -> str:
-        """The color at ``t`` from 0 to 1 along the gradient (:attr:`drawn`)."""
-        stops = self.drawn
+        """The color at ``t`` from 0 to 1 along the gradient (:attr:`drawn_stops`)."""
+        stops = self.drawn_stops
         for (p0, c0), (p1, c1) in itertools.pairwise(stops):
             if p0 <= t <= p1 and p1 > p0:
                 return blend(c1, c0, (t - p0) / (p1 - p0))

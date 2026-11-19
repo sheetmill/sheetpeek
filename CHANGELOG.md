@@ -114,7 +114,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `CellStyle.fill_spec` (a `Pattern` or a `Gradient`) and `CellStyle.borders` (a `Borders` of
   `Side`s), and `RenderedSheet.borders`, a `RenderedBorders` of the resolved lines in
   `excel` mode. New public types: `Pattern`, `Gradient`, `Fill`, `PatternKind`, `Borders`, `Side`,
-  `BorderStyle`, `RenderedBorders`, `Diagonal`.
+  `BorderStyle`, `RenderedBorders`, `Diagonal`. `Gradient.drawn_stops` gives a gradient's stops
+  as Excel draws them, for any output (black implied at the ends, stops at one position split
+  as Excel splits them).
 - Census codes `fill.pattern`, `fill.gradient`, `border`, `border.diagonal` and
   `border.slant_dash_dot`, declared by every output: `rich` shows a pattern as one blended color
   and a gradient as its midpoint color; borders are drawn only in HTML so far.
