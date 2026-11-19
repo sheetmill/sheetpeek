@@ -69,11 +69,12 @@ class HTMLBackend:
             Excel follows. Off by default: such links point into the viewer's own files, they
             reveal the paths the workbook names, and a target starting with ``//`` resolves to a
             network host when a page is served, as an ``http`` link would.
-        buttons: Whether to draw Excel's buttons, which do nothing on a static page. For now
-            this is the outline: ``"static"`` (the default) draws the outline gutter beside the
-            headings as Excel shows it, with its bars, dots, minus and plus buttons, and the level
-            buttons where the headings are drawn; ``"none"`` leaves the gutter out. A sheet's
-            outline is drawn only when the file shows outline symbols.
+        buttons: Whether to draw Excel's buttons, which do nothing on a static page: the
+            outline gutter and the filter buttons. ``"static"`` (the default) draws the outline
+            gutter beside the headings as Excel shows it, with its bars, dots, minus and plus
+            buttons, and the level buttons where the headings are drawn, and each filter button
+            over its header cell; ``"none"`` leaves them out. A sheet's outline is drawn only
+            when the file shows outline symbols.
         zoom: The zoom in percent, 10 to 400, as Excel's zoom box takes it. By default
             (``None``), the zoom saved with each sheet, as Excel opens it. Cells, text, fills
             and borders' positions and the headings scale; lines, pattern tiles and the outline's

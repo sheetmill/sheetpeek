@@ -50,7 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   loses nothing by leaving out is not reported: a black font color (the text an output without
   colors draws) and a white solid fill (its paper), whatever sets them, a table style included.
 - Reported when a file uses them, until they are drawn: phonetic guides, row and column formats, sheet views (right to left, formulas,
-  page layout, split panes), conditional formatting, filter buttons,
+  page layout, split panes), conditional formatting,
   sparklines, slicers, timelines, pictures, charts, shapes, embedded objects, form
   controls, background pictures, notes and threaded comments, tab colors (drawn only on the workbook page), dialog sheets, macro sheets, and any sheet element or extension sheetpeek
   does not recognize. A file is reported for what it uses, not what it contains: margins, page
@@ -97,7 +97,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   shown. A range that cuts a group reports the button it leaves out (`outline.cut`). A level is read as
   Excel reads it: modulo 8, and one that is not decimal digits as none.
 - `buttons="static" | "none"` on `HTMLBackend`, `RichBackend` and `TextBackend`: whether to draw
-  Excel's buttons, which do nothing in a static output; for now the outline gutter. New CSS custom
+  Excel's buttons, which do nothing in a static output: the outline gutter, and the filter
+  buttons (below). New CSS custom
   properties `--sheetpeek-outline-paper`, `--sheetpeek-outline-ink`,
   `--sheetpeek-outline-button`, `--sheetpeek-outline-button-paper`, and classes `sp-ol`,
   `sp-olbutton`, `sp-ollevel`.
