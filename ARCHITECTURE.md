@@ -1756,15 +1756,19 @@ the model's types as read ones do (§3): a whole number below 2**53 an `int`, an
 `xlformat.ExcelError`.
 
 **Measured** (every sheet of a book read, best of three, each in a fresh process, against the
-reader before recalculation, measured together). The largest public workbook (§5.2; 10
-formulas, an older `calcId`, so Excel recalculates it all): 37.7 s and 864 MiB before, 56.8 s and
-967 MiB under `"excel"`, 55.0 s and 889 MiB under `"never"`. Nearly all of the difference is the
-workbook read a second time: xlrecalc's load reads every sheet again (19.2 s alone), and under
-`"never"`, where the workbook part does not settle the answer, the formula-only pass does
-(17.6 s). A workbook openpyxl wrote, 100,000 rows of 4 formulas with no values: 2.7 s and
-175 MiB before, 8.4 s and 318 MiB (load 2.5 s, the rest computing 400,001 formulas). The same
-workbook with its values and marked as Excel saves it, where nothing is recalculated but every
-formula is given to the check: 2.7 s and 167 MiB before, 3.3 s and 189 MiB.
+reader before recalculation, measured together; the highest peak of the three). The largest
+public workbook (§5.2; 10 formulas, an older `calcId`, so Excel recalculates it all): 38.5 s and
+858 MiB before, 58.1 s and 905 MiB under `"excel"`, 55.7 s and 888 MiB under `"never"`. Nearly
+all of the difference is the workbook read a second time: xlrecalc's load reads every sheet
+again (19.2 s alone), and under `"never"`, where the workbook part does not settle the answer,
+the formula-only pass does (17.6 s). A workbook openpyxl wrote, 100,000 rows of 4 formulas with
+no values: 2.7 s and 178 MiB before, 7.5 s and 323 MiB (load 2.5 s, the rest computing 400,001
+formulas). The same workbook with its values and marked as Excel saves it, where nothing is
+recalculated but every formula is given to the check: 2.8 s and 170 MiB before, 3.3 s and
+191 MiB. A sweep of the 15,935 public workbooks of §5.5 takes 20 minutes with four workers,
+where it took 10; 1,706 of them hold formulas xlrecalc does not compute, most of
+them references to other workbooks, which Excel too leaves at their cached values until the
+links are updated.
 
 ## 6. The xlformat seam
 
