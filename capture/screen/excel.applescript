@@ -8,6 +8,8 @@
 --                              the measured area) and scroll back to A1
 --   scroll NAME ROW            scroll the active window so ROW is its top row (column A at the
 --                              left); returns the address of the window's visible range
+--   window NAME                the workbook's active window's state, read and not set: zoom,
+--                              view, freeze panes, split row and column, scroll row and column
 --   save NAME PATH             save the workbook as PATH (Excel's own file)
 --   read NAME CELL...          what Excel shows for each cell: its display format, its own
 --                              format, its borders and its geometry, one record a property
@@ -28,6 +30,8 @@ on run argv
 		return my viewBook(item 2 of argv, item 3 of argv, (item 4 of argv) as integer)
 	else if request is "scroll" then
 		return my scrollBook(item 2 of argv, (item 3 of argv) as integer)
+	else if request is "window" then
+		return my windowState(item 2 of argv)
 	else if request is "save" then
 		return my saveBook(item 2 of argv, item 3 of argv)
 	else if request is "read" then
@@ -87,6 +91,57 @@ on scrollBook(xlName, topRow)
 		return (get address of (visible range of active window)) as string
 	end tell
 end scrollBook
+
+-- The window's state as key=value fields joined by ";"; a field Excel refuses is "ERR". The
+-- window's view comes back as Excel names it ("normal view"), or as a raw constant for page break
+-- preview, which the dictionary leaves out of its enumeration.
+on windowState(xlName)
+	set found to {}
+	tell application "Microsoft Excel"
+		activate object workbook xlName
+		set xlWindow to active window
+		try
+			set end of found to "zoom=" & ((zoom of xlWindow) as string)
+		on error
+			set end of found to "zoom=ERR"
+		end try
+		try
+			set end of found to "view=" & ((view of xlWindow) as string)
+		on error
+			set end of found to "view=ERR"
+		end try
+		try
+			set end of found to "freeze_panes=" & ((freeze panes of xlWindow) as string)
+		on error
+			set end of found to "freeze_panes=ERR"
+		end try
+		try
+			set end of found to "split_row=" & ((split row of xlWindow) as string)
+		on error
+			set end of found to "split_row=ERR"
+		end try
+		try
+			set end of found to "split_column=" & ((split column of xlWindow) as string)
+		on error
+			set end of found to "split_column=ERR"
+		end try
+		try
+			set end of found to "scroll_row=" & ((scroll row of xlWindow) as string)
+		on error
+			set end of found to "scroll_row=ERR"
+		end try
+		try
+			set end of found to "scroll_column=" & ((scroll column of xlWindow) as string)
+		on error
+			set end of found to "scroll_column=ERR"
+		end try
+	end tell
+	set saved to AppleScript's text item delimiters
+	set AppleScript's text item delimiters to ";"
+	set output to found as string
+	set AppleScript's text item delimiters to saved
+	return output
+end windowState
 
 on saveBook(xlName, xlPath)
 	tell application "Microsoft Excel"
