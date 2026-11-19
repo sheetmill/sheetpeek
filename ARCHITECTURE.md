@@ -454,7 +454,8 @@ the known deviations by count on every run. It compares `excel` mode with every 
 
 Also:
 - A number in the neighbor stops the spill (`layout` rows 120 to 122); a formula returning `""`,
-  a single space or a formula returning `0` stops it too (unverified). A neighbor holding only a
+  a single space or a formula returning `0` stops it too, and so does a zero the sheet hides
+  (`showZeros="0"`) (`spill_neighbors`). A neighbor holding only a
   fill does not: the text is drawn over the neighbor's own fill, and the spilling cell's fill
   stays in its own column (rows 174 and 175).
 - Wrapped text does not spill (rows 156 to 175); the height Excel fits such a row to is §4.7's.
@@ -658,7 +659,7 @@ a cached value (as openpyxl writes it) has no `t`. The same file confirms Excel 
 Captured so far, in `tests/captures/`: by print (route B) `layout` (§3.6, §4.1 to §4.7); read
 from Excel `theme_colors` and `theme_colors_more` (§3.3), `merge_width` and `error_width` (§4.2,
 §4.4, no deviation), `row_height` (§4.7), `package` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14), `headings_grid`
-(§4.14), `text_style` (§4.7, §4.13), `rotation` (§4.17), `filters` (§4.19) and `tables` (§4.20). All are
+(§4.14), `spill_neighbors` (§4.1, §4.2), `text_style` (§4.7, §4.13), `rotation` (§4.17), `filters` (§4.19) and `tables` (§4.20). All are
 Excel 16.115 (Microsoft 365). The rules of §4.10, §4.11, §4.15, §4.16 and §4.14's theme fonts
 and palette have no capture here yet and are marked unverified until screen suites capture them
 on Microsoft 365; so are the parts of §4.12, §4.14 and §4.18 that say so. What still waits for
@@ -1822,7 +1823,9 @@ xlformat.format_cell(value, number_format, font=cell_font,
   layout (the Normal font for column widths; cell fonts in `excel` mode). `xlformat.measured_fonts`
   tells which families are measured. Character mode was rejected because it counts a comma like a
   digit, which makes HTML disagree with Excel on more cells than a proportional approximation
-  does.
+  does. What it costs, captured (`spill_neighbors`): Excel's Arial 11 numbers in a 22 pt column
+  show `##` where sheetpeek gives `###`, and its scientific text starts up to 2 pt further left;
+  a known deviation.
 - **`ValueError` / `TypeError`** (a value no format shows, or an unexpected type): shown as
   `str(value)`, left-aligned, with one warning per format string naming the first cell. When a
   refused format's `General` retry fails so, the warning names `General`.

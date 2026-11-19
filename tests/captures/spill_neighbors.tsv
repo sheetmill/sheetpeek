@@ -1,0 +1,83 @@
+# excel: 16.115
+# build: 16.115.26110837
+# edition: Microsoft 365
+# channel: Current
+# macos: 26.5.1
+# appearance: dark
+# date: 2026-11-19
+# display_scale: 2.000
+# zooms: 100
+# colors: captures converted to sRGB (sips --matchTo sRGB Profile.icc)
+# platform: mac
+# suite: spill_neighbors
+group	name	zoom	cell	font	width	text	neighbor_text	row_height	ink_left	ink_right	ink_columns	hidden_gridlines
+blockers	beside empty	100	C4	Calibri 11	default	a long text that spills over three columns		15.0	3.5	-0.5	111100	11100
+blockers	beside number 1	100	C6	Calibri 11	default	a long text that spills over three columns	1	15.0	3.5	-0.5	110000	00000
+blockers	beside saved =""	100	C8	Calibri 11	default	a long text that spills over three columns		15.0	3.5	-0.5	100000	00000
+blockers	beside one space	100	C10	Calibri 11	default	a long text that spills over three columns	 	15.0	3.5	-0.5	100000	00000
+blockers	beside =0	100	C12	Calibri 11	default	a long text that spills over three columns	0	15.0	3.5	-0.5	110000	00000
+zeros	beside empty	100	C4	Calibri 11	default	a long text that spills over three columns		15.0	3.5	-0.5	111100	11100
+zeros	beside number 0	100	C6	Calibri 11	default	a long text that spills over three columns		15.0	3.5	-0.5	100000	00000
+zeros	beside =0	100	C8	Calibri 11	default	a long text that spills over three columns		15.0	3.5	-0.5	100000	00000
+numbers	7 digits, Calibri 11 bold, default	100	C4	Calibri 11 bold	default	1234567		15.0	9.5	-3		
+numbers	8 digits, Calibri 11 bold, default	100	D4	Calibri 11 bold	default	12345678		15.0	3.5	-2.5		
+numbers	9 digits, Calibri 11 bold, default	100	E4	Calibri 11 bold	default	1.23E+08		15.0	8.5	-2.5		
+numbers	10 digits, Calibri 11 bold, default	100	F4	Calibri 11 bold	default	1.23E+09		15.0	8.5	-3		
+numbers	11 digits, Calibri 11 bold, default	100	G4	Calibri 11 bold	default	1.23E+10		15.0	8.5	-2.5		
+numbers	12 digits, Calibri 11 bold, default	100	H4	Calibri 11 bold	default	1.23E+11		15.0	8.5	-3		
+numbers	7 digits, Calibri 11 bold, 22 pt	100	J4	Calibri 11 bold	22 pt	###		15.0	4	-2.5		
+numbers	8 digits, Calibri 11 bold, 22 pt	100	K4	Calibri 11 bold	22 pt	###		15.0	4	-2.5		
+numbers	9 digits, Calibri 11 bold, 22 pt	100	L4	Calibri 11 bold	22 pt	###		15.0	4	-2.5		
+numbers	10 digits, Calibri 11 bold, 22 pt	100	M4	Calibri 11 bold	22 pt	###		15.0	4	-2.5		
+numbers	11 digits, Calibri 11 bold, 22 pt	100	N4	Calibri 11 bold	22 pt	###		15.0	4	-2.5		
+numbers	12 digits, Calibri 11 bold, 22 pt	100	O4	Calibri 11 bold	22 pt	###		15.0	4	-2.5		
+numbers	7 digits, Calibri 9, default	100	C6	Calibri 9	default	1234567		15.0	16.5	-3		
+numbers	8 digits, Calibri 9, default	100	D6	Calibri 9	default	12345678		15.0	11.5	-3		
+numbers	9 digits, Calibri 9, default	100	E6	Calibri 9	default	123456789		15.0	6.5	-3		
+numbers	10 digits, Calibri 9, default	100	F6	Calibri 9	default	1.235E+09		15.0	11.5	-3		
+numbers	11 digits, Calibri 9, default	100	G6	Calibri 9	default	1.235E+10		15.0	11.5	-2.5		
+numbers	12 digits, Calibri 9, default	100	H6	Calibri 9	default	1.235E+11		15.0	11.5	-3		
+numbers	7 digits, Calibri 9, 22 pt	100	J6	Calibri 9	22 pt	####		15.0	4	-1.5		
+numbers	8 digits, Calibri 9, 22 pt	100	K6	Calibri 9	22 pt	####		15.0	4	-1.5		
+numbers	9 digits, Calibri 9, 22 pt	100	L6	Calibri 9	22 pt	####		15.0	4	-1.5		
+numbers	10 digits, Calibri 9, 22 pt	100	M6	Calibri 9	22 pt	####		15.0	4	-1.5		
+numbers	11 digits, Calibri 9, 22 pt	100	N6	Calibri 9	22 pt	####		15.0	4	-1.5		
+numbers	12 digits, Calibri 9, 22 pt	100	O6	Calibri 9	22 pt	####		15.0	4	-1.5		
+numbers	7 digits, Calibri 14, default	100	C8	Calibri 14	default	1E+06		19.0	17	-2.5		
+numbers	8 digits, Calibri 14, default	100	D8	Calibri 14	default	1E+07		19.0	17	-2.5		
+numbers	9 digits, Calibri 14, default	100	E8	Calibri 14	default	1E+08		19.0	17	-2.5		
+numbers	10 digits, Calibri 14, default	100	F8	Calibri 14	default	1E+09		19.0	17	-2.5		
+numbers	11 digits, Calibri 14, default	100	G8	Calibri 14	default	1E+10		19.0	17	-2.5		
+numbers	12 digits, Calibri 14, default	100	H8	Calibri 14	default	1E+11		19.0	17	-2.5		
+numbers	7 digits, Calibri 14, 22 pt	100	J8	Calibri 14	22 pt	##		19.0	5	-3		
+numbers	8 digits, Calibri 14, 22 pt	100	K8	Calibri 14	22 pt	##		19.0	5	-3		
+numbers	9 digits, Calibri 14, 22 pt	100	L8	Calibri 14	22 pt	##		19.0	5	-3		
+numbers	10 digits, Calibri 14, 22 pt	100	M8	Calibri 14	22 pt	##		19.0	5	-3		
+numbers	11 digits, Calibri 14, 22 pt	100	N8	Calibri 14	22 pt	##		19.0	5	-3		
+numbers	12 digits, Calibri 14, 22 pt	100	O8	Calibri 14	22 pt	##		19.0	5	-3		
+numbers	7 digits, Calibri 20, default	100	C10	Calibri 20	default	####		26.0	7	-6.5		
+numbers	8 digits, Calibri 20, default	100	D10	Calibri 20	default	####		26.0	7	-6.5		
+numbers	9 digits, Calibri 20, default	100	E10	Calibri 20	default	####		26.0	7	-6.5		
+numbers	10 digits, Calibri 20, default	100	F10	Calibri 20	default	####		26.0	7	-6.5		
+numbers	11 digits, Calibri 20, default	100	G10	Calibri 20	default	####		26.0	7	-6.5		
+numbers	12 digits, Calibri 20, default	100	H10	Calibri 20	default	####		26.0	7	-6.5		
+numbers	7 digits, Calibri 20, 22 pt	100	J10	Calibri 20	22 pt	#		26.0	7	-5.5		
+numbers	8 digits, Calibri 20, 22 pt	100	K10	Calibri 20	22 pt	#		26.0	7	-5.5		
+numbers	9 digits, Calibri 20, 22 pt	100	L10	Calibri 20	22 pt	#		26.0	7	-5.5		
+numbers	10 digits, Calibri 20, 22 pt	100	M10	Calibri 20	22 pt	#		26.0	7	-5.5		
+numbers	11 digits, Calibri 20, 22 pt	100	N10	Calibri 20	22 pt	#		26.0	7	-5.5		
+numbers	12 digits, Calibri 20, 22 pt	100	O10	Calibri 20	22 pt	#		26.0	7	-5.5		
+numbers	7 digits, Arial 11, default	100	C12	Arial 11	default	1234567		15.0	10	-2.5		
+numbers	8 digits, Arial 11, default	100	D12	Arial 11	default	12345678		15.0	4	-2.5		
+numbers	9 digits, Arial 11, default	100	E12	Arial 11	default	1.23E+08		15.0	6	-2.5		
+numbers	10 digits, Arial 11, default	100	F12	Arial 11	default	1.23E+09		15.0	6	-2.5		
+numbers	11 digits, Arial 11, default	100	G12	Arial 11	default	1.23E+10		15.0	6	-2.5		
+numbers	12 digits, Arial 11, default	100	H12	Arial 11	default	1.23E+11		15.0	6	-4		
+numbers	7 digits, Arial 11, 22 pt	100	J12	Arial 11	22 pt	##		15.0	6	-4		
+numbers	8 digits, Arial 11, 22 pt	100	K12	Arial 11	22 pt	##		15.0	6	-4		
+numbers	9 digits, Arial 11, 22 pt	100	L12	Arial 11	22 pt	##		15.0	6	-4		
+numbers	10 digits, Arial 11, 22 pt	100	M12	Arial 11	22 pt	##		15.0	6	-4		
+numbers	11 digits, Arial 11, 22 pt	100	N12	Arial 11	22 pt	##		15.0	6	-4		
+numbers	12 digits, Arial 11, 22 pt	100	O12	Arial 11	22 pt	##		15.0	6	-4		
+numbers	beside uncached =""	100	C16	Calibri 11	default	a long text that spills over three columns		15.0	3.5	-0.5	100000	00000
+numbers	beside empty	100	C18	Calibri 11	default	a long text that spills over three columns		15.0	3.5	-0.5	111100	11100

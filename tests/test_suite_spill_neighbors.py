@@ -264,6 +264,32 @@ def _number_cases():
     return [c for c in spill_neighbors.CASES if not c.spill]
 
 
+UNMEASURED = "Arial 11"
+"""A font xlformat has no glyph table for: sheetpeek measures it as Calibri at the same size
+(decided, ARCHITECTURE §6.2). Excel's Arial "#" and digits are wider: in the 22 pt column it
+shows "##" where sheetpeek gives "###", and its scientific text starts up to 2 pt further left.
+A known deviation, compared apart."""
+
+
+def _measured(case):
+    return case.font != UNMEASURED
+
+
+@pytest.mark.excel
+def test_a_font_without_a_glyph_table_is_the_known_deviation():
+    found = _captured()
+    if "numbers" not in found:
+        pytest.skip("group numbers not captured yet")
+    texts = [
+        case.name
+        for case in _number_cases()
+        if not _measured(case)
+        and found["numbers"][case.cell]["text"]
+        != spill_neighbors.EXPECTED["numbers"][case.cell]["text"]
+    ]
+    assert texts == [f"{d} digits, Arial 11, 22 pt" for d in range(7, 13)]
+
+
 @pytest.mark.excel
 def test_numbers_in_other_fonts_show_the_text_sheetpeek_gives_them():
     # §4.2: a number whose font is not the Normal font is formatted in its own font against the
@@ -274,7 +300,7 @@ def test_numbers_in_other_fonts_show_the_text_sheetpeek_gives_them():
         pytest.skip("group numbers not captured yet")
     captured = found["numbers"]
     texts, heights = [], []
-    for case in _number_cases():
+    for case in filter(_measured, _number_cases()):
         record, expected = captured[case.cell], spill_neighbors.EXPECTED["numbers"][case.cell]
         if record["text"] != expected["text"]:
             texts.append((case.name, record["text"], expected["text"]))
@@ -298,7 +324,7 @@ def test_numbers_in_other_fonts_are_placed_where_sheetpeek_places_them():
         pytest.skip("group numbers not captured yet")
     captured = found["numbers"]
     misplaced = []
-    for case in _number_cases():
+    for case in filter(_measured, _number_cases()):
         record, expected = captured[case.cell], spill_neighbors.EXPECTED["numbers"][case.cell]
         if record["text"] != expected["text"] or not record["ink_left"]:
             continue
