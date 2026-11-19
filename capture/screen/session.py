@@ -1,7 +1,8 @@
 """One generated workbook open in Excel for Mac, for a screen capture.
 
 Every request goes through ``excel.applescript``, one request a call (count, open, close, view,
-scroll, window, save, read), so each call does one visible thing and can be inspected on its own.
+scroll, window, save, read, follow), so each call does one visible thing and can be inspected on
+its own.
 ``ExcelSession`` refuses to start unless Excel answers, holds no workbook and shows no window
 of its own (About, Preferences, a dialog), since any other window spoils a window capture.
 It opens the workbook, keeps the display awake, and on every exit path
@@ -229,6 +230,23 @@ class ExcelSession:
         ``ERR``.
         """
         return self.ask("window", self.name)
+
+    def follow(self, active: str, sheet: str, cell: str) -> list[tuple[str, str]]:
+        """Follow the first hyperlink of ``sheet``'s ``cell`` with sheet ``active`` active.
+
+        Returns (property, value) pairs: the active sheet before, how many hyperlinks Excel holds
+        on the cell, its formula, the first link's address and sub address, whether it was
+        followed, and the active sheet and cell after. A step Excel refuses is ``ERR`` and its
+        message. For links into the workbook only: a URL or a file would open another
+        application.
+        """
+        text = self.ask("follow", self.name, active, sheet, cell)
+        pairs = []
+        for record in text.split(RS):
+            if record:
+                key, value = [*record.split(US), ""][:2]
+                pairs.append((key, value))
+        return pairs
 
     def read_cells(self, cells: list[str]) -> list[tuple[str, str, str]]:
         """(cell, property, value) for every cell: display format, own format, borders, geometry.

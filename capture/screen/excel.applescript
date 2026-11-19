@@ -13,6 +13,12 @@
 --   save NAME PATH             save the workbook as PATH (Excel's own file)
 --   read NAME CELL...          what Excel shows for each cell: its display format, its own
 --                              format, its borders and its geometry, one record a property
+--   follow NAME ACTIVE SHEET CELL
+--                              make sheet ACTIVE the active sheet (A1 selected), read the
+--                              hyperlinks Excel holds on CELL of SHEET and the cell's formula,
+--                              follow the first one, and read the active sheet and cell after
+--                              it; one record a property. For links into the workbook only: a
+--                              link to a URL or a file would open another application
 -- Non-interactive: display alerts are off while a workbook opens, closes or saves, and restored
 -- on every exit path. Opens only the workbook it is given; uses no clipboard.
 on run argv
@@ -36,6 +42,8 @@ on run argv
 		return my saveBook(item 2 of argv, item 3 of argv)
 	else if request is "read" then
 		return my readCells(item 2 of argv, items 3 thru -1 of argv)
+	else if request is "follow" then
+		return my followLink(item 2 of argv, item 3 of argv, item 4 of argv, item 5 of argv)
 	end if
 	error "unknown request: " & request
 end run
@@ -238,6 +246,63 @@ on borderPart(xlCell, edgeName, partName)
 	end tell
 	return "ERR unknown partName"
 end borderPart
+
+-- Follow a cell's first hyperlink with another sheet possibly active, and say where Excel went.
+-- Each step that Excel refuses is recorded as "ERR " and its message; the steps after it still run.
+on followLink(xlName, activeName, sheetName, cellRef)
+	set us to character id 31
+	set rs to character id 30
+	set output to ""
+	tell application "Microsoft Excel"
+		set xlWb to workbook xlName
+		activate object xlWb
+		set display alerts to false
+		try
+			activate object worksheet activeName of xlWb
+			select range "A1" of worksheet activeName of xlWb
+			set before to (name of active sheet) as string
+		on error errText
+			set before to "ERR " & errText
+		end try
+		set output to output & "active.before" & us & before & rs
+		try
+			set xlCell to range cellRef of worksheet sheetName of xlWb
+		on error errText
+			set display alerts to true
+			error errText
+		end try
+		try
+			set found to (count of hyperlinks of xlCell) as string
+		on error errText
+			set found to "ERR " & errText
+		end try
+		set output to output & "links.count" & us & found & rs
+		try
+			set formulaText to (formula of xlCell) as string
+		on error errText
+			set formulaText to "ERR " & errText
+		end try
+		set output to output & "formula" & us & formulaText & rs
+		try
+			set xlLink to hyperlink 1 of xlCell
+			set output to output & "link.address" & us & ((address of xlLink) as string) & rs
+			set output to output & "link.sub_address" & us & ((sub address of xlLink) as string) & rs
+			follow hyperlink xlLink
+			set followed to "yes"
+		on error errText
+			set followed to "ERR " & errText
+		end try
+		set output to output & "followed" & us & followed & rs
+		try
+			set output to output & "after.sheet" & us & ((name of active sheet) as string) & rs
+			set output to output & "after.cell" & us & ((get address of active cell) as string) & rs
+		on error errText
+			set output to output & "after.sheet" & us & "ERR " & errText & rs
+		end try
+		set display alerts to true
+	end tell
+	return output
+end followLink
 
 -- Where the cell is, in points from the sheet's origin, and the text it shows.
 on geometryPart(xlCell, partName)
