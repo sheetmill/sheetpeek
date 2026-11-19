@@ -459,7 +459,14 @@ def measure(cap: Any, case: Case) -> dict[str, str] | None:
         found["ink_top"] = pt(cap, glyph[1] - top)
         found["ink_bottom"] = pt(cap, glyph[3] - top)
     if "lines" in case.measure:
-        lines = bands(cap, box)
+        # bands under a screen point apart are one line: an "i"'s dot stands half a point
+        # above its stem (text_style_more's indent cases)
+        lines: list[tuple[int, int]] = []
+        for y, n in bands(cap, box):
+            if lines and y - (lines[-1][0] + lines[-1][1]) < cap.scale:
+                lines[-1] = (lines[-1][0], y + n - lines[-1][0])
+            else:
+                lines.append((y, n))
         found["lines"] = str(len(lines))
         found["line_tops"] = " ".join(_span(cap, y, n, top) for y, n in lines)
     if "words" in case.measure:

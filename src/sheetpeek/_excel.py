@@ -186,13 +186,14 @@ def _fitted(
         if cell.kind != "empty" and (cell.style.rotation or cell.style.stacked) and not merged:
             height = max(height, _turned_height(grid, cell, p, fonts))
             continue
-        # Horizontally distributed text wraps when drawn, and Excel 16.115 fits the row to the
-        # lines drawn (captured, text_style); justify and the vertical spreads are not fitted.
-        wraps = cell.style.wrap or cell.style.h_align == "distributed"
+        # Distributed and justified text, across or down, wraps when drawn, and Excel 16.115
+        # fits the row to the lines drawn, wrap flag or not (captured, text_style, text_style_more).
+        style = cell.style
+        wraps = style.wrap or style.h_align in _SPREAD or style.v_align in _SPREAD
         if cell.kind == "text" and wraps and widths[p] and not merged:
             budget = widths[p] - base.left_inset - base.right_inset
-            if cell.style.h_align == "distributed":  # between the indents, as drawn
-                budget -= 2 * cell.style.indent * base.digit_width
+            # between the indents, as drawn
+            budget -= _indents(cell.style.h_align) * cell.style.indent * base.digit_width
             if spans:
                 text = Text.of_spans(spans, fonts.get, breaks=True)
                 height = max(height, fitted_height(text, wrap(text.text, budget, text.width)))
@@ -209,6 +210,11 @@ def _fitted(
     if not wrapped:
         return height
     return max(height, _row_model(sheet.normal_font, frozenset(cell_fonts), tuple(wrapped)))
+
+
+def _indents(align: str) -> int:
+    """How many indents narrow a wrapped line: both ends when distributed, one left or right."""
+    return 2 if align == "distributed" else 1 if align in ("left", "right") else 0
 
 
 @functools.lru_cache(maxsize=1024)
@@ -446,8 +452,8 @@ class _Points:
             content = shown.text.replace("\r", "")
             text = Text.plain(content if wraps else content.replace("\n", ""), cell_font, font)
         # Distributed lines are broken between the indents at both ends (captured, text_style
-        # lone); how an indent narrows other wrapped text is unverified, so it does not.
-        line_budget = budget - 2 * indent if align == "distributed" else budget
+        # lone); left and right lines inside their one indent (captured, text_style_more).
+        line_budget = budget - _indents(align) * indent
         lines = wrap(text.text, line_budget, text.width) if wraps else [(0, len(text.text))]
         n = len(lines)
         if spans:
@@ -502,6 +508,7 @@ class _Points:
                 for j, piece in enumerate(pieces)
             )
         clip = (self.xs[low] + 1, top + 1, self.xs[high] + self.widths[high], bottom)
+        last_line = baselines[-1] + shift if baselines else None
         runs = []
         for a, b, copies, x, anchor, baseline, first_piece, line_width in placed:
             if a == b:
@@ -518,8 +525,13 @@ class _Points:
                 )
                 ruled = rules(cell_font, size, baseline, (x, x + width), own)
                 scale = size / cell_font.size
-            if own is not None and not first_piece and any(accounting(f) for f in text.fonts(a, b)):
-                # An accounting underline under text spans the cell, once per line.
+            if (
+                own is not None
+                and (not first_piece or baseline != last_line)
+                and any(accounting(f) for f in text.fonts(a, b))
+            ):
+                # An accounting underline under text spans the cell once, under its last line
+                # (captured, text_style_more: three wrapped lines draw one rule).
                 ruled = tuple(r for r in ruled if r.kind != "underline")
             runs.append(
                 TextRun(

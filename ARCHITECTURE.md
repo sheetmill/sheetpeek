@@ -647,8 +647,9 @@ after the word**, when one follows: a line may take the column less the insets (
 default column, 115 in one of 20 characters), and the space that ends it counts (captured,
 `text_style` groups `wrap` and `lone`, Excel 16.115: "aaaa aaaaii", 48 pt with nothing after it,
 fits; "shrink and ", 49, breaks before "and"). Excel wraps narrower at zoom 200 (47 pt breaks
-there); the layout is zoom 100. How an indent narrows wrapped text that is not distributed is
-**unverified**: sheetpeek breaks it at the full width.
+there); the layout is zoom 100. An indent narrows the lines of wrapped left or right text by
+its width, at the one end (`text_style_more`: "aaaa iii", 31 pt, wraps at indent 3, 18 pt, and not
+at 2).
 
 Superscript, subscript and accounting underlines grow a fitted row, and shrunk text fits it at its
 unshrunk size (§4.13).
@@ -666,7 +667,7 @@ a cached value (as openpyxl writes it) has no `t`. The same file confirms Excel 
 Captured so far, in `tests/captures/`: by print (route B) `layout` (§3.6, §4.1 to §4.7); read
 from Excel `theme_colors` and `theme_colors_more` (§3.3), `merge_width` and `error_width` (§4.2,
 §4.4, no deviation), `row_height` and `row_height_more` (§4.7), `package` and `package_more` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14), `theme_fonts_palette`
-and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts` and `gradients` (§4.12), `text_style` (§4.7, §4.13), `runs` (§4.16), `tab_strip` (§4.15), `outline` (§4.11), `rotation` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
+and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts` and `gradients` (§4.12), `text_style` and `text_style_more` (§4.7, §4.13), `runs` (§4.16), `tab_strip` (§4.15), `outline` (§4.11), `rotation` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
 Excel 16.115 (Microsoft 365). Every section here rests on one of them; what no capture covers
 is marked unverified where it is stated, as are the parts of §4.12, §4.14 and §4.18 that say so. What still waits for
 the screen: the text insets and the baselines of angled text, which come from print, and the 15 pt rows that print
@@ -963,7 +964,8 @@ case). **Indent moves both ends in** (captured: 12 pt for indent 2). `justifyLas
 is read (`CellStyle.justify_last_line`) and changes nothing: distributed already spreads the last
 line (captured). A row Excel fits grows to the lines distributed text draws, with the wrap flag
 or without it: two lines of Calibri 11 take 32 pt (Excel 16.115, screen suite `text_style`).
-Justify and the vertical spreads do not count in fitting (unverified).
+Justify and the vertical spreads wrap and fit the row the same way, with the wrap flag or
+without it (`text_style_more`: six lines take 96 pt).
 
 **Indent** is 6 pt a level (§4.6) on the side the alignment resolves to, `general` included:
 right-aligned text and numbers end `2 + 6n` pt before the next gridline (captured as ink 3, 9
@@ -1205,7 +1207,8 @@ size, for spill, `####`, wrapping, shrink to fit and alignment:
   each run raised or lowered on its own; the cell's own font counts only through the runs that
   take it.
 - Underlines and strikethrough are drawn per run; an accounting underline under text spans the
-  cell once per line, whichever runs have it.
+  cell once, under its last line, whichever runs have it (`text_style_more`: three wrapped lines
+  draw one rule).
 - `fill` repeats the runs; justified and distributed words keep the runs they cut.
 - The number format's section color replaces each run's color, as it replaces a cell's (`[Red]@`).
   Under a one-section format such as `[Blue]General`, Excel draws text in the section's color too,
