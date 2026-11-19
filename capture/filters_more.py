@@ -1,6 +1,8 @@
 """Capture more of how Excel for Mac draws filter and sort buttons, from the screen (route C).
 
     EXCEL_EDITION="Microsoft 365" uv run --group capture python -m capture.filters_more run beside
+    EXCEL_EDITION="Microsoft 365" uv run --group capture python -m capture.filters_more run lr_sheet
+    EXCEL_EDITION="Microsoft 365" uv run --group capture python -m capture.filters_more run lr_table
     EXCEL_EDITION="Microsoft 365" uv run --group capture python -m capture.filters_more run
     uv run --group capture python -m capture.filters_more read          # the saved captures again
     uv run --group capture python -m capture.filters_more build PATH    # every group's workbook
@@ -9,7 +11,8 @@ ARCHITECTURE.md §4.19, the rules the suite ``filters`` left unverified: the cri
 applied on opening (the rows the file saved as hidden are what shows); a button on each column
 of the range's first row, merged across or down and empty header cells included, none on a
 hidden column or header row; a left-to-right sort (``columnSort``) draws no arrow, on the sheet
-and in a table; the sheet's ``sortState`` beside its ``autoFilter`` (not inside it) counts.
+and in a table (Excel refuses both files); the sheet's ``sortState`` beside its ``autoFilter``
+(not inside it) counts.
 
 Each group is its own workbook and window, at zoom 100 and 200 as ``filters``, in the dark
 appearance as the other suites; case columns are 12 characters wide, rows 15 pt. Groups:
@@ -17,16 +20,19 @@ appearance as the other suites; case columns are 12 characters wide, rows 15 pt.
 - ``main``: the sheet's filter C4:I9. C4:D4 is one header merged across, E4:E5 one merged down
   into the data, F4 is empty, column G is hidden, H filters on the values 1, 3 and 5 (H5:H9
   hold 1 to 5, so the criteria would hide rows 6 and 8) while the file hides row 7 only (and
-  sets ``filterMode``, as Excel does when a filter hides rows), and the sheet's ``sortState``,
-  inside its ``autoFilter``, is left to right (``columnSort="1"``) with its condition on I.
-  Table ``ColSort`` (L4:N6) has a left-to-right ``sortState`` with its condition on M; table
-  ``Hidden`` (L12:N14) has its header row 12 hidden.
+  sets ``filterMode``, as Excel does when a filter hides rows); I is a plain column. Table
+  ``Plain`` (L4:N6) has no sort; table ``Hidden`` (L12:N14) has its header row 12 hidden.
 - ``beside``: the sheet's filter C4:E6 with no ``sortState`` inside its ``autoFilter`` and one
   beside it, the worksheet's own child after it, sorting D descending (written into
   ``xl/worksheets/sheet1.xml`` before Excel opens the file, ``postprocess``). Excel may refuse
   or repair the file (-50 with alerts off): it runs on its own, first, and a refusal is kept
   (``refused.txt``) and written as the group's one row, its ``case`` ``refused:`` and Excel's
   message.
+- ``lr_sheet``: the sheet's filter C4:E6 with a left-to-right ``sortState`` inside its
+  ``autoFilter`` (``columnSort="1"``), its condition on D. ``lr_table``: table ``ColSort``
+  (C4:E6) with the same ``sortState``. Excel refuses either file (-50 with alerts off), whether
+  the condition names a column or a row, where it opens the same sorts top to bottom: each runs
+  on its own, first, its refusal kept as ``beside``'s.
 
 Cell boxes come from reference cells in row 1 and column A, so no merged cell's geometry is
 read. Measured, as ``filters`` measures (``capture.filters._measure``), for each case cell: the
@@ -69,15 +75,17 @@ CASES = (
     Case("main", "E5", "merged down, data row"),
     Case("main", "F4", "empty header"),
     Case("main", "H4", "values filter, criteria not applied"),
-    Case("main", "I4", "sheet columnSort condition"),
-    Case("main", "L4", "table columnSort, plain"),
-    Case("main", "M4", "table columnSort condition"),
-    Case("main", "N4", "table columnSort, plain"),
+    Case("main", "I4", "plain"),
+    Case("main", "L4", "table, plain"),
+    Case("main", "M4", "table, plain"),
+    Case("main", "N4", "table, plain"),
     Case("main", "L13", "below a hidden header row"),
     Case("main", "M13", "below a hidden header row"),
     Case("beside", "C4", "plain, sortState beside"),
     Case("beside", "D4", "sorted descending, sortState beside"),
     Case("beside", "E4", "plain, sortState beside"),
+    *(Case("lr_sheet", c, "sheet columnSort") for c in ("C4", "D4", "E4")),
+    *(Case("lr_table", c, "table columnSort") for c in ("C4", "D4", "E4")),
 )
 EXPECTED: dict[tuple[str, str], str | None] = {
     ("main", "C4"): "plain", ("main", "D4"): "plain", ("main", "E4"): "plain",
@@ -85,6 +93,7 @@ EXPECTED: dict[tuple[str, str], str | None] = {
     ("main", "I4"): "plain", ("main", "L4"): "plain", ("main", "M4"): "plain",
     ("main", "N4"): "plain", ("main", "L13"): None, ("main", "M13"): None,
     ("beside", "C4"): "plain", ("beside", "D4"): "descending", ("beside", "E4"): "plain",
+    **{(g, c): "plain" for g in ("lr_sheet", "lr_table") for c in ("C4", "D4", "E4")},
 }  # fmt: skip
 """sheetpeek's glyph for each case cell; ``None`` draws no button."""
 SIZES: dict[str, dict[str, float]] = {
@@ -93,12 +102,19 @@ SIZES: dict[str, dict[str, float]] = {
         "A12": 0, "A13": 15, "A14": 15, "G1": 0,
     },
     "beside": {"A4": 15, "A5": 15, "A6": 15},
+    "lr_sheet": {"A4": 15, "A5": 15, "A6": 15},
+    "lr_table": {"A4": 15, "A5": 15, "A6": 15},
 }  # fmt: skip
 """sheetpeek's row heights (``A<row>``) and column G's width (``G1``) in points, 0 hidden."""
-GROUPS = ("main", "beside")
-REFUSALS = ("beside",)
+GROUPS = ("main", "beside", "lr_sheet", "lr_table")
+REFUSALS = ("beside", "lr_sheet", "lr_table")
 """Groups whose file Excel may refuse: run on their own, a refusal is recorded as the answer."""
-MARKERS = {"main": ("B2", "P16"), "beside": ("B2", "H9")}
+MARKERS = {
+    "main": ("B2", "P16"),
+    "beside": ("B2", "H9"),
+    "lr_sheet": ("B2", "H9"),
+    "lr_table": ("B2", "H9"),
+}
 ZOOMS = (100, 200)
 WIDTH = 12
 ROOT = Path(__file__).resolve().parents[1]
@@ -133,7 +149,7 @@ def _table(ws: Any, name: str, top: int, left: int, headers: list[str]) -> Table
 def _main(ws: Any) -> None:
     for column in "CDEFGHILMN":
         ws.column_dimensions[column].width = WIDTH
-    for k, header in enumerate(["across", None, "down", None, "hidden", "values", "colsort"]):
+    for k, header in enumerate(["across", None, "down", None, "hidden", "values", "plain"]):
         if header is not None:
             ws.cell(4, 3 + k, header)
         for row in range(5, 10):
@@ -148,14 +164,7 @@ def _main(ws: Any) -> None:
     ws.auto_filter.filterColumn.append(
         xl_filters.FilterColumn(colId=5, filters=xl_filters.Filters(filter=["1", "3", "5"]))
     )
-    ws.auto_filter.sortState = xl_filters.SortState(
-        ref="C5:I9", columnSort=True, sortCondition=[xl_filters.SortCondition(ref="I5:I9")]
-    )
-    colsort = _table(ws, "ColSort", 4, 12, ["left", "rows", "right"])
-    colsort.sortState = xl_filters.SortState(
-        ref="L5:N6", columnSort=True, sortCondition=[xl_filters.SortCondition(ref="M5:M6")]
-    )
-    ws.add_table(colsort)
+    ws.add_table(_table(ws, "Plain", 4, 12, ["left", "rows", "right"]))
     ws.add_table(_table(ws, "Hidden", 12, 12, ["one", "two", "three"]))
     ws.row_dimensions[12].hidden = True
 
@@ -170,9 +179,34 @@ def _beside(ws: Any) -> None:
     ws.auto_filter.ref = "C4:E6"
 
 
+def _column_sort() -> Any:
+    """A left-to-right sort of C5:E6, its condition on D."""
+    return xl_filters.SortState(
+        ref="C5:E6", columnSort=True, sortCondition=[xl_filters.SortCondition(ref="D5:D6")]
+    )
+
+
+def _lr_sheet(ws: Any) -> None:
+    _beside(ws)
+    ws.auto_filter.sortState = _column_sort()
+
+
+def _lr_table(ws: Any) -> None:
+    for column in "CDE":
+        ws.column_dimensions[column].width = WIDTH
+    table = _table(ws, "ColSort", 4, 3, ["left", "rows", "right"])
+    table.sortState = _column_sort()
+    ws.add_table(table)
+
+
 def fill(ws: Any, group: str) -> list[Case]:
     """Lay one group out on a worksheet; its cases."""
-    {"main": _main, "beside": _beside}[group](ws)
+    {
+        "main": _main,
+        "beside": _beside,
+        "lr_sheet": _lr_sheet,
+        "lr_table": _lr_table,
+    }[group](ws)
     return cases(group)
 
 

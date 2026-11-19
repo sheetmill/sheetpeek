@@ -268,11 +268,16 @@ def fill(ws: Any, group: str) -> list[Case]:
     return found
 
 
+FILE_VERSION = '<fileVersion appName="xl" lastEdited="7" lowestEdited="7" rupBuild="11011"/>'
+"""``<fileVersion>`` as Excel writes it (``tests/files/excel_formulas.xlsx``'s). With ``appName``
+alone, Excel 16.115 refused this suite's workbooks (-50 with alerts off)."""
+
+
 def excel_saved(text: str) -> str:
-    """The workbook part with the calculation properties Excel writes."""
+    """The workbook part with the calculation properties and file version Excel writes."""
     text = re.sub(r"<calcPr[^>]*/>", '<calcPr calcId="191029"/>', text)
     if "<fileVersion" not in text:
-        text = text.replace("<workbookPr", '<fileVersion appName="xl"/><workbookPr', 1)
+        text = text.replace("<workbookPr", FILE_VERSION + "<workbookPr", 1)
     return text
 
 

@@ -72,13 +72,17 @@ def test_the_beside_workbook_holds_its_sort_beside_the_filter(tmp_path):
     assert xml.count("<sortState") == 1
     with pytest.raises(SystemExit):
         filters_more.sort_beside("<worksheet/>")
-    # The main workbook's sorts are left to right, inside the sheet's filter and in the table.
-    with zipfile.ZipFile(paths["main"]) as z:
+    # The left-to-right sorts, which Excel refuses, each in a workbook of its own: inside the
+    # sheet's filter and in a table. The main workbook holds no sort.
+    with zipfile.ZipFile(paths["lr_sheet"]) as z:
         sheet = z.read("xl/worksheets/sheet1.xml").decode()
-        table = z.read("xl/tables/table1.xml").decode()
-    assert '<sortState columnSort="1" ref="C5:I9">' in sheet
+    assert '<sortState columnSort="1" ref="C5:E6">' in sheet
     assert sheet.index("<sortState") < sheet.index("</autoFilter>")
-    assert '<sortState columnSort="1" ref="L5:N6">' in table
+    with zipfile.ZipFile(paths["lr_table"]) as z:
+        table = z.read("xl/tables/table1.xml").decode()
+    assert '<sortState columnSort="1" ref="C5:E6">' in table
+    with zipfile.ZipFile(paths["main"]) as z:
+        assert not any(b"<sortState" in z.read(n) for n in z.namelist())
 
 
 def test_no_case_draws_a_fill_or_a_font_color(tmp_path):

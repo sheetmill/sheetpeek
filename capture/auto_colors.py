@@ -1,6 +1,7 @@
 """Capture how Excel for Mac draws automatic, system and missing colors, from the screen (route C).
 
     EXCEL_EDITION="Microsoft 365" uv run --group capture python -m capture.auto_colors run empty
+    EXCEL_EDITION="Microsoft 365" uv run --group capture python -m capture.auto_colors run border_81
     EXCEL_EDITION="Microsoft 365" uv run --group capture python -m capture.auto_colors run
     uv run --group capture python -m capture.auto_colors read           # the saved captures again
     uv run --group capture python -m capture.auto_colors build PATH     # every group's workbook
@@ -21,12 +22,15 @@ removes or empties is written by openpyxl as a placeholder ``rgb`` and rewritten
   blue on 64, a missing ``fgColor`` on yellow, blue with ``bgColor`` missing, both missing, and
   blue on yellow; fonts ("HH") in ``auto``, indexed 64, 81, no color element, blue, and indexed
   65 over a gray fill (white text would not show on white); medium borders on all four sides
-  in ``auto``, indexed 64, no color element, indexed 65, 81, and blue.
+  in ``auto``, indexed 64, no color element, indexed 65, and blue.
 - ``empty``: ``<fgColor/>``, ``<bgColor/>`` and ``<color/>`` with no attributes on a solid fill
   (alone and over yellow), on each color of a ``lightGrid`` fill, on a font and on a border, and
   a blue solid control. Excel may refuse or repair the file (-50 with alerts off): it runs on
   its own, first, and a refusal is kept (``refused.txt``) and written as the group's one row,
   its ``name`` ``refused:`` and Excel's message.
+- ``border_81``: a medium border on all four sides in indexed 81, and a blue control. Excel
+  refuses the file (-50 with alerts off), where it opens a font or a fill in indexed 81 and a
+  border in indexed 65: it runs on its own, first, its refusal kept as ``empty``'s.
 
 Measured per case: the two most common colors inside the cell, 4 image pixels in from its
 edges, with their shares (``interior``, ``RRGGBB:share``); per edge (left, right, top, bottom),
@@ -55,8 +59,8 @@ from openpyxl.styles import Border, Color, Font, PatternFill, Side
 ROOT = Path(__file__).resolve().parents[1]
 BUILD_DIR = ROOT / "capture" / "build" / "auto_colors"
 OUTPUT = ROOT / "tests" / "captures" / "auto_colors.tsv"
-GROUPS = ("main", "empty")
-REFUSALS = ("empty",)
+GROUPS = ("main", "empty", "border_81")
+REFUSALS = ("empty", "border_81")
 """Groups whose file Excel may refuse: run on their own, a refusal is recorded as the answer."""
 ZOOM = 100
 SLOTS = ("C", "E", "G", "I", "K", "M")
@@ -137,7 +141,6 @@ _SPECS = [
     Case("main", "border indexed 64", "border", color="indexed:64"),
     Case("main", "border without color", "border", color="missing"),
     Case("main", "border indexed 65", "border", color="indexed:65"),
-    Case("main", "border indexed 81", "border", color="indexed:81"),
     Case("main", "border blue", "border", color=f"rgb:{BLUE}"),
     _fill("empty", "solid <fgColor/>", "solid", "empty"),
     _fill("empty", "solid <fgColor/>, bg yellow", "solid", "empty", f"rgb:{YELLOW}"),
@@ -146,6 +149,8 @@ _SPECS = [
     _fill("empty", "solid blue control", "solid", f"rgb:{BLUE}"),
     Case("empty", "font <color/>", "font", color="empty"),
     Case("empty", "border <color/>", "border", color="empty"),
+    Case("border_81", "border indexed 81", "border", color="indexed:81"),
+    Case("border_81", "border blue control", "border", color=f"rgb:{BLUE}"),
 ]
 
 
@@ -216,6 +221,7 @@ EXPECTED = {
     "solid blue control": "solid 0000FF",
     "font <color/>": "000000",
     "border <color/>": "medium 000000",
+    "border blue control": "medium 0000FF",
 }
 """What sheetpeek draws for each case, by name: a fill as ``none``, ``solid RRGGBB`` or
 ``lightGrid FG/BG`` (the colors drawn, automatic resolved); a font's color drawn; a border's

@@ -106,7 +106,7 @@ def test_each_neighbor_and_the_workbook_are_written_as_excel_saves_them(tmp_path
         with zipfile.ZipFile(tmp_path / f"spill_neighbors_{group}.xlsx") as package:
             book = package.read("xl/workbook.xml").decode()
             sheet = package.read("xl/worksheets/sheet1.xml").decode()
-        assert '<fileVersion appName="xl"/>' in book
+        assert spill_neighbors.FILE_VERSION in book
         assert '<calcPr calcId="191029"/>' in book
         for case in spill_neighbors.cases(group):
             xml = spill_neighbors.NEIGHBORS[case.neighbor] if case.spill else None
