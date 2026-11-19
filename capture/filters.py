@@ -158,7 +158,8 @@ def run() -> None:
     write()
 
 
-def _measure(cap: Any, cell: str) -> dict[str, str]:
+def _measure(cap: Any, cell: str, case: str | None = None) -> dict[str, str]:
+    """One header cell's button and glyph; ``case`` names it (by default its ``CASES`` entry)."""
     from capture.screen.run import luma
 
     per = cap.scale * 100 / cap.zoom  # image pixels a screen point
@@ -176,7 +177,11 @@ def _measure(cap: Any, cell: str) -> dict[str, str]:
     def off(p: tuple[int, int, int]) -> bool:
         return max(abs(a - b) for a, b in zip(p, background, strict=True)) > 3
 
-    found: dict[str, str] = {"zoom": str(cap.zoom), "cell": cell, "case": CASES[cell]}
+    found: dict[str, str] = {
+        "zoom": str(cap.zoom),
+        "cell": cell,
+        "case": CASES[cell] if case is None else case,
+    }
     columns = [
         x
         for x in range(x0, x1)
