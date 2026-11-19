@@ -39,6 +39,10 @@ Source = str | os.PathLike[str] | IO[bytes]
 ACTIVE_INK = "278452"
 """The active tab's text: Excel's own green, whatever the tab's color (unverified)."""
 _TOP_SHARE, _BOTTOM_SHARE = 0.1, 0.4  # the active tab's gradient, as shares of its color
+_DARK_TEXT_FROM = 128
+"""An inactive colored tab's name is black from this Rec. 601 luma of its color up, else white
+(captured, tab_strip: white on luma 75 to 113, black on 170 to 188; the edge between is
+unverified)."""
 _NOT_SHOWN = {
     "chartsheet": "is a chartsheet: charts are not shown.",
     "dialogsheet": "is a dialog sheet, a legacy form: it is not shown.",
@@ -263,7 +267,8 @@ class _WorkbookPage:
             color = info.tab_color
             selector = f".sp-book > nav a.sp-t-{letters(k)}"
             if color:
-                rules.append(f"{selector} {{ background: #{color}; color: #ffffff; }}\n")
+                text = "000000" if _luma(color) >= _DARK_TEXT_FROM else "ffffff"
+                rules.append(f"{selector} {{ background: #{color}; color: #{text}; }}\n")
                 body = (
                     f"background: linear-gradient(#{_mix(color, _TOP_SHARE)}, "
                     f"#{_mix(color, _BOTTOM_SHARE)}); color: #{active_ink}; font-weight: bold;"
@@ -286,6 +291,12 @@ class _WorkbookPage:
             + "}\n"
             + fallback
         )
+
+
+def _luma(color: str) -> float:
+    """The Rec. 601 luma of an ``RRGGBB`` color, 0 to 255."""
+    r, g, b = (int(color[i : i + 2], 16) for i in (0, 2, 4))
+    return 0.299 * r + 0.587 * g + 0.114 * b
 
 
 def _mix(color: str, share: float) -> str:

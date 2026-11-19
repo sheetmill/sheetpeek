@@ -122,50 +122,50 @@ EXPECTED: dict[str, dict[str, list[tuple[str, str, str, str]]]] = {
         "order": [
             ("One", "FFFFFF", "FFFFFF", "278452"),
             ("Three", "00B050", "00B050", "FFFFFF"),
-            ("Five", "FFC000", "FFC000", "FFFFFF"),
-            ("Seven", "00FFFF", "00FFFF", "FFFFFF"),
+            ("Five", "FFC000", "FFC000", "000000"),
+            ("Seven", "00FFFF", "00FFFF", "000000"),
         ],
         "colors": [
             ("Active", "E6F1F9", "99C6E6", "278452"),
             ("Plain", "3A3A3A", "3A3A3A", "BBBBBB"),
             ("Rgb", "C00000", "C00000", "FFFFFF"),
             ("Theme", "C0504D", "C0504D", "FFFFFF"),
-            ("Tint", "DA9694", "DA9694", "FFFFFF"),
+            ("Tint", "DA9694", "DA9694", "000000"),
             ("Indexed", "008000", "008000", "FFFFFF"),
             ("Auto", "3A3A3A", "3A3A3A", "BBBBBB"),
             ("Bare", "3A3A3A", "3A3A3A", "BBBBBB"),
         ],
         "precedence": [
             ("First", "FFFFFF", "FFFFFF", "278452"),
-            ("IdxRgb", "008000", "008000", "FFFFFF"),
+            ("IdxRgb", "C00000", "C00000", "FFFFFF"),
             ("ThmRgb", "C0504D", "C0504D", "FFFFFF"),
-            ("AutoRgb", "3A3A3A", "3A3A3A", "BBBBBB"),
-            ("ThmIdx", "008000", "008000", "FFFFFF"),
+            ("AutoRgb", "0070C0", "0070C0", "FFFFFF"),
+            ("ThmIdx", "C0504D", "C0504D", "FFFFFF"),
         ],
     },
     "light": {
         "order": [
             ("One", "FFFFFF", "FFFFFF", "278452"),
             ("Three", "00B050", "00B050", "FFFFFF"),
-            ("Five", "FFC000", "FFC000", "FFFFFF"),
-            ("Seven", "00FFFF", "00FFFF", "FFFFFF"),
+            ("Five", "FFC000", "FFC000", "000000"),
+            ("Seven", "00FFFF", "00FFFF", "000000"),
         ],
         "colors": [
             ("Active", "E6F1F9", "99C6E6", "278452"),
             ("Plain", "E6E6E6", "E6E6E6", "444444"),
             ("Rgb", "C00000", "C00000", "FFFFFF"),
             ("Theme", "C0504D", "C0504D", "FFFFFF"),
-            ("Tint", "DA9694", "DA9694", "FFFFFF"),
+            ("Tint", "DA9694", "DA9694", "000000"),
             ("Indexed", "008000", "008000", "FFFFFF"),
             ("Auto", "E6E6E6", "E6E6E6", "444444"),
             ("Bare", "E6E6E6", "E6E6E6", "444444"),
         ],
         "precedence": [
             ("First", "FFFFFF", "FFFFFF", "278452"),
-            ("IdxRgb", "008000", "008000", "FFFFFF"),
+            ("IdxRgb", "C00000", "C00000", "FFFFFF"),
             ("ThmRgb", "C0504D", "C0504D", "FFFFFF"),
-            ("AutoRgb", "E6E6E6", "E6E6E6", "444444"),
-            ("ThmIdx", "008000", "008000", "FFFFFF"),
+            ("AutoRgb", "0070C0", "0070C0", "FFFFFF"),
+            ("ThmIdx", "C0504D", "C0504D", "FFFFFF"),
         ],
     },
 }
@@ -180,14 +180,21 @@ MARKERS = ("B2", "D6")
 ZOOM = 100
 TOP_RUN = 4
 """Points of non-sheet pixels, down column A, that make the strip's top."""
-ROW = 3
-"""Points below the strip's top of the row that is split into items."""
+ROW = 5
+"""Points below the strip's top of the row that is split into items: below an inactive tab's
+edge line and the light active tab's first rows (within :data:`SAME` of the strip), above the
+names (which start about 8 pt down)."""
+TOP_AT = 3
+"""Points into a fill where its top color is sampled (the active tab's gradient)."""
 SAME = 10
 """Per channel: pixels this close are one run of a row."""
 MIN_RUN = 2
 """Points: a narrower run (a separator, an anti-aliased edge) is no item."""
 GAP = 8
 """Points of ink-free columns that split a background run into items."""
+MIDDLE = 10
+"""Points below the strip's top where a fill's height is measured from, up and down: inside the
+tab's body, since an inactive tab's fill starts at :data:`ROW` under an edge line."""
 PROFILE_AT = 6
 """Points inside an item's left edge of the column its colors are sampled down."""
 BAND = 24
@@ -279,9 +286,12 @@ def sheetpeek_view(path: Path, appearance: str) -> list[tuple[str, str, str, str
     plain = re.search(r"\.sp-book > nav a \{ background: #(\w{6}); color: #(\w{6}); \}", page)
     assert plain is not None
     paper, ink = plain.groups()
-    colored = dict(
-        re.findall(r"nav a\.sp-t-(\w+) \{ background: #(\w{6}); color: #ffffff; \}", page)
-    )
+    colored = {
+        tag: (fill, text)
+        for tag, fill, text in re.findall(
+            r"nav a\.sp-t-(\w+) \{ background: #(\w{6}); color: #(\w{6}); \}", page
+        )
+    }
     active = re.search(
         r"@supports not .*?a\.sp-first \{ background: ([^;]+); color: #(\w{6})", page
     )
@@ -296,7 +306,7 @@ def sheetpeek_view(path: Path, appearance: str) -> list[tuple[str, str, str, str
             look = (stops[0], stops[-1], active.group(2))
         else:
             tag = next((c[5:] for c in names if c.startswith("sp-t-")), None)
-            look = (colored[tag],) * 2 + ("ffffff",) if tag else (paper, paper, ink)
+            look = (colored[tag][0],) * 2 + (colored[tag][1],) if tag else (paper, paper, ink)
         found.append((label, *(c.upper() for c in look)))
     return found
 
@@ -409,18 +419,18 @@ def _item(cap: Any, top: int, x0: int, x1: int, background: Pixel, kind: str) ->
     if kind == "fill":
 
         def inside(y: int, toward: int) -> bool:
-            here = image.pixel(px, y)
-            return _far(here, background) > SAME and _far(here, image.pixel(px, toward)) <= SAME
+            # continuity alone: the light active tab's gradient starts within SAME of the strip
+            return _far(image.pixel(px, y), image.pixel(px, toward)) <= SAME
 
-        y = top + round(ROW * per)
+        y = top + round(MIDDLE * per)
         while y < bottom and inside(y, y - 1):
             y += 1
-        z = top + round(ROW * per)
+        z = top + round(MIDDLE * per)
         while z > top and inside(z - 1, z):
             z -= 1
         y0, y1 = z, y
         found["height"] = spt(y1 - y0)
-        found["top_color"] = _hex([image.pixel(px, y0 + round(ROW * per))])
+        found["top_color"] = _hex([image.pixel(px, y0 + round(TOP_AT * per))])
         found["bottom_color"] = _hex([image.pixel(px, max(y0, y1 - 1 - round(2 * per)))])
     reference = {y: image.pixel(px, y) if kind == "fill" else background for y in range(y0, y1)}
     pixels = {

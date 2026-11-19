@@ -85,6 +85,26 @@ def from_xlio(color: Any) -> StatedColor | None:
     return None
 
 
+def tab_color_from_xlio(color: Any) -> StatedColor | None:
+    """A ``tabColor`` as a :class:`StatedColor`, its attributes in the order Excel draws them.
+
+    Where a tab color states more than one kind, Excel draws theme before rgb, rgb before indexed
+    and theme before indexed, and rgb over ``auto`` (captured, ``tab_strip``); ``auto`` against
+    theme or indexed is not captured and comes last. Cell colors keep :func:`from_xlio`'s order.
+    """
+    if color is None:
+        return None
+    if color.theme is not None:
+        return StatedColor("theme", theme=color.theme, tint=color.tint)
+    if color.rgb is not None:
+        return StatedColor("rgb", rgb=color.rgb, tint=color.tint)
+    if color.indexed is not None:
+        return StatedColor("indexed", indexed=color.indexed, tint=color.tint)
+    if color.auto:
+        return StatedColor("auto", tint=color.tint)
+    return None
+
+
 def default_sheet(sheets: list[ListedSheet], active: ListedSheet | None) -> ListedSheet | None:
     """The sheet Excel opens on that sheetpeek reads.
 

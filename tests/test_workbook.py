@@ -1,9 +1,9 @@
 """The sheet list, tab colors and the workbook page (ARCHITECTURE.md §4.15).
 
-Which tabs Excel shows and how it draws a tab color are unverified (no capture in this repository
-yet): visible sheets only, in file order; an inactive
-colored tab filled solid with white text; the active one a gradient to a light tint of its color;
-``auto`` drawn as an uncolored tab.
+Which tabs Excel shows and how it draws a tab color are captured (tab_strip): visible sheets
+only, in file order; an inactive colored tab filled solid, its name white on a dark color and
+black on a light one; the active one a gradient to a light tint of its color; ``auto`` drawn as
+an uncolored tab.
 """
 
 import io
@@ -121,7 +121,7 @@ def test_sheets_list_kind_state_and_tab_color(tabs):
     with sheetpeek.open(tabs) as book:
         found = [(s.name, s.kind, s.state, s.tab_color) for s in book.sheets]
     # Theme accent1 of the default theme is 4F81BD and indexed 12 is 0000FF, as drawn on the
-    # tabs, and auto draws an uncolored tab (unverified).
+    # tabs, and auto draws an uncolored tab (tab_strip).
     assert found == [
         ("Active", "worksheet", "visible", "FF0000"),
         ("Theme", "worksheet", "visible", "4F81BD"),
@@ -234,7 +234,7 @@ def test_a_one_sheet_render_reports_the_tab_color_as_an_option(tabs):
 def test_the_page_has_a_tab_for_each_visible_sheet_in_file_order(tabs):
     markup = page(tabs)
     labels = re.findall(r">([^<]+)</a>", nav(markup))
-    assert labels == ["Active", "Theme", "Index", "Auto", "Plain"]  # unverified
+    assert labels == ["Active", "Theme", "Index", "Auto", "Plain"]  # as Excel (tab_strip)
     assert re.findall(r'<section id="(sp-\d+)"', markup) == [f"sp-{i}" for i in range(1, 6)]
     assert ">hidden<" not in markup
     assert ">secret<" not in markup
@@ -273,8 +273,8 @@ def test_hidden_sheets_and_hidden_rows_are_separate_options(tmp_path):
 
 def test_tab_colors_as_excel_draws_them(tabs):
     markup = page(tabs)
-    # Inactive: filled solid with white text. Active: a gradient from near white to a light
-    # tint, with Excel's green text. Auto: an uncolored tab (unverified).
+    # Inactive: filled solid, white text on a dark color. Active: a gradient from near white to
+    # a light tint, with Excel's green text. Auto: an uncolored tab (tab_strip).
     assert ".sp-book > nav a.sp-t-b { background: #4F81BD; color: #ffffff; }" in markup
     assert ".sp-book > nav a.sp-t-c { background: #0000FF; color: #ffffff; }" in markup
     assert "sp-t-d" not in markup  # auto
@@ -514,7 +514,7 @@ def test_a_dialog_sheets_tab_color_is_drawn(kinds):
         "xl/worksheets/sheet2.xml",
         lambda t: t.replace("<sheetPr>", '<sheetPr><tabColor rgb="FF00FF00" />', 1),
     )
-    assert ".sp-book > nav a.sp-t-b { background: #00FF00; color: #ffffff; }" in page(kinds)
+    assert ".sp-book > nav a.sp-t-b { background: #00FF00; color: #000000; }" in page(kinds)
 
 
 @pytest.mark.parametrize(

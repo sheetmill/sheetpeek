@@ -666,8 +666,8 @@ a cached value (as openpyxl writes it) has no `t`. The same file confirms Excel 
 Captured so far, in `tests/captures/`: by print (route B) `layout` (§3.6, §4.1 to §4.7); read
 from Excel `theme_colors` and `theme_colors_more` (§3.3), `merge_width` and `error_width` (§4.2,
 §4.4, no deviation), `row_height` and `row_height_more` (§4.7), `package` and `package_more` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14), `theme_fonts_palette`
-and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts` and `gradients` (§4.12), `text_style` (§4.7, §4.13), `runs` (§4.16), `rotation` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
-Excel 16.115 (Microsoft 365). The rules of §4.11 and §4.15 have no
+and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts` and `gradients` (§4.12), `text_style` (§4.7, §4.13), `runs` (§4.16), `tab_strip` (§4.15), `rotation` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
+Excel 16.115 (Microsoft 365). The rules of §4.11 have no
 capture here yet and are marked unverified until screen suites capture them
 on Microsoft 365; so are the parts of §4.12, §4.14 and §4.18 that say so. What still waits for
 the screen: the text insets and the baselines of angled text, which come from print, and the 15 pt rows that print
@@ -1088,9 +1088,9 @@ zoom there, so the page draws them in points like the cells (`backends/html/_hea
 
 ### 4.15 Sheets and the workbook page
 
-**Unverified:** which tabs the strip shows and how a tab color is drawn have no capture in this
-repository yet; the tests that rest on them (`tests/test_workbook.py`) say so. The
-rules live in `_sheets.py` and `backends/html/_workbook.py`.
+Which tabs the strip shows and how a tab color is drawn are captured by the suite `tab_strip`
+(Excel 16.115, both appearances, zoom 100). The rules live in `_sheets.py` and
+`backends/html/_workbook.py`.
 
 **The sheet list** (`Book.sheets`, a `SheetInfo` per sheet, in workbook order):
 - **Kind** from the relationship type of the workbook's `<sheet>`: `worksheet`,
@@ -1099,8 +1099,10 @@ rules live in `_sheets.py` and `backends/html/_workbook.py`.
 - **State** from `sheet@state`: `visible`, `hidden`, `very_hidden`; anything else is visible.
 - **Tab color** from `sheetPr/tabColor` (xlio's sheet properties), so no cell is read for it.
   Resolved like any color (§3.3); `auto` and no color are `None`, since `auto` draws an
-  uncolored tab (unverified). When several of `indexed`, `theme`, `auto` and `rgb` are given,
-  they are taken in that order, as every other color is (which one Excel takes is unverified).
+  uncolored tab. When several kinds are given, Excel draws theme before rgb, rgb before indexed,
+  theme before indexed and rgb over `auto` (`_sheets.tab_color_from_xlio`); `auto` against theme
+  or indexed is not captured and comes last. This is not the order §3.3 takes for cell colors,
+  which no capture here covers.
   An index or theme number is an `unsignedInt` (`[0-9]{1,9}`, else none); a tint that is not
   a finite number is 0, and one past ±1 is clamped.
 - Sheets whose part is missing are left out (xlio does not list them), so `Book.sheets` and
@@ -1114,11 +1116,13 @@ reported (`sheet.macrosheet`, approximated). A chartsheet or dialog sheet raises
 the workbook's own `<sheet>` list) when it is a visible worksheet or macro sheet; else the first
 visible one; else the first readable one, hidden or not; with none, `NotAWorksheetError`.
 
-**The tab strip** (unverified): Excel shows the visible sheets only, in file order; hidden and very
-hidden sheets have no tab. An inactive colored tab is filled solid with the color, with white
-text; the active tab is a vertical gradient from near white to a light tint of the color (two
+**The tab strip:** Excel shows the visible sheets only, in file order; hidden and very hidden
+sheets have no tab. An inactive colored tab is filled solid with the color, its name white on a
+dark color and black on a light one: white up to a Rec. 601 luma of 113, black from 170, and
+sheetpeek's edge at 128 is unverified between. The active tab is a vertical gradient from near white to a light tint of the color (two
 samples fit 10 % and 40 % of the color mixed with white, an inference), with bold text in
-Excel's own green (`#278452`), not the file's color. Each tab is 72 × 20 pt, 7 pt apart.
+Excel's own green (`#278452`), not the file's color. Each inactive tab is 72 × 20 pt, 7 pt apart,
+the active one 78 × 22 (21 in the light appearance).
 `showSheetTabs`, `firstSheet` and a tab's platform shape are window chrome with no counterpart
 on a page and are not read.
 

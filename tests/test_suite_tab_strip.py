@@ -41,9 +41,9 @@ ORDER_TOLERANCE = 40
 off its color, and the colors are twice as far apart, so a tab names one sheet only."""
 GEOMETRY_TOLERANCE = 1.0
 """Points, for a tab's height, width and gap: each edge is anti-aliased over a device pixel."""
-LABEL = 10.0
-"""Points of ink at least as wide as a tab's name: the scroll arrows and the new-sheet button
-draw narrower ink, and a gap between tabs none."""
+LABEL = 15.0
+"""Points of ink at least as wide as a tab's name: the scroll arrows (6.5 to 7 pt) and the
+new-sheet button (10) draw narrower ink, the narrowest name 20.5, and a gap between tabs none."""
 
 # --- the workbooks
 
@@ -81,8 +81,8 @@ def test_the_precedence_group_carries_two_kinds_in_each_tab_color(tmp_path):
             assert found == ([tab.xml] if tab.xml else []), tab.name
     with sheetpeek.open(tmp_path / "tab_strip_precedence.xlsx") as book:
         colors = [s.tab_color for s in book.sheets]
-    # sheetpeek takes indexed, then theme, then auto, then rgb (§4.15, unverified)
-    assert colors == [None, "008000", "C0504D", None, "008000"]
+    # theme before rgb, rgb before indexed, rgb over auto, as Excel draws them (§4.15, captured)
+    assert colors == [None, "C00000", "C0504D", "0070C0", "C0504D"]
 
 
 def test_the_first_sheet_is_active_visible_and_holds_the_markers():
@@ -298,7 +298,7 @@ def test_tab_colors_as_sheetpeek_draws_them(captured):
                 assert _near(tab["top_color"], top, GRADIENT_TOLERANCE), where
                 assert _near(tab["bottom_color"], bottom, GRADIENT_TOLERANCE), where
                 assert _near(tab["ink_color"], ink, INK_TOLERANCE), where
-            elif ink == "FFFFFF":
+            elif ink in ("FFFFFF", "000000"):  # a colored tab, its name white or black
                 assert tab["kind"] == "fill", where
                 assert _near(tab["top_color"], top, FILL_TOLERANCE), where
                 assert _near(tab["bottom_color"], bottom, FILL_TOLERANCE), where
