@@ -267,6 +267,8 @@ def run(groups: tuple[str, ...] | None = None, *, light: bool = False) -> None:
             try:
                 read_zoom(name)
             except ExcelError as error:
+                if "got an error" not in str(error):
+                    raise  # the session's own refusal to start, not Excel's answer to the file
                 record_refusal(name, str(error))
                 print(f"{name}: Excel refused the file", file=sys.stderr)
             continue

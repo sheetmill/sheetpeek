@@ -1,15 +1,17 @@
 """Capture how Excel for Mac draws the grid color and the row and column headings (route C).
 
     EXCEL_EDITION="Microsoft 365" uv run --group capture python -m capture.headings_grid run grid_x
+    EXCEL_EDITION=... uv run --group capture python -m capture.headings_grid run grid_99999
     EXCEL_EDITION="Microsoft 365" uv run --group capture python -m capture.headings_grid run
     EXCEL_EDITION="Microsoft 365" uv run --group capture python -m capture.headings_grid run light
     uv run --group capture python -m capture.headings_grid read      # the saved captures again
     uv run --group capture python -m capture.headings_grid build PATH  # every group's workbook
 
 Each group is its own workbook and window (a sheet has one grid color and one Normal font, and
-a window one scroll position). ``run`` takes every group but ``grid_x`` in the dark appearance;
-``run grid_x`` runs that group alone first, since Excel may refuse its file (-50 with alerts
-off): the refusal is kept (``refused.txt``) and written as the group's one row, its ``kind``
+a window one scroll position). ``run`` takes every group but ``grid_x`` and ``grid_99999`` in
+the dark appearance; ``run grid_x`` and ``run grid_99999`` run those groups alone first, since
+Excel may refuse their files (16.115 refused colorId 99999 with a parameter error): the refusal
+is kept (``refused.txt``) and written as the group's one row, its ``kind``
 ``refused`` and Excel's message in ``item``. ``run light`` captures ``grid_default`` and
 ``grid_10_teal`` again at zoom 100 once macOS is switched to the light appearance (a person's
 step: System Settings, Appearance), into ``capture/build/headings_grid/light/``. Each run
@@ -111,7 +113,7 @@ GROUPS = (
     Group("grid_x", "x", zooms=(100,), grid=True),
 )
 GROUP = {g.name: g for g in GROUPS}
-REFUSALS = ("grid_x",)
+REFUSALS = ("grid_99999", "grid_x")
 """Groups whose file Excel may refuse: run on their own, a refusal is the answer."""
 LIGHT = ("grid_default", "grid_10_teal")
 """Groups captured again in the light appearance, at zoom 100."""
@@ -273,8 +275,8 @@ def run(groups: tuple[str, ...] | None = None, *, light: bool = False) -> None:
                 top_row=group.top_row,
             )
         except ExcelError as error:
-            if name not in REFUSALS:
-                raise
+            if name not in REFUSALS or "got an error" not in str(error):
+                raise  # not a file Excel may refuse, or the session's own refusal to start
             record_refusal(name, str(error))
             print(f"{name}: Excel refused the file", file=sys.stderr)
     write()

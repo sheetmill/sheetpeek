@@ -19,12 +19,15 @@ import datetime as dt
 import os
 import platform
 import subprocess
+import time
 from pathlib import Path
 from types import TracebackType
 
 HERE = Path(__file__).resolve().parent
 SCRIPT = HERE / "excel.applescript"
 WINDOWS = HERE / "windows.js"
+WINDOW_GRACE = 10.0
+"""Seconds a window with no workbook may stay on screen before a session refuses to start."""
 CONTAINER = Path.home() / "Library/Containers/com.microsoft.Excel/Data/Documents"
 """Excel is sandboxed: a workbook it opens by script lives here, so no "Grant Access" shows."""
 APP = Path("/Applications/Microsoft Excel.app")
@@ -152,7 +155,13 @@ class ExcelSession:
             raise ExcelError("Excel does not answer `count of workbooks`") from None
         if count != "0":
             raise ExcelError(f"{count} workbook(s) open in Excel: close them first")
+        # A workbook just closed can leave its window on screen for a moment: a suite that opens
+        # workbooks one after another (read-backs without a capture) meets it. Wait for it.
         windows = excel_windows()
+        deadline = time.monotonic() + WINDOW_GRACE
+        while windows and time.monotonic() < deadline:
+            time.sleep(0.5)
+            windows = excel_windows()
         if windows:
             listed = ", ".join(f"{w['w']:.0f}x{w['h']:.0f} {w['title']!r}" for w in windows)
             raise ExcelError(f"Excel shows windows with no workbook open ({listed}): close them")
