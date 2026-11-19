@@ -89,7 +89,7 @@ def test_solid_draws_its_foreground(tmp_path):
 
 
 def test_solid_with_only_a_background_draws_black(tmp_path):
-    # A missing fgColor is automatic, black (unverified).
+    # A missing fgColor is black (captured, auto_colors).
     assert spec(tmp_path, PatternFill("solid", bgColor="FFFF0000"))[1] == "000000"
 
 
@@ -100,8 +100,11 @@ def test_the_alpha_byte_is_ignored(tmp_path):
 @pytest.mark.parametrize(
     ("fill", "expected"),
     [
-        # Indexed 64 is the system foreground: a solid fill in it is no fill (captured).
-        (PatternFill("solid", fgColor=Color(indexed=64)), None),
+        # Indexed 64, the system foreground, draws a solid fill black, and an automatic
+        # foreground white (captured, auto_colors).
+        (PatternFill("solid", fgColor=Color(indexed=64)), "000000"),
+        (PatternFill("solid", fgColor=Color(auto=True)), "FFFFFF"),
+        (PatternFill("solid", fgColor=Color(indexed=65)), "FFFFFF"),
         # An index past the palette draws black (captured: 81).
         (PatternFill("solid", fgColor=Color(indexed=81)), "000000"),
         (PatternFill("solid", fgColor=Color(indexed=10)), "FF0000"),

@@ -41,7 +41,10 @@ def to_borders(part: Any, context: Context) -> Borders | None:
 
 
 def side(source: Any, context: Context) -> Side | None:
-    """One side: ``None`` without a style Excel draws. An automatic color is black (unverified)."""
+    """One side: ``None`` without a style Excel draws.
+
+    An automatic color is black (captured, ``auto_colors``).
+    """
     style = source.style if source is not None else None
     if style not in _STYLES:
         return None

@@ -173,12 +173,13 @@ leave them out by default and show them with an option.
 xlio returns a font, fill or border color as a `Color` holding every attribute the file states
 (`rgb`, `theme`, `indexed`, `auto`, `tint`). Where a file states more than one, the reader takes
 them in the order indexed, theme, auto, rgb (`_sheets.from_xlio`). A color element without
-attributes is read as `00000000`, black (unverified).
+attributes is read as `00000000`: black in a font, a border and a fill's foreground, and a fill's
+background in it is white (`auto_colors`).
 
 - `rgb`: `ARGB`, alpha ignored.
 - `indexed`: the workbook's custom palette if `styles.xml` has one, else the default 64-entry
   palette (`_colors.DEFAULT_PALETTE`), entry by entry (§4.14). Index 64 is the system foreground
-  color, which means automatic.
+  (black), 65 the system background (white) (§4.12, §4.14).
 - `theme`: the `clrScheme` of the theme part (`wb.loaded_theme`, raw XML), six hex digits or the
   theme is treated as unreadable, since its text would reach CSS as it stands, then `tint` applied
   as ECMA-376 §18.8.19 describes. **Captured** (suite `theme_colors`: theme indices 0 to 11 with
@@ -656,7 +657,7 @@ a cached value (as openpyxl writes it) has no `t`. The same file confirms Excel 
 
 Captured so far, in `tests/captures/`: by print (route B) `layout` (§3.6, §4.1 to §4.7); read
 from Excel `theme_colors` and `theme_colors_more` (§3.3), `merge_width` and `error_width` (§4.2,
-§4.4, no deviation), `row_height` (§4.7), `package` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12),
+§4.4, no deviation), `row_height` (§4.7), `package` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14),
 `text_style` (§4.7, §4.13), `rotation` (§4.17), `filters` (§4.19) and `tables` (§4.20). All are
 Excel 16.115 (Microsoft 365). The rules of §4.10, §4.11, §4.14 to §4.16 (but §4.14's theme
 colors, which `theme_colors` captures) have no capture here yet and are marked unverified until
@@ -793,12 +794,13 @@ one.
   rest (`TILES`, one tile pixel a whole screen point; `gray0625` is 8 × 4 with two set pixels).
   The tiles are fixed in screen points, the same at zoom 100 and 200, and anchored at the sheet's
   origin, not at each cell (Excel 16.115, screen suite `fills`).
-- Colors: `solid` draws `fgColor`; a missing `fgColor` is black, so `solid` with only `bgColor`
-  draws black; a pattern without colors, with automatic ones, or with indexed 64 and 65, is black
-  on white; one color given, the other takes its default (fg black, bg white). A `solid` fill in
-  indexed 64 is no fill; a fill index past the palette (81) is black; `patternType="none"` or none
-  at all draws nothing, whatever its colors. The alpha byte is ignored. A missing color element is read
-  as `00000000` (unverified), so a background of `00000000` is read as missing (white).
+- Colors (`auto_colors`): `solid` draws `fgColor`; a missing `fgColor` is black, so `solid` with
+  only `bgColor` draws black; an automatic `fgColor` draws a `solid` fill white and a pattern's
+  foreground black; an automatic or missing `bgColor` is white. Indexed 64 is black and 65 white,
+  as foreground and background (a pattern in 64 on 65 is black on white, in 65 on 64 white on
+  black); a fill index past the palette (81) is black. A color element without attributes reads
+  as a missing one. `patternType="none"` or none at all draws nothing, whatever its colors. The
+  alpha byte is ignored.
 - **The representative color** of a pattern is the blend of its two colors by the foreground's
   share of the tile (6.25 % for `gray0625`, 43.75 % for `lightGrid`); of a gradient, its color at
   the midpoint.
@@ -1002,8 +1004,10 @@ palette that recolors index 10 leaves fill index 2 red). Fill and font colors fo
 for indices 10 and 17). Excel caps the list at 64 entries; a shorter list keeps the default for
 the rest, and an entry that is not a color reads as the default's (both unverified). A
 `<colors>` without `indexedColors` keeps the default palette.
-Automatic colors (unverified): a fill in indexed 64 is no fill, a fill index past the palette (81)
-is black, and a font in `auto` or indexed 64 is the automatic black.
+Automatic colors (`auto_colors`): indexed 64 is black and 65 white, in a fill, a font and a
+border; a font or a border in `auto`, in 64 or without a color is black. An index past the
+palette (81) is black in a fill and a font; Excel refuses a file with a border in it, which
+sheetpeek draws black (a named deviation, as a merge inside a table).
 
 **Number-format colors.** `[ColorN]` draws the workbook palette's index `N + 7`; the eight named
 colors (`[Red]`, `[Blue]`) draw their default colors whatever the palette (unverified; Excel's

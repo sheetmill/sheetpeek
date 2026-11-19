@@ -311,9 +311,9 @@ def test_the_comparison_accepts_a_capture_that_agrees_with_sheetpeek(tmp_path, m
     test_fills_in_automatic_and_system_colors_draw_as_sheetpeek_draws_them()
     test_fonts_in_automatic_and_system_colors_draw_as_sheetpeek_draws_them()
     test_borders_in_automatic_and_system_colors_draw_as_sheetpeek_draws_them()
-    # and refuses one that does not: indexed 64 drawn as a black solid fill
+    # and refuses one that does not: indexed 64 drawn as no fill
     lines = [
-        line.replace("FFFFFF:1\t1111", "000000:1\t0000")
+        line.replace("000000:1\t0000", "FFFFFF:1\t1111")
         if "solid fg indexed 64\t" in line
         else line
         for line in lines

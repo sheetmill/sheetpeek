@@ -15,6 +15,8 @@ from collections.abc import Sequence
 from xlformat import DEFAULT_PALETTE as _SECTION_COLORS
 
 _AUTOMATIC_INDEX = (64, 65)  # system foreground and background
+SYSTEM_BACKGROUND = 65
+"""The indexed system background: white in a cell's font, border and fill (``auto_colors``)."""
 _HLS = 240  # Windows' HLSMAX
 _RGB = 255
 

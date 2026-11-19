@@ -44,8 +44,9 @@ def to_fill(part: Any, context: Context) -> Fill | None:
         fg = color(part.foreground, context)
         bg = color(part.background, context, background=True)
         if kind == "solid":
-            # A solid fill in the system foreground color is no fill (indexed 64; automatic
-            # taken alike; both unverified).
+            # An automatic foreground draws a solid fill white (captured, auto_colors).
+            if fg is None and part.foreground is not None and part.foreground.auto:
+                fg = WHITE
             return Pattern("solid", fg) if fg is not None else None
         return Pattern(kind, fg, bg)
     # By position only: stops at one position keep the file's order (a stable sort).
@@ -67,11 +68,11 @@ def to_fill(part: Any, context: Context) -> Fill | None:
 
 
 def color(source: Any, context: Context, *, background: bool = False) -> str | None:
-    """A fill color as ``RRGGBB``, or ``None`` for automatic (unverified, §4.12).
+    """A fill color as ``RRGGBB``, or ``None`` for automatic (§4.12).
 
-    Indexed 64 is automatic, 65 white, and an index past the palette black. A missing color
-    element, or one without attributes, is read as ``00000000`` (unverified; the reading of
-    0.2.0, kept): for a foreground that is black, and a background in it is automatic (white).
+    Indexed 64, the system foreground, is black and 65 white, as foreground and as background;
+    an index past the palette (81) is black; a missing color element, or one without attributes,
+    is black as a foreground and automatic (white) as a background (captured, ``auto_colors``).
     """
     if source is None or (
         source.indexed is None and source.theme is None and not source.auto and source.rgb is None
@@ -79,7 +80,7 @@ def color(source: Any, context: Context, *, background: bool = False) -> str | N
         return None if background else BLACK
     if source.indexed is not None:
         if source.indexed == _SYSTEM_FOREGROUND:
-            return None
+            return BLACK
         if source.indexed == _SYSTEM_BACKGROUND:
             return WHITE
         return context.color(source) or BLACK

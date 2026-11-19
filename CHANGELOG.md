@@ -315,6 +315,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   before. Use `notices`.
 
 ### Fixed
+- Automatic and system colors are drawn as Excel draws them (captured, screen suite
+  `auto_colors`): a solid fill in indexed 64 is black and one in an automatic color white, where
+  both were no fill; a font in indexed 65 is white, where it was the automatic black. In the
+  pattern fills and borders added in this release, indexed 64 is black and 65 white too.
 - Built-in number formats are Excel's (xlformat's table, captured from Excel for Mac), no
   longer openpyxl's: a typed date, which Excel stores as format 14, shows as `1/2/24` where it
   showed `01-02-24`; formats 44 and 47 are Excel's, and the built-in ids from 50 to 163, read as

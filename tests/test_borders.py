@@ -55,7 +55,7 @@ def test_sides_are_read_with_their_styles_and_colors(tmp_path):
     borders = sheetpeek.read(path).cell(1, 1).style.borders
     assert borders.left == Line("thin", "FF0000")
     assert borders.bottom == Line("double", None)
-    assert borders.bottom.drawn_color == "000000"  # automatic is black (unverified)
+    assert borders.bottom.drawn_color == "000000"  # automatic is black (captured, auto_colors)
     assert (borders.right, borders.top, borders.diagonal) == (None, None, None)
 
 

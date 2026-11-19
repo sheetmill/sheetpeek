@@ -126,8 +126,9 @@ def test_an_empty_theme_typeface_keeps_the_stored_name(tmp_path):
 
 def test_indexed_colors_follow_the_workbook_palette(tmp_path):
     # Unverified: fill and font indexed 10 and font 17 follow the palette; fill indexed 2
-    # stays red (0 to 7 do not mirror 8 to 15 once a palette is written); fill indexed 64 is no
-    # fill; fill 81, past the palette, is black; font indexed 64 is the automatic black.
+    # stays red (0 to 7 do not mirror 8 to 15 once a palette is written). With the default
+    # palette (captured, auto_colors): fill indexed 64 is black; fill 81, past the palette, is
+    # black; font indexed 64 is the automatic black.
     path = build(
         tmp_path,
         {
@@ -147,7 +148,7 @@ def test_indexed_colors_follow_the_workbook_palette(tmp_path):
     assert cells[1].font.color == TEAL
     assert cells[2].font.color == BROWN
     assert cells[3].fill == "FF0000"
-    assert cells[4].fill is None
+    assert cells[4].fill == "000000"
     assert cells[5].fill == "000000"
     assert cells[6].font.color is None
 

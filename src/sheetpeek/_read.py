@@ -25,7 +25,7 @@ import xlio
 import xlrecalc
 
 from sheetpeek import _style as styles
-from sheetpeek._colors import grid_color, resolve, workbook_palette
+from sheetpeek._colors import SYSTEM_BACKGROUND, grid_color, resolve, workbook_palette
 from sheetpeek._dates import iso_serial
 from sheetpeek._detect import (
     book_notices,
@@ -887,12 +887,16 @@ class Book:
     def _cell_color(self, color: Any) -> str | None:
         """An ``xlio.Color`` as ``RRGGBB`` or ``None``.
 
-        A color element without attributes is read as ``00000000``, black (unverified; the
-        reading of 0.2.0, kept).
+        A color element without attributes is read as ``00000000``, black; a fill's background
+        in it is white (``_style.fill.color``). Indexed 65, the system background, is white in a
+        font, a border and a fill; 64, the system foreground, is automatic (captured,
+        ``auto_colors``).
         """
         stated = from_xlio(color)
         if stated is None and color is not None:
             stated = StatedColor("rgb", rgb="00000000", tint=color.tint)
+        if stated is not None and stated.type == "indexed" and stated.indexed == SYSTEM_BACKGROUND:
+            return "FFFFFF"
         return self._color(stated)
 
     def _color(self, color: Any) -> str | None:
