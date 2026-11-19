@@ -878,7 +878,7 @@ class Book:
             cell_format = dataclasses.replace(cell_format, number_format=code)
             found = self._styles[index] = styles.resolve(cell_format, self._context)
             # By identity: a style whose font color is the Normal style's and one with another
-            # color can compare equal (Font.color reads theme 1 and automatic alike). Interning
+            # color can compare equal (colors stated differently resolve alike). Interning
             # equal styles would mark both; test_table_layout's equal-style test fails if so.
             if font_aspect.color_key(cell_format.font) == self._normal_key:
                 self._normal_color[id(found[0])] = found[0]

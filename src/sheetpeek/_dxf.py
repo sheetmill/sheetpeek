@@ -38,7 +38,7 @@ def stack(
             property wins over an earlier one's.
         own_color: Whether the cell's font color is its own: any color other than the Normal
             style's font color as the file states it. ``style.font.color`` cannot tell, since
-            it reads theme 1 and automatic alike as ``None``.
+            colors stated differently can resolve alike (an indexed black and an RGB black).
         sides: The sides the formats draw on this cell's edges, already placed (a format's
             ``horizontal`` and ``vertical`` lines inside its region, its outer sides on the
             region's edges), or ``None`` for none.

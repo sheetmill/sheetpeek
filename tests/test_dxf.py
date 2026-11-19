@@ -69,7 +69,7 @@ def test_an_own_automatic_color_wins_and_draws_black():
     assert stack(PLAIN, (WHITE_BOLD,), own_color=True).font.color is None
 
 
-def test_an_explicit_theme_1_lets_the_format_color_through():
+def test_a_font_color_that_is_the_normal_styles_lets_the_format_color_through():
     assert stack(PLAIN, (WHITE_BOLD,), own_color=False).font.color == "FFFFFF"
 
 
