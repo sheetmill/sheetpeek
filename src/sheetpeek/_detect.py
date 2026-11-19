@@ -83,7 +83,8 @@ CODES: dict[str, tuple[Outcome, Reason, str]] = {
     "sheet.unknown_extension": ("omitted", "not_implemented", ""),
 }
 
-# Children of a sheet that draw nothing on it: never reported.
+# Children of a sheet that draw nothing on it, or that are drawn through another element
+# (`sortState`, through the filter buttons' arrows, §4.19): never reported.
 _SILENT = frozenset(
     {
         "dimension",

@@ -357,7 +357,7 @@ element states something Excel draws differently from its default:
   (a border with a side style; a diagonal only with its flags; a row or column style only with a
   fill or a border);
 - children that draw nothing on the sheet are never reported: `dimension`, `sheetCalcPr`,
-  `sheetProtection`, `protectedRanges`, `scenarios`, `sortState`, `dataConsolidate`,
+  `sheetProtection`, `protectedRanges`, `scenarios`, `dataConsolidate`,
   `customSheetViews`, `phoneticPr`, `dataValidations`, `printOptions`, `pageMargins`, `pageSetup`,
   `headerFooter`, `customProperties`, `cellWatches`, `ignoredErrors`, `smartTags`,
   `webPublishItems`, `legacyDrawingHF`, `drawingHF`;
@@ -2415,7 +2415,7 @@ are read.
 
 ## 11. Roadmap
 
-1. **The middle tier:** filter and sort buttons, tables with the differential-format layer,
+1. **The middle tier** (filter and sort buttons and table styles are drawn, §4.19, §4.20):
    conditional formatting, pictures and their placement, notes and comments, the print
    settings not yet drawn (titles, headers and footers); then pivot
    tables. Their parts come from xlio; those it does not read yet (pivot tables) are on its list.
