@@ -24,9 +24,11 @@ Groups, each its own workbook:
   so Excel opens it in that view; the window's zoom is then set as in every capture.
 - ``zoom_*`` (no screen): a sheet whose ``zoomScale`` is ``5``, ``401``, ``85.5``, ``abc``, empty,
   or ``85`` (the control), written into the XML. Each is opened and the zoom Excel reports for
-  its window read, with nothing set first. Excel may refuse a crafted file (-50 with alerts
-  off): ``run zoom`` takes these groups on their own, a refusal is kept (``refused.txt``) and
-  written as the group's one row, its ``kind`` ``refused`` and Excel's message in ``item``.
+  its window read, with nothing set first, then the range it shows from row 1 (``visible=`` in
+  the state; the window kept as ``window_file_display.png``): its rows tell the zoom drawn.
+  Excel may refuse a crafted file (-50 with alerts off): ``run zoom`` takes these groups on
+  their own, a refusal is kept (``refused.txt``) and written as the group's one row, its
+  ``kind`` ``refused`` and Excel's message in ``item``.
 
 ``run`` takes ``normal`` and ``page_break`` in the dark appearance; ``run light`` captures
 ``normal`` again at zoom 100 once macOS is switched to the light appearance (a person's step:
@@ -56,6 +58,7 @@ a whole number (``_read_view.py``, ``_view_model.py``).
 
 from __future__ import annotations
 
+import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -142,7 +145,7 @@ EXPECTED = {
 """What sheetpeek draws: the freeze line and a manual break's mark, colors and widths in screen
 points (CSS px), over fills, borders and text; in the Normal view nothing at the breaks or the
 print area's edges (``backends/html/_panes.py``)."""
-EXPECTED_ZOOM = {"5": 100, "401": 100, "85.5": 100, "abc": 100, "empty": 100, "85": 85}
+EXPECTED_ZOOM = {"5": 5, "401": 401, "85.5": 100, "abc": 100, "empty": 100, "85": 85}
 """sheetpeek's ``Sheet.view.zoom`` for each crafted group."""
 EXPECTED_SPILL = {"spill right": (-50.0, 139.0), "spill left": (-69.0, 51.0)}
 """Where sheetpeek draws each spilled text, the left and right of its glyph advances in sheet
@@ -310,6 +313,12 @@ def read_zoom(name: str) -> str:
         postprocess(name)(path)
         with session:
             state = session.window()
+            # The rows the window shows at the zoom Excel opened it at, nothing set first but
+            # the top row: tells whether it draws at a zoom outside 10 to 400 (5, 401).
+            state += f";visible={session.scroll(1)}"
+            from capture.screen.window import capture_window
+
+            capture_window(path.stem, out / "window_file_display.png")
     finally:
         path.unlink(missing_ok=True)
     found["suite"] = f"freeze_view_{name}"
@@ -505,6 +514,16 @@ def measure(cap: Any, name: str, appearance: str = "dark") -> list[dict[str, str
         color = cap.image.pixel(round(cap.edge(cell, "cx")), round(cap.edge(cell, "cy")))
         records.append(base | {"kind": "paper", "item": item, "cell": cell, "color": _hex(color)})
     return records
+
+
+def visible_rows(state: str) -> int | None:
+    """The rows of the ``visible=`` range in a window's state (``$A$1:$AV$72``: 72), or ``None``."""
+    for part in state.split(";"):
+        key, _, value = part.partition("=")
+        if key == "visible" and ":" in value:
+            first, last = (int(re.sub(r"[^0-9]", "", end) or 0) for end in value.split(":"))
+            return last - first + 1
+    return None
 
 
 def zoom_of(state: str) -> str:

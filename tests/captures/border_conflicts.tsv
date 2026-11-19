@@ -451,3 +451,63 @@ colors	hidden	column medium, double hidden, thin	100	K6	right	medium	thin	-1 -0.
 colors	hidden	row medium, double hidden, thin	100	E12	bottom	medium	thin	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
 colors	hidden	column thin, thick hidden, dashed	100	K8	right	thin	dashed	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
 colors	hidden	row thin, thick hidden, dashed	100	G12	bottom	thin	dashed	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+black_white	ref	ref h thin	100	C4	top		thin	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+black_white	ref	ref v thin	100	C4	left		thin	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+black_white	ref	ref h medium	100	D4	top		medium	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+black_white	ref	ref v medium	100	C5	left		medium	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+black_white	ref	ref h thick	100	E4	top		thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+black_white	ref	ref v thick	100	C6	left		thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+black_white	ref	ref h double	100	F4	top		double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+black_white	ref	ref v double	100	C7	left		double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+black_white	ref	ref h dashed	100	G4	top		dashed	0 0.5	on 3 off 1	3	1	3	0.75	0.75	000000	dashed	0.00
+black_white	ref	ref v dashed	100	C8	left		dashed	0 0.5	on 3 off 1	3	1	3	0.78	0.78	000000	dashed	0.00
+black_white	ref	ref h hair	100	H4	top		hair	0 0.5	on 1 off 1	1	1	3	0.50	0.50	000000	hair	0.00
+black_white	ref	ref v hair	100	C9	left		hair	0 0.5	on 1 off 1	1	1	3	0.50	0.50	000000	hair	0.00
+black_white	color	v black vs: 000000|FF0000	100	C4	right	thin	thin FF0000	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+black_white	color	v black vs: FF0000|000000	100	D4	right	thin FF0000	thin	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+black_white	color	v black vs: 000000|00FF00	100	E4	right	thin	thin 00FF00	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+black_white	color	v black vs: 00FF00|000000	100	F4	right	thin 00FF00	thin	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+black_white	color	v black vs: 000000|0000FF	100	G4	right	thin	thin 0000FF	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+black_white	color	v black vs: 0000FF|000000	100	H4	right	thin 0000FF	thin	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+black_white	color	v black vs: 000000|808080	100	C5	right	thin	thin 808080	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+black_white	color	v black vs: 808080|000000	100	D5	right	thin 808080	thin	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+black_white	color	v black vs: 000000|FFFF00	100	E5	right	thin	thin FFFF00	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+black_white	color	v black vs: FFFF00|000000	100	F5	right	thin FFFF00	thin	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+black_white	color	v black vs: 000000|000080	100	G5	right	thin	thin 000080	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+black_white	color	v black vs: 000080|000000	100	H5	right	thin 000080	thin	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+black_white	color	v white vs: FFFFFF|FF0000	100	C6	right	thin FFFFFF	thin FF0000	0 0.5	solid			0	1.00	1.00	FF0000	thin	0.00
+black_white	color	v white vs: FF0000|FFFFFF	100	D6	right	thin FF0000	thin FFFFFF	0 0.5	solid			0	1.00	1.00	FF0000	thin	0.00
+black_white	color	v white vs: FFFFFF|00FF00	100	E6	right	thin FFFFFF	thin 00FF00	0 0.5	solid			0	1.00	1.00	03FF00	thin	0.00
+black_white	color	v white vs: 00FF00|FFFFFF	100	F6	right	thin 00FF00	thin FFFFFF	0 0.5	solid			0	1.00	1.00	03FF00	thin	0.00
+black_white	color	v white vs: FFFFFF|0000FF	100	G6	right	thin FFFFFF	thin 0000FF	0 0.5	solid			0	1.00	1.00	0000FF	thin	0.00
+black_white	color	v white vs: 0000FF|FFFFFF	100	H6	right	thin 0000FF	thin FFFFFF	0 0.5	solid			0	1.00	1.00	0000FF	thin	0.00
+black_white	color	v white vs: FFFFFF|808080	100	C7	right	thin FFFFFF	thin 808080	0 0.5	solid			0	1.00	1.00	808080	thin	0.00
+black_white	color	v white vs: 808080|FFFFFF	100	D7	right	thin 808080	thin FFFFFF	0 0.5	solid			0	1.00	1.00	808080	thin	0.00
+black_white	color	v white vs: FFFFFF|FFFF00	100	E7	right	thin FFFFFF	thin FFFF00	0 0.5	solid			0	1.00	1.00	FFFF00	thin	0.00
+black_white	color	v white vs: FFFF00|FFFFFF	100	F7	right	thin FFFF00	thin FFFFFF	0 0.5	solid			0	1.00	1.00	FFFF00	thin	0.00
+black_white	color	v white vs: FFFFFF|000080	100	G7	right	thin FFFFFF	thin 000080	0 0.5	solid			0	1.00	1.00	000080	thin	0.00
+black_white	color	v white vs: 000080|FFFFFF	100	H7	right	thin 000080	thin FFFFFF	0 0.5	solid			0	1.00	1.00	000080	thin	0.00
+black_white	color	h black vs: 000000/FF0000	100	C4	bottom	thin	thin FF0000	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+black_white	color	h black vs: FF0000/000000	100	D4	bottom	thin FF0000	thin	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+black_white	color	h black vs: 000000/00FF00	100	E4	bottom	thin	thin 00FF00	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+black_white	color	h black vs: 00FF00/000000	100	F4	bottom	thin 00FF00	thin	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+black_white	color	h black vs: 000000/0000FF	100	G4	bottom	thin	thin 0000FF	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+black_white	color	h black vs: 0000FF/000000	100	H4	bottom	thin 0000FF	thin	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+black_white	color	h black vs: 000000/808080	100	I4	bottom	thin	thin 808080	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+black_white	color	h black vs: 808080/000000	100	C5	bottom	thin 808080	thin	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+black_white	color	h black vs: 000000/FFFF00	100	D5	bottom	thin	thin FFFF00	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+black_white	color	h black vs: FFFF00/000000	100	E5	bottom	thin FFFF00	thin	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+black_white	color	h black vs: 000000/000080	100	F5	bottom	thin	thin 000080	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+black_white	color	h black vs: 000080/000000	100	G5	bottom	thin 000080	thin	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+black_white	color	h white vs: FFFFFF/FF0000	100	H5	bottom	thin FFFFFF	thin FF0000	0 0.5	solid			0	1.00	1.00	FF0000	thin	0.00
+black_white	color	h white vs: FF0000/FFFFFF	100	I5	bottom	thin FF0000	thin FFFFFF	0 0.5	solid			0	1.00	1.00	FF0000	thin	0.00
+black_white	color	h white vs: FFFFFF/00FF00	100	C6	bottom	thin FFFFFF	thin 00FF00	0 0.5	solid			0	1.00	1.00	03FF00	thin	0.00
+black_white	color	h white vs: 00FF00/FFFFFF	100	D6	bottom	thin 00FF00	thin FFFFFF	0 0.5	solid			0	1.00	1.00	03FF00	thin	0.00
+black_white	color	h white vs: FFFFFF/0000FF	100	E6	bottom	thin FFFFFF	thin 0000FF	0 0.5	solid			0	1.00	1.00	0000FF	thin	0.00
+black_white	color	h white vs: 0000FF/FFFFFF	100	F6	bottom	thin 0000FF	thin FFFFFF	0 0.5	solid			0	1.00	1.00	0000FF	thin	0.00
+black_white	color	h white vs: FFFFFF/808080	100	G6	bottom	thin FFFFFF	thin 808080	0 0.5	solid			0	1.00	1.00	808080	thin	0.00
+black_white	color	h white vs: 808080/FFFFFF	100	H6	bottom	thin 808080	thin FFFFFF	0 0.5	solid			0	1.00	1.00	808080	thin	0.00
+black_white	color	h white vs: FFFFFF/FFFF00	100	I6	bottom	thin FFFFFF	thin FFFF00	0 0.5	solid			0	1.00	1.00	FFFF00	thin	0.00
+black_white	color	h white vs: FFFF00/FFFFFF	100	C7	bottom	thin FFFF00	thin FFFFFF	0 0.5	solid			0	1.00	1.00	FFFF00	thin	0.00
+black_white	color	h white vs: FFFFFF/000080	100	D7	bottom	thin FFFFFF	thin 000080	0 0.5	solid			0	1.00	1.00	000080	thin	0.00
+black_white	color	h white vs: 000080/FFFFFF	100	E7	bottom	thin 000080	thin FFFFFF	0 0.5	solid			0	1.00	1.00	000080	thin	0.00

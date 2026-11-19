@@ -77,10 +77,15 @@ from openpyxl.utils.cell import coordinate_from_string
 ROOT = Path(__file__).resolve().parents[1]
 BUILD_DIR = ROOT / "capture" / "build" / "border_conflicts"
 OUTPUT = ROOT / "tests" / "captures" / "border_conflicts.tsv"
-GROUPS = ("start_end", "styles", "colors")
+GROUPS = ("start_end", "styles", "colors", "black_white")
 REFUSALS = ("start_end",)
 """Groups whose file Excel may refuse: run on their own, a refusal is recorded as the answer."""
-MARKERS = {"styles": ("B2", "R18"), "colors": ("B2", "O16"), "start_end": ("B2", "G16")}
+MARKERS = {
+    "styles": ("B2", "R18"),
+    "colors": ("B2", "O16"),
+    "start_end": ("B2", "G16"),
+    "black_white": ("B2", "K11"),
+}
 ZOOM = 100
 STYLES = (
     "thin", "medium", "thick", "double", "hair", "dotted", "dashed", "dashDot", "dashDotDot",
@@ -173,6 +178,12 @@ COLOR_PAIRS = (
     ("indexed vs lighter rgb", _thin("indexed10", "FF0000"), _thin("1050F8")),
 )
 """Thin sides in two colors: a label, then the two sides."""
+BLACK_WHITE_PAIRS = tuple(
+    (label, _thin(end), _thin(color))
+    for label, end in (("black vs", "000000"), ("white vs", "FFFFFF"))
+    for color in ("FF0000", "00FF00", "0000FF", "808080", "FFFF00", "000080")
+)
+"""Black and white against colors: the common case, which COLOR_PAIRS leaves out."""
 COLOR_REFERENCES = ("thin", "medium", "thick", "double", "dashed", "hair")
 RED, BLUE = Line("thick", "FF0000", "FF0000"), Line("thick", "0000FF", "0000FF")
 HIDDEN = (
@@ -231,6 +242,12 @@ def _edges() -> list[Edge]:
     flat = [(n.replace("|", "/"), a, b) for n, a, b in pairs]
     assert len(pairs) <= min(6 * 6, 5 * 7)
     found += _pairs("colors", "color", letters, numbers, pairs, flat, COLOR_REFERENCES)
+    pairs = []
+    for label, a, b in BLACK_WHITE_PAIRS:
+        pairs += [(f"{label}: {a.spec}|{b.spec}", a, b), (f"{label}: {b.spec}|{a.spec}", b, a)]
+    flat = [(n.replace("|", "/"), a, b) for n, a, b in pairs]
+    assert len(pairs) <= min(6 * 6, 5 * 7)
+    found += _pairs("black_white", "color", letters, numbers, pairs, flat, COLOR_REFERENCES)
     for k, (name, a, _, b) in enumerate(HIDDEN):
         found.append(Edge("colors", "hidden", f"column {name}", f"K{4 + 2 * k}", "right", a, b))
         found.append(Edge("colors", "hidden", f"row {name}", f"{'CEG'[k]}12", "bottom", a, b))
@@ -286,6 +303,10 @@ EXPECTED = {
 }  # fmt: skip
 """What sheetpeek draws, ``style RRGGBB`` or ``none``: for each color pair (in either order and
 orientation), each pair across a hidden column or row, and each crafted border's edge."""
+EXPECTED["colors"] |= {
+    f"{a.spec}|{b.spec}": f"thin {a.spec if a.spec == '000000' else b.spec}"
+    for _, a, b in BLACK_WHITE_PAIRS
+}  # sheetpeek's darker by Rec. 601 luma: black wins, white loses
 
 
 def expected(edge: Edge) -> str:
@@ -349,6 +370,9 @@ def fill(ws: Any, group: str) -> list[Edge]:
     if group == "styles":
         letters, numbers = _grid(14, 13)
         height = 56.0
+    elif group == "black_white":
+        letters, numbers = _grid(7, 6)
+        height = 30.0
     elif group == "colors":
         letters, numbers = [*_grid(7, 6)[0], "K", "L", "M"], [*_grid(7, 6)[1], 12, 13, 14]
         height = 30.0

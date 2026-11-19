@@ -5,7 +5,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 MIN_ZOOM, MAX_ZOOM = 10, 400
-"""The zooms Excel allows, in percent."""
+"""The zooms Excel's zoom control allows a person, in percent: the range of the ``zoom=``
+override."""
+FILE_MIN_ZOOM, FILE_MAX_ZOOM = 1, 1000
+"""The file zooms read as they stand: Excel opens and draws a sheet at 5 and at 401
+(``freeze_view``); the rest of this range is unverified, and its ends are sheetpeek's bound."""
 
 
 @dataclass(frozen=True, slots=True)

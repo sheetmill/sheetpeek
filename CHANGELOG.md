@@ -190,8 +190,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   zoom, whether zeros show, a frozen pane's rows and columns), `Sheet.print_areas` (the print
   area's ranges; `Sheet.print_area_problem` says why a part was left out: `#REF!`, a formula,
   another sheet), and the manual page breaks, `Sheet.row_breaks` and `Sheet.column_breaks`.
-- HTML draws the zoom saved with each sheet, as Excel opens it; `HTMLBackend(zoom=...)` (10 to
-  400), `sheetpeek view --zoom` and `serve`'s `?zoom=` override it. Cells, text and headings
+- HTML draws the zoom saved with each sheet, as Excel opens it, a whole one past Excel's zoom
+  control's 10 to 400 too (Excel opens and draws 5 and 401; sheetpeek keeps 1 to 1000);
+  `HTMLBackend(zoom=...)` (10 to 400), `sheetpeek view --zoom` and `serve`'s `?zoom=` override it. Cells, text and headings
   scale; lines, pattern tiles and outline symbols keep their screen size, as in Excel.
 - HTML draws a frozen pane: the freeze lines, and on a whole page the frozen rows and columns held
   in place while the page scrolls, through CSS `position: sticky` (no script).
@@ -231,7 +232,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   installed.
 - Files Excel opens that 0.2.0 refused are read: a color whose `rgb` is not hex (read as Excel
   reads it), an unknown sheet state (visible), a `zoomScale` that is not a whole number (100,
-  unverified). Of 15,935 public workbooks (the Enron spreadsheets and xlcalculator's test
+  as Excel opens it). Of 15,935 public workbooks (the Enron spreadsheets and xlcalculator's test
   workbooks), two refused for a print titles name of `#N/A` now open.
 - Files Excel refuses are refused (`PackageError`): a cell past row 1,048,576, and an error code
   Excel does not read in a cell's value (`#SPILL!` there, an unknown code); 0.2.0 read both.

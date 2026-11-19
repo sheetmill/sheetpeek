@@ -417,23 +417,22 @@ def test_the_frozen_window_is_frozen_at_c3():
         assert (fields.get("split_row"), fields.get("split_column")) == ("2", "2"), state
 
 
-OUTSIDE_RANGE = {"5": 5.0, "401": 401.0}
-"""zoomScale values Excel opens a window at, outside the 10 to 400 its own zoom control and
-sheetpeek's zoom allow; sheetpeek reads them as 100. Whether Excel draws at that zoom is not
-captured (the zoom groups read the window's state only)."""
-
-
 @pytest.mark.excel
 def test_a_zoom_excel_does_not_allow_opens_at_sheetpeeks_zoom():
-    # 85.5, "abc" and an empty zoomScale open at 100, as sheetpeek reads them (16.115). A file
-    # Excel refuses is left out of the comparison (the refusal is the answer); the control must
-    # read back as saved. Excel opens 5 and 401 at 5 and 401 where sheetpeek reads 100: open,
-    # as sheetpeek's zoom is 10 to 400 (OUTSIDE_RANGE).
+    # 85.5, "abc" and an empty zoomScale open at 100; 5 and 401 at their value, and Excel draws
+    # them: at 5 its window shows more rows than any zoom of 10 or more could (72 at 100), at
+    # 401 no more than 400 shows. A file Excel refuses is left out (the refusal is the answer).
     rows = _captured()
     refused = {r["group"] for r in rows if r["kind"] == "refused"}
     assert refused <= set(freeze_view.REFUSALS)
-    zooms = {r["item"]: float(r["zoom"]) for r in rows if r["kind"] == "zoom"}
+    states = {r["item"]: r["state"] for r in rows if r["kind"] == "zoom"}
+    zooms = {
+        name: float(r["zoom"]) for name, r in ((r["item"], r) for r in rows if r["kind"] == "zoom")
+    }
     assert zooms.get("85") == 85, zooms
     for name, found in zooms.items():
-        expected = OUTSIDE_RANGE.get(name, freeze_view.EXPECTED_ZOOM[name])
-        assert found == expected, (name, found)
+        assert found == freeze_view.EXPECTED_ZOOM[name], (name, found)
+    at_100 = freeze_view.visible_rows(states["abc"])
+    assert at_100 == 72, states["abc"]
+    assert freeze_view.visible_rows(states["5"]) > at_100 * 100 / 10, states["5"]
+    assert freeze_view.visible_rows(states["401"]) <= at_100 * 100 / 400, states["401"]

@@ -844,8 +844,8 @@ direction; Excel draws nothing otherwise.
   position, one color wins; **which one is not found**: sheetpeek takes the darker by Rec. 601
   luma and, of equal luma, the larger `RRGGBB`, which fits 28 of the suite's 68 cases; the larger
   `RRGGBB` alone fits 60, Rec. 709 luma 56, and no single measure fits all (a known deviation, not
-  yet modeled; black against a color is not among the cases). Colors are compared after resolution
-  to RGB.
+  yet modeled). Black wins over every color and white loses to every one (`black_white`, six colors,
+  both orders and orientations), as luma has it. Colors are compared after resolution to RGB.
 - **Merges:** borders stay per cell. The merge's outline is the outer sides of its edge cells,
   each on its own segment, the anchor's only on its own; sides inside the merge are not drawn;
   a neighbor's side competes with each segment by the rule above. A merge's diagonals are its
@@ -1327,8 +1327,9 @@ in `rich` and text, omitted in Markdown and CSV, which show the full text).
 
 **Read.** The first `<sheetView>` gives `Sheet.view` (`SheetView`, `_read_view.py`):
 the saved zoom (`zoomScale`, 100 when absent; a value not whole, or not a number, is 100, as
-Excel opens it; one outside 10 to 400 is 100 too, where Excel opens the window at it, 5 or 401
-(`freeze_view`; whether it draws at that zoom is not captured)), `showZeros`, and a frozen pane's rows and columns (`ySplit`, `xSplit` of a pane
+Excel opens it; a whole one is kept past Excel's zoom control's 10 to 400, as Excel opens and
+draws a sheet at 5 and 401, `freeze_view`, within sheetpeek's bound of 1 to 1000, 100 past it;
+the `zoom=` override keeps 10 to 400, Excel's range for a person), `showZeros`, and a frozen pane's rows and columns (`ySplit`, `xSplit` of a pane
 whose state is `frozen` or `frozenSplit`) from the view's top-left cell; a `split` pane is kept
 as its state only. The sheet's defined name `Print_Area` (reserved, local to the sheet) gives
 `Sheet.print_areas`,

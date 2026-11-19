@@ -35,14 +35,20 @@ def test_the_saved_zoom_and_zero_display_are_read(book):  # noqa: F811
     assert (view.zoom, view.show_zeros, view.top_left) == (85, False, "C5")
 
 
-@pytest.mark.parametrize("value", ["9", "401", "-100", "0"])
-def test_a_zoom_excel_does_not_allow_is_100(book, value):  # noqa: F811
+@pytest.mark.parametrize(("value", "zoom"), [("5", 5), ("9", 9), ("401", 401), ("1000", 1000)])
+def test_a_whole_zoom_past_excels_control_is_kept(book, value, zoom):  # noqa: F811
+    # Excel opens and draws a sheet at 5 and 401 (captured, freeze_view); 1 to 1000 kept.
+    assert _view(book, f'zoomScale="{value}"').zoom == zoom
+
+
+@pytest.mark.parametrize("value", ["-100", "0", "1001", "99999999"])
+def test_a_zoom_past_sheetpeeks_bound_is_100(book, value):  # noqa: F811
     assert _view(book, f'zoomScale="{value}"').zoom == 100
 
 
 @pytest.mark.parametrize("value", ["85.5", "abc", ""])
 def test_a_zoom_that_is_not_a_whole_number_is_100(book, value):  # noqa: F811
-    # As xlio reads it; what Excel does is not captured yet (unverified).
+    # Excel opens 85.5, "abc" and an empty zoomScale at 100 (captured, freeze_view).
     assert _view(book, f'zoomScale="{value}"').zoom == 100
 
 

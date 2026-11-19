@@ -374,6 +374,25 @@ def test_the_darker_color_wins_as_captured():
 
 
 @pytest.mark.excel
+def test_black_and_white_against_colors_as_captured():
+    # The common case the color pairs leave out: black and white against six colors, both
+    # orders and orientations, against sheetpeek's rule (black the darker, white the lighter).
+    captured = _group("black_white")
+    wrong = []
+    for edge in bc.edges("black_white"):
+        if edge.kind != "color":
+            continue
+        record = captured[edge.name]
+        expected = bc.expected(edge).split()[1]
+        other = edge.second.rgb if expected == edge.first.rgb else edge.first.rgb
+        color = record["color"]
+        if not (_far(color, expected) <= 24 and _far(color, expected) < _far(color, other)):
+            wrong.append((edge.name, color, expected))
+        assert record["drawn"] == "thin", edge.name
+    assert not wrong, wrong
+
+
+@pytest.mark.excel
 def test_sides_across_a_hidden_column_or_row_compete_as_captured():
     # The visible neighbors' facing sides meet on one edge (§4.12, "Hidden rows and columns"):
     # the hidden cell's own sides (double, thick) are not drawn.
