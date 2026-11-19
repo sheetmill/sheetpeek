@@ -335,6 +335,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rows in a Normal font of Calibri 18 or 24, or Aptos Narrow 18, 20 or 24, are as tall as Excel
   makes them (Calibri 18: 24 pt, 24: 31 pt, from xlformat's captured row model); they took the
   nearest smaller measured size's height (21 pt).
+- Rows in a Normal or cell font of Calibri or Aptos Narrow 13, 15, 17 or 22 are as tall as Excel
+  makes them (captured, suite `row_height_more`: Calibri 17, 20, 23 and 29 pt, where they were
+  16, 19, 21 and 21), and so are wrapped lines in them.
 - A row Excel fits to wrapped text is as tall as Excel makes it: one wrapped line is a point
   taller than the row (Calibri 11: 16 pt, where it was 15), and wrapped lines beside a larger
   font add the difference of the two faces' line insets (three Calibri 11 lines beside a 20 pt

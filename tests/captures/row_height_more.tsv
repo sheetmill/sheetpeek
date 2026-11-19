@@ -1,0 +1,77 @@
+# suite: row_height_more (capture.row_height_more); Excel 16.115 (16.115.26110837, Microsoft 365, Current channel) for Mac, en_US
+# one workbook per Normal font, with openpyxl's <sheetFormatPr baseColWidth="8" defaultRowHeight="15"> (no customHeight); workbook 17 is Calibri 11 with a cell font a row
+# captured: 2026-11-19; method: row height (AppleScript)
+# normal: the workbook's Normal font; label: what column A of the row holds (CASES in capture/row_height_more.py); font: the cell's font; wrapped: three wrapped lines; applied: the font Excel applied to the cell; height: the row's height in points
+workbook	normal	row	label	font	wrapped	applied	height
+1	Arial 11	1	number	Arial 11	no	Arial 11	14
+1	Arial 11	2	no row element	Arial 11	no	Arial 11	14
+1	Arial 11	3	3 wrapped lines	Arial 11	yes	Arial 11	45
+2	Arial 14	1	number	Arial 14	no	Arial 14	18
+2	Arial 14	2	no row element	Arial 14	no	Arial 14	18
+2	Arial 14	3	3 wrapped lines	Arial 14	yes	Arial 14	57
+3	Times New Roman 11	1	number	Times New Roman 11	no	Times New Roman 11	14
+3	Times New Roman 11	2	no row element	Times New Roman 11	no	Times New Roman 11	14
+3	Times New Roman 11	3	3 wrapped lines	Times New Roman 11	yes	Times New Roman 11	45
+4	Times New Roman 14	1	number	Times New Roman 14	no	Times New Roman 14	18
+4	Times New Roman 14	2	no row element	Times New Roman 14	no	Times New Roman 14	18
+4	Times New Roman 14	3	3 wrapped lines	Times New Roman 14	yes	Times New Roman 14	57
+5	Courier New 11	1	number	Courier New 11	no	Courier New 11	15
+5	Courier New 11	2	no row element	Courier New 11	no	Courier New 11	15
+5	Courier New 11	3	3 wrapped lines	Courier New 11	yes	Courier New 11	48
+6	Courier New 14	1	number	Courier New 14	no	Courier New 14	19
+6	Courier New 14	2	no row element	Courier New 14	no	Courier New 14	19
+6	Courier New 14	3	3 wrapped lines	Courier New 14	yes	Courier New 14	60
+7	Georgia 11	1	number	Georgia 11	no	Georgia 11	14
+7	Georgia 11	2	no row element	Georgia 11	no	Georgia 11	14
+7	Georgia 11	3	3 wrapped lines	Georgia 11	yes	Georgia 11	45
+8	Georgia 14	1	number	Georgia 14	no	Georgia 14	18
+8	Georgia 14	2	no row element	Georgia 14	no	Georgia 14	18
+8	Georgia 14	3	3 wrapped lines	Georgia 14	yes	Georgia 14	57
+9	Calibri 13	1	number	Calibri 13	no	Calibri 13	17
+9	Calibri 13	2	no row element	Calibri 13	no	Calibri 13	17
+9	Calibri 13	3	3 wrapped lines	Calibri 13	yes	Calibri 13	54
+10	Calibri 15	1	number	Calibri 15	no	Calibri 15	20
+10	Calibri 15	2	no row element	Calibri 15	no	Calibri 15	20
+10	Calibri 15	3	3 wrapped lines	Calibri 15	yes	Calibri 15	63
+11	Calibri 17	1	number	Calibri 17	no	Calibri 17	23
+11	Calibri 17	2	no row element	Calibri 17	no	Calibri 17	23
+11	Calibri 17	3	3 wrapped lines	Calibri 17	yes	Calibri 17	72
+12	Calibri 22	1	number	Calibri 22	no	Calibri 22	29
+12	Calibri 22	2	no row element	Calibri 22	no	Calibri 22	29
+12	Calibri 22	3	3 wrapped lines	Calibri 22	yes	Calibri 22	90
+13	Aptos Narrow 13	1	number	Aptos Narrow 13	no	Aptos Narrow 13	18
+13	Aptos Narrow 13	2	no row element	Aptos Narrow 13	no	Aptos Narrow 13	18
+13	Aptos Narrow 13	3	3 wrapped lines	Aptos Narrow 13	yes	Aptos Narrow 13	57
+14	Aptos Narrow 15	1	number	Aptos Narrow 15	no	Aptos Narrow 15	20
+14	Aptos Narrow 15	2	no row element	Aptos Narrow 15	no	Aptos Narrow 15	20
+14	Aptos Narrow 15	3	3 wrapped lines	Aptos Narrow 15	yes	Aptos Narrow 15	63
+15	Aptos Narrow 17	1	number	Aptos Narrow 17	no	Aptos Narrow 17	23
+15	Aptos Narrow 17	2	no row element	Aptos Narrow 17	no	Aptos Narrow 17	23
+15	Aptos Narrow 17	3	3 wrapped lines	Aptos Narrow 17	yes	Aptos Narrow 17	72
+16	Aptos Narrow 22	1	number	Aptos Narrow 22	no	Aptos Narrow 22	29
+16	Aptos Narrow 22	2	no row element	Aptos Narrow 22	no	Aptos Narrow 22	29
+16	Aptos Narrow 22	3	3 wrapped lines	Aptos Narrow 22	yes	Aptos Narrow 22	90
+17	Calibri 11	1	number in Arial 11	Arial 11	no	Arial 11	15
+17	Calibri 11	2	number in Arial 14	Arial 14	no	Arial 14	18
+17	Calibri 11	3	number in Times New Roman 11	Times New Roman 11	no	Times New Roman 11	15
+17	Calibri 11	4	number in Times New Roman 14	Times New Roman 14	no	Times New Roman 14	18
+17	Calibri 11	5	number in Courier New 11	Courier New 11	no	Courier New 11	15
+17	Calibri 11	6	number in Courier New 14	Courier New 14	no	Courier New 14	19
+17	Calibri 11	7	number in Georgia 11	Georgia 11	no	Georgia 11	15
+17	Calibri 11	8	number in Georgia 14	Georgia 14	no	Georgia 14	18
+17	Calibri 11	9	number in Calibri 13	Calibri 13	no	Calibri 13	17
+17	Calibri 11	10	number in Calibri 15	Calibri 15	no	Calibri 15	20
+17	Calibri 11	11	number in Calibri 17	Calibri 17	no	Calibri 17	23
+17	Calibri 11	12	number in Calibri 22	Calibri 22	no	Calibri 22	29
+17	Calibri 11	13	number in Aptos Narrow 13	Aptos Narrow 13	no	Aptos Narrow 13	18
+17	Calibri 11	14	number in Aptos Narrow 15	Aptos Narrow 15	no	Aptos Narrow 15	20
+17	Calibri 11	15	number in Aptos Narrow 17	Aptos Narrow 17	no	Aptos Narrow 17	23
+17	Calibri 11	16	number in Aptos Narrow 22	Aptos Narrow 22	no	Aptos Narrow 22	29
+17	Calibri 11	17	3 wrapped lines in Calibri 11	Calibri 11	yes	Calibri 11	48
+17	Calibri 11	18	3 wrapped lines in Calibri 14	Calibri 14	yes	Calibri 14	60
+17	Calibri 11	19	3 wrapped lines in Calibri 20	Calibri 20	yes	Calibri 20	81
+17	Calibri 11	20	3 wrapped lines in Aptos Narrow 11	Aptos Narrow 11	yes	Aptos Narrow 11	48
+17	Calibri 11	21	3 wrapped lines in Arial 11	Arial 11	yes	Arial 11	46
+17	Calibri 11	22	3 wrapped lines in Courier New 11	Courier New 11	yes	Courier New 11	48
+17	Calibri 11	23	3 wrapped lines in Times New Roman 11	Times New Roman 11	yes	Times New Roman 11	46
+17	Calibri 11	24	3 wrapped lines in Georgia 11	Georgia 11	yes	Georgia 11	46

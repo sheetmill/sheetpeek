@@ -210,11 +210,17 @@ def test_row_heights(tmp_path, sheet_format, size, heights):
 
 @pytest.mark.parametrize(
     ("family", "size", "height"),
-    [("Calibri", 18, 24), ("Calibri", 24, 31), ("Aptos Narrow", 20, 27), ("Calibri", 13, 16)],
+    [
+        ("Calibri", 18, 24),
+        ("Calibri", 24, 31),
+        ("Aptos Narrow", 20, 27),
+        ("Calibri", 13, 17),
+        ("Calibri", 19, 24),
+    ],
 )
 def test_row_heights_of_larger_normal_fonts(tmp_path, family, size, height):
-    # xlformat's row model, captured at 9 to 24 points; 13 is not measured and takes the
-    # nearest size's, 12 (unverified).
+    # xlformat's row model, captured at 9 to 24 points, and 13 from row_height_more; 19 is not
+    # captured and takes the nearest size's, the smaller on a tie, 18 (unverified).
     wb = openpyxl.Workbook()
     wb.active["A1"] = 1
     path = save(wb, tmp_path / "rows.xlsx")

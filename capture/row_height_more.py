@@ -137,36 +137,22 @@ EXPECTED: dict[tuple[int, int], float] = {
     # three lines of 16 and 20 pt
     **{(k, r): h for k in (1, 3, 5, 7) for r, h in ((1, 15), (2, 15), (3, 48))},
     **{(k, r): h for k in (2, 4, 6, 8) for r, h in ((1, 19), (2, 19), (3, 60))},
-    # Calibri 13, 15, 17, 22: the nearest measured size's (the smaller on a tie)
-    (9, 1): 16,
-    (9, 2): 16,
-    (9, 3): 51,
-    (10, 1): 19,
-    (10, 2): 19,
-    (10, 3): 60,
-    (11, 1): 21,
-    (11, 2): 21,
-    (11, 3): 66,
-    (12, 1): 26,
-    (12, 2): 26,
-    (12, 3): 81,
+    # Calibri 13, 15, 17, 22: the heights row_height_more captured, in sheetpeek's table
+    **{
+        (k, r): h
+        for k, base in ((9, 17), (10, 20), (11, 23), (12, 29))
+        for r, h in ((1, base), (2, base), (3, 3 * (base + 1)))
+    },
     # Aptos Narrow 13, 15, 17, 22
-    (13, 1): 16,
-    (13, 2): 16,
-    (13, 3): 51,
-    (14, 1): 19,
-    (14, 2): 19,
-    (14, 3): 60,
-    (15, 1): 22,
-    (15, 2): 22,
-    (15, 3): 69,
-    (16, 1): 27,
-    (16, 2): 27,
-    (16, 3): 84,
+    **{
+        (k, r): h
+        for k, base in ((13, 18), (14, 20), (15, 23), (16, 29))
+        for r, h in ((1, base), (2, base), (3, 3 * (base + 1)))
+    },
     # Calibri 11 Normal: a number in each font, then three wrapped lines
     **{
         (17, r): h
-        for r, h in enumerate((15, 19, 15, 19, 15, 19, 15, 19, 16, 19, 21, 26, 16, 19, 22, 27), 1)
+        for r, h in enumerate((15, 19, 15, 19, 15, 19, 15, 19, 17, 20, 23, 29, 18, 20, 23, 29), 1)
     },
     **{(17, r): h for r, h in enumerate((48, 60, 81, 48, 48, 48, 48, 48), len(NORMALS) + 1)},
 }

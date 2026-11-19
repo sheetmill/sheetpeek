@@ -611,8 +611,11 @@ at, in order:
 5. otherwise the Normal font's height from xlformat's row model (`row_metrics`, captured from
    Excel for Mac; this repository's suite `row_height` agrees at 9 to 16): Calibri 12, 14, 15, 16,
    19, 21, 24, 26, 31 pt at 9, 10, 11, 12, 14, 16, 18, 20, 24; Aptos Narrow 13, 14, 15, 16, 19,
-   22, 24, 27, 32. A size between them takes the nearest measured size's, and another face
-   Calibri's (unverified). Plus 1 pt each for `thickTop` and `thickBottom` when the row has no
+   22, 24, 27, 32; at 13, 15, 17 and 22 the heights suite `row_height_more` captured, Calibri 17,
+   20, 23, 29 and Aptos Narrow 18, 20, 23, 29. Another size takes the nearest of these (the
+   smaller on a tie; unverified). Another face takes Calibri's height, a known deviation:
+   Excel's rows in Arial, Times New Roman and Georgia are a point shorter at 11 and 14, and
+   Courier New's agree (`row_height_more`). Plus 1 pt each for `thickTop` and `thickBottom` when the row has no
    `<row>` element.
 
 **Rows are fitted to their cells** when Excel opens a file (captured, suite `row_height`): a row
@@ -627,8 +630,10 @@ cell fonts' (Calibri 11 has 1, Calibri 20 has 3); Calibri 11 gives 16 pt a line 
 tallest (not captured); rich-text runs and faces or sizes xlformat has not measured keep the line
 height plus 1 a line, without the inset. `thickTop` or `thickBottom` together with
 `customHeight` was not captured. A font not in
-the table uses Calibri's height at the nearest measured size, as xlformat scales widths; that, and
-sizes between the measured ones, are **unverified**.
+the table uses Calibri's height at the nearest captured size, as xlformat scales widths: the
+known deviation of other faces above, and each wrapped line in them a point taller than Excel's
+(`row_height_more`: three lines of Arial 11 are 45 pt under an Arial Normal font, 46 under
+Calibri 11, where sheetpeek gives 48).
 
 Excel ignores a stored `defaultRowHeight` without `customHeight` (15, 20 and 30 captured): with
 openpyxl's 15, a Calibri 14 workbook shows 19 pt rows and a Calibri 9 one 12 pt rows, so that
@@ -660,9 +665,9 @@ a cached value (as openpyxl writes it) has no `t`. The same file confirms Excel 
 
 Captured so far, in `tests/captures/`: by print (route B) `layout` (§3.6, §4.1 to §4.7); read
 from Excel `theme_colors` and `theme_colors_more` (§3.3), `merge_width` and `error_width` (§4.2,
-§4.4, no deviation), `row_height` (§4.7), `package` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14), `theme_fonts_palette`
-and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10, the look), `merges_spill`, `border_conflicts` and `gradients` (§4.12), `text_style` (§4.7, §4.13), `rotation` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
-Excel 16.115 (Microsoft 365). The rules of §4.11, §4.15, §4.16 and where §4.10's links go have no
+§4.4, no deviation), `row_height` and `row_height_more` (§4.7), `package` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14), `theme_fonts_palette`
+and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts` and `gradients` (§4.12), `text_style` (§4.7, §4.13), `rotation` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
+Excel 16.115 (Microsoft 365). The rules of §4.11, §4.15 and §4.16 have no
 capture here yet and are marked unverified until screen suites capture them
 on Microsoft 365; so are the parts of §4.12, §4.14 and §4.18 that say so. What still waits for
 the screen: the text insets and the baselines of angled text, which come from print, and the 15 pt rows that print

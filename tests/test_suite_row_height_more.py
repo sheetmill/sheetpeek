@@ -138,6 +138,20 @@ def _captured():
     return {(int(r["workbook"]), int(r["row"])): r for r in _parse(suite.OUTPUT)}
 
 
+SHORTER_FACES = ("Arial", "Times New Roman", "Georgia")
+"""Faces xlformat has no metrics for, measured as Calibri (decided, ARCHITECTURE §4.7): Excel's
+rows for them are a point shorter than Calibri's at 11 and 14 (14 and 18 pt), and so is each
+wrapped line. Courier New's agree with Calibri's. A known deviation until xlformat measures the
+faces; the rows it covers are pinned below, so a new one fails."""
+
+KNOWN = frozenset(
+    {(k, r) for k in (1, 2, 3, 4, 7, 8) for r in (1, 2, 3)}
+    | {(17, r) for r in (2, 4, 8, 21, 23, 24)}
+)
+"""The rows of :data:`SHORTER_FACES`, as Normal font (workbooks 1 to 4, 7, 8) or as the cell's
+font under Calibri 11 (workbook 17: at 14 pt, and three wrapped lines at 11)."""
+
+
 def _compare(name, cases):
     captured = _captured()
     substituted = []
@@ -148,13 +162,18 @@ def _compare(name, cases):
             substituted.append((case.label, case.normal, record["applied"]))
             continue
         expected = suite.EXPECTED[(case.workbook, case.row)]
-        if float(record["height"]) != expected:
+        key = (case.workbook, case.row)
+        if (float(record["height"]) != expected) != (key in KNOWN):
             wrong.append((case.normal, case.label, record["height"], expected))
+    known = sum(1 for case in cases if (case.workbook, case.row) in KNOWN)
     REPORT[f"row_height_more {name}"] = (
-        f"row_height_more {name}: {len(cases) - len(wrong)} of {len(cases)} rows as Excel lays out"
+        f"row_height_more {name}: {len(cases) - known} of {len(cases)} rows as Excel lays out, "
+        f"{known} the known deviation of faces measured as Calibri"
     )
     assert not substituted, f"Excel substituted a face: {substituted}"
-    assert not wrong, f"(Normal font, row, Excel, sheetpeek): {wrong}"
+    assert not wrong, (
+        f"(Normal font, row, Excel, sheetpeek; a new difference or a known one gone): {wrong}"
+    )
 
 
 @pytest.mark.excel

@@ -17,11 +17,24 @@ _MEASURED_SIZES = (9, 10, 11, 12, 14, 16, 18, 20, 24)
 # The height of a row without ``ht`` per Normal font: xlformat's row model, captured from Excel
 # for Mac for Calibri and Aptos Narrow at these sizes (its CAPTURING.md section 2 item 44; it
 # agrees with this repository's suite row_height at 9 to 16 points).
+# Sizes between those, from this repository's suite row_height_more (Excel's own row height):
+# no line through the measured sizes gives them (13 lies between 16 and 19, and is 17).
+_BETWEEN: dict[str, dict[int, float]] = {
+    "calibri": {13: 17.0, 15: 20.0, 17: 23.0, 22: 29.0},
+    "aptos narrow": {13: 18.0, 15: 20.0, 17: 23.0, 22: 29.0},
+}
 FONT_ROW_HEIGHTS: dict[str, dict[int, float]] = {
-    family.lower(): {
-        size: xlformat.row_metrics(xlformat.Font(family, size)).font_height
-        for size in _MEASURED_SIZES
-    }
+    family.lower(): dict(
+        sorted(
+            {
+                **{
+                    size: xlformat.row_metrics(xlformat.Font(family, size)).font_height
+                    for size in _MEASURED_SIZES
+                },
+                **_BETWEEN[family.lower()],
+            }.items()
+        )
+    )
     for family in ("Calibri", "Aptos Narrow")
 }
 NO_SHEET_FORMAT = 16.0  # an unlisted row of a file without <sheetFormatPr>, every font
@@ -30,10 +43,11 @@ WRAPPED_LEADING = 1.0  # wrapped lines are the font's row height plus 1 apart (C
 
 @lru_cache(maxsize=256)
 def font_row_height(font: Font) -> float:
-    """The captured row height for a font, at the nearest measured size.
+    """The captured row height for a font, at the nearest captured size (the smaller on a tie).
 
-    A family not in the table uses Calibri's heights, as xlformat measures it as Calibri; both are
-    unverified, as are sizes between the measured ones (xlformat's ``row_metrics`` refuses them).
+    A family not in the table uses Calibri's heights, as xlformat measures it as Calibri: a known
+    deviation, Excel's rows for Arial, Times New Roman and Georgia are a point shorter at 11 and
+    14 (row_height_more). Other sizes between the captured ones and past 24 are unverified.
     """
     table = FONT_ROW_HEIGHTS.get(font.name.lower(), FONT_ROW_HEIGHTS["calibri"])
     size = min(table, key=lambda s: (abs(s - font.size), s))
