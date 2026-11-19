@@ -264,12 +264,6 @@ PINNED = {
     # xlio refuses a font size past 409; Excel opens 409.5, reports size 409 and lays it out
     # wider than 409 (1,769 pt).
     "font_size_409.5": "xlio: refuses 409.5",
-    # xlformat has no Arial glyph table and measures Arial as Calibri: a digit of 5 pt, not 6,
-    # and Calibri's row (§4.7). Every Arial 10 case differs from there.
-    **dict.fromkeys(
-        ("arial_10", "arial_10_width_minus_1", "arial_10_width_1e6", "arial_10_width_1e30"),
-        "xlformat: Arial measured as Calibri",
-    ),
     # xlio wraps a width modulo 65,536 points at a fixed 6 pt digit (Calibri 11's); Excel wraps
     # it at the Normal font's digit: 1e6 at Calibri 14 (7 pt) is 7e6 mod 65,536 = 53,184 pt.
     **dict.fromkeys(
@@ -373,10 +367,26 @@ def test_the_digit_of_other_normal_fonts(captured, taken):
     # Rule package_limits (§5.5, ``<col width>``): kept in points modulo 65,536 at the Normal
     # font's digit, as Calibri 14's 7 pt shows (xlio's 6 pt for every font is pinned). Excel's
     # font name confirms the Normal font took.
-    for prefix, font in (("arial_10", "Arial"), ("calibri_14", "Calibri")):
-        for name, record in captured.items():
-            if name.startswith(prefix):
-                assert record["font name"] == font, name
-    deviations = _compare(captured, taken, ("arial_10", "calibri_14"))
-    _report("package_more normal fonts", "package_more, other Normal fonts", 8, deviations)
-    assert set(deviations) == _pinned(captured, ("arial_10", "calibri_14")), deviations
+    for name, record in captured.items():
+        if name.startswith("calibri_14"):
+            assert record["font name"] == "Calibri", name
+    deviations = _compare(captured, taken, ("calibri_14",))
+    _report("package_more Calibri 14", "package_more, a Calibri 14 Normal font", 4, deviations)
+    assert set(deviations) == _pinned(captured, ("calibri_14",)), deviations
+
+
+@pytest.mark.excel
+@pytest.mark.xfail(
+    strict=True,
+    reason="xlformat before 0.5.0 has no Arial glyph table and measures Arial as Calibri: "
+    "sheetpeek gives an Arial 10 Normal font a 45 pt default column and 14 pt rows, Excel 53 and "
+    "13; xlformat 0.5.0's table gives Excel's",
+)
+def test_an_arial_10_normal_font_as_captured(captured, taken):
+    # Arial 10's digit is 6 pt, as Calibri 11's, so its huge widths wrap as Calibri 11's do.
+    for name, record in captured.items():
+        if name.startswith("arial_10"):
+            assert record["font name"] == "Arial", name
+    deviations = _compare(captured, taken, ("arial_10",))
+    _report("package_more Arial 10", "package_more, an Arial 10 Normal font", 4, deviations)
+    assert deviations == {}
