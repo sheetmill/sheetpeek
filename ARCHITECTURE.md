@@ -14,10 +14,9 @@ CLI views a file and serves a folder of workbooks as HTML.
 - **One model, thin backends.** Reading and layout produce a public, immutable render model.
   Backends only translate it. Anything Excel decides is decided once, in the model: what text a
   cell shows, where it is aligned, how far text spills, which cells a merge covers.
-- **Cached values.** sheetpeek shows the values stored in the file. A formula without a cached value
-  (a file written by openpyxl and never opened in Excel) shows as empty and is counted in the
-  sheet's warnings. Recalculation through `xlrecalc`, which becomes a required dependency, is
-  planned (§11).
+- **Values on opening.** A formula cell shows what Excel shows when it opens the file: the cached
+  value where Excel keeps it, the value `xlrecalc` (a required dependency) computes where Excel
+  recalculates (§5.7). A formula xlrecalc does not compute keeps its cached value and is reported.
 - **Excel's number formats through xlformat**, a required dependency. It is pure Python with no
   dependencies of its own, and the package's purpose is showing what Excel shows.
 - **Degrade, never fail, never silently.** A backend that cannot show a feature leaves it out or
@@ -46,7 +45,8 @@ xlsx ──read──▶ Sheet ──layout(mode)──▶ RenderedSheet ──b
    the cell stream        layout-free        spill, visibility           rich, text
 ```
 
-A **`Sheet`** holds what the file says, independent of how it will be shown: raw cached values,
+A **`Sheet`** holds what the file says, independent of how it will be shown: the values Excel shows
+on opening (cached or computed, §5.7),
 number formats, resolved styles and geometry. **Layout** turns a `Sheet` into a `RenderedSheet`
 for one width mode (§2.1): it calls xlformat, applies Excel's layout rules (§4) and computes
 spill. A `RenderedSheet` keeps a reference to its `Sheet`, so a backend that wants a different
@@ -107,7 +107,7 @@ layout fields marked *layout*. The style fields (`number_format` to `indent`) li
 | field | type | source | notes |
 |---|---|---|---|
 | `row`, `column` | `int` | the cell's position | |
-| `value` | `None \| bool \| int \| float \| str \| ExcelError` | xlio's `Sheet.cells(ref, rich=True)`: the value as Excel reads it; a whole number below 2**53 is an `int` | raw cached value; dates stay serial numbers; `xlformat.ExcelError` (a `str` enum, compared with `==`) for `data_type == "e"`, or `str` when the file's text is not shaped like an error code |
+| `value` | `None \| bool \| int \| float \| str \| ExcelError` | xlio's `Sheet.cells(ref, rich=True)`: the value as Excel reads it; a whole number below 2**53 is an `int` | the value Excel shows on opening: the cached value, or xlrecalc's where Excel recalculates (§5.7); dates stay serial numbers; `xlformat.ExcelError` (a `str` enum, compared with `==`) for `data_type == "e"`, or `str` when the file's text is not shaped like an error code |
 | `kind` | `"empty" \| "number" \| "text" \| "bool" \| "error"` | `cell.data_type` | a date is a `number` whose format is a date format; `d` cells (ISO 8601, rare) become serials |
 | `number_format` | `str` | `cell.number_format` | |
 | `font` | `Font(name, size, bold, italic, underline, strike, color, ..., theme_color)` | the cell format's font (xlio); a missing name or size inherits the Normal style's | `color` is resolved `RRGGBB`, or `None` for automatic; `theme_color` the theme index it comes from (§3.3) |
@@ -674,8 +674,8 @@ capture them on Microsoft 365.
   link looks the same. So the cell's format draws a link, and every output adds nothing for it.
 - **The text is the cell's value.** `display` is not drawn, and an empty linked cell shows
   nothing; it gets no anchor and is reported (`link.empty_cell`). A merge's covered cells are not.
-- **`HYPERLINK()` from a file** is drawn as its cached value, in the cell's own format: Excel adds
-  no style when it loads a file.
+- **`HYPERLINK()` from a file** is drawn as the value it shows on opening (§5.7), in the cell's
+  own format: Excel adds no style when it loads a file.
 
 What sheetpeek decides (not Excel's behavior):
 - **Reading.** A `<hyperlink>` gives its `ref` range, the target of its relationship, `location`,
@@ -1531,7 +1531,9 @@ runs, in `Book._stream`), which gives at the same time:
 - the bounds of every cell, which with the merged ranges make the used range, and the rows with
   cells, which with xlio's rows make the rows the file lists (§4.7);
 - formulas without a cached value, strings with runs, shown phonetic guides, and formulas that
-  call `HYPERLINK()` (`_read_links.add_formula`, §4.10).
+  call `HYPERLINK()` (`_read_links.add_formula`, §4.10);
+- every formula, for the recalculation check while it takes them, and the formula cells and
+  array ranges of the range read, for the values on opening (§5.7).
 
 Each sheetpeek cell is built as the stream yields it and kept in its row's list; no `xlio.Cell`
 is kept, and a row's cells share one row number (each cell's own `int` cost 32 bytes a cell).
@@ -1694,7 +1696,7 @@ could be, and `Book` is for one thread at a time. `_package.open_package` gives 
 and `.xlsb`, looking at the content first and the name second.
 
 **Errors.** `PackageError` is a `ValueError`, and `LimitError` a `PackageError`, as in xlrecalc; the
-classes are separate, since sheetpeek does not yet depend on xlrecalc. xlio's refusals become
+classes are separate, and xlrecalc's refusals while computing are reported, not raised (§5.7). xlio's refusals become
 sheetpeek's: its `LimitError` a `LimitError`, its `PackageError` a `PackageError` ("cannot read
 this workbook: ...") with the original as its cause and the file's folder dropped from the
 message, since `serve` shows messages to clients. A path that cannot be opened keeps its
@@ -1712,6 +1714,43 @@ Excel (xlrecalc's capture `whitespace`). Escaped UTF-16 surrogates join into the
 spell; a lone one, which no output can encode, becomes the replacement character.
 
 Rich text keeps its runs in shared and inline strings alike (§4.16).
+
+### 5.7 Values on opening
+
+A formula cell shows what Excel shows when it opens the file: the cached value where Excel keeps
+it, a computed one where Excel recalculates. Which formulas Excel recalculates is xlrecalc's
+rule, captured there (`open_calc`, `volatile_names`): every formula in a file without `calcPr`,
+with `fullCalcOnLoad`, last calculated by an older Excel (`calcId`), not saved by Excel (no
+`<fileVersion appName="xl">`), or calling a volatile function in a cell Excel did not mark
+`ca="1"`; otherwise only the marked cells (volatile cells and their dependents); none in manual
+calculation. `recalc_on_load` takes xlrecalc's three values with its meaning: `"excel"`, the
+default, that rule; `"always"`, every formula; `"never"`, none but the formulas without a cached
+value and the volatile ones. `open`, `read`, `Book`, `make_server` and the command line's
+`--recalc-on-load` take it.
+
+**Work only where it is needed.** A `Book` asks `xlrecalc.RecalcCheck` (`_recalc.Recalc`), which
+reads the workbook part alone, and that settles most files. Otherwise the check is fed each
+formula as `Book._stream` reads it (its text, whether it holds a value, its `ca` mark); when a
+sheet read has formulas in its range, the worksheets not read yet get one pass of their formulas
+only. Feeding ends as soon as the answer is `"all"`. The answer is the whole workbook's, since a
+volatile cell or a formula without a value on one sheet changes what another shows. A range
+without formulas asks nothing, and `"none"` keeps every cached value without an engine.
+Otherwise one engine per `Book`, loaded on first use (`xlrecalc.load`, which reads every
+worksheet again), gives the value of each formula cell of the range and of each cell an array
+formula or data table fills there. xlrecalc reads the book's own open file through a view with
+a position of its own (`_recalc.FileView`), so what it computes is what was checked; it is
+given the file, not its path.
+
+**What xlrecalc does not compute** keeps the value the file holds: a function or construct it
+does not implement, a cell that depends on one, an error inside xlrecalc, a value the model has
+no kind for. Each such formula cell is reported as `value.not_computed`, with xlrecalc's reason as
+the detail (the function's name, or that it depends on one); one without a cached value shows as
+empty and is counted in `value.no_cached_value` too. A workbook xlrecalc refuses keeps every
+cached value, and the range's formulas are reported with the refusal. A macro sheet keeps its
+cached values, since xlrecalc computes worksheets only. An array formula fills the range the
+file records for it: a dynamic array that would spill further is not grown. Computed values take
+the model's types as read ones do (§3): a whole number below 2**53 an `int`, an error an
+`xlformat.ExcelError`.
 
 ## 6. The xlformat seam
 
@@ -1992,6 +2031,7 @@ src/sheetpeek/
   _read_filters.py   the sheet's and tables' filters from xlio (§4.19)
   _read_tables.py    the sheet's tables and the styles they name, from xlio (§4.20)
   _read.py           the reader: xlio's models and cell stream into a Sheet (§5.4)
+  _recalc.py         the values on opening through xlrecalc: the check, the engine (§5.7)
   _style/            a cell's style, one module per aspect: number format, border, fill, font,
                      alignment
   _detect.py         what a file uses that the model does not carry: one rule per sheet child
@@ -2033,8 +2073,8 @@ bench/               scripts that rerun §5 and §7.3's figures; README.md recor
 docs/                Sphinx, as in xlformat
 ```
 
-**The reader is isolated.** The reading modules (`_read.py`, `_structure.py`, the `_read_*`
-modules, `_detect.py`, `_sheets.py`, `_page.py`) take xlio's models; nothing imports openpyxl (a
+**The reader is isolated.** The reading modules (`_read.py`, `_recalc.py`, `_structure.py`, the
+`_read_*` modules, `_detect.py`, `_sheets.py`, `_page.py`) take xlio's models; nothing imports openpyxl (a
 test enforces it), and only the package's entry points import `_read.py`. Everything else works
 on sheetpeek's own model, so layout and backends do not know the reader. `_structure.py` knows
 nothing of layout.
@@ -2077,6 +2117,7 @@ sheetpeek.render_workbook("book.xlsx")                            # every sheet,
 
 limits = sheetpeek.ReadLimits(max_part_bytes=2**28, max_cells=10**6)
 sheetpeek.read(upload, limits=limits)                             # a file from someone else (§5.5)
+sheetpeek.read("book.xlsx", recalc_on_load="never")               # cached values (§5.7)
 ```
 
 **Functions, not methods (decided).** Methods such as `rs.to_html()` can be added later; they
@@ -2358,9 +2399,8 @@ are read.
    conditional formatting, pictures and their placement, notes and comments, the print
    settings not yet drawn (titles, headers and footers); then pivot
    tables. Their parts come from xlio; those it does not read yet (pivot tables) are on its list.
-2. **Recalculation** through `xlrecalc`, which becomes a required dependency: what a formula
-   cell shows on opening, and conditional formats driven by formulas, as Excel evaluates them.
-   Charts, possibly as a package of their own. Planned options (§9) as they are asked for.
+2. **Conditional formats driven by formulas**, evaluated through xlrecalc as Excel evaluates
+   them. Charts, possibly as a package of their own. Planned options (§9) as they are asked for.
 3. **Excel for Windows and the Mac.** The platform becomes a setting, with Excel for Windows as
    the default (most Excel users have it) and Excel for Mac kept; xlformat, which measures the
    Mac only so far, takes it where the platforms turn out to differ, and xlrecalc and xlio

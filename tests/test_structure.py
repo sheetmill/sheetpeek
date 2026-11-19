@@ -15,7 +15,7 @@ def scan_file(path):
     """The first sheet's structure, as the reader finds it before reading its cells."""
     with sheetpeek.open(path) as book:
         source = book._book.sheet(0)
-        found, _ = book._stream(source, None, Collector("sheet"))
+        found, _, _ = book._stream(source, None, None, Collector("sheet"))
         return fill(found, source)
 
 
@@ -108,7 +108,7 @@ def test_column_specs(scan_xml):
 
 def test_formulas_returning_the_empty_string(tmp_path):
     # An empty cached string is the empty string (xlio); a t="str" formula without <v> has no
-    # cached value, as xlio reads it (what Excel shows is not captured).
+    # cached value, as xlio reads it, and is computed (here the empty string, and 2).
     path = raw_sheet(
         tmp_path / "raw.xlsx",
         "<sheetData><row r='1'>"
@@ -121,8 +121,8 @@ def test_formulas_returning_the_empty_string(tmp_path):
     sheet = sheetpeek.read(path)
     assert [(c.value, c.kind) for c in sheet.cells[0]] == [
         ("", "text"),
-        (None, "empty"),
-        (None, "empty"),
+        ("", "text"),
+        (2, "number"),
     ]
 
 

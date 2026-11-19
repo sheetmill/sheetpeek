@@ -33,9 +33,10 @@ def run(*args, terminal=False):
 def test_view_is_text_when_piped(book):
     status, out, err = run(book)
     assert status == 0
-    # The used range is column A alone; the text spills into an added column.
-    assert out == "a long text value\n  1234.5\n\n"
-    assert "1 formula cell(s) have no cached value" in err
+    # The used range is column A alone; the text spills into an added column. The formula,
+    # which openpyxl writes without a value, is computed as Excel computes it on opening.
+    assert out == "a long text value\n  1234.5\n       2\n"
+    assert err == ""
 
 
 def test_view_is_rich_on_a_terminal(book):

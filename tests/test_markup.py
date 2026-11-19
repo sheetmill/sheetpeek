@@ -221,7 +221,15 @@ def inline(tmp_path):
 
 
 def cached(tmp_path):
-    return cell_xml(tmp_path, f'<c r="A2" t="str"><f>1</f><v>{escape(PAYLOAD)}</v></c>')
+    # A function xlrecalc does not compute keeps the value the file holds.
+    formula = "CUBEVALUE(&quot;x&quot;)"
+    return cell_xml(tmp_path, f'<c r="A2" t="str"><f>{formula}</f><v>{escape(PAYLOAD)}</v></c>')
+
+
+def computed(tmp_path):
+    # A string a formula computes on opening (the file holds no value; xlrecalc computes it).
+    literal = escape('"' + PAYLOAD.replace('"', '""') + '"')
+    return cell_xml(tmp_path, f'<c r="A2" t="str"><f>{literal}</f></c>')
 
 
 def error_text(tmp_path):
@@ -653,9 +661,9 @@ def table_own_style_name(tmp_path):
 
 
 SOURCES = [
-    inline, cached, error_text, error_shaped, date_text, shared, escaped_in_file, line_breaks,
-    wrapped, filled_alignment, justified, spilled_left, merged, filled_and_bordered, border_rgb,
-    gradient_rgb, hidden, format_quoted,
+    inline, cached, computed, error_text, error_shaped, date_text, shared, escaped_in_file,
+    line_breaks, wrapped, filled_alignment, justified, spilled_left, merged, filled_and_bordered,
+    border_rgb, gradient_rgb, hidden, format_quoted,
     format_text_section, format_escaped, format_currency, format_refused, sheet_name, font_name,
     normal_font_name, theme_srgb, theme_system, style_rgb, palette, hyperlink, hyperlink_target,
     hyperlink_mailto, hyperlink_refused, hyperlink_tab, hyperlink_tooltip, hyperlink_formula,

@@ -381,6 +381,8 @@ ODD_FIELDS = {
         '</sheetData><autoFilter ref="A1:B2"><filterColumn colId="{}"/></autoFilter>',
     ),
     "filter row": ("</sheetData>", '</sheetData><autoFilter ref="A1:B{}"/>'),
+    # A number a formula computes on opening (the file holds no value; xlrecalc computes it).
+    "computed": ("</sheetData>", '<row r="99"><c r="A99"><f>{0}*1</f></c></row></sheetData>'),
 }
 
 

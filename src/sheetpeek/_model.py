@@ -218,14 +218,16 @@ class CellStyle:
 
 @dataclass(frozen=True, slots=True)
 class Cell:
-    """One cell as the file states it: the cached value and the resolved style."""
+    """One cell: the value Excel shows on opening and the resolved style."""
 
     row: int
     column: int
     value: CellValue
-    """The cached value as Excel reads it. A number is an ``int`` when it is whole and below
-    2**53 in magnitude, else a ``float`` (Excel stores every number as a double); text is a
-    ``str``, ``_xHHHH_`` escapes decoded; an error an :class:`xlformat.ExcelError`."""
+    """The value Excel shows on opening: the cached value as Excel reads it, or the one xlrecalc
+    computes where Excel recalculates (``recalc_on_load``). A number is an ``int`` when it is
+    whole and below 2**53 in magnitude, else a ``float`` (Excel stores every number as a
+    double); text is a ``str``, ``_xHHHH_`` escapes decoded; an error an
+    :class:`xlformat.ExcelError`."""
     kind: CellKind
     style: CellStyle
     hyperlink: Hyperlink | None = None

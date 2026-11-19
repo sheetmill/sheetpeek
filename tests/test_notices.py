@@ -156,7 +156,7 @@ def build_every_feature(path: Path) -> Path:
     ws["B16"].border = Border(left=Side("thin"))
     ws.merge_cells("B16:C16")
     ws["B13"] = CellRichText([TextBlock(InlineFont(b=True), "rich"), " text"])
-    ws["B14"] = "=1+1"
+    ws["B14"] = '=CUBEVALUE("x")'  # not computed, no cached value
     # A [ColorN] the workbook palette recolors (index 17, [Color10]).
     wb._colors = [*wb._colors[:17], "00804000", *wb._colors[18:]]
     ws["O2"] = 1

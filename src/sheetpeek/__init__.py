@@ -1,7 +1,7 @@
 """Render Excel workbooks as HTML, Markdown and terminal text, showing what Excel shows.
 
-``read`` gives a :class:`Sheet`: the cached values, number formats, styles, column widths,
-row heights and merged ranges of one worksheet. See ``ARCHITECTURE.md``.
+``read`` gives a :class:`Sheet`: the values Excel shows on opening, number formats, styles,
+column widths, row heights and merged ranges of one worksheet. See ``ARCHITECTURE.md``.
 """
 
 from __future__ import annotations

@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- `recalc_on_load="excel" | "always" | "never"` on `read`, `open` and `Book`, and
+  `--recalc-on-load` on `sheetpeek view` and `sheetpeek serve`: which formulas show a value
+  computed by xlrecalc rather than the one the file holds, with xlrecalc's values and meaning.
+  The default, `"excel"`, is Excel's rule on opening a file: a file another program wrote (such
+  as openpyxl), or one an older Excel calculated, is recalculated whole; in a file Excel saved,
+  only the cells it marked (volatile cells and their dependents).
+- The notice `value.not_computed`: a formula xlrecalc does not compute (a function it does not
+  implement, or a cell that depends on one) keeps the value the file holds, and is reported
+  with xlrecalc's reason.
 - `Font.theme_color`, the theme color a font color comes from (Excel's `Font.ThemeColor`), and
   `Sheet.theme_colors`, the workbook theme's twelve colors.
 - Tables are read: `Sheet.tables` holds each table (`Table`: its range, header and totals rows,
@@ -191,6 +200,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   with a solid blue line, as Excel's page break preview draws them. Off by default.
 
 ### Changed
+- xlrecalc (`xlrecalc>=0.4,<1`) is a required dependency, for recalculation on opening. A formula
+  cell shows the value Excel shows when it opens the file, where 0.2.0 showed the cached value:
+  a formula written by openpyxl, which stores no value, shows its result where it showed as
+  empty with the warning "formula cell(s) have no cached value", and a cached value in such a
+  file is recomputed. `value.no_cached_value` and its warning now count only the formulas
+  without a value that xlrecalc does not compute.
 - `Font.color` of a theme color 1 font ("Text 1", Excel's default font color) is its RGB, the
   theme's dark 1 (`000000` in Excel's themes), where it was `None` like automatic: `Font.color`
   is the color Excel draws, and the new `Font.theme_color` says which theme color it comes from.

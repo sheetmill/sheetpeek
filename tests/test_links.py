@@ -121,10 +121,12 @@ def test_a_hyperlink_formula_with_a_literal_target_links(tmp_path):
         row(1, formula_cell("A1", 'HYPERLINK("https://example.com/?q=&quot;&quot;x", "go")')),
         "",
     )
+    # Excel recalculates a file it did not save: the friendly name; with the cached values
+    # kept, the cached one.
     cell = sheetpeek.read(path).cell(1, 1)
-    # The cached value is shown, not the friendly name in the formula (unverified).
-    assert cell.value == "shown"
+    assert cell.value == "go"
     assert cell.hyperlink == Hyperlink('https://example.com/?q="x', source="formula")
+    assert sheetpeek.read(path, recalc_on_load="never").cell(1, 1).value == "shown"
 
 
 def test_a_hyperlink_formula_that_cannot_be_read_is_reported(tmp_path):

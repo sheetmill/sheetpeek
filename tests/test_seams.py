@@ -24,7 +24,7 @@ def test_a_feature_keeps_what_it_reads_in_extra(tmp_path):
 
     with sheetpeek.open(_workbook(tmp_path)) as book:
         source = book._book.sheet(0)
-        found, _ = book._stream(source, None, Collector("sheet"))
+        found, _, _ = book._stream(source, None, None, Collector("sheet"))
         structure = with_levels(_structure.fill(found, source), source)
     assert structure.extra[KEY].rows == {1: 1}
     assert structure.used_range == sheetpeek.CellRange(1, 1, 1, 1)

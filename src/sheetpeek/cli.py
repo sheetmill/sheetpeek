@@ -14,6 +14,7 @@ from sheetpeek._notices import Notice
 from sheetpeek._package import SERVE_LIMITS, PackageError, ReadLimits
 from sheetpeek._read import Book
 from sheetpeek._read import open as open_book
+from sheetpeek._recalc import RECALC_ON_LOAD
 from sheetpeek._sheets import SheetInfo
 from sheetpeek._view_model import MAX_ZOOM, MIN_ZOOM
 from sheetpeek.backends import (
@@ -110,6 +111,7 @@ def _parser() -> argparse.ArgumentParser:
         help="do not report CODE or the codes under it, such as 'font' (repeatable)",
     )
     _add_limits(view, ReadLimits())
+    _add_recalc(view)
     serve = commands.add_parser(
         "serve",
         help="serve a folder of workbooks as HTML",
@@ -125,6 +127,7 @@ def _parser() -> argparse.ArgumentParser:
     serve.add_argument("--host", default="127.0.0.1", help="address to bind (default: 127.0.0.1)")
     serve.add_argument("-p", "--port", type=int, default=8000, help="port (default: 8000)")
     _add_limits(serve, SERVE_LIMITS)
+    _add_recalc(serve)
     return parser
 
 
@@ -148,6 +151,17 @@ def _add_limits(command: argparse.ArgumentParser, defaults: ReadLimits) -> None:
         )
 
 
+def _add_recalc(command: argparse.ArgumentParser) -> None:
+    command.add_argument(
+        "--recalc-on-load",
+        choices=RECALC_ON_LOAD,
+        default="excel",
+        help="which formulas show a computed value: those Excel recalculates on opening the "
+        "file (excel, the default), every formula (always), or only those without a cached "
+        "value and the volatile ones (never)",
+    )
+
+
 def _count(text: str) -> int:
     value = int(text)
     if value < 0:
@@ -164,7 +178,13 @@ def _serve(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
     from sheetpeek._serve import make_server
 
     try:
-        server = make_server(args.folder, args.host, args.port, limits=_limits(args))
+        server = make_server(
+            args.folder,
+            args.host,
+            args.port,
+            limits=_limits(args),
+            recalc_on_load=args.recalc_on_load,
+        )
     except (NotADirectoryError, OSError) as error:
         _say(err, f"sheetpeek: {error}")
         return 1
@@ -201,7 +221,7 @@ def _view(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
         _say(err, "sheetpeek: --hidden-sheets goes with --all-sheets (-s names a hidden sheet)")
         return 2
     try:
-        with open_book(args.file, limits=_limits(args)) as book:
+        with open_book(args.file, limits=_limits(args), recalc_on_load=args.recalc_on_load) as book:
             if args.list:
                 for info in book.sheets:
                     _say(out, _listed(info))

@@ -7,6 +7,7 @@ from pathlib import Path
 import openpyxl
 import pytest
 import xlformat
+import xlrecalc
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.styles.colors import Color
 from openpyxl.utils.datetime import CALENDAR_MAC_1904
@@ -304,7 +305,22 @@ def test_hyperlinks_reach_cells(tmp_path):
     assert sheet.cell(1, 2).hyperlink is None
 
 
-def test_uncached_formulas_warn(tmp_path):
+def test_uncached_formulas_are_computed(tmp_path):
+    # In every mode: xlrecalc computes a formula without a cached value.
+    wb = openpyxl.Workbook()
+    wb.active["A1"] = "=1+1"
+    path = save(wb, tmp_path / "formula.xlsx")
+    for mode in ("excel", "always", "never"):
+        sheet = sheetpeek.read(path, recalc_on_load=mode)
+        assert (sheet.cell(1, 1).value, sheet.cell(1, 1).kind) == (2, "number")
+        assert sheet.notices == ()
+
+
+def test_uncached_formulas_warn_when_xlrecalc_cannot_load(tmp_path, monkeypatch):
+    def refuse(*args, **kwargs):
+        raise xlrecalc.PackageError("refused")
+
+    monkeypatch.setattr(xlrecalc, "load", refuse)
     wb = openpyxl.Workbook()
     wb.active["A1"] = "=1+1"
     sheet = sheetpeek.read(save(wb, tmp_path / "formula.xlsx"))
@@ -312,6 +328,9 @@ def test_uncached_formulas_warn(tmp_path):
     assert len(sheet.warnings) == 1
     assert "1 formula cell(s) have no cached value" in sheet.warnings[0]
     assert "first: A1" in sheet.warnings[0]
+    (notice,) = [n for n in sheet.notices if n.code == "value.not_computed"]
+    assert "xlrecalc could not read the workbook: refused" in notice.message
+    assert [str(r) for r in notice.cells] == ["A1"]
 
 
 def test_sheet_selection(tmp_path):
@@ -404,7 +423,8 @@ def test_a_cached_text_result_is_decoded(tmp_path):
     path = save(openpyxl.Workbook(), tmp_path / "text.xlsx")
     cell = '<c r="A1" t="str"><f>1</f><v>a_x000D_b</v></c>'
     rewrite(path, SHEET1, replace_sheet_data(f'<sheetData><row r="1">{cell}</row></sheetData>'))
-    assert sheetpeek.read(path).cell(1, 1).value == "a\rb"
+    # A cached value Excel keeps (recalc_on_load="never"; under "excel" this file recalculates).
+    assert sheetpeek.read(path, recalc_on_load="never").cell(1, 1).value == "a\rb"
 
 
 def test_a_shared_string_is_decoded(tmp_path):

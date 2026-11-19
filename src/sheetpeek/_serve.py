@@ -30,6 +30,7 @@ from urllib.parse import parse_qs, quote, unquote, urlsplit
 from sheetpeek._model import CellRange, one_line
 from sheetpeek._package import SERVE_LIMITS, PackageError, ReadLimits
 from sheetpeek._read import open as open_book
+from sheetpeek._recalc import RecalcOnLoad, recalc_mode
 from sheetpeek.backends import _write_blocks
 from sheetpeek.backends.html import CSS, HTMLBackend
 
@@ -102,6 +103,7 @@ class _Handler(BaseHTTPRequestHandler):
     # Set on the subclass made by make_server.
     root: Path
     limits: ReadLimits
+    recalc_on_load: RecalcOnLoad
     slots: threading.BoundedSemaphore
     hosts: frozenset[str] | None  # the names answered to, or None to answer to any
     server_version = "sheetpeek"
@@ -186,7 +188,7 @@ class _Handler(BaseHTTPRequestHandler):
             backend = HTMLBackend(
                 fragment=True, column_headings=True, row_headings=True, notices=True, zoom=zoom
             )
-            with open_book(path, limits=self.limits) as book:
+            with open_book(path, limits=self.limits, recalc_on_load=self.recalc_on_load) as book:
                 infos = book.sheets
                 if query.get("print_area", ["0"])[0] == "1":
                     if ref:
@@ -241,6 +243,7 @@ def make_server(
     port: int = 8000,
     *,
     limits: ReadLimits = SERVE_LIMITS,
+    recalc_on_load: RecalcOnLoad = "excel",
 ) -> ThreadingHTTPServer:
     """A server for the workbooks under ``root``; call ``serve_forever()`` on it.
 
@@ -260,6 +263,7 @@ def make_server(
 
     Handler.root = folder
     Handler.limits = limits
+    Handler.recalc_on_load = recalc_mode(recalc_on_load)
     Handler.slots = threading.BoundedSemaphore(_READS_AT_ONCE)
     server = ThreadingHTTPServer((host, port), Handler)
     address = str(server.server_address[0])

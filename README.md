@@ -10,8 +10,8 @@ Documentation: <https://sheetpeek.readthedocs.io>.
 
 ## Reading a sheet
 
-`read` returns a `Sheet`: the cached values, number formats, styles, column widths, row
-heights and merged ranges of one worksheet. Dates stay the serial numbers Excel stores.
+`read` returns a `Sheet`: the values Excel shows on opening, number formats, styles, column
+widths, row heights and merged ranges of one worksheet. Dates stay the serial numbers Excel stores.
 
 ```python
 >>> import tempfile, pathlib, openpyxl, sheetpeek
@@ -88,7 +88,10 @@ column's position and width and each text's position in points, in `characters` 
 characters each column draws. The documentation's usage page has examples.
 
 Workbooks are read with [xlio](https://github.com/sheetmill/xlio), in one pass over each sheet's
-cells, with values as Excel reads them. `ref="A1:H40"` keeps part of a sheet (the whole sheet is
+cells, with values as Excel reads them. A formula shows what Excel shows when it opens the file:
+the cached value, or where Excel recalculates (a file another program wrote, for one), the value
+[xlrecalc](https://github.com/sheetmill/xlrecalc) computes; `recalc_on_load="never"` keeps the
+cached values. `ref="A1:H40"` keeps part of a sheet (the whole sheet is
 still read, for its used range), and `sheetpeek.open` reads several sheets with one load.
 
 A file from someone you do not trust is checked before anything parses it, and `limits=` sets what
@@ -105,7 +108,7 @@ pip install sheetpeek
 pip install "sheetpeek[rich]"   # with styled terminal output
 ```
 
-Python 3.11 or later. Depends on `xlio` and `xlformat`. The examples here build their workbooks
+Python 3.11 or later. Depends on `xlio`, `xlformat` and `xlrecalc`. The examples here build their workbooks
 with openpyxl (`pip install openpyxl`), which sheetpeek itself does not need.
 
 ## Related packages

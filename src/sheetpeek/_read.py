@@ -15,12 +15,14 @@ import io
 import os
 import re
 import zipfile
+from array import array
 from collections.abc import Iterator, Sequence
 from types import MappingProxyType, TracebackType
-from typing import IO, Any, overload
+from typing import IO, Any, BinaryIO, cast, overload
 
 import xlformat
 import xlio
+import xlrecalc
 
 from sheetpeek import _style as styles
 from sheetpeek._colors import grid_color, resolve, workbook_palette
@@ -63,6 +65,7 @@ from sheetpeek._read_links import report as report_links
 from sheetpeek._read_outline import read_outline, with_levels
 from sheetpeek._read_tables import read_tables
 from sheetpeek._read_view import sheet_view
+from sheetpeek._recalc import FileView, Recalc, RecalcOnLoad, recalc_mode, shown, why_not
 from sheetpeek._runs_model import TextSpan
 from sheetpeek._sheets import (
     ListedSheet,
@@ -152,8 +155,16 @@ class Book:
     Use a book from one thread at a time: its readers share one open file.
     """
 
-    def __init__(self, source: Source, *, limits: ReadLimits | None = None) -> None:
+    def __init__(
+        self,
+        source: Source,
+        *,
+        limits: ReadLimits | None = None,
+        recalc_on_load: RecalcOnLoad = "excel",
+    ) -> None:
         self._limits = limits or ReadLimits()
+        self._mode = recalc_mode(recalc_on_load)
+        self._recalc_state: Recalc | None = None
         self._path: str | None = None
         name: str | None
         handle: IO[bytes]
@@ -223,6 +234,19 @@ class Book:
             raise LimitError(str(error)) from None
         except xlio.PackageError as error:
             raise self._unreadable(error) from error
+
+    @property
+    def _recalc(self) -> Recalc:
+        """Recalculation on opening, set up on the first sheet read."""
+        if self._recalc_state is None:
+            self._recalc_state = Recalc(self._recalc_source, self._mode, self._limits)
+        return self._recalc_state
+
+    def _recalc_source(self) -> BinaryIO:
+        """The book's own file for xlrecalc, read without moving the book's position."""
+        if isinstance(self._handle, io.BytesIO):
+            return io.BytesIO(self._handle.getvalue())
+        return cast(BinaryIO, io.BufferedReader(FileView(self._handle.fileno())))
 
     def _check_area(self, ref: CellRange) -> None:
         area = (ref.max_row - ref.min_row + 1) * (ref.max_col - ref.min_col + 1)
@@ -390,7 +414,9 @@ class Book:
             with self._xlio_errors():
                 source = self._book.sheet(name)
                 cell_notes = Collector(name)
-                structure, kept = self._stream(source, ref, cell_notes)
+                structure, kept, formulas = self._stream(
+                    source, name if listed.kind == "worksheet" else None, ref, cell_notes
+                )
                 structure = with_levels(with_elements(fill(structure, source), source), source)
                 structure = with_formulas(structure, structure.extra.pop(_LINKS))
         except PackageError:
@@ -416,12 +442,13 @@ class Book:
                     source, ref, self._book.styles.table_style, self._context
                 )
                 notes.extend(cell_notes.notices())  # after the sheet's own, as they were read
+                empty = self._recompute(name, ref, kept, formulas, notes) if ref else CellSet()
                 cells = self._grid(kept, ref, structure, notes) if ref else ()
         except PackageError:
             raise
         except Exception as error:
             raise self._unreadable(error) from error
-        self._report_structure(notes, structure, ref)
+        self._report_structure(notes, structure, ref, empty)
         areas, area_problem, row_breaks, column_breaks = self._page_layout(name)
         rows, columns, outline = read_outline(
             structure, ref, _rows(structure, ref), _columns(structure, ref), notes
@@ -465,23 +492,39 @@ class Book:
         )
 
     def _report_structure(
-        self, notes: Collector, structure: Structure, ref: CellRange | None
+        self,
+        notes: Collector,
+        structure: Structure,
+        ref: CellRange | None,
+        empty: CellSet | None,
     ) -> None:
-        """Notices from what the cell stream found: uncached formulas, runs, row styles."""
-        if structure.uncached_formulas:
-            ranges, truncated = structure.uncached.ranges()
+        """Notices from what the cell stream found: uncached formulas, runs, row styles.
+
+        The formulas without a cached value reported are those that show as empty: ``empty``,
+        the range's that xlrecalc did not compute, or every one of the sheet's when
+        recalculation could not be done (``None``).
+        """
+        uncached = structure.uncached if empty is None else empty
+        if uncached.count:
+            ranges, truncated = uncached.ranges()
+            top = min(ranges, key=lambda r: (r.min_row, r.min_col)) if ranges else None
+            first = (
+                structure.first_uncached_formula
+                if empty is None or top is None
+                else f"{CellRange(top.min_row, top.min_col, top.min_row, top.min_col)}"
+            )
             notes.extend(
                 [
                     Notice(
                         "value.no_cached_value",
                         "omitted",
                         "not_implemented",
-                        f"{structure.uncached_formulas} formula cell(s) have no cached value and "
-                        f"show as empty (first: {structure.first_uncached_formula}); a file "
+                        f"{uncached.count} formula cell(s) have no cached value and "
+                        f"show as empty (first: {first}); a file "
                         "saved by Excel stores the values",
                         notes.sheet,
                         ranges,
-                        structure.uncached_formulas,
+                        uncached.count,
                         context={"truncated": 1} if truncated else {},
                     )
                 ]
@@ -519,8 +562,8 @@ class Book:
         return found.name
 
     def _stream(
-        self, sheet: xlio.Sheet, ref: CellRange | None, notes: Collector
-    ) -> tuple[Structure, dict[int, list[Cell]]]:
+        self, sheet: xlio.Sheet, name: str | None, ref: CellRange | None, notes: Collector
+    ) -> tuple[Structure, dict[int, list[Cell]], _Formulas]:
         """One pass of xlio's cell stream: the structure's marks, and the cells, built as read.
 
         The used range is the bounds of every cell the stream gives (the merges are added by
@@ -529,8 +572,14 @@ class Book:
         inside ``ref`` are built, every cell without one (they all lie inside the used range),
         each kept in its row's list in file order with no hyperlink yet (:meth:`_grid` adds
         them); what their styles use and is not read goes to ``notes``. No ``xlio.Cell`` is
-        kept, and a row's cells share one row number.
+        kept, and a row's cells share one row number. Every formula is given to the recalculation
+        check while it takes them; the formula cells inside ``ref`` and the ranges of array
+        formulas are kept for :meth:`_recompute`. ``name`` is ``None`` for a macro sheet, which
+        xlrecalc does not compute: its cells keep their cached values.
         """
+        recalc = self._recalc
+        feeding = name is not None and recalc.feeding and name not in recalc.fed
+        formulas = _Formulas()
         min_row = min_col = 1 << 30
         max_row = max_col = 0
         listed: set[int] = set()
@@ -557,10 +606,16 @@ class Book:
                 max_col = column
             formula = source.formula
             if formula is not None:
-                if source.type == "none":
+                cached = source.type != "none"
+                if not cached:
                     uncached.add(row, column)
                     if first_uncached is None:
                         first_uncached = f"{CellRange(row, column, row, column)}"
+                if feeding:
+                    ca = formula.attributes.get("ca") in ("1", "true")
+                    feeding = recalc.add(formula.text, cached=cached, ca=ca)
+                if name is not None and formula.kind in ("array", "dataTable") and formula.ref:
+                    formulas.add_array(row, column, formula.ref, ref)
                 add_formula(links, formula, row, column)
             rich = source.rich
             if rich is not None:
@@ -579,6 +634,8 @@ class Book:
             if text and value is not None:
                 for code in text:
                     report_style(notes, code, row, column)
+            if formula is not None and name is not None:
+                formulas.add(row, len(line))
             line.append(
                 Cell(
                     row,
@@ -590,6 +647,8 @@ class Book:
                     self._runs(rich, style.font, source.value) if kind == "text" else None,
                 )
             )
+        if name is not None:
+            recalc.fed.add(name)
         used = CellRange(min_row, min_col, max_row, max_col) if max_row else None
         listed.update(sheet.rows)
         structure = Structure(
@@ -602,7 +661,115 @@ class Book:
             phonetic=phonetic,
             extra={_LINKS: links},
         )
-        return structure, rows
+        return structure, rows, formulas
+
+    def _recompute(
+        self,
+        name: str,
+        ref: CellRange,
+        rows: dict[int, list[Cell]],
+        formulas: _Formulas,
+        notes: Collector,
+    ) -> CellSet | None:
+        """The formula cells of ``ref`` as Excel shows them on opening, in ``rows`` in place.
+
+        Nothing changes when the check's answer is ``"none"``. Otherwise the engine gives each
+        formula cell's value, and each cell an array formula fills; a cell xlrecalc does not
+        compute keeps the value the file holds and is reported, with xlrecalc's reason.
+
+        Returns:
+            The formula cells of ``ref`` without a cached value that xlrecalc did not compute;
+            ``None`` when recalculation could not be done (xlrecalc refused the book), and every
+            formula cell of ``ref`` keeps its cached value and is reported.
+        """
+        empty = CellSet()
+        if not formulas.marks and not formulas.arrays:
+            return empty
+        recalc = self._recalc
+        answer = recalc.answer(lambda: self._unfed(recalc.fed))
+        if answer == "none":
+            return empty
+        engine = recalc.engine() if answer is not None else None
+        if engine is None:
+            detail = recalc.error or "xlrecalc could not read the workbook"
+            for row, indexes in formulas.marks.items():
+                for index in indexes:
+                    cell = rows[row][index]
+                    notes.add(
+                        "value.not_computed",
+                        "approximated",
+                        "not_implemented",
+                        row=row,
+                        column=cell.column,
+                        detail=detail,
+                    )
+            return None
+        report = engine.report
+
+        def value(row: int, column: int, formula: bool) -> tuple[CellValue, CellKind] | None:
+            """The engine's value, or ``None`` where the file's value stays (and is reported)."""
+            where = xlrecalc.CellRef(name, row, column)
+            try:
+                result = shown(engine.value(where))
+            except Exception as error:  # a cell xlrecalc fails on keeps its value
+                reason: str | None = f"an error inside xlrecalc ({type(error).__name__})"
+            else:
+                if where not in report.uncomputed and where not in report.from_kept:
+                    if result is not None:
+                        return result
+                    reason = "a value sheetpeek does not show"
+                else:
+                    reason = None
+            if formula:
+                text = engine.formula(where) if reason is None else None
+                notes.add(
+                    "value.not_computed",
+                    "approximated",
+                    "not_implemented",
+                    row=row,
+                    column=column,
+                    detail=reason or why_not(report, where, text),
+                )
+            return None
+
+        for row, indexes in formulas.marks.items():
+            line = rows[row]
+            for index in indexes:
+                cell = line[index]
+                found = value(row, cell.column, True)
+                if found is None and cell.kind == "empty":
+                    empty.add(row, cell.column)
+                elif found is not None and found != (cell.value, cell.kind):
+                    line[index] = dataclasses.replace(
+                        cell, value=found[0], kind=found[1], runs=None
+                    )
+        # The cells an array fills: an array xlrecalc does not compute keeps their values.
+        for anchor_row, anchor_column, filled in formulas.arrays:
+            for row in range(filled.min_row, filled.max_row + 1):
+                line = rows.setdefault(row, [])
+                at = {cell.column: index for index, cell in enumerate(line)}
+                for column in range(filled.min_col, filled.max_col + 1):
+                    if (row, column) == (anchor_row, anchor_column):
+                        continue
+                    found = value(row, column, False)
+                    if found is None:
+                        continue
+                    found_at = at.get(column)
+                    if found_at is None:
+                        if found[1] != "empty":
+                            line.append(Cell(row, column, found[0], found[1], self._default_style))
+                    elif found != (line[found_at].value, line[found_at].kind):
+                        line[found_at] = dataclasses.replace(
+                            line[found_at], value=found[0], kind=found[1], runs=None
+                        )
+        return empty
+
+    def _unfed(self, fed: set[str]) -> Iterator[tuple[str, Iterator[xlio.Cell]]]:
+        """Each worksheet the recalculation check has not been given, with its cells."""
+        assert self._book is not None
+        for sheet in self._book:
+            if sheet.kind == "worksheet" and sheet.name not in fed:
+                yield sheet.name, sheet.cells()
 
     def _grid(
         self,
@@ -784,7 +951,10 @@ def _drawn(font: Font) -> Font:
 
 
 def open(  # noqa: A001 - the module-level open() of gzip, tarfile, shelve
-    source: Source, *, limits: ReadLimits | None = None
+    source: Source,
+    *,
+    limits: ReadLimits | None = None,
+    recalc_on_load: RecalcOnLoad = "excel",
 ) -> Book:
     """Open a workbook to read several sheets with one load.
 
@@ -792,16 +962,23 @@ def open(  # noqa: A001 - the module-level open() of gzip, tarfile, shelve
         source: A path, or a binary file object (read into memory).
         limits: What reading may cost. By default, ``ReadLimits()``; lower them for files from
             people you do not trust.
+        recalc_on_load: Which formulas show a computed value rather than the one the file
+            holds, as xlrecalc's option of that name: ``"excel"``, those Excel recalculates on
+            opening the file (all of them in a file another program wrote or an older Excel
+            saved; in a file Excel saved, those it marked, its volatile cells and their
+            dependents); ``"always"``, every formula; ``"never"``, none but those without a
+            cached value and the volatile ones.
 
     Raises:
         OSError: A path that cannot be opened.
+        ValueError: ``recalc_on_load`` is not one of the three.
         LimitError: The file exceeds ``limits``.
         PackageError: The file is not a readable xlsx workbook, or it is refused.
 
     Example:
         ``with sheetpeek.open("book.xlsx") as book: sheet = book.sheet("Data")``
     """
-    return Book(source, limits=limits)
+    return Book(source, limits=limits, recalc_on_load=recalc_on_load)
 
 
 def read(
@@ -810,6 +987,7 @@ def read(
     *,
     ref: str | CellRange | None = None,
     limits: ReadLimits | None = None,
+    recalc_on_load: RecalcOnLoad = "excel",
 ) -> Sheet:
     """Read one sheet of a workbook.
 
@@ -819,16 +997,17 @@ def read(
         ref: The range to read, such as ``"A1:H40"``. By default, the used range.
         limits: What reading may cost. By default, ``ReadLimits()``; lower them for files from
             people you do not trust.
+        recalc_on_load: Which formulas show a computed value, as :func:`open` takes it.
 
     Raises:
         OSError: A path that cannot be opened.
         KeyError: There is no sheet with that name.
         NotAWorksheetError: The sheet is a chartsheet or a dialog sheet (a :class:`ValueError`).
-        ValueError: ``ref`` is not a range.
+        ValueError: ``ref`` is not a range, or ``recalc_on_load`` not one of the three.
         LimitError: The file, or the range, exceeds ``limits``.
         PackageError: The file is not a readable xlsx workbook, or it is refused.
     """
-    with Book(source, limits=limits) as book:
+    with Book(source, limits=limits, recalc_on_load=recalc_on_load) as book:
         return book.sheet(sheet, ref=ref)
 
 
@@ -888,3 +1067,34 @@ def _find_sheet(sheets: list[ListedSheet], name: str) -> ListedSheet | None:
         return exact
     folded = name.casefold()
     return next((s for s in sheets if s.name.casefold() == folded), None)
+
+
+class _Formulas:
+    """The formula cells a sheet read keeps for :meth:`Book._recompute`."""
+
+    __slots__ = ("arrays", "marks")
+
+    def __init__(self) -> None:
+        self.marks: dict[int, array[int]] = {}
+        """Row → the indexes, in that row's list of built cells, of its formula cells."""
+        self.arrays: list[tuple[int, int, CellRange]] = []
+        """Each array formula or data table that fills part of the range: its first cell and the
+        part of its range inside the range read."""
+
+    def add(self, row: int, index: int) -> None:
+        marks = self.marks.get(row)
+        if marks is None:
+            self.marks[row] = marks = array("I")
+        marks.append(index)
+
+    def add_array(self, row: int, column: int, text: str, ref: CellRange | None) -> None:
+        try:
+            filled = CellRange.parse(text)
+        except ValueError:
+            return
+        if ref is not None:
+            inside = ref.intersection(filled)
+            if inside is None:
+                return
+            filled = inside
+        self.arrays.append((row, column, filled))

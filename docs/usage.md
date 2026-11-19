@@ -20,6 +20,25 @@ before any layout. The examples on this page use a small workbook written with o
 (1234567.891, '#,##0.00')
 ```
 
+## Formulas
+
+A formula cell shows what Excel shows when it opens the file. Excel keeps the values a file it
+saved holds, and recalculates a file another program wrote, such as openpyxl, which stores no
+values at all; sheetpeek computes those through
+[xlrecalc](https://github.com/sheetmill/xlrecalc), by the same rule.
+
+```python
+>>> ws["C2"] = "=B2*2"
+>>> wb.save(path)
+>>> sheetpeek.read(path).cell(2, 3).value
+2469135.782
+```
+
+`recalc_on_load` changes the rule: `"always"` computes every formula, `"never"` keeps every
+cached value but those of formulas without one and of volatile ones (`NOW()`, `RAND()`). A
+formula xlrecalc does not compute keeps the value the file holds and is reported
+(`value.not_computed`).
+
 ## Showing it
 
 {func}`sheetpeek.render` shows a sheet with a backend: `text`, `rich`, `html`, `markdown`,
