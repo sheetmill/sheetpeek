@@ -125,6 +125,7 @@ an API change.
 | `sp-rule`, `sp-double` | an underline or strikethrough, 1 px thick; a double underline |
 | `sp-colhead`, `sp-rowhead`, `sp-corner` | the headings |
 | `sp-ol`, `sp-olbutton`, `sp-ollevel` | the outline gutter's cells, its − and + buttons, its level buttons |
+| `sp-fb` | a filter button, over its header cell |
 | `sp-fills`, `sp-borders` | the layers of pattern and gradient fills and of borders, each a box per fill or line; their own classes (`sp-f-…`, `sp-b-…`) are generated per page, as is a grid color's (`sp-g-…`, on the wrapper) |
 | `sp-book` | the workbook page's wrapper `<div>`, around its `<nav>` of tabs and a `<section>` per sheet |
 | `sp-first`, `sp-hidden` | on the workbook page, the tab and section shown first; a hidden sheet's tab. A tab color's class (`sp-t-…`) is generated |

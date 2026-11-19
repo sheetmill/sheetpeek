@@ -1384,9 +1384,9 @@ glyphs, the hidden buttons and the sizes, `tests/test_filters.py`; the rest is u
   table without `autoFilter`, none on a hidden column or header row;
 - a range read that cuts the header row keeps the buttons of the header cells inside it; one
   without the header row draws none, as `range_edge` cuts the rest;
-- four glyphs: plain; filtered, whatever the criteria; sorted, an arrow up or down on every
-  sorted column; filtered and sorted, the arrow with the funnel (filtered with an ascending sort
-  is a glyph of its own, captured). A sort by cell color, font color or icon draws the arrow its
+- six glyphs, one for each state: plain; filtered, whatever the criteria; sorted up and sorted
+  down, an arrow on every sorted column; filtered and sorted up, and filtered and sorted down,
+  the arrow with the funnel (captured). A sort by cell color, font color or icon draws the arrow its
   order gives (captured: cell color descending, font color and icon ascending). A left-to-right
   sort (`columnSort`) draws no arrow (unverified). The sheet's `sortState` counts inside its
   `autoFilter` and, as a table's does, beside it (unverified for the sheet);

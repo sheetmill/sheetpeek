@@ -39,8 +39,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `ascending`, `descending`, `filtered_ascending`, `filtered_descending`), as Excel draws them:
   one per column, none where the file hides it or on a hidden column or row, a sort arrow on every
   sorted column. HTML draws them over the header text, at Excel's size (the row's height up to 17
-  screen points) and in its four glyphs: plain, filtered, sorted up or down, filtered and sorted;
-  `buttons="none"` leaves them out. `rich` and plain text put a `▾` in each header cell's last
+  screen points) and in its six glyphs: plain, filtered, sorted up, sorted down, and filtered
+  and sorted up or down; `buttons="none"` leaves them out. New HTML class `sp-fb`. `rich` and plain text put a `▾` in each header cell's last
   character, Markdown and delimited text report them.
 - Notices: nothing a workbook uses is dropped silently. `Sheet.notices` and
   `RenderedSheet.notices` hold a `Notice` for each kind of thing the file uses that sheetpeek does
