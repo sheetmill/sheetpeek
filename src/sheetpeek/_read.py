@@ -1048,7 +1048,7 @@ def _rows(structure: Structure, ref: CellRange | None) -> tuple[Row, ...]:
 def _builtin_format(number_format_id: int) -> str:
     """The code of a built-in format id, as Excel shows it (xlformat's captured table).
 
-    A custom id the file does not define reads as General (unverified).
+    A custom id the file does not define reads as General (captured, suite ``odd_values``).
     """
     try:
         return xlformat.builtin_format(number_format_id)

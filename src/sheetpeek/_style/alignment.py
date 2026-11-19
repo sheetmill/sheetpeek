@@ -52,8 +52,8 @@ def read(part: Any, context: Context) -> dict[str, Any]:
 def _rotation(value: Any) -> int:
     """Degrees counterclockwise: 0 to 90 as stored, 91 to 180 for -1 to -90 (§4.17).
 
-    255 (stacked) is 0, and so is any other value (unverified: what Excel does with one is not
-    captured).
+    255 (stacked) is 0, and so is any other value: Excel shows 181, 254, 256 and 1000 horizontal
+    (captured, suite ``odd_values``).
     """
     angle = int(value or 0)
     if 0 <= angle <= 90:

@@ -107,8 +107,8 @@ def apply_tint(rgb: str, tint: float) -> str:
 
     ECMA-376's tint on the lightness, in Windows' integer HLS (scale 240): darkening multiplies
     the lightness by ``1 + tint``, lightening moves it ``tint`` of the way to white, and the
-    result is truncated after adding a small tolerance (captured, suite ``theme_colors``; the
-    stored-fraction tolerance unverified). Files store a tint as a 16-bit fraction (0.6 as
+    result is truncated after adding a small tolerance (captured, suites ``theme_colors`` and,
+    for stored fractions, ``theme_colors_more``). Files store a tint as a 16-bit fraction (0.6 as
     0.59999389...), which would otherwise land a lightness just below a whole number; any
     tolerance from 0.0055 to 0.2 fits every captured cell.
     """
