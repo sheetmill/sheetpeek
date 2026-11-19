@@ -35,7 +35,8 @@ header; their column names equal their header cells and a totals row holds only 
 - ``normal_<variant>``: the same eight font colors as the Normal style's font, each its own
   workbook, a TableStyleMedium2 table whose cells set no font.
 - ``merge``: a merge inside a table's data rows. Excel may refuse or repair the file; that is
-  the result, and the run stops there.
+  the result. A refusal of ``unknown`` or ``merge`` is kept (``refused.txt``) and written as the
+  group's one row, its ``role`` ``refused:`` and Excel's message.
 
 Measured for every table cell: Excel's display format (fill, font color, bold, italic,
 underline, strikethrough, font name; exact, from ``display format``), and across every edge of
@@ -44,12 +45,14 @@ the boundary to 3 after it, averaged over 5 pixels along the segment, as hex, so
 can be classified afterwards (none, gridline, thin, medium, thick, double; their colors), as
 runs of one color (``FFFFFFx6 D4D4D4x2 FFFFFFx4``: the boundary lies after the sixth pixel).
 A cell's bottom and right edges are its neighbor's top and left, so they are written only on a
-table's last row and column. ``read`` writes ``tests/captures/tables.tsv``, one row per group,
+table's last row and column. ``read`` writes ``tests/captures/tables.tsv.gz``, one row per group,
 cell and zoom.
 """
 
 from __future__ import annotations
 
+import gzip
+import io
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -112,7 +115,8 @@ ALONG = 5
 """Device pixels averaged along an edge."""
 ROOT = Path(__file__).resolve().parents[1]
 BUILD_DIR = ROOT / "capture" / "build" / "tables"
-OUTPUT = ROOT / "tests" / "captures" / "tables.tsv"
+OUTPUT = ROOT / "tests" / "captures" / "tables.tsv.gz"
+"""Gzipped with no time stamp: reading the same captures again gives the same bytes."""
 READS = {
     "fill": "display.fill",
     "pattern": "display.pattern",
@@ -492,18 +496,34 @@ def run(groups: tuple[str, ...] | None = None) -> None:
 
     if groups is None:
         groups = tuple(g for g in GROUPS if g not in REFUSALS)
+    from capture.screen.session import ExcelError
+
     for group in groups:
         laid = fill(openpyxl.Workbook().active, group)
-        capture(
-            lambda ws, group=group: fill(ws, group),
-            cells=[p.cell for p in laid.cells],
-            out=BUILD_DIR / group,
-            markers=("B2", laid.marker),
-            zooms=(ZOOM,),
-            name=f"tables_{group}",
-            postprocess=postprocess(group),
-        )
+        try:
+            capture(
+                lambda ws, group=group: fill(ws, group),
+                cells=[p.cell for p in laid.cells],
+                out=BUILD_DIR / group,
+                markers=("B2", laid.marker),
+                zooms=(ZOOM,),
+                name=f"tables_{group}",
+                postprocess=postprocess(group),
+            )
+        except ExcelError as error:
+            if group not in REFUSALS:
+                raise
+            record_refusal(group, str(error))
+            print(f"{group}: Excel refused the file", file=sys.stderr)
     write()
+
+
+def record_refusal(group: str, message: str) -> None:
+    """Keep Excel's refusal of a group's file in ``refused.txt``, without the script's path."""
+    out = BUILD_DIR / group
+    out.mkdir(parents=True, exist_ok=True)
+    reason = message.rpartition("execution error: ")[2].strip() or message
+    (out / "refused.txt").write_text(reason + "\n", encoding="utf-8")
 
 
 def _strip(cap: Any, cell: str, edge: str) -> str:
@@ -568,13 +588,18 @@ def _mean(pixels: list[tuple[int, int, int]]) -> str:
 
 
 def write() -> None:
-    """Measure the saved captures again (no Excel) and write ``tables.tsv``."""
+    """Measure the saved captures again (no Excel) and write ``tables.tsv.gz``."""
     from capture.screen.run import header, load
 
     records = []
     first: dict[str, str] = {}
     for group in GROUPS:
         out = BUILD_DIR / group
+        refused = out / "refused.txt"
+        if refused.exists():
+            reason = refused.read_text(encoding="utf-8").strip()
+            records.append({"group": group, "role": f"refused: {reason}"})
+            continue
         if not (out / "formats.tsv").exists():
             print(f"{group}: not captured yet, left out", file=sys.stderr)
             continue
@@ -600,7 +625,11 @@ def write() -> None:
                 record |= {key: cap.value(p.cell, read) or "" for key, read in READS.items()}
                 record |= {f"edge_{e}": runs(_strip(cap, p.cell, e)) for e in edges}
                 records.append(record)
-    with open(OUTPUT, "w", encoding="utf-8") as out:
+    with (
+        open(OUTPUT, "wb") as raw,
+        gzip.GzipFile(filename="", mode="wb", fileobj=raw, mtime=0) as packed,
+        io.TextIOWrapper(packed, encoding="utf-8", newline="\n") as out,
+    ):
         for key, value in first.items():
             if key not in ("markers", "suite", "workbooks_open_after", "zooms"):
                 out.write(f"# {key}: {value}\n")

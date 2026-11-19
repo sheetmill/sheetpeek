@@ -1399,7 +1399,7 @@ workbook's own first and then Excel's 60 presets, which xlio ships with Ecma's n
 element's `DifferentialFormat` keeps only what its `<dxf>` sets; its colors are resolved through
 the workbook's theme, and a solid fill takes the `bgColor`.
 
-**Captures:** the screen suite `tables` (`tests/captures/tables.tsv`, Excel 16.115, Microsoft
+**Captures:** the screen suite `tables` (`tests/captures/tables.tsv.gz`, Excel 16.115, Microsoft
 365, zoom 100; `tests/test_table_captures.py`): each table cell's display format, read exactly,
 and the device pixels across its edges, for Excel's 60 presets under the default theme, eight
 under a second theme, a workbook style of all 13 elements in order, thin later lines against a

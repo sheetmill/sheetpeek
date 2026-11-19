@@ -1,6 +1,6 @@
 """Table styles against Excel: the screen suite ``tables`` (ARCHITECTURE.md §4.20).
 
-``tests/captures/tables.tsv`` holds, for every table cell of the suite's groups, Excel's display
+``tests/captures/tables.tsv.gz`` holds, for every table cell of the suite's groups, Excel's display
 format (read exactly) and the device pixels across its edges (Microsoft 365, 16.115). Each group's
 workbook is built again from ``capture/tables.py``, laid out, and compared cell by cell.
 """
@@ -8,6 +8,7 @@ workbook is built again from ``capture/tables.py``, laid out, and compared cell 
 from __future__ import annotations
 
 import collections
+import gzip
 from pathlib import Path
 
 import pytest
@@ -18,7 +19,7 @@ from tests.capture_report import REPORT
 
 openpyxl = pytest.importorskip("openpyxl")
 
-CAPTURE = Path(__file__).with_name("captures") / "tables.tsv"
+CAPTURE = Path(__file__).with_name("captures") / "tables.tsv.gz"
 UNDERLINES = {
     "none": None,
     "single": "single",
@@ -47,7 +48,9 @@ KNOWN = {
 
 def _records() -> list[dict[str, str]]:
     lines = [
-        ln for ln in CAPTURE.read_text(encoding="utf-8").splitlines() if not ln.startswith("#")
+        ln
+        for ln in gzip.decompress(CAPTURE.read_bytes()).decode().splitlines()
+        if not ln.startswith("#")
     ]
     names = lines[0].split("\t")
     return [dict(zip(names, line.split("\t"), strict=False)) for line in lines[1:]]
@@ -79,6 +82,7 @@ def _line_matches(side, pixels: list[str]) -> bool:
 def compared(tmp_path_factory):
     tables = pytest.importorskip("capture.tables")
     records = _records()
+    records = [r for r in records if not r["role"].startswith("refused")]
     groups = list(dict.fromkeys(r["group"] for r in records))
     differences: dict[tuple[str, str], list[str]] = collections.defaultdict(list)
     count = collections.Counter()
@@ -151,7 +155,23 @@ def test_every_table_cell_is_displayed_as_excel_displays_it(compared):
     )
 
 
-def test_every_group_but_the_refused_one_is_captured():
+def test_every_group_is_captured():
     tables = pytest.importorskip("capture.tables")
-    groups = {r["group"] for r in _records()}
-    assert groups == set(tables.GROUPS) - {"merge"}
+    assert {r["group"] for r in _records()} == set(tables.GROUPS)
+
+
+def test_a_merge_inside_a_table_is_shown_where_excel_refuses_the_file(tmp_path):
+    # Known deviation: Excel refuses the file with alerts off (it offers a repair); files it
+    # writes cannot hold such a merge. sheetpeek shows it, the merge in its anchor's own fill.
+    tables = pytest.importorskip("capture.tables")
+    (row,) = [r for r in _records() if r["group"] == "merge"]
+    assert row["role"].startswith("refused: ")
+    path = tmp_path / "merge.xlsx"
+    wb = openpyxl.Workbook()
+    tables.fill(wb.active, "merge")
+    wb.save(path)
+    rendered = sheetpeek.read(path).layout("excel")
+    merged = [c for r in rendered.rows for c in r.cells if c.merge is not None]
+    assert merged
+    assert {c.fill for c in merged} == {None}  # the anchor's own fill
+    REPORT["tables merge"] = "tables: a merge inside a table, which Excel refuses, is shown (1)"
