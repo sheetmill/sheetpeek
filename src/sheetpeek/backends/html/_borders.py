@@ -1,4 +1,4 @@
-"""Borders: one layer of lines in sheet coordinates, over the fills and gridlines, under the text.
+"""Borders: a layer of lines in sheet coordinates, over the fills and gridlines, under the text.
 
 The layout resolves one side per edge (``RenderedSheet.borders``, ``_pass_borders.py``);
 this layer draws each run of equal sides along a line as one box. Widths, dashes and the place of
@@ -13,8 +13,9 @@ a line on its gridline are Excel's in screen points, which are CSS px at any pag
 - slantDashDot as mediumDashDot, its gaps square (reported);
 - where two lines meet, each reaches over the other's band, so corners are square.
 
-Diagonals are an SVG line from corner to corner of the cell or merge. Each distinct line is one
-generated class (``sp-b-`` and letters), not a public interface.
+Diagonals are an SVG line from corner to corner of the cell or merge, in a second layer written
+after the text, which they cross as in Excel. Each distinct line is one generated class (``sp-b-``
+and letters), not a public interface.
 """
 
 from __future__ import annotations
@@ -101,6 +102,10 @@ class Borders:
         self.lines: list[str] = []
         self.at: list[tuple[int, int]] = []
         """Each line's left and top, for a frozen pane's copy, which writes only its own."""
+        self.over: list[str] = []
+        """The diagonals, a layer over the text: Excel draws a diagonal across a cell's text
+        (captured, diagonals)."""
+        self.over_at: list[tuple[int, int]] = []
         sheet = page.sheet
         resolved = rendered_borders(sheet)
         rows, columns = sheet.rows, sheet.columns
@@ -192,11 +197,11 @@ class Borders:
             f"{''.join(lines)}</svg>"
         )
         name = self.classes.name(f"background-image:{svg_uri(svg)}")
-        self.lines.append(
+        self.over.append(
             f'<i class="{name}" style="left:{left}px;top:{top}px;width:{width}px;'
             f'height:{height}px"></i>'
         )
-        self.at.append((left, top))
+        self.over_at.append((left, top))
 
     def slanted(
         self,
@@ -261,6 +266,12 @@ class Borders:
     def write(self, out: TextIO, window: tuple[float, float] | None = None) -> None:
         """Write the lines; with ``window`` (px), only those starting left of and above it."""
         lines = self.lines if window is None else inside(self.lines, self.at, window)
+        if lines:
+            out.write(f'<div class="sp-borders">{"".join(lines)}</div>')
+
+    def write_over(self, out: TextIO, window: tuple[float, float] | None = None) -> None:
+        """Write the diagonals after the text, so they lie over it; ``window`` as for ``write``."""
+        lines = self.over if window is None else inside(self.over, self.over_at, window)
         if lines:
             out.write(f'<div class="sp-borders">{"".join(lines)}</div>')
 

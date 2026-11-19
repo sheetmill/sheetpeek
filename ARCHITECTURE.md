@@ -667,7 +667,7 @@ a cached value (as openpyxl writes it) has no `t`. The same file confirms Excel 
 Captured so far, in `tests/captures/`: by print (route B) `layout` (§3.6, §4.1 to §4.7); read
 from Excel `theme_colors` and `theme_colors_more` (§3.3), `merge_width` and `error_width` (§4.2,
 §4.4, no deviation), `row_height` and `row_height_more` (§4.7), `package` and `package_more` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14), `theme_fonts_palette`
-and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts` and `gradients` (§4.12), `text_style` and `text_style_more` (§4.7, §4.13), `runs` (§4.16), `tab_strip` (§4.15), `outline` (§4.11), `rotation` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
+and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts`, `gradients` and `diagonals` (§4.12), `text_style` and `text_style_more` (§4.7, §4.13), `runs` (§4.16), `tab_strip` (§4.15), `outline` (§4.11), `rotation` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
 Excel 16.115 (Microsoft 365). Every section here rests on one of them; what no capture covers
 is marked unverified where it is stated, as are the parts of §4.12, §4.14 and §4.18 that say so. What still waits for
 the screen: the text insets and the baselines of angled text, which come from print, and the 15 pt rows that print
@@ -792,8 +792,9 @@ shown.
 
 **Captures:** the pattern tiles and colors and the line styles' geometry are captured on Excel
 16.115 (Microsoft 365) by the screen suites `fills` and `borders` (`tests/captures/fills.tsv`,
-`borders.tsv`). The rest (gradients, automatic colors, conflicts and ties, merges, spill,
-diagonals) has no capture in this repository yet and is unverified. The model is in
+`borders.tsv`); gradients, automatic colors, conflicts and ties, merges and spill, and
+diagonals by the suites `gradients`, `auto_colors`, `border_conflicts`, `merges_spill` and
+`diagonals`. What none of them covers is marked unverified where it is stated. The model is in
 `_fill_border_model.py`, the reading in `_style/fill.py` and `_style/border.py`, the layout in
 `_pass_borders.py`, the drawing in `backends/html/_patterns.py` and `backends/html/_borders.py`.
 
@@ -866,19 +867,22 @@ direction; Excel draws nothing otherwise.
   `RenderedRow.crossed` (§3.6).
 - **Hidden rows and columns** contribute no sides; the visible neighbors' facing sides meet on
   the one edge and compete.
-- Diagonals run corner to corner of the cell or merge, antialiased; hair diagonals are drawn as
-  thin, dashed ones as short blocks; text and the line both show.
+- Diagonals run corner to corner of the cell or merge, antialiased, over the cell's text; hair
+  diagonals are drawn as thin, dashed ones as short blocks (`diagonals`). Two known deviations:
+  Excel's dashes along a diagonal step with its raster (mediumDashed 10 on and 2 off in screen
+  points, where sheetpeek draws 9 and 3 along the line), and its medium dashed down lines lie
+  about 1.2 screen points below the corner-to-corner line, 2 thick, where sheetpeek centers them.
 
 **The layout** (`excel` mode only) resolves one side per edge of the laid-out grid into
 `RenderedSheet.borders`, a `RenderedBorders` of horizontal and vertical lines and the
 diagonals; no output compares two cells' sides. A range read cuts off the sides of the cells
 beyond it (not read).
 
-**HTML** draws two layers of absolutely positioned boxes before the table's text, in sheet
-coordinates: the fill layer (`sp-fills`: SVG tiles drawn `pixelated` and anchored at the sheet's
+**HTML** draws two layers of absolutely positioned boxes before the table's text, and the
+diagonals in a third after it, in sheet coordinates: the fill layer (`sp-fills`: SVG tiles drawn `pixelated` and anchored at the sheet's
 origin, CSS linear gradients, SVG path gradients in four bands) and the border layer
 (`sp-borders`: one box per run of equal sides along a line, reaching over the bands of the lines
-across its ends; dashes as SVG tiles on white; diagonals as SVG lines). Both stay in CSS px at any
+across its ends; dashes as SVG tiles on white; diagonals as SVG lines, after the text). Both stay in CSS px at any
 page scale. Tiles and dashes are in whole screen points, one to a CSS px, so a 1× display draws
 them exactly too. Where Excel starts a dash period is not captured; a run starts its own.
 **slantDashDot is drawn as mediumDashDot with square gaps** and reported

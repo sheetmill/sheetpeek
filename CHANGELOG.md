@@ -110,8 +110,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Borders: the four sides in all 13 styles and their colors, and diagonals, drawn in HTML as a
   layer of lines in CSS px. Where two cells' sides meet, the layout keeps the one Excel draws
   (the stronger style, then the darker color), keeps each cell's own sides around a merge, and
-  drops the vertical sides that spilled text crosses. `slantDashDot` is drawn as
-  `mediumDashDot`, and reported.
+  drops the vertical sides that spilled text crosses. A diagonal lies over the cell's text, as
+  in Excel. `slantDashDot` is drawn as `mediumDashDot`, and reported.
 - `CellStyle.fill_spec` (a `Pattern` or a `Gradient`) and `CellStyle.borders` (a `Borders` of
   `Side`s), and `RenderedSheet.borders`, a `RenderedBorders` of the resolved lines in
   `excel` mode. New public types: `Pattern`, `Gradient`, `Fill`, `PatternKind`, `Borders`, `Side`,

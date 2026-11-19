@@ -465,7 +465,9 @@ def measure_line(cap: Any, case: Case, line: str) -> dict[str, str]:
     columns = _columns(cap, case, line)
     found: dict[str, str] = {}
     inked = [c for c in columns if any(c["flags"])]
-    if inked:
+    # Ink spanning under 2 screen points across the cell is no line (a boundary's gridline or a
+    # neighbor's line at the corner): K16 at zoom 100 showed ink only in its right boundary column.
+    if inked and inked[-1]["x"] - inked[0]["x"] >= 2 * cap.scale:  # 2 screen points
         found["start"] = pt(cap, inked[0]["x"] - left)
         found["end"] = pt(cap, inked[-1]["x"] + 1 - right)
         darkest = min(

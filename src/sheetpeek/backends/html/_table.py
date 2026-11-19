@@ -184,7 +184,9 @@ class Page:
             out.write("</thead>\n")
         out.write("<tbody>\n")
         self.write_rows(out, rows, columns)
-        out.write(f"</tbody></table>{lines}</div>\n")
+        out.write("</tbody></table>")
+        self.borders.write_over(out, window)
+        out.write(f"{lines}</div>\n")
 
     def grid(self) -> tuple[_Spans, Holder]:
         """Each merge's grid span, and sheet position → grid position of the cell drawing it."""

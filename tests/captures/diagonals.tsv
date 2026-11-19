@@ -1,0 +1,251 @@
+# excel: 16.115
+# build: 16.115.26110837
+# edition: Microsoft 365
+# channel: Current
+# macos: 26.5.1
+# appearance: dark
+# date: 2026-11-19
+# display_scale: 2.000
+# zooms: 100,200
+# colors: captures converted to sRGB (sips --matchTo sRGB Profile.icc)
+# platform: mac
+# suite: diagonals
+group	name	zoom	cell	style	direction	line	width	height	read_up	read_down	ink	start	end	offset	coverage	bands	pattern	runs	text_box	crossing
+small	thin up	100	C4	thin	up	up	53	15	continuous	line style none	000000	1.5	0.5	0.284	1.035	1	solid			
+small	thin down	100	C6	thin	down	down	53	15	line style none	continuous	000000	0.5	-0.5	0.014	1.035	1	solid			
+small	thin both	100	C8	thin	both	up	53	15	continuous	continuous	000000	1.5	0.5							
+small	thin both	100	C8	thin	both	down	53	15	continuous	continuous	000000	0.5	-0.5							
+small	medium up	100	E4	medium	up	up	53	15	continuous	line style none	000000	0	1	0.648	2.878	1	solid			
+small	medium down	100	E6	medium	down	down	53	15			000000	0	1	0.367	2.878	1	solid			
+small	medium both	100	E8	medium	both	up	53	15			000000	0	1							
+small	medium both	100	E8	medium	both	down	53	15			000000	0	1							
+small	thick up	100	G4	thick	up	up	53	15	continuous	line style none	000000	0	1	0.643	3.5	1	solid			
+small	thick down	100	G6	thick	down	down	53	15			000000	0	1	0.349	3.5	1	solid			
+small	thick both	100	G8	thick	both	up	53	15			000000	0	1							
+small	thick both	100	G8	thick	both	down	53	15			000000	0	1							
+small	double up	100	I4	double	up	up	53	15	double	line style none	000000	1.5	0.5	0.28	2.069	2	solid			
+small	double down	100	I6	double	down	down	53	15			000000	0.5	-0.5	0.015	2.069	2	solid			
+small	double both	100	I8	double	both	up	53	15			000000	0.5	-0.5							
+small	double both	100	I8	double	both	down	53	15			000000	0.5	-0.5							
+small	hair up	100	K4	hair	up	up	53	15	continuous	line style none	000000	1.5	0.5	0.284	1.035	1	solid			
+small	hair down	100	K6	hair	down	down	53	15			000000	0.5	-0.5	0.014	1.035	1	solid			
+small	hair both	100	K8	hair	both	up	53	15			000000	1.5	0.5							
+small	hair both	100	K8	hair	both	down	53	15			000000	0.5	-0.5							
+small	dotted up	100	M4	dotted	up	up	53	15	dot	line style none	000000	4	-2	0.797	1	1	irregular: on 1 off 3 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 3 on 1 off 3	on 1 off 3 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 3 on 1 off 3 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 3 on 1 off 3 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 3 on 1		
+small	dotted down	100	M6	dotted	down	down	53	15			000000	3	-3	0.5	1	1	irregular: on 1 off 3 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 3 on 1 off 3	on 1 off 3 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 3 on 1 off 3 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 3 on 1 off 3 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 3 on 1		
+small	dotted both	100	M8	dotted	both	up	53	15			000000	4	-2							
+small	dotted both	100	M8	dotted	both	down	53	15			000000	3	3							
+small	dashed up	100	O4	dashed	up	up	53	15	dash	line style none	000000	4.5	0.5	0.642	1	1	irregular: on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 1.5 on 3 off 1	on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 1.5 on 3 off 1 on 3 off 1.5 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2		
+small	dashed down	100	O6	dashed	down	down	53	15			000000	0.5	-3.5	0.354	1	1	irregular: on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 1.5 on 3 off 1	on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 1.5 on 3 off 1 on 3 off 1.5 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2		
+small	dashed both	100	O8	dashed	both	up	53	15			000000	-3.5	0.5							
+small	dashed both	100	O8	dashed	both	down	53	15			000000	0.5	-3.5							
+small	dashDot up	100	C10	dashDot	up	up	53	15	dash dot	line style none	000000	0	0.5	1.001	1.055	1	irregular: on 3 off 3 on 9 off 3 on 3 off 3 on 9 off 3 on 2 off 4	on 3 off 3 on 9 off 3 on 3 off 3 on 9 off 3 on 2 off 4		
+small	dashDot down	100	C12	dashDot	down	down	53	15	line style none	dash dot	000000	0.5	1	0.698	1.055	1	irregular: off 4 on 2 off 3 on 9 off 3 on 3 off 3 on 9 off 3 on 3	off 4 on 2 off 3 on 9 off 3 on 3 off 3 on 9 off 3 on 3		
+small	dashDot both	100	C14	dashDot	both	up	53	15	dash dot	dash dot	000000	0	0.5							
+small	dashDot both	100	C14	dashDot	both	down	53	15	dash dot	dash dot	000000	0.5	1							
+small	dashDotDot up	100	E10	dashDotDot	up	up	53	15			000000	0.5	0.5	0.838	1.024	1	irregular: off 3 on 3 off 3 on 3 off 3 on 9 off 3 on 2 off 4 on 2 off 4	off 3 on 3 off 3 on 3 off 3 on 9 off 3 on 2 off 4 on 2 off 4		
+small	dashDotDot down	100	E12	dashDotDot	down	down	53	15			000000	0.5	0.5	0.555	1.024	1	irregular: off 4 on 2 off 4 on 2 off 3 on 9 off 3 on 3 off 3 on 3 off 3	off 4 on 2 off 4 on 2 off 3 on 9 off 3 on 3 off 3 on 3 off 3		
+small	dashDotDot both	100	E14	dashDotDot	both	up	53	15			000000	0.5	0.5							
+small	dashDotDot both	100	E14	dashDotDot	both	down	53	15			000000	0.5	0.5							
+small	mediumDashed up	100	G10	mediumDashed	up	up	53	15			000000	0	1	0.39	2.025	1	on 10 off 2	off 2 on 10 off 2 on 10 off 2 on 10 off 2		
+small	mediumDashed down	100	G12	mediumDashed	down	down	53	15			000000	0	1	1.098	2.025	1	on 10 off 2	off 2 on 10 off 2 on 10 off 2 on 10 off 2		
+small	mediumDashed both	100	G14	mediumDashed	both	up	53	15			000000	0	1							
+small	mediumDashed both	100	G14	mediumDashed	both	down	53	15			000000	0	1							
+small	mediumDashDot up	100	I10	mediumDashDot	up	up	53	15			000000	0	1	0.466	2.055	1	irregular: on 4 off 2 on 10 off 2 on 4 off 2 on 10 off 2 on 3 off 3	on 4 off 2 on 10 off 2 on 4 off 2 on 10 off 2 on 3 off 3		
+small	mediumDashDot down	100	I12	mediumDashDot	down	down	53	15			000000	0	1	1.172	2.055	1	irregular: off 3 on 3 off 2 on 10 off 2 on 4 off 2 on 10 off 2 on 4	off 3 on 3 off 2 on 10 off 2 on 4 off 2 on 10 off 2 on 4		
+small	mediumDashDot both	100	I14	mediumDashDot	both	up	53	15			000000	0	1							
+small	mediumDashDot both	100	I14	mediumDashDot	both	down	53	15			000000	0	1							
+small	mediumDashDotDot up	100	K10	mediumDashDotDot	up	up	53	15			000000	0	1	0.324	2.025	1	irregular: off 2 on 4 off 2 on 4 off 2 on 10 off 2 on 3 off 3 on 3 off 3	off 2 on 4 off 2 on 4 off 2 on 10 off 2 on 3 off 3 on 3 off 3		
+small	mediumDashDotDot down	100	K12	mediumDashDotDot	down	down	53	15			000000	0	1	1.052	2.025	1	irregular: off 3 on 3 off 3 on 3 off 2 on 10 off 2 on 4 off 2 on 4 off 2	off 3 on 3 off 3 on 3 off 2 on 10 off 2 on 4 off 2 on 4 off 2		
+small	mediumDashDotDot both	100	K14	mediumDashDotDot	both	up	53	15			000000	0	1							
+small	mediumDashDotDot both	100	K14	mediumDashDotDot	both	down	53	15			000000	0	1							
+small	slantDashDot up	100	M10	slantDashDot	up	up	53	15			000000	0	3	0.55	1.72	1	irregular: off 0.5 on 41 off 0.5	off 0.5 on 41 off 0.5		
+small	slantDashDot down	100	M12	slantDashDot	down	down	53	15			000000	-1	3	1.303	2.386	1	irregular: off 1.5	off 1.5		
+small	slantDashDot both	100	M14	slantDashDot	both	up	53	15			000000	0	3							
+small	slantDashDot both	100	M14	slantDashDot	both	down	53	15			000000	-1	1							
+small	thin both, text	100	C16	thin	both	up	53	15	continuous	continuous	000000	1.5	0.5						3.5 4.5 42 13.5	black 62 blue 1 white 0 other 0
+small	thin both, text	100	C16	thin	both	down	53	15	continuous	continuous	000000	0.5	-0.5						3.5 4.5 42 13.5	black 52 blue 0 white 0 other 0
+small	medium both, text centered	100	E16	medium	both	up	53	15	continuous	continuous	000000	0	1						7.5 4.5 46 13.5	black 59 blue 0 white 0 other 0
+small	medium both, text centered	100	E16	medium	both	down	53	15	continuous	continuous	000000	0	1						7.5 4.5 46 13.5	black 60 blue 0 white 0 other 0
+small	dashDot down, text	100	G16	dashDot	down	down	53	15	line style none	dash dot	000000	0.5	1	0.742	1.104	1	irregular: off 4 on 2 off 3 on 9 off 3 on 3 off 3 on 9 off 3 on 3	off 4 on 2 off 3 on 9 off 3 on 3 off 3 on 9 off 3 on 3	3.5 4.5 42 13.5	black 13 blue 16 white 16 other 7
+small	thin up	200	C4	thin	up	up	53	15	continuous	line style none	000000	0.75	0.25	0.14	0.519	1	solid			
+small	thin down	200	C6	thin	down	down	53	15	line style none	continuous	000000	0.25	-0.25	0.004	0.519	1	solid			
+small	thin both	200	C8	thin	both	up	53	15	continuous	continuous	000000	0.75	0.25	0.189	0.519	1				
+small	thin both	200	C8	thin	both	down	53	15	continuous	continuous	000000	0.25	-0.25	0.051	0.519	1				
+small	medium up	200	E4	medium	up	up	53	15	continuous	line style none	000000	0	0.5	0.322	1.442	1	solid			
+small	medium down	200	E6	medium	down	down	53	15			000000	0	0.5	0.182	1.442	1	solid			
+small	medium both	200	E8	medium	both	up	53	15			000000	0	0.5	0.332	1.442	1				
+small	medium both	200	E8	medium	both	down	53	15			000000	0	0.5	0.191	1.442	1				
+small	thick up	200	G4	thick	up	up	53	15	continuous	line style none	000000	0	0.5	0.32	1.738	1	solid			
+small	thick down	200	G6	thick	down	down	53	15			000000	0	0.5	0.178	1.738	1	solid			
+small	thick both	200	G8	thick	both	up	53	15			000000	0	0.5	0.291	1.738	1				
+small	thick both	200	G8	thick	both	down	53	15			000000	0	0.5	0.149	1.738	1				
+small	double up	200	I4	double	up	up	53	15	double	line style none	000000	0.75	0.25	0.143	1.037	2	solid			
+small	double down	200	I6	double	down	down	53	15			000000	0.25	-0.25	0.005	1.037	2	solid			
+small	double both	200	I8	double	both	up	53	15			000000	0.25	-0.25	0.504	1.036	2				
+small	double both	200	I8	double	both	down	53	15			000000	0.25	-0.25	0.004	1.036	2				
+small	hair up	200	K4	hair	up	up	53	15	continuous	line style none	000000	0.75	0.25	0.141	0.519	1	solid			
+small	hair down	200	K6	hair	down	down	53	15			000000	0.25	-0.25	0.003	0.519	1	solid			
+small	hair both	200	K8	hair	both	up	53	15			000000	0.75	0.25	0.191	0.519	1				
+small	hair both	200	K8	hair	both	down	53	15			000000	0.25	-0.25	0.053	0.519	1				
+small	dotted up	200	M4	dotted	up	up	53	15	dot	line style none	000000	0.5	-1	0.392	0.5	1	irregular: off 0.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 1.5 on 0.5 off 1.5 on 0.5 off 0.5 on 0.5	off 0.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 1.5 on 0.5 off 1.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 1.5 on 0.5 off 1.5 on 0.5 off 1.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 1.5 on 0.5 off 1.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 1.5 on 0.5 off 1.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 1.5 on 0.5 off 1.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 1.5 on 0.5 off 1.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 1.5 on 0.5		
+small	dotted down	200	M6	dotted	down	down	53	15			000000	1.5	0	0.248	0.5	1	irregular: on 0.5 off 1.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 1.5 on 0.5 off 1.5	on 0.5 off 1.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 1.5 on 0.5 off 1.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 1.5 on 0.5 off 1.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 1.5 on 0.5 off 1.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 1.5 on 0.5 off 1.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 1.5 on 0.5 off 1.5 on 0.5 off 1.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 1.5 on 0.5 off 1.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5		
+small	dotted both	200	M8	dotted	both	up	53	15			000000	0.5	-1	0.392	0.5	1				
+small	dotted both	200	M8	dotted	both	down	53	15			000000	1.5	0	0.248	0.5	1				
+small	dashed up	200	O4	dashed	up	up	53	15	dash	line style none	000000	0.75	0.25	0.191	0.5	1	irregular: off 1 on 1 off 1 on 1 off 1 on 1 off 0.75 on 1.5 off 0.75 on 1 off 1 on 1	off 1 on 1 off 1 on 1 off 1 on 1 off 0.75 on 1.5 off 0.75 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 0.75 on 1.5 off 0.75 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 0.75 on 1.5 off 0.5 on 1.5 off 0.75 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1		
+small	dashed down	200	O6	dashed	down	down	53	15			000000	0.25	-0.25	0.042	0.5	1	irregular: on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 0.75 on 1.5 off 0.5	on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 0.75 on 1.5 off 0.5 on 1.5 off 0.75 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 0.75 on 1.5 off 0.75 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 0.75 on 1.5 off 0.75 on 1 off 1 on 1 off 1 on 1 off 1		
+small	dashed both	200	O8	dashed	both	up	53	15			000000	0.75	0.25	0.186	0.5	1				
+small	dashed both	200	O8	dashed	both	down	53	15			000000	0.25	-0.25	0.035	0.5	1				
+small	dashDot up	200	C10	dashDot	up	up	53	15	dash dot	line style none	000000	1.25	0.25	0.471	0.527	1	irregular: on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5	on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1 off 2		
+small	dashDot down	200	C12	dashDot	down	down	53	15	line style none	dash dot	000000	0.25	-0.75	0.326	0.527	1	irregular: off 2 on 1 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5	off 2 on 1 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5		
+small	dashDot both	200	C14	dashDot	both	up	53	15	dash dot	dash dot	000000	1.25	0.25	0.453	0.527	1				
+small	dashDot both	200	C14	dashDot	both	down	53	15	dash dot	dash dot	000000	0.25	-0.75	0.306	0.527	1				
+small	dashDotDot up	200	E10	dashDotDot	up	up	53	15			000000	1.25	0.25	0.477	0.513	1	irregular: on 4.5 off 1.5 on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 1.5 off 1.5	on 4.5 off 1.5 on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1 off 2 on 1 off 2		
+small	dashDotDot down	200	E12	dashDotDot	down	down	53	15			000000	0.25	-0.75	0.335	0.513	1	irregular: off 2 on 1 off 2 on 1 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 1.5 off 1.5 on 4.5	off 2 on 1 off 2 on 1 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 1.5 off 1.5		
+small	dashDotDot both	200	E14	dashDotDot	both	up	53	15			000000	1.25	0.25	0.415	0.513	1				
+small	dashDotDot both	200	E14	dashDotDot	both	down	53	15			000000	0.25	-0.75	0.277	0.526	1				
+small	mediumDashed up	200	G10	mediumDashed	up	up	53	15			000000	1	0.5	0.233	1.026	1	on 5 off 1	on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1		
+small	mediumDashed down	200	G12	mediumDashed	down	down	53	15			000000	0	-0.5	0.591	1.026	1	on 5 off 1	off 1 on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1		
+small	mediumDashed both	200	G14	mediumDashed	both	up	53	15			000000	1	0.5	0.193	1.026	1				
+small	mediumDashed both	200	G14	mediumDashed	both	down	53	15			000000	0	-0.5	0.545	1.026	1				
+small	mediumDashDot up	200	I10	mediumDashDot	up	up	53	15			000000	1	0.5	0.223	1.027	1	irregular: on 2 off 1 on 5 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 5 off 1	on 2 off 1 on 5 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 5 off 1 on 1.5 off 1.5		
+small	mediumDashDot down	200	I12	mediumDashDot	down	down	53	15			000000	0	-0.5	0.58	1.027	1	irregular: off 1.5 on 1.5 off 1 on 5 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 5	off 1.5 on 1.5 off 1 on 5 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 5 off 1		
+small	mediumDashDot both	200	I14	mediumDashDot	both	up	53	15			000000	1	0.5	0.203	1.027	1				
+small	mediumDashDot both	200	I14	mediumDashDot	both	down	53	15			000000	0	-0.5	0.557	1.027	1				
+small	mediumDashDotDot up	200	K10	mediumDashDotDot	up	up	53	15			000000	1	0.5	0.232	1.026	1	irregular: on 5 off 1 on 2 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 2 off 1	on 5 off 1 on 2 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 2 off 1 on 5 off 1 on 1.5 off 1.5 on 1.5 off 1.5		
+small	mediumDashDotDot down	200	K12	mediumDashDotDot	down	down	53	15			000000	0	-0.5	0.591	1.026	1	irregular: off 1.5 on 1.5 off 1.5 on 1.5 off 1 on 5 off 1 on 2 off 1 on 2 off 1 on 5	off 1.5 on 1.5 off 1.5 on 1.5 off 1 on 5 off 1 on 2 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 2 off 1		
+small	mediumDashDotDot both	200	K14	mediumDashDotDot	both	up	53	15			000000	1	0.5	0.173	1.027	1				
+small	mediumDashDotDot both	200	K14	mediumDashDotDot	both	down	53	15			000000	0	-0.5	0.537	1.027	1				
+small	slantDashDot up	200	M10	slantDashDot	up	up	53	15			000000	0.5	1.5	0.301	0.86	1	irregular: off 0.25	off 0.25		
+small	slantDashDot down	200	M12	slantDashDot	down	down	53	15			000000	-0.5	-0.25	0.642	1.193	1	irregular: off 0.75	off 0.75		
+small	slantDashDot both	200	M14	slantDashDot	both	up	53	15			000000	0.5	1.5	0.273	0.86	1				
+small	slantDashDot both	200	M14	slantDashDot	both	down	53	15			000000	-0.5	-0.25	0.627	1.193	1				
+small	thin both, text	200	C16	thin	both	up	53	15	continuous	continuous	000000	0.75	0.25	0.221	0.519	1			2.75 4 41.25 13.5	black 127 blue 3 white 0 other 4
+small	thin both, text	200	C16	thin	both	down	53	15	continuous	continuous	000000	0.25	-0.25	0.069	0.519	1			2.75 4 41.25 13.5	black 107 blue 1 white 0 other 0
+small	medium both, text centered	200	E16	medium	both	up	53	15	continuous	continuous	000000	0	0.5	0.341	1.442	1			7.75 3.75 46.25 13.5	black 128 blue 0 white 0 other 0
+small	medium both, text centered	200	E16	medium	both	down	53	15	continuous	continuous	000000	0	0.5	0.173	1.442	1			7.75 3.75 46.25 13.5	black 132 blue 0 white 0 other 0
+small	dashDot down, text	200	G16	dashDot	down	down	53	15	line style none	dash dot	000000	0.25	-0.75	0.368	0.527	1	irregular: off 2 on 1 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5	off 2 on 1 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5	2.75 3.75 41.25 13.5	black 30 blue 30 white 35 other 17
+large	thin up	100	C4	thin	up	up	100	40	continuous	line style none	000000	1.5	0.5	0.4	1.075	1	solid			
+large	thin down	100	C6	thin	down	down	100	40	line style none	continuous	000000	0.5	-0.5	0.012	1.075	1	solid			
+large	thin both	100	C8	thin	both	up	100	40	continuous	continuous	000000	1.5	0.5	0.459	1.075	1				
+large	thin both	100	C8	thin	both	down	100	40	continuous	continuous	000000	0.5	-0.5	0.066	1.075	1				
+large	medium up	100	E4	medium	up	up	100	40	continuous	line style none	000000	0	1	0.7	2.873	1	solid			
+large	medium down	100	E6	medium	down	down	100	40			000000	0	1	0.301	2.873	1	solid			
+large	medium both	100	E8	medium	both	up	100	40			000000	0	1	0.719	2.873	1				
+large	medium both	100	E8	medium	both	down	100	40			000000	0	1	0.321	2.873	1				
+large	thick up	100	G4	thick	up	up	100	40	continuous	line style none	000000	0	1	0.7	3.706	1	solid			
+large	thick down	100	G6	thick	down	down	100	40			000000	0	1	0.292	3.706	1	solid			
+large	thick both	100	G8	thick	both	up	100	40			000000	0	1	0.638	3.706	1				
+large	thick both	100	G8	thick	both	down	100	40			000000	0	1	0.231	3.706	1				
+large	double up	100	I4	double	up	up	100	40	double	line style none	000000	1.5	0.5	0.401	2.151	2	solid			
+large	double down	100	I6	double	down	down	100	40			000000	0.5	-0.5	0.003	2.151	2	solid			
+large	double both	100	I8	double	both	up	100	40			000000	0.5	-0.5	1.004	2.147	2				
+large	double both	100	I8	double	both	down	100	40			000000	0.5	-0.5	0.003	2.147	2				
+large	hair up	100	K4	hair	up	up	100	40	continuous	line style none	000000	1.5	0.5	0.4	1.075	1	solid			
+large	hair down	100	K6	hair	down	down	100	40			000000	0.5	-0.5	0.012	1.075	1	solid			
+large	hair both	100	K8	hair	both	up	100	40			000000	1.5	0.5	0.459	1.075	1				
+large	hair both	100	K8	hair	both	down	100	40			000000	0.5	-0.5	0.066	1.075	1				
+large	dotted up	100	M4	dotted	up	up	100	40	dot	line style none	000000	1	-4	0.8	1	1	on 1 off 1 on 1 off 5 on 1 off 1	off 1 on 1 off 1 on 1 off 5 on 1 off 1 on 1 off 1 on 1 off 5 on 1 off 1 on 1 off 1 on 1 off 5 on 1 off 1 on 1 off 1 on 1 off 5 on 1 off 1 on 1 off 1 on 1 off 5 on 1 off 1 on 1 off 1 on 1 off 5 on 1 off 1 on 1 off 1 on 1 off 5 on 1 off 1 on 1 off 1 on 1 off 5 on 1 off 1 on 1 off 1 on 1 off 5 on 1 off 1 on 1 off 1 on 1		
+large	dotted down	100	M6	dotted	down	down	100	40			000000	5	0	0.4	1	1	on 1 off 1 on 1 off 1 on 1 off 5	on 1 off 1 on 1 off 1 on 1 off 5 on 1 off 1 on 1 off 1 on 1 off 5 on 1 off 1 on 1 off 1 on 1 off 5 on 1 off 1 on 1 off 1 on 1 off 5 on 1 off 1 on 1 off 1 on 1 off 5 on 1 off 1 on 1 off 1 on 1 off 5 on 1 off 1 on 1 off 1 on 1 off 5 on 1 off 1 on 1 off 1 on 1 off 5 on 1 off 1 on 1 off 1 on 1 off 5 on 1 off 1 on 1		
+large	dotted both	100	M8	dotted	both	up	100	40			000000	1	-4	0.8	1	1				
+large	dotted both	100	M8	dotted	both	down	100	40			000000	5	3.5	0.4	1	1				
+large	dashed up	100	O4	dashed	up	up	100	40	dash	line style none	000000	3.5	0.5	0.4	1	1	on 2 off 2	on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2		
+large	dashed down	100	O6	dashed	down	down	100	40			000000	0.5	-2.5	0	1	1	on 2 off 2	on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2		
+large	dashed both	100	O8	dashed	both	up	100	40			000000	-3.5	0.5	0.4	1	1				
+large	dashed both	100	O8	dashed	both	down	100	40			000000	0.5	-2.5	0	1	1				
+large	dashDot up	100	C10	dashDot	up	up	100	40	dash dot	line style none	000000	2.5	0.5	1.026	1.055	1	irregular: on 9 off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 9 off 3 on 3 off 3	on 9 off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 9 off 3 on 2 off 4		
+large	dashDot down	100	C12	dashDot	down	down	100	40	line style none	dash dot	000000	0.5	-1.5	0.625	1.055	1	irregular: off 4 on 2 off 3 on 9 off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 9	off 4 on 2 off 3 on 9 off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 9 off 3 on 3 off 3		
+large	dashDot both	100	C14	dashDot	both	up	100	40	dash dot	dash dot	000000	2.5	0.5	1.01	1.055	1				
+large	dashDot both	100	C14	dashDot	both	down	100	40	dash dot	dash dot	000000	0.5	-1.5	0.611	1.055	1				
+large	dashDotDot up	100	E10	dashDotDot	up	up	100	40			000000	0	0.5	1.11	1.055	1	irregular: off 3 on 3 off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3 on 9	off 3 on 3 off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3 on 9 off 3 on 2 off 4 on 2 off 4		
+large	dashDotDot down	100	E12	dashDotDot	down	down	100	40			000000	0.5	1	0.71	1.055	1	irregular: off 4 on 2 off 4 on 2 off 3 on 9 off 3 on 3 off 3 on 3 off 3 on 9	off 4 on 2 off 4 on 2 off 3 on 9 off 3 on 3 off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3 on 9 off 3 on 3 off 3 on 3 off 3		
+large	dashDotDot both	100	E14	dashDotDot	both	up	100	40			000000	0	0.5	1.1	1.055	1				
+large	dashDotDot both	100	E14	dashDotDot	both	down	100	40			000000	0.5	1	0.69	1.055	1				
+large	mediumDashed up	100	G10	mediumDashed	up	up	100	40			000000	0	1	0.6	2.055	1	on 10 off 2	off 2 on 10 off 2 on 10 off 2 on 10 off 2 on 10 off 2 on 10 off 2 on 10 off 2 on 10 off 2		
+large	mediumDashed down	100	G12	mediumDashed	down	down	100	40			000000	0	1	1.2	2.055	1	on 10 off 2	off 2 on 10 off 2 on 10 off 2 on 10 off 2 on 10 off 2 on 10 off 2 on 10 off 2 on 10 off 2		
+large	mediumDashed both	100	G14	mediumDashed	both	up	100	40			000000	0	1	0.614	2.055	1				
+large	mediumDashed both	100	G14	mediumDashed	both	down	100	40			000000	0	1	1.241	2.055	1				
+large	mediumDashDot up	100	I10	mediumDashDot	up	up	100	40			000000	2	1	0.537	2.055	1	irregular: on 10 off 2 on 4 off 2 on 10 off 2 on 4 off 2 on 10 off 2 on 4 off 2	on 10 off 2 on 4 off 2 on 10 off 2 on 4 off 2 on 10 off 2 on 4 off 2 on 10 off 2 on 4 off 2 on 10 off 2 on 3 off 3		
+large	mediumDashDot down	100	I12	mediumDashDot	down	down	100	40			000000	0	-1	1.13	2.055	1	irregular: off 3 on 3 off 2 on 10 off 2 on 4 off 2 on 10 off 2 on 4 off 2 on 10	off 3 on 3 off 2 on 10 off 2 on 4 off 2 on 10 off 2 on 4 off 2 on 10 off 2 on 4 off 2 on 10 off 2 on 4 off 2		
+large	mediumDashDot both	100	I14	mediumDashDot	both	up	100	40			000000	2	1	0.519	2.092	1				
+large	mediumDashDot both	100	I14	mediumDashDot	both	down	100	40			000000	0	-1	1.119	2.092	1				
+large	mediumDashDotDot up	100	K10	mediumDashDotDot	up	up	100	40			000000	0	1	0.614	2.055	1	irregular: off 2 on 4 off 2 on 4 off 2 on 10 off 2 on 4 off 2 on 4 off 2 on 10	off 2 on 4 off 2 on 4 off 2 on 10 off 2 on 4 off 2 on 4 off 2 on 10 off 2 on 4 off 2 on 4 off 2 on 10 off 2 on 3 off 3 on 3 off 3		
+large	mediumDashDotDot down	100	K12	mediumDashDotDot	down	down	100	40			000000	0	1	1.214	2.055	1	irregular: off 3 on 3 off 3 on 3 off 2 on 10 off 2 on 4 off 2 on 4 off 2 on 10	off 3 on 3 off 3 on 3 off 2 on 10 off 2 on 4 off 2 on 4 off 2 on 10 off 2 on 4 off 2 on 4 off 2 on 10 off 2 on 4 off 2 on 4 off 2		
+large	mediumDashDotDot both	100	K14	mediumDashDotDot	both	up	100	40			000000	0	1	0.614	2.055	1				
+large	mediumDashDotDot both	100	K14	mediumDashDotDot	both	down	100	40			000000	0	1	1.186	2.055	1				
+large	slantDashDot up	100	M10	slantDashDot	up	up	100	40			000000	0.5	3.5	0.75	1.651	1	solid			
+large	slantDashDot down	100	M12	slantDashDot	down	down	100	40			000000	-1	3.5	1.322	2.386	1	irregular: off 2 on 4 off 1 on 11 off 0.5 on 6 off 0.5 on 11 off 0.5 on 18 off 0.5 on 5	off 2 on 4 off 1 on 11 off 0.5 on 6 off 0.5 on 11 off 0.5 on 18 off 0.5 on 5 off 0.5 on 18 off 0.5		
+large	slantDashDot both	100	M14	slantDashDot	both	up	100	40			000000	0.5	3.5	0.732	1.65	1				
+large	slantDashDot both	100	M14	slantDashDot	both	down	100	40			000000	-1	-0.5	1.313	2.386	1				
+large	thin both, text centered	100	C16	thin	both	up	100	40	continuous	continuous	000000	1.5	0.5	0.491	1.075	1			31.5 16.5 70 26	black 40 blue 1 white 0 other 6
+large	thin both, text centered	100	C16	thin	both	down	100	40	continuous	continuous	000000	0.5	-0.5	0.07	1.075	1			31.5 16.5 70 26	black 47 blue 0 white 0 other 0
+large	thick both, text centered	100	E16	thick	both	up	100	40	continuous	continuous	000000	0	1	0.612	3.709	1			31.5 16.5 70 26	black 47 blue 0 white 0 other 0
+large	thick both, text centered	100	E16	thick	both	down	100	40	continuous	continuous	000000	0	1	0.257	3.706	1			31.5 16.5 70 26	black 47 blue 0 white 0 other 0
+large	double up, text	100	G16	double	up	up	100	40	double	line style none	000000	1.5	1	0.429	2.151	2	solid		3.5 29.5 42 38.5	black 5 blue 11 white 17 other 12
+large	dashed down, text	100	I16	dashed	down	down	100	40	line style none	dash	000000	0.5	-2.5	0	1	1	on 2 off 2	on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2 off 2 on 2	3.5 29.5 42 38.5	black 0 blue 0 white 0 other 0
+large	thin, no direction	100	K16	thin	none	up	100	40	line style none	line style none										
+large	thin, no direction	100	K16	thin	none	down	100	40	line style none	line style none										
+large	no style, up and down	100	M16		both	up	100	40	line style none	line style none										
+large	no style, up and down	100	M16		both	down	100	40	line style none	line style none										
+large	thin up	200	C4	thin	up	up	100	40	continuous	line style none	000000	0.75	0.25	0.199	0.538	1	solid			
+large	thin down	200	C6	thin	down	down	100	40	line style none	continuous	000000	0.25	-0.25	0.001	0.538	1	solid			
+large	thin both	200	C8	thin	both	up	100	40	continuous	continuous	000000	0.75	0.25	0.211	0.538	1				
+large	thin both	200	C8	thin	both	down	100	40	continuous	continuous	000000	0.25	-0.25	0.013	0.538	1				
+large	medium up	200	E4	medium	up	up	100	40	continuous	line style none	000000	0	0.5	0.35	1.437	1	solid			
+large	medium down	200	E6	medium	down	down	100	40			000000	0	0.5	0.152	1.437	1	solid			
+large	medium both	200	E8	medium	both	up	100	40			000000	0	0.5	0.354	1.437	1				
+large	medium both	200	E8	medium	both	down	100	40			000000	0	0.5	0.156	1.437	1				
+large	thick up	200	G4	thick	up	up	100	40	continuous	line style none	000000	0	0.5	0.36	1.845	1	solid			
+large	thick down	200	G6	thick	down	down	100	40			000000	0	0.5	0.151	1.845	1	solid			
+large	thick both	200	G8	thick	both	up	100	40			000000	0	0.5	0.345	1.845	1				
+large	thick both	200	G8	thick	both	down	100	40			000000	0	0.5	0.137	1.845	1				
+large	double up	200	I4	double	up	up	100	40	double	line style none	000000	0.75	0.25	0.2	1.076	2	solid			
+large	double down	200	I6	double	down	down	100	40			000000	0.25	-0.25	0.001	1.076	2	solid			
+large	double both	200	I8	double	both	up	100	40			000000	0.25	-0.25	0.501	1.075	2				
+large	double both	200	I8	double	both	down	100	40			000000	0.25	-0.25	0.001	1.075	2				
+large	hair up	200	K4	hair	up	up	100	40	continuous	line style none	000000	0.75	0.25	0.2	0.538	1	solid			
+large	hair down	200	K6	hair	down	down	100	40			000000	0.25	-0.25	0.001	0.538	1	solid			
+large	hair both	200	K8	hair	both	up	100	40			000000	0.75	0.25	0.212	0.538	1				
+large	hair both	200	K8	hair	both	down	100	40			000000	0.25	-0.25	0.013	0.538	1				
+large	dotted up	200	M4	dotted	up	up	100	40	dot	line style none	000000	0.5	-2	0.4	0.5	1	on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5	off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5		
+large	dotted down	200	M6	dotted	down	down	100	40			000000	2.5	0	0.2	0.5	1	on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5	on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5 off 0.5 on 0.5 off 2.5 on 0.5 off 0.5 on 0.5		
+large	dotted both	200	M8	dotted	both	up	100	40			000000	0.5	-2	0.4	0.5	1				
+large	dotted both	200	M8	dotted	both	down	100	40			000000	2.5	0	0.2	0.5	1				
+large	dashed up	200	O4	dashed	up	up	100	40	dash	line style none	000000	1.75	0.25	0.2	0.5	1	on 1 off 1	on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1		
+large	dashed down	200	O6	dashed	down	down	100	40			000000	0.25	-1.25	0	0.5	1	on 1 off 1	on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1		
+large	dashed both	200	O8	dashed	both	up	100	40			000000	1.75	0.25	0.2	0.5	1				
+large	dashed both	200	O8	dashed	both	down	100	40			000000	0.25	-1.25	0	0.5	1				
+large	dashDot up	200	C10	dashDot	up	up	100	40	dash dot	line style none	000000	0	0.25	0.542	0.527	1	irregular: off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5	off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1 off 2		
+large	dashDot down	200	C12	dashDot	down	down	100	40	line style none	dash dot	000000	0.25	0.5	0.34	0.527	1	irregular: off 2 on 1 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5	off 2 on 1 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5		
+large	dashDot both	200	C14	dashDot	both	up	100	40	dash dot	dash dot	000000	0	0.25	0.531	0.527	1				
+large	dashDot both	200	C14	dashDot	both	down	100	40	dash dot	dash dot	000000	0.25	0.5	0.325	0.527	1				
+large	dashDotDot up	200	E10	dashDotDot	up	up	100	40			000000	0.25	0.25	0.555	0.527	1	irregular: off 1.5 on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 1.5 off 1.5 on 4.5	off 1.5 on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1 off 2 on 1 off 2		
+large	dashDotDot down	200	E12	dashDotDot	down	down	100	40			000000	0.25	0.25	0.345	0.527	1	irregular: off 2 on 1 off 2 on 1 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 1.5 off 1.5 on 4.5	off 2 on 1 off 2 on 1 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 1.5 off 1.5 on 4.5 off 1.5 on 1.5 off 1.5 on 1.5 off 1.5		
+large	dashDotDot both	200	E14	dashDotDot	both	up	100	40			000000	0.25	0.25	0.575	0.527	1				
+large	dashDotDot both	200	E14	dashDotDot	both	down	100	40			000000	0.25	0.25	0.375	0.527	1				
+large	mediumDashed up	200	G10	mediumDashed	up	up	100	40			000000	0	0.5	0.293	1.047	1	on 5 off 1	off 1 on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1		
+large	mediumDashed down	200	G12	mediumDashed	down	down	100	40			000000	0	0.5	0.593	1.047	1	on 5 off 1	off 1 on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1 on 5 off 1		
+large	mediumDashed both	200	G14	mediumDashed	both	up	100	40			000000	0	0.5	0.309	1.047	1				
+large	mediumDashed both	200	G14	mediumDashed	both	down	100	40			000000	0	0.5	0.609	1.047	1				
+large	mediumDashDot up	200	I10	mediumDashDot	up	up	100	40			000000	0	0.5	0.293	1.046	1	irregular: off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 5	off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 5 off 1 on 1.5 off 1.5		
+large	mediumDashDot down	200	I12	mediumDashDot	down	down	100	40			000000	0	0.5	0.593	1.046	1	irregular: off 1.5 on 1.5 off 1 on 5 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 5	off 1.5 on 1.5 off 1 on 5 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 5 off 1 on 2 off 1		
+large	mediumDashDot both	200	I14	mediumDashDot	both	up	100	40			000000	0	0.5	0.288	1.027	1				
+large	mediumDashDot both	200	I14	mediumDashDot	both	down	100	40			000000	0	0.5	0.585	1.027	1				
+large	mediumDashDotDot up	200	K10	mediumDashDotDot	up	up	100	40			000000	0	0.5	0.307	1.027	1	irregular: off 1 on 2 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 2 off 1 on 5	off 1 on 2 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 2 off 1 on 5 off 1 on 1.5 off 1.5 on 1.5 off 1.5		
+large	mediumDashDotDot down	200	K12	mediumDashDotDot	down	down	100	40			000000	0	0.5	0.593	1.027	1	irregular: off 1.5 on 1.5 off 1.5 on 1.5 off 1 on 5 off 1 on 2 off 1 on 2 off 1 on 5	off 1.5 on 1.5 off 1.5 on 1.5 off 1 on 5 off 1 on 2 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 2 off 1 on 5 off 1 on 2 off 1 on 2 off 1		
+large	mediumDashDotDot both	200	K14	mediumDashDotDot	both	up	100	40			000000	0	0.5	0.32	1.027	1				
+large	mediumDashDotDot both	200	K14	mediumDashDotDot	both	down	100	40			000000	0	0.5	0.615	1.027	1				
+large	slantDashDot up	200	M10	slantDashDot	up	up	100	40			000000	0	1.75	0.396	0.825	1	solid			
+large	slantDashDot down	200	M12	slantDashDot	down	down	100	40			000000	-0.5	0.5	0.694	1.193	1	irregular: off 1 on 2 off 0.5 on 5.5 off 0.25 on 3 off 0.25 on 5.5 off 0.25 on 9 off 0.25 on 2.5	off 1 on 2 off 0.5 on 5.5 off 0.25 on 3 off 0.25 on 5.5 off 0.25 on 9 off 0.25 on 2.5 off 0.25 on 9 off 0.25 on 5.5 off 0.25 on 3 off 0.25 on 5.5 off 0.25 on 3 off 0.25 on 5.5 off 0.25 on 9 off 0.25 on 2.5 off 0.25 on 9 off 0.25 on 5.5 off 0.25 on 3 off 0.25		
+large	slantDashDot both	200	M14	slantDashDot	both	up	100	40			000000	0	1.75	0.387	0.825	1				
+large	slantDashDot both	200	M14	slantDashDot	both	down	100	40			000000	-0.5	0.5	0.675	1.193	1				
+large	thin both, text centered	200	C16	thin	both	up	100	40	continuous	continuous	000000	0.75	0.25	0.224	0.538	1			31.25 16.25 69.75 26	black 75 blue 12 white 0 other 10
+large	thin both, text centered	200	C16	thin	both	down	100	40	continuous	continuous	000000	0.25	-0.25	0.018	0.538	1			31.25 16.25 69.75 26	black 97 blue 0 white 0 other 0
+large	thick both, text centered	200	E16	thick	both	up	100	40	continuous	continuous	000000	0	0.5	0.326	1.845	1			31.25 16.25 69.75 26	black 97 blue 0 white 0 other 0
+large	thick both, text centered	200	E16	thick	both	down	100	40	continuous	continuous	000000	0	0.5	0.125	1.845	1			31.25 16.25 69.75 26	black 97 blue 0 white 0 other 0
+large	double up, text	200	G16	double	up	up	100	40	double	line style none	000000	0.75	0.25	0.215	1.076	2	solid		2.75 28.75 41.25 38.5	black 8 blue 29 white 37 other 23
+large	dashed down, text	200	I16	dashed	down	down	100	40	line style none	dash	000000	0.25	-1.25	0	0.5	1	on 1 off 1	on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1 off 1 on 1	2.75 28.75 41.25 38.5	black 0 blue 0 white 0 other 0
+large	thin, no direction	200	K16	thin	none	up	100	40	line style none	line style none										
+large	thin, no direction	200	K16	thin	none	down	100	40	line style none	line style none										
+large	no style, up and down	200	M16		both	up	100	40	line style none	line style none										
+large	no style, up and down	200	M16		both	down	100	40	line style none	line style none										
