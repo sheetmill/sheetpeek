@@ -1,0 +1,11 @@
+# suite: odd_values (capture.odd_values); Excel 16.115 (16.115.26110837, Microsoft 365, Current channel) for Mac, en_US
+# captured: 2026-11-19; method: open with alerts off, read A1's text and text orientation, B1's number format and the text B1 shows (string value); a refusal's error number in A1
+case	outcome	A1	orientation	number_format	text
+control	opened	Odd value	45	#,##0.00	1,234.50
+rotation_181	opened	Odd value	orientation horizontal	#,##0.00	1,234.50
+rotation_254	opened	Odd value	orientation horizontal	#,##0.00	1,234.50
+rotation_256	opened	Odd value	orientation horizontal	#,##0.00	1,234.50
+rotation_1000	opened	Odd value	orientation horizontal	#,##0.00	1,234.50
+format_170	opened	Odd value	45	General	1234.5
+format_300	opened	Odd value	45	General	1234.5
+control_again	opened	Odd value	45	#,##0.00	1,234.50

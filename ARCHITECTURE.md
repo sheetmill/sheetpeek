@@ -655,8 +655,8 @@ a cached value (as openpyxl writes it) has no `t`. The same file confirms Excel 
 ### 4.9 Captures
 
 Captured so far, in `tests/captures/`: by print (route B) `layout` (§3.6, §4.1 to §4.7); read
-from Excel `theme_colors` (§3.3), `merge_width` and `error_width` (§4.2, §4.4, no deviation),
-`row_height` (§4.7) and `package` (§5.5); on the screen (route C) `borders` and `fills` (§4.12),
+from Excel `theme_colors` and `theme_colors_more` (§3.3), `merge_width` and `error_width` (§4.2,
+§4.4, no deviation), `row_height` (§4.7), `package` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12),
 `text_style` (§4.7, §4.13), `rotation` (§4.17), `filters` (§4.19) and `tables` (§4.20). All are
 Excel 16.115 (Microsoft 365). The rules of §4.10, §4.11, §4.14 to §4.16 (but §4.14's theme
 colors, which `theme_colors` captures) have no capture here yet and are marked unverified until
