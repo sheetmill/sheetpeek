@@ -28,7 +28,10 @@ RECALC_ON_LOAD: tuple[RecalcOnLoad, ...] = ("excel", "always", "never")
 Opening = Literal["all", "some", "none"]
 
 _EXACT = 2**53  # whole numbers below this are exact as floats
-_FUNCTION = re.compile(r"[A-Z][A-Z0-9_.]*")
+_FUNCTION = re.compile(r"[A-Z_][A-Z0-9_.]*")
+_EXTERNAL_LABEL = "external or 3-D reference"
+_EXTERNAL = re.compile(r"\[[^\]]*\]|[\w.']+:[\w.']+!")
+"""A reference to another workbook (``[1]Sheet1!A1``) or across sheets (``Sheet1:Sheet3!A1``)."""
 
 
 def recalc_mode(value: object) -> RecalcOnLoad:
@@ -204,6 +207,8 @@ def why_not(report: xlrecalc.Report, where: xlrecalc.CellRef, formula: str | Non
             for label in report.unsupported
             if (found := _FUNCTION.match(label)) is not None and f"{found.group()}(" in text
         )
+        if _EXTERNAL_LABEL in report.unsupported and _EXTERNAL.search(formula):
+            named.append(_EXTERNAL_LABEL)
         if named:
             return "; ".join(named)
     return "depends on a formula xlrecalc does not compute"

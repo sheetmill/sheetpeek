@@ -355,3 +355,20 @@ def test_a_failure_in_the_recalculation_keeps_every_cached_value(tmp_path, monke
     assert sheet.cell(1, 2).value == 99
     (notice,) = notices(sheet)
     assert "xlrecalc could not read the workbook: inside" in notice.message
+
+
+def test_the_reason_names_an_external_reference_and_an_add_in_function(tmp_path):
+    cells = [
+        '<c r="A1"><f>[1]Other!A1*2</f><v>4</v></c>',
+        '<c r="B1"><f>Sheet1:Sheet3!A1+1</f><v>5</v></c>',
+        '<c r="C1"><f>_xll.HEAT(1)</f><v>6</v></c>',
+        '<c r="D1"><f>A1+1</f><v>7</v></c>',
+    ]
+    sheet = sheetpeek.read(book(tmp_path, row(1, *cells), by_excel=False))
+    assert [c.value for c in sheet.cells[0]] == [4, 5, 6, 7]
+    found = {n.message.split(": ", 1)[-1]: [str(r) for r in n.cells] for n in notices(sheet)}
+    assert found == {
+        "external or 3-D reference": ["A1:B1"],
+        "_XLL.HEAT": ["C1"],
+        "depends on a formula xlrecalc does not compute": ["D1"],
+    }
