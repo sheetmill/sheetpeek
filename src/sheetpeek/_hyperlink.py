@@ -93,8 +93,8 @@ def location_cell(location: str, sheet: str) -> tuple[int, int] | None:
 
     ``A1`` and ``Sheet!A1`` name a cell (``$`` allowed), ``'It''s'!B2:C3`` a range whose first
     cell is taken; sheet names compare ignoring case, as Excel's do. A defined name, another
-    sheet's cell or text that is neither gives ``None``. A reference without a sheet is taken as
-    the link's own sheet (unverified).
+    sheet's cell or text that is neither gives ``None``. A reference without a sheet is the
+    link's own sheet, whichever sheet is active, as in Excel (captured).
     """
     place = location_place(location, sheet)
     if place is None or place[0].casefold() != sheet.casefold():

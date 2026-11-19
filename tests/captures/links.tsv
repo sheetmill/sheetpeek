@@ -4,7 +4,7 @@
 # channel: Current
 # macos: 26.5.1
 # appearance: dark
-# date: 2026-11-18
+# date: 2026-11-19
 # display_scale: 2.000
 # zooms: 100
 # colors: captures converted to sRGB (sips --matchTo sRGB Profile.icc)
@@ -24,8 +24,8 @@ look	HYPERLINK() with a friendly name	C10	100	Friendly name	756	000000	3.5	67	4.
 look	HYPERLINK() without a friendly name	E10	100	#Third!B8	606	000000	3	47.5	4.5	12	0			0,0,0	underline style none	0,0,0	underline style none									
 look	element and HYPERLINK()	G10	100	Formula text	654	000000	3.5	60.5	4.5	12	0			0,0,0	underline style none	0,0,0	underline style none									
 look	empty merge, linked with a display	C12	100		0	none					0			0,0,0	underline style none	0,0,0	underline style none									
-follow	location with a sheet (control)	C4																Links	Links	1	Hyperlink text	missing value	Third!E6	ERR Microsoft Excel got an error: Parameter error.	Links	$A$1
-follow	location without a sheet, its own sheet active	B2																Second	Second	1	to B5	missing value	B5	ERR Microsoft Excel got an error: Parameter error.	Second	$A$1
-follow	location without a sheet, the first sheet active	B2																Links	Second	1	to B5	missing value	B5	ERR Microsoft Excel got an error: Parameter error.	Links	$A$1
+follow	location with a sheet (control)	C4																Links	Links	1	Hyperlink text	missing value	Third!E6	yes	Third	$E$6
+follow	location without a sheet, its own sheet active	B2																Second	Second	1	to B5	missing value	B5	yes	Second	$B$5
+follow	location without a sheet, the first sheet active	B2																Links	Second	1	to B5	missing value	B5	yes	Second	$B$5
 follow	HYPERLINK() alone	C10																Links	Links	0	=HYPERLINK("#Third!B7","Friendly name")			ERR The object you are trying to access does not exist	Links	$A$1
-follow	element and HYPERLINK()	G10																Links	Links	1	=HYPERLINK("#Third!D4","Formula text")	missing value	Second!C3	ERR Microsoft Excel got an error: Parameter error.	Links	$A$1
+follow	element and HYPERLINK()	G10																Links	Links	1	=HYPERLINK("#Third!D4","Formula text")	missing value	Second!C3	yes	Second	$C$3

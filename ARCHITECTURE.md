@@ -670,8 +670,8 @@ the screen: the text insets and the baselines of angled text, which come from pr
 
 ### 4.10 Hyperlinks
 
-The look is captured (`links`, Excel 16.115, zoom 100); where a link goes is not: the suite's
-follow step met Excel's parameter error on every link, so the places below stay unverified.
+The look and where a link goes are captured (`links`, Excel 16.115, zoom 100; the places through
+Excel's scripting `follow` of the hyperlink it holds on the cell, not a click).
 
 - **A link has no look of its own.** A linked cell in the Normal style is drawn as plain text;
   one in the Hyperlink or Followed Hyperlink cell style takes that style's font color (the file's
@@ -688,7 +688,8 @@ What sheetpeek decides (not Excel's behavior):
   refused (`link.scheme`). A `HYPERLINK()` cell is linked only when the formula is one call whose
   first argument is a string literal (doubled quotes undone); a computed target, a shared or an
   array formula is reported (`link.computed`). An element and a formula on one cell: the element
-  wins and the conflict is reported (`link.conflict`); which one Excel follows is unverified.
+  wins and the conflict is reported (`link.conflict`). Excel holds the element as the cell's one
+  hyperlink and goes to its place (`links`); which one a click follows is not captured.
 - **Schemes:** an allow-list, `http`, `https` and `mailto`, compared lower-cased after what a
   browser drops (C0 controls and spaces at the ends, tabs and line breaks anywhere, so
   `java\tscript:` is `javascript:`), with `urllib.parse.urlsplit`. Local targets, which Excel
@@ -700,7 +701,7 @@ What sheetpeek decides (not Excel's behavior):
   percent-encoded, so none reaches a terminal.
 - **Places in the workbook.** `location` names a cell (`A1`, `Sheet!A1`, `'My sheet'!B2:C3`,
   first cell taken; sheet names compared ignoring case) or a defined name. A reference without a
-  sheet is taken as the link's own sheet (unverified). A link to a cell that is laid out goes
+  sheet is the link's own sheet, whichever sheet is active, as in Excel (`links`). A link to a cell that is laid out goes
   there in HTML (`link.internal`); a link to another sheet, a defined name or a cell not laid out
   is an anchor that goes nowhere (`link.elsewhere`, approximated). Defined names are not resolved.
 - **The census** (§3.7) counts `link` (an allowed URL), `link.internal` and `link.elsewhere` on
@@ -1328,7 +1329,8 @@ in `rich` and text, omitted in Markdown and CSV, which show the full text).
 **Read.** The first `<sheetView>` gives `Sheet.view` (`SheetView`, `_read_view.py`):
 the saved zoom (`zoomScale`, 100 when absent; a value not whole, or not a number, is 100, as
 Excel opens it; a whole one is kept past Excel's zoom control's 10 to 400, as Excel opens and
-draws a sheet at 5 and 401, `freeze_view`, within sheetpeek's bound of 1 to 1000, 100 past it;
+draws a sheet at 5 and 401, `freeze_view`, within 1 to 1000, a bound of sheetpeek's own against
+crafted files (wider zooms not captured), 100 past it;
 the `zoom=` override keeps 10 to 400, Excel's range for a person), `showZeros`, and a frozen pane's rows and columns (`ySplit`, `xSplit` of a pane
 whose state is `frozen` or `frozenSplit`) from the view's top-left cell; a `split` pane is kept
 as its state only. The sheet's defined name `Print_Area` (reserved, local to the sheet) gives

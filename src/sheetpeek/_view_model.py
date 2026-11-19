@@ -9,7 +9,8 @@ MIN_ZOOM, MAX_ZOOM = 10, 400
 override."""
 FILE_MIN_ZOOM, FILE_MAX_ZOOM = 1, 1000
 """The file zooms read as they stand: Excel opens and draws a sheet at 5 and at 401
-(``freeze_view``); the rest of this range is unverified, and its ends are sheetpeek's bound."""
+(``freeze_view``). The ends are sheetpeek's own bound against crafted files, not Excel's: Excel's
+zoom control takes 10 to 400, and wider file zooms are not captured."""
 
 
 @dataclass(frozen=True, slots=True)

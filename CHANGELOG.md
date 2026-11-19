@@ -191,7 +191,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   area's ranges; `Sheet.print_area_problem` says why a part was left out: `#REF!`, a formula,
   another sheet), and the manual page breaks, `Sheet.row_breaks` and `Sheet.column_breaks`.
 - HTML draws the zoom saved with each sheet, as Excel opens it, a whole one past Excel's zoom
-  control's 10 to 400 too (Excel opens and draws 5 and 401; sheetpeek keeps 1 to 1000);
+  control's 10 to 400 too (Excel opens and draws 5 and 401; sheetpeek keeps 1 to 1000, its own bound);
   `HTMLBackend(zoom=...)` (10 to 400), `sheetpeek view --zoom` and `serve`'s `?zoom=` override it. Cells, text and headings
   scale; lines, pattern tiles and outline symbols keep their screen size, as in Excel.
 - HTML draws a frozen pane: the freeze lines, and on a whole page the frozen rows and columns held

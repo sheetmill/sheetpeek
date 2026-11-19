@@ -287,7 +287,7 @@ on followLink(xlName, activeName, sheetName, cellRef)
 			set xlLink to hyperlink 1 of xlCell
 			set output to output & "link.address" & us & ((address of xlLink) as string) & rs
 			set output to output & "link.sub_address" & us & ((sub address of xlLink) as string) & rs
-			follow hyperlink xlLink
+			follow xlLink
 			set followed to "yes"
 		on error errText
 			set followed to "ERR " & errText

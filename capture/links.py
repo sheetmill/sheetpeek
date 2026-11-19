@@ -35,8 +35,9 @@ Two steps, each with the workbook open on its own:
   string value (``text``).
 - ``follow``: no window. For each case of :data:`FOLLOWS`, a sheet is made active, the cell's
   hyperlinks as Excel holds them are read (their count, the first one's address and sub
-  address, the cell's formula), the first one is followed (``follow hyperlink``), and the active
-  sheet and cell after it are read. This settles where a location without a sheet goes (from
+  address, the cell's formula), the first one is followed (the hyperlink's own ``follow``;
+  the workbook's ``follow hyperlink`` takes an address, not a link), and the active sheet and
+  cell after it are read. This settles where a location without a sheet goes (from
   its own sheet and from another), whether Excel keeps a ``HYPERLINK()`` cell's link as a
   hyperlink object, and, for a cell with both, which of the two Excel keeps as its link.
 

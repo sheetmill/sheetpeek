@@ -285,12 +285,6 @@ def test_display_is_not_drawn():
 
 
 @pytest.mark.excel
-@pytest.mark.xfail(
-    strict=True,
-    reason="16.115: the follow request's `follow hyperlink` met Excel's parameter error on "
-    "every link, the control included: the follow step captured nothing (capture/screen/"
-    "excel.applescript to fix, then the step rerun)",
-)
 def test_links_go_where_sheetpeek_takes_them():
     for name, record in _captured("follow").items():
         expected = links.FOLLOW_EXPECTED[name]
