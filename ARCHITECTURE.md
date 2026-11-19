@@ -1742,7 +1742,8 @@ data table fills there. Asked for cell by cell instead, each stale cell is a rec
 own, and each goes over every cell that rests on a value xlrecalc keeps: a corpus workbook with a
 function xlrecalc does not compute took over an hour that way, and five seconds this way. xlrecalc reads the book's own open file through a view with
 a position of its own (`_recalc.FileView`), so what it computes is what was checked; it is
-given the file, not its path.
+given the file, not its path, so `CELL("filename")` shows empty text where Excel shows the
+file's path (a known deviation, not reported).
 
 **What xlrecalc does not compute** keeps the value the file holds: a function or construct it
 does not implement, a cell that depends on one, an error inside xlrecalc, a value the model has
