@@ -33,6 +33,10 @@ SUITES = (
     "diagonals",
     "freeze_view",
     "spill_neighbors",
+    "text_style_more",
+    "rotation_more",
+    "filters_more",
+    "extensions",
 )
 
 
