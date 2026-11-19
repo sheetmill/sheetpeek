@@ -156,7 +156,8 @@ text styles into `Font` and `CellStyle` (§4.13). Rich-text runs inside one cell
 | `show_gridlines` | xlio: `<sheetView showGridLines>` |
 | `grid_color` | xlio: `<sheetView defaultGridColor colorId>`, through the workbook palette (§4.14) |
 | `autofilters` (`AutoFilter`s, the sheet's then each table's, that touch `ref`) | xlio: the sheet's `<autoFilter>` and each table's, their `filterColumn` flags and criteria, and the `sortState` inside or beside them (§4.19) |
-| `theme_colors` | xlio: the theme's `clrScheme`, by the index a color's `theme` names (§3.3) | twelve `RRGGBB`, empty without a readable theme |
+| `tables` (`Table`s that touch `ref`) and `table_styles` (the `TableStyle`s they name) | xlio: each `<tablePart>`'s range, header and totals row counts and `tableStyleInfo`; the styles from the workbook's own, then Excel's 60 presets, each element's `<dxf>` as a `DifferentialFormat` of only what it sets (§4.20) |
+| `theme_colors` | xlio: the theme's `clrScheme`, twelve `RRGGBB` by the index a color's `theme` names, empty without a readable theme (§3.3) |
 | `palette` | xlio: `<indexedColors>` as the indexed colors take it (64 entries, the default's for an entry missing or not a color), `None` without it (§4.14) |
 | `normal_font` | the font of xlio's `Normal` cell style, else the workbook's first font |
 | `date1904` | xlio: `<workbookPr date1904>` |
@@ -1978,6 +1979,7 @@ src/sheetpeek/
   _hyperlink.py      Hyperlink; the scheme check and place lookup every output shares (§4.10)
   _outline_model.py  Outline, OutlineMark, RenderedOutline (§4.11)
   _filter_model.py   AutoFilter, FilterColumn, SortCondition, FilterButtonState (§4.19)
+  _table_model.py    Table, TableStyleInfo, TableStyle, TableStyleElement, DifferentialFormat (§4.20)
   _fill_border_model.py  Pattern, Gradient, Side, Borders, RenderedBorders; the conflict rule (§4.12)
   _fill_border_census.py fills and borders in the census; the style that draws a cell's fill
   _text_model.py     TextRule, the lines drawn with text (§4.13)
@@ -1988,6 +1990,7 @@ src/sheetpeek/
   _read_links.py     hyperlinks from xlio and the cell stream, and the reader's link notices (§4.10)
   _read_outline.py   the outline from xlio: its rows, columns and settings
   _read_filters.py   the sheet's and tables' filters from xlio (§4.19)
+  _read_tables.py    the sheet's tables and the styles they name, from xlio (§4.20)
   _read.py           the reader: xlio's models and cell stream into a Sheet (§5.4)
   _style/            a cell's style, one module per aspect: number format, border, fill, font,
                      alignment
