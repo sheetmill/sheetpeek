@@ -188,7 +188,8 @@ def test_duplicate_stop_positions_are_read_in_order(tmp_path):
     path = filled(tmp_path, GradientFill(stop=("FFFFFFFF", "FF0000FF")))
     rewrite(path, STYLES, lambda t: t.replace('<stop position="1"', '<stop position="0"', 1))
     stops = sheetpeek.read(path).cell(1, 2).style.fill_spec.stops
-    assert [position for position, _ in stops] == [0.0, 0.0]
+    # In the file's order, white then blue, not sorted by color.
+    assert stops == ((0.0, "FFFFFF"), (0.0, "0000FF"))
 
 
 @pytest.mark.parametrize("value", ["nan", "inf", "-inf"])

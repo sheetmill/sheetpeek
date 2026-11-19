@@ -375,13 +375,13 @@ EXPECTED: dict[str, dict[str, dict[str, Any] | None]] = {
             "kind": "linear",
             "box": (187, 57),
             "angle": 90.0,
-            "stops": ((0.0, "0000FF"), (0.0, "FF0000")),
+            "stops": ((0.0, "FF0000"), (0.0, "0000FF")),
         },
         "S6": {
             "kind": "linear",
             "box": (188, 57),
             "angle": 90.0,
-            "stops": ((0.0, "FFFFFF"), (0.5, "0000FF"), (0.5, "FF0000")),
+            "stops": ((0.0, "FFFFFF"), (0.5, "FF0000"), (0.5, "0000FF")),
         },
         "U6": {
             "kind": "linear",

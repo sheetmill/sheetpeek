@@ -48,7 +48,11 @@ def to_fill(part: Any, context: Context) -> Fill | None:
             # taken alike; both unverified).
             return Pattern("solid", fg) if fg is not None else None
         return Pattern(kind, fg, bg)
-    stops = sorted((unit(stop.position), color(stop.color, context)) for stop in part.stops)
+    # By position only: stops at one position keep the file's order (a stable sort).
+    stops = sorted(
+        ((unit(stop.position), color(stop.color, context)) for stop in part.stops),
+        key=lambda stop: stop[0],
+    )
     if not stops:  # nothing to draw; what Excel does is not captured
         return None
     return Gradient(
