@@ -118,7 +118,7 @@ pt high in the file prints 14 pt apart). `capture/screen/` captures Excel's wind
   be inspected on its own: `scroll` sets the window's top row and returns its visible range,
   `window` reads the window's zoom, view, freeze and split state without setting anything, and
   `follow` follows a cell's first hyperlink and reads where it lands. The suites that read
-  Excel's own answers without a window (`package`, `odd_values`, `row_height`,
+  Excel's own answers without a window (`package`, `package_more`, `odd_values`, `row_height`,
   `row_height_more`, `theme_colors`, `theme_colors_more`) have scripts of their own.
   A request past its time limit is killed (`osascript` waiting on Excel ignores SIGTERM) and
   evidence is saved: a `sample` of Excel and whether it still answers.
