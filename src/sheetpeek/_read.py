@@ -141,10 +141,15 @@ def xlio_theme_colors(theme: xlio.Theme | None) -> tuple[str, ...]:
     return tuple(found)
 
 
+_NO_THEME_FONTS = {"minor": "Aptos Narrow"}
+"""Without a theme part Excel draws minor-scheme text, the Normal style's included, in its own
+default theme's minor font (``theme_fonts_palette``); the major font is not captured."""
+
+
 def xlio_theme_fonts(theme: xlio.Theme | None) -> dict[str, str]:
     """The theme's Latin typefaces, ``{"major": ..., "minor": ...}``, those it names."""
     if theme is None:
-        return {}
+        return dict(_NO_THEME_FONTS)
     pairs = (("major", theme.major_fonts), ("minor", theme.minor_fonts))
     return {key: fonts.latin for key, fonts in pairs if fonts is not None and fonts.latin}
 

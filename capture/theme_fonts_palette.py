@@ -192,13 +192,15 @@ EXPECTED: dict[str, dict[str, str | float | None]] = {
     },
     "palette": {
         "B4": "FF0000", "B5": OLIVE, "B6": TEAL, "B7": "00FF00", "B8": BROWN,
-        "D4": "FF0000", "D5": OLIVE, "D6": TEAL, "D7": BROWN,
+        "D4": "FF0000", "D5": "00FF00", "D6": TEAL, "D7": BROWN,
         "F4": BROWN, "F5": TEAL, "F6": "FF0000", "F7": "0000FF",
     },
     "palette_short": {"B4": TEAL, "B5": "008000", "B6": "0066CC", "B7": "FF0000"},
-    "palette_bad": {"B4": TEAL, "B5": "008000"},
+    "palette_bad": {"B4": TEAL, "B5": "000000"},
     "palette_long": {"B4": TEAL, "B5": "123456", "B6": "000000"},
-    "no_theme": {"B4": "Arial", "B5": "Calibri", "B6": "Arial", "B7": "Calibri", "D4": 53.0},
+    "no_theme": {
+        "B4": "Aptos Narrow", "B5": "Aptos Narrow", "B6": "Arial", "B7": "Calibri", "D4": 53.0,
+    },
     "empty_typeface": {
         "B4": "Arial", "B5": "Calibri", "B6": "Arial", "B7": "Calibri", "D4": 53.0,
     },

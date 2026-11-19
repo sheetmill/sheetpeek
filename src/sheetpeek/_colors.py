@@ -36,18 +36,21 @@ _AUTOMATIC_GRID = 64
 def workbook_palette(custom: Sequence[str | None] | None) -> tuple[str, ...]:
     """The palette a workbook's indexed colors take: its ``indexedColors``, else the default.
 
-    Each written entry is used as it stands, so indices 0 to 7 no longer repeat 8 to 15
-    (unverified). Entries past 64 are dropped, as Excel caps the list; a shorter list takes the
-    default for the indices it leaves out (unverified: Excel writes all 64). An entry that is not
-    a color reads as the default's.
+    Each written entry is used as it stands, so indices 0 to 7 no longer repeat 8 to 15 (in a
+    fill; a font in 0 to 7 keeps the default's, ``_style.font``). Entries past 64 are dropped, as
+    Excel ignores them (a fill in 66 of a list of 70 drew a gray of its own, 646464, not the
+    list's entry nor black: a known deviation). A shorter list takes the default for the indices
+    it leaves out; an entry that is not a color is black (``theme_fonts_palette``).
     """
     if not custom:
         return DEFAULT_PALETTE
 
     def entry(index: int) -> str:
-        found = custom[index] if index < len(custom) else None
+        if index >= len(custom):
+            return DEFAULT_PALETTE[index]
+        found = custom[index]
         color = found[-6:].upper() if isinstance(found, str) else ""
-        return color if _HEX.fullmatch(color) else DEFAULT_PALETTE[index]
+        return color if _HEX.fullmatch(color) else "000000"
 
     return tuple(entry(i) for i in range(PALETTE_SIZE))
 

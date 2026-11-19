@@ -1,7 +1,7 @@
 """Theme fonts, the workbook palette, the grid color and the headings (ARCHITECTURE.md §4.14).
 
-Expected values are unverified (dark appearance unless a test says otherwise): no capture of them
-is in this repository yet.
+Expected values are captured (dark appearance unless a test says otherwise): screen suites
+``theme_fonts_palette`` and ``headings_grid``; a test says where it goes past them.
 """
 
 import re
@@ -64,7 +64,7 @@ def custom_palette():
 
 
 def test_a_scheme_font_is_drawn_in_the_theme_typeface(tmp_path):
-    # Unverified: Calibri-minor and Times-New-Roman-minor both draw the theme's Courier
+    # Captured: Calibri-minor and Times-New-Roman-minor both draw the theme's Courier
     # New; Calibri-major draws Georgia; Calibri without a scheme stays Calibri.
     path = build(
         tmp_path,
@@ -85,7 +85,7 @@ def test_a_scheme_font_is_drawn_in_the_theme_typeface(tmp_path):
 
 
 def test_the_normal_font_follows_the_theme(tmp_path):
-    # Unverified: the Normal style's Calibri (minor) is replaced as well, so the default
+    # Captured: the Normal style's Calibri (minor) is replaced as well, so the default
     # column takes the theme font's digits (61 pt for Courier New). xlformat has no glyph table
     # for Courier New, so it is measured as Calibri and reported.
     path = themed(build(tmp_path, {"A1": (1, {})}))
@@ -125,7 +125,7 @@ def test_an_empty_theme_typeface_keeps_the_stored_name(tmp_path):
 
 
 def test_indexed_colors_follow_the_workbook_palette(tmp_path):
-    # Unverified: fill and font indexed 10 and font 17 follow the palette; fill indexed 2
+    # Captured: fill and font indexed 10 and font 17 follow the palette; fill indexed 2
     # stays red (0 to 7 do not mirror 8 to 15 once a palette is written). With the default
     # palette (captured, auto_colors): fill indexed 64 is black; fill 81, past the palette, is
     # black; font indexed 64 is the automatic black.
@@ -159,10 +159,11 @@ def test_the_palette_takes_the_default_where_the_file_gives_none():
     short = workbook_palette(["00123456"])
     assert short[0] == "123456"
     assert short[1:] == DEFAULT_PALETTE[1:]
-    long = workbook_palette(["00ABCDEF"] * 100)
+    long = workbook_palette(["00ABCDEF"] * 100)  # entries past 64 are ignored (captured)
     assert len(long) == 64
     assert set(long) == {"ABCDEF"}
-    assert workbook_palette(["not a color", 5, "00FF00FF"])[:3] == ("000000", "FFFFFF", "FF00FF")
+    # an entry that is not a color is black (captured, theme_fonts_palette)
+    assert workbook_palette(["not a color", 5, "00FF00FF"])[:3] == ("000000", "000000", "FF00FF")
 
 
 def test_a_colors_element_without_indexed_colors_keeps_the_default_palette(tmp_path):
@@ -186,7 +187,7 @@ def test_a_colors_element_without_indexed_colors_keeps_the_default_palette(tmp_p
 
 
 def test_a_section_color_follows_the_workbook_palette(tmp_path):
-    # Unverified: [Color10] follows the palette (brown here); [Red] keeps red, though
+    # Captured: [Color10] follows the palette (brown here); [Red] keeps red, though
     # the palette makes its slot teal; [Color3] is that slot.
     path = build(
         tmp_path,
@@ -292,7 +293,7 @@ def test_html_draws_the_grid_color_one_device_pixel_wide(tmp_path):
 
 
 def test_a_fill_covers_a_colored_gridline(tmp_path):
-    # Unverified: a white fill hides the colored gridline, as it hides the gray one.
+    # Captured (headings_grid): a white fill hides the colored gridline, as the gray one.
     text = sheetpeek.render(sheetpeek.read(grid_book(tmp_path, fill=True)), "html")
     assert '<td style="background:#FFFFFF;border-color:#FFFFFF">' in text
 

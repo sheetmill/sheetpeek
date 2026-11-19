@@ -10,6 +10,7 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from typing import TYPE_CHECKING, Any, Literal
 
+from sheetpeek._colors import DEFAULT_PALETTE, apply_tint
 from sheetpeek._model import Font, VerticalTextPosition
 from sheetpeek._package import PackageError
 
@@ -30,6 +31,23 @@ def read(part: Any, context: Context) -> dict[str, Any]:
     return {"font": to_font(part, context.normal_font, context.color, context.theme_fonts)}
 
 
+_FIXED_INDICES = 8
+
+
+def _fixed_index(color: Any) -> str | None:
+    """A font color in indexed 0 to 7: the default palette's, whatever the workbook's.
+
+    Captured for 3 (``theme_fonts_palette``: a recolored entry 3 draws a fill in the workbook's
+    color and a font in the default's, where 10 and 17 draw both in the workbook's); 0 to 7
+    taken alike (unverified).
+    """
+    index = getattr(color, "indexed", None) if color is not None else None
+    if not isinstance(index, int) or not 0 <= index < _FIXED_INDICES:
+        return None
+    tint = getattr(color, "tint", 0.0) or 0.0
+    return apply_tint(DEFAULT_PALETTE[index], tint) if tint else DEFAULT_PALETTE[index]
+
+
 def to_font(
     font: Any,
     normal: Font,
@@ -42,6 +60,7 @@ def to_font(
     of either scheme is drawn in that typeface, whatever name it stores (unverified, §4.14).
     """
     color = font.color
+    drawn = _fixed_index(color)
     # Indexed wins over the theme, and the theme over rgb and auto.
     theme = color.theme if color is not None and color.indexed is None else None
     stored = font.name or normal.name
@@ -54,7 +73,7 @@ def to_font(
         italic=bool(font.italic),
         underline=font.underline or None,
         strike=bool(font.strike),
-        color=color_of(color),
+        color=drawn if drawn is not None else color_of(color),
         vert_align=_VERT_ALIGN.get(font.vert_align),
         scheme=scheme,
         stored_name=stored if name != stored else None,

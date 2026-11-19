@@ -139,7 +139,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   whatever name it stores, as Excel draws it. `Font.name` is that typeface; the new
   `Font.scheme` and `Font.stored_name` keep what the file says. The Normal font follows the theme
   too, so column widths take the theme font's digits; a theme typeface xlformat has no glyph
-  table for is measured as Calibri and reported (`font.no_metrics`).
+  table for is measured as Calibri and reported (`font.no_metrics`). Without a theme part,
+  minor-scheme text is drawn in Aptos Narrow, the minor font of Excel's own default theme.
 - The grid color: `Sheet.grid_color` reads `<sheetView defaultGridColor="0" colorId>` through
   the workbook palette. HTML draws the gridlines in it, one device pixel wide as Excel does;
   `rich` draws the column separators in it.
@@ -284,8 +285,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   8 to 36). At zoom 75, 200 and 400 Excel's row band is up to 6 pt narrower, a known deviation.
   Their colors are Excel's: dark `#161616`, `#ffffff` and `#565656`; light `#f7f7f7`, `#5e5e5e`
   and `#e0dfdd`.
-- A workbook palette replaces the default entry by entry; a `<colors>` element without
-  `indexedColors` keeps the default palette instead of drawing indexed colors black.
+- A workbook palette replaces the default entry by entry in fills, while a font in indexed 0 to
+  7 keeps the default color, as Excel draws it; an entry that is not a color is black; a
+  `<colors>` element without `indexedColors` keeps the default palette instead of drawing
+  indexed colors black.
 - A row fitted to a Calibri 20 cell is 26 pt, as Excel fits it, instead of Calibri 16's 21.
 - Text sits where Excel's screen puts it (`excel` mode, so HTML), from xlformat's vertical
   metrics, where it followed Excel's print layout: at Calibri 11 a top-aligned line's baseline is

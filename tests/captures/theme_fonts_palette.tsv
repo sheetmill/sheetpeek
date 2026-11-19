@@ -1,0 +1,60 @@
+# excel: 16.115
+# build: 16.115.26110837
+# edition: Microsoft 365
+# channel: Current
+# macos: 26.5.1
+# appearance: dark
+# date: 2026-11-19
+# display_scale: 2.000
+# zooms: 100
+# colors: captures converted to sRGB (sips --matchTo sRGB Profile.icc)
+# platform: mac
+# suite: theme_fonts_palette
+group	cell	case	kind	font_name	font_color	fill	width	height	ink	ink_w	ink_h	ink_color	pixel
+fonts	B4	Calibri, minor	text	Courier New	000000	FFFFFF	280.0	15.0	6f0951cd	180.5	9	080808	
+fonts	B5	Times New Roman, minor	text	Courier New	000000	FFFFFF	280.0	15.0	6f0951cd	180.5	9	080808	
+fonts	B6	Calibri, major	text	Georgia	000000	FFFFFF	280.0	15.0	a66521ba	149.5	10.5	030303	
+fonts	B7	Calibri, no scheme	text	Calibri	000000	FFFFFF	280.0	15.0	5a9293ed	138.5	10	030303	
+fonts	B8	Normal style	text	Courier New	000000	FFFFFF	280.0	15.0	6f0951cd	180.5	9	080808	
+fonts	B9	control Courier New	text	Courier New	000000	FFFFFF	280.0	15.0	6f0951cd	180.5	9	080808	
+fonts	B10	control Georgia	text	Georgia	000000	FFFFFF	280.0	15.0	a66521ba	149.5	10.5	030303	
+fonts	B11	control Times New Roman	text	Times New Roman	000000	FFFFFF	280.0	15.0	e2f81497	143	10	030303	
+fonts	B13	Japanese, Calibri, minor	text	Courier New	000000	FFFFFF	280.0	15.0	e4e55126	85	10.5	090909	
+fonts	B14	Japanese, Calibri, major	text	Georgia	000000	FFFFFF	280.0	15.0	e4e55126	85	10.5	090909	
+fonts	B15	Japanese, Calibri, no scheme	text	Calibri	000000	FFFFFF	280.0	15.0	069205f8	85.5	10	020202	
+fonts	B16	control Japanese Hiragino Mincho ProN	text	Hiragino Mincho ProN	000000	FFFFFF	280.0	17.0	3fd8f4ed	85.5	10.5	060606	
+fonts	B17	control Japanese Hiragino Maru Gothic ProN	text	Hiragino Maru Gothic ProN	000000	FFFFFF	280.0	17.0	63d96a8e	86	10.5	030303	
+fonts	D4	default column	width	Courier New	000000	FFFFFF	61.0	15.0					
+fonts	E4	column of 20 characters	width	Courier New	000000	FFFFFF	140.0	15.0					
+palette	B4	fill indexed 2	fill	Calibri	000000	FF0000	120.0	30.0					FF0000
+palette	B5	fill indexed 3	fill	Calibri	000000	996600	120.0	30.0					996600
+palette	B6	fill indexed 10	fill	Calibri	000000	008080	120.0	30.0					008080
+palette	B7	fill indexed 11	fill	Calibri	000000	00FF00	120.0	30.0					03FF00
+palette	B8	fill indexed 17	fill	Calibri	000000	804000	120.0	30.0					804001
+palette	D4	font indexed 2	font	Calibri	FF0000	FFFFFF	120.0	30.0	c7467621	62	12	FF0101	
+palette	D5	font indexed 3	font	Calibri	996600	FFFFFF	120.0	30.0	34f1a33f	62	12	03FF01	
+palette	D6	font indexed 10	font	Calibri	008080	FFFFFF	120.0	30.0	c7467621	62	12	018080	
+palette	D7	font indexed 17	font	Calibri	804000	FFFFFF	120.0	30.0	0a4eda7e	61.5	11.5	804002	
+palette	F4	format [Color10]0	format	Calibri	804000	FFFFFF	120.0	30.0	58511864	35.5	12.5	804102	
+palette	F5	format [Color3]0	format	Calibri	008080	FFFFFF	120.0	30.0	b92acdf6	35.5	12.5	018080	
+palette	F6	format [Red]0	format	Calibri	FF0000	FFFFFF	120.0	30.0	b92acdf6	35.5	12.5	FF0101	
+palette	F7	format [Blue]0	format	Calibri	0000FF	FFFFFF	120.0	30.0	58511864	35.5	12.5	0101FF	
+palette_short	B4	fill indexed 10	fill	Calibri	000000	008080	120.0	15.0					
+palette_short	B5	fill indexed 17	fill	Calibri	000000	008000	120.0	15.0					
+palette_short	B6	fill indexed 30	fill	Calibri	000000	0066CC	120.0	15.0					
+palette_short	B7	fill indexed 2	fill	Calibri	000000	FF0000	120.0	15.0					
+no_theme	B4	Arial, minor	text	Aptos Narrow	000000	FFFFFF	240.0	15.0	8074e70c	137	9.5	030303	
+no_theme	B5	Normal style	text	Aptos Narrow	000000	FFFFFF	240.0	15.0	8074e70c	137	9.5	030303	
+no_theme	B6	control Arial	text	Arial	000000	FFFFFF	240.0	15.0	ee679b01	145.5	10	030303	
+no_theme	B7	control Calibri	text	Calibri	000000	FFFFFF	240.0	15.0	5a9293ed	138.5	10	030303	
+no_theme	D4	default column	width	Aptos Narrow	000000	FFFFFF	53.0	15.0					
+empty_typeface	B4	Arial, minor	text	Arial	000000	FFFFFF	240.0	15.0	ee679b01	145.5	10	030303	
+empty_typeface	B5	Normal style	text	Calibri	000000	FFFFFF	240.0	15.0	5a9293ed	138.5	10	030303	
+empty_typeface	B6	control Arial	text	Arial	000000	FFFFFF	240.0	15.0	ee679b01	145.5	10	030303	
+empty_typeface	B7	control Calibri	text	Calibri	000000	FFFFFF	240.0	15.0	5a9293ed	138.5	10	030303	
+empty_typeface	D4	default column	width	Calibri	000000	FFFFFF	53.0	15.0					
+palette_bad	B4	fill indexed 10	fill	Calibri	000000	008080	120.0	15.0					
+palette_bad	B5	fill indexed 17	fill	Calibri	000000	000000	120.0	15.0					
+palette_long	B4	fill indexed 10	fill	Calibri	000000	008080	120.0	15.0					
+palette_long	B5	fill indexed 63	fill	Calibri	000000	123456	120.0	15.0					
+palette_long	B6	fill indexed 66	fill	Calibri	000000	646464	120.0	15.0					

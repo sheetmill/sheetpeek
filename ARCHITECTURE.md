@@ -660,10 +660,10 @@ a cached value (as openpyxl writes it) has no `t`. The same file confirms Excel 
 
 Captured so far, in `tests/captures/`: by print (route B) `layout` (§3.6, §4.1 to §4.7); read
 from Excel `theme_colors` and `theme_colors_more` (§3.3), `merge_width` and `error_width` (§4.2,
-§4.4, no deviation), `row_height` (§4.7), `package` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14), `headings_grid`
-(§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10, the look), `merges_spill`, `border_conflicts` and `gradients` (§4.12), `text_style` (§4.7, §4.13), `rotation` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
-Excel 16.115 (Microsoft 365). The rules of §4.10, §4.11, §4.15, §4.16 and §4.14's theme fonts
-and palette have no capture here yet and are marked unverified until screen suites capture them
+§4.4, no deviation), `row_height` (§4.7), `package` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14), `theme_fonts_palette`
+and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10, the look), `merges_spill`, `border_conflicts` and `gradients` (§4.12), `text_style` (§4.7, §4.13), `rotation` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
+Excel 16.115 (Microsoft 365). The rules of §4.11, §4.15, §4.16 and where §4.10's links go have no
+capture here yet and are marked unverified until screen suites capture them
 on Microsoft 365; so are the parts of §4.12, §4.14 and §4.18 that say so. What still waits for
 the screen: the text insets and the baselines of angled text, which come from print, and the 15 pt rows that print
 14 pt apart.
@@ -987,10 +987,9 @@ has `direction: rtl`.
 
 ### 4.14 Theme fonts, palette, grid color and headings
 
-**Unverified:** no capture of the rules here is in this repository yet (the theme's colors and
-tints excepted: suite `theme_colors`, §3.3); the tests that rest on them (`tests/test_theme.py`)
-say so. The figures below are for the dark appearance at zoom 100 and 200 unless they say
-otherwise.
+Captured (Excel 16.115): the theme fonts and the palette (`theme_fonts_palette`), the grid
+color and the headings (`headings_grid`), the theme's colors and tints (`theme_colors`, §3.3).
+The figures below are for the dark appearance at zoom 100 and 200 unless they say otherwise.
 
 **Theme fonts.** A font with `scheme="minor"` or `"major"` is drawn in the theme's Latin typeface
 (`a:minorFont/a:latin`, `a:majorFont/a:latin`) whatever name it stores: Calibri-minor and
@@ -998,23 +997,30 @@ Times-New-Roman-minor both draw the theme's Courier New, at its width, and Calib
 Georgia; a font without a scheme keeps its own name. The reader resolves this when it reads the
 font (`_style/font.py`): `Font.name` is the typeface Excel draws, `Font.scheme` and
 `Font.stored_name` keep what the file says. **The Normal font follows the theme too**, so the
-default column takes the theme font's digits (unverified: 61 pt for Courier New, against 53 pt for
-Calibri 11), and so does every width in `excel` mode. A typeface without xlformat glyph tables is
+default column takes the theme font's digits (61 pt for Courier New, against 53 pt for Calibri
+11), and so does every width in `excel` mode. A typeface without xlformat glyph tables is
 measured as Calibri at the same size, with `font.no_metrics` (§6.2), so such a theme's widths are
-approximate. Without a theme, or with an empty typeface, the stored name is drawn (unverified).
-- **Other scripts:** East Asian text in a minor font is drawn in the theme's script font (`Jpan`,
-  unverified), not the system fallback. sheetpeek reads the Latin typeface only, so a page draws
+approximate (Courier New's default column: 53 pt in sheetpeek, a known deviation). Without a
+theme, minor-scheme text, the Normal style's included, is drawn in Excel's own default theme's
+minor font, Aptos Narrow (the major font is not captured: its stored name); with an empty
+typeface the stored name is drawn.
+- **Other scripts:** East Asian text in a minor or major font is drawn in the theme's script
+  font (`Jpan`: Hiragino Mincho ProN and Hiragino Maru Gothic ProN in the suite), not the system
+  fallback (a known deviation). sheetpeek reads the Latin typeface only, so a page draws
   such text in the browser's fallback for that typeface. A `@font-face` family per theme
   collection with a `unicode-range` per script would draw it exactly (measured equal to a
   fallback list in WebKit); it needs the theme's script fonts in the model and a table from ISO
   15924 codes to ranges, and is not built.
 
 **The workbook palette** (`_colors.workbook_palette`). `styles.xml`'s `indexedColors` replaces
-the default palette entry by entry: indices 0 to 7 no longer repeat 8 to 15 (unverified: a written
-palette that recolors index 10 leaves fill index 2 red). Fill and font colors follow it (unverified,
-for indices 10 and 17). Excel caps the list at 64 entries; a shorter list keeps the default for
-the rest, and an entry that is not a color reads as the default's (both unverified). A
-`<colors>` without `indexedColors` keeps the default palette.
+the default palette entry by entry: indices 0 to 7 no longer repeat 8 to 15 (a written palette
+that recolors index 10 leaves fill index 2 red). Fill and font colors follow it at 10 and 17; a
+font in 0 to 7 keeps the default palette's color (captured at 3, recolored: the fill draws the
+workbook's entry, the font the default's, though Excel's display format reports the workbook's;
+0 to 7 taken alike, unverified). Excel ignores entries past 64 (a fill in 66 of a list of 70
+drew 646464, neither the entry nor sheetpeek's black: a known deviation); a shorter list keeps
+the default for the rest, and an entry that is not a color is black. A `<colors>` without
+`indexedColors` keeps the default palette.
 Automatic colors (`auto_colors`): indexed 64 is black and 65 white, in a fill, a font and a
 border; a font or a border in `auto`, in 64 or without a color is black. An index past the
 palette (81) is black in a fill and a font; Excel refuses a file with a border in it, which
