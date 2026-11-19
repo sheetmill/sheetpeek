@@ -457,7 +457,8 @@ Also:
   fill does not: the text is drawn over the neighbor's own fill, and the spilling cell's fill
   stays in its own column (rows 174 and 175).
 - Wrapped text does not spill (rows 156 to 175); the height Excel fits such a row to is §4.7's.
-  A cell in a hidden row still spills (unverified).
+  A cell in a hidden row still spills (decided: Excel draws no hidden row, so this shapes only
+  what `show_hidden` shows).
 
 **How the `characters` layout follows this:** a spill takes whole columns as far as the text needs,
 centered text takes a column on each side at once, and hidden columns are crossed. Excel's points
@@ -601,8 +602,8 @@ at, in order:
 4. 16 pt when the file has no `<sheetFormatPr>` and the row has no `<row>` element (the height
    of Excel's application standard font, which is Aptos Narrow 12 under Microsoft 365 and was
    Calibri 12 under Office 2021: both give 16 pt in the table below, so the captures cannot tell
-   which font the rule follows, and a workbook opened where the standard font differs is
-   unverified);
+   which font the rule follows; a workbook opened where the standard font differs is a stated
+   limitation, since that font is an Excel preference outside the file, set by a person);
 5. otherwise the Normal font's height from xlformat's row model (`row_metrics`, captured from
    Excel for Mac; this repository's suite `row_height` agrees at 9 to 16): Calibri 12, 14, 15, 16,
    19, 21, 24, 26, 31 pt at 9, 10, 11, 12, 14, 16, 18, 20, 24; Aptos Narrow 13, 14, 15, 16, 19,
@@ -899,7 +900,7 @@ the drawn size (unverified at other sizes). A second line is 2 screen pt below t
   two letters in a 213 pt cell; a merge spans the merge, wrapped text gets one line per line,
   distributed words one line under the whole line (both unverified). **On a number, boolean or
   error they span the value**, like a single underline (Excel for Windows is said to span
-  numbers too; unverified). They add 3 pt under the text: a fitted row is 18 pt, not 15, and
+  numbers too: a stated limitation until the platform setting brings Windows captures, §11). They add 3 pt under the text: a fitted row is 18 pt, not 15, and
   a bottom-aligned baseline sits 6 pt above the cell's bottom, also in a row of fixed height
   (unverified).
 - Strikethrough: 3 pt above the baseline, the text's width.
