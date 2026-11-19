@@ -570,6 +570,88 @@ def defined_name(tmp_path):
     return rewrite(path, "xl/workbook.xml", replace_once("</sheets>", "</sheets>" + name))
 
 
+def theme_dark(tmp_path):
+    """The theme's dark 1, which every default font's color now resolves to."""
+    path = xml_text(tmp_path, A2="x")
+    new = f'<a:dk1><a:sysClr val="windowText" lastClr={quoteattr(PAYLOAD)}/></a:dk1>'
+    return rewrite(
+        path,
+        "xl/theme/theme1.xml",
+        lambda t: re.sub(r"<a:dk1>.*?</a:dk1>", lambda _: new, t, flags=re.S),
+    )
+
+
+def _table(tmp_path, edit):
+    """A2:B4 a table in TableStyleMedium2 with a totals row, its part edited by ``edit``."""
+    from openpyxl.worksheet.table import Table, TableColumn, TableStyleInfo
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws["A2"], ws["B2"], ws["A3"], ws["B3"], ws["A4"] = "a", "b", 1, 2, "Total"
+    table = Table(displayName="Sales", ref="A2:B4", totalsRowCount=1)
+    table.tableColumns = [TableColumn(id=1, name="a", totalsRowLabel="Total"),
+                          TableColumn(id=2, name="b")]  # fmt: skip
+    table.tableStyleInfo = TableStyleInfo(name="TableStyleMedium2", showRowStripes=True)
+    ws.add_table(table)
+    path = save(wb, tmp_path / "book.xlsx")
+    return rewrite(path, "xl/tables/table1.xml", edit)
+
+
+def table_name(tmp_path):
+    return _table(
+        tmp_path, lambda t: t.replace('displayName="Sales"', f"displayName={quoteattr(PAYLOAD)}")
+    )
+
+
+def table_style_name(tmp_path):
+    return _table(tmp_path, lambda t: t.replace('"TableStyleMedium2"', quoteattr(PAYLOAD)))
+
+
+def table_column_name(tmp_path):
+    return _table(tmp_path, lambda t: t.replace('name="b"', f"name={quoteattr(PAYLOAD)}"))
+
+
+def table_totals_label(tmp_path):
+    return _table(
+        tmp_path,
+        lambda t: t.replace('totalsRowLabel="Total"', f"totalsRowLabel={quoteattr(PAYLOAD)}"),
+    )
+
+
+def _own_table_style(tmp_path):
+    """A2:B3 a table in the workbook's own style ``Mine``: a red header fill and font color."""
+    from openpyxl.styles.differential import DifferentialStyle
+    from openpyxl.styles.table import TableStyle, TableStyleElement
+    from openpyxl.worksheet.table import Table, TableColumn, TableStyleInfo
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws["A2"], ws["B2"], ws["A3"] = "a", "b", 1
+    dxf = DifferentialStyle(font=Font(color="FFFF0000"), fill=PatternFill(bgColor="FFFF0000"))
+    element = TableStyleElement(type="headerRow", dxfId=wb._differential_styles.add(dxf))
+    wb._table_styles.tableStyle.append(
+        TableStyle(name="Mine", pivot=False, tableStyleElement=[element])
+    )
+    table = Table(displayName="Sales", ref="A2:B3")
+    table.tableColumns = [TableColumn(id=1, name="a"), TableColumn(id=2, name="b")]
+    table.tableStyleInfo = TableStyleInfo(name="Mine")
+    ws.add_table(table)
+    return save(wb, tmp_path / "book.xlsx")
+
+
+def table_dxf_rgb(tmp_path):
+    path = _own_table_style(tmp_path)
+    return rewrite(path, "xl/styles.xml", lambda t: t.replace('"FFFF0000"', quoteattr(PAYLOAD)))
+
+
+def table_own_style_name(tmp_path):
+    path = _own_table_style(tmp_path)
+    path = rewrite(
+        path, "xl/styles.xml", lambda t: t.replace('name="Mine"', f"name={quoteattr(PAYLOAD)}")
+    )
+    return rewrite(path, "xl/tables/table1.xml", lambda t: t.replace('"Mine"', quoteattr(PAYLOAD)))
+
+
 SOURCES = [
     inline, cached, error_text, error_shaped, date_text, shared, escaped_in_file, line_breaks,
     wrapped, filled_alignment, justified, spilled_left, merged, filled_and_bordered, border_rgb,
@@ -582,6 +664,8 @@ SOURCES = [
     runs, runs_wrapped, runs_filled, run_font_name, run_rgb,
     inline_runs,
     other_sheet_name, tab_color,
+    theme_dark, table_name, table_style_name, table_column_name, table_totals_label,
+    table_dxf_rgb, table_own_style_name,
 ]  # fmt: skip
 # Whichever of these openpyxl validates, it refuses when it loads the file: nothing is shown.
 BACKENDS = {
@@ -627,7 +711,8 @@ REACHES = {
     "absent": {
         "hidden", "format_refused", "theme_srgb", "theme_system", "hyperlink", "properties",
         "tab_color", "defined_name", "run_rgb", "hyperlink_refused", "hyperlink_tab",
-        "other_sheet_name",
+        "other_sheet_name", "theme_dark", "table_name", "table_style_name", "table_column_name",
+        "table_totals_label", "table_dxf_rgb", "table_own_style_name",
     },
     "attribute": {
         "normal_font_name", "hyperlink_target", "hyperlink_mailto", "hyperlink_tooltip",

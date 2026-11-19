@@ -539,6 +539,72 @@ def test_no_mode_allocates_or_fails_by_an_odd_palette_number(tmp_path, field):
             )
 
 
+# Numbers of a table and its style (ARCHITECTURE.md §4.20): its header and totals row counts and
+# range, a stripe's size, the differential format an element names, and a tint inside it.
+TABLE_PART = "xl/tables/table1.xml"
+ODD_TABLE_FIELDS = {
+    "header rows": (TABLE_PART, 'headerRowCount="1"', 'headerRowCount="{}"'),
+    "totals rows": (TABLE_PART, 'totalsRowCount="1"', 'totalsRowCount="{}"'),
+    "table rows": (TABLE_PART, 'ref="A1:C6"', 'ref="A1:C{}"'),
+    "stripe size": (STYLES, 'type="firstRowStripe" size="2"', 'type="firstRowStripe" size="{}"'),
+    "element format": (STYLES, 'type="headerRow" dxfId="1"', 'type="headerRow" dxfId="{}"'),
+    "format tint": (STYLES, 'theme="4" tint="0.5"', 'theme="4" tint="{}"'),
+}
+
+
+def tabled_book(path: Path) -> Path:
+    from openpyxl.styles import Border, Color, Font, PatternFill, Side
+    from openpyxl.styles.differential import DifferentialStyle
+    from openpyxl.styles.table import TableStyle, TableStyleElement
+    from openpyxl.worksheet.table import Table, TableColumn, TableStyleInfo
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    for r in range(1, 7):
+        for c in range(1, 4):
+            ws.cell(r, c, f"h{c}" if r == 1 else r * c)
+    stripe = DifferentialStyle(fill=PatternFill(bgColor=Color(theme=4, tint=0.5)))
+    header = DifferentialStyle(
+        font=Font(bold=True, color="FFFFFFFF"),
+        border=Border(bottom=Side("thick"), horizontal=Side("thin"), vertical=Side("thin")),
+    )
+    elements = [
+        TableStyleElement(type="firstRowStripe", dxfId=wb._differential_styles.add(stripe), size=2),
+        TableStyleElement(type="headerRow", dxfId=wb._differential_styles.add(header)),
+    ]
+    wb._table_styles.tableStyle.append(
+        TableStyle(name="Odd", pivot=False, tableStyleElement=elements)
+    )
+    table = Table(displayName="Odd", ref="A1:C6", headerRowCount=1, totalsRowCount=1)
+    table.tableColumns = [TableColumn(id=k + 1, name=f"h{k + 1}") for k in range(3)]
+    table.tableStyleInfo = TableStyleInfo(name="Odd", showRowStripes=True)
+    ws.add_table(table)
+    return save(wb, path)
+
+
+@pytest.mark.parametrize("field", ODD_TABLE_FIELDS)
+@bounded
+def test_no_mode_allocates_or_fails_by_an_odd_table_number(tmp_path, field):
+    # One bounded child for each field, trying every odd number (as above).
+    part, old, new = ODD_TABLE_FIELDS[field]
+    plain = tabled_book(tmp_path / "plain.xlsx").read_bytes()
+    for value in [*ODD_NUMBERS, "9" * 5000, "3", "10"]:
+        path = tmp_path / "odd.xlsx"
+        path.write_bytes(plain)
+        rewrite(path, part, lambda text, v=value: text.replace(old, new.format(v), 1))
+        try:
+            sheet = sheetpeek.read(path)
+        except PackageError:
+            continue
+        for mode in ("excel", "characters", "none"):
+            page = sheetpeek.render(
+                sheet.layout(mode),
+                {"excel": "html", "characters": "text"}.get(mode, "csv"),
+                on_notice="ignore",
+            )
+            assert "nan" not in page.lower().replace("sans", ""), (field, value, mode)
+
+
 # Numbers of the sheet list (ARCHITECTURE.md §4.15): a tab color's index, theme and tint, and the
 # workbook's active tab.
 ODD_SHEET_FIELDS = {
