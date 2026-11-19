@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from sheetpeek.backends.html._table import Page
 
 FREEZE_LINE = "9b9b9b"
-"""Excel's freeze line, gray 155, one screen point wide (unverified)."""
+"""Excel's freeze line, gray 155, one screen point wide (captured, ``freeze_view``)."""
 
 CSS = f"""\
 .sheetpeek {{ --sheetpeek-freeze: #{FREEZE_LINE}; }}
@@ -64,7 +64,7 @@ def frozen(sheet: RenderedSheet) -> tuple[int, int]:
 
 
 BREAK_LINE = "0000d0"
-"""A manual page break's mark, as page break preview draws it (unverified)."""
+"""A manual page break's mark, as page break preview draws it (captured, ``freeze_view``)."""
 
 BREAK_CSS = f"""\
 .sheetpeek {{ --sheetpeek-page-break: #{BREAK_LINE}; }}

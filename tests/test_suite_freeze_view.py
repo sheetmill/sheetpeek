@@ -292,7 +292,7 @@ def _open(rows):
 
 @pytest.mark.excel
 def test_the_freeze_line_is_one_screen_point_of_gray_155():
-    # Unverified until captured: at zoom 100 and 200, in the dark and light appearances.
+    # At zoom 100 and 200, in the dark and light appearances.
     found = _open(_captured())
     assert {zoom for zoom, _, _ in found} >= {"100", "200"}
     for key, row in found.items():
@@ -364,7 +364,8 @@ def test_the_normal_view_draws_neither_breaks_nor_the_print_area():
         assert float(row["line_spt"]) == pytest.approx(1.0, abs=WIDTH_TOLERANCE), row
         assert _near(row["line_color"], gray, COLOR_TOLERANCE), row
         compared += 1
-    assert compared == len(NO_MARKS) * len({r["zoom"] for r in _edges(rows, "normal", NO_MARKS)})
+    views = {(r["zoom"], r["appearance"]) for r in _edges(rows, "normal", NO_MARKS)}
+    assert compared == len(NO_MARKS) * len(views)
 
 
 @pytest.mark.excel
@@ -389,7 +390,7 @@ def test_the_freeze_line_lies_on_the_gridline():
 
 @pytest.mark.excel
 def test_page_break_preview_draws_a_manual_break_as_sheetpeek_marks_it():
-    # Unverified until captured: 3 screen points of #0000D0, centered on the gridline.
+    # 3 screen points of #0000D0, centered on the gridline.
     rows = _captured()
     states = [r["state"] for r in rows if r["group"] == "page_break" and r["kind"] == "window"]
     assert states, "page_break was not captured"
@@ -416,15 +417,23 @@ def test_the_frozen_window_is_frozen_at_c3():
         assert (fields.get("split_row"), fields.get("split_column")) == ("2", "2"), state
 
 
+OUTSIDE_RANGE = {"5": 5.0, "401": 401.0}
+"""zoomScale values Excel opens a window at, outside the 10 to 400 its own zoom control and
+sheetpeek's zoom allow; sheetpeek reads them as 100. Whether Excel draws at that zoom is not
+captured (the zoom groups read the window's state only)."""
+
+
 @pytest.mark.excel
 def test_a_zoom_excel_does_not_allow_opens_at_sheetpeeks_zoom():
-    # Unverified until captured: 5, 401, 85.5, "abc" and an empty zoomScale are 100. A file
+    # 85.5, "abc" and an empty zoomScale open at 100, as sheetpeek reads them (16.115). A file
     # Excel refuses is left out of the comparison (the refusal is the answer); the control must
-    # read back as saved.
+    # read back as saved. Excel opens 5 and 401 at 5 and 401 where sheetpeek reads 100: open,
+    # as sheetpeek's zoom is 10 to 400 (OUTSIDE_RANGE).
     rows = _captured()
     refused = {r["group"] for r in rows if r["kind"] == "refused"}
     assert refused <= set(freeze_view.REFUSALS)
-    zooms = {r["item"]: r["zoom"] for r in rows if r["kind"] == "zoom"}
-    assert zooms.get("85") == "85", zooms
+    zooms = {r["item"]: float(r["zoom"]) for r in rows if r["kind"] == "zoom"}
+    assert zooms.get("85") == 85, zooms
     for name, found in zooms.items():
-        assert found == str(freeze_view.EXPECTED_ZOOM[name]), (name, found)
+        expected = OUTSIDE_RANGE.get(name, freeze_view.EXPECTED_ZOOM[name])
+        assert found == expected, (name, found)

@@ -20,7 +20,8 @@ def _whole(value: float | None) -> int | None:
 def sheet_view(views: tuple[xlio.SheetView, ...]) -> SheetView:
     """The first view's zoom, zero display and frozen pane; the defaults without a view.
 
-    A zoom outside Excel's 10 to 400 is 100 (unverified); a frozen pane's ``ySplit`` and
+    A zoom outside 10 to 400, not whole or not a number is 100 (``freeze_view``: Excel opens
+    the last two at 100, the first at its value); a frozen pane's ``ySplit`` and
     ``xSplit`` count rows and columns from the view's top-left cell, and one that is not a whole
     number freezes nothing that way.
     """

@@ -661,7 +661,7 @@ a cached value (as openpyxl writes it) has no `t`. The same file confirms Excel 
 Captured so far, in `tests/captures/`: by print (route B) `layout` (§3.6, §4.1 to §4.7); read
 from Excel `theme_colors` and `theme_colors_more` (§3.3), `merge_width` and `error_width` (§4.2,
 §4.4, no deviation), `row_height` (§4.7), `package` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14), `headings_grid`
-(§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `text_style` (§4.7, §4.13), `rotation` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
+(§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `text_style` (§4.7, §4.13), `rotation` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
 Excel 16.115 (Microsoft 365). The rules of §4.10, §4.11, §4.15, §4.16 and §4.14's theme fonts
 and palette have no capture here yet and are marked unverified until screen suites capture them
 on Microsoft 365; so are the parts of §4.12, §4.14 and §4.18 that say so. What still waits for
@@ -1311,8 +1311,9 @@ in `rich` and text, omitted in Markdown and CSV, which show the full text).
 ### 4.18 Sheet view and page layout
 
 **Read.** The first `<sheetView>` gives `Sheet.view` (`SheetView`, `_read_view.py`):
-the saved zoom (`zoomScale`, 100 when absent; a value outside Excel's 10 to 400 or not whole is
-100, unverified), `showZeros`, and a frozen pane's rows and columns (`ySplit`, `xSplit` of a pane
+the saved zoom (`zoomScale`, 100 when absent; a value not whole, or not a number, is 100, as
+Excel opens it; one outside 10 to 400 is 100 too, where Excel opens the window at it, 5 or 401
+(`freeze_view`; whether it draws at that zoom is not captured)), `showZeros`, and a frozen pane's rows and columns (`ySplit`, `xSplit` of a pane
 whose state is `frozen` or `frozenSplit`) from the view's top-left cell; a `split` pane is kept
 as its state only. The sheet's defined name `Print_Area` (reserved, local to the sheet) gives
 `Sheet.print_areas`,
@@ -1322,7 +1323,7 @@ sheet, or not a plain range (a formula) is left out and named in `Sheet.print_ar
 `rowBreaks` and `colBreaks` give `Sheet.row_breaks` and `Sheet.column_breaks`: a `brk id` counts
 boundaries from zero, so `id="10"` falls below row 10; only manual breaks (`man="1"`) are kept.
 
-**What Excel's Normal view draws** (unverified: no capture in this repository yet):
+**What Excel's Normal view draws** (`freeze_view`, zoom 100 and 200, dark and light):
 neither the print area nor page breaks; a frozen pane as a line one screen point wide, gray 155,
 over borders and fills, with the frozen rows and columns kept in place while the rest scrolls;
 with `showZeros="0"`, an empty cell where a value shows as zero, which still blocks spill. So a
@@ -1383,7 +1384,7 @@ default, as in the Normal view (decided). When on, each manual break inside the 
 solid line 3 CSS px wide of `#0000D0`, centered on the gridline before the first drawn row or
 column after it (a break below a hidden row falls before the next drawn one), screen-sized like
 the freeze line and drawn with it over everything else, in the frozen copies too. The look is
-that of Excel's page break preview (unverified: not captured). The other outputs draw nothing
+that of Excel's page break preview (`freeze_view`). The other outputs draw nothing
 and report nothing for breaks.
 
 ### 4.19 Filter and sort buttons
