@@ -370,14 +370,14 @@ element states something Excel draws differently from its default:
   embedded objects and controls are not reported under `workbookPr showObjects="none"`;
 - a linked picture (`r:link` without `r:embed`) is reported as `unsafe`: Excel fetches the linked
   file on open, and sheetpeek never fetches;
-- sheet extension URIs are compared as Excel compares them, exactly. For conditional formatting
-  this is captured: Excel reads the extension only under `{78C0D931-6437-407d-A8EE-F0AAD7539E65}`
-  and ignores the upper-case form printed in [MS-XLSX], so that form is not reported. So are
-  sparklines', validation's, protected ranges' and ignored errors' (`extensions`: Excel saves each
-  in lower case as an unknown extension, and each under its exact URI as its kind); a re-cased
-  one is not reported. On the screen the suite settles nothing: its exact sparkline drew nothing
-  and the extension's exemption of ignored errors left the cells marked. Slicers', timelines'
-  and web extensions' URIs are matched ignoring case (unverified), so that none is missed;
+- conditional formatting's sheet extension URI is compared as Excel compares it, exactly
+  (captured): Excel reads the extension only under `{78C0D931-6437-407d-A8EE-F0AAD7539E65}` and
+  ignores the upper-case form printed in [MS-XLSX], so that form is not reported. The other known
+  URIs (sparklines, slicers, timelines; and validation, protected ranges, ignored errors and web
+  extensions, which are not reported) are matched ignoring case (unverified), so that none is
+  missed. The suite `extensions` does not settle them: Excel 16.115 read none of its extensions
+  even under their exact URIs (the sparkline drew nothing, the extension's exemption of ignored
+  errors left the cells marked) and saved each block back byte for byte, read or not;
 - anything else among a sheet's children, or an unknown extension URI, is reported as
   `sheet.unknown_element` or `sheet.unknown_extension`;
 - dialog sheets and macro sheets are told apart by their relationship type from the workbook

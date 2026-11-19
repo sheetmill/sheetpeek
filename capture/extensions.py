@@ -44,9 +44,11 @@ Two steps for each group:
   and the copy's ``Ext`` sheet is kept (``saved_sheet.xml``). For each kind the group holds, it
   is found where Excel wrote it: ``main`` (the sheet's own element), ``exact`` (an extension
   under the exact URI), ``other:<uri>`` (kept under another URI, as an extension Excel did not
-  read), or nowhere (dropped). This is the only evidence for validation and protected ranges,
-  which draw nothing while the selection is parked; a kind written back as ``main`` or
-  ``exact`` was read.
+  read), or nowhere (dropped). This was meant as the evidence for validation and protected ranges,
+  which draw nothing while the selection is parked, but it settles nothing alone: Excel 16.115
+  wrote back every block it was given byte for byte, read or not (the exact group's sparkline
+  drew nothing). Only with the exact group's screen showing the extensions read do the
+  lower-case groups say anything.
 
 Not covered: web extensions (``x15:webExtensions``) need an add-in's parts, and slicers and
 timelines need pivot or table caches; their URIs stay unverified.
@@ -128,13 +130,13 @@ _XM = "http://schemas.microsoft.com/office/excel/2006/main"
 def expected(group: str) -> dict[str, bool]:
     """Whether sheetpeek takes each of a group's extensions as the kind it is (by its URI).
 
-    Taken from sheetpeek's own table, not a guess about Excel: the URIs in ``_URIS_EXACT``
-    compared exactly, those in ``_URIS_ANY_CASE`` ignoring case.
+    Taken from sheetpeek's own table, not a guess about Excel: conditional formatting's URI is
+    compared exactly, the others in ``_URIS_ANY_CASE`` ignoring case.
     """
     from sheetpeek import _detect
 
     return {
-        kind: uri in _detect._URIS_EXACT or uri.upper() in _detect._URIS_ANY_CASE
+        kind: uri == URIS[kind] or uri.upper() in _detect._URIS_ANY_CASE
         for kind, uri in GROUPS[group].items()
     }
 
@@ -224,11 +226,23 @@ def sheet(text: str, group: str) -> str:
 
 
 def postprocess(group: str) -> Any:
-    """What a group's saved workbook needs: the ``Ext`` sheet's exemptions and extensions."""
+    """What a group's saved workbook needs: the ``Ext`` sheet's exemptions and extensions, and
+    the workbook part's ``fileVersion`` and ``calcId`` as Excel writes them.
+
+    openpyxl writes no ``fileVersion`` and the ``calcId`` of Excel 2007; these are Excel's, so
+    that the file reads as one Excel saved. Excel 16.115 read none of the extensions with either.
+    """
     from capture.screen.run import patch_part
+    from capture.spill_neighbors import excel_saved
 
     def edit(path: Path) -> None:
-        patch_part(path, {"xl/worksheets/sheet1.xml": lambda text: sheet(text, group)})
+        patch_part(
+            path,
+            {
+                "xl/workbook.xml": excel_saved,
+                "xl/worksheets/sheet1.xml": lambda text: sheet(text, group),
+            },
+        )
 
     return edit
 

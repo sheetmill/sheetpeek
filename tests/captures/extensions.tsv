@@ -23,12 +23,12 @@ save	exact										validation	{CCE6A557-97BC-4B89-ADB6-D9C93CAAB3DF}	exact	{CCE
 save	exact										protected	{FC87AEE6-9EDD-4A0A-B7FB-166176984837}	exact	{CCE6A557-97BC-4B89-ADB6-D9C93CAAB3DF} {05C60535-1F16-4FD2-B633-F4F36F0B64E0} {FC87AEE6-9EDD-4A0A-B7FB-166176984837} {01252117-D84E-4E92-8308-4BE1C098FCBB}
 save	exact										ignored	{01252117-D84E-4E92-8308-4BE1C098FCBB}	exact	{CCE6A557-97BC-4B89-ADB6-D9C93CAAB3DF} {05C60535-1F16-4FD2-B633-F4F36F0B64E0} {FC87AEE6-9EDD-4A0A-B7FB-166176984837} {01252117-D84E-4E92-8308-4BE1C098FCBB}
 screen	sparkline_lower	J4	column sparkline of C4:H4	100	0	none								
-screen	sparkline_lower	C7	number as text, not exempted	100					80	008002				
+screen	sparkline_lower	C7	number as text, not exempted	100					0	none				
 screen	sparkline_lower	E7	number as text, exempted by ignoredErrors	100					0	none				
-screen	sparkline_lower	G7	number as text, exempted by the extension	100					80	008002				
-screen	sparkline_lower	C9	=1/0, not exempted	100					80	008002				
+screen	sparkline_lower	G7	number as text, exempted by the extension	100					0	none				
+screen	sparkline_lower	C9	=1/0, not exempted	100					0	none				
 screen	sparkline_lower	E9	=1/0, exempted by ignoredErrors	100					0	none				
-screen	sparkline_lower	G9	=1/0, exempted by the extension	100					80	008002				
+screen	sparkline_lower	G9	=1/0, exempted by the extension	100					0	none				
 save	sparkline_lower										sparkline	{05c60535-1f16-4fd2-b633-f4f36f0b64e0}	other:{05c60535-1f16-4fd2-b633-f4f36f0b64e0}	{05c60535-1f16-4fd2-b633-f4f36f0b64e0}
 save	validation_lower										validation	{cce6a557-97bc-4b89-adb6-d9c93caab3df}	other:{cce6a557-97bc-4b89-adb6-d9c93caab3df}	{cce6a557-97bc-4b89-adb6-d9c93caab3df}
 save	protected_lower										protected	{fc87aee6-9edd-4a0a-b7fb-166176984837}	other:{fc87aee6-9edd-4a0a-b7fb-166176984837}	{fc87aee6-9edd-4a0a-b7fb-166176984837}

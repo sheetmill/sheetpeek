@@ -472,12 +472,9 @@ def test_extension_uris_are_compared_as_excel_compares_them(tmp_path):
     assert sheet_with(CF_URI) == {"cf"}
     # Excel ignores the upper-case form that [MS-XLSX] prints (captured): nothing is drawn.
     assert sheet_with(CF_URI.upper()) == set()
-    # Captured (extensions): sparklines' and validation's are compared exactly too.
-    assert sheet_with("{05C60535-1F16-4FD2-B633-F4F36F0B64E0}") == {"sparkline"}
-    assert sheet_with("{05c60535-1f16-4fd2-b633-f4f36f0b64e0}") == set()
+    # Not yet captured: matched ignoring case, so that nothing is missed.
+    assert sheet_with("{05c60535-1f16-4fd2-b633-f4f36f0b64e0}") == {"sparkline"}
     assert sheet_with("{CCE6A557-97BC-4b89-ADB6-D9C93CAAB3DF}") == set()  # validation
-    # Not captured: matched ignoring case, so that nothing is missed.
-    assert sheet_with("{a8765ba9-456a-4dab-b4f3-acf838c121de}") == {"slicer"}
     assert sheet_with("{11111111-2222-3333-4444-555555555555}") == {"sheet.unknown_extension"}
 
 

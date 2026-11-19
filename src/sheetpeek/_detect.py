@@ -120,25 +120,21 @@ _READ = frozenset(
 """Children the model reads. Page breaks are read and, like the print area, not reported: Excel's
 Normal view draws neither, so a sheet with them is shown as Excel shows it (§4.18)."""
 
-# Sheet extension URIs. Excel compares them exactly: conditional formatting's is captured
-# (lower-case "407d"; the upper-case form printed in [MS-XLSX] is ignored by Excel), and so are
-# sparklines', validation's, protected ranges' and ignored errors' (suite extensions: Excel keeps
-# each in lower case as an unknown extension). A re-cased one draws nothing and is not reported.
+# Sheet extension URIs. Conditional formatting's is compared exactly, as Excel does (captured:
+# lower-case "407d"; the upper-case form printed in [MS-XLSX] is ignored by Excel). The others
+# are matched ignoring case (unverified), so that none is missed: the suite extensions settles
+# none of them, as Excel 16.115 read none of its extensions even under their exact URIs.
 _CF_URI = "{78C0D931-6437-407d-A8EE-F0AAD7539E65}"
-_URIS_EXACT: dict[str, str | None] = {
-    "{05C60535-1F16-4FD2-B633-F4F36F0B64E0}": "sparkline",
-    # These draw nothing on the sheet.
-    "{CCE6A557-97BC-4B89-ADB6-D9C93CAAB3DF}": None,
-    "{FC87AEE6-9EDD-4A0A-B7FB-166176984837}": None,
-    "{01252117-D84E-4E92-8308-4BE1C098FCBB}": None,
-}
-_URIS_EXACT_ANY_CASE = frozenset(uri.upper() for uri in (_CF_URI, *_URIS_EXACT))
-# Not captured: matched ignoring case (unverified), so that none is missed.
 _URIS_ANY_CASE: dict[str, str | None] = {
+    "{05C60535-1F16-4FD2-B633-F4F36F0B64E0}": "sparkline",
     "{A8765BA9-456A-4DAB-B4F3-ACF838C121DE}": "slicer",
     "{3A4CF648-6AED-40F4-86FF-DC5316D8AED3}": "slicer",
     "{7E03D99C-DC04-49D9-9315-930204A7B6E9}": "timeline",
-    # Web extensions are drawn through the drawing part.
+    # These draw nothing on the sheet (validation, protected ranges, ignored errors) or are
+    # drawn through the drawing part (web extensions).
+    "{CCE6A557-97BC-4B89-ADB6-D9C93CAAB3DF}": None,
+    "{FC87AEE6-9EDD-4A0A-B7FB-166176984837}": None,
+    "{01252117-D84E-4E92-8308-4BE1C098FCBB}": None,
     "{F7C9EE02-42E1-4005-9D12-6889AFFD525C}": None,
 }
 
@@ -496,11 +492,7 @@ def _extensions(collector: Collector, ext_list: Iterable[ET.Element]) -> None:
             rules = sum(1 for e in ext.iter() if _local(e)[0] == "cfRule")
             if rules:
                 _report(collector, "cf", count=rules)
-        elif uri in _URIS_EXACT:
-            code = _URIS_EXACT[uri]
-            if code is not None:
-                _report(collector, code)
-        elif uri.upper() in _URIS_EXACT_ANY_CASE:
+        elif uri.upper() == _CF_URI.upper():
             continue  # Excel ignores the extension unless its URI matches exactly (captured)
         elif uri.upper() in _URIS_ANY_CASE:
             code = _URIS_ANY_CASE[uri.upper()]
