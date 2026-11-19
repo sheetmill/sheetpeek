@@ -84,7 +84,7 @@ class RenderedCell:
     source: tuple[int, int] | None
     """(row, column) of the cell whose text is drawn in ``lines``, or ``None`` when blank."""
     fill: str | None
-    """The background of this column: the displayed fill of the cell, or of the merge anchor."""
+    """The background of this column, the displayed fill of the cell or of the merge anchor."""
     font: Font | None
     """Font of the text drawn here (the source cell's, displayed), or ``None`` when blank."""
     color: str | None

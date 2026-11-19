@@ -335,9 +335,11 @@ class Sheet:
     """The gridlines' color, ``RRGGBB`` from the workbook palette (``<sheetView
     defaultGridColor="0" colorId>``), or ``None`` for Excel's automatic gray (§4.14)."""
     theme_colors: tuple[str, ...] = ()
-    """The workbook theme's twelve colors, ``RRGGBB``, by the index a color's ``theme`` names
-    (``Font.theme_color``): 0 light 1, 1 dark 1, 2 light 2, 3 dark 2, accents 1 to 6, the link
-    and the followed link; empty without a theme."""
+    """The workbook theme's twelve colors as ``RRGGBB``, empty without a theme.
+
+    They are in the order of the index a color's ``theme`` names (``Font.theme_color``): 0 light
+    1, 1 dark 1, 2 light 2, 3 dark 2, accents 1 to 6, the link and the followed link.
+    """
     palette: tuple[str, ...] | None = None
     """The workbook's indexed palette when the file has its own (``<indexedColors>``), as its
     indexed colors are drawn: 64 ``RRGGBB`` entries, one the file lacks or cannot be read taken
