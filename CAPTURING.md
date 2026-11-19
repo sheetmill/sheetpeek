@@ -157,17 +157,20 @@ outline symbols are fixed in screen units, so they are reported in screen points
 `python -m capture.screen run SUITE ...` runs suites one at a time (one Excel, never two
 captures at once); `read SUITE ...` measures saved captures again from `capture/build/<suite>/`
 without Excel. Each suite writes `tests/captures/<suite>.tsv`, gzipped as `<suite>.tsv.gz` when
-it is large (`tables`). The suites: `rotation` (angled
-and stacked text: which borders slant, where general text is anchored, fitted heights over
-lengths and sizes; cases measured by row height alone are read without a capture), and the
-cell-style suites `borders`, `fills` and `text_style`, `filters` (filter and sort buttons) and
-`tables` (table styles: each table cell's display format, read exactly, and the device pixels
-across each of its edges, one workbook and window per group; its groups `unknown` and `merge`
-may be refused by Excel and run on their own, `python -m capture.tables run unknown`). Cases added to a suite after it was
-captured go where the captured ones stay as they were: a group of their own (`text_style`'s
-`wrap` and `lone`, run with `python -m capture.text_style run wrap lone`), or windows of their
-own (`rotation`'s second set, `python -m capture.rotation run more`). `read` leaves out what is
-not captured yet.
+it is large (`tables`). The suites:
+- the cell-style suites `borders`, `fills` and `text_style`;
+- `rotation`: angled and stacked text (which borders slant, where general text is anchored,
+  fitted heights over lengths and sizes; cases measured by row height alone are read without a
+  capture);
+- `filters`: filter and sort buttons;
+- `tables`: table styles (each table cell's display format, read exactly, and the device pixels
+  across each of its edges), one workbook and window per group; its groups `unknown` and `merge`
+  may be refused by Excel and run on their own (`python -m capture.tables run unknown`).
+
+Cases added to a suite after it was captured go where the captured ones stay as they were: a
+group of their own (`text_style`'s `wrap` and `lone`, run with
+`python -m capture.text_style run wrap lone`), or windows of their own (`rotation`'s second set,
+`python -m capture.rotation run more`). `read` leaves out what is not captured yet.
 
 ## Saving a copy
 
