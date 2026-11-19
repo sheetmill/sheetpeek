@@ -64,7 +64,7 @@ def test_the_crafted_color_id_is_in_the_file_as_written(tmp_path):
     with zipfile.ZipFile(tmp_path / "headings_grid_grid_x.xlsx") as archive:
         sheet = archive.read("xl/worksheets/sheet1.xml").decode()
     assert '<sheetView defaultGridColor="0" colorId="x" ' in sheet
-    assert headings_grid.REFUSALS == ("grid_99999", "grid_x")  # Excel refused 99999 (16.115)
+    assert headings_grid.REFUSALS == ("grid_65", "grid_99999", "grid_x")  # 16.115 refused 65, 99999
     assert headings_grid.GROUPS[-1].name == "grid_x"  # runs on its own, after the others
     with zipfile.ZipFile(tmp_path / "headings_grid_font_calibri_8.xlsx") as archive:
         assert "<sheetFormatPr" not in archive.read("xl/worksheets/sheet1.xml").decode()
