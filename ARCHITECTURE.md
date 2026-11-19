@@ -372,10 +372,12 @@ element states something Excel draws differently from its default:
   file on open, and sheetpeek never fetches;
 - sheet extension URIs are compared as Excel compares them, exactly. For conditional formatting
   this is captured: Excel reads the extension only under `{78C0D931-6437-407d-A8EE-F0AAD7539E65}`
-  and ignores the upper-case form printed in [MS-XLSX], so that form is not reported. The other
-  known URIs (sparklines, slicers, timelines; and validation, protected ranges, ignored errors and
-  web extensions, which are not reported) are matched ignoring case until captured (unverified),
-  so that none is missed;
+  and ignores the upper-case form printed in [MS-XLSX], so that form is not reported. So are
+  sparklines', validation's, protected ranges' and ignored errors' (`extensions`: Excel saves each
+  in lower case as an unknown extension, and each under its exact URI as its kind); a re-cased
+  one is not reported. On the screen the suite settles nothing: its exact sparkline drew nothing
+  and the extension's exemption of ignored errors left the cells marked. Slicers', timelines'
+  and web extensions' URIs are matched ignoring case (unverified), so that none is missed;
 - anything else among a sheet's children, or an unknown extension URI, is reported as
   `sheet.unknown_element` or `sheet.unknown_extension`;
 - dialog sheets and macro sheets are told apart by their relationship type from the workbook
@@ -659,7 +661,7 @@ a cached value (as openpyxl writes it) has no `t`. The same file confirms Excel 
 Captured so far, in `tests/captures/`: by print (route B) `layout` (§3.6, §4.1 to §4.7); read
 from Excel `theme_colors` and `theme_colors_more` (§3.3), `merge_width` and `error_width` (§4.2,
 §4.4, no deviation), `row_height` (§4.7), `package` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14), `headings_grid`
-(§4.14), `spill_neighbors` (§4.1, §4.2), `text_style` (§4.7, §4.13), `rotation` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
+(§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `text_style` (§4.7, §4.13), `rotation` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
 Excel 16.115 (Microsoft 365). The rules of §4.10, §4.11, §4.15, §4.16 and §4.14's theme fonts
 and palette have no capture here yet and are marked unverified until screen suites capture them
 on Microsoft 365; so are the parts of §4.12, §4.14 and §4.18 that say so. What still waits for

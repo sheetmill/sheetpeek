@@ -128,13 +128,13 @@ _XM = "http://schemas.microsoft.com/office/excel/2006/main"
 def expected(group: str) -> dict[str, bool]:
     """Whether sheetpeek takes each of a group's extensions as the kind it is (by its URI).
 
-    Taken from sheetpeek's own table, not a guess about Excel: conditional formatting's URI is
-    compared exactly, the others in ``_URIS_ANY_CASE`` ignoring case.
+    Taken from sheetpeek's own table, not a guess about Excel: the URIs in ``_URIS_EXACT``
+    compared exactly, those in ``_URIS_ANY_CASE`` ignoring case.
     """
     from sheetpeek import _detect
 
     return {
-        kind: uri == URIS[kind] or uri.upper() in _detect._URIS_ANY_CASE
+        kind: uri in _detect._URIS_EXACT or uri.upper() in _detect._URIS_ANY_CASE
         for kind, uri in GROUPS[group].items()
     }
 

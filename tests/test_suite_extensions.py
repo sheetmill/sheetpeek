@@ -45,11 +45,11 @@ def test_every_group_builds_and_reads_back_as_built(tmp_path):
             assert f'<ext uri="{uri}"' in xml, group
         assert extensions.IGNORED in xml
         codes = {n.code for n in sheetpeek.notices(path, "html")}
-        # what sheetpeek takes each extension for: the sparkline reported, the rest silent,
-        # nothing reported as unknown while sheetpeek matches the URI
+        # what sheetpeek takes each extension for: the sparkline reported, the rest silent; a
+        # re-cased URI draws nothing and is not reported, as Excel ignores it
         took = extensions.expected(group)
         assert ("sparkline" in codes) == took.get("sparkline", False), group
-        assert ("sheet.unknown_extension" in codes) == (not all(took.values())), group
+        assert "sheet.unknown_extension" not in codes, group
 
 
 def test_the_cells_hold_what_the_cases_say(tmp_path):
@@ -66,11 +66,11 @@ def test_the_cells_hold_what_the_cases_say(tmp_path):
     assert column_index_from_string(extensions.SPARKLINE[0]) > sheet.ref.max_col
 
 
-def test_sheetpeek_matches_every_lower_case_uri_today():
-    assert set(extensions.URIS.values()) <= set(_detect._URIS_ANY_CASE)
+def test_sheetpeek_matches_the_captured_uris_exactly():
+    assert set(extensions.URIS.values()) <= set(_detect._URIS_EXACT)
     assert extensions.expected("exact") == dict.fromkeys(extensions.URIS, True)
     for kind in extensions.URIS:
-        assert extensions.expected(f"{kind}_lower") == {kind: True}
+        assert extensions.expected(f"{kind}_lower") == {kind: False}
 
 
 def test_the_sheet_must_end_as_openpyxl_writes_it():
@@ -253,6 +253,12 @@ def _marked(record):
 
 
 @pytest.mark.excel
+@pytest.mark.xfail(
+    strict=True,
+    reason="16.115: the exact group's sparkline drew nothing and the extension's exemption left "
+    "G7 and G9 marked, though Excel saved all four extensions as their kinds; the screen step "
+    "settles nothing and the save step decides (ARCHITECTURE §3.7)",
+)
 def test_the_controls_show_what_the_exact_uris_draw():
     exact = _screen(_captured(), "exact")
     if not exact:
@@ -335,17 +341,21 @@ def _agreeing():
     def row(**fields):
         lines.append("\t".join(fields.get(c, "") for c in extensions.COLUMNS))
 
+    # Excel reads the exact URIs and ignores the lower-case ones (captured, 16.115).
     for group in extensions.SCREEN:
-        row(kind="screen", group=group, cell="J4", zoom="100", ink_pixels="2400",
-            ink_color=extensions.SERIES)  # fmt: skip
+        drawn = group != "sparkline_lower"
+        row(kind="screen", group=group, cell="J4", zoom="100",
+            ink_pixels="2400" if drawn else "0",
+            ink_color=extensions.SERIES if drawn else "none")  # fmt: skip
         for cell in (*extensions.NUMBER_TEXT, *extensions.ERRORS):
-            marked = cell[0] == "C"
+            marked = cell[0] == "C" or (group == "ignored_lower" and cell[0] == "G")
             row(kind="screen", group=group, cell=cell, zoom="100",
                 triangle_pixels="30" if marked else "0",
                 triangle_color="008000" if marked else "none")  # fmt: skip
     for group, chosen in extensions.GROUPS.items():
         for kind, uri in chosen.items():
-            row(kind="save", group=group, extension=kind, uri=uri, saved_where="exact")
+            where = "exact" if group == "exact" else f"other:{uri}"
+            row(kind="save", group=group, extension=kind, uri=uri, saved_where=where)
     return lines
 
 
@@ -362,22 +372,22 @@ def test_the_comparison_accepts_a_capture_that_agrees_with_sheetpeek(tmp_path, m
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     for check in checks:
         check()
-    # and refuses one that does not: a lower-case sparkline not drawn (and dropped on saving),
-    # a lower-case validation kept under its own URI, a triangle left on the exact exemption
+    # and refuses one that does not: a lower-case sparkline drawn, then saved as read, a
+    # lower-case validation saved as read, a triangle left on the exact exemption
     mutations = [
         (
             lambda line: line.startswith("screen\tsparkline_lower\tJ4"),
-            ("\t2400\t", "\t0\t"),
+            ("\t0\tnone", "\t2400\t" + extensions.SERIES),
             test_sheetpeek_matches_each_uri_as_excel_does,
         ),
         (
             lambda line: line.startswith("save\tsparkline_lower\t"),
-            ("\texact\t", "\t\t"),
+            ("\tother:", "\texact\tx"),
             test_the_screen_and_the_save_agree,
         ),
         (
             lambda line: line.startswith("save\tvalidation_lower\t"),
-            ("\texact\t", "\tother:x\t"),
+            ("\tother:", "\texact\tx"),
             test_sheetpeek_matches_each_uri_as_excel_does,
         ),
         (
