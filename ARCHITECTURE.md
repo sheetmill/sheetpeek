@@ -406,9 +406,6 @@ Four sources of evidence, all Excel 16 for Mac with Calibri 11 (openpyxl's defau
   `colspan`, hidden rows and columns, each cell's displayed text. It does not record left spill or
   what is painted, and its clip points are simplified.
 - **Checked by eye** (the route A workbook open in Excel, 2026-10-28).
-
-Route A's export and the checks by eye are not kept in this repository, so a rule resting on them
-alone is marked unverified; the rules below cite the committed suite that covers them.
 - **Route B** (`capture/layout.py`, suite `layout`, 200 rows; later runs reproduced the earlier
   rows exactly): Excel's PDF export,
   read with pdfminer.six. Excel prints each gridline as a 1 pt rectangle and leaves a vertical
@@ -418,8 +415,11 @@ alone is marked unverified; the rules below cite the committed suite that covers
   rendered page.
 - **Route C** (`capture/screen/`, suites `borders`, `fills`, `text_style`, `rotation`, `filters`,
   `tables`): a screenshot of Excel's window, measured against cells whose positions Excel
-  reports, at zoom 100 (and 200 for `borders`, `fills` and `filters`). It is the screen itself, so it settles what print cannot: line dashes, pattern tiles,
-  ink positions, slanted borders.
+  reports, at zoom 100 (and 200 for `borders`, `fills` and `filters`). It is the screen itself,
+  so it settles what print cannot: line dashes, pattern tiles, ink positions, slanted borders.
+
+Route A's export and the checks by eye are not kept in this repository, so a rule resting on them
+alone is marked unverified; the rules below cite the committed suite that covers them.
 
 `tests/test_captures.py` lays the `layout` workbook out in `characters` mode, compares the
 reach of every spill of digits with the capture, checks the other captured facts, and reports
