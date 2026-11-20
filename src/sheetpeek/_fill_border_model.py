@@ -1,8 +1,9 @@
 """Fills and borders: what a cell's ``fillId`` and ``borderId`` resolve to, and Excel's rules.
 
 The rules are ``ARCHITECTURE.md`` §4.12: the pattern tiles are captured by the screen suite
-``fills``; the colors a pattern's automatic colors take, the conflict order of border styles and
-the tie between two colors are unverified.
+``fills``, the colors a pattern's automatic colors take by ``auto_colors``, and the conflict
+order of border styles by ``border_conflicts``; which of two colors of one style wins is a known
+deviation (``border_conflicts``: Excel's rule is not found).
 """
 
 from __future__ import annotations

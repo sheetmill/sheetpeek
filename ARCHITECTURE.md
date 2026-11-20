@@ -936,12 +936,17 @@ the drawn size (unverified at other sizes). A second line is 2 screen pt below t
   Accounting underlines and strikethrough end as below.
 - Single accounting: 3 pt below the baseline; double accounting a second line. **On text they
   span the cell**, from 3 pt after its left gridline to 2 pt before the next one, even under
-  two letters in a 213 pt cell; a merge spans the merge, wrapped text gets one line per line,
-  distributed words one line under the whole line (both unverified). **On a number, boolean or
+  two letters in a 213 pt cell; a merge spans the merge (captured, `text_style_more`); wrapped
+  text gets one line per line and distributed words one line under the whole line, a known
+  deviation: Excel draws one rule, under the last wrapped line, fits each wrapped line 3 pt
+  taller (three lines take 57 pt), and puts the distributed rule a point lower
+  (`text_style_more`, group `rules`). **On a number, boolean or
   error they span the value**, like a single underline (Excel for Windows is said to span
   numbers too: a stated limitation until the platform setting brings Windows captures, §11). They add 3 pt under the text: a fitted row is 18 pt, not 15, and
   a bottom-aligned baseline sits 6 pt above the cell's bottom, also in a row of fixed height
-  (unverified).
+  (captured, `text_style_more` group `rules`, rows fixed at 15, 20 and 30 pt). Plain
+  bottom-aligned text beside it in that row sits on the same baseline in Excel, where sheetpeek
+  keeps it 3 pt above the bottom, a known deviation.
 - Strikethrough: 3 pt above the baseline, the text's width.
 
 **Outline, shadow, condense and extend** are drawn as plain text by Excel for Mac (the same ink
@@ -958,8 +963,8 @@ text). **Wrap overrides it**, as do horizontal and vertical justify and distribu
 text keeps its size and breaks where wrap alone breaks it (captured, `text_style` group `wrap`: 28
 pairs of cases, identical). **Shrunk text never spills**, in every mode. **Rows fit the unshrunk
 size** (captured at 20 pt). A merge with the flag on its anchor is not shrunk, clipped at the
-merge's edge (captured once, doubtful). The baseline stays where unshrunk text would sit
-(unverified).
+merge's edge (captured once, doubtful). The baseline stays where unshrunk text would sit, a
+known deviation: Excel's is not the unshrunk size's (`text_style_more`, group `shrunk`).
 
 **Vertical justify and distributed** wrap text whose wrap flag is off (captured: the file still
 says it does not wrap). One line sits at the top (justify) or the center (distributed). Several

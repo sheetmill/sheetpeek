@@ -5,8 +5,8 @@ headings, each cell holding absolutely positioned segments, so it scrolls with t
 sizes are screen-fixed, as Excel keeps them at any zoom: 4/3 CSS pixels a screen point, the
 cells' scale at zoom 100, rounded to whole pixels, so the gutter keeps its proportion
 to the rows; its lines (bars, borders, strokes) keep their width in CSS pixels, as gridlines and
-borders do (``ARCHITECTURE.md`` §4.11). Unverified: no
-capture in this repository yet. The column gutter is the row gutter's geometry transposed.
+borders do (``ARCHITECTURE.md`` §4.11; captured, ``outline``). The column gutter is the row
+gutter's geometry transposed.
 """
 
 from __future__ import annotations
@@ -20,9 +20,9 @@ if TYPE_CHECKING:
     from sheetpeek.backends.html import HTMLBackend
     from sheetpeek.backends.html._table import Page
 
-# In screen points (unverified): lanes 12 apart from 2 in, 3 after the last; bars 2 wide, 3 into the
-# lane, from 2 past the edge, with a 6 long tick; buttons 12 square filling the lane; dots 2
-# square. In CSS px, 4/3 each, rounded; the bars' width is a line's and stays 2 px.
+# In screen points (captured, outline): lanes 12 apart from 2 in, 3 after the last; bars 2 wide,
+# 3 into the lane, from 2 past the edge, with a 6 long tick; buttons 12 square filling the lane;
+# dots 2 square. In CSS px, 4/3 each, rounded; the bars' width is a line's and stays 2 px.
 _MARGIN, _LANE, _END = 3, 16, 4
 _BAR, _INSET, _START, _TICK = 2, 4, 3, 8
 _BUTTON, _DOT = 16, 3
