@@ -1264,8 +1264,12 @@ boxes match a rigid rotation of the upright box (captured: 45°, 58.5 × 57.5 pt
   but for fill and justify at 90°, 1.55 pt, and distributed at 90°, 2.0 pt, known deviations;
   −90° unverified, no capture in this repository yet). Their height at 75° and 90° is 1.6 to
   2.9 pt below Excel's, as for a merge across at 45°: a known deviation without a rule yet.
-- **Vertical:** bottom puts the box's lowest corner on the cell's bottom, top its highest on the
-  top, center centers it (captured in a 90 pt row at 45°). A box taller than its row
+- **Vertical:** bottom puts the box's lowest corner on the cell's bottom, top its highest 3 pt
+  below the top (`TOP_DROP`, less where the row has less room), center centers it (captured in a
+  90 pt row at 45°). The drop is captured between slanted sides, where the text's height moves
+  it across (`rotation` at 45°, `rotation_more` at 30°, 60°, 75° and −45°: within 1.5 pt, where
+  without it they were 2.5 to 19 pt off); without borders, and in rows with less than 6 pt to
+  spare, it is unverified (no capture in this repository compares the height yet). A box taller than its row
   stays bottom-aligned and is clipped at the row; nothing is drawn in the row above (captured,
   a 15 pt row at 45° and 90°).
 - **Spill:** angled text spills into empty neighbors as horizontal text does (§4.1), by its box's
@@ -1322,9 +1326,7 @@ descent 1.5 pt inside it; centered text centers its line box between them; an in
 horizontally, `6n` pt (`SLANT_INSETS`). How high the text sits is as without borders. None of row
 height, column width and length changes it. Against the capture, with each end letter's own height,
 the ink edges lie within 1.5 pt across the line (median 0.6) but for three cases: top alignment at
-45° (2.5; the height is placed as without borders, which puts this case within 0.6 there, so Excel
-moves top-aligned text between slanted sides differently: a known deviation at 15° to 75° and
-−45°, up to 19 pt across the line at 15°, `rotation_more`), −60° (1.9; the
+15° in a 45 pt row (2.1, `rotation_more`, a known deviation), −60° (1.9; the
 unbordered placement is 1 pt off at that angle) and 20 pt (1.7; the insets are fitted at 11 pt). At
 20 pt Excel's wider text (xlformat's tables, the `upright` cases) puts the far edge up to 4.7 pt
 further. At negative angles left, center and right are the mirror of the positive angles at −45°

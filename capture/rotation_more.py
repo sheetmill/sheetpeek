@@ -197,11 +197,11 @@ stacked general | 47 | 0 | 58,14,6 58,29,6 58,44,5 | - | -
 45 lrtb thick neighbors | 70 | 45 | 20.51,67.88,78 | - | 70 | thick,thick,thick,thick
 45 lrtb merged across | 70 | 45 | 10.78,67.88,78 | - | -
 45 lrtb merged down | 40 | 45 | 10.78,67.88,78 | - | -
-15 lrtb vertical top | 45 | 15 | 103.17,30.81,78 | - | 167.94
-30 lrtb vertical top | 90 | 30 | 97.83,48.53,78 | - | 155.88
-60 lrtb vertical top | 90 | 60 | 24.8,73.05,78 | - | 51.96
-75 lrtb vertical top | 90 | 75 | 16.62,78.19,78 | - | 24.12
--45 lrtb vertical top | 90 | -45 | -47.61,7.78,78 | - | -90
+15 lrtb vertical top | 45 | 15 | 91.98,33.81,78 | - | 167.94
+30 lrtb vertical top | 90 | 30 | 92.64,51.53,78 | - | 155.88
+60 lrtb vertical top | 90 | 60 | 23.07,76.05,78 | - | 51.96
+75 lrtb vertical top | 90 | 75 | 15.82,81.19,78 | - | 24.12
+-45 lrtb vertical top | 90 | -45 | -44.61,10.78,78 | - | -90
 -15 lrtb left | 38 | -15 | -68.77,14.91,78 | - | -141.82
 -15 lrtb center | 38 | -15 | -75.11,14.91,78 | - | -141.82
 -15 lrtb right | 38 | -15 | -83.39,14.91,78 | - | -141.82

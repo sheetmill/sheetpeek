@@ -456,9 +456,6 @@ SLANT_BOUND = 1.5
 """Points, across the line, within which each slanted case's ink edges lie (median 0.6, 90th
 percentile 1.1 over the 46 cases' 88 edges), but for ``SLANT_OUTLIERS``."""
 SLANT_OUTLIERS = {
-    # Top alignment between slanted sides, one case: the height is placed as without borders,
-    # where this case is within 0.6 pt; Excel puts the text 2.2 to 2.5 pt further across.
-    "45 lrtb vertical top": 2.75,
     # The unbordered placement is already 1 pt off at -60 degrees; the right edge is 1.9.
     "-60 lrtb": 2.25,
     # The insets are fitted at 11 pt; at 20 pt the left edge lies 1.7 pt inside.

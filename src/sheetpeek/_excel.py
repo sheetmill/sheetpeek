@@ -75,6 +75,8 @@ ROTATED_EXTRA = 7.0
 """Points a row fitted to angled text adds to its footprint, fitted the same way (§4.17)."""
 STACKED_EXTRA = 2.0
 """Points a row fitted to stacked text adds to its lines (captured, §4.17)."""
+TOP_DROP = 3.0
+"""Points below the cell's top that top-aligned angled text's highest corner sits (§4.17)."""
 TALLEST_ROW = 409.5
 """Excel's tallest row, in points: a row fitted to 90-degree text stops there (§4.17)."""
 
@@ -672,8 +674,9 @@ class _Points:
                 (s * cos - t * sin, -s * sin - t * cos) for s in (0, width) for t in (-below, above)
             ]
             y_lo, y_hi = min(y for _, y in corners), max(y for _, y in corners)
-            if style.v_align == "top" and y_hi - y_lo <= bottom - top:
-                y = top - y_lo
+            room = bottom - top - (y_hi - y_lo)
+            if style.v_align == "top" and room >= 0:
+                y = top - y_lo + min(TOP_DROP, room)
             elif style.v_align in ("center", "distributed") and y_hi - y_lo <= bottom - top:
                 y = top + math.floor((bottom - top - (y_hi - y_lo)) / 2) - y_lo
             else:  # bottom; justify as bottom (unverified); a box taller than the row (captured)

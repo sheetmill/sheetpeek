@@ -339,18 +339,10 @@ named outliers 1.5), in x and y elsewhere (``rotation``'s unbordered and turned 
 
 PINNED = {
     "between": (
-        [
-            "15 lrtb vertical top",
-            "30 lrtb vertical top",
-            "60 lrtb vertical top",
-            "75 lrtb vertical top",
-            "-45 lrtb vertical top",
-            "-75 lrtb left",
-            "45 lrtb vertical distributed",
-        ],
+        ["15 lrtb vertical top", "-75 lrtb left", "45 lrtb vertical distributed"],
         (
-            "top alignment between slanted sides (and vertical distributed, and left at -75) sits "
-            "elsewhere in Excel, up to 19 pt across at 15 degrees"
+            "top alignment at 15 degrees in a 45 pt row sits 2.1 pt across from sheetpeek's, "
+            "vertical distributed and left at -75 elsewhere"
         ),
     ),
     "across": (
