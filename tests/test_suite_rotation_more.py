@@ -374,7 +374,11 @@ PINNED = {
     ),
     "stacked": (
         ["stacked left", "stacked right", "stacked center", "stacked general"],
-        "stacked characters sit up to 4 pt from sheetpeek's place across the cell",
+        (
+            "Excel centers stacked characters on one axis, about 10.2 pt from the near edge at "
+            "11 pt for left and right (sheetpeek starts each at the inset, up to 4 pt off) and "
+            "1 pt left of sheetpeek's for center and general"
+        ),
     ),
     "underline": (
         [
