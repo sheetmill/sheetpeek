@@ -77,6 +77,8 @@ STACKED_EXTRA = 2.0
 """Points a row fitted to stacked text adds to its lines (captured, §4.17)."""
 TOP_DROP = 3.0
 """Points below the cell's top that top-aligned angled text's highest corner sits (§4.17)."""
+STACKED_AXIS = (1.43, 0.758)
+"""Stacked left or right text's axis from the near edge: points, and points per point of size."""
 TALLEST_ROW = 409.5
 """Excel's tallest row, in points: a row fitted to 90-degree text stops there (§4.17)."""
 
@@ -279,6 +281,12 @@ def _turned_height(grid: _Grid, cell: Any, p: int, fonts: _Fonts) -> float:
     angle = math.radians(cell.style.rotation)
     turned = width * abs(math.sin(angle)) + size * abs(math.cos(angle)) + ROTATED_EXTRA
     return max(line, float(round(turned)))
+
+
+def _stacked_axis(size: float) -> float:
+    """Points from the near edge to the axis stacked left or right text is centered on (§4.17)."""
+    constant, share = STACKED_AXIS
+    return constant + share * size
 
 
 def _upright(style: Any) -> bool:
@@ -783,7 +791,9 @@ class _Points:
     def place_stacked(self, origin: _Origin) -> tuple[list[TextRun], int, int, int]:
         """Stacked text: one upright character a line, a font line apart (§4.17).
 
-        General text is centered (captured); left and right sit at the insets (unverified). The
+        Each character is centered on one vertical axis: ``STACKED_AXIS`` from the near edge for
+        left and right, the cell's middle for center and general (captured, ``rotation_placement``
+        at 9 to 36 pt; Calibri in a 120 pt column only). The
         lines are placed as wrapped lines are by the vertical alignment, clipped at the cell.
         """
         cell, shown = origin.cell, origin.shown
@@ -810,11 +820,11 @@ class _Points:
                 continue
             width = text.width(k, k + 1)
             if align == "left":
-                x = x0 + self.left_inset
+                x = x0 + _stacked_axis(cell.font.size) - width / 2
             elif align == "right":
-                x = x1 - self.right_inset - width
+                x = x1 - _stacked_axis(cell.font.size) - width / 2
             else:
-                x = x0 + 1 + math.ceil((x1 - x0 - 1 - width) / 2)
+                x = (x0 + x1 - width) / 2
             baseline += shift
             drawn = _spans(text, k, k + 1, 1, 1.0, shown.format_color) if spans else ()
             runs.append(

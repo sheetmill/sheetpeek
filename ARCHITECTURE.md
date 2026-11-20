@@ -1325,10 +1325,12 @@ boxes match a rigid rotation of the upright box (captured: 45°, 58.5 × 57.5 pt
   without its column's width.
 
 **Stacked text** draws one upright character a line, a font line apart (captured: 15 pt at
-Calibri 11), centered for general text (captured); left and right sit at the insets, a known deviation:
-Excel centers each character on one axis, about `1.7 + 0.76·S` pt from the near edge for left
-and right (8.5 pt at 9 pt to 29 pt at 36, `rotation_more` and `rotation_placement`), and
-centered ones lie up to 1 pt from sheetpeek's. The lines are placed by the vertical alignment as wrapped lines are, clipped at
+Calibri 11). Each character is centered on one vertical axis: for left and right alignment
+`1.43 + 0.758·S` pt from the near edge (`STACKED_AXIS`), for center and general the cell's
+middle. Captured (`rotation_placement`: "Abc" at 9 to 36 pt and "WiW" at 11 and 20, left,
+right and center; `rotation_more` at 11 pt): every line's ink center within 1.3 pt of its
+character's center (96 lines, median 0.3). Calibri in a 120 pt column only; other faces and
+column widths are unverified (no capture in this repository yet). The lines are placed by the vertical alignment as wrapped lines are, clipped at
 the cell. A fitted row grows to a line a character plus 2 pt (captured: nine cases of 3 to 8
 characters at 9, 14 and 20 pt, all exact).
 

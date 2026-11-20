@@ -372,14 +372,6 @@ PINNED = {
             "vertical distributed 12 pt lower, and fill and a merge down's text elsewhere"
         ),
     ),
-    "stacked": (
-        ["stacked left", "stacked right", "stacked center", "stacked general"],
-        (
-            "Excel centers stacked characters on one axis, about 10.2 pt from the near edge at "
-            "11 pt for left and right (sheetpeek starts each at the inset, up to 4 pt off) and "
-            "1 pt left of sheetpeek's for center and general"
-        ),
-    ),
     "underline": (
         [
             "45 accounting text",
@@ -544,25 +536,18 @@ def test_a_neighbors_side_on_a_shared_edge_is_drawn_upright():
         assert lo <= float(record[f"edge_{side}"]) <= hi, (side, style, record[f"edge_{side}"])
 
 
-STACKED_BEARINGS = (0.15, 0.1)
-"""Ems by which a glyph's ink may lie inside its advance on the left and the right (Calibri's
-"A", "b" and "c": under 0.1), plus half a point for the device pixel the ink ends on."""
-
-
 @pytest.mark.excel
-@pytest.mark.parametrize("name", _pinned("stacked", _names("stacked")))
+@pytest.mark.parametrize("name", _names("stacked"))
 def test_stacked_characters_sit_where_sheetpeek_puts_them(name, widths):
-    # §4.17, stacked_align: each line's ink inside its character's advance, left, right, center
-    # and general in a 20-character column, where the three placements lie about 50 pt apart.
+    # §4.17: each character centered on one axis, left, right, center and general in a
+    # 20-character column: each line's ink center against its character's center.
     record = _row(name)
     lines = [tuple(map(float, line.split(":"))) for line in record["lines"].split(";")]
     runs = rotation_more.EXPECTED[name]["runs"]
     assert len(lines) == len(runs), name
-    size = _case(name)[2].cell.size
     for (ink_left, ink_right), (x, _, w) in zip(lines, runs, strict=True):
-        left, right = x, x + w - widths[name]
-        assert -0.5 <= ink_left - left <= STACKED_BEARINGS[0] * size + 0.5, (name, ink_left, left)
-        assert -0.5 <= right - ink_right <= STACKED_BEARINGS[1] * size + 0.5, (name, ink_right)
+        center = (ink_left + widths[name] + ink_right) / 2
+        assert abs(center - (x + w / 2)) <= INK_BOUND, (name, center, x + w / 2)
 
 
 RULE_BOUND = 1.5

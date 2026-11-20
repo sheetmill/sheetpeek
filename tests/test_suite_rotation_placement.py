@@ -117,18 +117,6 @@ PINNED: dict[str, frozenset[str]] = {
         "15 lrtb top 30|15 lrtb top 45|20 lrtb top 30|20 lrtb top 50|20 lrtb top 70|"
         "20 lrtb top 90|50 lrtb top 90"
     ),
-    # Excel centers stacked characters on one axis about 1.7 + 0.76 S from the near edge (8.5 pt
-    # at 9 pt to 29 at 36), where sheetpeek starts each at the inset; center and general up to 1
-    # pt from sheetpeek's place.
-    "stacked": _names(
-        "stacked Abc center 12|stacked Abc center 14|stacked Abc center 9|"
-        "stacked Abc left 12|stacked Abc left 14|stacked Abc left 16|stacked Abc left 20|"
-        "stacked Abc left 24|stacked Abc left 28|stacked Abc left 36|stacked Abc left 9|"
-        "stacked Abc right 12|stacked Abc right 14|stacked Abc right 16|stacked Abc right 20|"
-        "stacked Abc right 24|stacked Abc right 28|stacked Abc right 36|stacked Abc right 9|"
-        "stacked WiW center 11|stacked WiW center 20|stacked WiW left 11|stacked WiW left 20|"
-        "stacked WiW right 11|stacked WiW right 20"
-    ),
 }
 """Cases where Excel 16.115 differs from sheetpeek, by comparison, with their reasons."""
 
@@ -193,18 +181,20 @@ def test_top_aligned_text_between_slanted_sides_as_captured(laid_out):
 
 @pytest.mark.excel
 def test_stacked_characters_sit_where_sheetpeek_puts_them(laid_out):
-    """§4.17: each line's ink inside its character's advance, as rotation_more compares it."""
+    """§4.17: each line's ink center against its character's center, as rotation_more compares
+    it; "WiW"'s "i" draws two bands, its dot and its stem, each centered on the "i"."""
     found = _captured()
     wrong = {}
     for case in (c for c in suite.CASES if c.group == "stacked"):
         record, entry = found[case.name], laid_out[case.name]
         lines = [tuple(map(float, line.split(":"))) for line in record["lines"].split(";")]
-        size = case.cell.size
-        bad = len(lines) != len(entry["runs"])
-        for (ink_left, ink_right), (x, _, w, _) in zip(lines, entry["runs"], strict=False):
-            left, right = x, x + w - entry["width"]
-            bad |= not -0.5 <= ink_left - left <= 0.15 * size + 0.5
-            bad |= not -0.5 <= right - ink_right <= 0.1 * size + 0.5
-        if bad:
-            wrong[case.name] = record["lines"]
+        runs = entry["runs"]
+        if case.cell.text == "WiW":
+            runs = [runs[0], runs[1], runs[1], runs[2]]
+        offsets = [
+            (ink_left + entry["width"] + ink_right) / 2 - (x + w / 2)
+            for (ink_left, ink_right), (x, _, w, _) in zip(lines, runs, strict=True)
+        ]
+        if max(map(abs, offsets)) > INK_BOUND:
+            wrong[case.name] = round(max(offsets, key=abs), 2)
     _check("stacked", wrong)
