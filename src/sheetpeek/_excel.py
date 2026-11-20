@@ -963,9 +963,9 @@ def _baselines(
     ``metrics`` holds each line's height, its baseline below its top and its baseline above its
     bottom (``line_metrics``). When the lines do not fit, bottom and center text places the first
     lines that reach the bottom, as a block of its own, and the rest follow, clipped (captured,
-    ``text_style_more`` group ``shrunk``: three lines in 15 and 20 pt rows; unverified for a
-    line taller than its row); top text and the spread alignments start at the top (unverified
-    for the spread ones). A centered
+    ``text_style_more`` groups ``shrunk`` and ``overflow``: two and three lines in rows of 15 to
+    32 pt, and a line of 14 or 20 pt in a 15 pt row); top text and the spread alignments start
+    at the top (captured, ``overflow``). A centered
     block sits midway between its top and bottom placements, the half truncated toward zero, and
     spread lines go evenly from the top position to the bottom one (§4.13), each a whole number
     of points below the first: a half point is dropped (captured, suite ``text_style``, group

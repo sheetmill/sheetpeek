@@ -128,8 +128,8 @@ def test_rows_fit_their_cells(tmp_path):
     rendered = lay_out(tmp_path, build, ref="A1:A3")
     assert [r.height_pt for r in rendered.rows] == [19, 15, 15]
     # In a row too short for its text, the first line is placed as a block of its own, here at
-    # the bottom: 4 pt above it at Calibri 14 (ARCHITECTURE.md §3.6; unverified for a line taller
-    # than its row).
+    # the bottom: 4 pt above it at Calibri 14 (ARCHITECTURE.md §3.6; captured, text_style_more
+    # group overflow).
     assert rendered.rows[2].runs[0].y == 19 + 15 + 15 - 4
 
 

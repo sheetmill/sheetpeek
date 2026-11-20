@@ -300,8 +300,10 @@ of its baseline, with its rules; its `clip` stays upright (§4.17).
   the rest follow, clipped; top text starts at the top. A Calibri 11 row of 15 pt shows its
   first line either way (captured, rows 161 to 168); three lines in a 20 pt row show the end of
   the first and the top of the second, bottom aligned, and the first and the top of the second,
-  centered (`text_style_more`, group `shrunk`). A line taller than its row, and the spread
-  alignments, are unverified (no capture in this repository yet).
+  centered (`text_style_more`, groups `shrunk` and `overflow`: two and three lines in rows of 15
+  to 32 pt, every visible line within half a point). A line taller than its row is placed so:
+  Calibri 14 and 20 in a 15 pt row sit 4 and 5 pt above the bottom, bottom aligned; vertical
+  justify and distributed lines that do not fit start at the top (`overflow`).
 - **Glyphs** sit at `x` plus the running sum of `xlformat.glyph_widths`, in whole points, as Excel
   draws them: outside the competing spills, all 3,480 glyphs of 185 `layout` runs are within
   0.02 pt of the PDF's. (The other 35 runs have nothing to compare: lines a fixed row height hides,
@@ -964,8 +966,8 @@ says it does not wrap). One line sits at the top (justify) or the center (distri
 lines spread from the top position to the bottom one with an even pitch, each a whole number of
 points below the first: the first baseline 12 pt below the top, the last 3 pt above the bottom at
 Calibri 11, and the middle one of three in a 60 pt row at 34 (suite `text_style`). Lines that do
-not fit start at the top (unverified), where other wrapped text places its first lines as a
-block (§3.6). Characters mode spreads them in whole lines, and does what Excel does
+not fit start at the top (captured, `text_style_more` group `overflow`), where other wrapped
+text places its first lines as a block (§3.6). Characters mode spreads them in whole lines, and does what Excel does
 with one line.
 
 **Horizontal distributed** spreads the words between the insets, a single word centered

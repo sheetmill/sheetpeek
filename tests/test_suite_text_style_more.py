@@ -682,7 +682,8 @@ CAP_HEIGHT = 0.644
 def test_lines_that_overflow_their_row_sit_where_sheetpeek_puts_them():
     # §3.6: three and two wrapped lines in rows of 15 to 32 pt, a line taller than its 15 pt row,
     # and vertical justify and distributed in a 20 pt row: each visible line's baseline (the
-    # ink's bottom under its "H"), half a point. A line cut by the row's bottom reads there.
+    # ink's bottom under its "H"), half a point. A line cut by the row's bottom reads there,
+    # half a point up (the ink's pixel).
     captured = _group("overflow")
     wrong = []
     for case in suite.cases("overflow"):
@@ -690,7 +691,9 @@ def test_lines_that_overflow_their_row_sit_where_sheetpeek_puts_them():
         height = expected["row_height"]
         size = 20 if case.name.startswith("tall 20") else 14 if case.name.startswith("tall") else 11
         cap = CAP_HEIGHT * size
-        shown = [min(b, height - 0.5) for b in expected["baselines"] if b - cap < height and b > 0]
+        # A line shows when at least a point of its ink is in the row.
+        visible = [b for b in expected["baselines"] if b - cap < height - 1 and b >= 2]
+        shown = [min(b, height - 0.5) for b in visible]
         found = [float(b) for b in record["baselines"].split()] if record["baselines"] else []
         if len(found) != len(shown) or any(
             abs(a - b) > 0.5 for a, b in zip(found, shown, strict=True)
