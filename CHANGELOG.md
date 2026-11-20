@@ -324,6 +324,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   space that ends a broken line: a one-word line inside distributed text sits at the left inset,
   where it was centered; a one-word last line stays centered. Distributed text with an indent
   breaks between the indents at both ends.
+- Wrapped lines that do not fit their row are placed as Excel places them: bottom and center
+  text places the first lines that reach the row's bottom as a block, and the rest follow,
+  clipped. Three Calibri 11 lines in a 20 pt row, bottom aligned, show the end of the first
+  line and the top of the second, where 0.2.0 started them at the top.
 
 ### Deprecated
 - `Sheet.layout(spill_edge=...)`: use `range_edge`, the same option under a name that also covers

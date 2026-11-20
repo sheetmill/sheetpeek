@@ -348,8 +348,8 @@ EXPECTED: dict[str, dict[str, dict[str, Any]]] = {
         "C20": {"row_height": 15, "baselines": (12, 27, 42), "left": 3, "scale": 7},
         "E20": {"row_height": 15, "baselines": (12, 27, 42), "left": 3, "scale": 7},
         "G20": {"row_height": 15, "baselines": (12, 27, 42), "left": 3, "scale": 7},
-        "C22": {"row_height": 20, "baselines": (12, 27, 42), "left": 3, "scale": 7},
-        "E22": {"row_height": 20, "baselines": (12, 27, 42), "left": 3, "scale": 7},
+        "C22": {"row_height": 20, "baselines": (7, 22, 37), "left": 3, "scale": 7},
+        "E22": {"row_height": 20, "baselines": (2, 17, 32), "left": 3, "scale": 7},
         "G22": {"row_height": 20, "baselines": (12, 27, 42), "left": 3, "scale": 7},
     },
     "wrap": {

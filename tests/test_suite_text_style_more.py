@@ -287,9 +287,6 @@ PINNED: dict[str, frozenset[str]] = {
             "Times New Roman 11 top three lines",
         )
     ),
-    "test_lines_that_do_not_fit_their_block_start_where_sheetpeek_starts_them": frozenset(
-        ("overfull bottom 20", "overfull center 20")
-    ),
     "test_rules_sit_where_sheetpeek_puts_them_at_other_sizes:100": frozenset(
         (
             "double 14",
@@ -596,11 +593,16 @@ def test_when_nothing_fits_shrunk_text_is_clipped_at_its_cell():
         assert record["ink_right"] == record["ink_left"] == "", cell
 
 
+X_BAND = 5.5
+"""Points from the baseline to the top of "aaa"'s ink at Calibri 11, as the capture measures it."""
+
+
 @pytest.mark.excel
 def test_lines_that_do_not_fit_their_block_start_where_sheetpeek_starts_them():
     # Three lines in 15 and 20 pt rows, centered, bottom and top aligned: the bands' bottoms
     # ("aaa", "bbb", "ccc" do not descend; "bbb"'s ascender only rises) against sheetpeek's
-    # baselines that fall inside the row, half a point.
+    # baselines of the lines that show, half a point. A line whose x-height band starts inside
+    # the row shows; one cut by the row's bottom ends there, a half point up (the ink's pixel).
     captured = _group("shrunk")
     wrong = []
     for case in suite.cases("shrunk"):
@@ -611,7 +613,8 @@ def test_lines_that_do_not_fit_their_block_start_where_sheetpeek_starts_them():
             float(start) + float(length)
             for start, length in (s.split("+") for s in record["line_tops"].split())
         ]
-        shown = [b for b in expected["baselines"] if 0 < b <= expected["row_height"]]
+        height = expected["row_height"]
+        shown = [min(b, height - 0.5) for b in expected["baselines"] if 0 < b < height + X_BAND]
         if len(bottoms) != len(shown) or any(
             abs(a - b) > 0.5 for a, b in zip(bottoms, shown, strict=True)
         ):

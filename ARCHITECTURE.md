@@ -295,8 +295,13 @@ of its baseline, with its rules; its `clip` stays upright (§4.17).
   height), and a centered block midway between the two, a half point dropped. Print differs: a
   top-aligned baseline 11 pt below the top, lines 16 pt apart (`layout` rows 1 and 152 to 154);
   `_rows.print_baseline_offsets` keeps those for a print output, and angled text keeps them,
-  since its insets were fitted with them (§4.17). Lines that do not fit the block start at the
-  top, so a custom-height row shows its first line (captured, rows 161 to 168).
+  since its insets were fitted with them (§4.17). When the lines do not fit the row, bottom and
+  center text places the first lines that reach the row's bottom as a block of their own, and
+  the rest follow, clipped; top text starts at the top. A Calibri 11 row of 15 pt shows its
+  first line either way (captured, rows 161 to 168); three lines in a 20 pt row show the end of
+  the first and the top of the second, bottom aligned, and the first and the top of the second,
+  centered (`text_style_more`, group `shrunk`). A line taller than its row, and the spread
+  alignments, are unverified (no capture in this repository yet).
 - **Glyphs** sit at `x` plus the running sum of `xlformat.glyph_widths`, in whole points, as Excel
   draws them: outside the competing spills, all 3,480 glyphs of 185 `layout` runs are within
   0.02 pt of the PDF's. (The other 35 runs have nothing to compare: lines a fixed row height hides,
@@ -952,8 +957,9 @@ merge's edge (captured once, doubtful). The baseline stays where unshrunk text w
 says it does not wrap). One line sits at the top (justify) or the center (distributed). Several
 lines spread from the top position to the bottom one with an even pitch, each a whole number of
 points below the first: the first baseline 12 pt below the top, the last 3 pt above the bottom at
-Calibri 11, and the middle one of three in a 60 pt row at 34 (suite `text_style`). Lines that do not fit start at the
-top, as other wrapped text. Characters mode spreads them in whole lines, and does what Excel does
+Calibri 11, and the middle one of three in a 60 pt row at 34 (suite `text_style`). Lines that do
+not fit start at the top (unverified), where other wrapped text places its first lines as a
+block (§3.6). Characters mode spreads them in whole lines, and does what Excel does
 with one line.
 
 **Horizontal distributed** spreads the words between the insets, a single word centered

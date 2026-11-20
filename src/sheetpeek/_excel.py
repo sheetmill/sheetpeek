@@ -945,26 +945,39 @@ def _baselines(
     """The baseline of each line of a block from ``top`` to ``bottom``, placed by ``v_align``.
 
     ``metrics`` holds each line's height, its baseline below its top and its baseline above its
-    bottom (``line_metrics``). Lines that do not fit start at the top: a custom-height row shows
-    its first line (captured, layout rows 161 to 168; unverified for centered text). A centered
-    block sits midway between its top and bottom placements, and spread lines go evenly from the
-    top position to the bottom one (§4.13), each a whole number of points below the first: a
-    half point is dropped (captured, suite ``text_style``, group ``align``).
+    bottom (``line_metrics``). When the lines do not fit, bottom and center text places the first
+    lines that reach the bottom, as a block of its own, and the rest follow, clipped (captured,
+    ``text_style_more`` group ``shrunk``: three lines in 15 and 20 pt rows; unverified for a
+    line taller than its row); top text and the spread alignments start at the top (unverified
+    for the spread ones). A centered
+    block sits midway between its top and bottom placements, the half truncated toward zero, and
+    spread lines go evenly from the top position to the bottom one (§4.13), each a whole number
+    of points below the first: a half point is dropped (captured, suite ``text_style``, group
+    ``align``).
     """
     heights = [m[0] for m in metrics]
     total = sum(heights)
     n = len(metrics)
-    if total > bottom - top or v_align not in ("bottom", "center", "distributed", "justify"):
+    block = metrics
+    if total > bottom - top and v_align in ("bottom", "center"):
+        k = 1
+        while k < n and sum(heights[:k]) < bottom - top:
+            k += 1
+        block = metrics[:k]
+    elif total > bottom - top:
+        v_align = "top"
+    first_lines = sum(m[0] for m in block[:-1])
+    if v_align not in ("bottom", "center", "distributed", "justify"):
         line_top = top
     elif v_align in _SPREAD and n > 1:
         first = top + metrics[0][1]
         pitch = (bottom - metrics[-1][2] - first) / (n - 1)
         return [first + math.floor(k * pitch) for k in range(n)]
     elif v_align in ("center", "distributed"):
-        at_bottom = bottom - metrics[-1][2] - metrics[-1][1] - sum(heights[:-1])
-        line_top = top + math.floor((at_bottom - top) / 2)
+        at_bottom = bottom - block[-1][2] - block[-1][1] - first_lines
+        line_top = top + math.trunc((at_bottom - top) / 2)
     elif v_align == "bottom":
-        line_top = bottom - metrics[-1][2] - metrics[-1][1] - sum(heights[:-1])
+        line_top = bottom - block[-1][2] - block[-1][1] - first_lines
     else:  # justify, one line: at the top
         line_top = top
     result = []
