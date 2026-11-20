@@ -1149,7 +1149,7 @@ requires-dist = [
     { name = "rich", marker = "extra == 'rich'", specifier = ">=13" },
     { name = "xlformat", specifier = ">=0.5,<1" },
     { name = "xlio", specifier = "==0.3.*" },
-    { name = "xlrecalc", specifier = ">=0.4,<1" },
+    { name = "xlrecalc", specifier = ">=0.6,<1" },
 ]
 provides-extras = ["rich"]
 
@@ -1446,15 +1446,15 @@ wheels = [
 
 [[package]]
 name = "xlrecalc"
-version = "0.4.0"
+version = "0.6.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "xlformat" },
     { name = "xlio" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9e/c4/035c55a095495ece5a44b23af732b4f9e029ec99c784a46c36589fc44a6f/xlrecalc-0.4.0.tar.gz", hash = "sha256:1898d7ad03fc5b6499fc19eb4f0623303986aa39f4f7a2302d1e07b1dff72c37", size = 1488480, upload-time = "2026-11-18T21:34:54.35Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/bb/ba/cf7129a5293c6c3432918dbd1ae611516932382ecaa25032d4f46ff92e13/xlrecalc-0.6.0.tar.gz", hash = "sha256:9b2cd9d2417938afffe8d076a5766eab4cc14151c7e2f764c56551533d86eae1", size = 1715843, upload-time = "2026-11-20T18:44:54.386Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f1/36/5a9a25f019fc554569899ff3a5be4ba700c054cf9d09d3fbba54d3116efe/xlrecalc-0.4.0-py3-none-any.whl", hash = "sha256:3e3c2163d0a3463da1d3ac3e59a335ed18451948f1aa44979a5cbfec4fa0da5b", size = 223350, upload-time = "2026-11-18T21:34:52.806Z" },
+    { url = "https://files.pythonhosted.org/packages/d9/6b/bd33e3b0f70e6e2b32f9df40cc266f0801160de0ead7e1604a651c6edfab/xlrecalc-0.6.0-py3-none-any.whl", hash = "sha256:d32f9442a405c73e409f10b826a654a276dc37100c6d65b56d107d553c414551", size = 241661, upload-time = "2026-11-20T18:44:52.84Z" },
 ]
 
 [[package]]

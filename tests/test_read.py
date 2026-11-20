@@ -320,7 +320,7 @@ def test_uncached_formulas_warn_when_xlrecalc_cannot_load(tmp_path, monkeypatch)
     def refuse(*args, **kwargs):
         raise xlrecalc.PackageError("refused")
 
-    monkeypatch.setattr(xlrecalc, "load", refuse)
+    monkeypatch.setattr(xlrecalc, "Loader", refuse)
     wb = openpyxl.Workbook()
     wb.active["A1"] = "=1+1"
     sheet = sheetpeek.read(save(wb, tmp_path / "formula.xlsx"))

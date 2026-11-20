@@ -105,7 +105,7 @@ def test_the_pass_over_the_other_sheets_ends_at_all(tmp_path, monkeypatch):
 def test_a_sheet_without_formulas_asks_nothing(tmp_path, monkeypatch):
     given, loads = [], []
     monkeypatch.setattr(xlrecalc.RecalcCheck, "add", lambda self, f, **k: given.append(f))
-    monkeypatch.setattr(xlrecalc, "load", lambda *a, **k: loads.append(a))
+    monkeypatch.setattr(xlrecalc.Loader, "finish", lambda self: loads.append(self))
     path = book(tmp_path, row(1, A1), other=row(1, '<c r="A1"><f>NOW()</f></c>'))
     assert sheetpeek.read(path, "S").notices == ()
     assert (given, loads) == ([], [])
@@ -113,7 +113,7 @@ def test_a_sheet_without_formulas_asks_nothing(tmp_path, monkeypatch):
 
 def test_no_engine_when_every_cached_value_stands(tmp_path, monkeypatch):
     loads = []
-    monkeypatch.setattr(xlrecalc, "load", lambda *a, **k: loads.append(a))
+    monkeypatch.setattr(xlrecalc.Loader, "finish", lambda self: loads.append(self))
     sheet = sheetpeek.read(book(tmp_path, row(1, A1, STALE)))
     assert (sheet.cell(1, 2).value, loads) == (99, [])
 
@@ -228,7 +228,7 @@ def test_shown_values():
     assert shown([[1]]) is None
 
 
-@pytest.mark.parametrize("refused", ["RecalcCheck", "load"])
+@pytest.mark.parametrize("refused", ["RecalcCheck", "Loader"])
 def test_a_workbook_xlrecalc_refuses_keeps_every_cached_value(tmp_path, monkeypatch, refused):
     def refuse(*args, **kwargs):
         raise xlrecalc.PackageError("no")
@@ -281,19 +281,66 @@ def test_a_macro_sheet_keeps_its_cached_values(tmp_path):
 
 def test_one_engine_serves_every_sheet_of_a_book(tmp_path, monkeypatch):
     loads = []
-    load = xlrecalc.load
+    finish = xlrecalc.Loader.finish
 
-    def counted(*args, **kwargs):
-        loads.append(args)
-        return load(*args, **kwargs)
+    def counted(self):
+        loads.append(self)
+        return finish(self)
 
-    monkeypatch.setattr(xlrecalc, "load", counted)
+    monkeypatch.setattr(xlrecalc.Loader, "finish", counted)
     path = book(tmp_path, row(1, A1, STALE), other=row(1, A1, STALE), by_excel=False)
     with sheetpeek.open(path) as opened:
         assert opened.sheet("S").cell(1, 2).value == 6
         assert opened.sheet("T").cell(1, 2).value == 6
         assert opened.sheet("S").cell(1, 1).value == 2  # the book's own reads are unmoved
     assert len(loads) == 1
+
+
+@pytest.mark.parametrize("by_excel", [False, True])
+def test_each_sheet_is_read_from_the_file_once(tmp_path, monkeypatch, by_excel):
+    # The engine is built from the reader's own stream (xlrecalc's Loader): reading one sheet of
+    # a book reads each sheet's cells once, the engine's and the check's pass included.
+    import xlio
+
+    reads = []
+    cells = xlio.Sheet.cells
+
+    def counted(self, *args, **kwargs):
+        reads.append(self.name)
+        return cells(self, *args, **kwargs)
+
+    monkeypatch.setattr(xlio.Sheet, "cells", counted)
+    volatile = '<c r="C1"><f>NOW()</f><v>1</v></c>'  # Excel's file: the check reads T for it
+    path = book(tmp_path, row(1, A1, STALE), other=row(1, A1, volatile), by_excel=by_excel)
+    assert sheetpeek.read(path, "S").cell(1, 2).value == 6
+    assert sorted(reads) == ["S", "T"]
+
+
+def test_a_failure_while_recording_keeps_cached_values_and_reads_on(tmp_path, monkeypatch):
+    def failing(self, sheet, *, rich=False):
+        for k, cell in enumerate(sheet.cells(rich=rich)):
+            if k == 1:
+                raise RuntimeError("recording failed")
+            yield cell
+
+    monkeypatch.setattr(xlrecalc.Loader, "cells", failing)
+    uncached = '<c r="C1"><f>A1*4</f></c>'
+    sheet = sheetpeek.read(book(tmp_path, row(1, A1, STALE, uncached), by_excel=False))
+    assert values(sheet) == [[(2, "number"), (99, "number"), (None, "empty")]]
+    (notice,) = notices(sheet)
+    assert "xlrecalc could not read the workbook: recording failed" in notice.message
+
+
+def test_an_error_of_the_files_own_is_raised_through_the_loader(tmp_path, monkeypatch):
+    import xlio
+
+    def broken(self, sheet, *, rich=False):
+        raise xlio.PackageError("a broken sheet")
+        yield  # a generator, as Loader.cells is
+
+    monkeypatch.setattr(xlrecalc.Loader, "cells", broken)
+    with pytest.raises(sheetpeek.PackageError, match="a broken sheet"):
+        sheetpeek.read(book(tmp_path, row(1, A1, STALE), by_excel=False))
 
 
 def test_a_file_object_is_computed_too(tmp_path):

@@ -245,7 +245,8 @@ class Book:
     def _recalc(self) -> Recalc:
         """Recalculation on opening, set up on the first sheet read."""
         if self._recalc_state is None:
-            self._recalc_state = Recalc(self._recalc_source, self._mode, self._limits)
+            assert self._book is not None
+            self._recalc_state = Recalc(self._recalc_source, self._mode, self._limits, self._book)
         return self._recalc_state
 
     def _recalc_source(self) -> BinaryIO:
@@ -597,7 +598,8 @@ class Book:
         rows: dict[int, list[Cell]] = {}
         line: list[Cell] = []
         current = 0
-        for source in sheet.cells(rich=True):
+        stream = recalc.cells(sheet) if name is not None else sheet.cells(rich=True)
+        for source in stream:
             row, column = source.row, source.column
             if row == current:
                 row = current  # one int per row: each cell's own would cost 32 bytes a cell
@@ -773,11 +775,15 @@ class Book:
         return empty
 
     def _unfed(self, fed: set[str]) -> Iterator[tuple[str, Iterator[xlio.Cell]]]:
-        """Each worksheet the recalculation check has not been given, with its cells."""
+        """Each worksheet the recalculation check has not been given, with its cells.
+
+        They pass through the loader, so the engine records them in the same reading.
+        """
         assert self._book is not None
+        recalc = self._recalc
         for sheet in self._book:
             if sheet.kind == "worksheet" and sheet.name not in fed:
-                yield sheet.name, sheet.cells()
+                yield sheet.name, recalc.cells(sheet)
 
     def _grid(
         self,
