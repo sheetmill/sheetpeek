@@ -163,8 +163,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `emphasis=True`. A cell with runs is also counted under each font feature its runs use.
 - Rotated and stacked text are drawn in HTML (`excel` mode), from captures of Excel for Mac.
   Angled text is one line turned about the start of its baseline, placed in the cell by its
-  turned box (general text left for positive angles below 90 and at -90, right otherwise),
-  spilled into empty neighbors in the direction it runs, clipped at a custom-height row, with
+  turned box (general text left for positive angles below 90 and at -90, right otherwise; fill,
+  justify and distributed left for positive angles and right for negative ones, distributed
+  centered at 90), spilled into empty neighbors in the direction it runs (fill never), clipped at a custom-height row, with
   fitted rows grown to it (at 90 and -90 degrees as Excel fits them, a point taller every 30
   points of text past 90); an angled value shows in full, never `#` or shortened. Stacked text
   draws one character a line, centered. `rich`, plain

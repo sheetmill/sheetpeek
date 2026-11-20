@@ -353,7 +353,15 @@ PINNED = {
             "elsewhere in Excel, up to 19 pt across at 15 degrees"
         ),
     ),
-    "angled": (
+    "across": (
+        ["45 lrtb merged down", "15 fill", "-45 fill", "90 fill", "90 justify", "90 distributed"],
+        (
+            "fill stops at the cell's edge in Excel (up to 25 pt off), not modeled; a merge down's "
+            "angled text is not placed as without borders (12 pt); at 90 degrees fill and justify "
+            "sit 1.55 pt and distributed 2.0 pt left of sheetpeek's (its insets there)"
+        ),
+    ),
+    "height": (
         [
             "45 lrtb merged across",
             "45 lrtb merged down",
@@ -363,15 +371,13 @@ PINNED = {
             "-45 fill",
             "90 fill",
             "75 justify",
-            "-45 justify",
             "90 justify",
             "75 distributed",
-            "-45 distributed",
             "90 distributed",
         ],
         (
-            "fill, justify and distributed at 15 to 90 and -45 degrees are not placed as left in "
-            "Excel (up to 25 pt off), nor a merge's angled text as without borders"
+            "angled text sits 1.6 to 2.9 pt higher in Excel at 45 to 90 degrees (no rule yet), "
+            "vertical distributed 12 pt lower, and fill and a merge down's text elsewhere"
         ),
     ),
     "stacked": (
@@ -427,15 +433,26 @@ def test_text_between_slanted_sides_sits_where_sheetpeek_puts_it(name, widths):
 
 @pytest.mark.excel
 @pytest.mark.parametrize(
-    "name", _pinned("angled", _names("merge", "vertical", "spread", slanted=False))
+    "name", _pinned("across", _names("merge", "vertical", "spread", slanted=False))
 )
-def test_angled_text_without_slanted_sides_sits_where_sheetpeek_puts_it(name, widths):
+def test_angled_text_without_slanted_sides_sits_across_where_sheetpeek_puts_it(name, widths):
     # §4.17: a merge's text placed as without borders, vertical justify and distributed without
-    # borders, and fill, justify and distributed at 15, 75, -45 and 90 degrees placed as left.
+    # borders; fill, justify and distributed placed as left at positive angles and as right at
+    # negative ones, distributed at 90 degrees centered.
     record = _row(name)
-    left, right, top, bottom = _ink(name, widths[name])
+    left, right, _, _ = _ink(name, widths[name])
     assert abs(float(record["ink_left"]) - left) <= INK_BOUND, (name, left)
     assert abs(float(record["ink_right"]) - right) <= INK_BOUND, (name, right)
+
+
+@pytest.mark.excel
+@pytest.mark.parametrize(
+    "name", _pinned("height", _names("merge", "vertical", "spread", slanted=False))
+)
+def test_angled_text_without_slanted_sides_sits_in_height_where_sheetpeek_puts_it(name, widths):
+    # §4.17: bottom-aligned angled text, and vertical justify and distributed, in height.
+    record = _row(name)
+    _, _, top, bottom = _ink(name, widths[name])
     assert abs(float(record["ink_top"]) - top) <= INK_BOUND, (name, top)
     assert abs(float(record["ink_bottom"]) - bottom) <= INK_BOUND, (name, bottom)
 

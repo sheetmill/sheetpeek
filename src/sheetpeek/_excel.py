@@ -704,7 +704,9 @@ class _Points:
             x = self._between_slanted(x0, x1, first_y - bottom, align, angle, above, below, indent)
         shift = 0.0 if spans else vert_shift(cell.font)
         low, high = first, last
-        if origin.spills:
+        # Fill does not spill at an angle: its line stops at the cell's edge (captured,
+        # rotation_more: 15 and -45 degrees, about 2 pt past the edge in Excel).
+        if origin.spills and style.h_align != "fill":
             low, high = self.spill(origin, x + box_lo, x + box_hi, align)
         clip = (self.xs[low] + 1, top + 1, self.xs[high] + self.widths[high], bottom)
         size = cell.font.size * vert_scale(cell.font)
@@ -886,13 +888,19 @@ class _Points:
 def _turned_align(h_align: str, shown: str, angle: int) -> str:
     """Where angled text's box goes across the cell: left, right or center (§4.17).
 
-    General follows the angle; fill, justify and distributed are placed as left (captured at 45
-    degrees, rotation suite align and turned; other angles unverified).
+    General follows the angle and switches sides at exactly 90 and -90 degrees. Fill, justify and
+    distributed do not switch: placed as left at positive angles and as right at negative ones,
+    90 and -90 included, but distributed at 90 and -90 is centered (captured, rotation and
+    rotation_more at 15, 45, 75, -45 and 90 degrees).
     """
     if h_align == "general":
         return "left" if 0 < angle < 90 or angle == -90 else "right"
     if h_align in ("center", "center_across"):
         return "center"
+    if h_align in ("fill", "justify", "distributed"):
+        if h_align == "distributed" and abs(angle) == 90:
+            return "center"
+        return "left" if angle > 0 else "right"
     return "right" if shown == "right" else "left"
 
 

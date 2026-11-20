@@ -145,6 +145,19 @@ def test_a_neighbor_with_a_value_stops_the_spill(tmp_path):
     assert run.clip[2] == column.x_pt + column.width_pt
 
 
+@pytest.mark.parametrize("angle", [15, 135])  # 15 and -45 degrees
+def test_angled_fill_does_not_spill(tmp_path, angle):
+    # Captured (rotation_more, 15 and -45 fill): Excel's line stops at the cell's edge.
+    alignment = Alignment(horizontal="fill", textRotation=angle)
+    path = _book(tmp_path, [("C2", TEXT, alignment, {})])
+    rendered = sheetpeek.read(path).layout("excel")
+    run = next(r for r in _row(rendered, 2).runs if r.source == (2, 3))
+    assert rendered.cell(2, 3).spill == (0, 0)
+    column = next(c for c in rendered.columns if c.index == 3)
+    assert run.clip[0] == column.x_pt + 1
+    assert run.clip[2] == column.x_pt + column.width_pt
+
+
 def test_a_custom_height_row_clips_at_the_row_and_keeps_the_text_at_the_bottom(tmp_path):
     wb = openpyxl.Workbook()
     wb.active["B2"] = TEXT

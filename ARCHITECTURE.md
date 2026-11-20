@@ -1258,14 +1258,20 @@ boxes match a rigid rotation of the upright box (captured: 45°, 58.5 × 57.5 pt
   pt, fitted to the capture: every captured ink edge is within 1.1 pt. Center centers the box on
   the cell (captured at 45°); right puts it against the right inset (captured at 45°). An indent
   moves the box in by 6 pt a level (captured: 12 pt for 2, left and right). Fill, justify and
-  distributed are placed as left (captured at 45°; at 15°, 75°, −45° and 90° Excel places them
-  elsewhere, up to 25 pt off, a known deviation, `rotation_more`).
+  distributed do not switch sides at ±90° as general does: they are placed as left at positive
+  angles, 90° included, and as right at negative ones, but distributed at 90° is centered
+  (captured, `rotation` at 45°, `rotation_more` at 15°, 75°, −45° and 90°: across within 1.5 pt
+  but for fill and justify at 90°, 1.55 pt, and distributed at 90°, 2.0 pt, known deviations;
+  −90° unverified, no capture in this repository yet). Their height at 75° and 90° is 1.6 to
+  2.9 pt below Excel's, as for a merge across at 45°: a known deviation without a rule yet.
 - **Vertical:** bottom puts the box's lowest corner on the cell's bottom, top its highest on the
   top, center centers it (captured in a 90 pt row at 45°). A box taller than its row
   stays bottom-aligned and is clipped at the row; nothing is drawn in the row above (captured,
   a 15 pt row at 45° and 90°).
 - **Spill:** angled text spills into empty neighbors as horizontal text does (§4.1), by its box's
   extent: right for positive angles, left for negative ones, both when centered (captured).
+  Fill does not spill: its line stops at the cell's edge (captured, `rotation_more` at 15° and
+  −45°, where Excel's ink ends about 2 pt past the edge, a known deviation).
 - **Fitted rows:** a row Excel fits grows to `W·|sin θ| + S·|cos θ| + 7` pt, to the nearest
   point, with `W` the text's width and `S` its font size. Captured over three lengths, four angles
   and four sizes: with xlformat's tables measured at each size, rows at 15 to 75° are within 2 pt
