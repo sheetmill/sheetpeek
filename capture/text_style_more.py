@@ -56,6 +56,12 @@ repeated and "g" (the g's descender shows the line's box below the baseline).
   Roman (I), Courier New (K), all 11 pt but Calibri's, and Calibri 11 (M) as the control: each
   line's baseline (sizes and faces xlformat has not measured take the nearest measured size,
   and Calibri's, §3.6).
+- ``overflow``, zoom 100. Rows 4 to 21, fixed at 15 to 32 pt: "Haa", "Hbb", "Hcc" wrapped in
+  Calibri 11, centered (C), bottom (E) and top (G), and "Haa", "Hbb" centered (I) and bottom
+  (K): which lines Excel places as the block when they do not fit (§3.6). Rows 23 and 25, fixed
+  at 15 pt: one line "Hg" in Calibri 14 (row 23) and 20 (row 25), bottom (C), center (E) and top
+  (G): a line taller than its row. Row 27, fixed at 20 pt: "aaa", "bbb", "ccc" vertical justify
+  (C) and distributed (E): the spread alignments when the lines do not fit.
 
 Geometry is read for one cell a column (row 1) and one a row (column A, which gives the row's
 height); each case's box is put together from them, so few cells are read. ``vert``'s numbers
@@ -83,14 +89,14 @@ from capture.text_style import Case
 ROOT = Path(__file__).resolve().parents[1]
 BUILD_DIR = ROOT / "capture" / "build" / "text_style_more"
 OUTPUT = ROOT / "tests" / "captures" / "text_style_more.tsv"
-GROUPS = ("vert", "rules", "steps", "shrunk", "wrap", "faces")
+GROUPS = ("vert", "rules", "steps", "shrunk", "wrap", "faces", "overflow")
 ZOOMS = {
     "vert": (100,), "rules": (100, 200), "steps": (100,), "shrunk": (100, 200), "wrap": (100,),
-    "faces": (100,),
+    "faces": (100,), "overflow": (100,),
 }  # fmt: skip
 MARKERS = {
     "vert": ("B2", "N3"), "rules": ("B2", "M3"), "steps": ("B2", "S3"), "shrunk": ("B2", "Q3"),
-    "wrap": ("B2", "U3"), "faces": ("B2", "O3"),
+    "wrap": ("B2", "U3"), "faces": ("B2", "O3"), "overflow": ("B2", "M3"),
 }  # fmt: skip
 """The second marker sits right of every case, in row 3; at zoom 200 it may be out of the
 window, and the grid is then measured from B2 and the nominal scale (``CAPTURING.md``)."""
@@ -509,6 +515,106 @@ EXPECTED: dict[str, dict[str, dict[str, Any]]] = {
         "K14": {"baselines": (57, 72, 87)},
         "M14": {"baselines": (57, 72, 87)},
     },
+    "overflow": {
+        "C4": {"row_height": 15, "baselines": (12, 27, 42)},
+        "E4": {"row_height": 15, "baselines": (12, 27, 42)},
+        "G4": {"row_height": 15, "baselines": (12, 27, 42)},
+        "I4": {"row_height": 15, "baselines": (12, 27)},
+        "K4": {"row_height": 15, "baselines": (12, 27)},
+        "C5": {"row_height": 16, "baselines": (5, 20, 35)},
+        "E5": {"row_height": 16, "baselines": (-2, 13, 28)},
+        "G5": {"row_height": 16, "baselines": (12, 27, 42)},
+        "I5": {"row_height": 16, "baselines": (5, 20)},
+        "K5": {"row_height": 16, "baselines": (-2, 13)},
+        "C6": {"row_height": 17, "baselines": (6, 21, 36)},
+        "E6": {"row_height": 17, "baselines": (-1, 14, 29)},
+        "G6": {"row_height": 17, "baselines": (12, 27, 42)},
+        "I6": {"row_height": 17, "baselines": (6, 21)},
+        "K6": {"row_height": 17, "baselines": (-1, 14)},
+        "C7": {"row_height": 18, "baselines": (6, 21, 36)},
+        "E7": {"row_height": 18, "baselines": (0, 15, 30)},
+        "G7": {"row_height": 18, "baselines": (12, 27, 42)},
+        "I7": {"row_height": 18, "baselines": (6, 21)},
+        "K7": {"row_height": 18, "baselines": (0, 15)},
+        "C8": {"row_height": 19, "baselines": (7, 22, 37)},
+        "E8": {"row_height": 19, "baselines": (1, 16, 31)},
+        "G8": {"row_height": 19, "baselines": (12, 27, 42)},
+        "I8": {"row_height": 19, "baselines": (7, 22)},
+        "K8": {"row_height": 19, "baselines": (1, 16)},
+        "C9": {"row_height": 20, "baselines": (7, 22, 37)},
+        "E9": {"row_height": 20, "baselines": (2, 17, 32)},
+        "G9": {"row_height": 20, "baselines": (12, 27, 42)},
+        "I9": {"row_height": 20, "baselines": (7, 22)},
+        "K9": {"row_height": 20, "baselines": (2, 17)},
+        "C10": {"row_height": 21, "baselines": (8, 23, 38)},
+        "E10": {"row_height": 21, "baselines": (3, 18, 33)},
+        "G10": {"row_height": 21, "baselines": (12, 27, 42)},
+        "I10": {"row_height": 21, "baselines": (8, 23)},
+        "K10": {"row_height": 21, "baselines": (3, 18)},
+        "C11": {"row_height": 22, "baselines": (8, 23, 38)},
+        "E11": {"row_height": 22, "baselines": (4, 19, 34)},
+        "G11": {"row_height": 22, "baselines": (12, 27, 42)},
+        "I11": {"row_height": 22, "baselines": (8, 23)},
+        "K11": {"row_height": 22, "baselines": (4, 19)},
+        "C12": {"row_height": 23, "baselines": (9, 24, 39)},
+        "E12": {"row_height": 23, "baselines": (5, 20, 35)},
+        "G12": {"row_height": 23, "baselines": (12, 27, 42)},
+        "I12": {"row_height": 23, "baselines": (9, 24)},
+        "K12": {"row_height": 23, "baselines": (5, 20)},
+        "C13": {"row_height": 24, "baselines": (9, 24, 39)},
+        "E13": {"row_height": 24, "baselines": (6, 21, 36)},
+        "G13": {"row_height": 24, "baselines": (12, 27, 42)},
+        "I13": {"row_height": 24, "baselines": (9, 24)},
+        "K13": {"row_height": 24, "baselines": (6, 21)},
+        "C14": {"row_height": 25, "baselines": (10, 25, 40)},
+        "E14": {"row_height": 25, "baselines": (7, 22, 37)},
+        "G14": {"row_height": 25, "baselines": (12, 27, 42)},
+        "I14": {"row_height": 25, "baselines": (10, 25)},
+        "K14": {"row_height": 25, "baselines": (7, 22)},
+        "C15": {"row_height": 26, "baselines": (10, 25, 40)},
+        "E15": {"row_height": 26, "baselines": (8, 23, 38)},
+        "G15": {"row_height": 26, "baselines": (12, 27, 42)},
+        "I15": {"row_height": 26, "baselines": (10, 25)},
+        "K15": {"row_height": 26, "baselines": (8, 23)},
+        "C16": {"row_height": 27, "baselines": (11, 26, 41)},
+        "E16": {"row_height": 27, "baselines": (9, 24, 39)},
+        "G16": {"row_height": 27, "baselines": (12, 27, 42)},
+        "I16": {"row_height": 27, "baselines": (11, 26)},
+        "K16": {"row_height": 27, "baselines": (9, 24)},
+        "C17": {"row_height": 28, "baselines": (11, 26, 41)},
+        "E17": {"row_height": 28, "baselines": (10, 25, 40)},
+        "G17": {"row_height": 28, "baselines": (12, 27, 42)},
+        "I17": {"row_height": 28, "baselines": (11, 26)},
+        "K17": {"row_height": 28, "baselines": (10, 25)},
+        "C18": {"row_height": 29, "baselines": (12, 27, 42)},
+        "E18": {"row_height": 29, "baselines": (11, 26, 41)},
+        "G18": {"row_height": 29, "baselines": (12, 27, 42)},
+        "I18": {"row_height": 29, "baselines": (12, 27)},
+        "K18": {"row_height": 29, "baselines": (11, 26)},
+        "C19": {"row_height": 30, "baselines": (12, 27, 42)},
+        "E19": {"row_height": 30, "baselines": (12, 27, 42)},
+        "G19": {"row_height": 30, "baselines": (12, 27, 42)},
+        "I19": {"row_height": 30, "baselines": (12, 27)},
+        "K19": {"row_height": 30, "baselines": (12, 27)},
+        "C20": {"row_height": 31, "baselines": (5, 20, 35)},
+        "E20": {"row_height": 31, "baselines": (-2, 13, 28)},
+        "G20": {"row_height": 31, "baselines": (12, 27, 42)},
+        "I20": {"row_height": 31, "baselines": (12, 27)},
+        "K20": {"row_height": 31, "baselines": (13, 28)},
+        "C21": {"row_height": 32, "baselines": (6, 21, 36)},
+        "E21": {"row_height": 32, "baselines": (-1, 14, 29)},
+        "G21": {"row_height": 32, "baselines": (12, 27, 42)},
+        "I21": {"row_height": 32, "baselines": (13, 28)},
+        "K21": {"row_height": 32, "baselines": (14, 29)},
+        "C23": {"row_height": 15, "baselines": (11,)},
+        "E23": {"row_height": 15, "baselines": (13,)},
+        "G23": {"row_height": 15, "baselines": (15,)},
+        "C25": {"row_height": 15, "baselines": (10,)},
+        "E25": {"row_height": 15, "baselines": (16,)},
+        "G25": {"row_height": 15, "baselines": (21,)},
+        "C27": {"row_height": 20, "baselines": (12, 27, 42)},
+        "E27": {"row_height": 20, "baselines": (12, 27, 42)},
+    },
 }
 # fmt: on
 """What sheetpeek draws for each case, by group and cell, as far as the comparison needs it (zoom
@@ -722,9 +828,41 @@ def _faces(ws: Any) -> list[Case]:
     return found
 
 
+def _overflow(ws: Any) -> list[Case]:
+    found = []
+    blocks = (
+        ("C", "Haa\nHbb\nHcc", "center"), ("E", "Haa\nHbb\nHcc", "bottom"),
+        ("G", "Haa\nHbb\nHcc", "top"), ("I", "Haa\nHbb", "center"), ("K", "Haa\nHbb", "bottom"),
+    )  # fmt: skip
+    for k, height in enumerate(range(15, 33)):
+        row = 4 + k
+        ws.row_dimensions[row].height = height
+        for column, text, vertical in blocks:
+            ws[f"{column}{row}"] = text
+            ws[f"{column}{row}"].alignment = Alignment(vertical=vertical, wrap_text=True)
+            lines = text.count("\n") + 1
+            name = f"overflow {vertical} {lines} lines {height}"
+            found.append(Case("overflow", name, f"{column}{row}", ("lines", "ink", "baselines")))
+    for row, size in ((23, 14), (25, 20)):
+        ws.row_dimensions[row].height = 15
+        for column, vertical in (("C", "bottom"), ("E", "center"), ("G", "top")):
+            ws[f"{column}{row}"] = "Hg"
+            ws[f"{column}{row}"].font = _font(size)
+            ws[f"{column}{row}"].alignment = Alignment(vertical=vertical)
+            name = f"tall {size} {vertical} 15"
+            found.append(Case("overflow", name, f"{column}{row}", ("lines", "ink", "baselines")))
+    ws.row_dimensions[27].height = 20
+    for column, vertical in (("C", "justify"), ("E", "distributed")):
+        ws[f"{column}27"] = THREE
+        ws[f"{column}27"].alignment = Alignment(vertical=vertical, wrap_text=True)
+        name = f"spread {vertical} 3 lines 20"
+        found.append(Case("overflow", name, f"{column}27", ("lines", "ink", "baselines")))
+    return found
+
+
 FILLS = {
     "vert": _vert, "rules": _rules, "steps": _steps, "shrunk": _shrunk, "wrap": _wrap,
-    "faces": _faces,
+    "faces": _faces, "overflow": _overflow,
 }  # fmt: skip
 
 

@@ -66,6 +66,7 @@ FIELDS = {
     "shrunk": ("row_height", "baselines", "left", "scale"),
     "wrap": ("row_height", "lines", "left"),
     "faces": ("baselines",),
+    "overflow": ("row_height", "baselines"),
 }
 """What the comparison of each group needs of sheetpeek's layout."""
 
@@ -125,9 +126,10 @@ def test_every_case_has_a_cell_of_its_own_left_of_and_below_the_markers():
 
 
 def test_few_cells_are_read():
-    # Geometry comes from one cell a column and one a row; Excel's reads take about 1.3 s a cell.
+    # Geometry comes from one cell a column and one a row; Excel's reads take about 1.3 s a cell,
+    # about four minutes for the seven groups (187 cells).
     total = sum(len(suite.references(group)) for group in suite.GROUPS)
-    assert total < 170
+    assert total < 200
     for group in suite.GROUPS:
         refs = suite.references(group)
         assert len(refs) == len(set(refs))
@@ -670,3 +672,28 @@ def test_baselines_of_sizes_and_faces_xlformat_has_not_measured():
         ):
             wrong.append((case.name, found, expected))
     _pinned("test_baselines_of_sizes_and_faces_xlformat_has_not_measured", wrong)
+
+
+CAP_HEIGHT = 0.644
+"""Calibri's cap height in ems: a line whose "H" starts above the row's bottom shows."""
+
+
+@pytest.mark.excel
+def test_lines_that_overflow_their_row_sit_where_sheetpeek_puts_them():
+    # §3.6: three and two wrapped lines in rows of 15 to 32 pt, a line taller than its 15 pt row,
+    # and vertical justify and distributed in a 20 pt row: each visible line's baseline (the
+    # ink's bottom under its "H"), half a point. A line cut by the row's bottom reads there.
+    captured = _group("overflow")
+    wrong = []
+    for case in suite.cases("overflow"):
+        record, expected = captured[case.cell], suite.EXPECTED["overflow"][case.cell]
+        height = expected["row_height"]
+        size = 20 if case.name.startswith("tall 20") else 14 if case.name.startswith("tall") else 11
+        cap = CAP_HEIGHT * size
+        shown = [min(b, height - 0.5) for b in expected["baselines"] if b - cap < height and b > 0]
+        found = [float(b) for b in record["baselines"].split()] if record["baselines"] else []
+        if len(found) != len(shown) or any(
+            abs(a - b) > 0.5 for a, b in zip(found, shown, strict=True)
+        ):
+            wrong.append((case.name, found, shown))
+    _pinned("test_lines_that_overflow_their_row_sit_where_sheetpeek_puts_them", wrong)
