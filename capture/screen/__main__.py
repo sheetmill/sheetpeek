@@ -35,6 +35,7 @@ SUITES = (
     "spill_neighbors",
     "text_style_more",
     "rotation_more",
+    "rotation_placement",
     "filters_more",
     "extensions",
 )
