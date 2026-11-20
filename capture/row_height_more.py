@@ -133,10 +133,13 @@ CASES = _cases()
 # What sheetpeek lays out today for each record (``excel`` mode, ``RenderedRow.height_pt``), by
 # (workbook, row); ``tests/test_suite_row_height_more.py`` checks it against sheetpeek.
 EXPECTED: dict[tuple[int, int], float] = {
-    # Arial, Times New Roman, Courier New, Georgia at 11 and 14: Calibri's 15 and 19; wrapped
-    # three lines of 16 and 20 pt
-    **{(k, r): h for k in (1, 3, 5, 7) for r, h in ((1, 15), (2, 15), (3, 48))},
-    **{(k, r): h for k in (2, 4, 6, 8) for r, h in ((1, 19), (2, 19), (3, 60))},
+    # Arial at 11 and 14: xlformat's 14 and 18; wrapped three lines of 15 and 19 pt
+    **{(1, r): h for r, h in ((1, 14), (2, 14), (3, 45))},
+    **{(2, r): h for r, h in ((1, 18), (2, 18), (3, 57))},
+    # Times New Roman, Courier New, Georgia at 11 and 14: Calibri's 15 and 19; wrapped three
+    # lines of 16 and 20 pt
+    **{(k, r): h for k in (3, 5, 7) for r, h in ((1, 15), (2, 15), (3, 48))},
+    **{(k, r): h for k in (4, 6, 8) for r, h in ((1, 19), (2, 19), (3, 60))},
     # Calibri 13, 15, 17, 22: the heights row_height_more captured, in sheetpeek's table
     **{
         (k, r): h
@@ -152,9 +155,9 @@ EXPECTED: dict[tuple[int, int], float] = {
     # Calibri 11 Normal: a number in each font, then three wrapped lines
     **{
         (17, r): h
-        for r, h in enumerate((15, 19, 15, 19, 15, 19, 15, 19, 17, 20, 23, 29, 18, 20, 23, 29), 1)
+        for r, h in enumerate((15, 18, 15, 19, 15, 19, 15, 19, 17, 20, 23, 29, 18, 20, 23, 29), 1)
     },
-    **{(17, r): h for r, h in enumerate((48, 60, 81, 48, 48, 48, 48, 48), len(NORMALS) + 1)},
+    **{(17, r): h for r, h in enumerate((48, 60, 81, 48, 46, 48, 48, 48), len(NORMALS) + 1)},
 }
 
 

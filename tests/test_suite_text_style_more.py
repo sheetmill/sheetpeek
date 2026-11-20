@@ -265,7 +265,6 @@ PINNED: dict[str, frozenset[str]] = {
             "Arial 11 bottom three lines",
             "Arial 11 center one line",
             "Arial 11 center three lines",
-            "Arial 11 top three lines",
             "Calibri 11 bottom one line",
             "Calibri 11 bottom three lines",
             "Calibri 13 bottom one line",

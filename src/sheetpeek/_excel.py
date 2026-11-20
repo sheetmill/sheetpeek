@@ -142,7 +142,7 @@ def lay_out(draft: Draft) -> tuple[tuple[RenderedColumn, ...], tuple[RenderedRow
     heights = [
         _fitted(grid, i, row, sheet, read, widths, base, fonts) for i, row in enumerate(rows)
     ]
-    layout = _Points(grid, widths, heights, base, fonts, notes)
+    layout = _Points(grid, widths, heights, base, fonts, notes, sheet.normal_font)
     rendered_rows, kept = layout.render()
     x0 = layout.xs[kept[0]]
     rendered_columns = tuple(
@@ -315,9 +315,11 @@ class _Points:
         base: xlformat.ColumnMetrics,
         fonts: _Fonts,
         notes: Any = None,
+        normal: Font | None = None,
     ) -> None:
         self.grid = grid
         self.notes = notes
+        self.normal = normal
         self.widths = widths
         self.heights = heights
         self.left_inset = base.left_inset
@@ -334,7 +336,7 @@ class _Points:
         key = (id(font), lines)
         hit = self._metrics.get(key)
         if hit is None or hit[0] is not font:
-            hit = self._metrics[key] = (font, line_metrics([font], lines))
+            hit = self._metrics[key] = (font, line_metrics([font], lines, self.normal))
         return hit[1]
 
     def slant_spans(self, origins: list[Any]) -> list[tuple[int, int]]:
@@ -477,7 +479,7 @@ class _Points:
         lines = wrap(text.text, line_budget, text.width) if wraps else [(0, len(text.text))]
         n = len(lines)
         if spans:
-            metrics = [line_metrics(text.fonts(a, b), n) for a, b in lines]
+            metrics = [line_metrics(text.fonts(a, b), n, self.normal) for a, b in lines]
         else:
             metrics = [self.plain_metrics(cell_font, n)] * n
         if n == 1 and v_align == "bottom" and metrics[0][0] <= bottom - top:
@@ -780,7 +782,8 @@ class _Points:
         text, spans = self._one_line(origin)
         n = len(text.text)
         metrics = [
-            line_metrics(text.fonts(k, k + 1) if spans else [cell.font], 1) for k in range(n)
+            line_metrics(text.fonts(k, k + 1) if spans else [cell.font], 1, self.normal)
+            for k in range(n)
         ]
         baselines = _baselines(metrics, top, bottom, style.v_align)
         size = cell.font.size * vert_scale(cell.font)

@@ -264,30 +264,12 @@ def _number_cases():
     return [c for c in spill_neighbors.CASES if not c.spill]
 
 
-UNMEASURED = "Arial 11"
-"""A font xlformat has no glyph table for: sheetpeek measures it as Calibri at the same size
-(decided, ARCHITECTURE §6.2). Excel's Arial "#" and digits are wider: in the 22 pt column it
-shows "##" where sheetpeek gives "###", and its scientific text starts up to 2 pt further left.
-A known deviation, compared apart."""
-
-
-def _measured(case):
-    return case.font != UNMEASURED
-
-
-@pytest.mark.excel
-def test_a_font_without_a_glyph_table_is_the_known_deviation():
-    found = _captured()
-    if "numbers" not in found:
-        pytest.skip("group numbers not captured yet")
-    texts = [
-        case.name
-        for case in _number_cases()
-        if not _measured(case)
-        and found["numbers"][case.cell]["text"]
-        != spill_neighbors.EXPECTED["numbers"][case.cell]["text"]
-    ]
-    assert texts == [f"{d} digits, Arial 11, 22 pt" for d in range(7, 13)]
+WIDE_RIGHT_BEARINGS = {
+    # "1.23457E+11" ends in Arial's "1", whose ink ends 0.184 em inside its advance (2.0 pt at
+    # 11 pt, Arial.ttf's glyf and hmtx); the other texts end in glyphs under 0.1 em.
+    "12 digits, Arial 11, default": 0.19,
+}
+"""Ems by which a text's last glyph's ink may end inside its advance, where more than 0.1."""
 
 
 @pytest.mark.excel
@@ -300,7 +282,7 @@ def test_numbers_in_other_fonts_show_the_text_sheetpeek_gives_them():
         pytest.skip("group numbers not captured yet")
     captured = found["numbers"]
     texts, heights = [], []
-    for case in filter(_measured, _number_cases()):
+    for case in _number_cases():
         record, expected = captured[case.cell], spill_neighbors.EXPECTED["numbers"][case.cell]
         if record["text"] != expected["text"]:
             texts.append((case.name, record["text"], expected["text"]))
@@ -324,13 +306,14 @@ def test_numbers_in_other_fonts_are_placed_where_sheetpeek_places_them():
         pytest.skip("group numbers not captured yet")
     captured = found["numbers"]
     misplaced = []
-    for case in filter(_measured, _number_cases()):
+    for case in _number_cases():
         record, expected = captured[case.cell], spill_neighbors.EXPECTED["numbers"][case.cell]
         if record["text"] != expected["text"] or not record["ink_left"]:
             continue
         em = spill_neighbors.FONTS[case.font]["size"]
         left = float(record["ink_left"]) - expected["left"]
         right = float(record["ink_right"]) - expected["right"]
-        if not (-0.5 <= left <= 0.15 * em + 0.5 and -(0.1 * em + 0.5) <= right <= 0.5):
+        inside = WIDE_RIGHT_BEARINGS.get(case.name, 0.1)
+        if not (-0.5 <= left <= 0.15 * em + 0.5 and -(inside * em + 0.5) <= right <= 0.5):
             misplaced.append((case.name, round(left, 2), round(right, 2)))
     assert misplaced == []

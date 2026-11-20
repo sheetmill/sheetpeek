@@ -109,7 +109,7 @@ def test_wrapped_rows_follow_xlformats_row_model(tmp_path):
         ws["B2"].font = Font(size=20)
         ws["A3"] = "one"
         ws["A3"].alignment = Alignment(wrap_text=True)
-        ws["A3"].font = Font(name="Arial", size=11)  # not measured: the table's heights
+        ws["A3"].font = Font(name="Verdana", size=11)  # not measured: the table's heights
 
     rendered = lay_out(tmp_path, build, ref="A1:B3")
     assert [r.height_pt for r in rendered.rows] == [16, 3 * 16 + 2, 15]
@@ -147,11 +147,11 @@ def test_hidden_column_is_crossed(tmp_path):
 def test_unmeasured_cell_font_warns_in_excel_mode(tmp_path):
     def build(ws):
         ws["A1"] = "x"
-        ws["A1"].font = Font(name="Arial", size=10)
+        ws["A1"].font = Font(name="Verdana", size=10)
 
     rendered = lay_out(tmp_path, build)
     assert rendered.warnings == (
-        "font 'Arial' has no glyph table in xlformat; measured as Calibri at the same size",
+        "font 'Verdana' has no glyph table in xlformat; measured as Calibri at the same size",
     )
 
 

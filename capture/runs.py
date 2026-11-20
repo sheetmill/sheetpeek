@@ -470,21 +470,21 @@ EXPECTED: dict[str, dict[str, dict[str, Any]]] = {
             ),
         },
         "C6": {
-            "row_height": 19.0,
+            "row_height": 18.0,
             "text": "HH",
-            "baselines": (16.0,),
+            "baselines": (15.0,),
             "words": (("Calibri 11", "000000", 0.0),),
         },
         "C8": {
-            "row_height": 19.0,
+            "row_height": 18.0,
             "text": "HH",
             "baselines": (15.0,),
             "words": (("Arial 14 bold", "000000", 0.0),),
         },
         "C10": {
-            "row_height": 19.0,
+            "row_height": 18.0,
             "text": "HH",
-            "baselines": (16.0,),
+            "baselines": (15.0,),
             "words": (("Arial 11", "000000", 0.0),),
         },
         "C12": {
@@ -494,7 +494,7 @@ EXPECTED: dict[str, dict[str, dict[str, Any]]] = {
             "words": (("Calibri 14", "000000", 0.0),),
         },
         "C14": {
-            "row_height": 19.0,
+            "row_height": 18.0,
             "text": "HH",
             "baselines": (15.0,),
             "words": (("Arial 14", "000000", 0.0),),

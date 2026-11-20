@@ -15,8 +15,8 @@ from sheetpeek._model import Font, Row, Sheet
 
 _MEASURED_SIZES = (9, 10, 11, 12, 14, 16, 18, 20, 24)
 # The height of a row without ``ht`` per Normal font: xlformat's row model, captured from Excel
-# for Mac for Calibri and Aptos Narrow at these sizes (its CAPTURING.md section 2 item 44; it
-# agrees with this repository's suite row_height at 9 to 16 points).
+# for Mac for Calibri, Aptos Narrow and Arial at these sizes (its CAPTURING.md section 2 item
+# 44; it agrees with this repository's suite row_height at 9 to 16 points).
 # Sizes between those, from this repository's suite row_height_more (Excel's own row height):
 # no line through the measured sizes gives them (13 lies between 16 and 19, and is 17).
 _BETWEEN: dict[str, dict[int, float]] = {
@@ -31,11 +31,11 @@ FONT_ROW_HEIGHTS: dict[str, dict[int, float]] = {
                     size: xlformat.row_metrics(xlformat.Font(family, size)).font_height
                     for size in _MEASURED_SIZES
                 },
-                **_BETWEEN[family.lower()],
+                **_BETWEEN.get(family.lower(), {}),
             }.items()
         )
     )
-    for family in ("Calibri", "Aptos Narrow")
+    for family in xlformat.measured_fonts()
 }
 NO_SHEET_FORMAT = 16.0  # an unlisted row of a file without <sheetFormatPr>, every font
 WRAPPED_LEADING = 1.0  # wrapped lines are the font's row height plus 1 apart (Calibri 11: 16)
@@ -46,8 +46,8 @@ def font_row_height(font: Font) -> float:
     """The captured row height for a font, at the nearest captured size (the smaller on a tie).
 
     A family not in the table uses Calibri's heights, as xlformat measures it as Calibri: a known
-    deviation, Excel's rows for Arial, Times New Roman and Georgia are a point shorter at 11 and
-    14 (row_height_more). Other sizes between the captured ones and past 24 are unverified.
+    deviation, Excel's rows for Times New Roman and Georgia are a point shorter at 11 and 14
+    (row_height_more). Other sizes between the captured ones and past 24 are unverified.
     """
     table = FONT_ROW_HEIGHTS.get(font.name.lower(), FONT_ROW_HEIGHTS["calibri"])
     size = min(table, key=lambda s: (abs(s - font.size), s))
@@ -90,16 +90,17 @@ def wrapped_height(lines: int, font: Font) -> float:
     return lines * (font_row_height(font) + WRAPPED_LEADING)
 
 
-def baseline_offsets(font: Font) -> tuple[float, float, float]:
+def baseline_offsets(font: Font, normal: Font | None = None) -> tuple[float, float, float]:
     """(line pitch, baseline below a top-aligned line's top, baseline above a bottom one's bottom).
 
     Excel's screen, from xlformat's ``vertical_metrics`` (its CAPTURING.md section 2 item 47:
-    Calibri and Aptos Narrow at 9 to 24 points; this repository's suite ``text_style`` agrees):
-    Calibri 11 has its baseline 12 pt below the top and 3 pt above the bottom, and wrapped lines
-    15 pt apart. Another size takes the nearest measured size's, another face Calibri's
-    (unverified).
+    Calibri, Aptos Narrow and Arial at 9 to 24 points; this repository's suite ``text_style``
+    agrees): Calibri 11 has its baseline 12 pt below the top and 3 pt above the bottom, and
+    wrapped lines 15 pt apart. Given the workbook's ``normal`` font, bottom-aligned text sits at
+    least that font's distance up, as Excel places it. Another size takes the nearest measured
+    size's, another face Calibri's (unverified).
     """
-    metrics = _screen(*_measured(font))
+    metrics = _screen(*_measured(font), *(_measured(normal) if normal else ("", 0)))
     return metrics.line_pitch, metrics.baseline_from_top, metrics.baseline_from_bottom
 
 
@@ -116,12 +117,16 @@ def print_baseline_offsets(font: Font) -> tuple[float, float, float]:
     return line, float(above), line - above - 1
 
 
+_MEASURED_FACES = {name.lower(): name for name in xlformat.measured_fonts()}
+
+
 def _measured(font: Font) -> tuple[str, int]:
     """The measured face and size nearest to ``font``: Calibri for a face not measured."""
-    family = "Aptos Narrow" if font.name.lower() == "aptos narrow" else "Calibri"
+    family = _MEASURED_FACES.get(font.name.lower(), "Calibri")
     return family, min(_MEASURED_SIZES, key=lambda s: (abs(s - font.size), s))
 
 
 @lru_cache(maxsize=64)
-def _screen(family: str, size: int) -> xlformat.VerticalMetrics:
-    return xlformat.vertical_metrics(xlformat.Font(family, size))
+def _screen(family: str, size: int, normal: str, normal_size: int) -> xlformat.VerticalMetrics:
+    under = xlformat.Font(normal, normal_size) if normal else None
+    return xlformat.vertical_metrics(xlformat.Font(family, size), normal_font=under)

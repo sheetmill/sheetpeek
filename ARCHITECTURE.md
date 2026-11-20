@@ -618,18 +618,19 @@ at, in order:
 5. otherwise the Normal font's height from xlformat's row model (`row_metrics`, captured from
    Excel for Mac; this repository's suite `row_height` agrees at 9 to 16): Calibri 12, 14, 15, 16,
    19, 21, 24, 26, 31 pt at 9, 10, 11, 12, 14, 16, 18, 20, 24; Aptos Narrow 13, 14, 15, 16, 19,
-   22, 24, 27, 32; at 13, 15, 17 and 22 the heights suite `row_height_more` captured, Calibri 17,
-   20, 23, 29 and Aptos Narrow 18, 20, 23, 29. Another size takes the nearest of these (the
-   smaller on a tie; unverified). Another face takes Calibri's height, a known deviation:
-   Excel's rows in Arial, Times New Roman and Georgia are a point shorter at 11 and 14, and
-   Courier New's agree (`row_height_more`). Plus 1 pt each for `thickTop` and `thickBottom` when the row has no
+   22, 24, 27, 32; Arial at the same sizes (13 at 10, 14 at 11, 18 at 14: `row_height_more`
+   and `package_more` agree); at 13, 15, 17 and 22 the heights suite `row_height_more`
+   captured, Calibri 17, 20, 23, 29 and Aptos Narrow 18, 20, 23, 29. Another size takes the
+   nearest of these (the smaller on a tie; unverified). Another face takes Calibri's height, a
+   known deviation: Excel's rows in Times New Roman and Georgia are a point shorter at 11 and
+   14, and Courier New's agree (`row_height_more`). Plus 1 pt each for `thickTop` and `thickBottom` when the row has no
    `<row>` element.
 
 **Rows are fitted to their cells** when Excel opens a file (captured, suite `row_height`): a row
 with a `<row>` element and no `ht`, in a sheet without `customHeight`, takes the largest of those
 heights and of each cell font's height from the table, merged cells included, and of its wrapped
 text, merged cells excluded. Wrapped text follows xlformat's row model (`row_metrics`, its
-CAPTURING.md section 2 item 44, Calibri and Aptos Narrow at 9 to 24 pt): k lines in a face of
+CAPTURING.md section 2 item 44, Calibri, Aptos Narrow and Arial at 9 to 24 pt): k lines in a face of
 height F take k(F + 1) points, so even one wrapped line is a point taller than the row, plus
 max(0, P - p), p the face's line inset and P the largest of the Normal font's and the row's other
 cell fonts' (Calibri 11 has 1, Calibri 20 has 3); Calibri 11 gives 16 pt a line (suite
@@ -639,8 +640,9 @@ height plus 1 a line, without the inset. `thickTop` or `thickBottom` together wi
 `customHeight` was not captured. A font not in
 the table uses Calibri's height at the nearest captured size, as xlformat scales widths: the
 known deviation of other faces above, and each wrapped line in them a point taller than Excel's
-(`row_height_more`: three lines of Arial 11 are 45 pt under an Arial Normal font, 46 under
-Calibri 11, where sheetpeek gives 48).
+(`row_height_more`: three lines of Times New Roman 11 are 45 pt, where sheetpeek gives 48).
+Arial's follow xlformat's model: three lines of Arial 11 are 45 pt under an Arial Normal font
+and 46 under Calibri 11, as captured.
 
 Excel ignores a stored `defaultRowHeight` without `customHeight` (15, 20 and 30 captured): with
 openpyxl's 15, a Calibri 14 workbook shows 19 pt rows and a Calibri 9 one 12 pt rows, so that
@@ -1705,8 +1707,8 @@ under Calibri 14, 7 pt, 1e6 is 53,184 pt and -1 is 65,530). A Normal font xlform
 measured keeps the 6 pt digit. Where 0 starts between 1e300 and 1e308 is not captured. Known
 deviations of sheetpeek's own: a row of font size 1 is 4 pt
 in Excel, and sizes under 9 are outside the row-height table (§4.7); past 24 pt the table gives
-24's height, where Excel gives a 409 pt Normal font its tallest row, 409.5; a size of 409.5 is
-kept, where Excel reports 409; and Arial is measured as Calibri (§4.7).
+24's height, where Excel gives a 409 pt Normal font its tallest row, 409.5; and a size of
+409.5 is kept, where Excel reports 409.
 
 **A column in `characters` mode is at most 255 characters**, Excel's own limit, whatever its width
 in points. Each character costs about 10 bytes in every row while the rows are built (the canvas),
@@ -1889,15 +1891,15 @@ xlformat.format_cell(value, number_format, font=cell_font,
 
 - **`FormatError`**: the cell is formatted again with `"General"` at the same width, and the sheet
   records one warning naming the format. This is what Excel's repair does.
-- **A font without a glyph table** (xlformat measures Calibri and Aptos Narrow; Arial and
-  others would raise `LookupError`): **decided**, the layout measures it as Calibri at the same
+- **A font without a glyph table** (xlformat measures Calibri, Aptos Narrow and Arial; others
+  would raise `LookupError`): **decided**, the layout measures it as Calibri at the same
   size and style, and records one warning per family, only where the font's widths decide the
   layout (the Normal font for column widths; cell fonts in `excel` mode). `xlformat.measured_fonts`
   tells which families are measured. Character mode was rejected because it counts a comma like a
   digit, which makes HTML disagree with Excel on more cells than a proportional approximation
-  does. What it costs, captured (`spill_neighbors`): Excel's Arial 11 numbers in a 22 pt column
-  show `##` where sheetpeek gives `###`, and its scientific text starts up to 2 pt further left;
-  a known deviation.
+  does. What it costs, captured before xlformat measured Arial (`spill_neighbors`): Excel's
+  Arial 11 numbers in a 22 pt column showed `##` where Calibri's widths gave `###`; another
+  face costs the same kind of difference (Times New Roman's rows, §4.7).
 - **`ValueError` / `TypeError`** (a value no format shows, or an unexpected type): shown as
   `str(value)`, left-aligned, with one warning per format string naming the first cell. When a
   refused format's `General` retry fails so, the warning names `General`.
@@ -2268,7 +2270,7 @@ sheetpeek already use openpyxl.
 ### 8.3 Dependencies
 
 - `xlio==0.3.*` (§5): the family's reader, internal to the family, pinned to a minor.
-- `xlformat>=0.4.1,<1` (§6.4), imported normally: it is required.
+- `xlformat>=0.5,<1` (§6.4), imported normally: it is required.
 - openpyxl is a dev dependency only: the tests and the documentation's examples build workbooks
   with it, and the tests that need it are left out without it.
 - Extra `sheetpeek[rich]`: `rich>=13`.

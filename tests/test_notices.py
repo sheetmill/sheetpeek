@@ -92,7 +92,7 @@ def build_every_feature(path: Path) -> Path:
     # What the model carries (the census).
     ws["A1"] = "names"
     ws["A1"].font = Font(
-        name="Arial",
+        name="Verdana",
         size=14,
         bold=True,
         italic=True,
@@ -138,7 +138,7 @@ def build_every_feature(path: Path) -> Path:
     ws["B6"] = "superscript"
     ws["B6"].font = Font(vertAlign="superscript")
     ws["B7"] = "scheme"
-    ws["B7"].font = Font(name="Arial", scheme="minor")
+    ws["B7"].font = Font(name="Verdana", scheme="minor")
     for row, alignment in enumerate(
         (
             Alignment(textRotation=45, wrap_text=True),  # drawn in lines

@@ -253,8 +253,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sheet names are looked up without case, as Excel compares them: `Book.sheet("data")` and
   `read(path, "DATA")` find a sheet named `Data` (and keep its spelling), where 0.2.0 raised
   `KeyError`.
-- Requires xlformat 0.4.1. Through it, a workbook whose Normal font is 18 pt or more gets Excel's
-  wider column padding: its columns without a stored width are wider (2 pt at Calibri 20).
+- Requires xlformat 0.5. Through it, a workbook whose Normal font is 18 pt or more gets Excel's
+  wider column padding: its columns without a stored width are wider (2 pt at Calibri 20); and
+  Arial is measured, where 0.2.0 measured it as Calibri with a warning: an Arial 10 Normal font
+  gives 53 pt columns and 13 pt rows, as Excel does (0.2.0: 45 and 14), and an Arial 11 number
+  in a 22 pt column shows `##` (0.2.0: `###`).
 - `Cell.value` of a whole number is an `int` only below 2**53 in magnitude, a `float` above:
   it comes from the stored double, not the file's digits, so `9995806932108624` (one value in
   those 15,935 workbooks) is now `9995806932108624.0`. The rendered text is the same.

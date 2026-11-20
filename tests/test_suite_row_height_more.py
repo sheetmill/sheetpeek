@@ -96,7 +96,7 @@ def test_reading_an_answer_returns_its_values(tmp_path):
         "number",
         "15.75",
     )
-    assert rows[1]["height"] == "15"  # 15.0 as 15
+    assert rows[1]["height"] == "14"  # 14.0 as 14
     by_key = {(r["workbook"], r["row"]): r for r in rows}
     assert by_key[("5", "1")]["applied"] == "Courier 11"
     assert by_key[("17", "18")]["height"] == "62"
@@ -138,17 +138,17 @@ def _captured():
     return {(int(r["workbook"]), int(r["row"])): r for r in _parse(suite.OUTPUT)}
 
 
-SHORTER_FACES = ("Arial", "Times New Roman", "Georgia")
+SHORTER_FACES = ("Times New Roman", "Georgia")
 """Faces xlformat has no metrics for, measured as Calibri (decided, ARCHITECTURE §4.7): Excel's
 rows for them are a point shorter than Calibri's at 11 and 14 (14 and 18 pt), and so is each
-wrapped line. Courier New's agree with Calibri's. A known deviation until xlformat measures the
-faces; the rows it covers are pinned below, so a new one fails."""
+wrapped line. Courier New's agree with Calibri's, and Arial's, which xlformat measures, are its
+own. A known deviation until xlformat measures the faces; the rows it covers are pinned below,
+so a new one fails."""
 
 KNOWN = frozenset(
-    {(k, r) for k in (1, 2, 3, 4, 7, 8) for r in (1, 2, 3)}
-    | {(17, r) for r in (2, 4, 8, 21, 23, 24)}
+    {(k, r) for k in (3, 4, 7, 8) for r in (1, 2, 3)} | {(17, r) for r in (4, 8, 23, 24)}
 )
-"""The rows of :data:`SHORTER_FACES`, as Normal font (workbooks 1 to 4, 7, 8) or as the cell's
+"""The rows of :data:`SHORTER_FACES`, as Normal font (workbooks 3, 4, 7, 8) or as the cell's
 font under Calibri 11 (workbook 17: at 14 pt, and three wrapped lines at 11)."""
 
 
@@ -178,8 +178,8 @@ def _compare(name, cases):
 
 @pytest.mark.excel
 def test_other_normal_faces_take_calibris_heights_as_captured():
-    # §4.7: a Normal face not in the table (Arial, Times New Roman, Courier New, Georgia at 11
-    # and 14) gives its rows Calibri's height, listed (row 1) or not (row 2).
+    # §4.7: a Normal face not in the table (Times New Roman, Courier New, Georgia at 11 and 14)
+    # gives its rows Calibri's height, listed (row 1) or not (row 2); Arial its own.
     faces = set(suite.OTHER_FACES)
     _compare(
         "other Normal faces",

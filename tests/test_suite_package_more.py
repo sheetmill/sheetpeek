@@ -365,12 +365,6 @@ def test_the_digit_of_other_normal_fonts(captured, taken):
 
 
 @pytest.mark.excel
-@pytest.mark.xfail(
-    strict=True,
-    reason="xlformat before 0.5.0 has no Arial glyph table and measures Arial as Calibri: "
-    "sheetpeek gives an Arial 10 Normal font a 45 pt default column and 14 pt rows, Excel 53 and "
-    "13; xlformat 0.5.0's table gives Excel's",
-)
 def test_an_arial_10_normal_font_as_captured(captured, taken):
     # Arial 10's digit is 6 pt, as Calibri 11's, so its huge widths wrap as Calibri 11's do.
     for name, record in captured.items():

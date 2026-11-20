@@ -115,14 +115,17 @@ def line_font(fonts: list[Font]) -> Font:
     return max(fonts, key=lambda f: (font_row_height(f), f.size))
 
 
-def line_metrics(fonts: list[Font], lines: int) -> tuple[float, float, float]:
+def line_metrics(
+    fonts: list[Font], lines: int, normal: Font | None = None
+) -> tuple[float, float, float]:
     """(line pitch, baseline below its top, baseline above its bottom) of a line in ``fonts``.
 
     Excel's screen (``baseline_offsets``): wrapped lines are the font's row height apart, the
     point each adds to a fitted row lying below the last (§4.7); an accounting underline adds
-    room under the text (§4.13). ``lines`` is the block's number of lines.
+    room under the text (§4.13). ``lines`` is the block's number of lines; ``normal`` the
+    workbook's Normal font, which bottom-aligned text sits at least as high as.
     """
-    pitch, above, below = baseline_offsets(line_font(fonts))
+    pitch, above, below = baseline_offsets(line_font(fonts), normal)
     if any(accounting(f) for f in fonts):
         below += ACCOUNTING_EXTRA
     return pitch, above, below
