@@ -7,6 +7,11 @@ workbook's notices, and for each sheet digests of its values, styles, runs, colu
 merges, links and outline, the rows the file lists, its sheet format, view, print layout, its
 notices with their cells, and its filters when it has any.
 
+Volatile functions are held still: xlrecalc's clock reads ``FIXED_NOW`` and ``random`` is
+reseeded for each workbook, so two snapshots of one tree agree. Each sheet's record counts the
+formula cells that call a volatile function (``volatile``), and ``diff`` reports how many were
+held and how many differing values sit on sheets that have them.
+
     find CORPUS -name '*.xlsx' > list.txt
     python -m tests.watchdog -- python tools/reader_snapshot.py sweep OLD/src list.txt a.jsonl
     python -m tests.watchdog -- python tools/reader_snapshot.py sweep src list.txt b.jsonl
@@ -131,15 +136,74 @@ def _default(book: Any) -> str | None:
         return f"{type(error).__name__}: {str(error)[:120]}"
 
 
+FIXED_NOW = (2026, 1, 1, 12, 0, 0)
+"""The instant every snapshot computes NOW() and TODAY() at, so two runs agree."""
+
+
+def _hold_still() -> None:
+    """Pin xlrecalc's clock (its private date modules; checked against xlrecalc 0.4).
+
+    Volatile functions (NOW, TODAY, RAND, RANDBETWEEN, RANDARRAY) and every cell resting on
+    them would otherwise differ between two sweeps of one tree; random is reseeded per file.
+    """
+    import datetime as dt
+    import types
+
+    class _Fixed(dt.datetime):
+        @classmethod
+        def now(cls, tz: Any = None) -> Any:
+            return dt.datetime(*FIXED_NOW, tzinfo=tz)
+
+    class _Day(dt.date):
+        @classmethod
+        def today(cls) -> Any:
+            return dt.date(*FIXED_NOW[:3])
+
+    shim = types.ModuleType("dt_fixed")
+    shim.__dict__.update(dt.__dict__)
+    shim.__dict__.update(datetime=_Fixed, date=_Day)
+    from xlrecalc import _engine, _numtext
+    from xlrecalc._functions import _datetime
+
+    for module in (_engine, _numtext, _datetime):
+        if getattr(module, "dt", None) is not dt:
+            raise RuntimeError(f"{module.__name__} no longer imports datetime as dt")
+        module.dt = shim  # type: ignore[attr-defined]
+
+
+def _volatile(path: str) -> dict[str, int]:
+    """Each worksheet's formula cells that call a volatile function in their own text."""
+    import xlio
+    from xlrecalc._opening import Volatility
+
+    found: dict[str, int] = {}
+    test = Volatility(())
+    with xlio.open(path) as book:
+        for sheet in book.sheets:
+            if sheet.kind != "worksheet":
+                continue
+            found[sheet.name] = sum(
+                1 for c in sheet.cells() if c.formula is not None and test.own(c.formula.text or "")
+            )
+    return found
+
+
 def snap(listing: str, out: str, start: int = 0, stop: int | None = None) -> None:
     """Append the records of lines ``start`` to ``stop`` of ``listing`` to ``out``."""
     import sheetpeek
+
+    _hold_still()
 
     limits = sheetpeek.ReadLimits(max_cells=MAX_CELLS)
     paths = [p for p in Path(listing).read_text().split("\n") if p][start:stop]
     with open(out, "a", encoding="utf-8") as handle:
         for path in paths:
             warnings.simplefilter("ignore")
+            random.seed(0)
+            try:
+                volatile = _volatile(path)
+            except Exception:
+                volatile = {}
             try:
                 with sheetpeek.open(path, limits=limits) as book:
                     infos = [(i.name, i.kind, i.state, i.tab_color) for i in book.sheets]
@@ -155,6 +219,7 @@ def snap(listing: str, out: str, start: int = 0, stop: int | None = None) -> Non
                             record = _sheet(book, name)
                         except Exception as error:  # every refusal is a result to compare
                             record = {"error": f"{type(error).__name__}: {str(error)[:120]}"}
+                        record["volatile"] = volatile.get(name, 0)
                         handle.write(json.dumps({"file": path, "sheet": name, **record}) + "\n")
             except Exception as error:
                 failure = f"{type(error).__name__}: {str(error)[:120]}"
@@ -208,6 +273,17 @@ def diff(before: str, after: str, examples: int = 3) -> None:
                 if len(shown[field]) < examples:
                     name = key[0].rsplit("/", 1)[-1]
                     shown[field].append((name, key[1], a[key].get(field), b[key].get(field)))
+    held = [r.get("volatile", 0) for r in b.values()]
+    print(
+        f"volatile formula cells held still (NOW, TODAY at {FIXED_NOW}, random seeded): "
+        f"{sum(held)} in {sum(1 for h in held if h)} sheets"
+    )
+    on_volatile = sum(
+        1
+        for key in a.keys() & b.keys()
+        if a[key].get("values") != b[key].get("values") and b[key].get("volatile")
+    )
+    print(f"of the values that differ, on sheets with volatile formulas: {on_volatile}")
     for field, n in fields.most_common():
         print(f"\n{field}: {n}")
         for name, sheet, x, y in shown[field]:
