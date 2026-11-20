@@ -11,6 +11,7 @@ writers omit it or get it wrong.
 from __future__ import annotations
 
 import dataclasses
+import math
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -28,6 +29,8 @@ class ColumnSpec:
     max: int
     width: float | None
     hidden: bool
+    raw_width: str | None = None
+    """``width`` as written; xlio derives ``width`` at Calibri 11's 6 pt digit."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -98,7 +101,7 @@ def fill(found: Structure, sheet: xlio.Sheet) -> Structure:
         used_range=used,
         merges=merges,
         columns=tuple(
-            ColumnSpec(column.min, column.max, column.width, column.hidden)
+            ColumnSpec(column.min, column.max, column.width, column.hidden, column.raw_width)
             for column in sheet.columns
         ),
         rows={
@@ -133,3 +136,34 @@ def _union(a: CellRange, b: CellRange) -> CellRange:
         max(a.max_row, b.max_row),
         max(a.max_col, b.max_col),
     )
+
+
+XLIO_DIGIT = 6.0
+"""The digit, in points, at which xlio derives a column's width: Calibri 11's."""
+_WIDTH_WRAP = 65_536  # points: Excel keeps a column's width in 16 bits
+_INT_RANGE = 2**31
+
+
+def width_at_digit(spec: ColumnSpec, digit: float) -> float | None:
+    """A column's width as Excel takes it under a Normal font whose digit is ``digit`` points.
+
+    Excel keeps a width in points modulo 65,536 at the Normal font's digit, a negative width with
+    one more point, and a width whose points pass 2**31 as one point (captured ``package`` at
+    Calibri 11, ``package_more`` at Calibri 14: 1e6 is 53,184 pt and -1 is 65,530 at a 7 pt
+    digit). xlio does the same at a 6 pt digit, and its 0 (a hidden column: NaN, text, 8e305 and
+    past) stands at any digit.
+    """
+    width, raw = spec.width, spec.raw_width
+    if digit == XLIO_DIGIT or not width or raw is None:
+        return width
+    try:
+        value = float(raw)
+    except ValueError:
+        return width
+    points = value * digit
+    if 0 <= points < _WIDTH_WRAP:
+        return value
+    if abs(points) >= _INT_RANGE:
+        return 1 / digit
+    wrapped = math.fmod(points, _WIDTH_WRAP) % _WIDTH_WRAP
+    return (wrapped + (1 if value < 0 else 0)) / digit

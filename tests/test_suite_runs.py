@@ -318,10 +318,6 @@ UPSTREAM = {
     # Excel draws text under a one-section [Blue]General in blue, runs included; xlformat gives
     # text no section color there (only a text section's color), so sheetpeek keeps the runs'.
     ("main", "J28"): (("Calibri 11", "0000FF", 0.0), ("Calibri 11", "0000FF", 0.0)),
-    # A <t> beside runs: Excel keeps the <t> as a run in the cell's font and the run with its own
-    # properties (11 pt bold black). xlio gives the runs without the <t>, its text first, so
-    # sheetpeek draws the whole text in the cell's font.
-    ("text_and_runs", "C4"): (("Calibri 16", "FF0000", 0.0), ("Calibri 11 bold", "000000", 0.0)),
 }
 """Words drawn as Excel draws them where a sibling package does not give sheetpeek the means yet:
 compared at Excel's fonts and colors, and each must still differ from sheetpeek's (unpin it)."""

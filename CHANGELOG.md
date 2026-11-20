@@ -231,12 +231,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - openpyxl is no longer a dependency (0.2.0 required it): nothing in sheetpeek imports it. The
   README's and the documentation's examples build their workbooks with it, so they need it
   installed.
+- Column widths are taken as Excel takes them: a width from 1e30 to 1e300 is one point, where
+  0.2.0 hid the column; a `baseColWidth` of 255 gives columns of 10 characters, where 0.2.0 made
+  them 255; and a negative width, or one past 65,536 points, wraps at the Normal font's digit
+  (under a Calibri 14 Normal font a width of 1e6 is 53,184 pt, where 0.2.0 drew 42,261).
 - Files Excel opens that 0.2.0 refused are read: a color whose `rgb` is not hex (read as Excel
   reads it), an unknown sheet state (visible), a `zoomScale` that is not a whole number (100,
   as Excel opens it). Of 15,935 public workbooks (the Enron spreadsheets and xlcalculator's test
   workbooks), two refused for a print titles name of `#N/A` now open.
-- Files Excel refuses are refused (`PackageError`): a cell past row 1,048,576, and an error code
-  Excel does not read in a cell's value (`#SPILL!` there, an unknown code); 0.2.0 read both.
+- Files Excel refuses are refused (`PackageError`): a cell past row 1,048,576, an error code
+  Excel does not read in a cell's value (`#SPILL!` there, an unknown code), a string with text
+  (`<t>`) after its runs, and a border with `<left>` before `<start>` or `<right>` before
+  `<end>`; 0.2.0 read them all.
 - Values read as Excel reads them: a number too large for a double is `#NULL!` (0.2.0: infinity);
   `<c t="str"><v/></c>` is the empty string, which stops a spill (0.2.0: an empty cell); in shared
   strings `_x005F_` escapes an underscore (`a_x005F_x0041_b` reads `a_x0041_b`, where 0.2.0 read

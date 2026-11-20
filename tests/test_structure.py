@@ -7,7 +7,7 @@ from openpyxl.styles import Alignment
 import sheetpeek
 from sheetpeek import CellRange
 from sheetpeek._notices import Collector
-from sheetpeek._structure import ColumnSpec, fill
+from sheetpeek._structure import ColumnSpec, fill, width_at_digit
 from tests.workbooks import raw_sheet, save
 
 
@@ -103,7 +103,7 @@ def test_column_specs(scan_xml):
         '<cols><col min="2" max="4" width="3.5" customWidth="1"/>'
         '<col min="6" max="6" hidden="true"/></cols><sheetData/>'
     )
-    assert found.columns == (ColumnSpec(2, 4, 3.5, False), ColumnSpec(6, 6, None, True))
+    assert found.columns == (ColumnSpec(2, 4, 3.5, False, "3.5"), ColumnSpec(6, 6, None, True))
 
 
 def test_formulas_returning_the_empty_string(tmp_path):
@@ -151,3 +151,30 @@ def test_raw_sheet_helper(tmp_path):
         tmp_path / "r.xlsx", '<sheetData><row r="2"><c r="B2"><v>1</v></c></row></sheetData>'
     )
     assert scan_file(path).used_range == CellRange.parse("B2")
+
+
+@pytest.mark.parametrize(
+    ("raw", "xlio_width", "points"),
+    [
+        ("100", 100.0, 700.0),  # under 65,536 points, as written
+        ("1e6", 6036.5, 53184.0),  # 7e6 modulo 65,536 (captured package_more, Calibri 14)
+        ("-1", 10921.0, 65530.0),  # -7 modulo 65,536, and one more point (captured)
+        ("9400", 9400.0, 264.0),  # past 65,536 points at 7 pt, though not at 6
+        ("1e30", 0.1, 1.0),  # past 2**31 points: one point (captured)
+        ("-1e30", 0.1, 1.0),
+        ("nan", 0.0, 0.0),  # xlio's 0, a hidden column, stands
+        ("1e308", 0.0, 0.0),
+        ("abc", 0.0, 0.0),
+    ],
+)
+def test_a_width_wraps_at_the_normal_fonts_digit(raw, xlio_width, points):
+    spec = ColumnSpec(1, 1, xlio_width, False, raw)
+    assert width_at_digit(spec, 7.0) * 7.0 == pytest.approx(points)
+    assert width_at_digit(spec, 6.0) == xlio_width  # xlio's own digit: its width
+
+
+def test_a_width_xlio_does_not_give_is_kept():
+    assert width_at_digit(ColumnSpec(1, 1, None, True), 7.0) is None
+    assert width_at_digit(ColumnSpec(1, 1, 2.0, False, None), 7.0) == 2.0
+    # Text xlio took as a number that Python does not parse keeps xlio's width.
+    assert width_at_digit(ColumnSpec(1, 1, 5.0, False, "5 pt"), 7.0) == 5.0

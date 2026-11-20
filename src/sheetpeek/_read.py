@@ -76,7 +76,7 @@ from sheetpeek._sheets import (
     default_sheet,
     from_xlio,
 )
-from sheetpeek._structure import Structure, fill
+from sheetpeek._structure import XLIO_DIGIT, Structure, fill, width_at_digit
 from sheetpeek._style import Code
 from sheetpeek._style import font as font_aspect
 from sheetpeek._view_model import SheetView
@@ -196,6 +196,7 @@ class Book:
             self._own_palette = tuple(self._palette) if custom else None
             self._theme_fonts = xlio_theme_fonts(self._book.theme)
             self._normal_font = self._read_normal_font()
+            self._normal_digit = _normal_digit(self._normal_font)
             self._info = workbook_info(self._book.parts)
             self._context = styles.Context(
                 self._cell_color, self._normal_font, self._theme_fonts, self._palette
@@ -458,9 +459,8 @@ class Book:
             raise self._unreadable(error) from error
         self._report_structure(notes, structure, ref, empty)
         areas, area_problem, row_breaks, column_breaks = self._page_layout(name)
-        rows, columns, outline = read_outline(
-            structure, ref, _rows(structure, ref), _columns(structure, ref), notes
-        )
+        columns = _columns(structure, ref, self._normal_digit)
+        rows, columns, outline = read_outline(structure, ref, _rows(structure, ref), columns, notes)
         return Sheet(
             name=name,
             state=listed.state,
@@ -1035,13 +1035,25 @@ def _clip(area: CellRange, used: CellRange | None) -> CellRange | None:
     return CellRange(area.min_row, area.min_col, max_row, max_col)
 
 
-def _columns(structure: Structure, ref: CellRange | None) -> tuple[Column, ...]:
+def _normal_digit(font: Font) -> float:
+    """The Normal font's digit in points, as the layout measures it.
+
+    A face xlformat has not measured keeps xlio's 6 pt (the layout measures it as Calibri, §4.7).
+    """
+    if font.name.lower() not in {name.lower() for name in xlformat.measured_fonts()}:
+        return XLIO_DIGIT
+    measured = xlformat.Font(font.name, font.size, font.bold, font.italic)
+    return xlformat.file_column_metrics(None, normal_font=measured).digit_width
+
+
+def _columns(structure: Structure, ref: CellRange | None, digit: float) -> tuple[Column, ...]:
     if ref is None:
         return ()
     found: dict[int, Column] = {}
     for spec in structure.columns:
+        width = width_at_digit(spec, digit)
         for index in range(max(spec.min, ref.min_col), min(spec.max, ref.max_col) + 1):
-            found[index] = Column(index, spec.width, spec.hidden)
+            found[index] = Column(index, width, spec.hidden)
     # A default width of 0 hides every column without a width of its own (captured).
     width = 0.0 if structure.default_column_width == 0 else None
     return tuple(found.get(i, Column(i, width)) for i in range(ref.min_col, ref.max_col + 1))

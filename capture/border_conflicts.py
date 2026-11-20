@@ -295,8 +295,8 @@ EXPECTED = {
     "start_end": {
         "start thick: left": "thick 000000", "start thick: right": "none",
         "end medium: left": "none", "end medium: right": "medium 000000",
-        "start thick, left thin: left": "thin 000000", "start thick, left thin: right": "none",
-        "end thick, right dashed: left": "none", "end thick, right dashed: right": "dashed 000000",
+        "start thick, left thin: left": "thick 000000", "start thick, left thin: right": "none",
+        "end thick, right dashed: left": "none", "end thick, right dashed: right": "thick 000000",
         "start double, end mediumDashed: left": "double 000000",
         "start double, end mediumDashed: right": "mediumDashed 000000",
     },

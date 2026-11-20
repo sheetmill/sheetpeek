@@ -21,8 +21,8 @@ def read(part: Any, context: Context) -> dict[str, Any]:
 def to_borders(part: Any, context: Context) -> Borders | None:
     """An ``xlio.Border`` as the model's :class:`Borders`.
 
-    xlio reads ``start`` and ``end`` as ``left`` and ``right`` where those are absent; where a side
-    has both, Excel draws ``start`` and ``end`` (``border_conflicts``), a known deviation.
+    xlio reads ``start`` and ``end`` as ``left`` and ``right``, over a ``left`` or ``right`` the
+    border also has, as Excel draws them (``border_conflicts``).
     A diagonal counts only with a style and a direction, as Excel draws it.
     """
     if part is None:

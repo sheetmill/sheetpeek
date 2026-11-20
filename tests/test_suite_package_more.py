@@ -251,24 +251,13 @@ KNOWN_DEVIATIONS = {
 }
 
 PINNED = {
-    # xlio's ``_structure.column_width`` makes a finite width past 1e30 0; Excel keeps 1e100,
-    # 1e200 and 1e300 at one point (1e308 is 0, captured ``package``).
-    **dict.fromkeys(("width_1e100", "width_1e200", "width_1e300"), "xlio: 0 past 1e30"),
-    # Excel opens a baseColWidth of 255 with columns of 10 characters (65 pt), neither 255 nor
-    # the 8 of an absent one; xlio keeps 255 (1,535 pt). 256 and past are refused by both.
-    "base_width_255": "xlio: baseColWidth 255 kept",
     # sheetpeek's row table stops at 24 pt and takes its height (31) for larger fonts; Excel
     # gives a 409 pt Normal font its tallest row, 409.5. The default column (1,761 pt) is
     # xlformat's digit at 409 pt, 26 pt wider than sheetpeek's.
     "font_size_409": "row table past 24 pt; xlformat's digit at 409 pt",
-    # xlio refuses a font size past 409; Excel opens 409.5, reports size 409 and lays it out
-    # wider than 409 (1,769 pt).
-    "font_size_409.5": "xlio: refuses 409.5",
-    # xlio wraps a width modulo 65,536 points at a fixed 6 pt digit (Calibri 11's); Excel wraps
-    # it at the Normal font's digit: 1e6 at Calibri 14 (7 pt) is 7e6 mod 65,536 = 53,184 pt.
-    **dict.fromkeys(
-        ("calibri_14_width_minus_1", "calibri_14_width_1e6"), "xlio: 6 pt digit for every font"
-    ),
+    # The same, and Excel reports a size of 409.5 as 409 where sheetpeek keeps 409.5 (Excel lays
+    # it out wider than 409: 1,769 pt).
+    "font_size_409.5": "row table past 24 pt; xlformat's digit at 409.5 pt",
 }
 """Cases where sheetpeek differs from Excel for a reason recorded here, most of them in a sibling
 package. Each comparison asserts exactly these, so a new difference fails, and so does a fixed
@@ -365,7 +354,7 @@ def test_font_sizes_at_their_edges(captured, taken):
 @pytest.mark.excel
 def test_the_digit_of_other_normal_fonts(captured, taken):
     # Rule package_limits (§5.5, ``<col width>``): kept in points modulo 65,536 at the Normal
-    # font's digit, as Calibri 14's 7 pt shows (xlio's 6 pt for every font is pinned). Excel's
+    # font's digit, as Calibri 14's 7 pt shows. Excel's
     # font name confirms the Normal font took.
     for name, record in captured.items():
         if name.startswith("calibri_14"):

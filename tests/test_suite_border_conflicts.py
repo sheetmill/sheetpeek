@@ -96,7 +96,24 @@ def test_the_crafted_borders_hold_start_and_end(built):
     assert "<vertical" not in styles
     sheet = sheetpeek.read(built / "border_conflicts_start_end.xlsx")
     assert sheet.cell(4, 3).style.borders.left.style == "thick"
-    assert sheet.cell(8, 3).style.borders.left.style == "thin"  # left before start
+    assert sheet.cell(8, 3).style.borders.left.style == "thick"  # start over left, as Excel
+
+
+def test_left_before_start_is_refused_as_excel_refuses_it(built, tmp_path):
+    source, path = built / "border_conflicts_start_end.xlsx", tmp_path / "left_first.xlsx"
+    start = '<start style="thick"><color rgb="FF000000"/></start>'
+    with zipfile.ZipFile(source) as old, zipfile.ZipFile(path, "w") as new:
+        for item in old.infolist():
+            data = old.read(item.filename)
+            if item.filename == "xl/styles.xml":
+                text = data.decode()
+                left = text.index("<left", text.index(start + "<left"))
+                end = text.index("</left>", left) + len("</left>")
+                text = text[: left - len(start)] + text[left:end] + start + text[end:]
+                data = text.encode()
+            new.writestr(item, data)
+    with pytest.raises(sheetpeek.PackageError, match="left before start"):
+        sheetpeek.read(path)
 
 
 def test_no_case_draws_near_the_marker_color():
@@ -407,28 +424,13 @@ def test_sides_across_a_hidden_column_or_row_compete_as_captured():
         assert _far(record["color"], color) <= 24, (edge.name, record["color"])
 
 
-START_OVER_LEFT = {
-    "start thick, left thin: left": "thick",
-    "end thick, right dashed: right": "thick",
-}
-"""Where a side has both, Excel draws start over left and end over right; xlio reads left and
-right first (a known deviation until xlio reads them as Excel does)."""
-
-
 @pytest.mark.excel
-def test_where_both_are_given_excel_draws_start_and_end_as_captured():
-    captured = _group("start_end")
-    for name, drawn in START_OVER_LEFT.items():
-        assert captured[name]["drawn"] == drawn, (name, captured[name]["drawn"])
-
-
-@pytest.mark.excel
-def test_start_and_end_are_drawn_as_left_and_right_as_captured():
-    # A border's start and end where left and right are absent; left and right where both are
-    # given (§4.12, "Borders"). A refusal of the crafted file skips this test.
+def test_start_and_end_are_drawn_as_captured():
+    # A border's start and end as left and right, over left and right where both are given
+    # (§4.12, "Borders"). A refusal of the crafted file skips this test.
     captured = _group("start_end")
     for edge in bc.edges("start_end"):
-        if edge.kind == "ref" or edge.name in START_OVER_LEFT:
+        if edge.kind == "ref":
             continue
         record = captured[edge.name]
         assert record["drawn"] == bc.expected(edge).split()[0], (edge.name, record["drawn"])

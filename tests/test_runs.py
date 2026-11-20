@@ -137,11 +137,20 @@ def shared_strings_again(path):
     )  # fmt: skip
 
 
-def test_a_string_with_text_outside_its_runs_shows_in_the_cell_font(tmp_path):
-    # The schema allows a <t> before runs, which Excel does not write. xlio reads the text of
-    # both; sheetpeek draws it in the cell's font. Excel keeps the runs (runs): a known deviation.
+def test_text_before_runs_is_a_run_in_the_cell_font(tmp_path):
+    # The schema allows a <t> before runs, which Excel does not write. Excel keeps it as a run in
+    # the cell's font, first, and the runs with their own properties (captured, runs).
     cell = sheetpeek.read(book(tmp_path, nothing, {"A1": "<t>top</t>" + run("runs", "<b/>")}))
-    assert (cell.cell(1, 1).value, cell.cell(1, 1).runs) == ("topruns", None)
+    found = cell.cell(1, 1)
+    assert found.value == "topruns"
+    assert found.runs is not None
+    assert [(span.text, span.font.bold) for span in found.runs] == [("top", False), ("runs", True)]
+
+
+def test_text_after_runs_is_refused_as_excel_refuses_it(tmp_path):
+    path = book(tmp_path, nothing, {"A1": run("runs", "<b/>") + "<t>end</t>"})
+    with pytest.raises(sheetpeek.PackageError, match="text after its runs"):
+        sheetpeek.read(path)
 
 
 def test_runs_of_inline_strings_are_drawn(tmp_path):

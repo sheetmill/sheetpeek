@@ -113,7 +113,7 @@ layout fields marked *layout*. The style fields (`number_format` to `indent`) li
 | `font` | `Font(name, size, bold, italic, underline, strike, color, ..., theme_color)` | the cell format's font (xlio); a missing name or size inherits the Normal style's | `color` is resolved `RRGGBB`, or `None` for automatic; `theme_color` the theme index it comes from (§3.3) |
 | `fill` | `str \| None` | `fgColor` of a `solid` pattern fill, resolved | other patterns map to their foreground color, a documented approximation; gradients are ignored |
 | `fill_spec` | `Pattern \| Gradient \| None` | `cell.fill` (§4.12) | the fill itself: a pattern's kind and two colors, or a gradient's kind, angle, rectangle and stops; `fill` is its one color |
-| `borders` | `Borders \| None` | `cell.border` (§4.12) | four `Side`s (style, color) and the diagonal with its two flags; `start` and `end` read as `left` and `right` |
+| `borders` | `Borders \| None` | `cell.border` (§4.12) | four `Side`s (style, color) and the diagonal with its two flags; `start` and `end` read as `left` and `right`, over them where both are given |
 | `h_align` | `"general" \| "left" \| "center" \| "right" \| "fill" \| "justify" \| "distributed" \| "center_across"` | `cell.alignment.horizontal` | as stored; `centerContinuous` is `center_across` |
 | `v_align` | `"top" \| "center" \| "bottom" \| "justify" \| "distributed"` | `cell.alignment.vertical`, default `bottom` | |
 | `wrap` | `bool` | `cell.alignment.wrap_text` | |
@@ -836,9 +836,8 @@ gridline with its own fill. A pattern shows its pattern on the gridlines it cove
 
 **Borders.** `CellStyle.borders` is a `Borders` of four `Side`s (13 styles, a color or `None`
 for automatic, which is black), and a diagonal with its `diagonal_up` and `diagonal_down` flags.
-`start` and `end` are read as `left` and `right` where those are absent (xlio). Where a side has
-both, Excel draws `start` and `end` (`border_conflicts`), sheetpeek `left` and `right`: a known
-deviation until xlio reads them as Excel does. A diagonal is read only with a style and a
+`start` and `end` are read as `left` and `right`, over a `left` or `right` the border also has,
+as Excel draws them (`border_conflicts`; xlio). A diagonal is read only with a style and a
 direction; Excel draws nothing otherwise.
 - **Lines are fixed in screen points**, the same at every zoom (CSS px in HTML): thin 1 on the
   gridline; medium 2 from 1 before it; thick 3 from 1 before it; double 1, a white 1, 1, from 1
@@ -1179,10 +1178,9 @@ its known deviations are named below. The code is `_read.py`
 **Reading.** A cell's string can hold runs, each with its own font (`<r>` with `<rPr>`), in a
 shared string (where Excel writes them) or an inline one (what openpyxl writes). xlio gives both
 with `Sheet.cells(rich=True)`: each run's text and its `xlio.Font`, or no font for a run without
-properties. A string holding both a `<t>` and runs, which the schema allows and Excel does not
-write, reads as the text of both, drawn in the cell's font: a known deviation, as Excel keeps the
-`<t>` as a run in the cell's font and each run with its own (`runs`); xlio gives the runs without
-the `<t>`.
+properties. A string holding a `<t>` before runs, which the schema allows and Excel does not
+write, reads as Excel keeps it: the `<t>` a first run in the cell's font, each run with its own
+(`runs`); xlio refuses a `<t>` after a run, as Excel refuses the file.
 
 **The model.** `Cell.runs` holds the runs as `TextSpan`s (text and fully resolved `Font`), and
 `Cell.value` their text joined; escapes (§5.6) are decoded in each run. Adjacent runs in one font
@@ -1682,15 +1680,16 @@ refuses:
 - **`defaultRowHeight`:** NaN and infinity are refused. Without `customHeight` a number is ignored,
   as ever (§4.7). With it, -1 is 1 pt, and 1e308 acts as `zeroHeight`.
 
-The suite `package_more` settles the edges (Excel 16.115). xlio reads these numbers, and where it
-does not yet take them as Excel does, sheetpeek shows its reading, a known deviation: a width wraps
-at a 6 pt digit whatever the Normal font, where Excel wraps at the Normal font's own (under
-Calibri 14, 7 pt: 1e6 is 53,184 pt and -1 is 65,530, where sheetpeek shows 76,453); a width past 1e30 is 0 where Excel keeps one point up to
-1e300; a `baseColWidth` of 255 is kept; a font size of 409.5 is refused. Where 0 starts between
-1e300 and 1e308 is not captured. Known deviations of sheetpeek's own: a row of font size 1 is 4 pt
+The suite `package_more` settles the edges (Excel 16.115): a width past 1e30 is one point up to
+1e300, a `baseColWidth` of 255 gives columns of 10 characters, and a font size of 409.5 opens.
+xlio reads these numbers as Excel takes them, a width at Calibri 11's 6 pt digit; sheetpeek
+wraps a width again at the Normal font's own digit, as Excel does (`_structure.width_at_digit`:
+under Calibri 14, 7 pt, 1e6 is 53,184 pt and -1 is 65,530). A Normal font xlformat has not
+measured keeps the 6 pt digit. Where 0 starts between 1e300 and 1e308 is not captured. Known
+deviations of sheetpeek's own: a row of font size 1 is 4 pt
 in Excel, and sizes under 9 are outside the row-height table (§4.7); past 24 pt the table gives
-24's height, where Excel gives a 409 pt Normal font its tallest row, 409.5; and Arial is measured
-as Calibri (§4.7).
+24's height, where Excel gives a 409 pt Normal font its tallest row, 409.5; a size of 409.5 is
+kept, where Excel reports 409; and Arial is measured as Calibri (§4.7).
 
 **A column in `characters` mode is at most 255 characters**, Excel's own limit, whatever its width
 in points. Each character costs about 10 bytes in every row while the rows are built (the canvas),
