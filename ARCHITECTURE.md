@@ -1053,9 +1053,9 @@ palette (81) is black in a fill and a font; Excel refuses a file with a border i
 sheetpeek draws black (a named deviation, as a merge inside a table).
 
 **Number-format colors.** `[ColorN]` draws the workbook palette's index `N + 7`; the eight named
-colors (`[Red]`, `[Blue]`) draw their default colors whatever the palette (unverified; Excel's
-`display format` reports palette indices 2 and 4 for `[Red]` and `[Blue]` instead, so the screen
-was taken as the truth). The reader gives the sheet the workbook's palette (`Sheet.palette`, the
+colors (`[Red]`, `[Blue]`) draw their default colors whatever the palette (captured,
+`theme_fonts_palette`; Excel's `display format` reports palette indices 2 and 4 for `[Red]` and
+`[Blue]` instead, so the screen is taken as the truth). The reader gives the sheet the workbook's palette (`Sheet.palette`, the
 same palette its indexed fill, font and border colors are drawn in, `None` when the file has none)
 and the layout draws a section color through `xlformat.section_rgb` with it. Quoted text and
 escaped characters are not section colors.
@@ -1215,7 +1215,7 @@ size, for spill, `####`, wrapping, shrink to fit and alignment:
   run's line pitch apart, the point each adds to a fitted row lying below the last.
 - A fitted row counts its runs' fonts and the cell's own, even when every run is smaller: 9 pt
   runs in a 20 pt cell fit the row to 26 pt. Where Excel places the small runs in that row is not
-  modeled (unverified): their baseline is 8 pt above the bottom, sheetpeek's 3.
+  modeled, a known deviation (`runs`, C14): their baseline is 8 pt above the bottom, sheetpeek's 3.
 - **Superscript and subscript runs** follow §4.13 (rows of 17 pt, as whole cells),
   each run raised or lowered on its own; the cell's own font counts only through the runs that
   take it.

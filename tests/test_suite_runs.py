@@ -243,7 +243,7 @@ change on either side shows."""
 SMALL_RUNS_BASELINE = {"C14": (18.0,)}
 """9 pt runs in a 20 pt cell: the row is the cell font's 26 pt in both, but Excel puts the runs'
 baseline 8 pt above the bottom where sheetpeek puts it 3 pt above (23), a 9 pt line's place. Where
-Excel places small runs in a taller row is not modeled (unverified, ARCHITECTURE §4.16)."""
+Excel places small runs in a taller row is not modeled, a known deviation (ARCHITECTURE §4.16)."""
 
 
 @pytest.mark.excel
