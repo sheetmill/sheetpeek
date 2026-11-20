@@ -82,7 +82,8 @@ def row_extras(fonts: Iterable[Font]) -> list[tuple[Font, float]]:
 
     A fitted row takes the largest font row height plus addition. An accounting underline adds
     3 pt. A row holding both superscript and subscript grows 1 pt more at 11 pt (18 pt,
-    captured), half the one-kind addition at other sizes (unverified).
+    captured), half the one-kind addition at other sizes: from 12 pt Excel's rows differ, a
+    known deviation (row_height_fitted, group styled).
     """
     fonts = list(fonts)
     both = {f.vert_align for f in fonts} >= {"superscript", "subscript"}

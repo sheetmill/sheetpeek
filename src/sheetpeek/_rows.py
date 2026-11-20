@@ -47,7 +47,8 @@ def font_row_height(font: Font) -> float:
 
     A family not in the table uses Calibri's heights, as xlformat measures it as Calibri: a known
     deviation, Excel's rows for Times New Roman and Georgia are a point shorter at 11 and 14
-    (row_height_more). Other sizes between the captured ones and past 24 are unverified.
+    (row_height_more). Other sizes take the nearest captured size's, a known deviation: Excel's
+    rows at half sizes, at 19, 21 and 23, and past 24 differ (row_height_fitted, group styled).
     """
     table = FONT_ROW_HEIGHTS.get(font.name.lower(), FONT_ROW_HEIGHTS["calibri"])
     size = min(table, key=lambda s: (abs(s - font.size), s))

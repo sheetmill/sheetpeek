@@ -182,12 +182,16 @@ def _fitted(
         # smaller (captured, runs: 9 pt runs in a 20 pt cell fit the row to 26 pt; §4.16).
         spans = drawn_spans(cell, _UNDRAWN.sub("", str(cell.value))) if cell.runs else None
         own = [span.font for span in spans] if spans else [cell.font]
-        height = max(height, *map(fonts.row_height, own), fonts.row_height(cell.font))
-        if cell.kind != "empty":
-            styled += [f for f in own if f.vert_align or accounting(f)]
         # A merged cell's font counts, its wrapped lines do not (captured).
         merged = (row.index, grid.columns[p].index) in grid.merge_of
-        if cell.kind != "empty" and (cell.style.rotation or cell.style.stacked) and not merged:
+        turned = cell.kind != "empty" and (cell.style.rotation or cell.style.stacked) and not merged
+        if not (turned and _upright(cell.style)):
+            # Text at 90 degrees fits the row by its width alone, at least the Normal font's
+            # row: its own font's row does not count (captured, row_height_fitted).
+            height = max(height, *map(fonts.row_height, own), fonts.row_height(cell.font))
+        if cell.kind != "empty":
+            styled += [f for f in own if f.vert_align or accounting(f)]
+        if turned:
             height = max(height, _turned_height(grid, cell, p, fonts))
             continue
         # Distributed and justified text, across or down, wraps when drawn, and Excel 16.115
@@ -270,11 +274,20 @@ def _turned_height(grid: _Grid, cell: Any, p: int, fonts: _Fonts) -> float:
     else:
         width = xlformat.text_width(content, font=fonts.get(cell.font))
     size = max(font.size for font in own)
-    if abs(cell.style.rotation) == 90:
-        return max(line, _upright_height(width, size))
+    if _upright(style):
+        return _upright_height(width, size)  # the Normal font's row bounds it (the caller)
     angle = math.radians(cell.style.rotation)
     turned = width * abs(math.sin(angle)) + size * abs(math.cos(angle)) + ROTATED_EXTRA
     return max(line, float(round(turned)))
+
+
+def _upright(style: Any) -> bool:
+    """Text turned exactly 90 or -90 degrees, on one line: the path ``_upright_height`` fits."""
+    return (
+        abs(style.rotation) == 90
+        and not style.stacked
+        and not (style.wrap or style.h_align in _SPREAD or style.v_align in _SPREAD)
+    )
 
 
 def _upright_height(width: float, size: float) -> float:
@@ -282,9 +295,9 @@ def _upright_height(width: float, size: float) -> float:
 
     ``W + max(0, floor(W / 30) - 2) + 7 + 2·floor((S - 9) / 8)``, with ``W`` the width in whole
     advances and ``S`` the font size, at most ``TALLEST_ROW``: past 90 points of text the row
-    gains a point every 30 (captured, ``rotation``: every 90-degree row at 9, 11, 14 and 20 pt).
-    The pad is 7 to 16 pt, 9 at 17 to 24, 11 at 25 to 32 and so on; -90 degrees, the steps
-    past 16 pt and the 7 held below 9 pt are unverified (no capture in this repository yet).
+    gains a point every 30. The pad is 7 to 16 pt, 9 at 17 to 24, 11 at 25 to 32 and so on
+    (captured, ``row_height_fitted`` group ``turned`` and ``rotation``: every row at 90 and -90
+    degrees at the sizes xlformat measures; the 7 held below 9 pt is unverified).
     """
     whole = math.floor(width + 1e-9)
     pad = ROTATED_EXTRA + 2 * max(0, math.floor((size - 9) / 8))

@@ -621,7 +621,9 @@ at, in order:
    22, 24, 27, 32; Arial at the same sizes (13 at 10, 14 at 11, 18 at 14: `row_height_more`
    and `package_more` agree); at 13, 15, 17 and 22 the heights suite `row_height_more`
    captured, Calibri 17, 20, 23, 29 and Aptos Narrow 18, 20, 23, 29. Another size takes the
-   nearest of these (the smaller on a tie; unverified). Another face takes Calibri's height, a
+   nearest of these (the smaller on a tie), a known deviation: as a cell font, Excel's rows at
+   half sizes, at Calibri 19, 21 and 23 and past 24 differ (`row_height_fitted`, group `styled`:
+   Calibri 40 is 52 pt where sheetpeek gives 31). Another face takes Calibri's height, a
    known deviation: Excel's rows in Times New Roman and Georgia are a point shorter at 11 and
    14, and Courier New's agree (`row_height_more`). Plus 1 pt each for `thickTop` and `thickBottom` when the row has no
    `<row>` element.
@@ -675,7 +677,7 @@ a cached value (as openpyxl writes it) has no `t`. The same file confirms Excel 
 
 Captured so far, in `tests/captures/`: by print (route B) `layout` (§3.6, §4.1 to §4.7); read
 from Excel `theme_colors` and `theme_colors_more` (§3.3), `merge_width` and `error_width` (§4.2,
-§4.4, no deviation), `row_height` and `row_height_more` (§4.7), `color_kinds` (§3.3), `package` and `package_more` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14), `theme_fonts_palette`
+§4.4, no deviation), `row_height`, `row_height_more` and `row_height_fitted` (§4.7, §4.16, §4.17), `color_kinds` (§3.3), `package` and `package_more` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14), `theme_fonts_palette`
 and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts`, `gradients` and `diagonals` (§4.12), `text_style` and `text_style_more` (§4.7, §4.13), `runs` (§4.16), `tab_strip` (§4.15), `outline` (§4.11), `rotation` and `rotation_more` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
 Excel 16.115 (Microsoft 365). Every section here rests on one of them; what no capture covers
 is marked unverified where it is stated, as are the parts of §4.12, §4.14 and §4.18 that say so. What still waits for
@@ -916,9 +918,11 @@ size (cap heights 0.64 to 0.68 of the plain text's at 11 and 24 pt), its baselin
 `round(0.48 × size)` or lowered by `round(0.18 × size)` from the cell's baseline (5 and 2 pt at
 11 pt, 12 and 4 pt at 24 pt). It is measured at the drawn size, for wrapping, `####` and spill
 as for its runs (unverified for `####`). A fitted row grows by 2 pt at 11 pt (17 pt) and 6 pt at
-24 pt (37 pt against 31), linearly between and beyond and never below 0 (unverified); a row
-holding both kinds grows 1 pt more at 11 pt (18 pt), half the one-kind growth at other sizes
-(unverified). `TextRun.scale` carries the drawn size over `font.size`.
+24 pt (37 pt against 31), linearly between and beyond and never below 0; a row holding both
+kinds grows 1 pt more at 11 pt (18 pt), half the one-kind growth at other sizes. Against
+`row_height_fitted` (group `styled`, Calibri 6 to 40 pt) that holds to 11 pt; from 12 pt the
+rows differ by 1 to 3 pt below 25 pt and more above, a known deviation: Excel's growth is
+not linear and a row of both kinds is not one-kind growth plus half (not yet modeled). `TextRun.scale` carries the drawn size over `font.size`.
 
 **Underlines and strikethrough** are lines **1 screen pt thick at any zoom**, as gridlines and
 outline symbols are: one CSS pixel at any page scale (decided), at whole-pixel positions. The
@@ -1290,11 +1294,15 @@ boxes match a rigid rotation of the upright box (captured: 45°, 58.5 × 57.5 pt
   at every size (the median 2 pt short at 20 pt), and upright text's ink ends within 0.8 pt.
   Exactly 90° is a path of its own: the row is `W + max(0, ⌊W/30⌋ − 2) + 7 + 2·⌊(S − 9)/8⌋` pt,
   `W` in whole advances, at most 409.5. Past 90 points of text the row gains a point every 30,
-  though the 90° ink equals the upright ink (captured, `upright`). All 12 captured rows at 90°
-  (three lengths at 9, 11, 14 and 20 pt) match exactly; where `W·|sin θ| + S·|cos θ| + 7` was
-  short by up to 9 pt (20 pt, the long text). −90° takes the same path, and the pad steps by 2
-  every 8 points from 17 pt; both are unverified (no capture in this repository yet), as is
-  the pad held at 7 below 9 pt. A merge does not count, as for wrapped text.
+  though the 90° ink equals the upright ink (captured, `upright`). −90° takes the same path. The
+  row is at least the Normal font's (15 pt at Calibri 11), not the cell font's: "i" at 20 pt
+  fits 15. Captured (`row_height_fitted`, group `turned`, and `rotation`): at every size
+  xlformat measures (9 to 12, 14, 16, 18, 20, 24), three texts and one-glyph runs of 1 to 40,
+  every row at 90° and −90° matches exactly, where `W·|sin θ| + S·|cos θ| + 7` was short by up
+  to 9 pt. At the other sizes from 13 to 36 the pad's steps hold, but `W` comes from xlformat's
+  table scaled from the nearest measured size, so those rows are off by up to 20 pt, a known
+  deviation. The pad held at 7 below 9 pt is unverified (no capture in this repository yet).
+  A merge does not count, as for wrapped text.
 - **Wrapped angled text** (wrap, justify or distributed) wraps along the turned direction: a line
   holds what a fitted row of this height would, `W·|sin θ| + S·|cos θ| + 7 ≤ h`, with a word joining
   a line only if the space after it fits too (§4.7); the lines step one font line (15 pt at Calibri

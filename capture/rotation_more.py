@@ -268,11 +268,13 @@ drawn upright on the cell's left, right, top and bottom edges (``edges``).
 """
 
 
-def windows() -> list[tuple[str, list[Case]]]:
-    """Each window's folder name with its cases: cases of one column width share a window."""
+def windows(cases: list[Case] | None = None) -> list[tuple[str, list[Case]]]:
+    """Each window's folder name with its cases (``CASES`` by default): cases of one column
+    width share a window."""
+    chosen = CASES if cases is None else cases
     found: list[tuple[str, list[Case]]] = []
-    for width in dict.fromkeys(case.cell.width for case in CASES):
-        same = [case for case in CASES if case.cell.width == width]
+    for width in dict.fromkeys(case.cell.width for case in chosen):
+        same = [case for case in chosen if case.cell.width == width]
         prefix = "default" if width is None else f"width_{width:g}"
         found += [
             (f"{prefix}_{k // PER_WINDOW}", same[k : k + PER_WINDOW])
@@ -285,11 +287,11 @@ def _row(k: int) -> int:
     return FIRST_ROW + 2 * k
 
 
-def placements() -> list[tuple[str, str, Case]]:
+def placements(cases: list[Case] | None = None) -> list[tuple[str, str, Case]]:
     """Each case's window (its sheet in :func:`build`'s workbook) and cell, with the case."""
     return [
         (name, f"{COLUMN}{_row(k)}", case)
-        for name, chosen in windows()
+        for name, chosen in windows(cases)
         for k, case in enumerate(chosen)
     ]
 
@@ -339,33 +341,39 @@ def read_cells(chosen: list[Case]) -> list[str]:
     return list(dict.fromkeys(found))
 
 
-def build(path: Path) -> list[tuple[str, str, Case]]:
+def build(path: Path, cases: list[Case] | None = None) -> list[tuple[str, str, Case]]:
     """Write every window's cases to one workbook at ``path``, a sheet a window; each case's
     sheet and cell address with the case."""
     wb = openpyxl.Workbook()
     wb.remove(wb.active)
     placed = []
-    for name, chosen in windows():
+    for name, chosen in windows(cases):
         ws = wb.create_sheet(name)
         placed += [(name, cell, case) for cell, case in fill(ws, chosen)]
     wb.save(path)
     return placed
 
 
-def run() -> None:
-    """Capture every window, then write the TSV (needs Excel)."""
+def run(
+    cases: list[Case] | None = None,
+    build_dir: Path = BUILD_DIR,
+    output: Path = OUTPUT,
+    suite: str = "rotation_more",
+) -> None:
+    """Capture every window, then write the TSV (needs Excel). Another suite passes its own
+    cases, folder, output and name (``capture/rotation_placement.py``)."""
     from capture.screen.run import capture
 
-    for name, chosen in windows():
+    for name, chosen in windows(cases):
         last = _row(len(chosen) - 1)
         capture(
             lambda ws, chosen=chosen: fill(ws, chosen),
             cells=read_cells(chosen),
-            out=BUILD_DIR / name,
+            out=build_dir / name,
             markers=("B2", f"J{last + 2}"),
-            name=f"rotation_more_{name}",
+            name=f"{suite}_{name}",
         )
-    write()
+    write(cases, build_dir, output, suite)
 
 
 # -- measuring -----------------------------------------------------------------------------------
@@ -526,14 +534,19 @@ def record(cap: Any, cell: str, case: Case) -> dict[str, str]:
     return found | {"group": case.group, "name": case.name}
 
 
-def write() -> None:
-    """Measure the saved captures again (no Excel) and write ``rotation_more.tsv``."""
+def write(
+    cases: list[Case] | None = None,
+    build_dir: Path = BUILD_DIR,
+    output: Path = OUTPUT,
+    suite: str = "rotation_more",
+) -> None:
+    """Measure the saved captures again (no Excel) and write the suite's TSV."""
     from capture.screen.run import header, load
 
     records: list[dict[str, str]] = []
     first: dict[str, str] = {}
-    for name, chosen in windows():
-        out = BUILD_DIR / name
+    for name, chosen in windows(cases):
+        out = build_dir / name
         if not (out / "formats.tsv").exists():
             print(f"{name}: not captured yet, left out", file=sys.stderr)
             continue
@@ -545,14 +558,14 @@ def write() -> None:
     if not records:
         print("nothing captured yet; no TSV written", file=sys.stderr)
         return
-    with open(OUTPUT, "w", encoding="utf-8") as out_file:
+    with open(output, "w", encoding="utf-8") as out_file:
         for key, value in first.items():
             if key not in ("markers", "suite", "workbooks_open_after"):
                 out_file.write(f"# {key}: {value}\n")
-        out_file.write("# suite: rotation_more\n" + "\t".join(COLUMNS) + "\n")
+        out_file.write(f"# suite: {suite}\n" + "\t".join(COLUMNS) + "\n")
         for found in records:
             out_file.write("\t".join(found.get(c, "") for c in COLUMNS) + "\n")
-    print(f"{len(records)} cases written to {OUTPUT}")
+    print(f"{len(records)} cases written to {output}")
 
 
 def main(argv: list[str]) -> int:
