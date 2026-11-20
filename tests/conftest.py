@@ -9,14 +9,27 @@ from tests.watchdog import watch_session
 
 
 def _needing_openpyxl() -> list[str]:
-    """Test modules that build workbooks with openpyxl, directly or through another test module.
+    """Test modules that build workbooks with openpyxl, directly or through a module they import.
 
     openpyxl is a development dependency: the sdist's tests run without it, so these are left
     out there (``pytest_report_header`` says how many).
     """
-    sources = {p.stem: p.read_text(encoding="utf-8") for p in Path(__file__).parent.glob("*.py")}
+    here = Path(__file__).parent
+    sources = {p.stem: p.read_text(encoding="utf-8") for p in here.glob("*.py")}
+    # The capture modules some suites import, which build their workbooks with openpyxl too.
+    sources |= {
+        f"capture.{p.stem}": p.read_text(encoding="utf-8")
+        for p in (here.parent / "capture").glob("*.py")
+    }
     uses = {
         name: set(re.findall(r"^\s*from tests\.(\w+) import", text, re.M))
+        | {f"capture.{m}" for m in re.findall(r"^\s*from capture\.(\w+) import", text, re.M)}
+        | {
+            f"capture.{m.strip()}"
+            for group in re.findall(r"^\s*from capture import ([\w, ]+)", text, re.M)
+            for m in group.split(",")
+            for m in [m.split(" as ")[0]]
+        }
         for name, text in sources.items()
     }
     needs = {
