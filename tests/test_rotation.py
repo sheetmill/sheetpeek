@@ -531,14 +531,6 @@ def test_wrapped_angled_text_sits_where_excel_draws_it(tmp_path, name, height, l
 
 FITTED_BOUND = 2.0
 """Points within which a fitted angled or stacked row lies (medians 0 to 2 at 9 to 20 pt)."""
-FITTED_OUTLIERS = {
-    # At exactly 90 degrees Excel fits rows taller than W + 7 as the text grows, though its ink is
-    # the upright ink; the cause is not captured yet. Model minus Excel.
-    "90 long 14": -4.0,
-    "90 long 20": -9.0,
-    "90 medium 20": -4.0,
-    "90 short 20": -2.0,
-}
 
 
 def _fitted_captures():
@@ -562,7 +554,24 @@ def test_a_row_fits_angled_and_stacked_text_as_excel_does(tmp_path, name, height
     rotation.fill(wb.active, [case])
     rendered = sheetpeek.read(save(wb, tmp_path / "fitted.xlsx")).layout("excel")
     gap = _row(rendered, 4).height_pt - height
-    if name in FITTED_OUTLIERS:
-        assert gap == pytest.approx(FITTED_OUTLIERS[name], abs=1.0), (name, gap)
+    if case.rotation in (90, -90):
+        assert gap == 0, (name, gap)  # §4.17: the 90-degree rule is exact
     else:
         assert abs(gap) <= FITTED_BOUND, (name, gap)
+
+
+@pytest.mark.parametrize(
+    ("width", "size", "height"),
+    [
+        (60.0, 11.0, 67.0),  # under 90 points of text: W + 7
+        (278.0, 20.0, 294.0),  # 20 pt, long: 278 + 7 + 9 (captured, rotation)
+        (90.0, 16.0, 98.0),  # 16 pt: pad 7, the 30-point term 1
+        (90.0, 17.0, 100.0),  # 17 pt: pad 9 (not in rotation's sizes)
+        (90.0, 8.0, 98.0),  # under 9 pt the pad is held at 7
+        (600.0, 11.0, 409.5),  # Excel's tallest row
+    ],
+)
+def test_a_row_at_90_degrees_fits_by_whole_width_and_size(width, size, height):
+    from sheetpeek._excel import _upright_height
+
+    assert _upright_height(width, size) == height

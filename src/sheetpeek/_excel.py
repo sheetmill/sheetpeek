@@ -75,6 +75,8 @@ ROTATED_EXTRA = 7.0
 """Points a row fitted to angled text adds to its footprint, fitted the same way (§4.17)."""
 STACKED_EXTRA = 2.0
 """Points a row fitted to stacked text adds to its lines (captured, §4.17)."""
+TALLEST_ROW = 409.5
+"""Excel's tallest row, in points: a row fitted to 90-degree text stops there (§4.17)."""
 
 
 def lay_out(draft: Draft) -> tuple[tuple[RenderedColumn, ...], tuple[RenderedRow, ...]]:
@@ -247,9 +249,9 @@ def _turned_height(grid: _Grid, cell: Any, p: int, fonts: _Fonts) -> float:
 
     Angled: the text's width times the sine of its angle, its size times the cosine, and
     ``ROTATED_EXTRA``, to the nearest point (captured over three lengths at 15, 45, 75 and 90
-    degrees and 9, 11, 14 and 20 pt: within 2 pt below 90 degrees; at exactly 90 Excel's long rows
-    are up to 9 pt taller at 20 pt, not modeled); wrapped, justified or distributed angled text
-    leaves the row as it is. Stacked: a font line a character and ``STACKED_EXTRA``.
+    degrees and 9, 11, 14 and 20 pt: within 2 pt below 90 degrees). At exactly 90 or -90 degrees,
+    :func:`_upright_height`. Wrapped, justified or distributed angled text leaves the row as it
+    is. Stacked: a font line a character and ``STACKED_EXTRA``.
     """
     shown = grid.show(cell, [p])
     content = _UNDRAWN.sub("", (shown.full_text or shown.text).replace("\n", ""))
@@ -266,9 +268,25 @@ def _turned_height(grid: _Grid, cell: Any, p: int, fonts: _Fonts) -> float:
     else:
         width = xlformat.text_width(content, font=fonts.get(cell.font))
     size = max(font.size for font in own)
+    if abs(cell.style.rotation) == 90:
+        return max(line, _upright_height(width, size))
     angle = math.radians(cell.style.rotation)
     turned = width * abs(math.sin(angle)) + size * abs(math.cos(angle)) + ROTATED_EXTRA
     return max(line, float(round(turned)))
+
+
+def _upright_height(width: float, size: float) -> float:
+    """The row Excel fits to text at exactly 90 or -90 degrees (§4.17, fitted rows).
+
+    ``W + max(0, floor(W / 30) - 2) + 7 + 2·floor((S - 9) / 8)``, with ``W`` the width in whole
+    advances and ``S`` the font size, at most ``TALLEST_ROW``: past 90 points of text the row
+    gains a point every 30 (captured, ``rotation``: every 90-degree row at 9, 11, 14 and 20 pt).
+    The pad is 7 to 16 pt, 9 at 17 to 24, 11 at 25 to 32 and so on; -90 degrees, the steps
+    past 16 pt and the 7 held below 9 pt are unverified (no capture in this repository yet).
+    """
+    whole = math.floor(width + 1e-9)
+    pad = ROTATED_EXTRA + 2 * max(0, math.floor((size - 9) / 8))
+    return min(TALLEST_ROW, whole + max(0, whole // 30 - 2) + pad)
 
 
 def _points(column: Column, metrics: Any) -> float:

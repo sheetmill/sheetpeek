@@ -1269,11 +1269,14 @@ boxes match a rigid rotation of the upright box (captured: 45°, 58.5 × 57.5 pt
 - **Fitted rows:** a row Excel fits grows to `W·|sin θ| + S·|cos θ| + 7` pt, to the nearest
   point, with `W` the text's width and `S` its font size. Captured over three lengths, four angles
   and four sizes: with xlformat's tables measured at each size, rows at 15 to 75° are within 2 pt
-  at every size (the median 2 pt short at 20 pt), and upright text's ink ends within 0.8 pt. At
-  exactly 90° Excel fits the row taller than `W + 7` as the text grows: short by up to 1, 2, 4
-  and 9 pt at 9, 11, 14 and 20 pt (the long text), though its 90° ink equals its upright ink
-  (captured, `upright`); the cause is not known and not captured yet. A merge does not count,
-  as for wrapped text.
+  at every size (the median 2 pt short at 20 pt), and upright text's ink ends within 0.8 pt.
+  Exactly 90° is a path of its own: the row is `W + max(0, ⌊W/30⌋ − 2) + 7 + 2·⌊(S − 9)/8⌋` pt,
+  `W` in whole advances, at most 409.5. Past 90 points of text the row gains a point every 30,
+  though the 90° ink equals the upright ink (captured, `upright`). All 12 captured rows at 90°
+  (three lengths at 9, 11, 14 and 20 pt) match exactly; where `W·|sin θ| + S·|cos θ| + 7` was
+  short by up to 9 pt (20 pt, the long text). −90° takes the same path, and the pad steps by 2
+  every 8 points from 17 pt; both are unverified (no capture in this repository yet), as is
+  the pad held at 7 below 9 pt. A merge does not count, as for wrapped text.
 - **Wrapped angled text** (wrap, justify or distributed) wraps along the turned direction: a line
   holds what a fitted row of this height would, `W·|sin θ| + S·|cos θ| + 7 ≤ h`, with a word joining
   a line only if the space after it fits too (§4.7); the lines step one font line (15 pt at Calibri
