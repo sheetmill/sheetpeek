@@ -909,8 +909,8 @@ def _turned_align(h_align: str, shown: str, angle: int) -> str:
 
     General follows the angle and switches sides at exactly 90 and -90 degrees. Fill, justify and
     distributed do not switch: placed as left at positive angles and as right at negative ones,
-    90 and -90 included, but distributed at 90 and -90 is centered (captured, rotation and
-    rotation_more at 15, 45, 75, -45 and 90 degrees).
+    90 and -90 included, but distributed at 90 and -90 is centered (captured, rotation,
+    rotation_more and rotation_placement from -90 to 90 degrees).
     """
     if h_align == "general":
         return "left" if 0 < angle < 90 or angle == -90 else "right"

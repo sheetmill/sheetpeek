@@ -1,0 +1,86 @@
+# excel: 16.115
+# build: 16.115.26110837
+# edition: Microsoft 365
+# channel: Current
+# macos: 26.5.1
+# appearance: dark
+# date: 2026-11-19
+# display_scale: 2.000
+# zooms: 100
+# colors: captures converted to sRGB (sips --matchTo sRGB Profile.icc)
+# platform: mac
+# suite: rotation_placement
+group	name	cell	rotation	row_height	ink_left	ink_right	ink_top	ink_bottom	border_left_25	border_right_25	border_left_75	border_right_75	top_from	top_to	bottom_from	bottom_to	edge_left	edge_right	edge_top	edge_bottom	lines	rule_start	rule_end	rule_offset	orientation	text
+spread	30 fill	E4	30	55.0	5.5	2	19	51																	30	Rotated text here
+spread	30 justify	E6	30	61.0	5.5	22	15	57																	30	Rotated text here
+spread	30 distributed	E8	30	61.0	5.5	22	15	57																	30	Rotated text here
+spread	30 left	E10	30	55.0	5.5	22	9	51																	30	Rotated text here
+spread	60 fill	E12	60	80.0	6.5	-3	6.5	75																	60	Rotated text here
+spread	60 justify	E4	60	85.0	6.5	-3	11.5	80																	60	Rotated text here
+spread	60 distributed	E6	60	85.0	6.5	-3	11.5	80																	60	Rotated text here
+spread	60 left	E8	60	80.0	6.5	-3	6.5	75																	60	Rotated text here
+spread	85 fill	E10	85	84.0	6	-33.5	4	81																	85	Rotated text here
+spread	85 justify	E12	85	91.0	6	-33.5	11	88																	85	Rotated text here
+spread	85 distributed	E4	85	91.0	6	-33.5	11	88																	85	Rotated text here
+spread	85 left	E6	85	84.0	6	-33.5	4	81																	85	Rotated text here
+spread	-15 fill	E8	105	38.0	2.5	-4.5	15.5	33.5																	-15	Rotated text here
+spread	-15 justify	E10	105	43.0	-26.5	-4.5	12	38.5																	-15	Rotated text here
+spread	-15 distributed	E12	105	43.0	-26.5	-4.5	12	38.5																	-15	Rotated text here
+spread	-15 left	E4	105	38.0	4.5	26.5	7	33.5																	-15	Rotated text here
+spread	-75 fill	E6	165	84.0	19.5	-9	5.5	81.5																	-75	Rotated text here
+spread	-75 justify	E8	165	90.0	19.5	-9	11.5	87.5																	-75	Rotated text here
+spread	-75 distributed	E10	165	90.0	19.5	-9	11.5	87.5																	-75	Rotated text here
+spread	-75 left	E12	165	84.0	6.5	-22	5.5	81.5																	-75	Rotated text here
+spread	-90 fill	E4	180	85.0	39	-6.5	6	83																	orientation downward	Rotated text here
+spread	-90 justify	E6	180	90.0	39	-6.5	11	88																	orientation downward	Rotated text here
+spread	-90 distributed	E8	180	90.0	22	-23.5	11	88																	orientation downward	Rotated text here
+spread	-90 left	E10	180	85.0	6	-39.5	6	83																	orientation downward	Rotated text here
+top	15 top 90	E12	15	90.0	5	27.5	9	33.5																	15	Rotated text here
+top	30 top 90	E4	30	90.0	5.5	22	9	51																	30	Rotated text here
+top	60 top 90	E6	60	90.0	6.5	-3	6.5	75																	60	Rotated text here
+top	75 top 90	E8	75	90.0	6.5	-20.5	5.5	80.5																	75	Rotated text here
+top	10 top 30	E10	10	30.0	4.5	28	7.5	25.5																	10	Rotated text here
+top	15 top 30	E12	15	30.0	5	27.5	9	29.5																	15	Rotated text here
+top	20 top 30	E4	20	30.0	21.5	26.5	9.5	29.5																	20	Rotated text here
+top	20 lrtb top 90	E6	20	90.0	169	190.5	9.5	40	186.5	242	62	118	247	264.5	0	54									20	Rotated text here
+top	40 lrtb top 90	E8	40	90.0	49	58.5	8.5	61	80.5	135	27	81.5	107	160	0	54									40	Rotated text here
+top	50 lrtb top 90	E10	50	90.0	27	28.5	8	69.5	57	111	19	73.5	76	129	0	54									50	Rotated text here
+top	70 lrtb top 90	E12	70	90.0	11.5	-9.5	6	79.5	24.5	78.5	8	62	33	86	0	54									70	Rotated text here
+top	-30 lrtb top 90	E4	120	90.0	-105	-89.5	7	51	-118.5	-63.5	-40	15	-156	-103	0	54									-30	Rotated text here
+top	-60 lrtb top 90	E6	150	90.0	-9	-20	5.5	75	-39	15	-13	41	-52	1	0	54									-60	Rotated text here
+top	10 lrtb top 30	E8	10	30.0	95.5	119	7.5	25.5	130.5	189	43	102	170	223	0	54									10	Rotated text here
+top	15 lrtb top 30	E10	15	30.0	27	49.5	9	29.5	85.5	142.5	28.5	85	112	165	0	54									15	Rotated text here
+top	15 lrtb top 45	E12	15	45.0	83	105.5	9	33.5	128.5	185.5	41.5	98	168	221	0	54									15	Rotated text here
+top	20 lrtb top 30	E4	20	30.0	21.5	26.5	9.5	29.5	62.5	118.5	21	76.5	82	135	0	54									20	Rotated text here
+top	20 lrtb top 50	E6	20	50.0	59	80.5	9.5	40	104	159.5	34.5	90.5	137	190	0	54									20	Rotated text here
+top	20 lrtb top 70	E8	20	70.0	114	135.5	9.5	40	145	201	48.5	104	192	245	0	54									20	Rotated text here
+stacked	stacked Abc left 9	E4	255	38.0	6	-109	4	34													6:-109;6.5:-109.5;7.5:-109.5				orientation vertical	Abc
+stacked	stacked Abc right 9	E6	255	38.0	109	-6	4	34													109:-6;109.5:-6.5;110.5:-6.5				orientation vertical	Abc
+stacked	stacked Abc center 9	E8	255	38.0	57	-58	4	34													57:-58;57.5:-58.5;58.5:-58.5				orientation vertical	Abc
+stacked	stacked Abc left 12	E10	255	50.0	7	-106	5.5	45													7:-106.5;9:-106;8.5:-107.5				orientation vertical	Abc
+stacked	stacked Abc right 12	E12	255	50.0	106	-7	5.5	45													106:-7.5;108:-7;107.5:-8.5				orientation vertical	Abc
+stacked	stacked Abc center 12	E4	255	50.0	56	-57	5.5	45													56:-57.5;58:-57;57.5:-58.5				orientation vertical	Abc
+stacked	stacked Abc left 14	E6	255	59.0	8	-104	6	53													8:-104;10:-104.5;9.5:-105.5				orientation vertical	Abc
+stacked	stacked Abc right 14	E8	255	59.0	104	-8	6	53													104:-8;106:-8.5;105.5:-9.5				orientation vertical	Abc
+stacked	stacked Abc center 14	E10	255	59.0	56	-56	6	53													56:-56;58:-56.5;57.5:-57.5				orientation vertical	Abc
+stacked	stacked Abc left 16	E12	255	65.0	9	-102	6.5	59													9:-102;10:-103.5;10.5:-103.5				orientation vertical	Abc
+stacked	stacked Abc right 16	E4	255	65.0	103	-8	6.5	59													103:-8;104:-9.5;104.5:-9.5				orientation vertical	Abc
+stacked	stacked Abc center 16	E6	255	65.0	56	-55	6.5	59													56:-55;57:-56.5;57.5:-56.5				orientation vertical	Abc
+stacked	stacked Abc left 20	E8	255	80.0	11.5	-97.5	8	73													11.5:-97.5;12.5:-99.5;14:-99				orientation vertical	Abc
+stacked	stacked Abc right 20	E10	255	80.0	98.5	-10.5	8	73													98.5:-10.5;99.5:-12.5;101:-12				orientation vertical	Abc
+stacked	stacked Abc center 20	E12	255	80.0	54.5	-54.5	8	73													54.5:-54.5;55.5:-56.5;57:-56				orientation vertical	Abc
+stacked	stacked Abc left 24	E4	255	95.0	12.5	-94.5	9.5	87													12.5:-94.5;14.5:-95.5;15:-96.5				orientation vertical	Abc
+stacked	stacked Abc right 24	E6	255	95.0	94.5	-12.5	9.5	87													94.5:-12.5;96.5:-13.5;97:-14.5				orientation vertical	Abc
+stacked	stacked Abc center 24	E8	255	95.0	53.5	-53.5	9.5	87													53.5:-53.5;55.5:-54.5;56:-55.5				orientation vertical	Abc
+stacked	stacked Abc left 28	E10	255	113.0	15.5	-89	11	103													15.5:-89;18:-90.5;18:-92				orientation vertical	Abc
+stacked	stacked Abc right 28	E12	255	113.0	89.5	-15	11	103													89.5:-15;92:-16.5;92:-18				orientation vertical	Abc
+stacked	stacked Abc center 28	E4	255	113.0	52.5	-52	11	103													52.5:-52;55:-53.5;55:-55				orientation vertical	Abc
+stacked	stacked Abc left 36	E6	255	143.0	19.5	-80.5	14	131.5													19.5:-80.5;22.5:-82.5;23.5:-84				orientation vertical	Abc
+stacked	stacked Abc right 36	E8	255	143.0	81.5	-18.5	14	131.5													81.5:-18.5;84.5:-20.5;85.5:-22				orientation vertical	Abc
+stacked	stacked Abc center 36	E10	255	143.0	50.5	-49.5	14	131.5													50.5:-49.5;53.5:-51.5;54.5:-53				orientation vertical	Abc
+stacked	stacked WiW left 11	E12	255	47.0	5.5	-105.5	5	42													5.5:-105.5;9.5:-109;10:-109.5;5.5:-105.5				orientation vertical	WiW
+stacked	stacked WiW right 11	E4	255	47.0	105.5	-5.5	5	42													105.5:-5.5;109.5:-9;110:-9.5;105.5:-5.5				orientation vertical	WiW
+stacked	stacked WiW center 11	E6	255	47.0	55.5	-55.5	5	42													55.5:-55.5;59.5:-59;60:-59.5;55.5:-55.5				orientation vertical	WiW
+stacked	stacked WiW left 20	E8	255	80.0	8.5	-95	8	73													8.5:-95;15:-102.5;15.5:-103;8.5:-95				orientation vertical	WiW
+stacked	stacked WiW right 20	E10	255	80.0	95.5	-8	8	73													95.5:-8;102:-15.5;102.5:-16;95.5:-8				orientation vertical	WiW
+stacked	stacked WiW center 20	E12	255	80.0	51.5	-52	8	73													51.5:-52;58:-59.5;58.5:-60;51.5:-52				orientation vertical	WiW

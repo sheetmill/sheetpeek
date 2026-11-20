@@ -678,7 +678,7 @@ a cached value (as openpyxl writes it) has no `t`. The same file confirms Excel 
 Captured so far, in `tests/captures/`: by print (route B) `layout` (§3.6, §4.1 to §4.7); read
 from Excel `theme_colors` and `theme_colors_more` (§3.3), `merge_width` and `error_width` (§4.2,
 §4.4, no deviation), `row_height`, `row_height_more` and `row_height_fitted` (§4.7, §4.16, §4.17), `color_kinds` (§3.3), `package` and `package_more` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14), `theme_fonts_palette`
-and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts`, `gradients` and `diagonals` (§4.12), `text_style` and `text_style_more` (§4.7, §4.13), `runs` (§4.16), `tab_strip` (§4.15), `outline` (§4.11), `rotation` and `rotation_more` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
+and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts`, `gradients` and `diagonals` (§4.12), `text_style` and `text_style_more` (§4.7, §4.13), `runs` (§4.16), `tab_strip` (§4.15), `outline` (§4.11), `rotation`, `rotation_more` and `rotation_placement` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
 Excel 16.115 (Microsoft 365). Every section here rests on one of them; what no capture covers
 is marked unverified where it is stated, as are the parts of §4.12, §4.14 and §4.18 that say so. What still waits for
 the screen: the text insets and the baselines of angled text, which come from print, and the 15 pt rows that print
@@ -1272,16 +1272,18 @@ boxes match a rigid rotation of the upright box (captured: 45°, 58.5 × 57.5 pt
   moves the box in by 6 pt a level (captured: 12 pt for 2, left and right). Fill, justify and
   distributed do not switch sides at ±90° as general does: they are placed as left at positive
   angles, 90° included, and as right at negative ones, but distributed at 90° is centered
-  (captured, `rotation` at 45°, `rotation_more` at 15°, 75°, −45° and 90°: across within 1.5 pt
-  but for fill and justify at 90°, 1.55 pt, and distributed at 90°, 2.0 pt, known deviations;
-  −90° unverified, no capture in this repository yet). Their height at 75° and 90° is 1.6 to
-  2.9 pt below Excel's, as for a merge across at 45°: a known deviation without a rule yet.
+  and −90° (captured, `rotation` at 45°, `rotation_more` at 15°, 75°, −45° and 90°,
+  `rotation_placement` at 30°, 60°, 85°, −15°, −75° and −90°: across within 1.5 pt but for fill
+  and justify at ±90°, 1.55 pt, distributed at 90°, 2.0 pt, and right placement at −15°, 1.9 pt,
+  known deviations). Bottom-aligned angled text sits 1.2 to 4.4 pt higher in Excel at 30° to 85°
+  and −75° to −90°, as for a merge across at 45°: a known deviation without a rule yet.
 - **Vertical:** bottom puts the box's lowest corner on the cell's bottom, top its highest 3 pt
   below the top (`TOP_DROP`, less where the row has less room), center centers it (captured in a
   90 pt row at 45°). The drop is captured between slanted sides, where the text's height moves
   it across (`rotation` at 45°, `rotation_more` at 30°, 60°, 75° and −45°: within 1.5 pt, where
-  without it they were 2.5 to 19 pt off); without borders, and in rows with less than 6 pt to
-  spare, it is unverified (no capture in this repository compares the height yet). A box taller than its row
+  without it they were 2.5 to 19 pt off), and without borders (`rotation_placement`: 15° to 75°
+  in 90 pt rows and 10° in a 30 pt row, within 1.4 pt in height). Between sides at 15° to 20°
+  and at 50° it lies 1.5 to 2.1 pt across from sheetpeek's, a known deviation. A box taller than its row
   stays bottom-aligned and is clipped at the row; nothing is drawn in the row above (captured,
   a 15 pt row at 45° and 90°).
 - **Spill:** angled text spills into empty neighbors as horizontal text does (§4.1), by its box's
@@ -1322,7 +1324,9 @@ boxes match a rigid rotation of the upright box (captured: 45°, 58.5 × 57.5 pt
 
 **Stacked text** draws one upright character a line, a font line apart (captured: 15 pt at
 Calibri 11), centered for general text (captured); left and right sit at the insets, a known deviation:
-Excel's stacked characters sit up to 4 pt from there, centered ones 1 pt (`rotation_more`). The lines are placed by the vertical alignment as wrapped lines are, clipped at
+Excel centers each character on one axis, about `1.7 + 0.76·S` pt from the near edge for left
+and right (8.5 pt at 9 pt to 29 pt at 36, `rotation_more` and `rotation_placement`), and
+centered ones lie up to 1 pt from sheetpeek's. The lines are placed by the vertical alignment as wrapped lines are, clipped at
 the cell. A fitted row grows to a line a character plus 2 pt (captured: nine cases of 3 to 8
 characters at 9, 14 and 20 pt, all exact).
 

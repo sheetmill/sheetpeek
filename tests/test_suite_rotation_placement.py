@@ -94,9 +94,43 @@ def _captured():
     return {r["name"]: r for r in (dict(zip(header, b, strict=False)) for b in body)}
 
 
-PINNED: dict[str, frozenset[str]] = {}
-"""Cases where Excel 16.115 differs from sheetpeek, by comparison; each comparison's reason is
-in its docstring. Filled from the capture."""
+def _names(text):
+    return frozenset(text.split("|"))
+
+
+PINNED: dict[str, frozenset[str]] = {
+    # Fill stops at the cell's edge in Excel, which the ink model does not cut (30 and -15: 20 and
+    # 31 pt); right placement at -15 sits 1.9 pt from sheetpeek's and fill and justify at -90 1.55
+    # pt (its insets there); in 30 pt rows a box at 20 degrees is taller than the row and clipped.
+    "across": _names("-15 distributed|-15 fill|-15 justify|-90 fill|-90 justify|20 top 30|30 fill"),
+    # Bottom-aligned angled text sits 1.2 to 4.4 pt higher in Excel at 30 to 85 and -75 to -90
+    # degrees, not yet modeled; fill's cut edge also cuts its top; boxes at 15 and 20 degrees in
+    # 30 pt rows are clipped.
+    "height": _names(
+        "-15 fill|-75 fill|-75 left|-90 distributed|-90 fill|-90 justify|-90 left|15 top 30|"
+        "20 top 30|30 fill|30 left|60 distributed|60 fill|60 justify|60 left|85 distributed|"
+        "85 fill|85 justify|85 left"
+    ),
+    # Top alignment between slanted sides at 15 to 20 degrees and at 50 lies 1.5 to 2.1 pt across
+    # from sheetpeek's (8 to 13 pt where the box is taller than its 30 pt row).
+    "between": _names(
+        "15 lrtb top 30|15 lrtb top 45|20 lrtb top 30|20 lrtb top 50|20 lrtb top 70|"
+        "20 lrtb top 90|50 lrtb top 90"
+    ),
+    # Excel centers stacked characters on one axis about 1.7 + 0.76 S from the near edge (8.5 pt
+    # at 9 pt to 29 at 36), where sheetpeek starts each at the inset; center and general up to 1
+    # pt from sheetpeek's place.
+    "stacked": _names(
+        "stacked Abc center 12|stacked Abc center 14|stacked Abc center 9|"
+        "stacked Abc left 12|stacked Abc left 14|stacked Abc left 16|stacked Abc left 20|"
+        "stacked Abc left 24|stacked Abc left 28|stacked Abc left 36|stacked Abc left 9|"
+        "stacked Abc right 12|stacked Abc right 14|stacked Abc right 16|stacked Abc right 20|"
+        "stacked Abc right 24|stacked Abc right 28|stacked Abc right 36|stacked Abc right 9|"
+        "stacked WiW center 11|stacked WiW center 20|stacked WiW left 11|stacked WiW left 20|"
+        "stacked WiW right 11|stacked WiW right 20"
+    ),
+}
+"""Cases where Excel 16.115 differs from sheetpeek, by comparison, with their reasons."""
 
 
 def _check(key, wrong):
