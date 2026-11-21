@@ -87,28 +87,96 @@ def test_an_unmarked_volatile_function_on_another_sheet_recalculates_every_formu
     assert sheetpeek.read(path, "S", recalc_on_load="never").cell(1, 2).value == 99
 
 
-def test_the_pass_over_the_other_sheets_ends_at_all(tmp_path, monkeypatch):
-    given = []
-    add = xlrecalc.RecalcCheck.add
+def counted_reads(monkeypatch):
+    """Each reading of a sheet through xlio, as ``(kind, sheet name)``."""
+    import xlio
 
-    def counted(self, formula, **kwargs):
-        given.append(formula)
-        add(self, formula, **kwargs)
+    reads = []
+    for kind in ("cells", "formulas"):
+        original = getattr(xlio.Sheet, kind)
 
-    monkeypatch.setattr(xlrecalc.RecalcCheck, "add", counted)
+        def counted(self, *args, _original=original, _kind=kind, **kwargs):
+            reads.append((_kind, self.name))
+            return _original(self, *args, **kwargs)
+
+        monkeypatch.setattr(xlio.Sheet, kind, counted)
+    return reads
+
+
+def test_the_other_sheets_answer_from_their_formulas_alone(tmp_path, monkeypatch):
+    # Excel's file: whether T holds a formula Excel recomputes decides the answer; T's formulas
+    # are read for it, not its values, and with every cached value standing, never its cells.
+    reads = counted_reads(monkeypatch)
     later = "".join(f'<c r="{c}1"><f>A1+1</f><v>2</v></c>' for c in "BCD")
-    other = row(1, '<c r="A1"><f>NOW()</f><v>1</v></c>', later)
-    sheetpeek.read(book(tmp_path, row(1, A1, STALE), other=other), "S")
-    assert given == ["A1*3", "NOW()"]
+    sheet = sheetpeek.read(book(tmp_path, row(1, A1, STALE), other=row(1, A1, later)), "S")
+    assert sheet.cell(1, 2).value == 99
+    assert reads == [("cells", "S"), ("formulas", "T")]
 
 
 def test_a_sheet_without_formulas_asks_nothing(tmp_path, monkeypatch):
-    given, loads = [], []
-    monkeypatch.setattr(xlrecalc.RecalcCheck, "add", lambda self, f, **k: given.append(f))
+    asked, loads = [], []
+    opening = xlrecalc.Loader.opening
+
+    def counted(self):
+        asked.append(self)
+        return opening.fget(self)
+
+    monkeypatch.setattr(xlrecalc.Loader, "opening", property(counted))
     monkeypatch.setattr(xlrecalc.Loader, "finish", lambda self: loads.append(self))
+    reads = counted_reads(monkeypatch)
     path = book(tmp_path, row(1, A1), other=row(1, '<c r="A1"><f>NOW()</f></c>'))
     assert sheetpeek.read(path, "S").notices == ()
-    assert (given, loads) == ([], [])
+    assert (asked, loads, reads) == ([], [], [("cells", "S")])
+
+
+# Each case: sheet S (A1 = 2, B1 = A1*3 cached 99, and the cells given), sheet T, Excel's file
+# or not, and what S shows in each mode (B1, then each cell given). The answers are xlrecalc's
+# RecalcCheck's, as sheetpeek asked them before it took them from the Loader.
+OPENING_CASES = {
+    "cached": ([], None, True, {"excel": [99], "always": [6], "never": [99]}),
+    "marked": (
+        ['<c r="C1"><f ca="1">A1*4</f><v>98</v></c>'],
+        None,
+        True,
+        {"excel": [99, 8], "always": [6, 8], "never": [99, 98]},
+    ),
+    "uncached": (
+        ['<c r="C1"><f>A1*4</f></c>'],
+        None,
+        True,
+        {"excel": [99, 8], "always": [6, 8], "never": [99, 8]},
+    ),
+    "volatile elsewhere": (
+        [],
+        '<c r="A1"><f>NOW()</f><v>1</v></c>',
+        True,
+        {"excel": [6], "always": [6], "never": [99]},
+    ),
+    "another program": ([], None, False, {"excel": [6], "always": [6], "never": [99]}),
+}
+
+
+@pytest.mark.parametrize("mode", ["excel", "always", "never"])
+@pytest.mark.parametrize("case", list(OPENING_CASES))
+def test_recalc_on_load_answers_as_the_separate_check_did(tmp_path, case, mode):
+    import xlio
+
+    cells, other, by_excel, shown_values = OPENING_CASES[case]
+    path = book(
+        tmp_path, row(1, A1, STALE, *cells), other=other and row(1, other), by_excel=by_excel
+    )
+    check = xlrecalc.RecalcCheck(io.BytesIO(path.read_bytes()), recalc_on_load=mode)
+    with xlio.open(path) as opened:
+        for each in opened:
+            for cell in each.cells():
+                if check.result is None and cell.formula is not None:
+                    ca = cell.formula.attributes.get("ca") in ("1", "true")
+                    check.add(cell.formula.text, cached=cell.type != "none", ca=ca)
+        expected = check.finish()
+    with xlio.open(path) as opened:
+        assert xlrecalc.Loader(opened, recalc_on_load=mode).opening == expected
+    sheet = sheetpeek.read(path, "S", recalc_on_load=mode)
+    assert [c.value for c in sheet.cells[0][1:]] == shown_values[mode]
 
 
 def test_no_engine_when_every_cached_value_stands(tmp_path, monkeypatch):
@@ -228,12 +296,15 @@ def test_shown_values():
     assert shown([[1]]) is None
 
 
-@pytest.mark.parametrize("refused", ["RecalcCheck", "Loader"])
+@pytest.mark.parametrize("refused", ["Loader", "opening"])
 def test_a_workbook_xlrecalc_refuses_keeps_every_cached_value(tmp_path, monkeypatch, refused):
     def refuse(*args, **kwargs):
         raise xlrecalc.PackageError("no")
 
-    monkeypatch.setattr(xlrecalc, refused, refuse)
+    if refused == "Loader":
+        monkeypatch.setattr(xlrecalc, "Loader", refuse)
+    else:
+        monkeypatch.setattr(xlrecalc.Loader, "opening", property(refuse))
     uncached = '<c r="C1"><f>A1*4</f></c>'
     sheet = sheetpeek.read(book(tmp_path, row(1, A1, STALE, uncached), by_excel=False))
     assert values(sheet) == [[(2, "number"), (99, "number"), (None, "empty")]]
@@ -244,10 +315,12 @@ def test_a_workbook_xlrecalc_refuses_keeps_every_cached_value(tmp_path, monkeypa
 
 
 def test_another_sheet_that_cannot_be_read_is_reported(tmp_path, monkeypatch):
-    def unreadable(self, fed):
-        yield "T", iter([object()])  # no .formula: fails as a broken part would
+    import xlio
 
-    monkeypatch.setattr(sheetpeek._read.Book, "_unfed", unreadable)
+    def unreadable(self, *args, **kwargs):
+        raise RuntimeError("a broken part")
+
+    monkeypatch.setattr(xlio.Sheet, "formulas", unreadable)
     sheet = sheetpeek.read(book(tmp_path, row(1, A1, STALE)))
     assert sheet.cell(1, 2).value == 99
     (notice,) = notices(sheet)

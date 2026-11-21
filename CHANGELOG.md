@@ -209,7 +209,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   with a solid blue line, as Excel's page break preview draws them. Off by default.
 
 ### Changed
-- xlrecalc (`xlrecalc>=0.6,<1`) is a required dependency, for recalculation on opening. A formula
+- xlrecalc (`xlrecalc>=0.7,<1`) is a required dependency, for recalculation on opening. A formula
   cell shows the value Excel shows when it opens the file, where 0.2.0 showed the cached value:
   a formula written by openpyxl, which stores no value, shows its result where it showed as
   empty with the warning "formula cell(s) have no cached value", and a cached value in such a
@@ -225,7 +225,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   is the color Excel draws, and the new `Font.theme_color` says which theme color it comes from.
   HTML draws such text in the theme's dark 1, as Excel does under a theme whose dark 1 is not
   black; rich still shows it as the terminal's default text. Automatic stays `None`.
-- Workbooks are read through xlio (`xlio==0.3.*`, a new dependency), in one pass of each sheet's
+- Workbooks are read through xlio (`xlio==0.4.*`, a new dependency), in one pass of each sheet's
   cells, where 0.2.0 read them through openpyxl's read-only mode; values are read as Excel reads
   them (the entries below), and none of openpyxl's warnings reach the caller. On the
   100,000-cell bench sheets (`bench/html_size.py`, measured together) a plain sheet reads in 0.42

@@ -1563,7 +1563,7 @@ are `filter.buttons` (§4.19).
 
 ## 5. Reading
 
-sheetpeek reads a workbook through xlio (`xlio==0.3.*`), the family's xlsx reader, after a check
+sheetpeek reads a workbook through xlio (`xlio==0.4.*`), the family's xlsx reader, after a check
 of its own (§5.5). openpyxl is not imported at run time; the tests and the documentation's
 examples build workbooks with it.
 
@@ -1840,22 +1840,24 @@ default, that rule; `"always"`, every formula; `"never"`, none but the formulas 
 value and the volatile ones. `open`, `read`, `Book`, `make_server` and the command line's
 `--recalc-on-load` take it.
 
-**Work only where it is needed.** A `Book` asks `xlrecalc.RecalcCheck` (`_recalc.Recalc`), which
-reads the workbook part alone, and that settles most files. Otherwise the check is fed each
-formula as `Book._stream` reads it (its text, whether it holds a value, its `ca` mark); when a
-sheet read has formulas in its range, the worksheets not read yet get one pass of their formulas
-only. Feeding ends as soon as the answer is `"all"`. The answer is the whole workbook's, since a
-volatile cell or a formula without a value on one sheet changes what another shows. A range
-without formulas asks nothing, and `"none"` keeps every cached value without an engine.
-Otherwise one engine per `Book`, loaded on first use (`xlrecalc.load`, which reads every
-worksheet again) and recalculated at once, the whole workbook's share as Excel computes it on
-opening, gives the value of each formula cell of the range and of each cell an array formula or
-data table fills there. Asked for cell by cell instead, each stale cell is a recalculation of its
-own, and each goes over every cell that rests on a value xlrecalc keeps: a corpus workbook with a
-function xlrecalc does not compute took over an hour that way, and five seconds this way. xlrecalc reads the book's own open file through a view with
-a position of its own (`_recalc.FileView`), so what it computes is what was checked; it is
-given the file, not its path, so `CELL("filename")` shows empty text where Excel shows the
-file's path (a known deviation, not reported).
+**Work only where it is needed.** Each worksheet's cells pass through an `xlrecalc.Loader`
+(`_recalc.Recalc`) as `Book._stream` reads them, so the engine is built from the reader's own
+reading of the file. Which formulas Excel recalculates is the loader's `opening`, asked once,
+when a range read has formulas: the workbook part settles most files; otherwise the formulas fed
+decide, and the worksheets not read yet get a formulas-only reading (xlio's `Sheet.formulas`, no
+values). The answer is the whole workbook's, since a volatile cell or a formula without a value
+on one sheet changes what another shows. A range without formulas asks nothing, and `"none"`
+keeps every cached value without an engine: the loader is let go and has compiled nothing.
+Otherwise one engine per `Book`, taken from the loader on first use (`Loader.finish`, which
+reads the worksheets not fed yet; xlrecalc's report, which gives each formula cell's reason,
+covers the whole workbook) and recalculated at once, the whole workbook's share as Excel
+computes it on opening, gives the value of each formula cell of the range and of each cell an
+array formula or data table fills there. A worksheet the engine read before the book reads it is
+read from the file again. Asked for cell by cell instead, each stale cell is a recalculation of
+its own, and each goes over every cell that rests on a value xlrecalc keeps: a corpus workbook
+with a function xlrecalc does not compute took over an hour that way, and five seconds this way. xlrecalc is given the open workbook, not the file's path, so
+`CELL("filename")` shows empty text where Excel shows the file's path (a known deviation, not
+reported).
 
 **What xlrecalc does not compute** keeps the value the file holds: a function or construct it
 does not implement, a cell that depends on one, an error inside xlrecalc, a value the model has
@@ -2290,7 +2292,8 @@ sheetpeek already use openpyxl.
 
 ### 8.3 Dependencies
 
-- `xlio==0.3.*` (§5): the family's reader, internal to the family, pinned to a minor.
+- `xlio==0.4.*` (§5): the family's reader, internal to the family, pinned to a minor.
+- `xlrecalc>=0.7,<1` (§5.7), imported normally: it is required.
 - `xlformat>=0.5,<1` (§6.4), imported normally: it is required.
 - openpyxl is a dev dependency only: the tests and the documentation's examples build workbooks
   with it, and the tests that need it are left out without it.

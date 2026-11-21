@@ -1,31 +1,27 @@
 """What a formula cell shows on opening: its cached value, or the one xlrecalc computes.
 
 Excel's rule (``recalc_on_load="excel"``) and its two alternatives are xlrecalc's
-(``ARCHITECTURE.md`` §5.7). A :class:`Recalc` belongs to one ``Book``. Its
-``xlrecalc.RecalcCheck`` reads the workbook part, which settles most files; otherwise it is fed
-the formula cells as the sheets are streamed, and the worksheets not read yet get one pass for
-their formulas only, ended as soon as the answer is ``"all"``. Unless the check has answered
-``"none"``, the book's own cell stream passes through an ``xlrecalc.Loader`` as the reader
-streams each worksheet, so the engine is built from the same reading of the file; it is
-finished (sheets not read are read then) only when the answer is not ``"none"``, once per book,
-and asked only for the formula cells of the range read and the cells their arrays fill.
+(``ARCHITECTURE.md`` §5.7). A :class:`Recalc` belongs to one ``Book``. The book's own cell stream
+passes through an ``xlrecalc.Loader`` as the reader streams each worksheet, so the engine is built
+from the same reading of the file. The loader's ``opening`` answers which formulas Excel computes
+on opening, from the workbook part and the formulas fed, or else from a formulas-only reading of
+the worksheets not fed yet; it is asked only when a sheet read has formulas. Unless it answers
+``"none"``, the engine is taken from the loader once per book and asked only for the formula cells
+of the range read and the cells their arrays fill.
 """
 
 from __future__ import annotations
 
-import io
 import itertools
-import os
 import re
-from collections.abc import Callable, Iterable, Iterator
-from typing import Any, BinaryIO, Literal
+from collections.abc import Iterator
+from typing import Literal
 
 import xlformat
 import xlio
 import xlrecalc
 
 from sheetpeek._model import CellKind, CellValue
-from sheetpeek._package import ReadLimits
 
 RecalcOnLoad = Literal["excel", "always", "never"]
 RECALC_ON_LOAD: tuple[RecalcOnLoad, ...] = ("excel", "always", "never")
@@ -50,89 +46,31 @@ def recalc_mode(value: object) -> RecalcOnLoad:
     raise ValueError(f"recalc_on_load must be one of {RECALC_ON_LOAD}: {value!r}")
 
 
-class FileView(io.RawIOBase):
-    """A read-only view of an open file with a position of its own (``os.pread``).
-
-    xlrecalc reads the very file the book checked and reads, without moving the book's own
-    position.
-    """
-
-    def __init__(self, fd: int) -> None:
-        super().__init__()
-        self._fd = fd
-        self._size = os.fstat(fd).st_size
-        self._position = 0
-
-    def readable(self) -> bool:
-        return True
-
-    def seekable(self) -> bool:
-        return True
-
-    def tell(self) -> int:
-        return self._position
-
-    def seek(self, offset: int, whence: int = io.SEEK_SET) -> int:
-        base = {io.SEEK_SET: 0, io.SEEK_CUR: self._position, io.SEEK_END: self._size}[whence]
-        self._position = max(0, base + offset)
-        return self._position
-
-    def readinto(self, buffer: Any) -> int:
-        view = memoryview(buffer).cast("B")
-        data = os.pread(self._fd, len(view), self._position)
-        view[: len(data)] = data
-        self._position += len(data)
-        return len(data)
-
-    def close(self) -> None:  # the book's file stays open
-        super().close()
-
-
 class Recalc:
-    """Recalculation on opening for one book: the check's answer, then the engine."""
+    """Recalculation on opening for one book: the loader's answer, then the engine."""
 
-    def __init__(
-        self,
-        source: Callable[[], BinaryIO],
-        mode: RecalcOnLoad,
-        limits: ReadLimits,
-        book: xlio.Workbook,
-    ) -> None:
+    def __init__(self, mode: RecalcOnLoad, book: xlio.Workbook) -> None:
         self.mode = mode
-        self._limits = xlrecalc.ReadLimits(
-            max_parts=limits.max_parts, max_part_bytes=limits.max_part_bytes
-        )
-        self._check: xlrecalc.RecalcCheck | None = None
         self._answer: Opening | None = None
         self._loader: xlrecalc.Loader | None = None
         self._loaded: set[str] = set()
         self._engine: xlrecalc.Workbook | None = None
         self.error: str | None = None
         """Why recalculation cannot be done for this book (xlrecalc refused it), else ``None``."""
-        self.fed: set[str] = set()
-        """The worksheets whose formulas the check has been given."""
         try:
-            self._check = xlrecalc.RecalcCheck(source(), recalc_on_load=mode, limits=self._limits)
+            self._loader = xlrecalc.Loader(book, recalc_on_load=mode)
         except Exception as error:  # xlrecalc refuses what xlio read: report, keep cached values
             self.error = _reason(error)
-            return
-        if self._check.result is not None:
-            self._answer = self._check.finish()
-        if self._answer != "none":
-            try:
-                self._loader = xlrecalc.Loader(book, recalc_on_load=mode)
-            except Exception as error:
-                self.error = _reason(error)
 
     def cells(self, sheet: xlio.Sheet) -> Iterator[xlio.Cell]:
         """The worksheet's cells with their runs, through the loader the first time it is read.
 
-        An error xlrecalc raises while recording ends the loader (recalculation cannot be done,
-        :attr:`error`) and the rest of the sheet is read from xlio alone; an error of xlio's own
-        is raised as it would be without the loader.
+        An error xlrecalc raises while recording ends the recording (recalculation cannot be
+        done, :attr:`error`) and the rest of the sheet is read from xlio alone; an error of
+        xlio's own is raised as it would be without the loader.
         """
         loader = self._loader
-        if loader is None or sheet.name in self._loaded:
+        if loader is None or self.error is not None or sheet.name in self._loaded:
             yield from sheet.cells(rich=True)
             return
         self._loaded.add(sheet.name)
@@ -147,69 +85,42 @@ class Recalc:
                 raise
             except Exception as error:  # xlrecalc's recording failed: keep cached values
                 self.error = _reason(error)
-                self._loader = None
                 yield from itertools.islice(sheet.cells(rich=True), given, None)
                 return
             given += 1
             yield cell
 
-    @property
-    def feeding(self) -> bool:
-        """Whether the check still takes formula cells."""
-        return self._answer is None and self.error is None
+    def answer(self) -> Opening | None:
+        """Which formulas Excel computes on opening; ``None`` when it cannot be told.
 
-    def add(self, formula: str | None, *, cached: bool, ca: bool) -> bool:
-        """Give the check one formula cell; whether it takes more."""
-        assert self._check is not None
-        self._check.add(formula, cached=cached, ca=ca)
-        if self._check.result is not None:
-            self._settle(self._check.finish())
-            return False
-        return True
-
-    def _settle(self, answer: Opening) -> None:
-        self._answer = answer
-        if answer == "none":
-            self._loader = None  # nothing to compute: what it recorded is let go
-
-    def answer(self, rest: Callable[[], Iterable[tuple[str, Iterable[Any]]]]) -> Opening | None:
-        """The check's answer, after feeding it ``rest`` (each worksheet not fed, its cells).
-
-        ``None`` when recalculation cannot be done (:attr:`error`).
+        Asked once: the worksheets not fed yet have their formulas read for it, without their
+        values, unless the workbook part settles it. It is asked even after a failure to
+        record, so that a book whose cached values all stand is not reported. ``"none"`` lets
+        the loader go, so the sheets read later are not recorded.
         """
-        if self._answer is None and self.error is None:
-            assert self._check is not None
+        if self._answer is None and self._loader is not None:
             try:
-                more = True
-                for name, cells in rest():
-                    self.fed.add(name)
-                    for cell in cells:
-                        formula = cell.formula
-                        if formula is None:
-                            continue
-                        ca = formula.attributes.get("ca") in ("1", "true")
-                        more = self.add(formula.text, cached=cell.type != "none", ca=ca)
-                        if not more:
-                            break
-                    if not more:
-                        if self._loader is not None:  # the engine records the rest in this pass
-                            for _ in cells:
-                                pass
-                        break
-                if more:
-                    self._settle(self._check.finish())
+                answer = self._loader.opening
+            except (xlio.LimitError, MemoryError):
+                raise
             except Exception as error:  # another sheet xlrecalc would read too
-                self.error = _reason(error)
+                answer = None
+                self.error = self.error or _reason(error)
+            if answer is None:  # also once the book is closed, which a reading book is not
+                self.error = self.error or "xlrecalc could not read the workbook"
+                self._loader = None
+                return None
+            self._answer = answer
+            if answer == "none":
+                self._loader = None  # nothing to compute: what it recorded is let go
         return self._answer
 
     def engine(self) -> xlrecalc.Workbook | None:
         """The engine, loaded and recalculated on first use; ``None`` when xlrecalc fails.
 
         Everything Excel would compute on opening is computed at once, as Excel does, and each
-        value is then read as it stands: asked for one by one, each stale cell would be a
-        recalculation of its own, and in xlrecalc 0.4 each such recalculation goes over every
-        cell that rests on a value it keeps (a workbook with a function it does not compute
-        took hours).
+        value is then read as it stands. The report sheetpeek reads for each formula cell
+        covers the whole workbook, so the sheets not fed are read here in any case.
         """
         if self._engine is None and self.error is None and self._loader is not None:
             loader, self._loader = self._loader, None

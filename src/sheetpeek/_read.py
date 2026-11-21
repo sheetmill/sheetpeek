@@ -18,7 +18,7 @@ import zipfile
 from array import array
 from collections.abc import Iterator, Sequence
 from types import MappingProxyType, TracebackType
-from typing import IO, Any, BinaryIO, cast, overload
+from typing import IO, Any, overload
 
 import xlformat
 import xlio
@@ -65,7 +65,7 @@ from sheetpeek._read_links import report as report_links
 from sheetpeek._read_outline import read_outline, with_levels
 from sheetpeek._read_tables import read_tables
 from sheetpeek._read_view import sheet_view
-from sheetpeek._recalc import FileView, Recalc, RecalcOnLoad, recalc_mode, shown, why_not
+from sheetpeek._recalc import Recalc, RecalcOnLoad, recalc_mode, shown, why_not
 from sheetpeek._runs_model import TextSpan
 from sheetpeek._sheets import (
     ListedSheet,
@@ -246,14 +246,8 @@ class Book:
         """Recalculation on opening, set up on the first sheet read."""
         if self._recalc_state is None:
             assert self._book is not None
-            self._recalc_state = Recalc(self._recalc_source, self._mode, self._limits, self._book)
+            self._recalc_state = Recalc(self._mode, self._book)
         return self._recalc_state
-
-    def _recalc_source(self) -> BinaryIO:
-        """The book's own file for xlrecalc, read without moving the book's position."""
-        if isinstance(self._handle, io.BytesIO):
-            return io.BytesIO(self._handle.getvalue())
-        return cast(BinaryIO, io.BufferedReader(FileView(self._handle.fileno())))
 
     def _check_area(self, ref: CellRange) -> None:
         area = (ref.max_row - ref.min_row + 1) * (ref.max_col - ref.min_col + 1)
@@ -581,13 +575,12 @@ class Book:
         inside ``ref`` are built, every cell without one (they all lie inside the used range),
         each kept in its row's list in file order with no hyperlink yet (:meth:`_grid` adds
         them); what their styles use and is not read goes to ``notes``. No ``xlio.Cell`` is
-        kept, and a row's cells share one row number. Every formula is given to the recalculation
-        check while it takes them; the formula cells inside ``ref`` and the ranges of array
+        kept, and a row's cells share one row number. A worksheet's cells pass through the
+        recalculation's loader; the formula cells inside ``ref`` and the ranges of array
         formulas are kept for :meth:`_recompute`. ``name`` is ``None`` for a macro sheet, which
         xlrecalc does not compute: its cells keep their cached values.
         """
         recalc = self._recalc
-        feeding = name is not None and recalc.feeding and name not in recalc.fed
         formulas = _Formulas()
         min_row = min_col = 1 << 30
         max_row = max_col = 0
@@ -621,9 +614,6 @@ class Book:
                     uncached.add(row, column)
                     if first_uncached is None:
                         first_uncached = f"{CellRange(row, column, row, column)}"
-                if feeding:
-                    ca = formula.attributes.get("ca") in ("1", "true")
-                    feeding = recalc.add(formula.text, cached=cached, ca=ca)
                 if name is not None and formula.kind in ("array", "dataTable") and formula.ref:
                     formulas.add_array(row, column, formula.ref, ref)
                 add_formula(links, formula, row, column)
@@ -657,8 +647,6 @@ class Book:
                     self._runs(rich, style.font, source.value) if kind == "text" else None,
                 )
             )
-        if name is not None:
-            recalc.fed.add(name)
         used = CellRange(min_row, min_col, max_row, max_col) if max_row else None
         listed.update(sheet.rows)
         structure = Structure(
@@ -696,7 +684,7 @@ class Book:
         if not formulas.marks and not formulas.arrays:
             return empty
         recalc = self._recalc
-        answer = recalc.answer(lambda: self._unfed(recalc.fed))
+        answer = recalc.answer()
         if answer == "none":
             return empty
         engine = recalc.engine() if answer is not None else None
@@ -773,17 +761,6 @@ class Book:
                             line[found_at], value=found[0], kind=found[1], runs=None
                         )
         return empty
-
-    def _unfed(self, fed: set[str]) -> Iterator[tuple[str, Iterator[xlio.Cell]]]:
-        """Each worksheet the recalculation check has not been given, with its cells.
-
-        They pass through the loader, so the engine records them in the same reading.
-        """
-        assert self._book is not None
-        recalc = self._recalc
-        for sheet in self._book:
-            if sheet.kind == "worksheet" and sheet.name not in fed:
-                yield sheet.name, recalc.cells(sheet)
 
     def _grid(
         self,
