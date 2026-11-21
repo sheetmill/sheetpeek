@@ -131,7 +131,16 @@ pt high in the file prints 14 pt apart). `capture/screen/` captures Excel's wind
   captured with `screencapture -l` at the display's scale (2 px a point on a 2x display), again
   every second until two shots are identical: Excel may still be redrawing after a zoom change.
 - **Colors:** each capture is converted from the display's profile to sRGB (`sips --matchTo`),
-  so pixel colors compare with the file's.
+  so pixel colors compare with the file's. From a wide-gamut display the conversion leaves
+  saturated colors a few units off: on a Mac with a P3 display, `border_conflicts.tsv` reads
+  `00FF00` as `03FF00`, `FF8000` as `FF8002` and `A00000` as `A00001` (32 of its 484 window
+  rows, at most 3 units in one channel), where the same suite run in a macOS virtual machine,
+  whose display is sRGB, reads every color exactly. A test comparing a captured color allows
+  for it (within 24 of the expected color, and nearer it than the other candidate).
+- **In a macOS virtual machine** the suites run as on the host. A suite's first run there is
+  compared with its committed capture: `border_conflicts` (16.115, all four groups) gave the
+  same data lines, but for the colors above in `colors` (28 rows) and `black_white` (4 rows);
+  every drawn style, offset, pattern and distance the same.
 - **Markers:** two cells (B2 and one below and right of the cases) are filled magenta; their pixel
   boxes, against Excel's own `left position`, `top`, `width` and `height` of the cells, give the
   origin and the scale per axis. A marker must be a cell's full height, which keeps out the
