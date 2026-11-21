@@ -54,7 +54,15 @@ def built(tmp_path_factory):
     return folder
 
 
-@pytest.mark.parametrize("group", bc.GROUPS)
+BEFORE_THE_RULE = pytest.mark.xfail(
+    strict=True, reason="sheetpeek still orders two colors by Rec. 601 luma"
+)
+
+
+@pytest.mark.parametrize(
+    "group",
+    [pytest.param(g, marks=BEFORE_THE_RULE) if g == "color_rule" else g for g in bc.GROUPS],
+)
 def test_each_group_reads_back_as_built_and_draws_the_expected_sides(built, group):
     found = drawn(built / f"border_conflicts_{group}.xlsx", group)
     expected = {edge.name: bc.expected(edge) for edge in bc.edges(group)}
@@ -76,10 +84,11 @@ def test_each_edge_is_measured_on_a_cell_of_its_own_side():
         assert len(places) == len(set(places)), group
 
 
-def test_theme_and_indexed_colors_resolve_as_the_cases_state(built):
-    sheet = sheetpeek.read(built / "border_conflicts_colors.xlsx")
-    for edge in bc.edges("colors"):
-        if edge.kind != "color":
+@pytest.mark.parametrize("group", ["colors", "color_rule"])
+def test_theme_and_indexed_colors_resolve_as_the_cases_state(built, group):
+    sheet = sheetpeek.read(built / f"border_conflicts_{group}.xlsx")
+    for edge in bc.edges(group):
+        if edge.kind not in ("color", "rule"):
             continue
         letters, row = coordinate_from_string(edge.cell)
         side = sheet.cell(row, column_index_from_string(letters)).style.borders.sides[
@@ -124,6 +133,35 @@ def test_no_case_draws_near_the_marker_color():
                 continue
             rgb = tuple(int(line.rgb[k : k + 2], 16) for k in (0, 2, 4))
             assert sum((a - b) ** 2 for a, b in zip(rgb, marker, strict=True)) ** 0.5 > 200
+
+
+def _rule_value(color):
+    red, green, blue = _rgb(color)
+    return 2 * red + 5 * green + blue
+
+
+def test_the_designed_pairs_are_as_their_labels_say_and_predict_by_the_rule():
+    # The predictions, written before the first run: the lower 2R + 5G + B of the resolved
+    # colors, an exact tie to the larger blue. Each pair at least 60 apart in a channel.
+    differs_from_601 = 0
+    for label, a, b, orientations, winner in bc.RULE_PAIRS:
+        va, vb = _rule_value(a.rgb), _rule_value(b.rgb)
+        if va != vb:
+            expected = a if va < vb else b
+        else:
+            expected = a if _rgb(a.rgb)[2] > _rgb(b.rgb)[2] else b
+        assert winner == expected.spec, label
+        assert max(abs(x - y) for x, y in zip(_rgb(a.rgb), _rgb(b.rgb), strict=True)) >= 60
+        if "tie" in label:
+            assert va == vb, (label, a, b)
+            assert orientations == "vh"
+        elif label.startswith("near"):
+            assert abs(va - vb) == int(label.split()[1]), (label, a, b)
+        elif "rgb" in label:
+            assert abs(va - vb) == 3, (label, a, b)
+        luma = [0.299 * r + 0.587 * g + 0.114 * bl for r, g, bl in (_rgb(a.rgb), _rgb(b.rgb))]
+        differs_from_601 += (luma[0] < luma[1]) != (va < vb)
+    assert differs_from_601 >= 40
 
 
 def test_the_color_pairs_separate_what_they_say():
@@ -382,6 +420,25 @@ def test_the_darker_color_wins_as_captured():
             continue
         record = captured[edge.name]
         expected = bc.expected(edge).split()[1]
+        other = edge.second.rgb if expected == edge.first.rgb else edge.first.rgb
+        color = record["color"]
+        if not (_far(color, expected) <= 24 and _far(color, expected) < _far(color, other)):
+            wrong.append((edge.name, color, expected))
+        assert record["drawn"] == "thin", edge.name
+    assert not wrong, wrong
+
+
+@pytest.mark.excel
+def test_the_designed_pairs_draw_the_predicted_winner_as_captured():
+    # The color rule (§4.12, "Conflicts"), against the predictions written before the run. The drawn
+    # color is the nearer of the two sides' and within 24 of it.
+    captured = _group("color_rule")
+    wrong = []
+    for edge in bc.edges("color_rule"):
+        if edge.kind != "rule":
+            continue
+        record = captured[edge.name]
+        expected = bc.predicted(edge)
         other = edge.second.rgb if expected == edge.first.rgb else edge.first.rgb
         color = record["color"]
         if not (_far(color, expected) <= 24 and _far(color, expected) < _far(color, other)):
