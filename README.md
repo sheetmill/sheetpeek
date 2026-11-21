@@ -120,12 +120,14 @@ sheetpeek is part of the [sheetmill](https://github.com/sheetmill) project, with
 
 ## Development
 
-`uv sync --group docs` then `uv run pytest`; `CONTRIBUTING.md` has the pip route, the full set of
-checks and the commit conventions. `ARCHITECTURE.md` describes the design and the measurements
-behind it.
+`uv sync --group docs` then `uv run pytest`;
+[CONTRIBUTING.md](https://github.com/sheetmill/sheetpeek/blob/main/CONTRIBUTING.md) has the pip route, the full
+set of checks and the commit conventions.
+[ARCHITECTURE.md](https://github.com/sheetmill/sheetpeek/blob/main/ARCHITECTURE.md) describes the design and
+the measurements behind it.
 
 Most of the code is written with Claude Code, reviewed before each commit and tested against
-output captured from Excel; see `CONTRIBUTING.md`.
+output captured from Excel; see [CONTRIBUTING.md](https://github.com/sheetmill/sheetpeek/blob/main/CONTRIBUTING.md).
 
 ## License
 
