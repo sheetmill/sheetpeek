@@ -862,11 +862,14 @@ direction; Excel draws nothing otherwise.
   mediumDashDot > slantDashDot > mediumDashDotDot > thin > dashed > dotted > dashDot > dashDotDot >
   hair** (`border_conflicts`: every pair, both orders and orientations; a hair bottom side over a
   slantDashDot top side draws a line that is neither, the one exception). Of one style, never the
-  position, one color wins; **which one is not found**: sheetpeek takes the darker by Rec. 601
-  luma and, of equal luma, the larger `RRGGBB`, which fits 28 of the suite's 68 cases; the larger
-  `RRGGBB` alone fits 60, Rec. 709 luma 56, and no single measure fits all (a known deviation, not
-  yet modeled). Black wins over every color and white loses to every one (`black_white`, six colors,
-  both orders and orientations), as luma has it. Colors are compared after resolution to RGB.
+  position, **the lower `2R + 5G + B` wins** (the 8-bit channels of the color resolved to RGB, so
+  theme, tinted and indexed colors compare by what they draw), compared exactly, and **of an
+  exact tie the larger blue** (`_fill_border_model.conflict_key`). Captured in
+  `border_conflicts`: every case of `color_rule` (60 pairs far apart, 40 of them ordered the other
+  way by Rec. 601 luma; 28 pairs whose sums differ by 1 to 7; 24 exact ties; theme, tinted theme
+  and indexed colors 3 below, 3 above and level with an `rgb` color; each in both orders, the
+  ties in both orientations: 300 cases), every case of `colors` (17 pairs, 68 cases) and of
+  `black_white` (black wins over six colors and white loses to them, 48 cases).
 - **Merges:** borders stay per cell. The merge's outline is the outer sides of its edge cells,
   each on its own segment, the anchor's only on its own; sides inside the merge are not drawn;
   a neighbor's side competes with each segment by the rule above. A merge's diagonals are its

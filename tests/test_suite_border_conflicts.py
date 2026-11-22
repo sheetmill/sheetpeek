@@ -54,15 +54,7 @@ def built(tmp_path_factory):
     return folder
 
 
-BEFORE_THE_RULE = pytest.mark.xfail(
-    strict=True, reason="sheetpeek still orders two colors by Rec. 601 luma"
-)
-
-
-@pytest.mark.parametrize(
-    "group",
-    [pytest.param(g, marks=BEFORE_THE_RULE) if g == "color_rule" else g for g in bc.GROUPS],
-)
+@pytest.mark.parametrize("group", bc.GROUPS)
 def test_each_group_reads_back_as_built_and_draws_the_expected_sides(built, group):
     found = drawn(built / f"border_conflicts_{group}.xlsx", group)
     expected = {edge.name: bc.expected(edge) for edge in bc.edges(group)}
@@ -401,16 +393,9 @@ def test_the_stronger_style_wins_as_captured():
 
 
 @pytest.mark.excel
-@pytest.mark.xfail(
-    strict=True,
-    reason="16.115: Excel's rule for two colors of one style is not found. Rec. 601 luma, "
-    "sheetpeek's, fits 28 of the 68 cases; the larger RRGGBB, the largest channel and the red "
-    "channel fit 60, Rec. 709 luma 56; no single measure fits all. A known deviation, not yet "
-    "modeled",
-)
-def test_the_darker_color_wins_as_captured():
-    # Rec. 601 luma, equal luma to the larger RRGGBB, theme, tinted and indexed colors compared
-    # after resolution (§4.12, "Conflicts"). The drawn color is the nearer of the two sides'
+def test_of_one_style_the_lower_2r_5g_b_wins_as_captured():
+    # The lower 2R + 5G + B, theme, tinted and indexed colors compared after resolution
+    # (§4.12, "Conflicts"). The drawn color is the nearer of the two sides'
     # (the pairs are at least 150 apart) and within 24 of it: the capture's conversion to sRGB
     # moves a saturated color by a few units.
     captured = _group("colors")

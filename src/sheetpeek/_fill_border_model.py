@@ -2,8 +2,7 @@
 
 The rules are ``ARCHITECTURE.md`` §4.12: the pattern tiles are captured by the screen suite
 ``fills``, the colors a pattern's automatic colors take by ``auto_colors``, and the conflict
-order of border styles by ``border_conflicts``; which of two colors of one style wins is a known
-deviation (``border_conflicts``: Excel's rule is not found).
+order of border styles and which of two colors of one style wins by ``border_conflicts``.
 """
 
 from __future__ import annotations
@@ -234,28 +233,27 @@ class Borders:
         return self.left, self.right, self.top, self.bottom
 
 
-def luma(color: str) -> float:
-    """Rec. 601 luma of an ``RRGGBB`` color."""
+def conflict_key(color: str) -> tuple[int, int]:
+    """How two colors of one style compare where their sides meet: the smaller key wins.
+
+    ``2R + 5G + B`` of the 8-bit channels, exactly, and of equal sums the larger blue first.
+    """
     red, green, blue = (int(color[k : k + 2], 16) for k in (0, 2, 4))
-    return 0.299 * red + 0.587 * green + 0.114 * blue
+    return 2 * red + 5 * green + blue, -blue
 
 
 def winner(a: Side | None, b: Side | None) -> Side | None:
     """The side Excel draws where two cells' sides meet: never both, never by position.
 
-    The stronger style wins (:data:`STYLES`, captured); of one style, the darker color by Rec.
-    601 luma and of equal luma the larger ``RRGGBB``: a known deviation, as Excel's own color
-    rule is not found (``border_conflicts``: luma fits 28 of 68 cases, no single measure all).
+    The stronger style wins (:data:`STYLES`); of one style, the color with the lower
+    ``2R + 5G + B`` of its resolved RGB, and of an exact tie the larger blue
+    (:func:`conflict_key`; captured, ``border_conflicts``).
     """
     if a is None or b is None:
         return a or b
     if a.style != b.style:
         return a if _RANK[a.style] < _RANK[b.style] else b
-    ca, cb = a.drawn_color, b.drawn_color
-    la, lb = luma(ca), luma(cb)
-    if la != lb:
-        return a if la < lb else b
-    return a if int(ca, 16) >= int(cb, 16) else b
+    return a if conflict_key(a.drawn_color) <= conflict_key(b.drawn_color) else b
 
 
 @dataclass(frozen=True, slots=True)

@@ -95,8 +95,8 @@ def test_the_stronger_style_wins_in_either_order():
 
 
 @pytest.mark.parametrize(
-    ("darker", "lighter"),
-    [  # the luma rule (a known deviation: Excel's own rule is not found, border_conflicts)
+    ("winner_color", "loser"),
+    [  # the lower 2R + 5G + B (border_conflicts)
         ("FF0000", "00FF00"),
         ("0000FF", "00FF00"),
         ("000000", "0000FF"),
@@ -110,16 +110,24 @@ def test_the_stronger_style_wins_in_either_order():
         ("0000FF", "FF0000"),
     ],
 )
-def test_a_tie_goes_to_the_darker_color(darker, lighter):
+def test_of_one_style_the_lower_2r_5g_b_wins(winner_color, loser):
     for style in ("thin", "thick", "dashed", "double", "hair"):
-        a, b = Line(style, darker), Line(style, lighter)
+        a, b = Line(style, winner_color), Line(style, loser)
         assert winner(a, b) == a == winner(b, a)
 
 
-def test_equal_luma_goes_to_the_larger_rgb():
-    # border_conflicts: Excel took the larger RRGGBB in all four equal-luma pairs.
-    a, b = Line("thin", "003223"), Line("thin", "1400F0")
-    assert winner(a, b) == b == winner(b, a)
+def test_the_sums_are_compared_exactly_and_a_tie_goes_to_the_larger_blue():
+    # border_conflicts, color_rule: 2R + 5G + B one apart (1401 against 1402, the same >> 3, the
+    # loser the bluer) decides; an exact tie (1026 each; 992 for theme accent 1's 4F81BD) goes
+    # to the bluer, in either order.
+    for first, second, expected in (
+        ("DCB051", "91BCAC", "DCB051"),
+        ("219ABE", "479C68", "219ABE"),
+        ("479C68", "219ABE", "219ABE"),
+        ("4F81BD", "0D91F1", "0D91F1"),
+    ):
+        a, b = Line("thin", first), Line("thin", second)
+        assert winner(a, b).drawn_color == expected == winner(b, a).drawn_color
 
 
 def test_automatic_competes_as_black():

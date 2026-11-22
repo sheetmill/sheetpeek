@@ -6,8 +6,8 @@
     uv run --group capture python -m capture.border_conflicts read         # saved captures again
     uv run --group capture python -m capture.border_conflicts build PATH   # the workbooks only
 
-ARCHITECTURE.md §4.12, "Conflicts" (the style order, the darker color by Rec. 601 luma, equal
-luma to the larger ``RRGGBB``, colors compared after resolution), "Hidden rows and columns" (the
+ARCHITECTURE.md §4.12, "Conflicts" (the style order; of one style the lower ``2R + 5G + B``, an
+exact tie to the larger blue, colors compared after resolution), "Hidden rows and columns" (the
 visible neighbors' facing sides compete on one edge) and "Borders" (``start`` and ``end`` read
 as ``left`` and ``right``). Each group is its own workbook and window, at zoom 100, in the dark
 appearance as the other suites (the sheet stays white).
@@ -474,14 +474,14 @@ ORDER = (
 """The style order sheetpeek draws by, strongest first: its expectation for the style pairs."""
 EXPECTED = {
     "colors": {
-        "40C080|FF8000": "thin 40C080", "00FF00|40C0C0": "thin 00FF00",
+        "40C080|FF8000": "thin FF8000", "00FF00|40C0C0": "thin 00FF00",
         "004080|A00000": "thin A00000", "604080|FF0000": "thin FF0000",
-        "80A080|FF8000": "thin 80A080", "00FF40|A0A060": "thin A0A060",
-        "00C0C0|80A040": "thin 00C0C0", "003223|1400F0": "thin 1400F0",
+        "80A080|FF8000": "thin FF8000", "00FF40|A0A060": "thin A0A060",
+        "00C0C0|80A040": "thin 80A040", "003223|1400F0": "thin 1400F0",
         "2D5A69|FA0505": "thin FA0505", "23B923|3787F0": "thin 3787F0",
         "5055B9|D22D32": "thin D22D32", "theme4|F84800": "thin F84800",
-        "theme4|F85800": "thin 4F81BD", "theme4+0.4|60F000": "thin 60F000",
-        "theme4+0.4|E8B800": "thin 95B3D7", "indexed10|0848F8": "thin 0848F8",
+        "theme4|F85800": "thin F85800", "theme4+0.4|60F000": "thin 60F000",
+        "theme4+0.4|E8B800": "thin E8B800", "indexed10|0848F8": "thin FF0000",
         "indexed10|1050F8": "thin FF0000",
     },
     "hidden": {
@@ -503,7 +503,7 @@ orientation), each pair across a hidden column or row, and each crafted border's
 EXPECTED["colors"] |= {
     f"{a.spec}|{b.spec}": f"thin {a.spec if a.spec == '000000' else b.spec}"
     for _, a, b in BLACK_WHITE_PAIRS
-}  # sheetpeek's darker by Rec. 601 luma: black wins, white loses
+}  # the lower 2R + 5G + B: black wins, white loses
 
 
 def expected(edge: Edge) -> str:
