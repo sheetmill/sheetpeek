@@ -1,7 +1,9 @@
 # Architecture
 
 Rules about Excel's layout cite the capture that pins them (§4); a rule no capture has pinned yet
-is marked **unverified**. The reader's figures (§5) were measured on Python 3.11, macOS, Apple
+is marked **unverified**. A choice of sheetpeek's own, where Excel has nothing to copy (an output
+that cannot draw what Excel draws, or the shape of the API), is marked **decided**. The reader's
+figures (§5) were measured on Python 3.11, macOS, Apple
 M4 Pro, with the scripts in `bench/` (`load_modes.py`, `date_fidelity.py`), which rerun them;
 `bench/html_size.py` measures the HTML output (§7.3).
 
@@ -601,8 +603,8 @@ spaces, and an explicit line break starts a new line. **A row with a custom heig
 line shows.
 
 **Known deviation:** the `characters` layout ignores row heights and grows every row to the most
-lines any cell needs, as Excel's row autofit would. Following a custom height means turning points
-into lines, a choice listed in §9; it waits for `excel` mode, which has the points.
+lines any cell needs, as Excel's row autofit would. `excel` mode follows the custom height; in
+characters it would mean turning points into lines, a choice listed in §9.
 
 **Captured** (suite `row_height`, `CAPTURING.md`): **a row without `ht` takes the Normal font's
 height, and `defaultRowHeight` counts only with `customHeight="1"`.** `excel` mode lays a row out
@@ -944,8 +946,8 @@ the drawn size (unverified at other sizes). A second line is 2 screen pt below t
   deviation: Excel draws one rule, under the last wrapped line, fits each wrapped line 3 pt
   taller (three lines take 57 pt), and puts the distributed rule a point lower
   (`text_style_more`, group `rules`). **On a number, boolean or
-  error they span the value**, like a single underline (Excel for Windows is said to span
-  numbers too: a stated limitation until the platform setting brings Windows captures, §11). They add 3 pt under the text: a fitted row is 18 pt, not 15, and
+  error they span the value**, like a single underline (captured on the Mac only: a stated
+  limitation until the platform setting brings Windows captures, §11). They add 3 pt under the text: a fitted row is 18 pt, not 15, and
   a bottom-aligned baseline sits 6 pt above the cell's bottom, also in a row of fixed height
   (captured, `text_style_more` group `rules`, rows fixed at 15, 20 and 30 pt). Plain
   bottom-aligned text beside it in that row sits on the same baseline in Excel, where sheetpeek
@@ -1564,7 +1566,7 @@ are `filter.buttons` (§4.19).
 
 ## 5. Reading
 
-sheetpeek reads a workbook through xlio (`xlio==0.4.*`), the family's xlsx reader, after a check
+sheetpeek reads a workbook through xlio (`xlio==0.4.*`), the sheetmill project's xlsx reader, after a check
 of its own (§5.5). openpyxl is not imported at run time; the tests and the documentation's
 examples build workbooks with it.
 
@@ -1979,13 +1981,13 @@ A backend writes to a text stream, so the server and large sheets stream instead
 string. Backends are classes whose constructors take their drawing options; layout options
 (`show_hidden`, `scale`, `max_width`) belong to `Sheet.layout`. Built in:
 
-- `TextBackend(separator=" ", column_headings=False, row_headings=False)`, name `text`;
-- `RichBackend(separator=" ", column_headings=False, row_headings=False, color_system="auto",
-  force_terminal=None)`, name `rich`;
-- `HTMLBackend(fragment=False, column_headings=False, row_headings=False,
-  color_scheme="light")`, name `html` (§7.3);
-- `MarkdownBackend(header="first" | "letters", emphasis=False)`, name `markdown`;
-- `DelimitedBackend(delimiter)`, names `csv` and `tsv`.
+- `TextBackend`, name `text`;
+- `RichBackend`, name `rich`;
+- `HTMLBackend`, name `html` (§7.3);
+- `MarkdownBackend`, name `markdown`;
+- `DelimitedBackend`, names `csv` and `tsv`.
+
+Their constructors' parameters, with their defaults, are in the API reference (`docs/api.md`).
 
 They receive a `RenderedSheet` already laid out in their mode and never call xlformat.
 `render()` lays a `Sheet` out in the backend's mode, and lays a `RenderedSheet` out again when
@@ -2254,8 +2256,7 @@ sheetpeek.read("book.xlsx", recalc_on_load="never")               # cached value
 cannot be removed. **`ref=` names the range**, not `range=`, which would shadow the built-in
 (ruff A002). `ref` is openpyxl's own name for a range in a user-facing constructor
 (`openpyxl.worksheet.table.Table(ref="A1:E5")`, also `AutoFilter.ref`), matching the `ref`
-attribute of `<dimension>`, `<mergeCell>` and `<autoFilter>` in the file format. Callers of
-sheetpeek already use openpyxl.
+attribute of `<dimension>`, `<mergeCell>` and `<autoFilter>` in the file format.
 
 **CLI.**
 - `sheetpeek view book.xlsx [--sheet NAME] [--ref A1:H40] [--to rich|text|html|markdown|csv|tsv]
@@ -2287,7 +2288,7 @@ sheetpeek already use openpyxl.
 
 ### 8.3 Dependencies
 
-- `xlio==0.4.*` (§5): the family's reader, internal to the family, pinned to a minor.
+- `xlio==0.4.*` (§5): the sheetmill project's reader, pinned to a minor.
 - `xlrecalc>=0.8.1,<1` (§5.7), imported normally: it is required.
 - `xlformat>=0.6,<1` (§6.4), imported normally: it is required.
 - openpyxl is a dev dependency only: the tests and the documentation's examples build workbooks
@@ -2328,9 +2329,9 @@ drawn, objects reaching past the edge (decided), hence its general name.
 **Two spills competing for one empty cell** (§4.1). Excel lets both take the cell and draws the
 texts over each other, unreadably (captured). Characters cannot be drawn over each other, so
 `characters` mode cannot copy Excel; its default is that the first spill placed, left to right,
-takes the cell. HTML could overlay the two texts as Excel does.
-- *Alternatives:* the right cell's spill wins; the cell is split between them; neither spills
-  into it; in HTML, Excel's overlap.
+takes the cell. HTML draws both texts over each other, as Excel does (§3.6, §7.3).
+- *Alternatives (characters):* the right cell's spill wins; the cell is split between them;
+  neither spills into it.
 - *Scope leaning:* document.
 
 **Clipped text** (§4.1). Excel cuts blocked text at the cell's edge, through a glyph, with no
@@ -2421,8 +2422,8 @@ is an open question.
 - *Scope leaning:* document (HTML backend).
 
 **An on-screen scale for HTML** (planned). The page uses CSS points and pixels at 4/3 px per
-point, so it is 4/3 the size Excel for Mac shows at 100 % if Excel draws one point as one screen
-point (being measured). The default stays as it is. The option is a CSS custom property, such as
+point, so it is 4/3 the size Excel for Mac shows at 100 %, where Excel draws one point as one
+screen point (§4.11). The default stays as it is. The option is a CSS custom property, such as
 `--sheetpeek-scale`, applied to the wrapper, so a caller can match Excel's on-screen size without
 the layout changing.
 - *Scope:* document (HTML backend, or the caller's stylesheet).
@@ -2560,7 +2561,7 @@ Checked 2026-10-27; versions and dates from PyPI.
   - skips hidden rows and columns.
 
   Concurrent runs need a separate profile per process (`-env:UserInstallation`). `unoconv` was
-  archived in 2025; `unoserver` 3.7 keeps a listener running. It is a heavy external process, and
+  archived in 2025; `unoserver` 3.7 keeps a listener running. It is an external process, and
   its formatting is LibreOffice's, not Excel's.
 - **xlsx2html** 0.6.4 (2026-02, MIT): openpyxl `data_only`, with its own Babel-based number
   formatter that applies only the first section of date formats.
