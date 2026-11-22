@@ -17,9 +17,9 @@ last: an outcome counts only between two that open. The output is
 
 What the capture settles (``ARCHITECTURE.md``):
 - §4.17, the reading of ``textRotation``: a value other than 0 to 180 and 255 reads as 0
-  (unverified; ``sheetpeek._style.alignment``). Cases 181, 254, 256 and 1000.
+  (``sheetpeek._style.alignment``; Excel opens each horizontal). Cases 181, 254, 256 and 1000.
 - §5, reading: a custom ``numFmtId`` (164 and up) the file does not define reads as General
-  (unverified; ``sheetpeek._read``). Cases 170 and 300.
+  (``sheetpeek._read``; Excel shows each as General). Cases 170 and 300.
 
 ``EXPECTED`` is what sheetpeek reads for each case today (taken by running it, see
 ``sheetpeek_reads``), not a guess at Excel: the capture shows where the two differ.

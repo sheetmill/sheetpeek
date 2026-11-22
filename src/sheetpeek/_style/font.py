@@ -57,7 +57,8 @@ def to_font(
     """An ``xlio.Font`` as the model's :class:`~sheetpeek.Font`.
 
     ``theme_fonts`` holds the theme's Latin typefaces, ``{"major": ..., "minor": ...}``: a font
-    of either scheme is drawn in that typeface, whatever name it stores (unverified, §4.14).
+    of either scheme is drawn in that typeface, whatever name it stores (captured,
+    ``theme_fonts_palette``, §4.14).
     """
     color = font.color
     drawn = _fixed_index(color)

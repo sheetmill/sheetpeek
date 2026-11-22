@@ -1,6 +1,7 @@
 """The borders pass: one resolved side per edge of the laid-out grid, and the diagonals.
 
-The rules (``ARCHITECTURE.md`` §4.12, unverified): where two cells' sides
+The rules (``ARCHITECTURE.md`` §4.12; captured, ``border_conflicts``, ``merges_spill`` and
+``rotation``): where two cells' sides
 meet, one is drawn whole, by :func:`~sheetpeek._fill_border_model.winner`; each cell keeps its own
 sides, also inside a merge, whose inner sides are dropped; an unmerged angled cell's own sides slant
 with its text (§4.17) and leave the upright grid; a vertical side that spilled text crosses is not
@@ -90,7 +91,8 @@ def slant_shift(style: CellStyle, height: float) -> float:
 def _slanted(draft: Draft) -> tuple[SlantedBorders, ...]:
     """The side borders of unmerged angled cells, slanted with the text (:func:`slants`).
 
-    A merge's borders stay upright (unverified; reported as ``border.slanted``).
+    A merge's borders stay upright (captured, ``rotation_more``; reported as ``border.slanted``,
+    since its text is not placed as Excel places it).
     """
     found = []
     for i, row in enumerate(draft.rows):

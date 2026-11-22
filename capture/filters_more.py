@@ -7,7 +7,7 @@
     uv run --group capture python -m capture.filters_more read          # the saved captures again
     uv run --group capture python -m capture.filters_more build PATH    # every group's workbook
 
-ARCHITECTURE.md §4.19, the rules the suite ``filters`` left unverified: the criteria are not
+ARCHITECTURE.md §4.19, the rules the suite ``filters`` did not capture: the criteria are not
 applied on opening (the rows the file saved as hidden are what shows); a button on each column
 of the range's first row, merged across or down and empty header cells included, none on a
 hidden column or header row; a left-to-right sort (``columnSort``) draws no arrow, on the sheet

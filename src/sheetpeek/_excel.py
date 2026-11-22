@@ -234,8 +234,10 @@ def _row_model(
     """The height xlformat's captured row model gives, or 0 when a font is not measured.
 
     Wrapped lines take a point each beyond the font's height, one line included, and a larger
-    font in the row adds the difference of the faces' line insets (xlformat's CAPTURING.md
-    section 2 item 44; several wrapped cells in one row are not captured). Rows repeat the same
+    font in the row adds the difference of the faces' line insets (xlformat's
+    ``capture/row_heights.py``: Excel's heights for one to six wrapped lines in each face under
+    each Normal font, and beside unwrapped cells in other fonts, under "Row heights" in its
+    CAPTURING.md; several wrapped cells in one row are not captured). Rows repeat the same
     fonts, so the result is kept by them.
     """
 

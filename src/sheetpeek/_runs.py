@@ -1,7 +1,7 @@
 """Rich-text runs in the layout: a cell's text measured, broken and cut by its runs (§4.16).
 
-Every rule here is unverified (no capture in this repository yet): widths add per run, and each
-line of text takes the height of its largest run.
+Captured (``runs``): widths add per run, and each line of text takes the height of its largest
+run.
 """
 
 from __future__ import annotations
@@ -26,7 +26,7 @@ def drawn_spans(cell: Cell, text: str) -> tuple[TextSpan, ...] | None:
 
     Characters Excel does not draw are removed from each run as from the cell's text. A number
     format whose text section adds characters shows other text, and draws it in the cell's font
-    (unverified).
+    (captured, ``runs``).
     """
     if not cell.runs or cell.kind != "text":
         return None
@@ -111,7 +111,7 @@ class Text:
 
 
 def line_font(fonts: list[Font]) -> Font:
-    """The font that sets a line's height and baseline: its largest run's (unverified)."""
+    """The font that sets a line's height and baseline: its largest run's (captured, ``runs``)."""
     return max(fonts, key=lambda f: (font_row_height(f), f.size))
 
 

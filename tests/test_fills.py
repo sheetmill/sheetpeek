@@ -1,7 +1,7 @@
 """Fills: pattern and gradient fills read, their one color, the census, and the HTML fill layer.
 
-The expected tiles, shares and colors come from the screen suite ``fills``; the gradient angles
-are unverified (ARCHITECTURE.md §4.12).
+The expected tiles, shares and colors come from the screen suite ``fills``, the gradient angles
+from ``gradients`` (ARCHITECTURE.md §4.12).
 """
 
 import math

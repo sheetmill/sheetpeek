@@ -851,7 +851,7 @@ class Book:
 
         A run without properties takes the cell's font. A run with properties stands alone: what
         they leave out is the default, not the cell's, and a missing name or size the
-        Normal font's (both unverified). Adjacent runs in one font are joined.
+        Normal font's (both captured, ``runs``). Adjacent runs in one font are joined.
         """
         if rich is None or not rich.runs:
             return None

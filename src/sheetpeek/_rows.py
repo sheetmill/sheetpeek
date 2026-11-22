@@ -15,8 +15,10 @@ from sheetpeek._model import Font, Row, Sheet
 
 _MEASURED_SIZES = (9, 10, 11, 12, 14, 16, 18, 20, 24)
 # The height of a row without ``ht`` per Normal font: xlformat's row model, captured from Excel
-# for Mac for Calibri, Aptos Narrow and Arial at these sizes (its CAPTURING.md section 2 item
-# 44; it agrees with this repository's suite row_height at 9 to 16 points).
+# for Mac for Calibri, Aptos Narrow and Arial at these sizes (xlformat's ``capture/row_heights.py``:
+# one workbook per Normal font, the heights Excel gives the rows it fits on opening, under "Row
+# heights" and "Arial" in its CAPTURING.md; it agrees with this repository's suite row_height
+# at 9 to 16 points).
 # Sizes between those, from this repository's suite row_height_more (Excel's own row height):
 # no line through the measured sizes gives them (13 lies between 16 and 19, and is 17).
 _BETWEEN: dict[str, dict[int, float]] = {
@@ -84,7 +86,9 @@ def fits_cells(row: Row, sheet: Sheet) -> bool:
 def wrapped_height(lines: int, font: Font) -> float:
     """The height Excel gives a row for ``lines`` wrapped lines in ``font``.
 
-    Captured: three and six lines of Calibri 11 are 48 and 96 pt; other fonts are unverified.
+    Captured: three and six lines of Calibri 11 are 48 and 96 pt (``row_height``); three lines in
+    other fonts and sizes in ``row_height_more``, where each line in Times New Roman or Georgia is
+    a point shorter in Excel, a known deviation.
     """
     if lines <= 1:
         return font_row_height(font)
@@ -94,12 +98,14 @@ def wrapped_height(lines: int, font: Font) -> float:
 def baseline_offsets(font: Font, normal: Font | None = None) -> tuple[float, float, float]:
     """(line pitch, baseline below a top-aligned line's top, baseline above a bottom one's bottom).
 
-    Excel's screen, from xlformat's ``vertical_metrics`` (its CAPTURING.md section 2 item 47:
-    Calibri, Aptos Narrow and Arial at 9 to 24 points; this repository's suite ``text_style``
-    agrees): Calibri 11 has its baseline 12 pt below the top and 3 pt above the bottom, and
-    wrapped lines 15 pt apart. Given the workbook's ``normal`` font, bottom-aligned text sits at
-    least that font's distance up, as Excel places it. Another size takes the nearest measured
-    size's, another face Calibri's (unverified).
+    Excel's screen, from xlformat's ``vertical_metrics`` (xlformat's ``capture/screen_vertical.py``:
+    text aligned top, center and bottom in rows of several heights, the window captured at zoom
+    100 and each baseline measured, for Calibri, Aptos Narrow and Arial at 9 to 24 points, under
+    "Vertical placement on screen" and "The row's top on screen" in its CAPTURING.md; this
+    repository's suite ``text_style`` agrees): Calibri 11 has its baseline 12 pt below the top
+    and 3 pt above the bottom, and wrapped lines 15 pt apart. Given the workbook's ``normal``
+    font, bottom-aligned text sits at least that font's distance up, as Excel places it. Another
+    size takes the nearest measured size's, another face Calibri's (unverified).
     """
     metrics = _screen(*_measured(font), *(_measured(normal) if normal else ("", 0)))
     return metrics.line_pitch, metrics.baseline_from_top, metrics.baseline_from_bottom

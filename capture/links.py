@@ -4,7 +4,7 @@
     uv run --group capture python -m capture.links read           # the saved captures again
     uv run --group capture python -m capture.links build PATH     # the workbook only
 
-ARCHITECTURE.md §4.10, every rule the section marks unverified: a link has no look of its own
+ARCHITECTURE.md §4.10, the rules it settles: a link has no look of its own
 (the Normal style draws a linked cell as plain text; the Hyperlink and Followed Hyperlink cell
 styles draw the theme's ``hlink`` and ``folHlink`` with a single underline, with or without a
 link); ``display`` is not drawn and an empty linked cell shows nothing; a ``HYPERLINK()`` cell

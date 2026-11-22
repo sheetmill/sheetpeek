@@ -37,7 +37,7 @@ from sheetpeek.backends.html._table import Page
 Source = str | os.PathLike[str] | IO[bytes]
 
 ACTIVE_INK = "278452"
-"""The active tab's text: Excel's own green, whatever the tab's color (unverified)."""
+"""The active tab's text: Excel's own green, whatever the tab's color (captured, tab_strip)."""
 _TOP_SHARE, _BOTTOM_SHARE = 0.1, 0.4  # the active tab's gradient, as shares of its color
 _DARK_TEXT_FROM = 128
 """An inactive colored tab's name is black from this Rec. 601 luma of its color up, else white

@@ -17,8 +17,10 @@ zoom control takes 10 to 400, and wider file zooms are not captured."""
 class SheetView:
     """What the first ``<sheetView>`` says about how the sheet is shown.
 
-    ``zoom`` is the saved zoom in percent (``zoomScale``, 100 when absent; a value outside 10 to
-    400 or not a whole number is 100, unverified). ``show_zeros`` is ``showZeros``.
+    ``zoom`` is the saved zoom in percent (``zoomScale``, 100 when absent). A value that is not a
+    whole number is 100, and a whole one is kept, also outside the 10 to 400 of Excel's zoom
+    control, as Excel opens and draws a sheet at 5 and 401 (captured, ``freeze_view``); past 1 to
+    1000, sheetpeek's own bound against crafted files, it is 100. ``show_zeros`` is ``showZeros``.
     ``frozen_rows`` and ``frozen_columns`` count the rows and columns a frozen pane keeps in
     place (``ySplit`` and ``xSplit`` of a ``<pane>`` whose state is ``frozen`` or
     ``frozenSplit``), from ``top_left``, the view's top-left cell (``topLeftCell``, ``"A1"``

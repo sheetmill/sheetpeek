@@ -421,7 +421,7 @@ def test_each_style_draws_its_width(captured):
 
 @pytest.mark.excel
 def test_a_hair_diagonal_is_drawn_as_thin(captured):
-    # Excel against itself: in each group, zoom and direction, hair as thin (unverified).
+    # Excel against itself: in each group, zoom and direction, hair as thin.
     rows = {
         (r["group"], r["zoom"], r["direction"], r["line"], r["style"]): r
         for r in captured

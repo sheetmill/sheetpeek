@@ -15,10 +15,10 @@ cell holds an ``x``; no case draws magenta.
   them, 16-bit fractions just short of a round tint (0.6 stored as 0.59999389629810485, and
   0.4, 0.8, 0.25, 0.5, 0.15 and -0.25 likewise). ARCHITECTURE §3.3, ``_colors.apply_tint``:
   "Stored 16-bit tint fractions draw as the round tint" (the tolerance added before truncating
-  the lightness), unverified until this capture.
+  the lightness), which this capture settles.
 - ``third``: rows 12 and 13 hold theme 1 (dark 1, black) and theme 3 (dark 2, ``1F497D``),
   columns A to C the tints 0.333333, 0.33333 and 0.3333333333. §3.3: "Tint 0.333333 on black
-  is 555555" (lightness 80 of 240, not 79), unverified until this capture.
+  is 555555" (lightness 80 of 240, not 79), which this capture settles.
 
 Tints are written into ``styles.xml`` as the ``repr`` of the case's float, exactly: openpyxl's
 ``%.16g`` is rewritten (:func:`build`). ``run`` saves Excel's answers with the environment

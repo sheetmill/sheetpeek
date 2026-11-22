@@ -11,10 +11,10 @@
 The tab strip is window chrome: it lies below the grid, at the window's bottom left, above the
 status bar, and a full-screen window (2560 points wide) shows every tab of these workbooks. Each
 group is its own workbook and window, at zoom 100; the active sheet is the first one (the one
-the capture's markers, B2 and D6, are on). Captures so far are in macOS's dark appearance;
-``run light`` takes the groups again in the light appearance (switch macOS's appearance once,
-for all suites), into a folder of its own: a run refuses an appearance other than the one it
-names. Groups:
+the capture's markers, B2 and D6, are on). ``run`` takes the groups in macOS's dark appearance
+and ``run light`` again in the light appearance (switch macOS's appearance once, for all
+suites), into a folder of its own; the committed capture holds both. A run refuses an appearance
+other than the one it names. Groups:
 
 - ``order``: seven sheets in file order One (visible, active, uncolored), Two (hidden), Three,
   Four (very hidden), Five, Six (hidden), Seven, their ``sheetId`` in another order (7, 3, 5, 1,

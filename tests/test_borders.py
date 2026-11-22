@@ -1,7 +1,7 @@
 """Borders: sides read, conflicts resolved in the layout, and the HTML border layer.
 
-The line geometry comes from the screen suite ``borders``; the order, ties, merges and spill are
-unverified (ARCHITECTURE.md §4.12).
+The line geometry comes from the screen suite ``borders``; the order, ties and hidden rows and
+columns from ``border_conflicts``, merges and spill from ``merges_spill`` (ARCHITECTURE.md §4.12).
 A default column here is 71 or 70 px wide (53 pt) and a row 20 px (15 pt).
 """
 
@@ -234,7 +234,8 @@ def test_a_hidden_column_s_sides_do_not_compete(tmp_path):
         },
         hidden=["B"],
     )
-    # A and C meet on one edge: their thick sides compete, blue being darker (unverified).
+    # A and C meet on one edge: their thick sides compete, and blue's lower 2R + 5G + B wins
+    # (captured, border_conflicts).
     assert resolved(path).vertical[0][1] == Line("thick", "0000FF")
 
 
@@ -366,7 +367,7 @@ def test_a_diagonal_is_a_line_from_corner_to_corner(tmp_path):
     ((name, style),) = lines(page)
     assert geometry(style) == (0, 0, 72, 21)
     body = rules(page)[name]
-    # Hair is drawn as thin (unverified).
+    # Hair is drawn as thin (captured, diagonals).
     assert "%3Cline x1='0' y1='0' x2='72' y2='21' stroke='%23FF0000' stroke-width='1'/%3E" in body
 
 
