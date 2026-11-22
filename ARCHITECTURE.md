@@ -2085,12 +2085,12 @@ points.
   row gutter's geometry transposed. The level buttons sit in the headings' bands, so they are
   drawn only with both headings. `buttons="none"` leaves the gutter out; `"static"`, the
   default, draws it, and leaves room for working buttons later. Its stylesheet is written only on
-  a page that draws a gutter. The dark colors are captured; the light ones are placeholders.
+  a page that draws a gutter. Its colors are captured in the light appearance and the dark one.
 - **The CSS surface is public interface**, changed only with a changelog entry: the custom
   properties `--sheetpeek-paper`, `--sheetpeek-ink`, `--sheetpeek-grid`,
   `--sheetpeek-heading-paper`, `--sheetpeek-heading-ink`, `--sheetpeek-heading-grid`,
   `--sheetpeek-outline-paper`, `--sheetpeek-outline-ink`, `--sheetpeek-outline-button`,
-  `--sheetpeek-outline-button-paper`, the classes `sheetpeek`, `sp-crossed`, `sp-clip`,
+  `--sheetpeek-outline-button-paper`, `--sheetpeek-outline-stroke`, the classes `sheetpeek`, `sp-crossed`, `sp-clip`,
   `sp-run`, `sp-center`, `sp-colhead`, `sp-rowhead`, `sp-corner`, `sp-nogrid`, `sp-ol`,
   `sp-olbutton`, `sp-ollevel`, and the ids `sp-<cell>` of cells a link goes to. Explicit
   colors from the file (fills, font and section

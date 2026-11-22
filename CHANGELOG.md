@@ -99,9 +99,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Excel reads it: modulo 8, and one that is not decimal digits as none.
 - `buttons="static" | "none"` on `HTMLBackend`, `RichBackend` and `TextBackend`: whether to draw
   Excel's buttons, which do nothing in a static output: the outline gutter, and the filter
-  buttons (below). New CSS custom
+  buttons (above). New CSS custom
   properties `--sheetpeek-outline-paper`, `--sheetpeek-outline-ink`,
-  `--sheetpeek-outline-button`, `--sheetpeek-outline-button-paper`, and classes `sp-ol`,
+  `--sheetpeek-outline-button`, `--sheetpeek-outline-button-paper`,
+  `--sheetpeek-outline-stroke`, and classes `sp-ol`,
   `sp-olbutton`, `sp-ollevel`.
 - Pattern fills: the 17 patterns are drawn in HTML as Excel draws them, from tiles captured on
   the screen, anchored at the sheet's origin, a tile pixel a whole screen point at any zoom.

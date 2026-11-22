@@ -109,10 +109,11 @@ an API change.
 | `--sheetpeek-zoom` | set by the page when its zoom is not 100: the zoom as a factor, which scales the headings' font | `1` |
 | `--sheetpeek-freeze` | a frozen pane's freeze lines | `#9b9b9b` |
 | `--sheetpeek-page-break` | the page-break marks, when the `page_breaks` option asks for them | `#0000d0` |
-| `--sheetpeek-outline-paper` | the outline gutter | `#eeeeee`, dark `#555555` |
-| `--sheetpeek-outline-ink` | the outline's bars and dots | `#a6a6a6`, dark `#999999` |
-| `--sheetpeek-outline-button` | the outline buttons' borders and strokes | `#808080`, dark `#333333` |
+| `--sheetpeek-outline-paper` | the outline gutter | `#e6e6e6`, dark `#555555` |
+| `--sheetpeek-outline-ink` | the outline's bars, ticks and dots | `#999999` |
+| `--sheetpeek-outline-button` | the outline buttons' borders | `#8a8a8a`, dark `#333333` |
 | `--sheetpeek-outline-button-paper` | the outline buttons' background | `#ffffff` |
+| `--sheetpeek-outline-stroke` | the minus and plus in the outline buttons | `#333333` |
 
 | class | element |
 |---|---|
@@ -231,9 +232,10 @@ Carlito installed on the viewer's system, then a local Arial or Helvetica scaled
 widths. Every text is anchored where Excel anchors it, by its start, its end or its center, so a
 different font changes only the far end of a text, and the clip windows cut where Excel cuts.
 
-The outline gutter's colors in the light scheme are placeholders; its dark colors and its sizes
-come from Excel's screen. The heading sizes and colors and the grid color come from Excel's
-screen too; the light headings' colors are provisional. The heading bands are in points, so they
+### Where the measurements come from
+
+The outline gutter's colors and sizes, the headings' sizes and colors and the grid color come
+from Excel's screen, in the light appearance and the dark one. The heading bands are in points, so they
 scale with the page like the cells, and grow with the Normal font's size. A sheet's own grid
 color draws its gridlines half a CSS pixel wide, one device pixel on a high-density display, as
 Excel draws it. The text's baseline comes from Excel's screen; its insets, and the baseline of
