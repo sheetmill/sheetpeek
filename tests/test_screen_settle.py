@@ -85,3 +85,14 @@ def test_an_audit_watches_two_seconds_and_refuses_a_change():
     assert screen.t >= 0.6 + 2.0
     with pytest.raises(RuntimeError, match="audit"):
         run([(0, b"a"), (2.0, b"b")], audit=True)
+
+
+def test_settling_compares_the_window_less_the_overlay_scroll_bars():
+    from capture.screen.window import SCROLL_BARS, compared_area
+
+    window = {"id": 1, "x": 0.0, "y": 30.0, "w": 2560.0, "h": 1320.0, "title": "t"}
+    assert compared_area(window) == (0.0, 30.0, 2560.0 - SCROLL_BARS[0], 1320.0 - SCROLL_BARS[1])
+    # the bars measured in the macOS VM: vertical 3 to 10 pt from the right, horizontal 58 to 64
+    # pt above the bottom; both lie outside the compared area
+    assert SCROLL_BARS[0] > 10
+    assert SCROLL_BARS[1] > 64

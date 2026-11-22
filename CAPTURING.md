@@ -138,9 +138,12 @@ pt high in the file prints 14 pt apart). `capture/screen/` captures Excel's wind
   seen, how long the picture held, the longest stillness a change interrupted, and `near` when
   that came within 0.1 s of 0.4). A run's first capture is shot again 1 s later and must be
   unchanged; with `SHEETPEEK_CAPTURE_AUDIT=1` every capture is watched for 2 s after settling,
-  for a suite's first run and after an update of Excel or macOS. The whole window is compared:
-  whether Excel's chrome on the Mac changes on its own, as on Windows, is not measured yet; if it
-  does, the comparison is to be limited to the headings and cells.
+  for a suite's first run and after an update of Excel or macOS. The shots compared are of the
+  window less 16 pt at its right and 72 pt at its bottom (`screencapture -R`): macOS's overlay
+  scroll bars, which a view's scroll shows and which fade about a second later, lie there
+  (measured in the macOS VM: the window's only change after settling, a 14 px strip down its
+  right edge and one above the sheet tabs). That keeps the headings and nearly every cell; the
+  window is then captured whole.
 - **The window's geometry:** where a dash or a tile starts follows Excel's window on the screen
   (a dash's phase moved with the window at zoom 200), so each machine captures in one geometry,
   recorded once outside the repository (`capture/screen/geometry.py`: `$SHEETPEEK_CAPTURE_GEOMETRY`,

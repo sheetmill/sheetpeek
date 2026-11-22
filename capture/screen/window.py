@@ -77,7 +77,33 @@ class SettleError(RuntimeError):
         self.changed = changed
 
 
-def _shoot(window_id: int, out: Path) -> bytes:
+SCROLL_BARS = (16.0, 72.0)
+"""Points left out of the compared area at the window's right and bottom: macOS's overlay scroll
+bars, which a view's scroll shows and which fade about a second later (measured in the macOS
+VM: the vertical bar 3 to 10 pt from the window's right edge, the horizontal one 58 to 64 pt
+above its bottom, the sheet tabs and status bar below it)."""
+
+
+def compared_area(window: dict[str, object]) -> tuple[float, float, float, float]:
+    """The screen rectangle (x, y, width, height in points) a settling capture compares: the
+    window less the overlay scroll bars' strips, so the headings and nearly every cell."""
+    right, bottom = SCROLL_BARS
+    x, y, w, h = (float(window[k]) for k in ("x", "y", "w", "h"))  # type: ignore[arg-type]
+    return x, y, w - right, h - bottom
+
+
+def _shoot_area(area: tuple[float, float, float, float], out: Path) -> bytes:
+    """One ``screencapture -R`` of a screen rectangle, as the PNG file's bytes."""
+    rect = ",".join(f"{v:g}" for v in area)
+    result = subprocess.run(
+        ["screencapture", "-x", f"-R{rect}", str(out)], capture_output=True, text=True, timeout=30
+    )
+    if result.returncode or not out.exists():
+        raise RuntimeError(f"screencapture failed: {result.stderr.strip()}")
+    return out.read_bytes()
+
+
+def _shoot(window_id: object, out: Path) -> bytes:
     """One ``screencapture`` of the window, as the PNG file's bytes."""
     result = subprocess.run(
         ["screencapture", "-x", "-o", "-l", str(window_id), str(out)],
@@ -157,7 +183,9 @@ def capture_window(
 ) -> tuple[dict[str, object], png.Image, dict[str, object]]:
     """Capture the on-screen Excel window whose title contains ``title``, once it has settled.
 
-    Returns the window, the picture and how it settled (:func:`settle`).
+    Settling compares shots of :func:`compared_area` (the overlay scroll bars change on their own
+    after a view); the window is then captured whole. Returns the window, the picture and how
+    it settled (:func:`settle`).
     """
     for _ in range(20):
         windows = [w for w in excel_windows() if title in w["title"]]
@@ -167,13 +195,17 @@ def capture_window(
     else:
         raise RuntimeError(f"no Excel window titled {title!r} on screen")
     window = windows[0]
+    area = compared_area(window)
+    polled = out.with_name(f"{out.stem}_area.png")
     try:
-        shot, found = settle(lambda: _shoot(int(window["id"]), out), confirm=confirm, audit=audit)
+        _, found = settle(lambda: _shoot_area(area, polled), confirm=confirm, audit=audit)
     except SettleError as e:  # both pictures kept as evidence
         out.with_name(f"{out.stem}_settled.png").write_bytes(e.settled)
         out.with_name(f"{out.stem}_changed.png").write_bytes(e.changed)
         raise
-    out.write_bytes(shot)
+    finally:
+        polled.unlink(missing_ok=True)
+    _shoot(window["id"], out)
     return window, png.read(out), found
 
 
