@@ -151,13 +151,15 @@ def test_the_designed_pairs_are_as_their_labels_say_and_predict_by_the_rule():
             assert abs(va - vb) == int(label.split()[1]), (label, a, b)
         elif "rgb" in label:
             assert abs(va - vb) == 3, (label, a, b)
-        luma = [0.299 * r + 0.587 * g + 0.114 * bl for r, g, bl in (_rgb(a.rgb), _rgb(b.rgb))]
+        luma = [299 * r + 587 * g + 114 * bl for r, g, bl in (_rgb(a.rgb), _rgb(b.rgb))]
         differs_from_601 += (luma[0] < luma[1]) != (va < vb)
     assert differs_from_601 >= 40
 
 
 def test_the_color_pairs_separate_what_they_say():
-    def luma(c, weights=(0.299, 0.587, 0.114)):
+    # Luma in integers (Rec. 601 in thousandths, Rec. 709 in ten-thousandths): exact on every
+    # Python, where a float sum of the weighted channels may round two equal lumas apart.
+    def luma(c, weights=(299, 587, 114)):
         return sum(w * int(c[k : k + 2], 16) for w, k in zip(weights, (0, 2, 4), strict=True))
 
     for label, a, b in bc.COLOR_PAIRS:
@@ -165,11 +167,9 @@ def test_the_color_pairs_separate_what_they_say():
         if label == "equal luma":
             assert la == lb, (a, b)
             continue
-        assert abs(la - lb) >= 3, (a, b)
+        assert abs(la - lb) >= 3000, (a, b)
         if "709" in label:
-            assert (la < lb) != (
-                luma(a.rgb, (0.2126, 0.7152, 0.0722)) < luma(b.rgb, (0.2126, 0.7152, 0.0722))
-            )
+            assert (la < lb) != (luma(a.rgb, (2126, 7152, 722)) < luma(b.rgb, (2126, 7152, 722)))
         if "max" in label:
             assert (la < lb) != (max(bytes.fromhex(a.rgb)) < max(bytes.fromhex(b.rgb)))
         if "mean" in label:
