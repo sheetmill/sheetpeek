@@ -239,7 +239,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   README's and the documentation's examples build their workbooks with it, so they need it
   installed.
 - Column widths are taken as Excel takes them: a width from 1e30 to 1e300 is one point, where
-  0.2.0 hid the column; a `baseColWidth` of 255 gives columns of 10 characters, where 0.2.0 made
+  0.2.0 hid the wider ones (1e100 and 1e300 among them); a `baseColWidth` of 255 gives columns of 10 characters, where 0.2.0 made
   them 255; and a negative width, or one past 65,536 points, wraps at the Normal font's digit
   (under a Calibri 14 Normal font a width of 1e6 is 53,184 pt, where 0.2.0 drew 42,261).
 - Files Excel opens that 0.2.0 refused are read: a color whose `rgb` is not hex (read as Excel
@@ -281,7 +281,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A sheet with grouped rows or columns whose file shows outline symbols starts with the outline
   gutter in HTML, `rich` and plain text output; `buttons="none"` leaves it out.
 - `sheetpeek view` reports on standard error after the output, one line per kind with its code
-  first (`sheetpeek: border: borders not shown (3 cells): not implemented yet`), in place of
+  first (`sheetpeek: border: borders not shown in text (3 cells): borders are drawn only in HTML
+  so far`), in place of
   `sheetpeek: warning: ...` lines before it.
 - `Sheet` and `RenderedSheet` take `notices` in place of their `warnings` field; `warnings` is a
   read-only property.
@@ -290,8 +291,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `CellStyle.fill` of a pattern fill is the blend of its two colors by the pattern's share,
   not its foreground: a `gray0625` fill, 6.25 % black dots, was shown as solid black. A
   gradient's is its midpoint color, where it was no fill.
-- A solid fill in indexed color 64 is no fill, and a fill index past the palette is black, as
-  Excel draws them; an index past the palette was no fill.
+- A fill index past the palette is black, as Excel draws it, where it was no fill.
 - Underlines and strikethrough in HTML are 1 px rules at Excel's offsets, not the browser's text
   decorations, so they stay one pixel thick at any page scale; a single or double underline runs
   1 pt past its text, as Excel 16.115 draws it.
