@@ -314,11 +314,7 @@ def _word(record, k):
     }
 
 
-UPSTREAM = {
-    # Excel draws text under a one-section [Blue]General in blue, runs included; xlformat gives
-    # text no section color there (only a text section's color), so sheetpeek keeps the runs'.
-    ("main", "J28"): (("Calibri 11", "0000FF", 0.0), ("Calibri 11", "0000FF", 0.0)),
-}
+UPSTREAM: dict[tuple[str, str], tuple[tuple[str, str, float], ...]] = {}
 """Words drawn as Excel draws them where a sibling package does not give sheetpeek the means yet:
 compared at Excel's fonts and colors, and each must still differ from sheetpeek's (unpin it)."""
 

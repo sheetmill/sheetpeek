@@ -1234,9 +1234,8 @@ size, for spill, `####`, wrapping, shrink to fit and alignment:
   draw one rule).
 - `fill` repeats the runs; justified and distributed words keep the runs they cut.
 - The number format's section color replaces each run's color, as it replaces a cell's (`[Red]@`).
-  Under a one-section format such as `[Blue]General`, Excel draws text in the section's color too,
-  runs included; xlformat gives text no color there, so sheetpeek keeps the runs' own, a known
-  deviation. A text section that adds characters (`@" more"`) shows other text, which is drawn
+  Under a one-section format such as `[Blue]General`, text takes the section's color too, runs
+  included, as Excel draws it (`runs`, case J28). A text section that adds characters (`@" more"`) shows other text, which is drawn
   in the cell's font.
 
 A `TextRun` of a cell with runs carries `spans`: each piece of its line as a `TextSpan` with its
@@ -2294,7 +2293,7 @@ sheetpeek already use openpyxl.
 
 - `xlio==0.4.*` (§5): the family's reader, internal to the family, pinned to a minor.
 - `xlrecalc>=0.8.1,<1` (§5.7), imported normally: it is required.
-- `xlformat>=0.5,<1` (§6.4), imported normally: it is required.
+- `xlformat>=0.6,<1` (§6.4), imported normally: it is required.
 - openpyxl is a dev dependency only: the tests and the documentation's examples build workbooks
   with it, and the tests that need it are left out without it.
 - Extra `sheetpeek[rich]`: `rich>=13`.

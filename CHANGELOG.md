@@ -258,7 +258,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sheet names are looked up without case, as Excel compares them: `Book.sheet("data")` and
   `read(path, "DATA")` find a sheet named `Data` (and keep its spelling), where 0.2.0 raised
   `KeyError`.
-- Requires xlformat 0.5. Through it, a workbook whose Normal font is 18 pt or more gets Excel's
+- Requires xlformat 0.6. Through it, text under a one-section colored General format
+  (`[Blue]General`) takes the section's color, runs included, as Excel draws it, where 0.2.0 drew
+  it in the font's color; a workbook whose Normal font is 18 pt or more gets Excel's
   wider column padding: its columns without a stored width are wider (2 pt at Calibri 20); and
   Arial is measured, where 0.2.0 measured it as Calibri with a warning: an Arial 10 Normal font
   gives 53 pt columns and 13 pt rows, as Excel does (0.2.0: 45 and 14), and an Arial 11 number

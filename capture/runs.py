@@ -392,7 +392,7 @@ EXPECTED: dict[str, dict[str, dict[str, Any]]] = {
             "row_height": 15.0,
             "text": "HH HH",
             "baselines": (12.0,),
-            "words": (("Calibri 11", "FF0000", 0.0), ("Calibri 11", "00B050", 0.0)),
+            "words": (("Calibri 11", "0000FF", 0.0), ("Calibri 11", "0000FF", 0.0)),
         },
         "J30": {
             "row_height": 21.0,
