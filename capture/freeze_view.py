@@ -497,7 +497,10 @@ def measure(cap: Any, name: str, appearance: str = "dark") -> list[dict[str, str
     base = {"group": name, "appearance": appearance, "zoom": str(cap.zoom)}
     for cell in fill(openpyxl.Workbook().active) + [f"A{r}" for r in (11, 13)] + ["F11", "F13"]:
         place(cap, cell)
-    records = [base | {"kind": "window", "state": cap.value("window", f"state.{cap.zoom}") or ""}]
+    from capture.screen.session import readable
+
+    state = readable(cap.value("window", f"state.{cap.zoom}") or "")
+    records = [base | {"kind": "window", "state": state}]
     open_line = None
     for item, cell, side in EDGES:
         found = _edge(cap, cell, side)

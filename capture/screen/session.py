@@ -18,6 +18,7 @@ import contextlib
 import datetime as dt
 import os
 import platform
+import re
 import subprocess
 import time
 from pathlib import Path
@@ -53,6 +54,20 @@ def request(*arguments: str, timeout: float = 60.0) -> str:
     if result.returncode:
         raise ExcelError(result.stderr.strip()[:400])
     return result.stdout.rstrip("\n")
+
+
+_UNNAMED = re.compile("\u00abconstant \\*\\*\\*\\*(.{4})\u00bb", re.DOTALL)
+"""AppleScript's raw form of a constant it has no name for: its four-character code as raw
+characters, control characters among them."""
+
+
+def readable(text: str) -> str:
+    """``text`` with each unnamed constant written as ``constant 0x`` and its code in hex.
+
+    Excel answers a window's ``view`` with such a constant in page break preview; written raw, its
+    control characters make a capture binary to git.
+    """
+    return _UNNAMED.sub(lambda m: "constant 0x" + "".join(f"{ord(c):02X}" for c in m[1]), text)
 
 
 def excel_windows() -> list[dict[str, object]]:
@@ -243,7 +258,7 @@ class ExcelSession:
         panes, the split row and column, the scroll row and column; a field Excel refuses is
         ``ERR``.
         """
-        return self.ask("window", self.name)
+        return readable(self.ask("window", self.name))
 
     def follow(self, active: str, sheet: str, cell: str) -> list[tuple[str, str]]:
         """Follow the first hyperlink of ``sheet``'s ``cell`` with sheet ``active`` active.

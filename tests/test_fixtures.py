@@ -49,3 +49,22 @@ def test_no_personal_data(path):
             for marker in MARKERS:
                 assert marker not in data, f"{name} contains {marker.decode()}"
             assert not FILLED.search(data), f"{name} names a company or manager"
+
+
+CAPTURES = sorted((ROOT / "tests" / "captures").glob("*.tsv*"))
+CONTROL = re.compile(r"[\x00-\x08\x0b-\x1f\x7f]")
+"""Control characters other than tab and newline: git and GitHub take a file holding one for
+binary."""
+
+
+@pytest.mark.parametrize("path", CAPTURES, ids=lambda p: p.name)
+def test_a_text_capture_holds_no_control_character(path):
+    import gzip
+
+    data = gzip.decompress(path.read_bytes()) if path.suffix == ".gz" else path.read_bytes()
+    found = [
+        (number, line[:60])
+        for number, line in enumerate(data.decode("utf-8").splitlines(), 1)
+        if CONTROL.search(line)
+    ]
+    assert not found, found
