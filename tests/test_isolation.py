@@ -1,4 +1,4 @@
-"""The reader is the only module that knows openpyxl, so it can be replaced on its own."""
+"""Nothing in the package imports openpyxl, and only the entry points import the reader."""
 
 import ast
 from pathlib import Path

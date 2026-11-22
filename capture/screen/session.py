@@ -28,9 +28,9 @@ HERE = Path(__file__).resolve().parent
 SCRIPT = HERE / "excel.applescript"
 WINDOWS = HERE / "windows.js"
 WINDOW_GRACE = 10.0
+"""Seconds a window with no workbook may stay on screen before a session refuses to start."""
 SETTLE = 5.0
 """Seconds between a session's checks and its opening the workbook."""
-"""Seconds a window with no workbook may stay on screen before a session refuses to start."""
 CONTAINER = Path.home() / "Library/Containers/com.microsoft.Excel/Data/Documents"
 """Excel is sandboxed: a workbook it opens by script lives here, so no "Grant Access" shows."""
 APP = Path("/Applications/Microsoft Excel.app")

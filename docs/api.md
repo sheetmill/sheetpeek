@@ -8,7 +8,7 @@ Everything below is importable from `sheetpeek`.
 .. autofunction:: sheetpeek.read
 .. autofunction:: sheetpeek.open
 .. autoclass:: sheetpeek.Book
-   :members: sheet, sheet_names, sheets, date1904, close
+   :members: sheet, sheet_names, sheets, date1904, notices, close
 .. autoclass:: sheetpeek.SheetInfo
    :members:
 .. autoexception:: sheetpeek.NotAWorksheetError
@@ -85,7 +85,7 @@ Everything below is importable from `sheetpeek`.
    What a :class:`SortCondition` sorts by: ``"value"``, ``"cellColor"``, ``"fontColor"`` or
    ``"icon"``.
 .. autoclass:: sheetpeek.CellRange
-   :members: parse, rows, columns, intersects
+   :members: parse, rows, columns, intersects, intersection
 ```
 
 ## Layout

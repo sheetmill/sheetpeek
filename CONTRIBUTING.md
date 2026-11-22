@@ -8,10 +8,8 @@ version and platform.
 
 ## Pull requests
 
-The project is just getting started, so pull requests aren't being accepted yet while
-the test-capture workflow, release process and review practices settle. This will be
-revisited after the first releases. In the meantime, if you have a change in mind,
-please open an issue describing it.
+Pull requests aren't being accepted. If you have a change in mind, please open an issue
+describing it.
 
 When pull requests open, these rules will apply:
 

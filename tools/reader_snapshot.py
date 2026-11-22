@@ -141,7 +141,7 @@ FIXED_NOW = (2026, 1, 1, 12, 0, 0)
 
 
 def _hold_still() -> None:
-    """Pin xlrecalc's clock (its private date modules; checked against xlrecalc 0.4).
+    """Pin xlrecalc's clock (its private date modules, checked here to import ``datetime as dt``).
 
     Volatile functions (NOW, TODAY, RAND, RANDBETWEEN, RANDARRAY) and every cell resting on
     them would otherwise differ between two sweeps of one tree; random is reseeded per file.

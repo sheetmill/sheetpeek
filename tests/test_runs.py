@@ -1,8 +1,8 @@
 """Rich-text runs: read from shared strings, measured and drawn per run (ARCHITECTURE.md §4.16).
 
 The expected layouts (zoom 100) are the suite runs' (tests/test_suite_runs.py compares them).
-Excel writes runs in shared strings; openpyxl writes inline strings, whose runs its read-only
-reader drops, so the workbooks here move their runs into shared strings.
+Excel writes runs in shared strings and openpyxl writes them inline, so the workbooks here move
+their runs into shared strings, as Excel writes them.
 """
 
 import io
