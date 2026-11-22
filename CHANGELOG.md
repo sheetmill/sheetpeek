@@ -215,12 +215,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   a formula written by openpyxl, which stores no value, shows its result where it showed as
   empty with the warning "formula cell(s) have no cached value", and a cached value in such a
   file is recomputed. `value.no_cached_value` and its warning now count only the formulas
-  without a value that xlrecalc does not compute. Files Excel recalculates are read more
-  slowly, because sheetpeek computes what Excel computes: the largest public workbook (15.2
-  million cells) about 50% slower, in 58.1 s and 905 MiB at peak where it took 38.5 s and
-  858 MiB; a workbook of 400,001 formulas openpyxl wrote in 7.5 s where it took 2.7 s. A file
-  Excel saved and does not recalculate takes about a fifth longer at most, for the check of its
-  formulas.
+  without a value that xlrecalc does not compute. A formula is computed only when a range read
+  holds it, and only the sheets its evaluation reaches are read for it. Reading every sheet
+  (best of three, measured together): the largest public workbook (15.2 million cells, 10
+  formulas, all recalculated on opening) in 40.3 s and 876 MiB at peak, against 38.0 s and
+  863 MiB for the same reader without recalculation and 38.6 s and 643 MiB for 0.2.0 (whose
+  openpyxl reader takes less memory); a workbook of 400,001 formulas openpyxl wrote, with no
+  values, in 7.7 s and 314 MiB, against 2.7 s without recalculation and 3.3 s for 0.2.0, which
+  showed every one of them empty; the same workbook as Excel saves it, where no formula is
+  recalculated, in 3.7 s and 255 MiB, against 2.8 s and 3.5 s.
 - `Font.color` of a theme color 1 font ("Text 1", Excel's default font color) is its RGB, the
   theme's dark 1 (`000000` in Excel's themes), where it was `None` like automatic: `Font.color`
   is the color Excel draws, and the new `Font.theme_color` says which theme color it comes from.
