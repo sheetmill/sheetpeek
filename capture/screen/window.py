@@ -68,6 +68,15 @@ AUDIT = 2.0
 """Seconds an audited capture is watched after settling; any change ends the run."""
 
 
+class SettleError(RuntimeError):
+    """The window changed after settling: the settled picture and the changed one are kept."""
+
+    def __init__(self, message: str, settled: bytes, changed: bytes) -> None:
+        super().__init__(message)
+        self.settled = settled
+        self.changed = changed
+
+
 def _shoot(window_id: int, out: Path) -> bytes:
     """One ``screencapture`` of the window, as the PNG file's bytes."""
     result = subprocess.run(
@@ -122,14 +131,18 @@ def settle(
     }
     if confirm:
         sleep(CONFIRM)
-        if shoot() != shot:
-            raise RuntimeError("Excel's window changed after settling (the run's first capture)")
+        again = shoot()
+        if again != shot:
+            raise SettleError(
+                "Excel's window changed after settling (the run's first capture)", shot, again
+            )
         found["confirmed"] = True
     if audit:
         until = clock() + AUDIT
         while clock() < until:
-            if shoot() != shot:
-                raise RuntimeError("Excel's window changed after settling (audit)")
+            again = shoot()
+            if again != shot:
+                raise SettleError("Excel's window changed after settling (audit)", shot, again)
         found["audited"] = True
     return shot, found
 
@@ -154,7 +167,12 @@ def capture_window(
     else:
         raise RuntimeError(f"no Excel window titled {title!r} on screen")
     window = windows[0]
-    shot, found = settle(lambda: _shoot(int(window["id"]), out), confirm=confirm, audit=audit)
+    try:
+        shot, found = settle(lambda: _shoot(int(window["id"]), out), confirm=confirm, audit=audit)
+    except SettleError as e:  # both pictures kept as evidence
+        out.with_name(f"{out.stem}_settled.png").write_bytes(e.settled)
+        out.with_name(f"{out.stem}_changed.png").write_bytes(e.changed)
+        raise
     out.write_bytes(shot)
     return window, png.read(out), found
 
