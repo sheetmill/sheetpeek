@@ -7,6 +7,7 @@ A default column here is 71 or 70 px wide (53 pt) and a row 20 px (15 pt).
 
 import itertools
 import re
+from pathlib import Path
 
 import openpyxl
 import pytest
@@ -375,3 +376,56 @@ def test_no_border_layer_without_borders(tmp_path):
     page = sheetpeek.render(bordered(tmp_path, {"A1": ("x", None)}), "html")
     assert "sp-borders" not in page
     assert "sp-fills" not in page
+
+
+# --- dashes against the screen capture (borders.tsv): lengths, not phase
+
+
+def _tile_runs(style):
+    """One period of sheetpeek's dash tile for ``style``: on, off, ... in screen points."""
+    from sheetpeek.backends.html._borders import _TILES
+
+    tile = _TILES[style][0]
+    return [len(run) / 2 for run in re.findall(r"#+|\.+", tile)]
+
+
+def _fits_cycle(measured, period):
+    """Whether the runs ``measured`` (each ``(on, length)``) occur in the repeated ``period``
+    (on first) from some run of it: lengths exact, the starting point free."""
+    n = len(period)
+    for start in range(n):
+        if all(
+            measured[i][0] == ((start + i) % n % 2 == 0)
+            and measured[i][1] == period[(start + i) % n]
+            for i in range(len(measured))
+        ):
+            return True
+    return False
+
+
+@pytest.mark.excel
+def test_dashes_have_the_lengths_sheetpeek_draws_at_any_phase():
+    # Every dashed side borders.tsv captured, at zoom 100 and 200, against sheetpeek's tile:
+    # dash and gap lengths in screen points are exact; where Excel starts the period is not
+    # modeled (§4.12), so a pattern may start at any dash or gap of the period, and a scanline
+    # that holds part of a period only ("irregular", or one pair) fits as a run of it.
+    # slantDashDot reads solid along its edge and is drawn as mediumDashDot (a reported notice).
+    lines = (Path(__file__).with_name("captures") / "borders.tsv").read_text(encoding="utf-8")
+    rows = [line.split("\t") for line in lines.splitlines() if line and not line.startswith("#")]
+    header, body = rows[0], [dict(zip(rows[0], r, strict=False)) for r in rows[1:]]
+    assert "pattern" in header
+    checked, wrong = 0, []
+    for row in body:
+        style, pattern = row["style"], row["pattern"]
+        if style in ("slantDashDot", "none") or pattern in ("solid", "empty", ""):
+            continue
+        tokens = pattern.removeprefix("irregular: ").split()
+        measured = [
+            (kind == "on", float(length) * int(row["zoom"]) / 100)
+            for kind, length in zip(tokens[::2], tokens[1::2], strict=True)
+        ]
+        checked += 1
+        if not _fits_cycle(measured, _tile_runs(style)):
+            wrong.append((row["zoom"], style, row["edge"], pattern))
+    assert checked == 176
+    assert wrong == []

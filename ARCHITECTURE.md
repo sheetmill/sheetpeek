@@ -905,7 +905,8 @@ origin, CSS linear gradients, SVG path gradients in four bands) and the border l
 (`sp-borders`: one box per run of equal sides along a line, reaching over the bands of the lines
 across its ends; dashes as SVG tiles on white; diagonals as SVG lines, after the text). Both stay in CSS px at any
 page scale. Tiles and dashes are in whole screen points, one to a CSS px, so a 1× display draws
-them exactly too. Where Excel starts a dash period is not captured; a run starts its own.
+them exactly too. Every dashed side of `borders` (zoom 100 and 200) has the tiles' dash and gap
+lengths (captured); where Excel starts a dash period is not modeled, and a run starts its own.
 **slantDashDot is drawn as mediumDashDot with square gaps** and reported
 (`border.slant_dash_dot`).
 
