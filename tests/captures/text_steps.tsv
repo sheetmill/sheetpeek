@@ -9,160 +9,160 @@
 # colors: captures converted to sRGB (sips --matchTo sRGB Profile.icc)
 # platform: mac
 # suite: text_steps
-group	name	zoom	cell	normal_font	cell_font	align	indent	row_height	ink_left	ink_right	ink_top	ink_bottom	width_ratio	height_ratio	ink_width	ref_width
-indent_calibri9	Calibri 9 left indent 0	100	C4	Calibri 9	Calibri 9	left	0	12.0	3.5	-74	4	10				
-indent_calibri9	Calibri 9 right indent 0	100	E4	Calibri 9	Calibri 9	right	0	12.0	74.5	-3	4	10				
-indent_calibri9	Calibri 9 left indent 1	100	C5	Calibri 9	Calibri 9	left	1	12.0	9.5	-68	4	10				
-indent_calibri9	Calibri 9 right indent 1	100	E5	Calibri 9	Calibri 9	right	1	12.0	68.5	-9	4	10				
-indent_calibri9	Calibri 9 left indent 2	100	C6	Calibri 9	Calibri 9	left	2	12.0	15.5	-62	4	10				
-indent_calibri9	Calibri 9 right indent 2	100	E6	Calibri 9	Calibri 9	right	2	12.0	62.5	-15	4	10				
-indent_calibri9	Calibri 9 left indent 3	100	C7	Calibri 9	Calibri 9	left	3	12.0	21.5	-56	4	10				
-indent_calibri9	Calibri 9 right indent 3	100	E7	Calibri 9	Calibri 9	right	3	12.0	56.5	-21	4	10				
-indent_calibri9	Calibri 9 left indent 4	100	C8	Calibri 9	Calibri 9	left	4	12.0	27.5	-50	4	10				
-indent_calibri9	Calibri 9 right indent 4	100	E8	Calibri 9	Calibri 9	right	4	12.0	50.5	-27	4	10				
-indent_calibri9	Calibri 9 left indent 5	100	C9	Calibri 9	Calibri 9	left	5	12.0	33.5	-44	4	10				
-indent_calibri9	Calibri 9 right indent 5	100	E9	Calibri 9	Calibri 9	right	5	12.0	44.5	-33	4	10				
-indent_calibri11	Calibri 11 left indent 0	100	C4	Calibri 11	Calibri 11	left	0	21.0	4	-90	10	17				
-indent_calibri11	Calibri 11 right indent 0	100	E4	Calibri 11	Calibri 11	right	0	21.0	91	-3	10	17				
-indent_calibri11	Calibri 11 left indent 1	100	C5	Calibri 11	Calibri 11	left	1	21.0	10	-84	10	17				
-indent_calibri11	Calibri 11 right indent 1	100	E5	Calibri 11	Calibri 11	right	1	21.0	85	-9	10	17				
-indent_calibri11	Calibri 11 left indent 2	100	C6	Calibri 11	Calibri 11	left	2	21.0	16	-78	10	17				
-indent_calibri11	Calibri 11 right indent 2	100	E6	Calibri 11	Calibri 11	right	2	21.0	79	-15	10	17				
-indent_calibri11	Calibri 11 left indent 3	100	C7	Calibri 11	Calibri 11	left	3	21.0	22	-72	10	17				
-indent_calibri11	Calibri 11 right indent 3	100	E7	Calibri 11	Calibri 11	right	3	21.0	73	-21	10	17				
-indent_calibri11	Calibri 11 left indent 4	100	C8	Calibri 11	Calibri 11	left	4	21.0	28	-66	10	17				
-indent_calibri11	Calibri 11 right indent 4	100	E8	Calibri 11	Calibri 11	right	4	21.0	67	-27	10	17				
-indent_calibri11	Calibri 11 left indent 5	100	C9	Calibri 11	Calibri 11	left	5	21.0	34	-60	10	17				
-indent_calibri11	Calibri 11 right indent 5	100	E9	Calibri 11	Calibri 11	right	5	21.0	61	-33	10	17				
-indent_calibri11	Calibri 16 left indent 0	100	G4	Calibri 11	Calibri 16	left	0	21.0	4	-78	6.5	17				
-indent_calibri11	Calibri 16 right indent 0	100	I4	Calibri 11	Calibri 16	right	0	21.0	79	-3	6.5	17				
-indent_calibri11	Calibri 16 left indent 1	100	G5	Calibri 11	Calibri 16	left	1	21.0	10	-72	6.5	17				
-indent_calibri11	Calibri 16 right indent 1	100	I5	Calibri 11	Calibri 16	right	1	21.0	73	-9	6.5	17				
-indent_calibri11	Calibri 16 left indent 2	100	G6	Calibri 11	Calibri 16	left	2	21.0	16	-66	6.5	17				
-indent_calibri11	Calibri 16 right indent 2	100	I6	Calibri 11	Calibri 16	right	2	21.0	67	-15	6.5	17				
-indent_calibri11	Calibri 16 left indent 3	100	G7	Calibri 11	Calibri 16	left	3	21.0	22	-60	6.5	17				
-indent_calibri11	Calibri 16 right indent 3	100	I7	Calibri 11	Calibri 16	right	3	21.0	61	-21	6.5	17				
-indent_calibri11	Calibri 16 left indent 4	100	G8	Calibri 11	Calibri 16	left	4	21.0	28	-54	6.5	17				
-indent_calibri11	Calibri 16 right indent 4	100	I8	Calibri 11	Calibri 16	right	4	21.0	55	-27	6.5	17				
-indent_calibri11	Calibri 16 left indent 5	100	G9	Calibri 11	Calibri 16	left	5	21.0	34	-48	6.5	17				
-indent_calibri11	Calibri 16 right indent 5	100	I9	Calibri 11	Calibri 16	right	5	21.0	49	-33	6.5	17				
-indent_calibri11	Aptos Narrow 12 left indent 0	100	K4	Calibri 11	Aptos Narrow 12	left	0	21.0	4	-86	9	17				
-indent_calibri11	Aptos Narrow 12 right indent 0	100	M4	Calibri 11	Aptos Narrow 12	right	0	21.0	87	-3	9	17				
-indent_calibri11	Aptos Narrow 12 left indent 1	100	K5	Calibri 11	Aptos Narrow 12	left	1	21.0	10	-80	9	17				
-indent_calibri11	Aptos Narrow 12 right indent 1	100	M5	Calibri 11	Aptos Narrow 12	right	1	21.0	81	-9	9	17				
-indent_calibri11	Aptos Narrow 12 left indent 2	100	K6	Calibri 11	Aptos Narrow 12	left	2	21.0	16	-74	9	17				
-indent_calibri11	Aptos Narrow 12 right indent 2	100	M6	Calibri 11	Aptos Narrow 12	right	2	21.0	75	-15	9	17				
-indent_calibri11	Aptos Narrow 12 left indent 3	100	K7	Calibri 11	Aptos Narrow 12	left	3	21.0	22	-68	9	17				
-indent_calibri11	Aptos Narrow 12 right indent 3	100	M7	Calibri 11	Aptos Narrow 12	right	3	21.0	69	-21	9	17				
-indent_calibri11	Aptos Narrow 12 left indent 4	100	K8	Calibri 11	Aptos Narrow 12	left	4	21.0	28	-62	9	17				
-indent_calibri11	Aptos Narrow 12 right indent 4	100	M8	Calibri 11	Aptos Narrow 12	right	4	21.0	63	-27	9	17				
-indent_calibri11	Aptos Narrow 12 left indent 5	100	K9	Calibri 11	Aptos Narrow 12	left	5	21.0	34	-56	9	17				
-indent_calibri11	Aptos Narrow 12 right indent 5	100	M9	Calibri 11	Aptos Narrow 12	right	5	21.0	57	-33	9	17				
-indent_calibri12	Calibri 12 left indent 0	100	C4	Calibri 12	Calibri 12	left	0	16.0	4	-89.5	5	13				
-indent_calibri12	Calibri 12 right indent 0	100	E4	Calibri 12	Calibri 12	right	0	16.0	91	-2.5	5	13				
-indent_calibri12	Calibri 12 left indent 1	100	C5	Calibri 12	Calibri 12	left	1	16.0	13	-80.5	5	13				
-indent_calibri12	Calibri 12 right indent 1	100	E5	Calibri 12	Calibri 12	right	1	16.0	82	-11.5	5	13				
-indent_calibri12	Calibri 12 left indent 2	100	C6	Calibri 12	Calibri 12	left	2	16.0	22	-71.5	5	13				
-indent_calibri12	Calibri 12 right indent 2	100	E6	Calibri 12	Calibri 12	right	2	16.0	73	-20.5	5	13				
-indent_calibri12	Calibri 12 left indent 3	100	C7	Calibri 12	Calibri 12	left	3	16.0	31	-62.5	5	13				
-indent_calibri12	Calibri 12 right indent 3	100	E7	Calibri 12	Calibri 12	right	3	16.0	64	-29.5	5	13				
-indent_calibri12	Calibri 12 left indent 4	100	C8	Calibri 12	Calibri 12	left	4	16.0	40	-53.5	5	13				
-indent_calibri12	Calibri 12 right indent 4	100	E8	Calibri 12	Calibri 12	right	4	16.0	55	-38.5	5	13				
-indent_calibri12	Calibri 12 left indent 5	100	C9	Calibri 12	Calibri 12	left	5	16.0	49	-44.5	5	13				
-indent_calibri12	Calibri 12 right indent 5	100	E9	Calibri 12	Calibri 12	right	5	16.0	46	-47.5	5	13				
-indent_calibri16	Calibri 16 left indent 0	100	C4	Calibri 16	Calibri 16	left	0	21.0	4	-118	6.5	17				
-indent_calibri16	Calibri 16 right indent 0	100	E4	Calibri 16	Calibri 16	right	0	21.0	119	-3	6.5	17				
-indent_calibri16	Calibri 16 left indent 1	100	C5	Calibri 16	Calibri 16	left	1	21.0	16	-106	6.5	17				
-indent_calibri16	Calibri 16 right indent 1	100	E5	Calibri 16	Calibri 16	right	1	21.0	107	-15	6.5	17				
-indent_calibri16	Calibri 16 left indent 2	100	C6	Calibri 16	Calibri 16	left	2	21.0	28	-94	6.5	17				
-indent_calibri16	Calibri 16 right indent 2	100	E6	Calibri 16	Calibri 16	right	2	21.0	95	-27	6.5	17				
-indent_calibri16	Calibri 16 left indent 3	100	C7	Calibri 16	Calibri 16	left	3	21.0	40	-82	6.5	17				
-indent_calibri16	Calibri 16 right indent 3	100	E7	Calibri 16	Calibri 16	right	3	21.0	83	-39	6.5	17				
-indent_calibri16	Calibri 16 left indent 4	100	C8	Calibri 16	Calibri 16	left	4	21.0	52	-70	6.5	17				
-indent_calibri16	Calibri 16 right indent 4	100	E8	Calibri 16	Calibri 16	right	4	21.0	71	-51	6.5	17				
-indent_calibri16	Calibri 16 left indent 5	100	C9	Calibri 16	Calibri 16	left	5	21.0	64	-58	6.5	17				
-indent_calibri16	Calibri 16 right indent 5	100	E9	Calibri 16	Calibri 16	right	5	21.0	59	-63	6.5	17				
-indent_calibri24	Calibri 24 left indent 0	100	C4	Calibri 24	Calibri 24	left	0	31.0	6	-178	9.5	25				
-indent_calibri24	Calibri 24 right indent 0	100	E4	Calibri 24	Calibri 24	right	0	31.0	179	-5	9.5	25				
-indent_calibri24	Calibri 24 left indent 1	100	C5	Calibri 24	Calibri 24	left	1	31.0	21	-163	9.5	25				
-indent_calibri24	Calibri 24 right indent 1	100	E5	Calibri 24	Calibri 24	right	1	31.0	164	-20	9.5	25				
-indent_calibri24	Calibri 24 left indent 2	100	C6	Calibri 24	Calibri 24	left	2	31.0	36	-148	9.5	25				
-indent_calibri24	Calibri 24 right indent 2	100	E6	Calibri 24	Calibri 24	right	2	31.0	149	-35	9.5	25				
-indent_calibri24	Calibri 24 left indent 3	100	C7	Calibri 24	Calibri 24	left	3	31.0	51	-133	9.5	25				
-indent_calibri24	Calibri 24 right indent 3	100	E7	Calibri 24	Calibri 24	right	3	31.0	134	-50	9.5	25				
-indent_calibri24	Calibri 24 left indent 4	100	C8	Calibri 24	Calibri 24	left	4	31.0	66	-118	9.5	25				
-indent_calibri24	Calibri 24 right indent 4	100	E8	Calibri 24	Calibri 24	right	4	31.0	119	-65	9.5	25				
-indent_calibri24	Calibri 24 left indent 5	100	C9	Calibri 24	Calibri 24	left	5	31.0	81	-103	9.5	25				
-indent_calibri24	Calibri 24 right indent 5	100	E9	Calibri 24	Calibri 24	right	5	31.0	104	-80	9.5	25				
-indent_aptos_narrow11	Aptos Narrow 11 left indent 0	100	C4	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	4	-89.5	4.5	12				
-indent_aptos_narrow11	Aptos Narrow 11 right indent 0	100	E4	Aptos Narrow 11	Aptos Narrow 11	right	0	15.0	91	-2.5	4.5	12				
-indent_aptos_narrow11	Aptos Narrow 11 left indent 1	100	C5	Aptos Narrow 11	Aptos Narrow 11	left	1	15.0	10	-83.5	4.5	12				
-indent_aptos_narrow11	Aptos Narrow 11 right indent 1	100	E5	Aptos Narrow 11	Aptos Narrow 11	right	1	15.0	85	-8.5	4.5	12				
-indent_aptos_narrow11	Aptos Narrow 11 left indent 2	100	C6	Aptos Narrow 11	Aptos Narrow 11	left	2	15.0	16	-77.5	4.5	12				
-indent_aptos_narrow11	Aptos Narrow 11 right indent 2	100	E6	Aptos Narrow 11	Aptos Narrow 11	right	2	15.0	79	-14.5	4.5	12				
-indent_aptos_narrow11	Aptos Narrow 11 left indent 3	100	C7	Aptos Narrow 11	Aptos Narrow 11	left	3	15.0	22	-71.5	4.5	12				
-indent_aptos_narrow11	Aptos Narrow 11 right indent 3	100	E7	Aptos Narrow 11	Aptos Narrow 11	right	3	15.0	73	-20.5	4.5	12				
-indent_aptos_narrow11	Aptos Narrow 11 left indent 4	100	C8	Aptos Narrow 11	Aptos Narrow 11	left	4	15.0	28	-65.5	4.5	12				
-indent_aptos_narrow11	Aptos Narrow 11 right indent 4	100	E8	Aptos Narrow 11	Aptos Narrow 11	right	4	15.0	67	-26.5	4.5	12				
-indent_aptos_narrow11	Aptos Narrow 11 left indent 5	100	C9	Aptos Narrow 11	Aptos Narrow 11	left	5	15.0	34	-59.5	4.5	12				
-indent_aptos_narrow11	Aptos Narrow 11 right indent 5	100	E9	Aptos Narrow 11	Aptos Narrow 11	right	5	15.0	61	-32.5	4.5	12				
-indent_aptos_narrow12	Aptos Narrow 12 left indent 0	100	C4	Aptos Narrow 12	Aptos Narrow 12	left	0	16.0	4	-86	5	13				
-indent_aptos_narrow12	Aptos Narrow 12 right indent 0	100	E4	Aptos Narrow 12	Aptos Narrow 12	right	0	16.0	87	-3	5	13				
-indent_aptos_narrow12	Aptos Narrow 12 left indent 1	100	C5	Aptos Narrow 12	Aptos Narrow 12	left	1	16.0	10	-80	5	13				
-indent_aptos_narrow12	Aptos Narrow 12 right indent 1	100	E5	Aptos Narrow 12	Aptos Narrow 12	right	1	16.0	81	-9	5	13				
-indent_aptos_narrow12	Aptos Narrow 12 left indent 2	100	C6	Aptos Narrow 12	Aptos Narrow 12	left	2	16.0	16	-74	5	13				
-indent_aptos_narrow12	Aptos Narrow 12 right indent 2	100	E6	Aptos Narrow 12	Aptos Narrow 12	right	2	16.0	75	-15	5	13				
-indent_aptos_narrow12	Aptos Narrow 12 left indent 3	100	C7	Aptos Narrow 12	Aptos Narrow 12	left	3	16.0	22	-68	5	13				
-indent_aptos_narrow12	Aptos Narrow 12 right indent 3	100	E7	Aptos Narrow 12	Aptos Narrow 12	right	3	16.0	69	-21	5	13				
-indent_aptos_narrow12	Aptos Narrow 12 left indent 4	100	C8	Aptos Narrow 12	Aptos Narrow 12	left	4	16.0	28	-62	5	13				
-indent_aptos_narrow12	Aptos Narrow 12 right indent 4	100	E8	Aptos Narrow 12	Aptos Narrow 12	right	4	16.0	63	-27	5	13				
-indent_aptos_narrow12	Aptos Narrow 12 left indent 5	100	C9	Aptos Narrow 12	Aptos Narrow 12	left	5	16.0	34	-56	5	13				
-indent_aptos_narrow12	Aptos Narrow 12 right indent 5	100	E9	Aptos Narrow 12	Aptos Narrow 12	right	5	16.0	57	-33	5	13				
-shrink	shrunk 4	100	C4	Calibri 11	Calibri 11	left	0	15.0	4	-23	5	12	1	1	26	26
-shrink	shrunk 5	100	C5	Calibri 11	Calibri 11	left	0	15.0	4	-16	5	12	1	1	33	33
-shrink	shrunk 6	100	C6	Calibri 11	Calibri 11	left	0	15.0	4	-9	5	12	1	1	40	40
-shrink	shrunk 7	100	C7	Calibri 11	Calibri 11	left	0	15.0	3.5	-8.5	5.5	12	0.8723	0.9286	41	47
-shrink	shrunk 8	100	C8	Calibri 11	Calibri 11	left	0	15.0	3.5	-3	6	12	0.8611	0.8571	46.5	54
-shrink	shrunk 9	100	C9	Calibri 11	Calibri 11	left	0	15.0	2.5	-6.5	7	12	0.7213	0.7143	44	61
-shrink	shrunk 10	100	C10	Calibri 11	Calibri 11	left	0	15.0	2.5	-1.5	7	12	0.7206	0.7143	49	68
-shrink	shrunk 11	100	C11	Calibri 11	Calibri 11	left	0	15.0	2.5	-7	7.5	12	0.58	0.6429	43.5	75
-shrink	shrunk 12	100	C12	Calibri 11	Calibri 11	left	0	15.0	2.5	-3.5	8	12	0.5732	0.5714	47	82
-shrink	shrunk 13	100	C13	Calibri 11	Calibri 11	left	0	15.0	2.5	-12	9	12	0.4326	0.4286	38.5	89
-shrink	shrunk 14	100	C14	Calibri 11	Calibri 11	left	0	15.0	2.5	-9	9	12	0.4323	0.4286	41.5	96
-shrink	shrunk 15	100	C15	Calibri 11	Calibri 11	left	0	15.0	2.5	-6	9	12	0.432	0.4286	44.5	103
-shrink	shrunk 16	100	C16	Calibri 11	Calibri 11	left	0	15.0	2.5	-3	9	12	0.4318	0.4286	47.5	110
-shrink	shrunk 17	100	C17	Calibri 11	Calibri 11	left	0	15.0	2.5	-17	10	11	0.2863	0.1429	33.5	117
-shrink	shrunk 18	100	C18	Calibri 11	Calibri 11	left	0	15.0	2.5	-15	10	11	0.2863	0.1429	35.5	124
-shrink	shrunk 19	100	C19	Calibri 11	Calibri 11	left	0	15.0	2.5	-13	10	11	0.2863	0.1429	37.5	131
-shrink	shrunk 20	100	C20	Calibri 11	Calibri 11	left	0	15.0	2.5	-11	10	11	0.2862	0.1429	39.5	138
-shrink	shrunk 21	100	C21	Calibri 11	Calibri 11	left	0	15.0	2.5	-9	10	11	0.2862	0.1429	41.5	145
-shrink	shrunk 22	100	C22	Calibri 11	Calibri 11	left	0	15.0	2	-7.5	10	12	0.2862	0.2857	43.5	152
-shrink	shrunk 23	100	C23	Calibri 11	Calibri 11	left	0	15.0	2	-5.5	10	12	0.2862	0.2857	45.5	159
-shrink	shrunk 24	100	C24	Calibri 11	Calibri 11	left	0	15.0	2	-3.5	10	12	0.2861	0.2857	47.5	166
-shrink	shrunk 25	100	C25	Calibri 11	Calibri 11	left	0	15.0	2	-1.5	10	12	0.2861	0.2857	49.5	173
-shrink	shrunk 26	100	C26	Calibri 11	Calibri 11	left	0	15.0	2	-25	11	11.5	0.1444	0.0714	26	180
-shrink	shrunk 27	100	C27	Calibri 11	Calibri 11	left	0	15.0	2	-24	11	11.5	0.1444	0.0714	27	187
-shrink	shrunk 28	100	C28	Calibri 11	Calibri 11	left	0	15.0	2	-23	11	11.5	0.1443	0.0714	28	194
-shrink	shrunk 29	100	C29	Calibri 11	Calibri 11	left	0	15.0	2	-22	11	11.5	0.1443	0.0714	29	201
-shrink	shrunk 30	100	C30	Calibri 11	Calibri 11	left	0	15.0	2	-21	11	11.5	0.1442	0.0714	30	208
-shrink	ladder 1	100	G4	Calibri 11	Calibri 1	left	0	15.0								
-shrink	ladder 1.5	100	G5	Calibri 11	Calibri 1.5	left	0	15.0	2	-108	11	11.5				
-shrink	ladder 2	100	G6	Calibri 11	Calibri 2	left	0	15.0	2	-108	11	11.5				
-shrink	ladder 2.5	100	G7	Calibri 11	Calibri 2.5	left	0	15.0	2	-98.5	10	12				
-shrink	ladder 3	100	G8	Calibri 11	Calibri 3	left	0	15.0	2	-98.5	10	12				
-shrink	ladder 3.5	100	G9	Calibri 11	Calibri 3.5	left	0	15.0	2.5	-98	10	11				
-shrink	ladder 4	100	G10	Calibri 11	Calibri 4	left	0	15.0	2.5	-98	10	11				
-shrink	ladder 4.5	100	G11	Calibri 11	Calibri 4.5	left	0	15.0	2.5	-88	9	12				
-shrink	ladder 5	100	G12	Calibri 11	Calibri 5	left	0	15.0	2.5	-88	9	12				
-shrink	ladder 5.5	100	G13	Calibri 11	Calibri 5.5	left	0	15.0	2.5	-78.5	8	12				
-shrink	ladder 6	100	G14	Calibri 11	Calibri 6	left	0	15.0	2.5	-78.5	8	12				
-shrink	ladder 6.5	100	G15	Calibri 11	Calibri 6.5	left	0	15.0	2.5	-78	7.5	12				
-shrink	ladder 7	100	G16	Calibri 11	Calibri 7	left	0	15.0	2.5	-78	7.5	12				
-shrink	ladder 7.5	100	G17	Calibri 11	Calibri 7.5	left	0	15.0	2.5	-68.5	7	12				
-shrink	ladder 8	100	G18	Calibri 11	Calibri 8	left	0	15.0	2.5	-68.5	7	12				
-shrink	ladder 8.5	100	G19	Calibri 11	Calibri 8.5	left	0	15.0	3.5	-58	6	12				
-shrink	ladder 9	100	G20	Calibri 11	Calibri 9	left	0	15.0	3.5	-58	6	12				
-shrink	ladder 9.5	100	G21	Calibri 11	Calibri 9.5	left	0	15.0	3.5	-57.5	5.5	12				
-shrink	ladder 10	100	G22	Calibri 11	Calibri 10	left	0	15.0	3.5	-57.5	5.5	12				
-shrink	ladder 10.5	100	G23	Calibri 11	Calibri 10.5	left	0	15.0	4	-48	5	12				
-shrink	ladder 11	100	G24	Calibri 11	Calibri 11	left	0	15.0	4	-48	5	12				
+group	name	zoom	cell	normal_font	cell_font	align	indent	row_height	cell_width	ink_left	ink_right	ink_top	ink_bottom	width_ratio	height_ratio	ink_width	ref_width
+indent_calibri9	Calibri 9 left indent 0	100	C4	Calibri 9	Calibri 9	left	0	12.0	100	3.5	-74	4	10				
+indent_calibri9	Calibri 9 right indent 0	100	E4	Calibri 9	Calibri 9	right	0	12.0	100	74.5	-3	4	10				
+indent_calibri9	Calibri 9 left indent 1	100	C5	Calibri 9	Calibri 9	left	1	12.0	100	9.5	-68	4	10				
+indent_calibri9	Calibri 9 right indent 1	100	E5	Calibri 9	Calibri 9	right	1	12.0	100	68.5	-9	4	10				
+indent_calibri9	Calibri 9 left indent 2	100	C6	Calibri 9	Calibri 9	left	2	12.0	100	15.5	-62	4	10				
+indent_calibri9	Calibri 9 right indent 2	100	E6	Calibri 9	Calibri 9	right	2	12.0	100	62.5	-15	4	10				
+indent_calibri9	Calibri 9 left indent 3	100	C7	Calibri 9	Calibri 9	left	3	12.0	100	21.5	-56	4	10				
+indent_calibri9	Calibri 9 right indent 3	100	E7	Calibri 9	Calibri 9	right	3	12.0	100	56.5	-21	4	10				
+indent_calibri9	Calibri 9 left indent 4	100	C8	Calibri 9	Calibri 9	left	4	12.0	100	27.5	-50	4	10				
+indent_calibri9	Calibri 9 right indent 4	100	E8	Calibri 9	Calibri 9	right	4	12.0	100	50.5	-27	4	10				
+indent_calibri9	Calibri 9 left indent 5	100	C9	Calibri 9	Calibri 9	left	5	12.0	100	33.5	-44	4	10				
+indent_calibri9	Calibri 9 right indent 5	100	E9	Calibri 9	Calibri 9	right	5	12.0	100	44.5	-33	4	10				
+indent_calibri11	Calibri 11 left indent 0	100	C4	Calibri 11	Calibri 11	left	0	21.0	120	4	-90	10	17				
+indent_calibri11	Calibri 11 right indent 0	100	E4	Calibri 11	Calibri 11	right	0	21.0	120	91	-3	10	17				
+indent_calibri11	Calibri 11 left indent 1	100	C5	Calibri 11	Calibri 11	left	1	21.0	120	10	-84	10	17				
+indent_calibri11	Calibri 11 right indent 1	100	E5	Calibri 11	Calibri 11	right	1	21.0	120	85	-9	10	17				
+indent_calibri11	Calibri 11 left indent 2	100	C6	Calibri 11	Calibri 11	left	2	21.0	120	16	-78	10	17				
+indent_calibri11	Calibri 11 right indent 2	100	E6	Calibri 11	Calibri 11	right	2	21.0	120	79	-15	10	17				
+indent_calibri11	Calibri 11 left indent 3	100	C7	Calibri 11	Calibri 11	left	3	21.0	120	22	-72	10	17				
+indent_calibri11	Calibri 11 right indent 3	100	E7	Calibri 11	Calibri 11	right	3	21.0	120	73	-21	10	17				
+indent_calibri11	Calibri 11 left indent 4	100	C8	Calibri 11	Calibri 11	left	4	21.0	120	28	-66	10	17				
+indent_calibri11	Calibri 11 right indent 4	100	E8	Calibri 11	Calibri 11	right	4	21.0	120	67	-27	10	17				
+indent_calibri11	Calibri 11 left indent 5	100	C9	Calibri 11	Calibri 11	left	5	21.0	120	34	-60	10	17				
+indent_calibri11	Calibri 11 right indent 5	100	E9	Calibri 11	Calibri 11	right	5	21.0	120	61	-33	10	17				
+indent_calibri11	Calibri 16 left indent 0	100	G4	Calibri 11	Calibri 16	left	0	21.0	120	4	-78	6.5	17				
+indent_calibri11	Calibri 16 right indent 0	100	I4	Calibri 11	Calibri 16	right	0	21.0	120	79	-3	6.5	17				
+indent_calibri11	Calibri 16 left indent 1	100	G5	Calibri 11	Calibri 16	left	1	21.0	120	10	-72	6.5	17				
+indent_calibri11	Calibri 16 right indent 1	100	I5	Calibri 11	Calibri 16	right	1	21.0	120	73	-9	6.5	17				
+indent_calibri11	Calibri 16 left indent 2	100	G6	Calibri 11	Calibri 16	left	2	21.0	120	16	-66	6.5	17				
+indent_calibri11	Calibri 16 right indent 2	100	I6	Calibri 11	Calibri 16	right	2	21.0	120	67	-15	6.5	17				
+indent_calibri11	Calibri 16 left indent 3	100	G7	Calibri 11	Calibri 16	left	3	21.0	120	22	-60	6.5	17				
+indent_calibri11	Calibri 16 right indent 3	100	I7	Calibri 11	Calibri 16	right	3	21.0	120	61	-21	6.5	17				
+indent_calibri11	Calibri 16 left indent 4	100	G8	Calibri 11	Calibri 16	left	4	21.0	120	28	-54	6.5	17				
+indent_calibri11	Calibri 16 right indent 4	100	I8	Calibri 11	Calibri 16	right	4	21.0	120	55	-27	6.5	17				
+indent_calibri11	Calibri 16 left indent 5	100	G9	Calibri 11	Calibri 16	left	5	21.0	120	34	-48	6.5	17				
+indent_calibri11	Calibri 16 right indent 5	100	I9	Calibri 11	Calibri 16	right	5	21.0	120	49	-33	6.5	17				
+indent_calibri11	Aptos Narrow 12 left indent 0	100	K4	Calibri 11	Aptos Narrow 12	left	0	21.0	120	4	-86	9	17				
+indent_calibri11	Aptos Narrow 12 right indent 0	100	M4	Calibri 11	Aptos Narrow 12	right	0	21.0	120	87	-3	9	17				
+indent_calibri11	Aptos Narrow 12 left indent 1	100	K5	Calibri 11	Aptos Narrow 12	left	1	21.0	120	10	-80	9	17				
+indent_calibri11	Aptos Narrow 12 right indent 1	100	M5	Calibri 11	Aptos Narrow 12	right	1	21.0	120	81	-9	9	17				
+indent_calibri11	Aptos Narrow 12 left indent 2	100	K6	Calibri 11	Aptos Narrow 12	left	2	21.0	120	16	-74	9	17				
+indent_calibri11	Aptos Narrow 12 right indent 2	100	M6	Calibri 11	Aptos Narrow 12	right	2	21.0	120	75	-15	9	17				
+indent_calibri11	Aptos Narrow 12 left indent 3	100	K7	Calibri 11	Aptos Narrow 12	left	3	21.0	120	22	-68	9	17				
+indent_calibri11	Aptos Narrow 12 right indent 3	100	M7	Calibri 11	Aptos Narrow 12	right	3	21.0	120	69	-21	9	17				
+indent_calibri11	Aptos Narrow 12 left indent 4	100	K8	Calibri 11	Aptos Narrow 12	left	4	21.0	120	28	-62	9	17				
+indent_calibri11	Aptos Narrow 12 right indent 4	100	M8	Calibri 11	Aptos Narrow 12	right	4	21.0	120	63	-27	9	17				
+indent_calibri11	Aptos Narrow 12 left indent 5	100	K9	Calibri 11	Aptos Narrow 12	left	5	21.0	120	34	-56	9	17				
+indent_calibri11	Aptos Narrow 12 right indent 5	100	M9	Calibri 11	Aptos Narrow 12	right	5	21.0	120	57	-33	9	17				
+indent_calibri12	Calibri 12 left indent 0	100	C4	Calibri 12	Calibri 12	left	0	16.0	120	4	-89.5	5	13				
+indent_calibri12	Calibri 12 right indent 0	100	E4	Calibri 12	Calibri 12	right	0	16.0	120	91	-2.5	5	13				
+indent_calibri12	Calibri 12 left indent 1	100	C5	Calibri 12	Calibri 12	left	1	16.0	120	13	-80.5	5	13				
+indent_calibri12	Calibri 12 right indent 1	100	E5	Calibri 12	Calibri 12	right	1	16.0	120	82	-11.5	5	13				
+indent_calibri12	Calibri 12 left indent 2	100	C6	Calibri 12	Calibri 12	left	2	16.0	120	22	-71.5	5	13				
+indent_calibri12	Calibri 12 right indent 2	100	E6	Calibri 12	Calibri 12	right	2	16.0	120	73	-20.5	5	13				
+indent_calibri12	Calibri 12 left indent 3	100	C7	Calibri 12	Calibri 12	left	3	16.0	120	31	-62.5	5	13				
+indent_calibri12	Calibri 12 right indent 3	100	E7	Calibri 12	Calibri 12	right	3	16.0	120	64	-29.5	5	13				
+indent_calibri12	Calibri 12 left indent 4	100	C8	Calibri 12	Calibri 12	left	4	16.0	120	40	-53.5	5	13				
+indent_calibri12	Calibri 12 right indent 4	100	E8	Calibri 12	Calibri 12	right	4	16.0	120	55	-38.5	5	13				
+indent_calibri12	Calibri 12 left indent 5	100	C9	Calibri 12	Calibri 12	left	5	16.0	120	49	-44.5	5	13				
+indent_calibri12	Calibri 12 right indent 5	100	E9	Calibri 12	Calibri 12	right	5	16.0	120	46	-47.5	5	13				
+indent_calibri16	Calibri 16 left indent 0	100	C4	Calibri 16	Calibri 16	left	0	21.0	160	4	-118	6.5	17				
+indent_calibri16	Calibri 16 right indent 0	100	E4	Calibri 16	Calibri 16	right	0	21.0	160	119	-3	6.5	17				
+indent_calibri16	Calibri 16 left indent 1	100	C5	Calibri 16	Calibri 16	left	1	21.0	160	16	-106	6.5	17				
+indent_calibri16	Calibri 16 right indent 1	100	E5	Calibri 16	Calibri 16	right	1	21.0	160	107	-15	6.5	17				
+indent_calibri16	Calibri 16 left indent 2	100	C6	Calibri 16	Calibri 16	left	2	21.0	160	28	-94	6.5	17				
+indent_calibri16	Calibri 16 right indent 2	100	E6	Calibri 16	Calibri 16	right	2	21.0	160	95	-27	6.5	17				
+indent_calibri16	Calibri 16 left indent 3	100	C7	Calibri 16	Calibri 16	left	3	21.0	160	40	-82	6.5	17				
+indent_calibri16	Calibri 16 right indent 3	100	E7	Calibri 16	Calibri 16	right	3	21.0	160	83	-39	6.5	17				
+indent_calibri16	Calibri 16 left indent 4	100	C8	Calibri 16	Calibri 16	left	4	21.0	160	52	-70	6.5	17				
+indent_calibri16	Calibri 16 right indent 4	100	E8	Calibri 16	Calibri 16	right	4	21.0	160	71	-51	6.5	17				
+indent_calibri16	Calibri 16 left indent 5	100	C9	Calibri 16	Calibri 16	left	5	21.0	160	64	-58	6.5	17				
+indent_calibri16	Calibri 16 right indent 5	100	E9	Calibri 16	Calibri 16	right	5	21.0	160	59	-63	6.5	17				
+indent_calibri24	Calibri 24 left indent 0	100	C4	Calibri 24	Calibri 24	left	0	31.0	240	6	-178	9.5	25				
+indent_calibri24	Calibri 24 right indent 0	100	E4	Calibri 24	Calibri 24	right	0	31.0	240	179	-5	9.5	25				
+indent_calibri24	Calibri 24 left indent 1	100	C5	Calibri 24	Calibri 24	left	1	31.0	240	21	-163	9.5	25				
+indent_calibri24	Calibri 24 right indent 1	100	E5	Calibri 24	Calibri 24	right	1	31.0	240	164	-20	9.5	25				
+indent_calibri24	Calibri 24 left indent 2	100	C6	Calibri 24	Calibri 24	left	2	31.0	240	36	-148	9.5	25				
+indent_calibri24	Calibri 24 right indent 2	100	E6	Calibri 24	Calibri 24	right	2	31.0	240	149	-35	9.5	25				
+indent_calibri24	Calibri 24 left indent 3	100	C7	Calibri 24	Calibri 24	left	3	31.0	240	51	-133	9.5	25				
+indent_calibri24	Calibri 24 right indent 3	100	E7	Calibri 24	Calibri 24	right	3	31.0	240	134	-50	9.5	25				
+indent_calibri24	Calibri 24 left indent 4	100	C8	Calibri 24	Calibri 24	left	4	31.0	240	66	-118	9.5	25				
+indent_calibri24	Calibri 24 right indent 4	100	E8	Calibri 24	Calibri 24	right	4	31.0	240	119	-65	9.5	25				
+indent_calibri24	Calibri 24 left indent 5	100	C9	Calibri 24	Calibri 24	left	5	31.0	240	81	-103	9.5	25				
+indent_calibri24	Calibri 24 right indent 5	100	E9	Calibri 24	Calibri 24	right	5	31.0	240	104	-80	9.5	25				
+indent_aptos_narrow11	Aptos Narrow 11 left indent 0	100	C4	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	120	4	-89.5	4.5	12				
+indent_aptos_narrow11	Aptos Narrow 11 right indent 0	100	E4	Aptos Narrow 11	Aptos Narrow 11	right	0	15.0	120	91	-2.5	4.5	12				
+indent_aptos_narrow11	Aptos Narrow 11 left indent 1	100	C5	Aptos Narrow 11	Aptos Narrow 11	left	1	15.0	120	10	-83.5	4.5	12				
+indent_aptos_narrow11	Aptos Narrow 11 right indent 1	100	E5	Aptos Narrow 11	Aptos Narrow 11	right	1	15.0	120	85	-8.5	4.5	12				
+indent_aptos_narrow11	Aptos Narrow 11 left indent 2	100	C6	Aptos Narrow 11	Aptos Narrow 11	left	2	15.0	120	16	-77.5	4.5	12				
+indent_aptos_narrow11	Aptos Narrow 11 right indent 2	100	E6	Aptos Narrow 11	Aptos Narrow 11	right	2	15.0	120	79	-14.5	4.5	12				
+indent_aptos_narrow11	Aptos Narrow 11 left indent 3	100	C7	Aptos Narrow 11	Aptos Narrow 11	left	3	15.0	120	22	-71.5	4.5	12				
+indent_aptos_narrow11	Aptos Narrow 11 right indent 3	100	E7	Aptos Narrow 11	Aptos Narrow 11	right	3	15.0	120	73	-20.5	4.5	12				
+indent_aptos_narrow11	Aptos Narrow 11 left indent 4	100	C8	Aptos Narrow 11	Aptos Narrow 11	left	4	15.0	120	28	-65.5	4.5	12				
+indent_aptos_narrow11	Aptos Narrow 11 right indent 4	100	E8	Aptos Narrow 11	Aptos Narrow 11	right	4	15.0	120	67	-26.5	4.5	12				
+indent_aptos_narrow11	Aptos Narrow 11 left indent 5	100	C9	Aptos Narrow 11	Aptos Narrow 11	left	5	15.0	120	34	-59.5	4.5	12				
+indent_aptos_narrow11	Aptos Narrow 11 right indent 5	100	E9	Aptos Narrow 11	Aptos Narrow 11	right	5	15.0	120	61	-32.5	4.5	12				
+indent_aptos_narrow12	Aptos Narrow 12 left indent 0	100	C4	Aptos Narrow 12	Aptos Narrow 12	left	0	16.0	120	4	-86	5	13				
+indent_aptos_narrow12	Aptos Narrow 12 right indent 0	100	E4	Aptos Narrow 12	Aptos Narrow 12	right	0	16.0	120	87	-3	5	13				
+indent_aptos_narrow12	Aptos Narrow 12 left indent 1	100	C5	Aptos Narrow 12	Aptos Narrow 12	left	1	16.0	120	10	-80	5	13				
+indent_aptos_narrow12	Aptos Narrow 12 right indent 1	100	E5	Aptos Narrow 12	Aptos Narrow 12	right	1	16.0	120	81	-9	5	13				
+indent_aptos_narrow12	Aptos Narrow 12 left indent 2	100	C6	Aptos Narrow 12	Aptos Narrow 12	left	2	16.0	120	16	-74	5	13				
+indent_aptos_narrow12	Aptos Narrow 12 right indent 2	100	E6	Aptos Narrow 12	Aptos Narrow 12	right	2	16.0	120	75	-15	5	13				
+indent_aptos_narrow12	Aptos Narrow 12 left indent 3	100	C7	Aptos Narrow 12	Aptos Narrow 12	left	3	16.0	120	22	-68	5	13				
+indent_aptos_narrow12	Aptos Narrow 12 right indent 3	100	E7	Aptos Narrow 12	Aptos Narrow 12	right	3	16.0	120	69	-21	5	13				
+indent_aptos_narrow12	Aptos Narrow 12 left indent 4	100	C8	Aptos Narrow 12	Aptos Narrow 12	left	4	16.0	120	28	-62	5	13				
+indent_aptos_narrow12	Aptos Narrow 12 right indent 4	100	E8	Aptos Narrow 12	Aptos Narrow 12	right	4	16.0	120	63	-27	5	13				
+indent_aptos_narrow12	Aptos Narrow 12 left indent 5	100	C9	Aptos Narrow 12	Aptos Narrow 12	left	5	16.0	120	34	-56	5	13				
+indent_aptos_narrow12	Aptos Narrow 12 right indent 5	100	E9	Aptos Narrow 12	Aptos Narrow 12	right	5	16.0	120	57	-33	5	13				
+shrink	shrunk 4	100	C4	Calibri 11	Calibri 11	left	0	15.0	53	4	-23	5	12	1	1	26	26
+shrink	shrunk 5	100	C5	Calibri 11	Calibri 11	left	0	15.0	53	4	-16	5	12	1	1	33	33
+shrink	shrunk 6	100	C6	Calibri 11	Calibri 11	left	0	15.0	53	4	-9	5	12	1	1	40	40
+shrink	shrunk 7	100	C7	Calibri 11	Calibri 11	left	0	15.0	53	3.5	-8.5	5.5	12	0.8723	0.9286	41	47
+shrink	shrunk 8	100	C8	Calibri 11	Calibri 11	left	0	15.0	53	3.5	-3	6	12	0.8611	0.8571	46.5	54
+shrink	shrunk 9	100	C9	Calibri 11	Calibri 11	left	0	15.0	53	2.5	-6.5	7	12	0.7213	0.7143	44	61
+shrink	shrunk 10	100	C10	Calibri 11	Calibri 11	left	0	15.0	53	2.5	-1.5	7	12	0.7206	0.7143	49	68
+shrink	shrunk 11	100	C11	Calibri 11	Calibri 11	left	0	15.0	53	2.5	-7	7.5	12	0.58	0.6429	43.5	75
+shrink	shrunk 12	100	C12	Calibri 11	Calibri 11	left	0	15.0	53	2.5	-3.5	8	12	0.5732	0.5714	47	82
+shrink	shrunk 13	100	C13	Calibri 11	Calibri 11	left	0	15.0	53	2.5	-12	9	12	0.4326	0.4286	38.5	89
+shrink	shrunk 14	100	C14	Calibri 11	Calibri 11	left	0	15.0	53	2.5	-9	9	12	0.4323	0.4286	41.5	96
+shrink	shrunk 15	100	C15	Calibri 11	Calibri 11	left	0	15.0	53	2.5	-6	9	12	0.432	0.4286	44.5	103
+shrink	shrunk 16	100	C16	Calibri 11	Calibri 11	left	0	15.0	53	2.5	-3	9	12	0.4318	0.4286	47.5	110
+shrink	shrunk 17	100	C17	Calibri 11	Calibri 11	left	0	15.0	53	2.5	-17	10	11	0.2863	0.1429	33.5	117
+shrink	shrunk 18	100	C18	Calibri 11	Calibri 11	left	0	15.0	53	2.5	-15	10	11	0.2863	0.1429	35.5	124
+shrink	shrunk 19	100	C19	Calibri 11	Calibri 11	left	0	15.0	53	2.5	-13	10	11	0.2863	0.1429	37.5	131
+shrink	shrunk 20	100	C20	Calibri 11	Calibri 11	left	0	15.0	53	2.5	-11	10	11	0.2862	0.1429	39.5	138
+shrink	shrunk 21	100	C21	Calibri 11	Calibri 11	left	0	15.0	53	2.5	-9	10	11	0.2862	0.1429	41.5	145
+shrink	shrunk 22	100	C22	Calibri 11	Calibri 11	left	0	15.0	53	2	-7.5	10	12	0.2862	0.2857	43.5	152
+shrink	shrunk 23	100	C23	Calibri 11	Calibri 11	left	0	15.0	53	2	-5.5	10	12	0.2862	0.2857	45.5	159
+shrink	shrunk 24	100	C24	Calibri 11	Calibri 11	left	0	15.0	53	2	-3.5	10	12	0.2861	0.2857	47.5	166
+shrink	shrunk 25	100	C25	Calibri 11	Calibri 11	left	0	15.0	53	2	-1.5	10	12	0.2861	0.2857	49.5	173
+shrink	shrunk 26	100	C26	Calibri 11	Calibri 11	left	0	15.0	53	2	-25	11	11.5	0.1444	0.0714	26	180
+shrink	shrunk 27	100	C27	Calibri 11	Calibri 11	left	0	15.0	53	2	-24	11	11.5	0.1444	0.0714	27	187
+shrink	shrunk 28	100	C28	Calibri 11	Calibri 11	left	0	15.0	53	2	-23	11	11.5	0.1443	0.0714	28	194
+shrink	shrunk 29	100	C29	Calibri 11	Calibri 11	left	0	15.0	53	2	-22	11	11.5	0.1443	0.0714	29	201
+shrink	shrunk 30	100	C30	Calibri 11	Calibri 11	left	0	15.0	53	2	-21	11	11.5	0.1442	0.0714	30	208
+shrink	ladder 1	100	G4	Calibri 11	Calibri 1	left	0	15.0	120								
+shrink	ladder 1.5	100	G5	Calibri 11	Calibri 1.5	left	0	15.0	120	2	-108	11	11.5				
+shrink	ladder 2	100	G6	Calibri 11	Calibri 2	left	0	15.0	120	2	-108	11	11.5				
+shrink	ladder 2.5	100	G7	Calibri 11	Calibri 2.5	left	0	15.0	120	2	-98.5	10	12				
+shrink	ladder 3	100	G8	Calibri 11	Calibri 3	left	0	15.0	120	2	-98.5	10	12				
+shrink	ladder 3.5	100	G9	Calibri 11	Calibri 3.5	left	0	15.0	120	2.5	-98	10	11				
+shrink	ladder 4	100	G10	Calibri 11	Calibri 4	left	0	15.0	120	2.5	-98	10	11				
+shrink	ladder 4.5	100	G11	Calibri 11	Calibri 4.5	left	0	15.0	120	2.5	-88	9	12				
+shrink	ladder 5	100	G12	Calibri 11	Calibri 5	left	0	15.0	120	2.5	-88	9	12				
+shrink	ladder 5.5	100	G13	Calibri 11	Calibri 5.5	left	0	15.0	120	2.5	-78.5	8	12				
+shrink	ladder 6	100	G14	Calibri 11	Calibri 6	left	0	15.0	120	2.5	-78.5	8	12				
+shrink	ladder 6.5	100	G15	Calibri 11	Calibri 6.5	left	0	15.0	120	2.5	-78	7.5	12				
+shrink	ladder 7	100	G16	Calibri 11	Calibri 7	left	0	15.0	120	2.5	-78	7.5	12				
+shrink	ladder 7.5	100	G17	Calibri 11	Calibri 7.5	left	0	15.0	120	2.5	-68.5	7	12				
+shrink	ladder 8	100	G18	Calibri 11	Calibri 8	left	0	15.0	120	2.5	-68.5	7	12				
+shrink	ladder 8.5	100	G19	Calibri 11	Calibri 8.5	left	0	15.0	120	3.5	-58	6	12				
+shrink	ladder 9	100	G20	Calibri 11	Calibri 9	left	0	15.0	120	3.5	-58	6	12				
+shrink	ladder 9.5	100	G21	Calibri 11	Calibri 9.5	left	0	15.0	120	3.5	-57.5	5.5	12				
+shrink	ladder 10	100	G22	Calibri 11	Calibri 10	left	0	15.0	120	3.5	-57.5	5.5	12				
+shrink	ladder 10.5	100	G23	Calibri 11	Calibri 10.5	left	0	15.0	120	4	-48	5	12				
+shrink	ladder 11	100	G24	Calibri 11	Calibri 11	left	0	15.0	120	4	-48	5	12				

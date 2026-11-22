@@ -21,6 +21,10 @@ appearance as the other suites; its Normal font is the group's.
   ink's width over the reference's, at each length. Rows 4 to 24: "HHHHHHHHHH" unshrunk in G at
   1 to 11 pt in half points: the ink width of each drawn size, to tell which size a shrunk text
   is drawn at.
+- ``shrink_calibri16`` and ``shrink_aptos_narrow11``, those Normal fonts. "H" repeated 4 to 51
+  times with shrink to fit, left aligned, in the default columns C (4 to 19), E (20 to 35) and G
+  (36 to 51), rows 4 to 19; unshrunk "H" repeated 10 (I4) and 20 times (I5) in a column of 60
+  characters: each length's ink width against the unshrunk advance, so the size it is drawn at.
 
 Geometry is read for one cell a column (row 1) and one a row (column A). ``read`` writes
 ``tests/captures/text_steps.tsv``: one row per case, measured as ``text_style`` measures (its
@@ -54,11 +58,22 @@ FACES = {
     "indent_aptos_narrow11": ("Aptos Narrow", 11),
     "indent_aptos_narrow12": ("Aptos Narrow", 12),
     "shrink": ("Calibri", 11),
+    "shrink_calibri16": ("Calibri", 16),
+    "shrink_aptos_narrow11": ("Aptos Narrow", 11),
 }
 """Each group's Normal font."""
 GROUPS = tuple(FACES)
 MARKERS = {
-    group: ("B2", "O3" if group == "indent_calibri11" else "I3" if group == "shrink" else "G3")
+    group: (
+        "B2",
+        "O3"
+        if group == "indent_calibri11"
+        else "I3"
+        if group == "shrink"
+        else "K3"
+        if group.startswith("shrink_")
+        else "G3",
+    )
     for group in GROUPS
 }
 """The second marker sits just right of every case, in row 3, so that it stays in the window
@@ -68,11 +83,16 @@ CELL_FONTS = (("G", "I", "Calibri", 16), ("K", "M", "Aptos Narrow", 12))
 """``indent_calibri11``'s cell-font columns: left, right, face, size."""
 LENGTHS = range(4, 31)
 """Shrunk texts' lengths in characters; each in the row of its number."""
+SHRUNK_COLUMNS = (("C", range(4, 20)), ("E", range(20, 36)), ("G", range(36, 52)))
+"""``shrink_<face>``: the default columns holding "H" repeated 4 to 51 times, 16 lengths each."""
+REFERENCES = {"I4": 10, "I5": 20}
+"""``shrink_<face>``: unshrunk "H" repeated 10 and 20 times in a column of 60 characters: their
+ink widths give the face's "H" advance and side bearings, so each shrunk length's drawn size."""
 LADDER = tuple(1 + k / 2 for k in range(21))
 """The reference ladder's sizes, 1 to 11 pt, in rows 4 to 24."""
 COLUMNS = (
     "group", "name", "zoom", "cell", "normal_font", "cell_font", "align", "indent",
-    "row_height", "ink_left", "ink_right", "ink_top", "ink_bottom", "width_ratio",
+    "row_height", "cell_width", "ink_left", "ink_right", "ink_top", "ink_bottom", "width_ratio",
     "height_ratio", "ink_width", "ref_width",
 )  # fmt: skip
 
@@ -126,10 +146,30 @@ def _shrink(ws: Any) -> list[Case]:
     return found
 
 
+def _shrink_face(ws: Any, group: str) -> list[Case]:
+    found = []
+    for column, lengths in SHRUNK_COLUMNS:
+        for row, length in enumerate(lengths, 4):
+            cell = f"{column}{row}"
+            ws[cell] = "H" * length
+            ws[cell].alignment = Alignment(horizontal="left", shrink_to_fit=True)
+            found.append(Case(group, f"shrunk {length}", cell, ("ink",)))
+    ws.column_dimensions["I"].width = 60
+    for cell, length in REFERENCES.items():
+        ws[cell] = "H" * length
+        ws[cell].alignment = Alignment(horizontal="left")
+        found.append(Case(group, f"reference {length}", cell, ("ink",)))
+    return found
+
+
 def fill(ws: Any, group: str) -> list[Case]:
     """Lay one group out on the first worksheet of its own workbook; its cases."""
     _normal(ws, group)
-    return _shrink(ws) if group == "shrink" else _indent(ws, group)
+    if group == "shrink":
+        return _shrink(ws)
+    if group.startswith("shrink_"):
+        return _shrink_face(ws, group)
+    return _indent(ws, group)
 
 
 def cases(group: str | None = None) -> list[Case]:
@@ -240,6 +280,7 @@ def write() -> None:
                         "zoom": str(cap.zoom),
                         "cell": case.cell,
                         "row_height": cap.value(f"A{row}", "geometry.height") or "",
+                        "cell_width": f"{cap.geometry[case.cell]['width']:g}",
                         **_described(case, ws),
                         **measured,
                     }
