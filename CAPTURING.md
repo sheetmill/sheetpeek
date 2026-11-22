@@ -14,18 +14,20 @@ project captures layout: spill, alignment, merges, overflow, indent.
   on every exit path, errors included. Left off, Excel would afterwards fail to show its dialogs.
 - A script opens only the workbook it built, and closes it without saving unless saving is the
   point. It stops before opening anything when a workbook of the same name is already open in
-  Excel: that one is someone's (left open to compare, say), and Excel would hand the script that
-  copy instead of the file just built. It never touches another open workbook, and never runs an application-wide command such
+  Excel: that workbook is not the script's (a person may have left it open to compare), and
+  Excel would hand the script that copy instead of the file just built. It never touches another open workbook, and never runs an application-wide command such
   as `calculate`.
 - Two captures never run at once.
 - No sweep of crafted or extreme input runs during a capture. Before a capture, check that Excel
   answers and that no sweep is still running: a machine out of memory pauses Excel, which then looks
   like a hang.
-- A case that hangs ends the run. It is reported and looked into, not retried.
+- A case that hangs ends the run. It is reported and looked into, not retried: a retry hides
+  what made Excel hang, and a hang that comes from Excel's state comes back.
 - Anything that feeds crafted or extreme input to the package runs in a child process under a memory
   watchdog that samples its size and kills it at 4 GB (`tests/watchdog.py`). A time limit alone does
   not count, and `ulimit -v` is not a limit on macOS. A killed run, a missing result or an exit status
-  of 137 means stop and find out why, not run it again.
+  of 137 means stop and find out why, not run it again: the same input does the same harm, and an
+  unbounded run once took the machine past its memory and paused every application.
 - The page setup a capture needs (orientation, scale, gridlines, margins) is written into the
   workbook by openpyxl, not set through AppleScript.
 
@@ -123,8 +125,8 @@ pt high in the file prints 14 pt apart). `capture/screen/` captures Excel's wind
   A request past its time limit is killed (`osascript` waiting on Excel ignores SIGTERM) and
   evidence is saved: a `sample` of Excel and whether it still answers.
 - **Safeguards:** a screen suite starts only when Excel answers, holds no workbook and shows no
-  window of its own, since any other window spoils a window capture (the older suites only refuse
-  a workbook of their own name). It opens only the workbook it built, inside Excel's sandbox
+  window of its own, since any other window spoils a window capture (`layout` and the suites with
+  scripts of their own, above, only refuse a workbook of their own name). It opens only the workbook it built, inside Excel's sandbox
   container, keeps the display awake, and on every exit path closes it without saving, turns
   display alerts back on and deletes it.
 - **The window** is found through CoreGraphics by its title (`capture/screen/windows.js`) and
@@ -161,8 +163,9 @@ pt high in the file prints 14 pt apart). `capture/screen/` captures Excel's wind
   styles), its own format, its own borders and its geometry, each property in its own `try`.
 - **Headers** record Excel's version and build, the edition (stated in `EXCEL_EDITION`, which
   Excel's dictionary does not give), the update channel, macOS, the appearance, the zoom, the
-  color conversion, the date, the suite, the platform and the display's scale. The older suites' headers record version, build,
-  edition and channel too.
+  color conversion, the date, the suite, the platform and the display's scale. The headers of
+  `layout` and of the suites with scripts of their own record version, build, edition and
+  channel too.
 
 Units: lengths are reported in sheet points at the capture's zoom (image pixels divided by the
 scale), with image pixels beside them where a suite keeps them. Lines, dashes, pattern tiles and
@@ -171,7 +174,8 @@ outline symbols are fixed in screen units, so they are reported in screen points
 `python -m capture.screen run SUITE ...` runs suites one at a time (one Excel, never two
 captures at once); `read SUITE ...` measures saved captures again from `capture/build/<suite>/`
 without Excel. Each suite writes `tests/captures/<suite>.tsv`, gzipped as `<suite>.tsv.gz` when
-it is large (`tables`). The suites:
+it is large (`tables`). Every suite is in the table under **Suites** below; among the screen
+suites:
 - the cell-style suites `borders`, `fills` and `text_style`;
 - `rotation`: angled and stacked text (which borders slant, where general text is anchored,
   fitted heights over lengths and sizes; cases measured by row height alone are read without a
