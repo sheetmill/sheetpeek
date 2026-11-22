@@ -116,7 +116,7 @@ The PDF is Excel's print layout; the screen is the truth, and the two differ in 
 pt high in the file prints 14 pt apart). `capture/screen/` captures Excel's window:
 
 - **Requests** go through `capture/screen/excel.applescript`, one request a call (count, open,
-  close, view, scroll, window, save, read, follow), so each call does one visible thing and can
+  close, view, scroll, window, maximize, geometry, save, read, follow), so each call does one visible thing and can
   be inspected on its own: `scroll` sets the window's top row and returns its visible range,
   `window` reads the window's zoom, view, freeze and split state without setting anything, and
   `follow` follows a cell's first hyperlink and reads where it lands. The suites that read
@@ -132,6 +132,14 @@ pt high in the file prints 14 pt apart). `capture/screen/` captures Excel's wind
 - **The window** is found through CoreGraphics by its title (`capture/screen/windows.js`) and
   captured with `screencapture -l` at the display's scale (2 px a point on a 2x display), again
   every second until two shots are identical: Excel may still be redrawing after a zoom change.
+- **The window's geometry:** where a dash or a tile starts follows Excel's window on the screen
+  (a dash's phase moved with the window at zoom 200), so each machine captures in one geometry,
+  recorded once outside the repository (`capture/screen/geometry.py`: `$SHEETPEEK_CAPTURE_GEOMETRY`,
+  else `~/.sheetpeek-capture/geometry.json`, written by `python -m capture.screen geometry
+  record`): the main screen's size in points and its backing scale, Excel's window maximized
+  (bounds and window state) and its usable width and height. Before its first view a capture
+  maximizes the window, reads the geometry, records it in its header (`geometry`) and refuses to
+  run when it differs from the recorded one in any field, or when none is recorded.
 - **Colors:** each capture is converted from the display's profile to sRGB (`sips --matchTo`),
   so pixel colors compare with the file's. From a wide-gamut display the conversion leaves
   saturated colors a few units off: on a Mac with a P3 display, `border_conflicts.tsv` reads
@@ -163,7 +171,8 @@ pt high in the file prints 14 pt apart). `capture/screen/` captures Excel's wind
   styles), its own format, its own borders and its geometry, each property in its own `try`.
 - **Headers** record Excel's version and build, the edition (stated in `EXCEL_EDITION`, which
   Excel's dictionary does not give), the update channel, macOS, the appearance, the zoom, the
-  color conversion, the date, the suite, the platform and the display's scale. The headers of
+  color conversion, the date, the suite, the platform, the display's scale and the window's
+  geometry. The headers of
   `layout` and of the suites with scripts of their own record version, build, edition and
   channel too.
 

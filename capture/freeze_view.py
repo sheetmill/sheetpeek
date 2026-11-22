@@ -312,6 +312,12 @@ def read_zoom(name: str) -> str:
         wb.save(path)
         postprocess(name)(path)
         with session:
+            from capture.screen import geometry
+
+            # maximized and checked first: maximizing leaves the zoom Excel opened at
+            seen = session.geometry()
+            geometry.check(seen)
+            found["geometry"] = geometry.text(seen)
             state = session.window()
             # The rows the window shows at the zoom Excel opened it at, nothing set first but
             # the top row: tells whether it draws at a zoom outside 10 to 400 (5, 401).

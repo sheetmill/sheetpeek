@@ -10,6 +10,9 @@
 --                              left); returns the address of the window's visible range
 --   window NAME                the workbook's active window's state, read and not set: zoom,
 --                              view, freeze panes, split row and column, scroll row and column
+--   maximize NAME              maximize the workbook's active window; returns its window state
+--   geometry NAME              the active window's usable width and height in points and its
+--                              window state, joined by ";"
 --   save NAME PATH             save the workbook as PATH (Excel's own file)
 --   read NAME CELL...          what Excel shows for each cell: its display format, its own
 --                              format, its borders and its geometry, one record a property
@@ -38,6 +41,10 @@ on run argv
 		return my scrollBook(item 2 of argv, (item 3 of argv) as integer)
 	else if request is "window" then
 		return my windowState(item 2 of argv)
+	else if request is "maximize" then
+		return my maximizeBook(item 2 of argv)
+	else if request is "geometry" then
+		return my windowGeometry(item 2 of argv)
 	else if request is "save" then
 		return my saveBook(item 2 of argv, item 3 of argv)
 	else if request is "read" then
@@ -90,6 +97,23 @@ on viewBook(xlName, park, zoomLevel)
 		return (zoom of active window) as string
 	end tell
 end viewBook
+
+on maximizeBook(xlName)
+	tell application "Microsoft Excel"
+		activate
+		activate object workbook xlName
+		set window state of active window to window state maximized
+		return (window state of active window) as string
+	end tell
+end maximizeBook
+
+on windowGeometry(xlName)
+	tell application "Microsoft Excel"
+		activate object workbook xlName
+		set xlWindow to active window
+		return ((usable width of xlWindow) as string) & ";" & ((usable height of xlWindow) as string) & ";" & ((window state of xlWindow) as string)
+	end tell
+end windowGeometry
 
 on scrollBook(xlName, topRow)
 	tell application "Microsoft Excel"

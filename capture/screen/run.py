@@ -27,6 +27,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from capture.screen import geometry as machine_geometry
 from capture.screen import png
 from capture.screen.session import CONTAINER, ExcelSession, environment
 from capture.screen.window import (
@@ -158,6 +159,9 @@ def capture(
         if postprocess is not None:
             postprocess(path)
         with session:
+            found = session.geometry()
+            machine_geometry.check(found)
+            header["geometry"] = machine_geometry.text(found)
             session.view(PARK, zooms[0])
             rows = session.read_cells(cells)
             for zoom in zooms:

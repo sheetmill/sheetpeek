@@ -27,6 +27,7 @@ from types import TracebackType
 HERE = Path(__file__).resolve().parent
 SCRIPT = HERE / "excel.applescript"
 WINDOWS = HERE / "windows.js"
+SCREEN = HERE / "screen.js"
 WINDOW_GRACE = 10.0
 """Seconds a window with no workbook may stay on screen before a session refuses to start."""
 SETTLE = 5.0
@@ -87,6 +88,17 @@ def excel_windows() -> list[dict[str, object]]:
              "title": title}
         )  # fmt: skip
     return windows
+
+
+def main_screen() -> tuple[float, float, float]:
+    """The main screen's width and height in points and its backing scale (2 on a 2x display)."""
+    result = subprocess.run(
+        ["osascript", "-l", "JavaScript", str(SCREEN)], capture_output=True, text=True, timeout=15
+    )
+    if result.returncode:
+        raise ExcelError(result.stderr.strip()[:400])
+    width, height, scale = result.stdout.strip().split("\t")
+    return float(width), float(height), float(scale)
 
 
 def environment(edition: str) -> dict[str, str]:
@@ -250,6 +262,28 @@ class ExcelSession:
         gives it: rows and columns shown in part count.
         """
         return self.ask("scroll", self.name, str(row))
+
+    def geometry(self) -> dict[str, object]:
+        """Maximize the workbook's window, then its geometry (``capture.screen.geometry``).
+
+        The screen's size and backing scale, the window's bounds on screen and its window state,
+        and its usable width and height, all in points.
+        """
+        self.ask("maximize", self.name)
+        usable_width, usable_height, state = self.ask("geometry", self.name).split(";")
+        stem = Path(self.name).stem
+        windows = [w for w in excel_windows() if stem in str(w["title"])]
+        if len(windows) != 1:
+            raise ExcelError(f"expected one Excel window titled {stem!r}, found {len(windows)}")
+        w = windows[0]
+        width, height, scale = main_screen()
+        return {
+            "screen_pt": [width, height],
+            "display_scale": scale,
+            "window_pt": [w["x"], w["y"], w["w"], w["h"]],
+            "usable_pt": [float(usable_width), float(usable_height)],
+            "window_state": state.strip(),
+        }
 
     def window(self) -> str:
         """The workbook's active window's state as Excel reports it, nothing set first.
