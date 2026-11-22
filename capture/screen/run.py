@@ -240,10 +240,13 @@ def patch_part(path: Path, edits: dict[str, Callable[[str], str] | str]) -> None
     """Rewrite parts of a saved xlsx: ``{part name: new text, or a function of the old text}``.
 
     A part not present is added. The ``[Content_Types].xml`` and relationship parts are the
-    caller's to edit like any other part.
+    caller's to edit like any other part. A function sees its part in the standard library's form
+    (:func:`capture.xmlform.standard_form`), whichever writer openpyxl used.
     """
     import shutil
     import zipfile
+
+    from capture.xmlform import serialized, standard_form
 
     tmp = path.with_suffix(".tmp.xlsx")
     with zipfile.ZipFile(path) as src, zipfile.ZipFile(tmp, "w", zipfile.ZIP_DEFLATED) as dst:
@@ -252,7 +255,10 @@ def patch_part(path: Path, edits: dict[str, Callable[[str], str] | str]) -> None
             data = src.read(name)
             if name in edits:
                 edit = edits[name]
-                data = (edit(data.decode("utf-8")) if callable(edit) else edit).encode("utf-8")
+                text = data.decode("utf-8")
+                if callable(edit) and serialized(name):
+                    text = standard_form(text)
+                data = (edit(text) if callable(edit) else edit).encode("utf-8")
             dst.writestr(name, data)
         for name, edit in edits.items():
             if name not in names:

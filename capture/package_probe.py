@@ -29,6 +29,7 @@ from pathlib import Path
 import openpyxl
 
 from capture.edition import excel_description
+from capture.xmlform import serialized, standard_form
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "tests" / "captures" / "package.tsv"
@@ -52,7 +53,17 @@ def base() -> bytes:
     workbook.active["A1"] = 111
     buffer = io.BytesIO()
     workbook.save(buffer)
-    return buffer.getvalue()
+    out = io.BytesIO()  # every XML part in the standard library's form, whichever writer was used
+    with (
+        zipfile.ZipFile(buffer) as source,
+        zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as target,
+    ):
+        for info in source.infolist():
+            body = source.read(info.filename)
+            if serialized(info.filename):
+                body = standard_form(body.decode()).encode()
+            target.writestr(info, body)
+    return out.getvalue()
 
 
 def _rewrite(data: bytes, write_sheet: Callable[[zipfile.ZipFile, bytes], None]) -> bytes:

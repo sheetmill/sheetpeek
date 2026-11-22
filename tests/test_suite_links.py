@@ -13,6 +13,7 @@ import openpyxl
 import pytest
 from capture import links
 from capture.screen.window import MARKER
+from capture.xmlform import standard_form
 from openpyxl.utils import column_index_from_string
 from openpyxl.utils.cell import coordinate_from_string
 
@@ -87,7 +88,7 @@ def test_the_theme_and_the_empty_links_are_written_as_stated(tmp_path):
     with zipfile.ZipFile(path) as package:
         theme = package.read("xl/theme/theme1.xml").decode()
         sheet = package.read("xl/worksheets/sheet1.xml").decode()
-        styles = package.read("xl/styles.xml").decode()
+        styles = standard_form(package.read("xl/styles.xml").decode())
         book = package.read("xl/workbook.xml").decode()
     assert f'<a:srgbClr val="{links.HLINK}"/>' in theme
     assert f'<a:srgbClr val="{links.FOLHLINK}"/>' in theme
