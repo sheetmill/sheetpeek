@@ -10,10 +10,10 @@
 group	name	zoom	cell	row_height	cell_width	lines	line_tops	ink_left	ink_right	ink_top	ink_bottom	words	baseline	glyph_top	rule_offset	rule_thickness	rule_start	rule_end	width_ratio	height_ratio	ink_width	ref_width	font_name	font_size	underline	h_align	v_align	text	line_inks
 align	vertical top one line	100	C4	60.0	144.0	1	5+9	4	-124	5	14												Calibri	11	underline style none	horizontal align general	vertical alignment top	Hxg	
 align	vertical top three lines	100	E4	60.0	53.0	3	6.5+5.5 19.5+7.5 36.5+5.5	3.5	-32.5	6.5	42												Calibri	11	underline style none	horizontal align general	vertical alignment top	aaa bbb ccc	
-align	vertical top long unwrapped	100	G4	60.0	53.0	1	4.5+7.5	3.5	-0.5	4.5	12												Calibri	11	underline style none	horizontal align general	vertical alignment top	aaaa bbbb cccc dddd	
+align	vertical top long unwrapped	100	G4	60.0	53.0	1	4.5+7.5	3.5	0	4.5	12												Calibri	11	underline style none	horizontal align general	vertical alignment top	aaaa bbbb cccc dddd	
 align	vertical center one line	100	C6	60.0	144.0	1	27+9	4	-124	27	36												Calibri	11	underline style none	horizontal align general	vertical alignment center	Hxg	
 align	vertical center three lines	100	E6	60.0	53.0	3	13.5+5.5 26.5+7.5 43.5+5.5	3.5	-32.5	13.5	49												Calibri	11	underline style none	horizontal align general	vertical alignment center	aaa bbb ccc	
-align	vertical center long unwrapped	100	G6	60.0	53.0	1	26.5+7.5	3.5	-0.5	26.5	34												Calibri	11	underline style none	horizontal align general	vertical alignment center	aaaa bbbb cccc dddd	
+align	vertical center long unwrapped	100	G6	60.0	53.0	1	26.5+7.5	3.5	0	26.5	34												Calibri	11	underline style none	horizontal align general	vertical alignment center	aaaa bbbb cccc dddd	
 align	vertical justify one line	100	C8	60.0	144.0	1	5+9	4	-124	5	14												Calibri	11	underline style none	horizontal align general	vertical alignment justify	Hxg	
 align	vertical justify three lines	100	E8	60.0	53.0	3	6.5+5.5 26.5+7.5 51.5+5.5	3.5	-32.5	6.5	57												Calibri	11	underline style none	horizontal align general	vertical alignment justify	aaa bbb ccc	
 align	vertical justify long unwrapped	100	G8	60.0	53.0	2	4.5+7.5 49.5+7.5	3.5	-4.5	4.5	57												Calibri	11	underline style none	horizontal align general	vertical alignment justify	aaaa bbbb cccc dddd	
@@ -22,7 +22,7 @@ align	vertical distributed three lines	100	E10	60.0	53.0	3	6.5+5.5 26.5+7.5 51.5
 align	vertical distributed long unwrapped	100	G10	60.0	53.0	2	4.5+7.5 49.5+7.5	3.5	-4.5	4.5	57												Calibri	11	underline style none	horizontal align general	vertical alignment distributed	aaaa bbbb cccc dddd	
 align	vertical bottom one line	100	C12	60.0	144.0	1	50+9	4	-124	50	59												Calibri	11	underline style none	horizontal align general	vertical alignment bottom	Hxg	
 align	vertical bottom three lines	100	E12	60.0	53.0	3	21.5+5.5 34.5+7.5 51.5+5.5	3.5	-32.5	21.5	57												Calibri	11	underline style none	horizontal align general	vertical alignment bottom	aaa bbb ccc	
-align	vertical bottom long unwrapped	100	G12	60.0	53.0	1	49.5+7.5	3.5	-0.5	49.5	57												Calibri	11	underline style none	horizontal align general	vertical alignment bottom	aaaa bbbb cccc dddd	
+align	vertical bottom long unwrapped	100	G12	60.0	53.0	1	49.5+7.5	3.5	0	49.5	57												Calibri	11	underline style none	horizontal align general	vertical alignment bottom	aaaa bbbb cccc dddd	
 align	distributed words	100	C14	32.0	144.0	1	21.5+7.5	3.5	-2.5	21.5	29	3.5+4 8.5+4 67.5+5 73.5+5 132.5+4 137.5+4											Calibri	11	underline style none	horizontal align distributed	vertical alignment bottom	aa bb cc	
 align	distributed one word	100	E14	32.0	53.0	1	21.5+7.5	19.5	-18.5	21.5	29	19.5+4 24.5+5 30.5+4											Calibri	11	underline style none	horizontal align distributed	vertical alignment bottom	abc	
 align	distributed long unwrapped	100	G14	32.0	53.0	2	6.5+7.5 21.5+7.5	3.5	-3	6.5	29	3.5+4 8.5+4 13.5+4 18.5+4 25.5+24.5											Calibri	11	underline style none	horizontal align distributed	vertical alignment bottom	aaaa bbbb cccc dddd	
@@ -95,15 +95,15 @@ fonts	underline none wide cell	100	G4	15.0	180.0			4	-164	5	12		12	7									Cal
 fonts	underline single text	100	C6	15.0	84.0			3	-59	5	14		12	7	1	1	3	-59					Calibri	11	underline style single	horizontal align general	vertical alignment bottom	HHH	
 fonts	underline single number	100	E6	15.0	84.0			64	-1	5	14		12	7	1	1	64	-1					Calibri	11	underline style single	horizontal align general	vertical alignment bottom	123	
 fonts	underline single wide cell	100	G6	15.0	180.0			3	-162	5	14		12	7	1	1	3	-162					Calibri	11	underline style single	horizontal align general	vertical alignment bottom	HH	
-fonts	underline double text	100	C8	15.0	84.0			3	-59	5	14.5		12	7	0 2	1 0.5	3 3	-59 -59					Calibri	11	underline style double	horizontal align general	vertical alignment bottom	HHH	
-fonts	underline double number	100	E8	15.0	84.0			64	-1	5	14.5		12	7	0 2	1 0.5	64 64	-1 -1					Calibri	11	underline style double	horizontal align general	vertical alignment bottom	123	
-fonts	underline double wide cell	100	G8	15.0	180.0			3	-162	5	14.5		12	7	0 2	1 0.5	3 3	-162 -162					Calibri	11	underline style double	horizontal align general	vertical alignment bottom	HH	
+fonts	underline double text	100	C8	15.0	84.0			3	-59	5	15		12	7	0 2	1 1	3 3	-59 -59					Calibri	11	underline style double	horizontal align general	vertical alignment bottom	HHH	
+fonts	underline double number	100	E8	15.0	84.0			64	-1	5	15		12	7	0 2	1 1	64 64	-1 -1					Calibri	11	underline style double	horizontal align general	vertical alignment bottom	123	
+fonts	underline double wide cell	100	G8	15.0	180.0			3	-162	5	15		12	7	0 2	1 1	3 3	-162 -162					Calibri	11	underline style double	horizontal align general	vertical alignment bottom	HH	
 fonts	underline singleAccounting text	100	C10	18.0	84.0			3	-2	5	16		12	7	3	1	3	-2					Calibri	11	underline style single accounting	horizontal align general	vertical alignment bottom	HHH	
 fonts	underline singleAccounting number	100	E10	18.0	84.0			64	-2	5	16		12	7	3	1	64	-2					Calibri	11	underline style single accounting	horizontal align general	vertical alignment bottom	123	
 fonts	underline singleAccounting wide cell	100	G10	18.0	180.0			3	-2	5	16		12	7	3	1	3	-2					Calibri	11	underline style single accounting	horizontal align general	vertical alignment bottom	HH	
-fonts	underline doubleAccounting text	100	C12	18.0	84.0			3	-2	5	17.5		12	7	3 5	1 0.5	3 3	-2 -2					Calibri	11	underline style double accounting	horizontal align general	vertical alignment bottom	HHH	
-fonts	underline doubleAccounting number	100	E12	18.0	84.0			64	-2	5	17.5		12	7	3 5	1 0.5	64 64	-2 -2					Calibri	11	underline style double accounting	horizontal align general	vertical alignment bottom	123	
-fonts	underline doubleAccounting wide cell	100	G12	18.0	180.0			3	-2	5	17.5		12	7	3 5	1 0.5	3 3	-2 -2					Calibri	11	underline style double accounting	horizontal align general	vertical alignment bottom	HH	
+fonts	underline doubleAccounting text	100	C12	18.0	84.0			3	-2	5	18		12	7	3 5	1 1	3 3	-2 -2					Calibri	11	underline style double accounting	horizontal align general	vertical alignment bottom	HHH	
+fonts	underline doubleAccounting number	100	E12	18.0	84.0			64	-2	5	18		12	7	3 5	1 1	64 64	-2 -2					Calibri	11	underline style double accounting	horizontal align general	vertical alignment bottom	123	
+fonts	underline doubleAccounting wide cell	100	G12	18.0	180.0			3	-2	5	18		12	7	3 5	1 1	3 3	-2 -2					Calibri	11	underline style double accounting	horizontal align general	vertical alignment bottom	HH	
 fonts	baseline 11	100	C14	18.0	84.0			4	-61	7	14		14	7									Calibri	11	underline style none	horizontal align general	vertical alignment bottom	HHH	
 fonts	superscript 11	100	E14	18.0	84.0			2.5	-70	4.5	9		9	4.5									Calibri	11	underline style none	horizontal align general	vertical alignment bottom	HHH	
 fonts	subscript 11	100	G14	18.0	180.0			2.5	-166	11.5	16		16	4.5									Calibri	11	underline style none	horizontal align general	vertical alignment bottom	HHH	
@@ -228,8 +228,8 @@ wrap	word 47	200	C22	32.0	53.0	1	20.75+7.75	2.75	-3	20.75	28.5												Calibr
 wrap	shrink word 47	200	E22	32.0	53.0	1	20.75+7.75	2.75	-3	20.75	28.5												Calibri	11	underline style none	horizontal align general	vertical alignment bottom	bbbbaaaai	
 wrap	word 48	200	C24	32.0	53.0	1	20.75+7.75	2.75	-2.5	20.75	28.5												Calibri	11	underline style none	horizontal align general	vertical alignment bottom	bbbbbaaai	
 wrap	shrink word 48	200	E24	32.0	53.0	1	20.75+7.75	2.75	-2.5	20.75	28.5												Calibri	11	underline style none	horizontal align general	vertical alignment bottom	bbbbbaaai	
-wrap	word 49	200	C26	32.0	53.0	2	5.75+7.75 21.25+10.5	0.25	-0.25	5.75	31.75												Calibri	11	underline style none	horizontal align general	vertical alignment bottom	bbbaaaaaii	
-wrap	shrink word 49	200	E26	32.0	53.0	2	5.75+7.75 21.25+10.5	0.25	-0.25	5.75	31.75												Calibri	11	underline style none	horizontal align general	vertical alignment bottom	bbbaaaaaii	
+wrap	word 49	200	C26	32.0	53.0	2	5.75+7.75 21.25+10.75	0.5	0	5.75	32												Calibri	11	underline style none	horizontal align general	vertical alignment bottom	bbbaaaaaii	
+wrap	shrink word 49	200	E26	32.0	53.0	2	5.75+7.75 21.25+10.75	0.5	0	5.75	32												Calibri	11	underline style none	horizontal align general	vertical alignment bottom	bbbaaaaaii	
 lone	distributed fitted	100	C4	144.0	53.0	6	58.5+9.5 73.5+7.5 88.5+7.5 103.5+7.5 118.5+7.5 133.5+7.5	3	-7	58.5	141												Calibri	11	underline style none	horizontal align distributed	vertical alignment bottom	spilled text that is much wider than one column	3.5+28.5 3+42.5 3.5+39.5 3+25.5 3+43 10.5+33.5
 lone	last line fitted	100	E4	144.0	53.0	6	58.5+9.5 73.5+7.5 88.5+7.5 103.5+7.5 118.5+7.5 133.5+7.5	3	-7	58.5	141												Calibri	11	underline style none	horizontal align distributed	vertical alignment bottom	spilled text that is much wider than one column	3.5+28.5 3+42.5 3.5+39.5 3+25.5 3+43 10.5+33.5
 lone	justify fitted	100	G4	144.0	53.0	6	58.5+9.5 73.5+7.5 88.5+7.5 103.5+7.5 118.5+7.5 133.5+7.5	3	-7	58.5	141												Calibri	11	underline style none	horizontal align justify	vertical alignment bottom	spilled text that is much wider than one column	3.5+28.5 3+42.5 3.5+39.5 3+25.5 3+43 3.5+33.5

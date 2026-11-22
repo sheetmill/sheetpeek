@@ -58,7 +58,7 @@ class Canvas:
     def capture(self):
         image = png.Image(self.width, self.height, 3, self.rows, "sRGB")
         grid = Grid(0.0, 0.0, float(SCALE))
-        return Capture(100, image, grid, {}, self.geometry, self.reads)
+        return Capture(100, image, grid, {}, self.geometry, self.reads, "mac")
 
     def box(self, cell):
         g = self.geometry[cell]

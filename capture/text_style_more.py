@@ -952,14 +952,14 @@ def left_bottom(cap: Any, box: tuple[int, int, int, int]) -> int | None:
 def measure(cap: Any, case: Case) -> dict[str, str] | None:
     """One case's measurements at one zoom (``text_style``'s and this suite's), or ``None`` when
     it is outside the window."""
-    from capture.screen.ink import bands, cells_box, ink, pt, rule_rows
+    from capture.screen.ink import bands, content_box, ink, pt, rule_rows
 
     complete(cap, _boxes([case]))
     found = text_style.measure(cap, case)
     if found is None:
         return None
     top = cap.edge(case.cell, "top")
-    box = cells_box(cap, case.cell, case.last, inset=1)
+    box = content_box(cap, case.cell, case.last)
     if "baselines" in case.measure:
         lines = []
         for y, n in bands(cap, box):

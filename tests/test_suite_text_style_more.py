@@ -596,14 +596,17 @@ def test_when_nothing_fits_shrunk_text_is_clipped_at_its_cell():
 
 X_BAND = 5.5
 """Points from the baseline to the top of "aaa"'s ink at Calibri 11, as the capture measures it."""
+ASCENDER = 7.5
+"""Points from the baseline to the top of "bbb"'s ink at Calibri 11, as the capture measures it."""
 
 
 @pytest.mark.excel
 def test_lines_that_do_not_fit_their_block_start_where_sheetpeek_starts_them():
     # Three lines in 15 and 20 pt rows, centered, bottom and top aligned: the bands' bottoms
     # ("aaa", "bbb", "ccc" do not descend; "bbb"'s ascender only rises) against sheetpeek's
-    # baselines of the lines that show, half a point. A line whose x-height band starts inside
-    # the row shows; one cut by the row's bottom ends there, a half point up (the ink's pixel).
+    # baselines of the lines that show, half a point. A line shows when its tallest ink (the
+    # x-height of "aaa" and "ccc", the ascender of "bbb") starts inside the row; one cut by the
+    # row's bottom ends there.
     captured = _group("shrunk")
     wrong = []
     for case in suite.cases("shrunk"):
@@ -615,7 +618,12 @@ def test_lines_that_do_not_fit_their_block_start_where_sheetpeek_starts_them():
             for start, length in (s.split("+") for s in record["line_tops"].split())
         ]
         height = expected["row_height"]
-        shown = [min(b, height - 0.5) for b in expected["baselines"] if 0 < b < height + X_BAND]
+        tops = (X_BAND, ASCENDER, X_BAND)
+        shown = [
+            min(b, height)
+            for b, top in zip(expected["baselines"], tops, strict=True)
+            if 0 < b < height + top
+        ]
         if len(bottoms) != len(shown) or any(
             abs(a - b) > 0.5 for a, b in zip(bottoms, shown, strict=True)
         ):
@@ -682,8 +690,7 @@ CAP_HEIGHT = 0.644
 def test_lines_that_overflow_their_row_sit_where_sheetpeek_puts_them():
     # §3.6: three and two wrapped lines in rows of 15 to 32 pt, a line taller than its 15 pt row,
     # and vertical justify and distributed in a 20 pt row: each visible line's baseline (the
-    # ink's bottom under its "H"), half a point. A line cut by the row's bottom reads there,
-    # half a point up (the ink's pixel).
+    # ink's bottom under its "H"), half a point. A line cut by the row's bottom reads there.
     captured = _group("overflow")
     wrong = []
     for case in suite.cases("overflow"):
@@ -691,9 +698,9 @@ def test_lines_that_overflow_their_row_sit_where_sheetpeek_puts_them():
         height = expected["row_height"]
         size = 20 if case.name.startswith("tall 20") else 14 if case.name.startswith("tall") else 11
         cap = CAP_HEIGHT * size
-        # A line shows when at least a point of its ink is in the row.
-        visible = [b for b in expected["baselines"] if b - cap < height - 1 and b >= 2]
-        shown = [min(b, height - 0.5) for b in visible]
+        # A line shows when its "H" starts above the row's bottom.
+        visible = [b for b in expected["baselines"] if b - cap < height and b >= 2]
+        shown = [min(b, height) for b in visible]
         found = [float(b) for b in record["baselines"].split()] if record["baselines"] else []
         if len(found) != len(shown) or any(
             abs(a - b) > 0.5 for a, b in zip(found, shown, strict=True)

@@ -222,7 +222,7 @@ class Window:
     def capture(self):
         image = png.Image(self.width, self.height, 3, self.rows, "sRGB")
         grid = Grid(float(self.ox), float(self.oy), float(SCALE))
-        return Capture(100, image, grid, {}, self.geometry, [])
+        return Capture(100, image, grid, {}, self.geometry, [], "mac")
 
     def start(self, axis, index):
         cell = f"A{index}" if axis == "rows" else f"{index}1"

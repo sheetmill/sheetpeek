@@ -174,7 +174,7 @@ class Window:
             }
         top = 15.0 * (self.group.top_row - 1)
         grid = Grid(float(ORIGIN_X), ORIGIN_Y - top * 2, 2.0)
-        return Capture(100, image, grid, {}, geometry, self.reads)
+        return Capture(100, image, grid, {}, geometry, self.reads, "mac")
 
 
 def test_the_bands_and_heading_colors_read_from_the_window():

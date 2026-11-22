@@ -442,7 +442,7 @@ def _rules(
 
 def measure(cap: Any, case: Case) -> dict[str, str] | None:
     """One case's measurements at one zoom, or ``None`` when it is outside the window."""
-    from capture.screen.ink import bands, cells_box, ink, pt, visible
+    from capture.screen.ink import bands, content_box, ink, pt, visible
 
     end = case.last or case.cell
     shown = [case.cell, end, *([case.reference] if case.reference else [])]
@@ -450,7 +450,7 @@ def measure(cap: Any, case: Case) -> dict[str, str] | None:
         return None
     left, top = cap.edge(case.cell, "left"), cap.edge(case.cell, "top")
     right = cap.edge(end, "right")
-    box = cells_box(cap, case.cell, case.last, inset=1)
+    box = content_box(cap, case.cell, case.last)
     glyph = ink(cap, box)
     found: dict[str, str] = {}
     if glyph is not None and "ink" in case.measure:
@@ -481,7 +481,7 @@ def measure(cap: Any, case: Case) -> dict[str, str] | None:
     if glyph is not None and "rules" in case.measure:
         found.update(_rules(cap, box, glyph, (left, right, top)))
     if glyph is not None and case.reference:
-        other = ink(cap, cells_box(cap, case.reference, inset=1))
+        other = ink(cap, content_box(cap, case.reference))
         if other is not None:
             found["width_ratio"] = f"{round((glyph[2] - glyph[0]) / (other[2] - other[0]), 4):g}"
             found["height_ratio"] = f"{round((glyph[3] - glyph[1]) / (other[3] - other[1]), 4):g}"

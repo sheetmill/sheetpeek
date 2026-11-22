@@ -46,6 +46,24 @@ def cells_box(cap: Any, first: str, last: str | None = None, inset: int = 0) -> 
     )
 
 
+def gridline_pixels(cap: Any) -> int:
+    """Image pixels across a default gridline: one screen point, whatever the zoom (2 px on a
+    2x display, 1 px on a display of scale 1)."""
+    from capture.screen.window import POINT_PIXELS
+
+    return max(1, round(float(cap.scale) * 100 / (int(cap.zoom) * POINT_PIXELS[cap.platform])))
+
+
+def content_box(cap: Any, first: str, last: str | None = None) -> Box:
+    """The cells' inside: from past the gridline on ``first``'s top and left edges (in the Mac's
+    captures a cell's gridlines lie on its own first rows and columns of pixels) to ``last``'s
+    bottom right, its last row and column kept: text and rules may reach that last row (a
+    double underline's lower rule in a row fitted to its text)."""
+    x0, y0, x1, y1 = cells_box(cap, first, last)
+    line = gridline_pixels(cap)
+    return x0 + line, y0 + line, x1, y1
+
+
 def visible(cap: Any, cell: str) -> bool:
     """Whether the cell lies inside the captured image (a large zoom may push it out)."""
     return (

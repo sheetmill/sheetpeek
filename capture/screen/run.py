@@ -63,7 +63,8 @@ class Capture:
     check: dict
     geometry: dict[str, dict[str, float]]
     rows: list[tuple[str, str, str]] = field(repr=False)
-    platform: str = "mac"
+    platform: str
+    """``mac`` or ``windows``: every capture states the platform it was taken on."""
 
     @property
     def gridline(self) -> tuple[int, int, int] | None:
@@ -189,7 +190,7 @@ def capture(
         nominal = nominal_scale(zoom, round(display, 3), "mac")
         grid, check = locate(image, geometry[markers[0]], geometry[markers[1]], nominal)
         check["display_scale"] = round(display, 3)
-        results.append(Capture(zoom, image, grid, check, geometry, rows))
+        results.append(Capture(zoom, image, grid, check, geometry, rows, "mac"))
     return results
 
 
