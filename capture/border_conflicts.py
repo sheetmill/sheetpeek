@@ -858,12 +858,17 @@ def measure(cap: Any, group: str) -> list[dict[str, str]]:
     return records
 
 
+_PER_GROUP = ("markers", "suite", "workbooks_open_after")
+"""Header fields every group has a value of its own for, left out of the file's header."""
+
+
 def write() -> None:
     """Measure the saved captures again (no Excel) and write ``border_conflicts.tsv``."""
     from capture.screen.run import header, load
 
     records = []
     first: dict[str, str] = {}
+    own: dict[str, dict[str, str]] = {}
     for group in GROUPS:
         out = BUILD_DIR / group
         refused = out / "refused.txt"
@@ -874,13 +879,23 @@ def write() -> None:
         if not (out / "formats.tsv").exists():
             print(f"{group}: not captured yet, left out", file=sys.stderr)
             continue
-        first = first or header(out)
+        found = header(out)
+        first = first or found
+        own[group] = {
+            key: value
+            for key, value in found.items()
+            if key not in _PER_GROUP and value != first.get(key)
+        }
         for cap in load(out):
             records.extend(measure(cap, group))
     with open(OUTPUT, "w", encoding="utf-8") as out_file:
         for key, value in first.items():
-            if key not in ("markers", "suite", "workbooks_open_after"):
+            if key not in _PER_GROUP:
                 out_file.write(f"# {key}: {value}\n")
+        for group, differs in own.items():
+            if differs:
+                text = ", ".join(f"{key} {value}" for key, value in differs.items())
+                out_file.write(f"# group {group}: {text}\n")
         out_file.write("# suite: border_conflicts\n" + "\t".join(COLUMNS) + "\n")
         for record in records:
             out_file.write("\t".join(record.get(c, "") for c in COLUMNS) + "\n")

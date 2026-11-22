@@ -9,6 +9,10 @@
 # zooms: 100
 # colors: captures converted to sRGB (sips --matchTo sRGB Profile.icc)
 # platform: mac
+# group styles: date 2026-11-19
+# group colors: date 2026-11-19
+# group black_white: date 2026-11-19
+# group color_rule: macos 26.6.2, date 2026-11-21
 # suite: border_conflicts
 group	kind	name	zoom	cell	side	first	second	offsets	pattern	ons	offs	short_seq	coverage	solid	color	drawn	distance
 start_end	start_end	start thick: left	100	C4	left		thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
@@ -511,3 +515,315 @@ black_white	color	h white vs: FFFFFF/FFFF00	100	I6	bottom	thin FFFFFF	thin FFFF0
 black_white	color	h white vs: FFFF00/FFFFFF	100	C7	bottom	thin FFFF00	thin FFFFFF	0 0.5	solid			0	1.00	1.00	FFFF00	thin	0.00
 black_white	color	h white vs: FFFFFF/000080	100	D7	bottom	thin FFFFFF	thin 000080	0 0.5	solid			0	1.00	1.00	000080	thin	0.00
 black_white	color	h white vs: 000080/FFFFFF	100	E7	bottom	thin 000080	thin FFFFFF	0 0.5	solid			0	1.00	1.00	000080	thin	0.00
+color_rule	ref	ref h thin	100	C4	top		thin	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+color_rule	ref	ref v thin	100	C4	left		thin	0 0.5	solid			0	1.00	1.00	000000	thin	0.00
+color_rule	ref	ref h medium	100	D4	top		medium	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+color_rule	ref	ref v medium	100	C5	left		medium	-1 -0.5 0 0.5	solid			0	1.00	1.00	000000	medium	0.00
+color_rule	ref	ref h thick	100	E4	top		thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+color_rule	ref	ref v thick	100	C6	left		thick	-1 -0.5 0 0.5 1 1.5	solid			0	1.00	1.00	000000	thick	0.00
+color_rule	ref	ref h double	100	F4	top		double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+color_rule	ref	ref v double	100	C7	left		double	-1 -0.5 1 1.5	solid			0	1.00	1.00	000000	double	0.00
+color_rule	ref	ref h dashed	100	G4	top		dashed	0 0.5	on 3 off 1	3	1	3	0.75	0.75	000000	dashed	0.00
+color_rule	ref	ref v dashed	100	C8	left		dashed	0 0.5	on 3 off 1	3	1	3	0.78	0.78	000000	dashed	0.00
+color_rule	ref	ref h hair	100	H4	top		hair	0 0.5	on 1 off 1	1	1	3	0.50	0.50	000000	hair	0.00
+color_rule	ref	ref v hair	100	C9	left		hair	0 0.5	on 1 off 1	1	1	3	0.50	0.50	000000	hair	0.00
+color_rule	rule	v far, 601 differs: 841433|113692	100	C4	right	thin 841433	thin 113692	0 0.5	solid			0	1.00	1.00	841433	thin	0.00
+color_rule	rule	v far, 601 differs: 113692|841433	100	D4	right	thin 113692	thin 841433	0 0.5	solid			0	1.00	1.00	841433	thin	0.00
+color_rule	rule	v far, 601 differs: 76AE35|EB7F20	100	E4	right	thin 76AE35	thin EB7F20	0 0.5	solid			0	1.00	1.00	EB7F20	thin	0.00
+color_rule	rule	v far, 601 differs: EB7F20|76AE35	100	F4	right	thin EB7F20	thin 76AE35	0 0.5	solid			0	1.00	1.00	EB7F20	thin	0.00
+color_rule	rule	v far, 601 differs: 331518|091193	100	G4	right	thin 331518	thin 091193	0 0.5	solid			0	1.00	1.00	331518	thin	0.00
+color_rule	rule	v far, 601 differs: 091193|331518	100	H4	right	thin 091193	thin 331518	0 0.5	solid			0	1.00	1.00	331518	thin	0.00
+color_rule	rule	v far, 601 differs: 65F7D2|E0D26D	100	I4	right	thin 65F7D2	thin E0D26D	0 0.5	solid			0	1.00	1.00	E0D26D	thin	0.00
+color_rule	rule	v far, 601 differs: E0D26D|65F7D2	100	J4	right	thin E0D26D	thin 65F7D2	0 0.5	solid			0	1.00	1.00	E0D26D	thin	0.00
+color_rule	rule	v far, 601 differs: 4E347B|5E3A35	100	K4	right	thin 4E347B	thin 5E3A35	0 0.5	solid			0	1.00	1.00	5E3A35	thin	0.00
+color_rule	rule	v far, 601 differs: 5E3A35|4E347B	100	L4	right	thin 5E3A35	thin 4E347B	0 0.5	solid			0	1.00	1.00	5E3A35	thin	0.00
+color_rule	rule	v far, 601 differs: 1366BE|775D10	100	M4	right	thin 1366BE	thin 775D10	0 0.5	solid			0	1.00	1.00	775D10	thin	0.00
+color_rule	rule	v far, 601 differs: 775D10|1366BE	100	N4	right	thin 775D10	thin 1366BE	0 0.5	solid			0	1.00	1.00	775D10	thin	0.00
+color_rule	rule	v far, 601 differs: 1D9933|9A642F	100	O4	right	thin 1D9933	thin 9A642F	0 0.5	solid			0	1.00	1.00	9A642F	thin	0.00
+color_rule	rule	v far, 601 differs: 9A642F|1D9933	100	C5	right	thin 9A642F	thin 1D9933	0 0.5	solid			0	1.00	1.00	9A642F	thin	0.00
+color_rule	rule	v far, 601 differs: 70C1AA|24EB92	100	D5	right	thin 70C1AA	thin 24EB92	0 0.5	solid			0	1.00	1.00	70C1AA	thin	0.00
+color_rule	rule	v far, 601 differs: 24EB92|70C1AA	100	E5	right	thin 24EB92	thin 70C1AA	0 0.5	solid			0	1.00	1.00	70C1AA	thin	0.00
+color_rule	rule	v far, 601 differs: 1BC721|B0811D	100	F5	right	thin 1BC721	thin B0811D	0 0.5	solid			0	1.00	1.00	B0811D	thin	0.00
+color_rule	rule	v far, 601 differs: B0811D|1BC721	100	G5	right	thin B0811D	thin 1BC721	0 0.5	solid			0	1.00	1.00	B0811D	thin	0.00
+color_rule	rule	v far, 601 differs: 08CFE7|82AF4C	100	H5	right	thin 08CFE7	thin 82AF4C	0 0.5	solid			0	1.00	1.00	82AF4C	thin	0.00
+color_rule	rule	v far, 601 differs: 82AF4C|08CFE7	100	I5	right	thin 82AF4C	thin 08CFE7	0 0.5	solid			0	1.00	1.00	82AF4C	thin	0.00
+color_rule	rule	v far, 601 differs: 24F88D|DEB932	100	J5	right	thin 24F88D	thin DEB932	0 0.5	solid			0	1.00	1.00	DEB932	thin	0.00
+color_rule	rule	v far, 601 differs: DEB932|24F88D	100	K5	right	thin DEB932	thin 24F88D	0 0.5	solid			0	1.00	1.00	DEB932	thin	0.00
+color_rule	rule	v far, 601 differs: C77C40|42C310	100	L5	right	thin C77C40	thin 42C310	0 0.5	solid			0	1.00	1.00	C77C40	thin	0.00
+color_rule	rule	v far, 601 differs: 42C310|C77C40	100	M5	right	thin 42C310	thin C77C40	0 0.5	solid			0	1.00	1.00	C77C40	thin	0.00
+color_rule	rule	v far, 601 differs: 2546EA|754A31	100	N5	right	thin 2546EA	thin 754A31	0 0.5	solid			0	1.00	1.00	754A31	thin	0.00
+color_rule	rule	v far, 601 differs: 754A31|2546EA	100	O5	right	thin 754A31	thin 2546EA	0 0.5	solid			0	1.00	1.00	754A31	thin	0.00
+color_rule	rule	v far, 601 differs: 642702|1326AA	100	C6	right	thin 642702	thin 1326AA	0 0.5	solid			0	1.00	1.00	642702	thin	0.00
+color_rule	rule	v far, 601 differs: 1326AA|642702	100	D6	right	thin 1326AA	thin 642702	0 0.5	solid			0	1.00	1.00	642702	thin	0.00
+color_rule	rule	v far, 601 differs: 053F70|A21103	100	E6	right	thin 053F70	thin A21103	0 0.5	solid			0	1.00	1.00	A21103	thin	0.00
+color_rule	rule	v far, 601 differs: A21103|053F70	100	F6	right	thin A21103	thin 053F70	0 0.5	solid			0	1.00	1.00	A21103	thin	0.00
+color_rule	rule	v far, 601 differs: 7E4957|2A6597	100	G6	right	thin 7E4957	thin 2A6597	0 0.5	solid			0	1.00	1.00	7E4957	thin	0.00
+color_rule	rule	v far, 601 differs: 2A6597|7E4957	100	H6	right	thin 2A6597	thin 7E4957	0 0.5	solid			0	1.00	1.00	7E4957	thin	0.00
+color_rule	rule	v far, 601 differs: A8761A|2D8BCC	100	I6	right	thin A8761A	thin 2D8BCC	0 0.5	solid			0	1.00	1.00	A8761A	thin	0.00
+color_rule	rule	v far, 601 differs: 2D8BCC|A8761A	100	J6	right	thin 2D8BCC	thin A8761A	0 0.5	solid			0	1.00	1.00	A8761A	thin	0.00
+color_rule	rule	v far, 601 differs: C1BA66|64D899	100	K6	right	thin C1BA66	thin 64D899	0 0.5	solid			0	1.00	1.00	C1BA66	thin	0.00
+color_rule	rule	v far, 601 differs: 64D899|C1BA66	100	L6	right	thin 64D899	thin C1BA66	0 0.5	solid			0	1.00	1.00	C1BA66	thin	0.00
+color_rule	rule	v far, 601 differs: 37B9B1|9F9860	100	M6	right	thin 37B9B1	thin 9F9860	0 0.5	solid			0	1.00	1.00	9F9860	thin	0.00
+color_rule	rule	v far, 601 differs: 9F9860|37B9B1	100	N6	right	thin 9F9860	thin 37B9B1	0 0.5	solid			0	1.00	1.00	9F9860	thin	0.00
+color_rule	rule	v far, 601 differs: 71C895|EF9D4A	100	O6	right	thin 71C895	thin EF9D4A	0 0.5	solid			0	1.00	1.00	EF9D4A	thin	0.00
+color_rule	rule	v far, 601 differs: EF9D4A|71C895	100	C7	right	thin EF9D4A	thin 71C895	0 0.5	solid			0	1.00	1.00	EF9D4A	thin	0.00
+color_rule	rule	v far: 905E2B|A2E906	100	D7	right	thin 905E2B	thin A2E906	0 0.5	solid			0	1.00	1.00	905E2B	thin	0.00
+color_rule	rule	v far: A2E906|905E2B	100	E7	right	thin A2E906	thin 905E2B	0 0.5	solid			0	1.00	1.00	905E2B	thin	0.00
+color_rule	rule	v far: 147DDB|AD441E	100	F7	right	thin 147DDB	thin AD441E	0 0.5	solid			0	1.00	1.00	AD441E	thin	0.00
+color_rule	rule	v far: AD441E|147DDB	100	G7	right	thin AD441E	thin 147DDB	0 0.5	solid			0	1.00	1.00	AD441E	thin	0.00
+color_rule	rule	v far: 5AFFF4|62BA89	100	H7	right	thin 5AFFF4	thin 62BA89	0 0.5	solid			0	1.00	1.00	62BA89	thin	0.00
+color_rule	rule	v far: 62BA89|5AFFF4	100	I7	right	thin 62BA89	thin 5AFFF4	0 0.5	solid			0	1.00	1.00	62BA89	thin	0.00
+color_rule	rule	v far: 4A8888|A2E40B	100	J7	right	thin 4A8888	thin A2E40B	0 0.5	solid			0	1.00	1.00	4A8888	thin	0.00
+color_rule	rule	v far: A2E40B|4A8888	100	K7	right	thin A2E40B	thin 4A8888	0 0.5	solid			0	1.00	1.00	4A8888	thin	0.00
+color_rule	rule	v far: E4CE13|274D2D	100	L7	right	thin E4CE13	thin 274D2D	0 0.5	solid			0	1.00	1.00	274D2D	thin	0.00
+color_rule	rule	v far: 274D2D|E4CE13	100	M7	right	thin 274D2D	thin E4CE13	0 0.5	solid			0	1.00	1.00	274D2D	thin	0.00
+color_rule	rule	v far: 03AA75|741837	100	N7	right	thin 03AA75	thin 741837	0 0.5	solid			0	1.00	1.00	741837	thin	0.00
+color_rule	rule	v far: 741837|03AA75	100	O7	right	thin 741837	thin 03AA75	0 0.5	solid			0	1.00	1.00	741837	thin	0.00
+color_rule	rule	v far: 1433FD|1D4160	100	C8	right	thin 1433FD	thin 1D4160	0 0.5	solid			0	1.00	1.00	1D4160	thin	0.00
+color_rule	rule	v far: 1D4160|1433FD	100	D8	right	thin 1D4160	thin 1433FD	0 0.5	solid			0	1.00	1.00	1D4160	thin	0.00
+color_rule	rule	v far: A0E42D|535255	100	E8	right	thin A0E42D	thin 535255	0 0.5	solid			0	1.00	1.00	535255	thin	0.00
+color_rule	rule	v far: 535255|A0E42D	100	F8	right	thin 535255	thin A0E42D	0 0.5	solid			0	1.00	1.00	535255	thin	0.00
+color_rule	rule	v far: 23E6E0|E8501D	100	G8	right	thin 23E6E0	thin E8501D	0 0.5	solid			0	1.00	1.00	E8501D	thin	0.00
+color_rule	rule	v far: E8501D|23E6E0	100	H8	right	thin E8501D	thin 23E6E0	0 0.5	solid			0	1.00	1.00	E8501D	thin	0.00
+color_rule	rule	v far: 2BC61F|581832	100	I8	right	thin 2BC61F	thin 581832	0 0.5	solid			0	1.00	1.00	581832	thin	0.00
+color_rule	rule	v far: 581832|2BC61F	100	J8	right	thin 581832	thin 2BC61F	0 0.5	solid			0	1.00	1.00	581832	thin	0.00
+color_rule	rule	v near 1: 3D9BA0|5FAD03	100	K8	right	thin 3D9BA0	thin 5FAD03	0 0.5	solid			0	1.00	1.00	3D9BA0	thin	0.00
+color_rule	rule	v near 1: 5FAD03|3D9BA0	100	L8	right	thin 5FAD03	thin 3D9BA0	0 0.5	solid			0	1.00	1.00	3D9BA0	thin	0.00
+color_rule	rule	v near 3: 07B3B8|67AB23	100	M8	right	thin 07B3B8	thin 67AB23	0 0.5	solid			0	1.00	1.00	07B3B8	thin	0.00
+color_rule	rule	v near 3: 67AB23|07B3B8	100	N8	right	thin 67AB23	thin 07B3B8	0 0.5	solid			0	1.00	1.00	07B3B8	thin	0.00
+color_rule	rule	v near 5: A9B831|50DC34	100	O8	right	thin A9B831	thin 50DC34	0 0.5	solid			0	1.00	1.00	A9B831	thin	0.00
+color_rule	rule	v near 5: 50DC34|A9B831	100	C9	right	thin 50DC34	thin A9B831	0 0.5	solid			0	1.00	1.00	A9B831	thin	0.00
+color_rule	rule	v near 7: 40BE29|15BB95	100	D9	right	thin 40BE29	thin 15BB95	0 0.5	solid			0	1.00	1.00	40BE29	thin	0.00
+color_rule	rule	v near 7: 15BB95|40BE29	100	E9	right	thin 15BB95	thin 40BE29	0 0.5	solid			0	1.00	1.00	40BE29	thin	0.00
+color_rule	rule	v near 2: 50CDD5|76E02C	100	F9	right	thin 50CDD5	thin 76E02C	0 0.5	solid			0	1.00	1.00	50CDD5	thin	0.00
+color_rule	rule	v near 2: 76E02C|50CDD5	100	G9	right	thin 76E02C	thin 50CDD5	0 0.5	solid			0	1.00	1.00	50CDD5	thin	0.00
+color_rule	rule	v near 4: 9ADA00|6CD579	100	H9	right	thin 9ADA00	thin 6CD579	0 0.5	solid			0	1.00	1.00	9ADA00	thin	0.00
+color_rule	rule	v near 4: 6CD579|9ADA00	100	I9	right	thin 6CD579	thin 9ADA00	0 0.5	solid			0	1.00	1.00	9ADA00	thin	0.00
+color_rule	rule	v near 6: B93331|46603C	100	J9	right	thin B93331	thin 46603C	0 0.5	solid			0	1.00	1.00	B93331	thin	0.00
+color_rule	rule	v near 6: 46603C|B93331	100	K9	right	thin 46603C	thin B93331	0 0.5	solid			0	1.00	1.00	B93331	thin	0.00
+color_rule	rule	v near 1: DCB051|91BCAC	100	L9	right	thin DCB051	thin 91BCAC	0 0.5	solid			0	1.00	1.00	DCB051	thin	0.00
+color_rule	rule	v near 1: 91BCAC|DCB051	100	M9	right	thin 91BCAC	thin DCB051	0 0.5	solid			0	1.00	1.00	DCB051	thin	0.00
+color_rule	rule	v near 3: 9BFC48|61F5E2	100	N9	right	thin 9BFC48	thin 61F5E2	0 0.5	solid			0	1.00	1.00	9BFC48	thin	0.00
+color_rule	rule	v near 3: 61F5E2|9BFC48	100	O9	right	thin 61F5E2	thin 9BFC48	0 0.5	solid			0	1.00	1.00	9BFC48	thin	0.00
+color_rule	rule	v near 5: C5F03E|71EFF0	100	C10	right	thin C5F03E	thin 71EFF0	0 0.5	solid			0	1.00	1.00	C5F03E	thin	0.00
+color_rule	rule	v near 5: 71EFF0|C5F03E	100	D10	right	thin 71EFF0	thin C5F03E	0 0.5	solid			0	1.00	1.00	C5F03E	thin	0.00
+color_rule	rule	v near 7: C9FC00|E1E740	100	E10	right	thin C9FC00	thin E1E740	0 0.5	solid			0	1.00	1.00	C9FC00	thin	0.00
+color_rule	rule	v near 7: E1E740|C9FC00	100	F10	right	thin E1E740	thin C9FC00	0 0.5	solid			0	1.00	1.00	C9FC00	thin	0.00
+color_rule	rule	v near 2: 4FBD1A|57AB66	100	G10	right	thin 4FBD1A	thin 57AB66	0 0.5	solid			0	1.00	1.00	4FBD1A	thin	0.00
+color_rule	rule	v near 2: 57AB66|4FBD1A	100	H10	right	thin 57AB66	thin 4FBD1A	0 0.5	solid			0	1.00	1.00	4FBD1A	thin	0.00
+color_rule	rule	v near 4: 2C7B17|6C5D31	100	I10	right	thin 2C7B17	thin 6C5D31	0 0.5	solid			0	1.00	1.00	2C7B17	thin	0.00
+color_rule	rule	v near 4: 6C5D31|2C7B17	100	J10	right	thin 6C5D31	thin 2C7B17	0 0.5	solid			0	1.00	1.00	2C7B17	thin	0.00
+color_rule	rule	v near 6: 597E70|0DB400	100	K10	right	thin 597E70	thin 0DB400	0 0.5	solid			0	1.00	1.00	597E70	thin	0.00
+color_rule	rule	v near 6: 0DB400|597E70	100	L10	right	thin 0DB400	thin 597E70	0 0.5	solid			0	1.00	1.00	597E70	thin	0.00
+color_rule	rule	v tie: 4148A9|077A23	100	M10	right	thin 4148A9	thin 077A23	0 0.5	solid			0	1.00	1.00	4148A9	thin	0.00
+color_rule	rule	v tie: 077A23|4148A9	100	N10	right	thin 077A23	thin 4148A9	0 0.5	solid			0	1.00	1.00	4148A9	thin	0.00
+color_rule	rule	v tie: 42768D|B05F24	100	O10	right	thin 42768D	thin B05F24	0 0.5	solid			0	1.00	1.00	42768D	thin	0.00
+color_rule	rule	v tie: B05F24|42768D	100	C11	right	thin B05F24	thin 42768D	0 0.5	solid			0	1.00	1.00	42768D	thin	0.00
+color_rule	rule	v tie: 498F92|A57D34	100	D11	right	thin 498F92	thin A57D34	0 0.5	solid			0	1.00	1.00	498F92	thin	0.00
+color_rule	rule	v tie: A57D34|498F92	100	E11	right	thin A57D34	thin 498F92	0 0.5	solid			0	1.00	1.00	498F92	thin	0.00
+color_rule	rule	v tie: 029710|497D04	100	F11	right	thin 029710	thin 497D04	0 0.5	solid			0	1.00	1.00	029710	thin	0.00
+color_rule	rule	v tie: 497D04|029710	100	G11	right	thin 497D04	thin 029710	0 0.5	solid			0	1.00	1.00	029710	thin	0.00
+color_rule	rule	v tie: 53CD35|12C0F8	100	H11	right	thin 53CD35	thin 12C0F8	0 0.5	solid			0	1.00	1.00	12C0F8	thin	0.00
+color_rule	rule	v tie: 12C0F8|53CD35	100	I11	right	thin 12C0F8	thin 53CD35	0 0.5	solid			0	1.00	1.00	12C0F8	thin	0.00
+color_rule	rule	v tie: 2B1B99|970725	100	J11	right	thin 2B1B99	thin 970725	0 0.5	solid			0	1.00	1.00	2B1B99	thin	0.00
+color_rule	rule	v tie: 970725|2B1B99	100	K11	right	thin 970725	thin 2B1B99	0 0.5	solid			0	1.00	1.00	2B1B99	thin	0.00
+color_rule	rule	v tie: 7DA884|CEA200	100	L11	right	thin 7DA884	thin CEA200	0 0.5	solid			0	1.00	1.00	7DA884	thin	0.00
+color_rule	rule	v tie: CEA200|7DA884	100	M11	right	thin CEA200	thin 7DA884	0 0.5	solid			0	1.00	1.00	7DA884	thin	0.00
+color_rule	rule	v tie: CBE035|91E881	100	N11	right	thin CBE035	thin 91E881	0 0.5	solid			0	1.00	1.00	91E881	thin	0.00
+color_rule	rule	v tie: 91E881|CBE035	100	O11	right	thin 91E881	thin CBE035	0 0.5	solid			0	1.00	1.00	91E881	thin	0.00
+color_rule	rule	v tie: 238071|636B5A	100	C12	right	thin 238071	thin 636B5A	0 0.5	solid			0	1.00	1.00	238071	thin	0.00
+color_rule	rule	v tie: 636B5A|238071	100	D12	right	thin 636B5A	thin 238071	0 0.5	solid			0	1.00	1.00	238071	thin	0.00
+color_rule	rule	v tie: 1FB819|4C9669	100	E12	right	thin 1FB819	thin 4C9669	0 0.5	solid			0	1.00	1.00	4C9669	thin	0.00
+color_rule	rule	v tie: 4C9669|1FB819	100	F12	right	thin 4C9669	thin 1FB819	0 0.5	solid			0	1.00	1.00	4C9669	thin	0.00
+color_rule	rule	v tie: 3A6DE6|9F6B26	100	G12	right	thin 3A6DE6	thin 9F6B26	0 0.5	solid			0	1.00	1.00	3A6DE6	thin	0.00
+color_rule	rule	v tie: 9F6B26|3A6DE6	100	H12	right	thin 9F6B26	thin 3A6DE6	0 0.5	solid			0	1.00	1.00	3A6DE6	thin	0.00
+color_rule	rule	v tie: 197F62|586C43	100	I12	right	thin 197F62	thin 586C43	0 0.5	solid			0	1.00	1.00	197F62	thin	0.00
+color_rule	rule	v tie: 586C43|197F62	100	J12	right	thin 586C43	thin 197F62	0 0.5	solid			0	1.00	1.00	197F62	thin	0.00
+color_rule	rule	v tie: 1F7854|36609E	100	K12	right	thin 1F7854	thin 36609E	0 0.5	solid			0	1.00	1.00	36609E	thin	0.00
+color_rule	rule	v tie: 36609E|1F7854	100	L12	right	thin 36609E	thin 1F7854	0 0.5	solid			0	1.00	1.00	36609E	thin	0.00
+color_rule	rule	v tie: 9A9465|C8901D	100	M12	right	thin 9A9465	thin C8901D	0 0.5	solid			0	1.00	1.00	9A9465	thin	0.00
+color_rule	rule	v tie: C8901D|9A9465	100	N12	right	thin C8901D	thin 9A9465	0 0.5	solid			0	1.00	1.00	9A9465	thin	0.00
+color_rule	rule	v tie: 5CB93F|18C977	100	O12	right	thin 5CB93F	thin 18C977	0 0.5	solid			0	1.00	1.00	18C977	thin	0.00
+color_rule	rule	v tie: 18C977|5CB93F	100	C13	right	thin 18C977	thin 5CB93F	0 0.5	solid			0	1.00	1.00	18C977	thin	0.00
+color_rule	rule	v tie: 891502|511A59	100	D13	right	thin 891502	thin 511A59	0 0.5	solid			0	1.00	1.00	511A59	thin	0.00
+color_rule	rule	v tie: 511A59|891502	100	E13	right	thin 511A59	thin 891502	0 0.5	solid			0	1.00	1.00	511A59	thin	0.00
+color_rule	rule	v tie: 6CE9A5|A0E260	100	F13	right	thin 6CE9A5	thin A0E260	0 0.5	solid			0	1.00	1.00	6CE9A5	thin	0.00
+color_rule	rule	v tie: A0E260|6CE9A5	100	G13	right	thin A0E260	thin 6CE9A5	0 0.5	solid			0	1.00	1.00	6CE9A5	thin	0.00
+color_rule	rule	v tie: 8EB242|4AD616	100	H13	right	thin 8EB242	thin 4AD616	0 0.5	solid			0	1.00	1.00	8EB242	thin	0.00
+color_rule	rule	v tie: 4AD616|8EB242	100	I13	right	thin 4AD616	thin 8EB242	0 0.5	solid			0	1.00	1.00	8EB242	thin	0.00
+color_rule	rule	v tie: 121558|4D0A19	100	J13	right	thin 121558	thin 4D0A19	0 0.5	solid			0	1.00	1.00	121558	thin	0.00
+color_rule	rule	v tie: 4D0A19|121558	100	K13	right	thin 4D0A19	thin 121558	0 0.5	solid			0	1.00	1.00	121558	thin	0.00
+color_rule	rule	v tie: 7F0424|3D0F71	100	L13	right	thin 7F0424	thin 3D0F71	0 0.5	solid			0	1.00	1.00	3D0F71	thin	0.00
+color_rule	rule	v tie: 3D0F71|7F0424	100	M13	right	thin 3D0F71	thin 7F0424	0 0.5	solid			0	1.00	1.00	3D0F71	thin	0.00
+color_rule	rule	v tie: CCFF0B|F6DD61	100	N13	right	thin CCFF0B	thin F6DD61	0 0.5	solid			0	1.00	1.00	F6DD61	thin	0.00
+color_rule	rule	v tie: F6DD61|CCFF0B	100	O13	right	thin F6DD61	thin CCFF0B	0 0.5	solid			0	1.00	1.00	F6DD61	thin	0.00
+color_rule	rule	v tie: 7BB1C0|BFB61F	100	C14	right	thin 7BB1C0	thin BFB61F	0 0.5	solid			0	1.00	1.00	7BB1C0	thin	0.00
+color_rule	rule	v tie: BFB61F|7BB1C0	100	D14	right	thin BFB61F	thin 7BB1C0	0 0.5	solid			0	1.00	1.00	7BB1C0	thin	0.00
+color_rule	rule	v tie: 8E941A|E16F2D	100	E14	right	thin 8E941A	thin E16F2D	0 0.5	solid			0	1.00	1.00	E16F2D	thin	0.00
+color_rule	rule	v tie: E16F2D|8E941A	100	F14	right	thin E16F2D	thin 8E941A	0 0.5	solid			0	1.00	1.00	E16F2D	thin	0.00
+color_rule	rule	v tie: 219ABE|479C68	100	G14	right	thin 219ABE	thin 479C68	0 0.5	solid			0	1.00	1.00	219ABE	thin	0.00
+color_rule	rule	v tie: 479C68|219ABE	100	H14	right	thin 479C68	thin 219ABE	0 0.5	solid			0	1.00	1.00	219ABE	thin	0.00
+color_rule	rule	v theme4 vs lower rgb: theme4|1DAD42	100	I14	right	thin theme4	thin 1DAD42	0 0.5	solid			0	1.00	1.00	1DAD42	thin	0.00
+color_rule	rule	v theme4 vs lower rgb: 1DAD42|theme4	100	J14	right	thin 1DAD42	thin theme4	0 0.5	solid			0	1.00	1.00	1DAD42	thin	0.00
+color_rule	rule	v theme4+0.4 vs lower rgb: theme4+0.4|B7C43B	100	K14	right	thin theme4+0.4	thin B7C43B	0 0.5	solid			0	1.00	1.00	B7C43B	thin	0.00
+color_rule	rule	v theme4+0.4 vs lower rgb: B7C43B|theme4+0.4	100	L14	right	thin B7C43B	thin theme4+0.4	0 0.5	solid			0	1.00	1.00	B7C43B	thin	0.00
+color_rule	rule	v indexed10 vs lower rgb: indexed10|A91A27	100	M14	right	thin indexed10	thin A91A27	0 0.5	solid			0	1.00	1.00	A91A27	thin	0.00
+color_rule	rule	v indexed10 vs lower rgb: A91A27|indexed10	100	N14	right	thin A91A27	thin indexed10	0 0.5	solid			0	1.00	1.00	A91A27	thin	0.00
+color_rule	rule	v theme4 tie, rgb bluer: theme4|0D91F1	100	O14	right	thin theme4	thin 0D91F1	0 0.5	solid			0	1.00	1.00	0D91F1	thin	0.00
+color_rule	rule	v theme4 tie, rgb bluer: 0D91F1|theme4	100	C15	right	thin 0D91F1	thin theme4	0 0.5	solid			0	1.00	1.00	0D91F1	thin	0.00
+color_rule	rule	v theme4 tie, theme4 bluer: theme4|39AB17	100	D15	right	thin theme4	thin 39AB17	0 0.5	solid			0	1.00	1.00	4F81BD	thin	0.00
+color_rule	rule	v theme4 tie, theme4 bluer: 39AB17|theme4	100	E15	right	thin 39AB17	thin theme4	0 0.5	solid			0	1.00	1.00	4F81BD	thin	0.00
+color_rule	rule	v theme4+0.4 tie, rgb bluer: theme4+0.4|41CEF8	100	F15	right	thin theme4+0.4	thin 41CEF8	0 0.5	solid			0	1.00	1.00	41CEF8	thin	0.00
+color_rule	rule	v theme4+0.4 tie, rgb bluer: 41CEF8|theme4+0.4	100	G15	right	thin 41CEF8	thin theme4+0.4	0 0.5	solid			0	1.00	1.00	41CEF8	thin	0.00
+color_rule	rule	v theme4+0.4 tie, theme4+0.4 bluer: theme4+0.4|50DD8F	100	H15	right	thin theme4+0.4	thin 50DD8F	0 0.5	solid			0	1.00	1.00	95B3D7	thin	0.00
+color_rule	rule	v theme4+0.4 tie, theme4+0.4 bluer: 50DD8F|theme4+0.4	100	I15	right	thin 50DD8F	thin theme4+0.4	0 0.5	solid			0	1.00	1.00	95B3D7	thin	0.00
+color_rule	rule	h far, 601 differs: 84B6C1/B3C026	100	C4	bottom	thin 84B6C1	thin B3C026	0 0.5	solid			0	1.00	1.00	B3C026	thin	0.00
+color_rule	rule	h far, 601 differs: B3C026/84B6C1	100	D4	bottom	thin B3C026	thin 84B6C1	0 0.5	solid			0	1.00	1.00	B3C026	thin	0.00
+color_rule	rule	h far, 601 differs: 21E783/C7A633	100	E4	bottom	thin 21E783	thin C7A633	0 0.5	solid			0	1.00	1.00	C7A633	thin	0.00
+color_rule	rule	h far, 601 differs: C7A633/21E783	100	F4	bottom	thin C7A633	thin 21E783	0 0.5	solid			0	1.00	1.00	C7A633	thin	0.00
+color_rule	rule	h far, 601 differs: BB4312/128E4B	100	G4	bottom	thin BB4312	thin 128E4B	0 0.5	solid			0	1.00	1.00	BB4312	thin	0.00
+color_rule	rule	h far, 601 differs: 128E4B/BB4312	100	H4	bottom	thin 128E4B	thin BB4312	0 0.5	solid			0	1.00	1.00	BB4312	thin	0.00
+color_rule	rule	h far, 601 differs: 0812D4/561226	100	I4	bottom	thin 0812D4	thin 561226	0 0.5	solid			0	1.00	1.00	561226	thin	0.00
+color_rule	rule	h far, 601 differs: 561226/0812D4	100	J4	bottom	thin 561226	thin 0812D4	0 0.5	solid			0	1.00	1.00	561226	thin	0.00
+color_rule	rule	h far, 601 differs: 7BE4A4/EDB767	100	K4	bottom	thin 7BE4A4	thin EDB767	0 0.5	solid			0	1.00	1.00	EDB767	thin	0.00
+color_rule	rule	h far, 601 differs: EDB767/7BE4A4	100	L4	bottom	thin EDB767	thin 7BE4A4	0 0.5	solid			0	1.00	1.00	EDB767	thin	0.00
+color_rule	rule	h far, 601 differs: A67150/04AD8E	100	M4	bottom	thin A67150	thin 04AD8E	0 0.5	solid			0	1.00	1.00	A67150	thin	0.00
+color_rule	rule	h far, 601 differs: 04AD8E/A67150	100	N4	bottom	thin 04AD8E	thin A67150	0 0.5	solid			0	1.00	1.00	A67150	thin	0.00
+color_rule	rule	h far, 601 differs: 5E4B07/174CAA	100	O4	bottom	thin 5E4B07	thin 174CAA	0 0.5	solid			0	1.00	1.00	5E4B07	thin	0.00
+color_rule	rule	h far, 601 differs: 174CAA/5E4B07	100	P4	bottom	thin 174CAA	thin 5E4B07	0 0.5	solid			0	1.00	1.00	5E4B07	thin	0.00
+color_rule	rule	h far, 601 differs: 909E0A/12ABD7	100	C5	bottom	thin 909E0A	thin 12ABD7	0 0.5	solid			0	1.00	1.00	909E0A	thin	0.00
+color_rule	rule	h far, 601 differs: 12ABD7/909E0A	100	D5	bottom	thin 12ABD7	thin 909E0A	0 0.5	solid			0	1.00	1.00	909E0A	thin	0.00
+color_rule	rule	h far, 601 differs: 42D468/E69C27	100	E5	bottom	thin 42D468	thin E69C27	0 0.5	solid			0	1.00	1.00	E69C27	thin	0.00
+color_rule	rule	h far, 601 differs: E69C27/42D468	100	F5	bottom	thin E69C27	thin 42D468	0 0.5	solid			0	1.00	1.00	E69C27	thin	0.00
+color_rule	rule	h far, 601 differs: 9F574C/0281EC	100	G5	bottom	thin 9F574C	thin 0281EC	0 0.5	solid			0	1.00	1.00	9F574C	thin	0.00
+color_rule	rule	h far, 601 differs: 0281EC/9F574C	100	H5	bottom	thin 0281EC	thin 9F574C	0 0.5	solid			0	1.00	1.00	9F574C	thin	0.00
+color_rule	rule	h far, 601 differs: EE6522/52B012	100	I5	bottom	thin EE6522	thin 52B012	0 0.5	solid			0	1.00	1.00	EE6522	thin	0.00
+color_rule	rule	h far, 601 differs: 52B012/EE6522	100	J5	bottom	thin 52B012	thin EE6522	0 0.5	solid			0	1.00	1.00	EE6522	thin	0.00
+color_rule	rule	h far, 601 differs: 6DBC34/2FC584	100	K5	bottom	thin 6DBC34	thin 2FC584	0 0.5	solid			0	1.00	1.00	6DBC34	thin	0.00
+color_rule	rule	h far, 601 differs: 2FC584/6DBC34	100	L5	bottom	thin 2FC584	thin 6DBC34	0 0.5	solid			0	1.00	1.00	6DBC34	thin	0.00
+color_rule	rule	h far, 601 differs: DF5F34/02B777	100	M5	bottom	thin DF5F34	thin 02B777	0 0.5	solid			0	1.00	1.00	DF5F34	thin	0.00
+color_rule	rule	h far, 601 differs: 02B777/DF5F34	100	N5	bottom	thin 02B777	thin DF5F34	0 0.5	solid			0	1.00	1.00	DF5F34	thin	0.00
+color_rule	rule	h far, 601 differs: 4DF3F0/62F9A0	100	O5	bottom	thin 4DF3F0	thin 62F9A0	0 0.5	solid			0	1.00	1.00	62F9A0	thin	0.00
+color_rule	rule	h far, 601 differs: 62F9A0/4DF3F0	100	P5	bottom	thin 62F9A0	thin 4DF3F0	0 0.5	solid			0	1.00	1.00	62F9A0	thin	0.00
+color_rule	rule	h far, 601 differs: F4CD4E/72EFD5	100	C6	bottom	thin F4CD4E	thin 72EFD5	0 0.5	solid			0	1.00	1.00	F4CD4E	thin	0.00
+color_rule	rule	h far, 601 differs: 72EFD5/F4CD4E	100	D6	bottom	thin 72EFD5	thin F4CD4E	0 0.5	solid			0	1.00	1.00	F4CD4E	thin	0.00
+color_rule	rule	h far, 601 differs: AD916B/06E946	100	E6	bottom	thin AD916B	thin 06E946	0 0.5	solid			0	1.00	1.00	AD916B	thin	0.00
+color_rule	rule	h far, 601 differs: 06E946/AD916B	100	F6	bottom	thin 06E946	thin AD916B	0 0.5	solid			0	1.00	1.00	AD916B	thin	0.00
+color_rule	rule	h far, 601 differs: B37C46/F26035	100	G6	bottom	thin B37C46	thin F26035	0 0.5	solid			0	1.00	1.00	F26035	thin	0.00
+color_rule	rule	h far, 601 differs: F26035/B37C46	100	H6	bottom	thin F26035	thin B37C46	0 0.5	solid			0	1.00	1.00	F26035	thin	0.00
+color_rule	rule	h far, 601 differs: 53F43B/92D050	100	I6	bottom	thin 53F43B	thin 92D050	0 0.5	solid			0	1.00	1.00	92D050	thin	0.00
+color_rule	rule	h far, 601 differs: 92D050/53F43B	100	J6	bottom	thin 92D050	thin 53F43B	0 0.5	solid			0	1.00	1.00	92D050	thin	0.00
+color_rule	rule	h far, 601 differs: 5DF395/FDBF10	100	K6	bottom	thin 5DF395	thin FDBF10	0 0.5	solid			0	1.00	1.00	FDBF10	thin	0.00
+color_rule	rule	h far, 601 differs: FDBF10/5DF395	100	L6	bottom	thin FDBF10	thin 5DF395	0 0.5	solid			0	1.00	1.00	FDBF10	thin	0.00
+color_rule	rule	h far, 601 differs: 41BDFF/D6A213	100	M6	bottom	thin 41BDFF	thin D6A213	0 0.5	solid			0	1.00	1.00	D6A213	thin	0.00
+color_rule	rule	h far, 601 differs: D6A213/41BDFF	100	N6	bottom	thin D6A213	thin 41BDFF	0 0.5	solid			0	1.00	1.00	D6A213	thin	0.00
+color_rule	rule	h far: 01345F/F46418	100	O6	bottom	thin 01345F	thin F46418	0 0.5	solid			0	1.00	1.00	01345F	thin	0.00
+color_rule	rule	h far: F46418/01345F	100	P6	bottom	thin F46418	thin 01345F	0 0.5	solid			0	1.00	1.00	01345F	thin	0.00
+color_rule	rule	h far: 47AF43/57F83B	100	C7	bottom	thin 47AF43	thin 57F83B	0 0.5	solid			0	1.00	1.00	47AF43	thin	0.00
+color_rule	rule	h far: 57F83B/47AF43	100	D7	bottom	thin 57F83B	thin 47AF43	0 0.5	solid			0	1.00	1.00	47AF43	thin	0.00
+color_rule	rule	h far: 70C9F3/01E953	100	E7	bottom	thin 70C9F3	thin 01E953	0 0.5	solid			0	1.00	1.00	01E953	thin	0.00
+color_rule	rule	h far: 01E953/70C9F3	100	F7	bottom	thin 01E953	thin 70C9F3	0 0.5	solid			0	1.00	1.00	01E953	thin	0.00
+color_rule	rule	h far: B79117/250086	100	G7	bottom	thin B79117	thin 250086	0 0.5	solid			0	1.00	1.00	250086	thin	0.00
+color_rule	rule	h far: 250086/B79117	100	H7	bottom	thin 250086	thin B79117	0 0.5	solid			0	1.00	1.00	250086	thin	0.00
+color_rule	rule	h far: 8AA277/378905	100	I7	bottom	thin 8AA277	thin 378905	0 0.5	solid			0	1.00	1.00	378905	thin	0.00
+color_rule	rule	h far: 378905/8AA277	100	J7	bottom	thin 378905	thin 8AA277	0 0.5	solid			0	1.00	1.00	378905	thin	0.00
+color_rule	rule	h far: 6B7C0D/241E8A	100	K7	bottom	thin 6B7C0D	thin 241E8A	0 0.5	solid			0	1.00	1.00	241E8A	thin	0.00
+color_rule	rule	h far: 241E8A/6B7C0D	100	L7	bottom	thin 241E8A	thin 6B7C0D	0 0.5	solid			0	1.00	1.00	241E8A	thin	0.00
+color_rule	rule	h far: 650509/43AA15	100	M7	bottom	thin 650509	thin 43AA15	0 0.5	solid			0	1.00	1.00	650509	thin	0.00
+color_rule	rule	h far: 43AA15/650509	100	N7	bottom	thin 43AA15	thin 650509	0 0.5	solid			0	1.00	1.00	650509	thin	0.00
+color_rule	rule	h far: 0EED0C/14A672	100	O7	bottom	thin 0EED0C	thin 14A672	0 0.5	solid			0	1.00	1.00	14A672	thin	0.00
+color_rule	rule	h far: 14A672/0EED0C	100	P7	bottom	thin 14A672	thin 0EED0C	0 0.5	solid			0	1.00	1.00	14A672	thin	0.00
+color_rule	rule	h far: FFE039/7B600A	100	C8	bottom	thin FFE039	thin 7B600A	0 0.5	solid			0	1.00	1.00	7B600A	thin	0.00
+color_rule	rule	h far: 7B600A/FFE039	100	D8	bottom	thin 7B600A	thin FFE039	0 0.5	solid			0	1.00	1.00	7B600A	thin	0.00
+color_rule	rule	h far: B2CA2B/213C4B	100	E8	bottom	thin B2CA2B	thin 213C4B	0 0.5	solid			0	1.00	1.00	213C4B	thin	0.00
+color_rule	rule	h far: 213C4B/B2CA2B	100	F8	bottom	thin 213C4B	thin B2CA2B	0 0.5	solid			0	1.00	1.00	213C4B	thin	0.00
+color_rule	rule	h near 2: F9AC34/B4D202	100	G8	bottom	thin F9AC34	thin B4D202	0 0.5	solid			0	1.00	1.00	F9AC34	thin	0.00
+color_rule	rule	h near 2: B4D202/F9AC34	100	H8	bottom	thin B4D202	thin F9AC34	0 0.5	solid			0	1.00	1.00	F9AC34	thin	0.00
+color_rule	rule	h near 4: 8DA938/24DE05	100	I8	bottom	thin 8DA938	thin 24DE05	0 0.5	solid			0	1.00	1.00	8DA938	thin	0.00
+color_rule	rule	h near 4: 24DE05/8DA938	100	J8	bottom	thin 24DE05	thin 8DA938	0 0.5	solid			0	1.00	1.00	8DA938	thin	0.00
+color_rule	rule	h near 6: 7ECE34/55C7AF	100	K8	bottom	thin 7ECE34	thin 55C7AF	0 0.5	solid			0	1.00	1.00	7ECE34	thin	0.00
+color_rule	rule	h near 6: 55C7AF/7ECE34	100	L8	bottom	thin 55C7AF	thin 7ECE34	0 0.5	solid			0	1.00	1.00	7ECE34	thin	0.00
+color_rule	rule	h near 1: 46E5C5/48F572	100	M8	bottom	thin 46E5C5	thin 48F572	0 0.5	solid			0	1.00	1.00	46E5C5	thin	0.00
+color_rule	rule	h near 1: 48F572/46E5C5	100	N8	bottom	thin 48F572	thin 46E5C5	0 0.5	solid			0	1.00	1.00	46E5C5	thin	0.00
+color_rule	rule	h near 3: 081342/4A0602	100	O8	bottom	thin 081342	thin 4A0602	0 0.5	solid			0	1.00	1.00	081342	thin	0.00
+color_rule	rule	h near 3: 4A0602/081342	100	P8	bottom	thin 4A0602	thin 081342	0 0.5	solid			0	1.00	1.00	081342	thin	0.00
+color_rule	rule	h near 5: A79D01/E47B36	100	C9	bottom	thin A79D01	thin E47B36	0 0.5	solid			0	1.00	1.00	A79D01	thin	0.00
+color_rule	rule	h near 5: E47B36/A79D01	100	D9	bottom	thin E47B36	thin A79D01	0 0.5	solid			0	1.00	1.00	A79D01	thin	0.00
+color_rule	rule	h near 7: B9BF77/51F540	100	E9	bottom	thin B9BF77	thin 51F540	0 0.5	solid			0	1.00	1.00	B9BF77	thin	0.00
+color_rule	rule	h near 7: 51F540/B9BF77	100	F9	bottom	thin 51F540	thin B9BF77	0 0.5	solid			0	1.00	1.00	B9BF77	thin	0.00
+color_rule	rule	h near 2: 086D3A/334A95	100	G9	bottom	thin 086D3A	thin 334A95	0 0.5	solid			0	1.00	1.00	086D3A	thin	0.00
+color_rule	rule	h near 2: 334A95/086D3A	100	H9	bottom	thin 334A95	thin 086D3A	0 0.5	solid			0	1.00	1.00	086D3A	thin	0.00
+color_rule	rule	h near 4: 87F0F1/B8F86B	100	I9	bottom	thin 87F0F1	thin B8F86B	0 0.5	solid			0	1.00	1.00	87F0F1	thin	0.00
+color_rule	rule	h near 4: B8F86B/87F0F1	100	J9	bottom	thin B8F86B	thin 87F0F1	0 0.5	solid			0	1.00	1.00	87F0F1	thin	0.00
+color_rule	rule	h near 6: 56E3F1/73E6AE	100	K9	bottom	thin 56E3F1	thin 73E6AE	0 0.5	solid			0	1.00	1.00	56E3F1	thin	0.00
+color_rule	rule	h near 6: 73E6AE/56E3F1	100	L9	bottom	thin 73E6AE	thin 56E3F1	0 0.5	solid			0	1.00	1.00	56E3F1	thin	0.00
+color_rule	rule	h near 1: 294EB0/237304	100	M9	bottom	thin 294EB0	thin 237304	0 0.5	solid			0	1.00	1.00	294EB0	thin	0.00
+color_rule	rule	h near 1: 237304/294EB0	100	N9	bottom	thin 237304	thin 294EB0	0 0.5	solid			0	1.00	1.00	294EB0	thin	0.00
+color_rule	rule	h near 3: 840715/310CA5	100	O9	bottom	thin 840715	thin 310CA5	0 0.5	solid			0	1.00	1.00	840715	thin	0.00
+color_rule	rule	h near 3: 310CA5/840715	100	P9	bottom	thin 310CA5	thin 840715	0 0.5	solid			0	1.00	1.00	840715	thin	0.00
+color_rule	rule	h near 5: 02B66E/55A427	100	C10	bottom	thin 02B66E	thin 55A427	0 0.5	solid			0	1.00	1.00	02B66E	thin	0.00
+color_rule	rule	h near 5: 55A427/02B66E	100	D10	bottom	thin 55A427	thin 02B66E	0 0.5	solid			0	1.00	1.00	02B66E	thin	0.00
+color_rule	rule	h near 7: 5FC119/32C17A	100	E10	bottom	thin 5FC119	thin 32C17A	0 0.5	solid			0	1.00	1.00	5FC119	thin	0.00
+color_rule	rule	h near 7: 32C17A/5FC119	100	F10	bottom	thin 32C17A	thin 5FC119	0 0.5	solid			0	1.00	1.00	5FC119	thin	0.00
+color_rule	rule	h tie: 4148A9/077A23	100	G10	bottom	thin 4148A9	thin 077A23	0 0.5	solid			0	1.00	1.00	4148A9	thin	0.00
+color_rule	rule	h tie: 077A23/4148A9	100	H10	bottom	thin 077A23	thin 4148A9	0 0.5	solid			0	1.00	1.00	4148A9	thin	0.00
+color_rule	rule	h tie: 42768D/B05F24	100	I10	bottom	thin 42768D	thin B05F24	0 0.5	solid			0	1.00	1.00	42768D	thin	0.00
+color_rule	rule	h tie: B05F24/42768D	100	J10	bottom	thin B05F24	thin 42768D	0 0.5	solid			0	1.00	1.00	42768D	thin	0.00
+color_rule	rule	h tie: 498F92/A57D34	100	K10	bottom	thin 498F92	thin A57D34	0 0.5	solid			0	1.00	1.00	498F92	thin	0.00
+color_rule	rule	h tie: A57D34/498F92	100	L10	bottom	thin A57D34	thin 498F92	0 0.5	solid			0	1.00	1.00	498F92	thin	0.00
+color_rule	rule	h tie: 029710/497D04	100	M10	bottom	thin 029710	thin 497D04	0 0.5	solid			0	1.00	1.00	029710	thin	0.00
+color_rule	rule	h tie: 497D04/029710	100	N10	bottom	thin 497D04	thin 029710	0 0.5	solid			0	1.00	1.00	029710	thin	0.00
+color_rule	rule	h tie: 53CD35/12C0F8	100	O10	bottom	thin 53CD35	thin 12C0F8	0 0.5	solid			0	1.00	1.00	12C0F8	thin	0.00
+color_rule	rule	h tie: 12C0F8/53CD35	100	P10	bottom	thin 12C0F8	thin 53CD35	0 0.5	solid			0	1.00	1.00	12C0F8	thin	0.00
+color_rule	rule	h tie: 2B1B99/970725	100	C11	bottom	thin 2B1B99	thin 970725	0 0.5	solid			0	1.00	1.00	2B1B99	thin	0.00
+color_rule	rule	h tie: 970725/2B1B99	100	D11	bottom	thin 970725	thin 2B1B99	0 0.5	solid			0	1.00	1.00	2B1B99	thin	0.00
+color_rule	rule	h tie: 7DA884/CEA200	100	E11	bottom	thin 7DA884	thin CEA200	0 0.5	solid			0	1.00	1.00	7DA884	thin	0.00
+color_rule	rule	h tie: CEA200/7DA884	100	F11	bottom	thin CEA200	thin 7DA884	0 0.5	solid			0	1.00	1.00	7DA884	thin	0.00
+color_rule	rule	h tie: CBE035/91E881	100	G11	bottom	thin CBE035	thin 91E881	0 0.5	solid			0	1.00	1.00	91E881	thin	0.00
+color_rule	rule	h tie: 91E881/CBE035	100	H11	bottom	thin 91E881	thin CBE035	0 0.5	solid			0	1.00	1.00	91E881	thin	0.00
+color_rule	rule	h tie: 238071/636B5A	100	I11	bottom	thin 238071	thin 636B5A	0 0.5	solid			0	1.00	1.00	238071	thin	0.00
+color_rule	rule	h tie: 636B5A/238071	100	J11	bottom	thin 636B5A	thin 238071	0 0.5	solid			0	1.00	1.00	238071	thin	0.00
+color_rule	rule	h tie: 1FB819/4C9669	100	K11	bottom	thin 1FB819	thin 4C9669	0 0.5	solid			0	1.00	1.00	4C9669	thin	0.00
+color_rule	rule	h tie: 4C9669/1FB819	100	L11	bottom	thin 4C9669	thin 1FB819	0 0.5	solid			0	1.00	1.00	4C9669	thin	0.00
+color_rule	rule	h tie: 3A6DE6/9F6B26	100	M11	bottom	thin 3A6DE6	thin 9F6B26	0 0.5	solid			0	1.00	1.00	3A6DE6	thin	0.00
+color_rule	rule	h tie: 9F6B26/3A6DE6	100	N11	bottom	thin 9F6B26	thin 3A6DE6	0 0.5	solid			0	1.00	1.00	3A6DE6	thin	0.00
+color_rule	rule	h tie: 197F62/586C43	100	O11	bottom	thin 197F62	thin 586C43	0 0.5	solid			0	1.00	1.00	197F62	thin	0.00
+color_rule	rule	h tie: 586C43/197F62	100	P11	bottom	thin 586C43	thin 197F62	0 0.5	solid			0	1.00	1.00	197F62	thin	0.00
+color_rule	rule	h tie: 1F7854/36609E	100	C12	bottom	thin 1F7854	thin 36609E	0 0.5	solid			0	1.00	1.00	36609E	thin	0.00
+color_rule	rule	h tie: 36609E/1F7854	100	D12	bottom	thin 36609E	thin 1F7854	0 0.5	solid			0	1.00	1.00	36609E	thin	0.00
+color_rule	rule	h tie: 9A9465/C8901D	100	E12	bottom	thin 9A9465	thin C8901D	0 0.5	solid			0	1.00	1.00	9A9465	thin	0.00
+color_rule	rule	h tie: C8901D/9A9465	100	F12	bottom	thin C8901D	thin 9A9465	0 0.5	solid			0	1.00	1.00	9A9465	thin	0.00
+color_rule	rule	h tie: 5CB93F/18C977	100	G12	bottom	thin 5CB93F	thin 18C977	0 0.5	solid			0	1.00	1.00	18C977	thin	0.00
+color_rule	rule	h tie: 18C977/5CB93F	100	H12	bottom	thin 18C977	thin 5CB93F	0 0.5	solid			0	1.00	1.00	18C977	thin	0.00
+color_rule	rule	h tie: 891502/511A59	100	I12	bottom	thin 891502	thin 511A59	0 0.5	solid			0	1.00	1.00	511A59	thin	0.00
+color_rule	rule	h tie: 511A59/891502	100	J12	bottom	thin 511A59	thin 891502	0 0.5	solid			0	1.00	1.00	511A59	thin	0.00
+color_rule	rule	h tie: 6CE9A5/A0E260	100	K12	bottom	thin 6CE9A5	thin A0E260	0 0.5	solid			0	1.00	1.00	6CE9A5	thin	0.00
+color_rule	rule	h tie: A0E260/6CE9A5	100	L12	bottom	thin A0E260	thin 6CE9A5	0 0.5	solid			0	1.00	1.00	6CE9A5	thin	0.00
+color_rule	rule	h tie: 8EB242/4AD616	100	M12	bottom	thin 8EB242	thin 4AD616	0 0.5	solid			0	1.00	1.00	8EB242	thin	0.00
+color_rule	rule	h tie: 4AD616/8EB242	100	N12	bottom	thin 4AD616	thin 8EB242	0 0.5	solid			0	1.00	1.00	8EB242	thin	0.00
+color_rule	rule	h tie: 121558/4D0A19	100	O12	bottom	thin 121558	thin 4D0A19	0 0.5	solid			0	1.00	1.00	121558	thin	0.00
+color_rule	rule	h tie: 4D0A19/121558	100	P12	bottom	thin 4D0A19	thin 121558	0 0.5	solid			0	1.00	1.00	121558	thin	0.00
+color_rule	rule	h tie: 7F0424/3D0F71	100	C13	bottom	thin 7F0424	thin 3D0F71	0 0.5	solid			0	1.00	1.00	3D0F71	thin	0.00
+color_rule	rule	h tie: 3D0F71/7F0424	100	D13	bottom	thin 3D0F71	thin 7F0424	0 0.5	solid			0	1.00	1.00	3D0F71	thin	0.00
+color_rule	rule	h tie: CCFF0B/F6DD61	100	E13	bottom	thin CCFF0B	thin F6DD61	0 0.5	solid			0	1.00	1.00	F6DD61	thin	0.00
+color_rule	rule	h tie: F6DD61/CCFF0B	100	F13	bottom	thin F6DD61	thin CCFF0B	0 0.5	solid			0	1.00	1.00	F6DD61	thin	0.00
+color_rule	rule	h tie: 7BB1C0/BFB61F	100	G13	bottom	thin 7BB1C0	thin BFB61F	0 0.5	solid			0	1.00	1.00	7BB1C0	thin	0.00
+color_rule	rule	h tie: BFB61F/7BB1C0	100	H13	bottom	thin BFB61F	thin 7BB1C0	0 0.5	solid			0	1.00	1.00	7BB1C0	thin	0.00
+color_rule	rule	h tie: 8E941A/E16F2D	100	I13	bottom	thin 8E941A	thin E16F2D	0 0.5	solid			0	1.00	1.00	E16F2D	thin	0.00
+color_rule	rule	h tie: E16F2D/8E941A	100	J13	bottom	thin E16F2D	thin 8E941A	0 0.5	solid			0	1.00	1.00	E16F2D	thin	0.00
+color_rule	rule	h tie: 219ABE/479C68	100	K13	bottom	thin 219ABE	thin 479C68	0 0.5	solid			0	1.00	1.00	219ABE	thin	0.00
+color_rule	rule	h tie: 479C68/219ABE	100	L13	bottom	thin 479C68	thin 219ABE	0 0.5	solid			0	1.00	1.00	219ABE	thin	0.00
+color_rule	rule	h theme4 vs higher rgb: theme4/808259	100	M13	bottom	thin theme4	thin 808259	0 0.5	solid			0	1.00	1.00	4F81BD	thin	0.00
+color_rule	rule	h theme4 vs higher rgb: 808259/theme4	100	N13	bottom	thin 808259	thin theme4	0 0.5	solid			0	1.00	1.00	4F81BD	thin	0.00
+color_rule	rule	h theme4+0.4 vs higher rgb: theme4+0.4/35D9DC	100	O13	bottom	thin theme4+0.4	thin 35D9DC	0 0.5	solid			0	1.00	1.00	95B3D7	thin	0.00
+color_rule	rule	h theme4+0.4 vs higher rgb: 35D9DC/theme4+0.4	100	P13	bottom	thin 35D9DC	thin theme4+0.4	0 0.5	solid			0	1.00	1.00	95B3D7	thin	0.00
+color_rule	rule	h indexed10 vs higher rgb: indexed10/BA1B06	100	C14	bottom	thin indexed10	thin BA1B06	0 0.5	solid			0	1.00	1.00	FF0000	thin	0.00
+color_rule	rule	h indexed10 vs higher rgb: BA1B06/indexed10	100	D14	bottom	thin BA1B06	thin indexed10	0 0.5	solid			0	1.00	1.00	FF0000	thin	0.00
+color_rule	rule	h theme4 tie, rgb bluer: theme4/0D91F1	100	E14	bottom	thin theme4	thin 0D91F1	0 0.5	solid			0	1.00	1.00	0D91F1	thin	0.00
+color_rule	rule	h theme4 tie, rgb bluer: 0D91F1/theme4	100	F14	bottom	thin 0D91F1	thin theme4	0 0.5	solid			0	1.00	1.00	0D91F1	thin	0.00
+color_rule	rule	h theme4 tie, theme4 bluer: theme4/39AB17	100	G14	bottom	thin theme4	thin 39AB17	0 0.5	solid			0	1.00	1.00	4F81BD	thin	0.00
+color_rule	rule	h theme4 tie, theme4 bluer: 39AB17/theme4	100	H14	bottom	thin 39AB17	thin theme4	0 0.5	solid			0	1.00	1.00	4F81BD	thin	0.00
+color_rule	rule	h theme4+0.4 tie, rgb bluer: theme4+0.4/41CEF8	100	I14	bottom	thin theme4+0.4	thin 41CEF8	0 0.5	solid			0	1.00	1.00	41CEF8	thin	0.00
+color_rule	rule	h theme4+0.4 tie, rgb bluer: 41CEF8/theme4+0.4	100	J14	bottom	thin 41CEF8	thin theme4+0.4	0 0.5	solid			0	1.00	1.00	41CEF8	thin	0.00
+color_rule	rule	h theme4+0.4 tie, theme4+0.4 bluer: theme4+0.4/50DD8F	100	K14	bottom	thin theme4+0.4	thin 50DD8F	0 0.5	solid			0	1.00	1.00	95B3D7	thin	0.00
+color_rule	rule	h theme4+0.4 tie, theme4+0.4 bluer: 50DD8F/theme4+0.4	100	L14	bottom	thin 50DD8F	thin theme4+0.4	0 0.5	solid			0	1.00	1.00	95B3D7	thin	0.00
