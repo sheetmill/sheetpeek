@@ -2297,7 +2297,7 @@ sheetpeek already use openpyxl.
 ### 8.3 Dependencies
 
 - `xlio==0.4.*` (§5): the family's reader, internal to the family, pinned to a minor.
-- `xlrecalc>=0.8,<1` (§5.7), imported normally: it is required.
+- `xlrecalc>=0.8.1,<1` (§5.7), imported normally: it is required.
 - `xlformat>=0.5,<1` (§6.4), imported normally: it is required.
 - openpyxl is a dev dependency only: the tests and the documentation's examples build workbooks
   with it, and the tests that need it are left out without it.

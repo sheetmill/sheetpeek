@@ -14,7 +14,7 @@ requires-python = ">=3.11"
 dependencies = [
   "xlformat>=0.5,<1",
   "xlio==0.4.*",
-  "xlrecalc>=0.8,<1",
+  "xlrecalc>=0.8.1,<1",
 ]
 keywords = ["excel", "xlsx", "spreadsheet", "html", "markdown", "terminal"]
 classifiers = [
