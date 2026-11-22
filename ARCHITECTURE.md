@@ -1439,8 +1439,7 @@ across the sheet below the frozen rows and down it after the frozen columns. Wit
 as copies holding only their own rows or columns, the runs of later cells that reach into them
 and the fill and border boxes that start in them, stacked over it in one grid cell and held by
 `position: sticky`; copies carry no ids. On `bench/html_size.py`'s `features` sheet frozen at
-B2 (`... features frozen`), the page is 7 % larger (36.2 against 33.8 MB) and rendered in
-0.73 s against 0.66 s, best of three. This
+B2 (`... features frozen`), the page is 7 % larger (36.2 against 33.8 MB). This
 is CSS layout, not interactivity (no script, no hover; a browser without sticky positioning shows
 the static drawing), measured in WebKit: scrolled by (600, 900), the row copy stays at the top and
 follows the sheet sideways, the column copy stays at the left, the corner stays put. With
@@ -1608,7 +1607,7 @@ It is 18.8 MB on disk. Best of three, each in a fresh process (Python 3.11, Appl
 The stream holds one row at a time; a `Sheet` holds every cell of the range read, so its memory
 grows with the range (`max_cells`, §5.5, bounds it). On the largest of the 15,935 public
 workbooks of §5.5 (42 MB, 15.2 million cells over its sheets, every sheet read) the reader takes
-39 s at 845 MiB peak RSS.
+38.0 s at 863 MiB peak RSS without recalculation (§5.7, which gives the run).
 
 ### 5.3 Dates stay serials
 
@@ -1649,9 +1648,7 @@ sheet's relationships, everything else as `Sheet.unparsed`. A test reads files w
 `<dimension>` is missing, too small and too large, and checks the used range and that no cell is
 dropped.
 
-Measured (best of three, each in a fresh process): the 100,000-cell sheets of `bench/html_size.py`
-read in 0.46 s (plain) and 0.66 s (features); the largest public workbook as in §5.2. On its
-largest sheet, Python's live allocations peak at the level of the reader before xlio (648 MiB);
+Measured: the largest public workbook as in §5.7. On its largest sheet, Python's live allocations peak at the level of the reader before xlio (648 MiB);
 the rest of the RSS is the allocator's, the kept cells allocated between the stream's
 short-lived objects.
 
@@ -1874,8 +1871,10 @@ the model's types as read ones do (§3): a whole number below 2**53 an `int`, an
 `xlformat.ExcelError`.
 
 **Measured** (every sheet of a book read, in the book's order, best of three, each in a fresh
-process, against the same reader without recalculation, measured together on a quiet machine;
-the highest peak of the three). The largest public workbook (§5.2; 10 formulas, all `SUM`s over
+process, against the same reader without recalculation (`fc1e731`), measured together on a
+quiet machine; the highest peak of the three; the tree at `ddf2532` with the dependencies of its
+lock file, Python 3.11.18, Apple M4 Pro, macOS). This is the measurement of record: §5.2 and §5.4
+cite it. The largest public workbook (§5.2; 10 formulas, all `SUM`s over
 their own sheet, an older `calcId`, so Excel recalculates it all): 38.0 s and 863 MiB without,
 40.3 s and 876 MiB under `"excel"`, 40.4 s and 869 MiB under `"never"`. The difference is the
 loader recording each cell as it passes (about 2 s); the formulas read their own sheets only, so
@@ -2114,17 +2113,14 @@ points.
   `sp-notshown`, the section ids `sp-<n>` and the cell ids `sp-<n>-<cell>` join the public interface
   (`sp-t-` and letters, a tab color, is generated).
 - **Size** (`bench/html_size.py`, 5,000 rows × 20 columns, 100,000 cells and 97,144 runs, Apple
-  M4 Pro): 11.1 MB of HTML, 111 bytes per cell, 0.58 MB gzipped; read 0.60 s, layout 1.76 s,
-  render 0.28 s, peak RSS 246 MB. The same grid with every cell using a newer feature (borders,
-  pattern fills, runs, angled text, links, outlines) is 33.8 MB, 338 bytes per cell: layout
-  2.69 s, render 0.63 s, 358 MB (`bench/README.md`; times vary by about 5 % and peak RSS by
-  about 5 MB between runs). A sheet pays only for the features it
+  M4 Pro): 11.1 MB of HTML, 111 bytes per cell, 0.58 MB gzipped. The same grid with every cell
+  using a newer feature (borders, pattern fills, runs, angled text, links, outlines) is 33.8 MB,
+  338 bytes per cell (`bench/README.md` gives the commands). A sheet pays only for the features it
   uses: the passes and the HTML layers skip what is absent, and fonts, heights and line
   metrics are looked up by the identity of the style's font, which every cell of a style
   shares. The first version, with a clip span and a `calc()` baseline on
   every run, was 19.8 MB (198 bytes per cell); dropping clip spans a run does not need and
-  writing the baseline as a number halved it. Layout time is mostly xlformat's formatting, at
-  about 19 µs per cell.
+  writing the baseline as a number halved it. Layout time is mostly xlformat's formatting.
 
 **Ruled out:**
 - **Plain `colspan` for spill** (Excel's own web export, route A): a spanned cell has one

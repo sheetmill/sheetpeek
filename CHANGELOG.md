@@ -211,20 +211,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   with a solid blue line, as Excel's page break preview draws them. Off by default.
 
 ### Changed
-- xlrecalc (`xlrecalc>=0.8.1,<1`) is a required dependency, for recalculation on opening. A formula
-  cell shows the value Excel shows when it opens the file, where 0.2.0 showed the cached value:
-  a formula written by openpyxl, which stores no value, shows its result where it showed as
-  empty with the warning "formula cell(s) have no cached value", and a cached value in such a
-  file is recomputed. `value.no_cached_value` and its warning now count only the formulas
-  without a value that xlrecalc does not compute. A formula is computed only when a range read
-  holds it, and only the sheets its evaluation reaches are read for it. Reading every sheet
-  (best of three, measured together): the largest public workbook (15.2 million cells, 10
-  formulas, all recalculated on opening) in 40.3 s and 876 MiB at peak, against 38.0 s and
-  863 MiB for the same reader without recalculation and 38.6 s and 643 MiB for 0.2.0 (whose
-  openpyxl reader takes less memory); a workbook of 400,001 formulas openpyxl wrote, with no
-  values, in 7.7 s and 314 MiB, against 2.7 s without recalculation and 3.3 s for 0.2.0, which
-  showed every one of them empty; the same workbook as Excel saves it, where no formula is
-  recalculated, in 3.7 s and 255 MiB, against 2.8 s and 3.5 s.
+- xlrecalc (`xlrecalc>=0.8.1,<1`) is a required dependency, for recalculation on opening. A
+  formula cell shows the value Excel shows when it opens the file, where 0.2.0 showed the cached
+  value: a formula written by openpyxl, which stores no value, shows its result where it showed as
+  empty with the warning "formula cell(s) have no cached value", and a cached value in such a file
+  is recomputed. `value.no_cached_value` and its warning now count only the formulas without a
+  value that xlrecalc does not compute. A formula is computed only when a range read holds it, and
+  only the sheets its evaluation reaches are read for it. Reading every sheet (best of three,
+  measured together on a quiet machine; `ARCHITECTURE.md` §5.7 gives the run): the largest public
+  workbook (15.2 million cells, 10 formulas, all recalculated on opening) in 40.3 s and 876 MiB at
+  peak, against 38.0 s and 863 MiB for the same reader without recalculation and 38.6 s and 643
+  MiB for 0.2.0 (whose openpyxl reader takes less memory); a workbook of 400,001 formulas openpyxl
+  wrote, with no values, in 7.7 s and 314 MiB, against 2.7 s without recalculation and 3.3 s for
+  0.2.0, which showed every one of them empty; the same workbook as Excel saves it, where no
+  formula is recalculated, in 3.7 s and 255 MiB, against 2.8 s and 3.5 s.
 - `Font.color` of a theme color 1 font ("Text 1", Excel's default font color) is its RGB, the
   theme's dark 1 (`000000` in Excel's themes), where it was `None` like automatic: `Font.color`
   is the color Excel draws, and the new `Font.theme_color` says which theme color it comes from.
@@ -232,10 +232,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   black; rich still shows it as the terminal's default text. Automatic stays `None`.
 - Workbooks are read through xlio (`xlio==0.4.*`, a new dependency), in one pass of each sheet's
   cells, where 0.2.0 read them through openpyxl's read-only mode; values are read as Excel reads
-  them (the entries below), and none of openpyxl's warnings reach the caller. On the
-  100,000-cell bench sheets (`bench/html_size.py`, measured together) a plain sheet reads in 0.42
-  s against 0.2.0's 0.52 s; a sheet using the newer features in 0.64 s against 0.52 s, since
-  rich text, hyperlinks and the rest are now read.
+  them (the entries below), and none of openpyxl's warnings reach the caller. Reading every sheet
+  of the largest public workbook without recalculation takes 38.0 s and 863 MiB at peak, against
+  38.6 s and 643 MiB for 0.2.0 (the measurement in the recalculation entry above).
 - openpyxl is no longer a dependency (0.2.0 required it): nothing in sheetpeek imports it. The
   README's and the documentation's examples build their workbooks with it, so they need it
   installed.
@@ -272,9 +271,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - HTML draws each sheet at the zoom saved with it, as Excel opens it, where 0.2.0 drew every
   sheet at 100 %: a sheet saved at another zoom renders at another size. Pass
   `HTMLBackend(zoom=100)` (or `sheetpeek view --zoom 100`) for 0.2.0's size.
-- The HTML backend writes a page faster: 13 % on a plain 100,000-cell sheet
-  (`bench/html_size.py`), with layout within 4 % of 0.2.0 on it; a sheet pays for the newer
-  features only where it uses them.
+- The HTML backend's layout and output skip the features a sheet does not use: a sheet pays for
+  the newer features only where it uses them.
 - Tints stored as 16-bit fractions (0.6 is stored as 0.59999389...) give the colors Excel draws:
   the tinted lightness is truncated after a small tolerance. Some fills and font colors with such
   tints were a lightness level or two off.

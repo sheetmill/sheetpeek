@@ -18,37 +18,10 @@ one, never into the repository.
 ## HTML output
 
 `python bench/html_size.py DIR 5000 20 plain|features`, each run in a fresh process under
-`tests/watchdog.py`, best of three; Python 3.11, openpyxl 3.1.5, xlformat 0.3.0, Apple M4 Pro,
-macOS. Times vary by about 5 % between runs and from one day to the next, and peak RSS by about
-5 MB, so rows compare only when measured together: each version below was measured beside the
-next. 0.2.0 is
-the release from PyPI, which draws none of the newer features: on the `features` sheet it shows
-what the same cells cost without them. `2421aed` is an intermediate version, measured beside 0.2.0 and beside the next.
+`tests/watchdog.py`, best of three; `... features frozen` freezes the sheet at B2. It prints the
+page's size and the time and peak memory of reading, layout and rendering. Times vary by about
+5 % between runs and from one day to the next, and peak RSS by about 5 MB, so two versions
+compare only when measured together, each from its own clone, alternating.
 
-| case | version | HTML | read | layout | render | peak RSS |
-|---|---|---|---|---|---|---|
-| plain | 0.2.0 | 11.1 MB | 0.55 s | 1.70 s | 0.33 s | 237 MB |
-| plain | `2421aed` | 11.1 MB | 0.60 s | 1.76 s | 0.28 s | 248 MB |
-| plain | now | 11.1 MB | 0.60 s | 1.76 s | 0.28 s | 246 MB |
-| features | 0.2.0 | 21.6 MB | 0.54 s | 2.03 s | 0.50 s | 285 MB |
-| features | `2421aed` | 33.5 MB | 0.66 s | 2.60 s | 0.62 s | 356 MB |
-| features | now | 33.8 MB | 0.67 s | 2.69 s | 0.63 s | 358 MB |
-
-With a frozen pane (`... 5000 20 features frozen`, the sheet frozen at B2, measured beside the
-`features` case on the same version): 36.2 MB against 33.8 MB, render 0.73 s against 0.66 s, best
-of three; the copies hold only the frozen rows', columns' and corner's cells, fills and borders.
-
-**Against 0.2.0**, on the plain sheet layout is 4 % slower, about the runs' variation, and render
-is 13 % faster, after removing per-cell overhead the newer features had added: a second
-measurement of every line's width, a `Font` hashed several times a cell (fonts, row heights and
-line metrics are now found by the identity of the style's font), the bidirectional check on
-ASCII text, the general baseline routine for a single bottom-aligned line, and in HTML the link
-and rule bookkeeping for cells and runs that have none. Read time grew with the structure scan,
-which read every cell's type and the rich-text runs (in `load_modes.py` on 100,000 × 20
-cells: 2.46 s with 0.2.0, 3.13 s at the time); xlio's single pass has since replaced it
-(`ARCHITECTURE.md` §5.4).
-
-**Against `2421aed`**, the plain sheet is byte-identical at the same times. On the `features`
-sheet the wrap rule (a word joins a line only if the space after it fits too) breaks the wrapped
-cells of one column into one more line: 4,999 more runs, 1 % more HTML, 3 % more layout time;
-peak memory is within the run-to-run spread.
+The sizes it gives are in `ARCHITECTURE.md` §7.3. The measurement of record for reading is the
+one in `ARCHITECTURE.md` §5.7, with its commit and environment.
