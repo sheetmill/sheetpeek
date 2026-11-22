@@ -38,6 +38,7 @@ SUITES = (
     "rotation_placement",
     "filters_more",
     "extensions",
+    "text_steps",
 )
 
 
