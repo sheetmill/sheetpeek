@@ -497,6 +497,26 @@ def test_the_engine_computes_cell_by_cell_without_a_whole_recalculation(tmp_path
     assert runs == []
 
 
+def test_every_value_is_read_before_any_status(tmp_path, monkeypatch):
+    # xlrecalc's report passes then run once for the range, not once a cell.
+    calls = []
+    value, status = xlrecalc.Workbook.value, xlrecalc.Workbook.status
+
+    def counted_value(self, ref):
+        calls.append("value")
+        return value(self, ref)
+
+    def counted_status(self, ref):
+        calls.append("status")
+        return status(self, ref)
+
+    monkeypatch.setattr(xlrecalc.Workbook, "value", counted_value)
+    monkeypatch.setattr(xlrecalc.Workbook, "status", counted_status)
+    cells = [A1, *(f'<c r="{c}1"><f>A1*2</f><v>0</v></c>' for c in "BCD")]
+    sheetpeek.read(book(tmp_path, row(1, *cells), by_excel=False))
+    assert calls == ["value"] * 3 + ["status"] * 3
+
+
 def test_a_failure_to_build_the_engine_keeps_every_cached_value(tmp_path, monkeypatch):
     def fail(self, *args, **kwargs):
         raise RuntimeError("inside")

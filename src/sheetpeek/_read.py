@@ -703,11 +703,36 @@ class Book:
                     )
             return None
 
+        # Every value first, then each status: the report's passes then run once (xlrecalc's
+        # Workbook.status). A value is the engine's, or the error raised reading it.
+        read: dict[tuple[int, int], object] = {}
+        places = [
+            (row, rows[row][index].column)
+            for row, indexes in formulas.marks.items()
+            for index in indexes
+        ]
+        for anchor_row, anchor_column, filled in formulas.arrays:
+            places += [
+                (row, column)
+                for row in range(filled.min_row, filled.max_row + 1)
+                for column in range(filled.min_col, filled.max_col + 1)
+                if (row, column) != (anchor_row, anchor_column)
+            ]
+        for row, column in places:
+            if (row, column) not in read:
+                try:
+                    read[row, column] = engine.value(xlrecalc.CellRef(name, row, column))
+                except Exception as error:  # a cell xlrecalc fails on keeps its value
+                    read[row, column] = error
+
         def value(row: int, column: int, formula: bool) -> tuple[CellValue, CellKind] | None:
             """The engine's value, or ``None`` where the file's value stays (and is reported)."""
             where = xlrecalc.CellRef(name, row, column)
             try:
-                result = shown(engine.value(where))
+                got = read[row, column]
+                if isinstance(got, Exception):
+                    raise got
+                result = shown(got)
                 status = engine.status(where)  # a filled cell's is its array's anchor's
             except Exception as error:  # a cell xlrecalc fails on keeps its value
                 reason = f"an error inside xlrecalc ({type(error).__name__})"
