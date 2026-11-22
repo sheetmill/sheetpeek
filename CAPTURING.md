@@ -130,8 +130,17 @@ pt high in the file prints 14 pt apart). `capture/screen/` captures Excel's wind
   container, keeps the display awake, and on every exit path closes it without saving, turns
   display alerts back on and deletes it.
 - **The window** is found through CoreGraphics by its title (`capture/screen/windows.js`) and
-  captured with `screencapture -l` at the display's scale (2 px a point on a 2x display), again
-  every second until two shots are identical: Excel may still be redrawing after a zoom change.
+  captured with `screencapture -l` at the display's scale (2 px a point on a 2x display) once it
+  has settled, since Excel may still be redrawing after a zoom change (`window.settle`): shots
+  back to back (about 0.2 s each), compared as bytes (a still window gives identical files); the
+  window is settled when its picture has held for 0.4 s, and a run ends when it has not after
+  8 s. Each capture records how it settled (`settle.<zoom>`: shots, when the last change was
+  seen, how long the picture held, the longest stillness a change interrupted, and `near` when
+  that came within 0.1 s of 0.4). A run's first capture is shot again 1 s later and must be
+  unchanged; with `SHEETPEEK_CAPTURE_AUDIT=1` every capture is watched for 2 s after settling,
+  for a suite's first run and after an update of Excel or macOS. The whole window is compared:
+  whether Excel's chrome on the Mac changes on its own, as on Windows, is not measured yet; if it
+  does, the comparison is to be limited to the headings and cells.
 - **The window's geometry:** where a dash or a tile starts follows Excel's window on the screen
   (a dash's phase moved with the window at zoom 200), so each machine captures in one geometry,
   recorded once outside the repository (`capture/screen/geometry.py`: `$SHEETPEEK_CAPTURE_GEOMETRY`,

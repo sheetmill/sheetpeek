@@ -31,13 +31,16 @@ from capture.screen import geometry as machine_geometry
 from capture.screen import png
 from capture.screen.session import CONTAINER, ExcelSession, environment
 from capture.screen.window import (
+    GIVE_UP,
     GRIDLINE,
     MARKER,
+    STILL,
     Grid,
     capture_window,
     locate,
     nominal_scale,
     platform_of,
+    settled_text,
 )
 
 SRGB = Path("/System/Library/ColorSync/Profiles/sRGB Profile.icc")
@@ -147,6 +150,10 @@ def capture(
     (CONTAINER / folder).mkdir(parents=True, exist_ok=True)
     path = CONTAINER / folder / f"{name}_{os.getpid()}.xlsx"
     header = environment(edition)
+    audit = os.environ.get("SHEETPEEK_CAPTURE_AUDIT") == "1"
+    header["settling"] = (
+        f"still {STILL:g} s, give up {GIVE_UP:g} s, audit {'on' if audit else 'off'}"
+    )
     cells = list(dict.fromkeys([*markers, *cells]))
     session = ExcelSession(path, evidence=out / "excel_timeouts")
     shots = []
@@ -171,7 +178,10 @@ def capture(
                 if top_row is not None:
                     rows.append(("window", f"visible.{zoom}", session.scroll(top_row)))
                 raw = out / f"window_{zoom}_display.png"
-                window, shot = capture_window(path.stem, raw)
+                window, shot, settled = capture_window(
+                    path.stem, raw, confirm=not shots, audit=audit
+                )
+                rows.append(("window", f"settle.{zoom}", settled_text(settled)))
                 shots.append((zoom, window, raw))
                 header.setdefault("display_scale", f"{shot.width / window['w']:.3f}")
     finally:

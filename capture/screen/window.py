@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import subprocess
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -55,8 +56,96 @@ def nominal_scale(zoom: int, display_scale: float, platform: str) -> float:
     return POINT_PIXELS[platform] * display_scale * zoom / 100
 
 
-def capture_window(title: str, out: Path) -> tuple[dict[str, object], png.Image]:
-    """Capture the on-screen Excel window whose title contains ``title``."""
+STILL = 0.4
+"""Seconds without a change after which a window counts as settled."""
+GIVE_UP = 8.0
+"""Seconds after which a window that has not settled ends the run."""
+NEAR = 0.1
+"""A stillness that a later change interrupted within this of :data:`STILL` is flagged."""
+CONFIRM = 1.0
+"""Seconds after settling at which a run's first capture is shot again and must be unchanged."""
+AUDIT = 2.0
+"""Seconds an audited capture is watched after settling; any change ends the run."""
+
+
+def _shoot(window_id: int, out: Path) -> bytes:
+    """One ``screencapture`` of the window, as the PNG file's bytes."""
+    result = subprocess.run(
+        ["screencapture", "-x", "-o", "-l", str(window_id), str(out)],
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    if result.returncode or not out.exists():
+        raise RuntimeError(f"screencapture failed: {result.stderr.strip()}")
+    return out.read_bytes()
+
+
+def settle(
+    shoot: Callable[[], bytes],
+    *,
+    confirm: bool = False,
+    audit: bool = False,
+    clock: Callable[[], float] = time.monotonic,
+    sleep: Callable[[float], None] = time.sleep,
+) -> tuple[bytes, dict[str, object]]:
+    """Shots back to back until the window has not changed for :data:`STILL` seconds.
+
+    Shots are compared as bytes (a still window gives byte-identical files); each is timed when
+    it starts. Returns the settled shot and how it settled: the shots taken, when the last
+    change was first seen (seconds from the first shot), how long the picture then held (from
+    that shot to the last), the longest stillness a later change interrupted, and whether that
+    came within :data:`NEAR` of :data:`STILL` (``near``). ``confirm`` shoots once more
+    :data:`CONFIRM` seconds later; ``audit`` keeps shooting for :data:`AUDIT` seconds; either
+    refuses a change.
+    """
+    start = clock()
+    shot = shoot()
+    shots, changed, latest, interrupted = 1, start, start, 0.0
+    # each shot is timed when it starts: the picture shows the window then
+    while latest - changed < STILL:
+        if clock() - start > GIVE_UP:
+            raise RuntimeError(f"Excel's window did not settle within {GIVE_UP:g} s: {shots} shots")
+        held, latest = latest, clock()
+        again = shoot()
+        shots += 1
+        if again != shot:
+            # the picture held from the shot that first showed it to the last one before this
+            interrupted = max(interrupted, held - changed)
+            shot, changed = again, latest
+    found: dict[str, object] = {
+        "shots": shots,
+        "last_change": round(changed - start, 2),
+        "still": round(latest - changed, 2),
+        "interrupted": round(interrupted, 2),
+        "near": interrupted > 0 and STILL - interrupted <= NEAR,
+    }
+    if confirm:
+        sleep(CONFIRM)
+        if shoot() != shot:
+            raise RuntimeError("Excel's window changed after settling (the run's first capture)")
+        found["confirmed"] = True
+    if audit:
+        until = clock() + AUDIT
+        while clock() < until:
+            if shoot() != shot:
+                raise RuntimeError("Excel's window changed after settling (audit)")
+        found["audited"] = True
+    return shot, found
+
+
+def settled_text(found: dict[str, object]) -> str:
+    """How a capture settled, as ``key=value`` fields joined by ``;`` (a read of the run)."""
+    return ";".join(f"{key}={str(value).lower()}" for key, value in found.items())
+
+
+def capture_window(
+    title: str, out: Path, *, confirm: bool = False, audit: bool = False
+) -> tuple[dict[str, object], png.Image, dict[str, object]]:
+    """Capture the on-screen Excel window whose title contains ``title``, once it has settled.
+
+    Returns the window, the picture and how it settled (:func:`settle`).
+    """
     for _ in range(20):
         windows = [w for w in excel_windows() if title in w["title"]]
         if windows:
@@ -65,26 +154,9 @@ def capture_window(title: str, out: Path) -> tuple[dict[str, object], png.Image]
     else:
         raise RuntimeError(f"no Excel window titled {title!r} on screen")
     window = windows[0]
-    # Excel may still be redrawing after a zoom change (seen at zoom 200): capture until two
-    # shots a second apart are identical, at most 8 times.
-    previous = None
-    for _ in range(8):
-        time.sleep(1.0)
-        result = subprocess.run(
-            ["screencapture", "-x", "-o", "-l", str(window["id"]), str(out)],
-            capture_output=True,
-            text=True,
-            timeout=30,
-        )
-        if result.returncode or not out.exists():
-            raise RuntimeError(f"screencapture failed: {result.stderr.strip()}")
-        data = out.read_bytes()
-        if data == previous:
-            break
-        previous = data
-    else:
-        raise RuntimeError("Excel's window did not settle within 8 captures")
-    return window, png.read(out)
+    shot, found = settle(lambda: _shoot(int(window["id"]), out), confirm=confirm, audit=audit)
+    out.write_bytes(shot)
+    return window, png.read(out), found
 
 
 def is_marker(rgb: tuple[int, int, int]) -> bool:
