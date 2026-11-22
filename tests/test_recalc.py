@@ -10,7 +10,7 @@ import xlrecalc
 
 import sheetpeek
 from sheetpeek import cli
-from sheetpeek._recalc import shown
+from sheetpeek._recalc import shown, why_not
 from sheetpeek._serve import make_server
 from tests.workbooks import SHEET1, replace_sheet_data, rewrite, save
 
@@ -287,6 +287,17 @@ def test_a_value_sheetpeek_does_not_show_keeps_the_cached_one(tmp_path, monkeypa
     assert "a value sheetpeek does not show" in notice.message
 
 
+def test_the_reason_takes_the_error_then_the_labels_then_the_precedent():
+    status = xlrecalc.CellStatus
+    kept = "uncomputed"
+    error = status(kept, labels=("CUBEVALUE",), error="Boom\nTraceback")
+    assert why_not(error) == "an error inside xlrecalc (Boom)"
+    labels = status(kept, labels=("external or 3-D reference", "_XLL.HEAT", "CUBEVALUE"))
+    assert why_not(labels) == "CUBEVALUE; _XLL.HEAT; external or 3-D reference"
+    inherited = status("kept", inherited=True)
+    assert why_not(inherited) == "depends on a formula xlrecalc does not compute"
+
+
 def test_shown_values():
     assert shown(None) == (None, "empty")
     assert shown(3.0) == (3, "number")
@@ -354,13 +365,13 @@ def test_a_macro_sheet_keeps_its_cached_values(tmp_path):
 
 def test_one_engine_serves_every_sheet_of_a_book(tmp_path, monkeypatch):
     loads = []
-    finish = xlrecalc.Loader.finish
+    workbook = xlrecalc.Loader.workbook
 
     def counted(self):
         loads.append(self)
-        return finish(self)
+        return workbook(self)
 
-    monkeypatch.setattr(xlrecalc.Loader, "finish", counted)
+    monkeypatch.setattr(xlrecalc.Loader, "workbook", counted)
     path = book(tmp_path, row(1, A1, STALE), other=row(1, A1, STALE), by_excel=False)
     with sheetpeek.open(path) as opened:
         assert opened.sheet("S").cell(1, 2).value == 6
@@ -370,9 +381,10 @@ def test_one_engine_serves_every_sheet_of_a_book(tmp_path, monkeypatch):
 
 
 @pytest.mark.parametrize("by_excel", [False, True])
-def test_each_sheet_is_read_from_the_file_once(tmp_path, monkeypatch, by_excel):
-    # The engine is built from the reader's own stream (xlrecalc's Loader): reading one sheet of
-    # a book reads each sheet's cells once, the engine's and the check's pass included.
+def test_a_sheet_no_value_reaches_is_not_read(tmp_path, monkeypatch, by_excel):
+    # The engine is built from the reader's own stream (xlrecalc's Loader) and computes a cell
+    # when it is asked for: reading S, whose formula refers to S alone, reads no cell of T
+    # (whose formulas alone are read for the opening answer).
     import xlio
 
     reads = []
@@ -386,7 +398,28 @@ def test_each_sheet_is_read_from_the_file_once(tmp_path, monkeypatch, by_excel):
     volatile = '<c r="C1"><f>NOW()</f><v>1</v></c>'  # Excel's file: the check reads T for it
     path = book(tmp_path, row(1, A1, STALE), other=row(1, A1, volatile), by_excel=by_excel)
     assert sheetpeek.read(path, "S").cell(1, 2).value == 6
-    assert sorted(reads) == ["S", "T"]
+    assert reads == ["S"]
+
+
+def test_a_sheet_a_value_reaches_is_read_by_the_engine(tmp_path, monkeypatch):
+    import xlio
+
+    reads = []
+    cells = xlio.Sheet.cells
+
+    def counted(self, *args, **kwargs):
+        reads.append(self.name)
+        return cells(self, *args, **kwargs)
+
+    monkeypatch.setattr(xlio.Sheet, "cells", counted)
+    across = '<c r="B1"><f>T!A1*3</f><v>99</v></c>'
+    path = book(
+        tmp_path, row(1, A1, across), other=row(1, '<c r="A1"><v>5</v></c>'), by_excel=False
+    )
+    with sheetpeek.open(path) as opened:
+        assert opened.sheet("S").cell(1, 2).value == 15
+        assert opened.sheet("T").cell(1, 1).value == 5  # read again, from the file
+    assert reads == ["S", "T", "T"]
 
 
 def test_a_failure_while_recording_keeps_cached_values_and_reads_on(tmp_path, monkeypatch):
@@ -446,9 +479,7 @@ def test_the_command_line_takes_the_mode(tmp_path):
     assert parser.parse_args(["serve", ".", "--recalc-on-load", "never"]).recalc_on_load == "never"
 
 
-def test_the_engine_recalculates_once_then_reads(tmp_path, monkeypatch):
-    # Asked for cell by cell, each stale cell would be a recalculation of its own; with a
-    # function xlrecalc does not compute, xlrecalc 0.4 then took hours on a workbook.
+def test_the_engine_computes_cell_by_cell_without_a_whole_recalculation(tmp_path, monkeypatch):
     runs = []
     recalculate = xlrecalc.Workbook.recalculate
 
@@ -463,14 +494,14 @@ def test_the_engine_recalculates_once_then_reads(tmp_path, monkeypatch):
     sheet = sheetpeek.read(book(tmp_path, row(1, *cells), by_excel=False))
     # Resting on B1, which xlrecalc keeps: their cached values; the others computed.
     assert [sheet.cell(1, c).value for c in range(3, 13)] == [0] * 5 + [4] * 5
-    assert len(runs) == 1
+    assert runs == []
 
 
-def test_a_failure_in_the_recalculation_keeps_every_cached_value(tmp_path, monkeypatch):
+def test_a_failure_to_build_the_engine_keeps_every_cached_value(tmp_path, monkeypatch):
     def fail(self, *args, **kwargs):
         raise RuntimeError("inside")
 
-    monkeypatch.setattr(xlrecalc.Workbook, "recalculate", fail)
+    monkeypatch.setattr(xlrecalc.Loader, "workbook", fail)
     sheet = sheetpeek.read(book(tmp_path, row(1, A1, STALE), by_excel=False))
     assert sheet.cell(1, 2).value == 99
     (notice,) = notices(sheet)

@@ -13,7 +13,6 @@ of the range read and the cells their arrays fill.
 from __future__ import annotations
 
 import itertools
-import re
 from collections.abc import Iterator
 from typing import Literal
 
@@ -28,10 +27,9 @@ RECALC_ON_LOAD: tuple[RecalcOnLoad, ...] = ("excel", "always", "never")
 Opening = Literal["all", "some", "none"]
 
 _EXACT = 2**53  # whole numbers below this are exact as floats
-_FUNCTION = re.compile(r"[A-Z_][A-Z0-9_.]*")
 _EXTERNAL_LABEL = "external or 3-D reference"
-_EXTERNAL = re.compile(r"\[[^\]]*\]|[\w.']+:[\w.']+!")
-"""A reference to another workbook (``[1]Sheet1!A1``) or across sheets (``Sheet1:Sheet3!A1``)."""
+KEPT = ("uncomputed", "kept")
+"""The states of a cell whose value is the file's, as xlrecalc could not compute it."""
 
 
 def recalc_mode(value: object) -> RecalcOnLoad:
@@ -116,21 +114,16 @@ class Recalc:
         return self._answer
 
     def engine(self) -> xlrecalc.Workbook | None:
-        """The engine, loaded and recalculated on first use; ``None`` when xlrecalc fails.
+        """The engine, taken from the loader on first use; ``None`` when xlrecalc fails.
 
-        Everything Excel would compute on opening is computed at once, as Excel does, and each
-        value is then read as it stands. The report sheetpeek reads for each formula cell
-        covers the whole workbook, so the sheets not fed are read here in any case.
+        It computes a cell when its value is asked for and reads only the sheets that cell's
+        evaluation reaches; the loader stays, so that the sheets read later are recorded.
         """
         if self._engine is None and self.error is None and self._loader is not None:
-            loader, self._loader = self._loader, None
             try:
-                engine = loader.finish()
-                engine.recalculate()
+                self._engine = self._loader.workbook()
             except Exception as error:
                 self.error = _reason(error)
-            else:
-                self._engine = engine
         return self._engine
 
 
@@ -156,22 +149,15 @@ def shown(value: object) -> tuple[CellValue, CellKind] | None:
     return None
 
 
-def why_not(report: xlrecalc.Report, where: xlrecalc.CellRef, formula: str | None) -> str:
+def why_not(status: xlrecalc.CellStatus) -> str:
     """Why xlrecalc did not compute a cell, for a notice's detail."""
-    error = report.exceptions.get(where)
-    if error is not None:
-        return f"an error inside xlrecalc ({error.splitlines()[0][:200]})"
-    if formula is not None:
-        text = formula.upper()
-        named = sorted(
-            label
-            for label in report.unsupported
-            if (found := _FUNCTION.match(label)) is not None and f"{found.group()}(" in text
-        )
-        if _EXTERNAL_LABEL in report.unsupported and _EXTERNAL.search(formula):
+    if status.error is not None:
+        return f"an error inside xlrecalc ({status.error.splitlines()[0][:200]})"
+    if status.labels:
+        named = sorted(label for label in status.labels if label != _EXTERNAL_LABEL)
+        if _EXTERNAL_LABEL in status.labels:
             named.append(_EXTERNAL_LABEL)
-        if named:
-            return "; ".join(named)
+        return "; ".join(named)
     return "depends on a formula xlrecalc does not compute"
 
 

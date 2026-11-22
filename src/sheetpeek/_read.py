@@ -65,7 +65,7 @@ from sheetpeek._read_links import report as report_links
 from sheetpeek._read_outline import read_outline, with_levels
 from sheetpeek._read_tables import read_tables
 from sheetpeek._read_view import sheet_view
-from sheetpeek._recalc import Recalc, RecalcOnLoad, recalc_mode, shown, why_not
+from sheetpeek._recalc import KEPT, Recalc, RecalcOnLoad, recalc_mode, shown, why_not
 from sheetpeek._runs_model import TextSpan
 from sheetpeek._sheets import (
     ListedSheet,
@@ -702,31 +702,30 @@ class Book:
                         detail=detail,
                     )
             return None
-        report = engine.report
 
         def value(row: int, column: int, formula: bool) -> tuple[CellValue, CellKind] | None:
             """The engine's value, or ``None`` where the file's value stays (and is reported)."""
             where = xlrecalc.CellRef(name, row, column)
             try:
                 result = shown(engine.value(where))
+                status = engine.status(where)  # a filled cell's is its array's anchor's
             except Exception as error:  # a cell xlrecalc fails on keeps its value
-                reason: str | None = f"an error inside xlrecalc ({type(error).__name__})"
+                reason = f"an error inside xlrecalc ({type(error).__name__})"
             else:
-                if where not in report.uncomputed and where not in report.from_kept:
+                if status.state not in KEPT:
                     if result is not None:
                         return result
                     reason = "a value sheetpeek does not show"
                 else:
-                    reason = None
+                    reason = why_not(status)
             if formula:
-                text = engine.formula(where) if reason is None else None
                 notes.add(
                     "value.not_computed",
                     "approximated",
                     "not_implemented",
                     row=row,
                     column=column,
-                    detail=reason or why_not(report, where, text),
+                    detail=reason,
                 )
             return None
 

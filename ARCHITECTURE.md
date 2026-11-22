@@ -1851,16 +1851,17 @@ decide, and the worksheets not read yet get a formulas-only reading (xlio's `She
 values). The answer is the whole workbook's, since a volatile cell or a formula without a value
 on one sheet changes what another shows. A range without formulas asks nothing, and `"none"`
 keeps every cached value without an engine: the loader is let go and has compiled nothing.
-Otherwise one engine per `Book`, taken from the loader on first use (`Loader.finish`, which
-reads the worksheets not fed yet; xlrecalc's report, which gives each formula cell's reason,
-covers the whole workbook) and recalculated at once, the whole workbook's share as Excel
-computes it on opening, gives the value of each formula cell of the range and of each cell an
-array formula or data table fills there. A worksheet the engine read before the book reads it is
-read from the file again. Asked for cell by cell instead, each stale cell is a recalculation of
-its own, and each goes over every cell that rests on a value xlrecalc keeps: a corpus workbook
-with a function xlrecalc does not compute took over an hour that way, and five seconds this way. xlrecalc is given the open workbook, not the file's path, so
-`CELL("filename")` shows empty text where Excel shows the file's path (a known deviation, not
-reported).
+Otherwise one engine per `Book`, taken from the loader on first use (`Loader.workbook`), gives
+the value of each formula cell of the range and of each cell an array formula or data table
+fills there, and its status (`Workbook.status`: computed, or the file's value kept, and why). It
+computes a cell when it is asked for, and reads only the sheets that cell's evaluation reaches; a
+sheet no value reaches is not read for it. The loader stays while the book is open, so a sheet
+the book reads later is recorded as it is read; a sheet the engine read first is read from the
+file again when the book reads it. Read cell by cell, values differ from a whole recalculation's
+in two ways only (xlrecalc's `Workbook.value`): the draws of `RAND` and the other random
+functions follow the order cells are read in, and a step limit counts each read apart.
+xlrecalc is given the open workbook, not the file's path, so `CELL("filename")` shows empty text
+where Excel shows the file's path (a known deviation, not reported).
 
 **What xlrecalc does not compute** keeps the value the file holds: a function or construct it
 does not implement, a cell that depends on one, an error inside xlrecalc, a value the model has
@@ -2296,7 +2297,7 @@ sheetpeek already use openpyxl.
 ### 8.3 Dependencies
 
 - `xlio==0.4.*` (§5): the family's reader, internal to the family, pinned to a minor.
-- `xlrecalc>=0.7,<1` (§5.7), imported normally: it is required.
+- `xlrecalc>=0.8,<1` (§5.7), imported normally: it is required.
 - `xlformat>=0.5,<1` (§6.4), imported normally: it is required.
 - openpyxl is a dev dependency only: the tests and the documentation's examples build workbooks
   with it, and the tests that need it are left out without it.
