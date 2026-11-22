@@ -322,7 +322,7 @@ class Book:
 
     @property
     def notices(self) -> tuple[Notice, ...]:
-        """Workbook-level notices: the sheets that cannot be shown (chartsheets, dialog sheets)."""
+        """The workbook's own notices, for sheets it cannot show (chartsheets, dialog sheets)."""
         collector = Collector(None)
         book_notices(collector, self._info)
         return collector.notices()
