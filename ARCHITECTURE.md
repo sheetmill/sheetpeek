@@ -966,8 +966,12 @@ its size, `k` from 1 to 7, that fits between the insets, less the indent: a fixe
 at zoom 200), so the layout, made at zoom 100, uses sevenths. 25 of the 27 captured lengths (4 to 30
 Hs in a default column, `text_style` and `text_steps`) take Excel's step; ten Hs take 4/7 where Excel
 draws 5/7, and 25 take 1/7 where it draws 2/7 (each measures 50 pt in a 48 pt budget at Excel's step),
-a known deviation. Captured at Calibri 11 only; the step at other
-sizes is unverified, and when even 1/7 does not fit the text is clipped (decided). **It replaces
+a known deviation. At other sizes the steps are not sevenths (captured, `text_style_more` group `steps`
+and `text_steps` groups `shrink_calibri16` and `shrink_aptos_narrow11`): the text is drawn with every
+"H" advance a whole point, and every whole point from the unshrunk advance down to 1 is a step (under
+Calibri 16, 10 pt down to 1; under Aptos Narrow 11, 7 down to 1). Sevenths are that rule at Calibri 11,
+whose "H" is 7 pt; sheetpeek keeps sevenths, a known deviation at other sizes (which length takes which
+advance is not yet modeled). When even the smallest step does not fit, the text is clipped (decided). **It replaces
 `####`**: a value whose format overflows shows its full text, shrunk (`RenderedCell.text` is that
 text). **Wrap overrides it**, as do horizontal and vertical justify and distributed, which wrap: the
 text keeps its size and breaks where wrap alone breaks it (captured, `text_style` group `wrap`: 28

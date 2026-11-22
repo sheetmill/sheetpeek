@@ -172,3 +172,35 @@ def test_each_shrunk_length_takes_the_step_sheetpeek_gives_it(built):
         if step != round(drawn[case.cell][2]):
             wrong[case.name] = (step, drawn[case.cell][2])
     assert wrong == KNOWN_STEPS
+
+
+@pytest.mark.excel
+@pytest.mark.parametrize(
+    ("group", "unshrunk"), [("shrink_calibri16", 10), ("shrink_aptos_narrow11", 7)]
+)
+def test_shrunk_text_takes_every_whole_point_advance(group, unshrunk):
+    # The drawn "H" advance of each length: its ink width plus the unshrunk text's side bearings
+    # (from the two references), over its length. Every one is a whole point, and every whole
+    # point from the unshrunk advance down to 1 is drawn: sheetpeek's sevenths are this at
+    # Calibri 11, where "H" is 7 pt, and a known deviation at other sizes (§4.13). Lengths whose
+    # 1-pt text is too faint for the ink threshold have no ink and are left out.
+    captured = _captured()
+
+    def width(cell):
+        record = captured[(group, cell)]
+        if not record["ink_left"]:
+            return None
+        return float(record["cell_width"]) - float(record["ink_left"]) + float(record["ink_right"])
+
+    short, long = (width(cell) for cell in suite.REFERENCES)
+    advance = (long - short) / 10
+    bearings = 10 * advance - short
+    assert advance == unshrunk
+    drawn = set()
+    for case in suite.cases(group):
+        if not case.name.startswith("shrunk") or width(case.cell) is None:
+            continue
+        found = (width(case.cell) + bearings) / int(case.name.split()[1])
+        assert abs(found - round(found)) < 0.15, case.name
+        drawn.add(round(found))
+    assert drawn == set(range(1, unshrunk + 1))

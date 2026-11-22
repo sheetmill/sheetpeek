@@ -166,3 +166,103 @@ shrink	ladder 9.5	100	G21	Calibri 11	Calibri 9.5	left	0	15.0	120	3.5	-57.5	5.5	1
 shrink	ladder 10	100	G22	Calibri 11	Calibri 10	left	0	15.0	120	3.5	-57.5	5.5	12				
 shrink	ladder 10.5	100	G23	Calibri 11	Calibri 10.5	left	0	15.0	120	4	-48	5	12				
 shrink	ladder 11	100	G24	Calibri 11	Calibri 11	left	0	15.0	120	4	-48	5	12				
+shrink_calibri16	shrunk 4	100	C4	Calibri 16	Calibri 16	left	0	21.0	69	4	-27	6.5	17				
+shrink_calibri16	shrunk 5	100	C5	Calibri 16	Calibri 16	left	0	21.0	69	4	-17	6.5	17				
+shrink_calibri16	shrunk 6	100	C6	Calibri 16	Calibri 16	left	0	21.0	69	4	-7	6.5	17				
+shrink_calibri16	shrunk 7	100	C7	Calibri 16	Calibri 16	left	0	21.0	69	4	-4	7.5	17				
+shrink_calibri16	shrunk 8	100	C8	Calibri 16	Calibri 16	left	0	21.0	69	4	-3	8.5	17				
+shrink_calibri16	shrunk 9	100	C9	Calibri 16	Calibri 16	left	0	21.0	69	4	-4	10	17				
+shrink_calibri16	shrunk 10	100	C10	Calibri 16	Calibri 16	left	0	21.0	69	3.5	-6.5	10.5	17				
+shrink_calibri16	shrunk 11	100	C11	Calibri 16	Calibri 16	left	0	21.0	69	2.5	-12.5	12	17				
+shrink_calibri16	shrunk 12	100	C12	Calibri 16	Calibri 16	left	0	21.0	69	2.5	-7.5	12	17				
+shrink_calibri16	shrunk 13	100	C13	Calibri 16	Calibri 16	left	0	21.0	69	2.5	-2.5	12	17				
+shrink_calibri16	shrunk 14	100	C14	Calibri 16	Calibri 16	left	0	21.0	69	2.5	-11	12.5	17				
+shrink_calibri16	shrunk 15	100	C15	Calibri 16	Calibri 16	left	0	21.0	69	2.5	-7	12.5	17				
+shrink_calibri16	shrunk 16	100	C16	Calibri 16	Calibri 16	left	0	21.0	69	2.5	-3.5	13	17				
+shrink_calibri16	shrunk 17	100	C17	Calibri 16	Calibri 16	left	0	21.0	69	2.5	-16	14	17				
+shrink_calibri16	shrunk 18	100	C18	Calibri 16	Calibri 16	left	0	21.0	69	2.5	-13	14	17				
+shrink_calibri16	shrunk 19	100	C19	Calibri 16	Calibri 16	left	0	21.0	69	2.5	-10	14	17				
+shrink_calibri16	shrunk 20	100	E4	Calibri 16	Calibri 16	left	0	21.0	69	2.5	-7	14	17				
+shrink_calibri16	shrunk 21	100	E5	Calibri 16	Calibri 16	left	0	21.0	69	2.5	-4	14	17				
+shrink_calibri16	shrunk 22	100	E6	Calibri 16	Calibri 16	left	0	21.0	69	2.5	-1	14	17				
+shrink_calibri16	shrunk 23	100	E7	Calibri 16	Calibri 16	left	0	21.0	69	2.5	-21	15	16				
+shrink_calibri16	shrunk 24	100	E8	Calibri 16	Calibri 16	left	0	21.0	69	2.5	-19	15	16				
+shrink_calibri16	shrunk 25	100	E9	Calibri 16	Calibri 16	left	0	21.0	69	2.5	-17	15	16				
+shrink_calibri16	shrunk 26	100	E10	Calibri 16	Calibri 16	left	0	21.0	69	2.5	-15	15	16				
+shrink_calibri16	shrunk 27	100	E11	Calibri 16	Calibri 16	left	0	21.0	69	2.5	-13	15	16				
+shrink_calibri16	shrunk 28	100	E12	Calibri 16	Calibri 16	left	0	21.0	69	2.5	-11	15	16				
+shrink_calibri16	shrunk 29	100	E13	Calibri 16	Calibri 16	left	0	21.0	69	2.5	-9	15	16				
+shrink_calibri16	shrunk 30	100	E14	Calibri 16	Calibri 16	left	0	21.0	69	2	-7.5	15	17				
+shrink_calibri16	shrunk 31	100	E15	Calibri 16	Calibri 16	left	0	21.0	69	2	-5.5	15	17				
+shrink_calibri16	shrunk 32	100	E16	Calibri 16	Calibri 16	left	0	21.0	69	2	-3.5	15	17				
+shrink_calibri16	shrunk 33	100	E17	Calibri 16	Calibri 16	left	0	21.0	69	2	-1.5	15	17				
+shrink_calibri16	shrunk 34	100	E18	Calibri 16	Calibri 16	left	0	21.0	69	2	-33	16	16.5				
+shrink_calibri16	shrunk 35	100	E19	Calibri 16	Calibri 16	left	0	21.0	69	2	-32	16	16.5				
+shrink_calibri16	shrunk 36	100	G4	Calibri 16	Calibri 16	left	0	21.0	69	2	-31	16	16.5				
+shrink_calibri16	shrunk 37	100	G5	Calibri 16	Calibri 16	left	0	21.0	69	2	-30	16	16.5				
+shrink_calibri16	shrunk 38	100	G6	Calibri 16	Calibri 16	left	0	21.0	69	2	-29	16	16.5				
+shrink_calibri16	shrunk 39	100	G7	Calibri 16	Calibri 16	left	0	21.0	69	2	-28	16	16.5				
+shrink_calibri16	shrunk 40	100	G8	Calibri 16	Calibri 16	left	0	21.0	69	2	-27	16	16.5				
+shrink_calibri16	shrunk 41	100	G9	Calibri 16	Calibri 16	left	0	21.0	69	2	-26	16	16.5				
+shrink_calibri16	shrunk 42	100	G10	Calibri 16	Calibri 16	left	0	21.0	69	2	-25	16	16.5				
+shrink_calibri16	shrunk 43	100	G11	Calibri 16	Calibri 16	left	0	21.0	69	2	-24	16	16.5				
+shrink_calibri16	shrunk 44	100	G12	Calibri 16	Calibri 16	left	0	21.0	69	2	-23	16	16.5				
+shrink_calibri16	shrunk 45	100	G13	Calibri 16	Calibri 16	left	0	21.0	69	2	-22	16	16.5				
+shrink_calibri16	shrunk 46	100	G14	Calibri 16	Calibri 16	left	0	21.0	69	2	-21	16	16.5				
+shrink_calibri16	shrunk 47	100	G15	Calibri 16	Calibri 16	left	0	21.0	69	2	-20	16	16.5				
+shrink_calibri16	shrunk 48	100	G16	Calibri 16	Calibri 16	left	0	21.0	69	2	-19	16	16.5				
+shrink_calibri16	shrunk 49	100	G17	Calibri 16	Calibri 16	left	0	21.0	69	2	-18	16	16.5				
+shrink_calibri16	shrunk 50	100	G18	Calibri 16	Calibri 16	left	0	21.0	69	2	-17	16	16.5				
+shrink_calibri16	shrunk 51	100	G19	Calibri 16	Calibri 16	left	0	21.0	69	2	-16	16	16.5				
+shrink_calibri16	reference 10	100	I4	Calibri 16	Calibri 16	left	0	21.0	480	4	-378	6.5	17				
+shrink_calibri16	reference 20	100	I5	Calibri 16	Calibri 16	left	0	21.0	480	4	-278	6.5	17				
+shrink_aptos_narrow11	shrunk 4	100	C4	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	4	-22.5	4.5	12				
+shrink_aptos_narrow11	shrunk 5	100	C5	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	4	-15.5	4.5	12				
+shrink_aptos_narrow11	shrunk 6	100	C6	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	4	-8.5	4.5	12				
+shrink_aptos_narrow11	shrunk 7	100	C7	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	3.5	-8	5.5	12				
+shrink_aptos_narrow11	shrunk 8	100	C8	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	3.5	-3	6	12				
+shrink_aptos_narrow11	shrunk 9	100	C9	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2.5	-6.5	6.5	12				
+shrink_aptos_narrow11	shrunk 10	100	C10	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2.5	-1.5	6.5	12				
+shrink_aptos_narrow11	shrunk 11	100	C11	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2.5	-7.5	8	12				
+shrink_aptos_narrow11	shrunk 12	100	C12	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2.5	-3.5	8	12				
+shrink_aptos_narrow11	shrunk 13	100	C13	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2.5	-12	8.5	12				
+shrink_aptos_narrow11	shrunk 14	100	C14	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2.5	-9	8.5	12				
+shrink_aptos_narrow11	shrunk 15	100	C15	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2.5	-6	8.5	12				
+shrink_aptos_narrow11	shrunk 16	100	C16	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2.5	-3	8.5	12				
+shrink_aptos_narrow11	shrunk 17	100	C17	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2	-17	10	12				
+shrink_aptos_narrow11	shrunk 18	100	C18	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2	-15	10	12				
+shrink_aptos_narrow11	shrunk 19	100	C19	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2	-13	10	12				
+shrink_aptos_narrow11	shrunk 20	100	E4	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2	-11	10	12				
+shrink_aptos_narrow11	shrunk 21	100	E5	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2	-9	10	12				
+shrink_aptos_narrow11	shrunk 22	100	E6	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2	-7	10	12				
+shrink_aptos_narrow11	shrunk 23	100	E7	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2	-5	10	12				
+shrink_aptos_narrow11	shrunk 24	100	E8	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2	-3	10	12				
+shrink_aptos_narrow11	shrunk 25	100	E9	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2	-1	10	12				
+shrink_aptos_narrow11	shrunk 26	100	E10	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2	-25.5	11	11.5				
+shrink_aptos_narrow11	shrunk 27	100	E11	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2	-24.5	11	11.5				
+shrink_aptos_narrow11	shrunk 28	100	E12	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2	-23.5	11	11.5				
+shrink_aptos_narrow11	shrunk 29	100	E13	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2	-22.5	11	11.5				
+shrink_aptos_narrow11	shrunk 30	100	E14	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2	-21.5	11	11.5				
+shrink_aptos_narrow11	shrunk 31	100	E15	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2	-20.5	11	11.5				
+shrink_aptos_narrow11	shrunk 32	100	E16	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2	-19.5	11	11.5				
+shrink_aptos_narrow11	shrunk 33	100	E17	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2	-18.5	11	11.5				
+shrink_aptos_narrow11	shrunk 34	100	E18	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2	-17.5	11	11.5				
+shrink_aptos_narrow11	shrunk 35	100	E19	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2	-16.5	11	11.5				
+shrink_aptos_narrow11	shrunk 36	100	G4	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2	-15.5	11	11.5				
+shrink_aptos_narrow11	shrunk 37	100	G5	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2	-14.5	11	11.5				
+shrink_aptos_narrow11	shrunk 38	100	G6	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2	-13.5	11	11.5				
+shrink_aptos_narrow11	shrunk 39	100	G7	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2	-12.5	11	11.5				
+shrink_aptos_narrow11	shrunk 40	100	G8	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2	-11.5	11	11.5				
+shrink_aptos_narrow11	shrunk 41	100	G9	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2	-10.5	11	11.5				
+shrink_aptos_narrow11	shrunk 42	100	G10	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2	-9.5	11	11.5				
+shrink_aptos_narrow11	shrunk 43	100	G11	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2	-8.5	11	11.5				
+shrink_aptos_narrow11	shrunk 44	100	G12	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2	-7.5	11	11.5				
+shrink_aptos_narrow11	shrunk 45	100	G13	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2	-6.5	11	11.5				
+shrink_aptos_narrow11	shrunk 46	100	G14	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2	-5.5	11	11.5				
+shrink_aptos_narrow11	shrunk 47	100	G15	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2	-4.5	11	11.5				
+shrink_aptos_narrow11	shrunk 48	100	G16	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53	2	-3.5	11	11.5				
+shrink_aptos_narrow11	shrunk 49	100	G17	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53								
+shrink_aptos_narrow11	shrunk 50	100	G18	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53								
+shrink_aptos_narrow11	shrunk 51	100	G19	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	53								
+shrink_aptos_narrow11	reference 10	100	I4	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	360	4	-287.5	4.5	12				
+shrink_aptos_narrow11	reference 20	100	I5	Aptos Narrow 11	Aptos Narrow 11	left	0	15.0	360	4	-217.5	4.5	12				
