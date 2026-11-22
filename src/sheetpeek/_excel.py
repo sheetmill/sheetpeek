@@ -203,7 +203,11 @@ def _fitted(
         if cell.kind == "text" and wraps and widths[p] and not merged:
             budget = widths[p] - base.left_inset - base.right_inset
             # between the indents, as drawn
-            budget -= _indents(cell.style.h_align) * cell.style.indent * base.digit_width
+            budget -= (
+                _indents(cell.style.h_align)
+                * cell.style.indent
+                * indent_points(fonts.get(sheet.normal_font))
+            )
             if spans:
                 text = Text.of_spans(spans, fonts.get, breaks=True)
                 height = max(height, fitted_height(text, wrap(text.text, budget, text.width)))
@@ -220,6 +224,18 @@ def _fitted(
     if not wrapped:
         return height
     return max(height, _row_model(sheet.normal_font, frozenset(cell_fonts), tuple(wrapped)))
+
+
+_INDENT_SPACES = 3
+"""Spaces of the Normal font in one indent level (captured, ``text_steps``, §4.6)."""
+
+
+def indent_points(normal: xlformat.Font | None) -> float:
+    """Points one indent level moves text: three spaces of the Normal font (§4.6).
+
+    The cell's own font does not change it.
+    """
+    return _INDENT_SPACES * xlformat.text_width(" ", font=normal)
 
 
 def _indents(align: str) -> int:
@@ -347,7 +363,7 @@ class _Points:
         self.heights = heights
         self.left_inset = base.left_inset
         self.right_inset = base.right_inset
-        self.digit = base.digit_width
+        self.indent = indent_points(fonts.get(normal) if normal is not None else None)
         self.fonts = fonts
         self.xs = _running(widths)
         self.ys = _running(heights)
@@ -473,7 +489,7 @@ class _Points:
         wraps = cell.kind == "text" and (
             style.wrap or align in ("justify", "distributed") or v_align in _SPREAD
         )
-        indent = style.indent * self.digit
+        indent = style.indent * self.indent
         spans = drawn_spans(cell, shown.text)  # rich-text runs (§4.16)
         single = len(origin.rows) == len(origin.cols) == 1  # a merge is not shrunk (§4.13)
         shrink = 1.0
@@ -720,7 +736,7 @@ class _Points:
         assert box_lo is not None
         assert box_hi is not None
         align = _turned_align(style.h_align, shown.align, angle)
-        indent = style.indent * self.digit
+        indent = style.indent * self.indent
         left_inset, right_inset = ROTATED_INSETS
         if align == "left":
             x = x0 + left_inset + indent - box_lo

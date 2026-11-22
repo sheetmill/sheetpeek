@@ -119,7 +119,7 @@ layout fields marked *layout*. The style fields (`number_format` to `indent`) li
 | `h_align` | `"general" \| "left" \| "center" \| "right" \| "fill" \| "justify" \| "distributed" \| "center_across"` | `cell.alignment.horizontal` | as stored; `centerContinuous` is `center_across` |
 | `v_align` | `"top" \| "center" \| "bottom" \| "justify" \| "distributed"` | `cell.alignment.vertical`, default `bottom` | |
 | `wrap` | `bool` | `cell.alignment.wrap_text` | |
-| `indent` | `int` | `cell.alignment.indent` | one indent level is one digit's width, 6 pt at Calibri 11 (§4.6) |
+| `indent` | `int` | `cell.alignment.indent` | one indent level is three spaces of the Normal font, 6 pt at Calibri 11 (§4.6) |
 | `shrink`, `reading_order`, `justify_last_line` | `bool`, `0 \| 1 \| 2`, `bool` | `cell.alignment.shrinkToFit`, `readingOrder` (anything but 1 or 2 is 0), `justifyLastLine` | §4.13 |
 | `rotation`, `stacked` | `int` (−90 to 90), `bool` | `cell.alignment.textRotation`: 0 to 90 as stored, 91 to 180 as 90 − value, 255 stacked | §4.17 |
 | `font.vert_align` | `"superscript" \| "subscript" \| None` | `cell.font.vertAlign` | drawn at 2/3 size, raised or lowered (§4.13) |
@@ -264,7 +264,7 @@ left gridline, y down from the first visible row's top gridline.
   its gridline is `[x, x + 1)` and its interior `[x + 1, x + width)`. x positions are running
   sums of `width_pt` (captured: the `layout` gridlines are 53 pt apart for 53 pt columns, and the
   runs of rows 130 to 136 put the 22 pt column N right after the 53 pt column M).
-- **Text edges:** left text starts at `x + left_inset` (3 pt) plus one `digit_width` per indent
+- **Text edges:** left text starts at `x + left_inset` (3 pt) plus three Normal-font spaces per indent
   level; right text ends `right_inset` (2 pt) before the next gridline; centered text sits at
   `x + 1 + ceil((interior − width) / 2)`, the odd point going to its right. The insets are
   xlformat's `ColumnMetrics`, provisional from print.
@@ -591,9 +591,12 @@ and spill crosses it whatever it holds.
 
 ### 4.6 Indent
 
-**Captured** (`layout` rows 139 to 151): **one indent level is 6 pt, one digit's width**, for left
-and right alignment alike, and indented text spills as usual. The `characters` layout uses one
-character per level.
+**Captured** (`layout` rows 139 to 151; `text_steps`, groups `indent_*`): **one indent level is three
+spaces of the Normal font**, for left and right alignment alike, whatever the cell's own font:
+6 pt under Calibri 9 and 11 and Aptos Narrow 11 and 12, 9 pt under Calibri 12, 12 pt under Calibri 16,
+15 pt under Calibri 24, and 6 pt for Calibri 16 and Aptos Narrow 12 cells under a Calibri 11 Normal
+font (indents 0 to 5, every step exact). At Calibri 11 that is one digit's width. Indented text
+spills as usual. The `characters` layout uses one character per level.
 
 ### 4.7 Wrapped text and row heights
 
@@ -683,7 +686,7 @@ a cached value (as openpyxl writes it) has no `t`. The same file confirms Excel 
 Captured so far, in `tests/captures/`: by print (route B) `layout` (§3.6, §4.1 to §4.7); read
 from Excel `theme_colors` and `theme_colors_more` (§3.3), `merge_width` and `error_width` (§4.2,
 §4.4, no deviation), `row_height`, `row_height_more` and `row_height_fitted` (§4.7, §4.16, §4.17), `color_kinds` (§3.3), `package` and `package_more` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14), `theme_fonts_palette`
-and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts`, `gradients` and `diagonals` (§4.12), `text_style` and `text_style_more` (§4.7, §4.13), `runs` (§4.16), `tab_strip` (§4.15), `outline` (§4.11), `rotation`, `rotation_more` and `rotation_placement` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
+and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts`, `gradients` and `diagonals` (§4.12), `text_style`, `text_style_more` and `text_steps` (§4.6, §4.7, §4.13), `runs` (§4.16), `tab_strip` (§4.15), `outline` (§4.11), `rotation`, `rotation_more` and `rotation_placement` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
 Excel 16.115 (Microsoft 365). Every section here rests on one of them; what no capture covers
 is marked unverified where it is stated, as are the parts of §4.12, §4.14 and §4.18 that say so. What still waits for
 the screen: the text insets and the baselines of angled text, which come from print, and the 15 pt rows that print
@@ -960,9 +963,10 @@ at both zooms): they are not read, and nothing is reported.
 
 **Shrink to fit** (`CellStyle.shrink`). Text too wide for its cell is drawn at the largest `k/7` of
 its size, `k` from 1 to 7, that fits between the insets, less the indent: a fixed screen step (1/14
-at zoom 200), so the layout, made at zoom 100, uses sevenths. 18 of the 19 captured lengths (4 to 22
-Hs in a default column) take Excel's step; ten Hs take 4/7 where Excel draws 5/7 (their width at 5/7
-measures 50 pt in a 48 pt budget), a known deviation. Captured at Calibri 11 only; the step at other
+at zoom 200), so the layout, made at zoom 100, uses sevenths. 25 of the 27 captured lengths (4 to 30
+Hs in a default column, `text_style` and `text_steps`) take Excel's step; ten Hs take 4/7 where Excel
+draws 5/7, and 25 take 1/7 where it draws 2/7 (each measures 50 pt in a 48 pt budget at Excel's step),
+a known deviation. Captured at Calibri 11 only; the step at other
 sizes is unverified, and when even 1/7 does not fit the text is clipped (decided). **It replaces
 `####`**: a value whose format overflows shows its full text, shrunk (`RenderedCell.text` is that
 text). **Wrap overrides it**, as do horizontal and vertical justify and distributed, which wrap: the
@@ -2312,7 +2316,7 @@ The options that exist are `range_edge` (formerly `spill_edge`, deprecated until
 `buttons`, `notices`, `new_tab` and `local_links`; and Markdown's `header` and `emphasis`; the
 rest are planned. Behaviors a capture has settled
 with one right answer are not listed: Excel's behavior is the only rendering (hidden columns
-crossed whatever they hold, one digit per indent level, a merge's text at the bottom by default).
+crossed whatever they hold, three Normal-font spaces per indent level, a merge's text at the bottom by default).
 
 **Spill at the edge of the range** (`range_edge`; §4.1). Default `"extend"`: empty
 columns at the default width past the used range, marked `added`. One option for text and, when

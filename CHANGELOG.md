@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- An indent level is three spaces of the Normal font, as Excel draws it (captured, screen suite
+  `text_steps`): 6 pt under a Calibri 9 Normal font, 9 pt under Calibri 12, 12 pt under
+  Calibri 16 and 15 pt under Calibri 24, where one digit's width (5, 6, 8 and 12 pt) was taken
+  before. Under Calibri 11 and Aptos Narrow 11 and 12 it stays 6 pt.
+
 ## [0.3.0] - 2026-11-22
 
 ### Added

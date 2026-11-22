@@ -37,8 +37,8 @@ from sheetpeek._rendered import (
 from sheetpeek._rows import font_row_height, row_height
 from sheetpeek._text_styles import right_to_left, vert_scale
 
-# Characters per indent level. Captured (ARCHITECTURE.md §4.6): one level is one digit's width,
-# 6 pt at Calibri 11.
+# Characters per indent level in the characters layout: a level is three spaces of the Normal
+# font (ARCHITECTURE.md §4.6), 6 pt at Calibri 11, one digit's width.
 _INDENT = 1
 _EXPLICIT: dict[str, Alignment] = {
     "left": "left",
