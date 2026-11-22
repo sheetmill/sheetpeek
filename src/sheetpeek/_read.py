@@ -704,32 +704,32 @@ class Book:
             return None
 
         # Every value first, then each status: the report's passes then run once (xlrecalc's
-        # Workbook.status). A value is the engine's, or the error raised reading it.
-        read: dict[tuple[int, int], object] = {}
-        places = [
-            (row, rows[row][index].column)
-            for row, indexes in formulas.marks.items()
-            for index in indexes
-        ]
-        for anchor_row, anchor_column, filled in formulas.arrays:
-            places += [
-                (row, column)
-                for row in range(filled.min_row, filled.max_row + 1)
-                for column in range(filled.min_col, filled.max_col + 1)
-                if (row, column) != (anchor_row, anchor_column)
-            ]
-        for row, column in places:
-            if (row, column) not in read:
-                try:
-                    read[row, column] = engine.value(xlrecalc.CellRef(name, row, column))
-                except Exception as error:  # a cell xlrecalc fails on keeps its value
-                    read[row, column] = error
+        # Workbook.status). Each value is the engine's, or the error raised reading it, in the
+        # order the loops below take the cells.
+        def places() -> Iterator[tuple[int, int]]:
+            for row, indexes in formulas.marks.items():
+                line = rows[row]
+                for index in indexes:
+                    yield row, line[index].column
+            for anchor_row, anchor_column, filled in formulas.arrays:
+                for row in range(filled.min_row, filled.max_row + 1):
+                    for column in range(filled.min_col, filled.max_col + 1):
+                        if (row, column) != (anchor_row, anchor_column):
+                            yield row, column
+
+        def read(row: int, column: int) -> object:
+            try:
+                return engine.value(xlrecalc.CellRef(name, row, column))
+            except Exception as error:  # a cell xlrecalc fails on keeps its value
+                return error
+
+        taken = iter([read(row, column) for row, column in places()])
 
         def value(row: int, column: int, formula: bool) -> tuple[CellValue, CellKind] | None:
             """The engine's value, or ``None`` where the file's value stays (and is reported)."""
             where = xlrecalc.CellRef(name, row, column)
             try:
-                got = read[row, column]
+                got = next(taken)
                 if isinstance(got, Exception):
                     raise got
                 result = shown(got)
