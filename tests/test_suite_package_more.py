@@ -244,20 +244,14 @@ def test_write_measures_saved_answers_again(tmp_path):
 # width in points, which needs no font measurements (xlformat has none for Arial), and records
 # the width in characters as Excel reports it beside it.
 
-KNOWN_DEVIATIONS = {
-    # Excel gives a row of font size 2 a height Excel's row-height table does not cover; sizes
-    # under 9 are outside it (ARCHITECTURE.md §4.7), as size 1 in the ``package`` suite.
-    "font_size_minus_2": "a font size outside the row-height table (rows only)",
-}
+KNOWN_DEVIATIONS: dict[str, str] = {}
 
 PINNED = {
-    # sheetpeek's row table stops at 24 pt and takes its height (31) for larger fonts; Excel
-    # gives a 409 pt Normal font its tallest row, 409.5. The default column (1,761 pt) is
-    # xlformat's digit at 409 pt, 26 pt wider than sheetpeek's.
-    "font_size_409": "row table past 24 pt; xlformat's digit at 409 pt",
+    # The default column (1,761 pt) is xlformat's digit at 409 pt, 26 pt wider than sheetpeek's.
+    "font_size_409": "xlformat's digit at 409 pt",
     # The same, and Excel reports a size of 409.5 as 409 where sheetpeek keeps 409.5 (Excel lays
     # it out wider than 409: 1,769 pt).
-    "font_size_409.5": "row table past 24 pt; xlformat's digit at 409.5 pt",
+    "font_size_409.5": "xlformat's digit at 409.5 pt",
 }
 """Cases where sheetpeek differs from Excel for a reason recorded here, most of them in a sibling
 package. Each comparison asserts exactly these, so a new difference fails, and so does a fixed

@@ -329,11 +329,11 @@ EXPECTED: dict[str, dict[str, dict[str, Any]]] = {
         },
         "C8": {"row_height": 36.0, "text": "aaa BBB ccc ddd", "baselines": (17.0, 33.0)},
         "C10": {"row_height": 59.0, "text": "aaa BBB ccc ddd", "baselines": (15.0, 39.0, 56.0)},
-        "C12": {"row_height": 64.0, "text": "aaa BBB ccc ddd", "baselines": (15.0, 43.0, 61.0)},
+        "C12": {"row_height": 70.0, "text": "aaa BBB ccc ddd", "baselines": (15.0, 47.0, 67.0)},
         "C14": {
             "row_height": 26.0,
             "text": "aa bb",
-            "baselines": (23.0,),
+            "baselines": (21.0,),
             "words": (("Calibri 9", "000000", 0.0), ("Calibri 9 bold", "000000", 0.0)),
         },
         "J16": {
@@ -397,7 +397,7 @@ EXPECTED: dict[str, dict[str, dict[str, Any]]] = {
         "J30": {
             "row_height": 21.0,
             "text": "HH HH HH",
-            "baselines": (18.0,),
+            "baselines": (17.0,),
             "words": (
                 ("Calibri 11", "000000", 0.0),
                 ("Calibri 11", "000000", 0.0),
@@ -407,7 +407,7 @@ EXPECTED: dict[str, dict[str, dict[str, Any]]] = {
         "J32": {
             "row_height": 21.0,
             "text": "HH HH HH",
-            "baselines": (18.0,),
+            "baselines": (17.0,),
             "words": (
                 ("Calibri 11", "000000", 0.0),
                 ("Calibri 11", "000000", 0.0),
@@ -521,6 +521,7 @@ EXPECTED: dict[str, dict[str, dict[str, Any]]] = {
         },
     },
 }
+
 """What sheetpeek draws for each case, by group and cell: the row's height, the text drawn, each
 line's baseline below the row's top, each word's font (as the references name it), color and
 baseline shift, and for the spilling texts the reach of the last advance past C's right edge and

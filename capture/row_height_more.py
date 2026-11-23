@@ -21,8 +21,8 @@ Normal font's height, ``ARCHITECTURE.md`` §4.7):
   measured), then three wrapped lines in Calibri 11 (the captured control, 48 pt), Calibri 14
   and 20, Aptos Narrow 11, Arial 11, Courier New 11, Times New Roman 11 and Georgia 11.
 
-It settles two rules of §4.7: "a font not in the table uses Calibri's height at the nearest
-measured size, ... and sizes between the measured ones" (``_rows.font_row_height``), and the
+It settles two rules of §4.7: a font's row is xlformat's row model at its face and size
+(``_rows.font_row_height``), and the
 wrapped-row height k(F + 1) plus the inset difference for fonts other than Calibri 11
 (``_rows.wrapped_height`` and ``_excel._row_model``). ``EXPECTED`` is what sheetpeek lays out
 today for each record, taken by running sheetpeek on the built workbooks; the capture shows
@@ -136,11 +136,13 @@ EXPECTED: dict[tuple[int, int], float] = {
     # Arial at 11 and 14: xlformat's 14 and 18; wrapped three lines of 15 and 19 pt
     **{(1, r): h for r, h in ((1, 14), (2, 14), (3, 45))},
     **{(2, r): h for r, h in ((1, 18), (2, 18), (3, 57))},
-    # Times New Roman, Courier New, Georgia at 11 and 14: Calibri's 15 and 19; wrapped three
-    # lines of 16 and 20 pt
-    **{(k, r): h for k in (3, 5, 7) for r, h in ((1, 15), (2, 15), (3, 48))},
-    **{(k, r): h for k in (4, 6, 8) for r, h in ((1, 19), (2, 19), (3, 60))},
-    # Calibri 13, 15, 17, 22: the heights row_height_more captured, in sheetpeek's table
+    # Times New Roman and Georgia at 11 and 14: xlformat's 14 and 18, wrapped three lines of 15
+    # and 19 pt; Courier New's 15 and 19, wrapped 16 and 20 pt
+    **{(k, r): h for k in (3, 7) for r, h in ((1, 14), (2, 14), (3, 45))},
+    **{(k, r): h for k in (4, 8) for r, h in ((1, 18), (2, 18), (3, 57))},
+    **{(5, r): h for r, h in ((1, 15), (2, 15), (3, 48))},
+    **{(6, r): h for r, h in ((1, 19), (2, 19), (3, 60))},
+    # Calibri 13, 15, 17, 22: xlformat's heights
     **{
         (k, r): h
         for k, base in ((9, 17), (10, 20), (11, 23), (12, 29))
@@ -155,9 +157,9 @@ EXPECTED: dict[tuple[int, int], float] = {
     # Calibri 11 Normal: a number in each font, then three wrapped lines
     **{
         (17, r): h
-        for r, h in enumerate((15, 18, 15, 19, 15, 19, 15, 19, 17, 20, 23, 29, 18, 20, 23, 29), 1)
+        for r, h in enumerate((15, 18, 15, 18, 15, 19, 15, 18, 17, 20, 23, 29, 18, 20, 23, 29), 1)
     },
-    **{(17, r): h for r, h in enumerate((48, 60, 81, 48, 46, 48, 48, 48), len(NORMALS) + 1)},
+    **{(17, r): h for r, h in enumerate((48, 60, 81, 48, 46, 48, 46, 46), len(NORMALS) + 1)},
 }
 
 

@@ -217,12 +217,15 @@ def test_row_heights(tmp_path, sheet_format, size, heights):
         ("Calibri", 24, 31),
         ("Aptos Narrow", 20, 27),
         ("Calibri", 13, 17),
-        ("Calibri", 19, 24),
+        ("Calibri", 19, 25),
+        ("Calibri", 12.5, 17),
+        ("Times New Roman", 14, 18),
     ],
 )
 def test_row_heights_of_larger_normal_fonts(tmp_path, family, size, height):
-    # xlformat's row model, captured at 9 to 24 points, and 13 from row_height_more; 19 is not
-    # captured and takes the nearest size's, the smaller on a tie, 18 (unverified).
+    # xlformat's row model at the font's own size: 19 and 12.5 as Excel fits them as a cell font
+    # (row_height_fitted, "plain 19" and "plain 12.5"), and Times New Roman 14's own row
+    # ("Times New Roman 14").
     wb = openpyxl.Workbook()
     wb.active["A1"] = 1
     path = save(wb, tmp_path / "rows.xlsx")

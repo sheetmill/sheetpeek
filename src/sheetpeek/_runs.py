@@ -13,9 +13,9 @@ import xlformat
 
 from sheetpeek._layout import _UNDRAWN
 from sheetpeek._model import Cell, Font
-from sheetpeek._rows import WRAPPED_LEADING, baseline_offsets, font_row_height
+from sheetpeek._rows import WRAPPED_LEADING, baseline_offsets, face_metrics, font_row_height
 from sheetpeek._runs_model import TextSpan
-from sheetpeek._text_styles import ACCOUNTING_EXTRA, accounting, scaled
+from sheetpeek._text_styles import scaled
 
 Measure = Callable[[Font], xlformat.Font]
 """The font xlformat measures a model font with, at its drawn size."""
@@ -115,20 +115,19 @@ def line_font(fonts: list[Font]) -> Font:
     return max(fonts, key=lambda f: (font_row_height(f), f.size))
 
 
-def line_metrics(
-    fonts: list[Font], lines: int, normal: Font | None = None
-) -> tuple[float, float, float]:
+def line_metrics(fonts: list[Font], lines: int) -> tuple[float, float, float]:
     """(line pitch, baseline below its top, baseline above its bottom) of a line in ``fonts``.
 
-    Excel's screen (``baseline_offsets``): wrapped lines are the font's row height apart, the
-    point each adds to a fitted row lying below the last (§4.7); an accounting underline adds
-    room under the text (§4.13). ``lines`` is the block's number of lines; ``normal`` the
-    workbook's Normal font, which bottom-aligned text sits at least as high as.
+    Excel's screen (``baseline_offsets``) for the line's largest run's font: wrapped lines are
+    the font's height apart, the point each adds to a fitted row lying below the last (§4.7); an
+    accounting underline on any run adds its points to the pitch and under the text (§4.13).
+    The bottom is the line's own; a row of several fonts sets the bottom line on the largest
+    (``_excel.row_bottom``). ``lines`` is the block's number of lines.
     """
-    pitch, above, below = baseline_offsets(line_font(fonts), normal)
-    if any(accounting(f) for f in fonts):
-        below += ACCOUNTING_EXTRA
-    return pitch, above, below
+    font = line_font(fonts)
+    pitch, above, below = baseline_offsets(font)
+    extra = max((face_metrics(f)[3] for f in fonts), default=0.0) - face_metrics(font)[3]
+    return pitch + extra, above, below + extra
 
 
 def wrap(text: str, budget: float, width: Callable[[int, int], float]) -> list[tuple[int, int]]:

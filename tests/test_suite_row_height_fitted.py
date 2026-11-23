@@ -134,59 +134,20 @@ PINNED: dict[str, frozenset[str]] = {
         "90 ox4 31|90 ix3 31|90 ix3 32|90 ox1 33|90 ox2 33|90 ox4 33|90 ox1 35|90 ox2 35|"
         "90 ox4 35|90 ix3 35|90 ox1 36|90 ox2 36|90 ox4 36|90 ix3 36"
     ),
-    # The row a font fits at a size the row model has not measured: half sizes, Calibri 19, 21, 23
-    # and past 24 (sheetpeek takes 24's 31 pt), and Arial, Times New Roman, Courier New and Aptos
-    # Narrow at sizes between and past the measured ones.
-    "plain": _names(
-        "plain 11.5|plain 12.5|plain 13.5|plain 14.5|plain 15.5|plain 16.5|plain 17.5|"
-        "plain 18.5|plain 19|plain 20.5|plain 21|plain 22.5|plain 23|plain 24.5|plain 25|"
-        "plain 25.5|plain 26|plain 26.5|plain 27|plain 27.5|plain 28|plain 28.5|plain 29|"
-        "plain 29.5|plain 30|plain 30.5|plain 31|plain 31.5|plain 32|plain 32.5|plain 33|"
-        "plain 33.5|plain 34|plain 34.5|plain 35|plain 35.5|plain 36|plain 36.5|plain 37|"
-        "plain 37.5|plain 38|plain 38.5|plain 39|plain 39.5|plain 40|plain 41|plain 42|"
-        "plain 43|plain 44|plain 45|plain 46|plain 47|plain 48|plain 49|plain 50|plain 51|"
-        "plain 52|plain 53|plain 54|plain 55|plain 56|plain 57|plain 58|plain 59|plain 60|"
-        "plain 61|plain 62|plain 63|plain 64|plain 65|plain 66|plain 67|plain 68|plain 69|"
-        "plain 70|plain 71|plain 72|Courier New 12|Arial 13|Courier New 13|"
-        "Times New Roman 14|Arial 15|Times New Roman 15|Courier New 15|Times New Roman 16|"
-        "Courier New 16|Arial 17|Times New Roman 17|Times New Roman 18|Arial 19|"
-        "Courier New 19|Aptos Narrow 19|Times New Roman 20|Courier New 20|Arial 21|"
-        "Times New Roman 21|Courier New 21|Aptos Narrow 21|Arial 22|Times New Roman 22|"
-        "Courier New 22|Arial 23|Courier New 23|Aptos Narrow 23|Times New Roman 24|"
-        "Courier New 24|Arial 25|Courier New 25|Aptos Narrow 25|Arial 26|Times New Roman 26|"
-        "Courier New 26|Aptos Narrow 26|Arial 27|Times New Roman 27|Courier New 27|"
-        "Aptos Narrow 27|Arial 28|Times New Roman 28|Courier New 28|Aptos Narrow 28|Arial 29|"
-        "Times New Roman 29|Courier New 29|Aptos Narrow 29|Arial 30|Times New Roman 30|"
-        "Courier New 30|Aptos Narrow 30|Arial 31|Times New Roman 31|Courier New 31|"
-        "Aptos Narrow 31|Arial 32|Times New Roman 32|Courier New 32|Aptos Narrow 32|Arial 33|"
-        "Times New Roman 33|Courier New 33|Aptos Narrow 33|Arial 34|Times New Roman 34|"
-        "Courier New 34|Aptos Narrow 34|Arial 35|Times New Roman 35|Courier New 35|"
-        "Aptos Narrow 35|Arial 36|Times New Roman 36|Courier New 36|Aptos Narrow 36|Arial 37|"
-        "Times New Roman 37|Courier New 37|Aptos Narrow 37|Arial 38|Times New Roman 38|"
-        "Courier New 38|Aptos Narrow 38|Arial 39|Times New Roman 39|Courier New 39|"
-        "Aptos Narrow 39|Arial 40|Times New Roman 40|Courier New 40|Aptos Narrow 40"
-    ),
-    # Superscript and subscript text, alone and side by side, from 12 pt, and an accounting
-    # underline at 6 to 10 and from 19 pt: sheetpeek's linear growth is not Excel's, which is not
-    # yet modeled.
+    # Superscript and subscript text, alone and side by side, from 12 pt: sheetpeek's linear
+    # growth is not Excel's, which is not yet modeled (§4.13).
     "styled": _names(
-        "singleAccounting 6|singleAccounting 7|singleAccounting 8|singleAccounting 9|"
-        "singleAccounting 10|superscript 12|both 12|subscript 13|both 13|subscript 14|"
-        "both 14|subscript 15|superscript 16|both 16|superscript 17|subscript 17|both 17|"
-        "superscript 18|subscript 18|both 18|subscript 19|both 19|singleAccounting 19|"
-        "superscript 20|subscript 20|both 20|subscript 21|singleAccounting 21|superscript 22|"
-        "subscript 22|both 22|superscript 23|subscript 23|both 23|singleAccounting 23|"
-        "superscript 24|subscript 24|both 24|subscript 25|singleAccounting 25|subscript 26|"
-        "both 26|singleAccounting 26|superscript 27|subscript 27|singleAccounting 27|"
-        "superscript 28|subscript 28|both 28|singleAccounting 28|superscript 29|subscript 29|"
-        "both 29|singleAccounting 29|superscript 30|subscript 30|both 30|singleAccounting 30|"
-        "superscript 31|subscript 31|both 31|singleAccounting 31|superscript 32|subscript 32|"
-        "both 32|singleAccounting 32|superscript 33|subscript 33|both 33|singleAccounting 33|"
-        "superscript 34|subscript 34|both 34|singleAccounting 34|superscript 35|subscript 35|"
-        "both 35|singleAccounting 35|superscript 36|subscript 36|both 36|singleAccounting 36|"
-        "superscript 37|subscript 37|both 37|singleAccounting 37|superscript 38|subscript 38|"
-        "both 38|singleAccounting 38|superscript 39|subscript 39|both 39|singleAccounting 39|"
-        "superscript 40|subscript 40|both 40|singleAccounting 40"
+        "both 12|both 13|both 14|both 16|both 17|both 18|both 19|both 20|both 21|both 22|both 23|"
+        "both 24|both 25|both 26|both 27|both 28|both 29|both 30|both 31|both 32|both 33|both 34|"
+        "both 35|both 36|both 37|both 38|both 39|both 40|subscript 13|subscript 14|subscript 15|"
+        "subscript 17|subscript 18|subscript 19|subscript 20|subscript 21|subscript 22|"
+        "subscript 23|subscript 24|subscript 26|subscript 27|subscript 28|subscript 29|"
+        "subscript 30|subscript 32|subscript 33|subscript 34|subscript 35|subscript 36|"
+        "subscript 37|subscript 38|subscript 39|subscript 40|superscript 12|superscript 16|"
+        "superscript 17|superscript 18|superscript 19|superscript 20|superscript 21|superscript 22|"
+        "superscript 23|superscript 24|superscript 25|superscript 26|superscript 27|superscript 28|"
+        "superscript 29|superscript 30|superscript 31|superscript 32|superscript 33|superscript 34|"
+        "superscript 35|superscript 36|superscript 37|superscript 38|superscript 39|superscript 40"
     ),
 }
 """Cases where sheetpeek's row differs from Excel's, by comparison, with their reasons."""

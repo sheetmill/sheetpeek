@@ -138,18 +138,9 @@ def _captured():
     return {(int(r["workbook"]), int(r["row"])): r for r in _parse(suite.OUTPUT)}
 
 
-SHORTER_FACES = ("Times New Roman", "Georgia")
-"""Faces xlformat has no metrics for, measured as Calibri (decided, ARCHITECTURE §4.7): Excel's
-rows for them are a point shorter than Calibri's at 11 and 14 (14 and 18 pt), and so is each
-wrapped line. Courier New's agree with Calibri's, and Arial's, which xlformat measures, are its
-own. A known deviation until xlformat measures the faces; the rows it covers are pinned below,
-so a new one fails."""
-
-KNOWN = frozenset(
-    {(k, r) for k in (3, 4, 7, 8) for r in (1, 2, 3)} | {(17, r) for r in (4, 8, 23, 24)}
-)
-"""The rows of :data:`SHORTER_FACES`, as Normal font (workbooks 3, 4, 7, 8) or as the cell's
-font under Calibri 11 (workbook 17: at 14 pt, and three wrapped lines at 11)."""
+KNOWN: frozenset[tuple[int, int]] = frozenset()
+"""Rows where sheetpeek's height differs from Excel's, each with its reason: none. (Times New
+Roman and Georgia, once measured as Calibri and a point taller, take xlformat's own rows.)"""
 
 
 def _compare(name, cases):
@@ -168,7 +159,7 @@ def _compare(name, cases):
     known = sum(1 for case in cases if (case.workbook, case.row) in KNOWN)
     REPORT[f"row_height_more {name}"] = (
         f"row_height_more {name}: {len(cases) - known} of {len(cases)} rows as Excel lays out, "
-        f"{known} the known deviation of faces measured as Calibri"
+        f"{known} known deviations"
     )
     assert not substituted, f"Excel substituted a face: {substituted}"
     assert not wrong, (
@@ -177,9 +168,9 @@ def _compare(name, cases):
 
 
 @pytest.mark.excel
-def test_other_normal_faces_take_calibris_heights_as_captured():
-    # §4.7: a Normal face not in the table (Times New Roman, Courier New, Georgia at 11 and 14)
-    # gives its rows Calibri's height, listed (row 1) or not (row 2); Arial its own.
+def test_other_normal_faces_take_their_own_heights_as_captured():
+    # §4.7: Arial, Times New Roman, Courier New and Georgia at 11 and 14 as a Normal font give
+    # their rows xlformat's height for the face, listed (row 1) or not (row 2).
     faces = set(suite.OTHER_FACES)
     _compare(
         "other Normal faces",
@@ -188,9 +179,8 @@ def test_other_normal_faces_take_calibris_heights_as_captured():
 
 
 @pytest.mark.excel
-def test_normal_sizes_between_measured_ones_take_the_nearest_as_captured():
-    # §4.7: Calibri and Aptos Narrow at 13, 15, 17 and 22 take the nearest measured size's
-    # height, the smaller on a tie (13 as 12, 22 as 20).
+def test_normal_sizes_between_measured_ones_take_their_own_heights_as_captured():
+    # §4.7: Calibri and Aptos Narrow at 13, 15, 17 and 22 take xlformat's height at the size.
     _compare(
         "Normal sizes between",
         [
@@ -204,7 +194,7 @@ def test_normal_sizes_between_measured_ones_take_the_nearest_as_captured():
 @pytest.mark.excel
 def test_rows_fit_cell_fonts_the_table_has_not_measured_as_captured():
     # §4.7: under a Calibri 11 Normal font, a number in each of those fonts fits its row to the
-    # font's height from the table.
+    # font's height from xlformat's row model.
     _compare(
         "cell fonts fitted",
         [c for c in suite.CASES if c.workbook == len(suite.NORMALS) + 1 and not c.wrapped],

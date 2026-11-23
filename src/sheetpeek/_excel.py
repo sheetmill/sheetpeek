@@ -35,6 +35,7 @@ from sheetpeek._model import Column, Font, Row, Sheet
 from sheetpeek._pass_borders import slant_shift, slants
 from sheetpeek._rendered import RenderedCell, RenderedColumn, RenderedRow, TextRun
 from sheetpeek._rows import (
+    TALLEST_ROW,
     fits_cells,
     font_row_height,
     print_baseline_offsets,
@@ -79,8 +80,6 @@ TOP_DROP = 3.0
 """Points below the cell's top that top-aligned angled text's highest corner sits (§4.17)."""
 STACKED_AXIS = (1.43, 0.758)
 """Stacked left or right text's axis from the near edge: points, and points per point of size."""
-TALLEST_ROW = 409.5
-"""Excel's tallest row, in points: a row fitted to 90-degree text stops there (§4.17)."""
 
 
 def lay_out(draft: Draft) -> tuple[tuple[RenderedColumn, ...], tuple[RenderedRow, ...]]:
@@ -141,10 +140,10 @@ def lay_out(draft: Draft) -> tuple[tuple[RenderedColumn, ...], tuple[RenderedRow
 
     grid.units = units
     read = [p for p in range(len(every)) if p not in added]
-    heights = [
-        _fitted(grid, i, row, sheet, read, widths, base, fonts) for i, row in enumerate(rows)
-    ]
-    layout = _Points(grid, widths, heights, base, fonts, notes, sheet.normal_font)
+    fitted = [_fitted(grid, i, row, sheet, read, widths, base, fonts) for i, row in enumerate(rows)]
+    heights = [f[0] for f in fitted]
+    bottoms = [f[1] for f in fitted]
+    layout = _Points(grid, widths, heights, base, fonts, notes, sheet.normal_font, bottoms)
     rendered_rows, kept = layout.render()
     x0 = layout.xs[kept[0]]
     rendered_columns = tuple(
@@ -170,11 +169,42 @@ def _fitted(
     widths: list[float],
     base: xlformat.ColumnMetrics,
     fonts: _Fonts,
-) -> float:
-    """A row's height, fitted to its cells as Excel fits it on opening (§4.7)."""
-    height = row_height(row, sheet)
+) -> tuple[float, tuple[float, float, float, float]]:
+    """A row's height, fitted to its cells as Excel fits it on opening (§4.7), and its bottom.
+
+    The bottom is ``(B_row, I_row)``: bottom-aligned text in the row sits on one baseline,
+    ``B_row`` above the row's bottom, the largest bottom offset over the Normal font and the
+    fonts of the row's cells, empty styled cells and accounting underlines included (§3.6); and
+    ``I_row``, the largest line inset ``B - 2`` over the same fonts, which lifts wrapped text
+    in a face with a smaller one by the difference (captured, ``text_style_more`` group
+    ``faces``: three wrapped lines of five faces beside Calibri 17 in a 90 pt row). A fixed row
+    has a bottom too. The cells counted are those whose fonts fit the row (captured for cells
+    with values; empty styled cells and the other kinds unverified).
+
+    The bottom is given twice: with the fonts of rich-text runs, and with each cell's own font
+    alone. A rich-text cell's last line sits on its own line's bottom, not on a larger run's
+    of another line (captured, ``runs`` C8, C10 and C12), so it is placed by the second, which
+    also leaves out other cells' runs (unverified).
+    """
+    below, inset, ascent = fonts.bottom(sheet.normal_font)
+    plain_below, plain_inset = below, inset
     if not fits_cells(row, sheet):
-        return height
+        for p in read:
+            cell = grid.cell(i, p)
+            style = cell.style
+            if (style.rotation or style.stacked) and cell.kind != "empty" and _upright(style):
+                continue
+            b, n, _ = fonts.bottom(cell.font)
+            plain_below, plain_inset = max(plain_below, b), max(plain_inset, n)
+            own = [cell.font]
+            if cell.runs:
+                content = _UNDRAWN.sub("", str(cell.value))
+                own += [span.font for span in drawn_spans(cell, content) or ()]
+            for font in own:
+                b, n, _ = fonts.bottom(font)
+                below, inset = max(below, b), max(inset, n)
+        return row_height(row, sheet), (below, inset, plain_below, plain_inset)
+    height = row_height(row, sheet)
     styled = []
     cell_fonts: list[Font] = []  # fonts of the row's cells that do not wrap
     wrapped: list[tuple[Font, int]] = []  # each plain wrapped cell's font and lines
@@ -191,8 +221,13 @@ def _fitted(
             # Text at 90 degrees fits the row by its width alone, at least the Normal font's
             # row: its own font's row does not count (captured, row_height_fitted).
             height = max(height, *map(fonts.row_height, own), fonts.row_height(cell.font))
+            for font in (*own, cell.font):
+                b, n, a = fonts.bottom(font)
+                below, inset, ascent = max(below, b), max(inset, n), max(ascent, a)
+            b, n, _ = fonts.bottom(cell.font)
+            plain_below, plain_inset = max(plain_below, b), max(plain_inset, n)
         if cell.kind != "empty":
-            styled += [f for f in own if f.vert_align or accounting(f)]
+            styled += [f for f in own if f.vert_align]
         if turned:
             height = max(height, _turned_height(grid, cell, p, fonts))
             continue
@@ -217,13 +252,17 @@ def _fitted(
                 wrapped.append((cell.font, len(lines)))
             continue
         cell_fonts += own
-    # Superscript, subscript and accounting underlines grow the row (§4.13); the row fits the
-    # unshrunk size of shrunk text, so shrink adds nothing.
+    # The row holds its fonts' largest ascent and largest bottom, an accounting underline's
+    # points included (xlformat's row model; captured, row_height_fitted group styled: an
+    # accounting underline at 6 to 10 pt under Calibri 11 makes a row of 17 or 18 pt).
+    height = max(height, ascent + below)
+    # Superscript and subscript grow the row (§4.13); the row fits the unshrunk size of shrunk
+    # text, so shrink adds nothing.
     for font, extra in row_extras(styled):
         height = max(height, font_row_height(font) + extra)
-    if not wrapped:
-        return height
-    return max(height, _row_model(sheet.normal_font, frozenset(cell_fonts), tuple(wrapped)))
+    if wrapped:
+        height = max(height, _row_model(sheet.normal_font, frozenset(cell_fonts), tuple(wrapped)))
+    return min(height, TALLEST_ROW), (below, inset, plain_below, plain_inset)
 
 
 _INDENT_SPACES = 3
@@ -258,7 +297,8 @@ def _row_model(
     """
 
     def spec(font: Font) -> xlformat.Font:
-        return xlformat.Font(font.name, font.size, font.bold, font.italic)
+        underline = font.underline if accounting(font) else None  # a single one adds nothing
+        return xlformat.Font(font.name, font.size, font.bold, font.italic, underline)
 
     try:
         return xlformat.row_metrics(
@@ -355,8 +395,11 @@ class _Points:
         fonts: _Fonts,
         notes: Any = None,
         normal: Font | None = None,
+        bottoms: list[tuple[float, float, float, float]] | None = None,
     ) -> None:
         self.grid = grid
+        # each row's (B_row, I_row), with runs' fonts and without (``_fitted``)
+        self.bottoms = bottoms
         self.notes = notes
         self.normal = normal
         self.widths = widths
@@ -375,8 +418,24 @@ class _Points:
         key = (id(font), lines)
         hit = self._metrics.get(key)
         if hit is None or hit[0] is not font:
-            hit = self._metrics[key] = (font, line_metrics([font], lines, self.normal))
+            hit = self._metrics[key] = (font, line_metrics([font], lines))
         return hit[1]
+
+    def row_below(self, i: int, own: float, face: Font, wraps: bool, runs: bool = False) -> float:
+        """Where a bottom-aligned block's last baseline sits above row ``i``'s bottom (§3.6).
+
+        On the row's shared bottom ``B_row``, at least the line's own (an accounting run), and
+        for wrapped text the difference of the row's line inset and its face's higher
+        (xlformat's row model). A merge's text takes its last row's (unverified).
+        """
+        if self.bottoms is None:
+            return own
+        full_below, full_inset, plain_below, plain_inset = self.bottoms[i]
+        below, inset = (plain_below, plain_inset) if runs else (full_below, full_inset)
+        below = max(below, own)
+        if wraps:
+            below += max(0.0, inset - self.fonts.bottom(face)[1])
+        return below
 
     def slant_spans(self, origins: list[Any]) -> list[tuple[int, int]]:
         """The columns each slanted border box reaches, kept as a spill keeps them (§4.17)."""
@@ -518,15 +577,21 @@ class _Points:
         lines = wrap(text.text, line_budget, text.width) if wraps else [(0, len(text.text))]
         n = len(lines)
         if spans:
-            metrics = [line_metrics(text.fonts(a, b), n, self.normal) for a, b in lines]
+            metrics = [line_metrics(text.fonts(a, b), n) for a, b in lines]
         else:
-            metrics = [self.plain_metrics(cell_font, n)] * n
+            # Shrunk text is placed by its drawn size's metrics (captured, text_style_more
+            # group shrunk: top and center at 4/7 and 6/7; 2/7 sits as about 6 pt would)
+            placed_font = (
+                replace(cell_font, size=cell_font.size * shrink) if shrink < 1 else cell_font
+            )
+            metrics = [self.plain_metrics(placed_font, n)] * n
+        face = line_font(text.fonts(*lines[-1])) if spans else cell_font
+        row_below = self.row_below(origin.rows[-1], metrics[-1][2], face, wraps, bool(spans))
         if n == 1 and v_align == "bottom" and metrics[0][0] <= bottom - top:
             # One bottom-aligned line, as most cells are: ``_baselines``' arithmetic, inline.
-            _, above, below = metrics[0]
-            baselines = [bottom - below - above + above]
+            baselines = [bottom - row_below]
         else:
-            baselines = _baselines(metrics, top, bottom, v_align)
+            baselines = _baselines(metrics, top, bottom, v_align, row_below)
         shift = 0.0 if spans else vert_shift(cell_font)
         color = shown.format_color or cell_font.color
         direction: TextDirection = (
@@ -823,10 +888,13 @@ class _Points:
         text, spans = self._one_line(origin)
         n = len(text.text)
         metrics = [
-            line_metrics(text.fonts(k, k + 1) if spans else [cell.font], 1, self.normal)
-            for k in range(n)
+            line_metrics(text.fonts(k, k + 1) if spans else [cell.font], 1) for k in range(n)
         ]
-        baselines = _baselines(metrics, top, bottom, style.v_align)
+        # stacked text keeps its own bottom, at least the Normal font's (the row's shared
+        # bottom is not captured for it)
+        own = metrics[-1][2] if metrics else 0.0
+        normal = self.fonts.bottom(self.normal)[0] if self.normal is not None else 0.0
+        baselines = _baselines(metrics, top, bottom, style.v_align, max(own, normal))
         size = cell.font.size * vert_scale(cell.font)
         shift = 0.0 if spans else vert_shift(cell.font)
         align = shown.align if style.h_align in ("left", "right") else "center"
@@ -984,25 +1052,42 @@ def _wrap(text: str, budget: float, font: xlformat.Font) -> list[str]:
 
 
 def _baselines(
-    metrics: list[tuple[float, float, float]], top: float, bottom: float, v_align: str
+    metrics: list[tuple[float, float, float]],
+    top: float,
+    bottom: float,
+    v_align: str,
+    row_below: float | None = None,
 ) -> list[float]:
     """The baseline of each line of a block from ``top`` to ``bottom``, placed by ``v_align``.
 
-    ``metrics`` holds each line's height, its baseline below its top and its baseline above its
-    bottom (``line_metrics``). When the lines do not fit, bottom and center text places the first
-    lines that reach the bottom, as a block of its own, and the rest follow, clipped (captured,
-    ``text_style_more`` groups ``shrunk`` and ``overflow``: two and three lines in rows of 15 to
-    32 pt, and a line of 14 or 20 pt in a 15 pt row); top text and the spread alignments start
-    at the top (captured, ``overflow``). A centered
-    block sits midway between its top and bottom placements, the half truncated toward zero, and
-    spread lines go evenly from the top position to the bottom one (§4.13), each a whole number
-    of points below the first: a half point is dropped (captured, suite ``text_style``, group
-    ``align``).
+    ``metrics`` holds each line's pitch, its baseline below its top and its own baseline above
+    its bottom (``line_metrics``); ``row_below`` is where the row puts a bottom-aligned last
+    baseline above the bottom (``_Points.row_below``), the last line's own when not given.
+
+    - Top: the first baseline ``ceil(S) + 1`` below the top (captured, ``text_style_more``
+      group ``faces``).
+    - Bottom: the last baseline ``row_below`` above the bottom, shared by the row (captured,
+      ``faces``, ``shrunk`` rows 10 to 16, ``rules`` rows 18 to 22).
+    - Center: the first baseline ``ceil(S) + 1 + trunc((H - k·F) / 2)`` below the top, the
+      line's own font and ``k`` lines of pitch ``F``, the half truncated toward zero (captured,
+      ``faces`` and ``overflow``); the row's other fonts do not move it.
+    - Vertical distributed and justify: lines go evenly from the top position to the bottom
+      one, each a whole number of points below the first, a half point dropped (captured, suite
+      ``text_style``, group ``align``; the bottom's ``row_below`` beside larger fonts
+      unverified).
+
+    When the lines do not fit, bottom and center text places the first ``k = min(n, ceil(H /
+    F))`` lines that reach the bottom as a block of its own, and the rest follow, clipped
+    (captured, ``text_style_more`` groups ``shrunk`` and ``overflow``: two and three lines in
+    rows of 15 to 32 pt, and a line of 14 or 20 pt in a 15 pt row); top text and the spread
+    alignments start at the top (captured, ``overflow``).
     """
     heights = [m[0] for m in metrics]
     total = sum(heights)
     n = len(metrics)
     block = metrics
+    if row_below is None:
+        row_below = metrics[-1][2]
     if total > bottom - top and v_align in ("bottom", "center"):
         k = 1
         while k < n and sum(heights[:k]) < bottom - top:
@@ -1015,13 +1100,13 @@ def _baselines(
         line_top = top
     elif v_align in _SPREAD and n > 1:
         first = top + metrics[0][1]
-        pitch = (bottom - metrics[-1][2] - first) / (n - 1)
+        pitch = (bottom - row_below - first) / (n - 1)
         return [first + math.floor(k * pitch) for k in range(n)]
     elif v_align in ("center", "distributed"):
-        at_bottom = bottom - block[-1][2] - block[-1][1] - first_lines
-        line_top = top + math.trunc((at_bottom - top) / 2)
+        own = bottom - block[-1][2] - block[-1][1] - first_lines
+        line_top = top + math.trunc((own - top) / 2)
     elif v_align == "bottom":
-        line_top = bottom - block[-1][2] - block[-1][1] - first_lines
+        line_top = bottom - row_below - block[-1][1] - first_lines
     else:  # justify, one line: at the top
         line_top = top
     result = []

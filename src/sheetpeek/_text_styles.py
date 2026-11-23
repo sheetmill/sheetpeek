@@ -2,12 +2,13 @@
 
 Superscript and subscript, the underlines, strikethrough, shrink to fit and the text's direction.
 
-Every number here is from the screen suite ``text_style`` (Calibri 11 unless stated); sizes
-other than those captured are scaled from them, unverified.
+Every number here is from the screen suite ``text_style`` (Calibri 11 unless stated), the rules'
+positions and thicknesses from xlformat's ``rule_metrics``.
 """
 
 from __future__ import annotations
 
+import functools
 import unicodedata
 from collections.abc import Iterable
 from typing import Literal
@@ -23,9 +24,6 @@ VERT_SCALE = 2 / 3
 _RAISE = 0.48  # em of the font's size: 5 pt at 11 pt, 12 pt at 24 pt
 _LOWER = 0.18  # 2 pt at 11 pt, 4 pt at 24 pt
 
-ACCOUNTING_EXTRA = 3.0
-"""Points an accounting underline adds under the text: a fitted row is 18 pt instead of 15, and
-a bottom-aligned baseline sits 6 pt above the cell's bottom instead of 3."""
 ACCOUNTING_INSETS = (3.0, 2.0)
 UNDERLINE_OVERRUN = 1.0
 """Points a single or double underline runs past its text's end (Excel 16.115, screen suite
@@ -33,8 +31,9 @@ UNDERLINE_OVERRUN = 1.0
 """An accounting underline under text spans the cell, less these from its left and right
 gridlines (from the left gridline, and before the next one)."""
 
-# Offsets of the first line's top from the baseline, in points at 11 pt (positive is down),
-# scaled with the drawn size elsewhere (unverified).
+# Where xlformat has no rule positions (Courier New, sizes past 72 points): the offsets of the
+# first line's top from the baseline at Calibri 11 (positive is down), scaled with the drawn
+# size, 1 point thick (unverified).
 _CAPTURED_SIZE = 11.0
 _UNDERLINE_OFFSET = {
     "single": 1.0,
@@ -43,6 +42,10 @@ _UNDERLINE_OFFSET = {
     "doubleAccounting": 3.0,
 }
 _STRIKE_OFFSET = -3.0
+_RULE_FACES = frozenset(("calibri", "aptos narrow", "arial", "times new roman", "georgia"))
+"""The faces xlformat's ``rule_metrics`` covers; another face but Courier New is drawn as
+Calibri, as it is measured."""
+
 
 SHRINK_STEPS = 7
 """Shrink to fit draws the largest ``k / 7`` of the size, ``k`` from 1 to 7, that fits (captured
@@ -80,10 +83,10 @@ def vert_extra(font: Font) -> float:
 def row_extras(fonts: Iterable[Font]) -> list[tuple[Font, float]]:
     """Each font of a row's cells with values, with what its text styles add to its row height.
 
-    A fitted row takes the largest font row height plus addition. An accounting underline adds
-    3 pt. A row holding both superscript and subscript grows 1 pt more at 11 pt (18 pt,
-    captured), half the one-kind addition at other sizes: from 12 pt Excel's rows differ, a
-    known deviation (row_height_fitted, group styled).
+    A fitted row takes the largest font row height plus addition (an accounting underline's is
+    in the row's bottom, ``_excel._fitted``). A row holding both superscript and subscript grows
+    1 pt more at 11 pt (18 pt, captured), half the one-kind addition at other sizes: from 12 pt
+    Excel's rows differ, a known deviation (row_height_fitted, group styled).
     """
     fonts = list(fonts)
     both = {f.vert_align for f in fonts} >= {"superscript", "subscript"}
@@ -92,8 +95,6 @@ def row_extras(fonts: Iterable[Font]) -> list[tuple[Font, float]]:
         extra = vert_extra(font)
         if both and extra:
             extra += round(extra / 2)
-        if font.underline in ("singleAccounting", "doubleAccounting"):
-            extra += ACCOUNTING_EXTRA
         result.append((font, extra))
     return result
 
@@ -130,6 +131,12 @@ def rules(
 ) -> tuple[TextRule, ...]:
     """The underline and strikethrough of one run.
 
+    Each line's top and thickness come from xlformat's ``rule_metrics`` for the face at the
+    drawn size, at zoom 100 (captured in xlformat's suites; here, ``text_style_more`` group
+    ``rules`` at 9, 11, 14, 20 and 36 points): a single underline, a double one (both lines
+    the double's thickness, the second two thicknesses below), an accounting one (its first
+    line at the accounting top) and a strikethrough above the baseline.
+
     Args:
         font: The cell's font.
         size: The drawn size, in points.
@@ -139,8 +146,8 @@ def rules(
             which spans the cell; ``None`` for a number, whose underline spans the number.
     """
     found: list[TextRule] = []
-    factor = size / _CAPTURED_SIZE
     kind = font.underline
+    metrics = _rule_metrics(font.name, size, font.bold, font.italic)
     if kind in _UNDERLINE_OFFSET:
         x0, x1 = span
         if cell is not None and kind in ("singleAccounting", "doubleAccounting"):
@@ -148,13 +155,37 @@ def rules(
         elif kind in ("single", "double") and x1 > x0:
             x1 += UNDERLINE_OVERRUN
         lines: Literal[1, 2] = 2 if kind in ("double", "doubleAccounting") else 1
-        y = baseline + round(_UNDERLINE_OFFSET[kind] * factor)
+        if metrics is None:
+            top, thickness = float(round(_UNDERLINE_OFFSET[kind] * size / _CAPTURED_SIZE)), 1.0
+        elif kind == "single":
+            top, thickness = metrics.underline_top, metrics.underline_thickness
+        elif kind == "double":
+            top, thickness = metrics.double_top, metrics.double_thickness
+        elif kind == "singleAccounting":
+            top, thickness = metrics.accounting_top, metrics.underline_thickness
+        else:
+            top, thickness = metrics.accounting_top, metrics.double_thickness
         if x1 > x0:
-            found.append(TextRule("underline", x0, x1, y, lines))
+            found.append(TextRule("underline", x0, x1, baseline + top, lines, thickness))
     if font.strike and span[1] > span[0]:
-        y = baseline + round(_STRIKE_OFFSET * factor)
-        found.append(TextRule("strike", span[0], span[1], y))
+        if metrics is None:
+            top, thickness = float(round(_STRIKE_OFFSET * size / _CAPTURED_SIZE)), 1.0
+        else:
+            top, thickness = -metrics.strikethrough_top, metrics.strikethrough_thickness
+        found.append(TextRule("strike", span[0], span[1], baseline + top, 1, thickness))
     return tuple(found)
+
+
+@functools.lru_cache(maxsize=256)
+def _rule_metrics(name: str, size: float, bold: bool, italic: bool) -> xlformat.RuleMetrics | None:
+    """Xlformat's rules for the face at ``size``, zoom 100; ``None`` where it has none."""
+    face = name if name.lower() in _RULE_FACES else "Calibri"
+    if name.lower() == "courier new":  # its rules raise in xlformat 0.6
+        return None
+    try:
+        return xlformat.rule_metrics(xlformat.Font(face, size, bold, italic))
+    except LookupError:
+        return None
 
 
 def right_to_left(text: str) -> bool:

@@ -224,6 +224,40 @@ def test_rules_are_one_pixel_at_whole_pixels_in_html(tmp_path):
     assert ".sheetpeek .sp-rule { position: absolute; height: 1px;" in page
 
 
+def test_rules_at_36_points_are_two_points_thick(tmp_path):
+    # Captured (text_style_more, group rules, zoom 100): at Calibri 36 a single underline 4 pt
+    # below the baseline and a strikethrough 9 pt above it, each 2 pt thick; a double's two
+    # lines 2 pt thick and 4 pt apart, the first 4 pt below; at 11 pt every rule is 1 pt.
+    def build(ws):
+        ws["A1"], ws["B1"], ws["C1"] = "HHH", "HHH", "HHH"
+        ws["A1"].font = Font(size=36, underline="single", strike=True)
+        ws["B1"].font = Font(size=36, underline="double")
+        ws["C1"].font = Font(underline="single")
+
+    single, double, small = runs_of(lay_out(tmp_path, build), 1)
+    assert [(r.kind, r.y - single.y, r.thickness) for r in single.rules] == [
+        ("underline", 4, 2),
+        ("strike", -9, 2),
+    ]
+    (rule,) = double.rules
+    assert (rule.y - double.y, rule.lines, rule.thickness) == (4, 2, 2)
+    assert small.rules[0].thickness == 1
+
+
+def test_a_thick_rule_is_drawn_at_its_thickness_in_html(tmp_path):
+    def build(ws):
+        ws["A1"], ws["B1"] = "HHH", "HHH"
+        ws["A1"].font = Font(size=36, underline="single")
+        ws["B1"].font = Font(size=36, underline="double")
+
+    out = io.StringIO()
+    HTMLBackend(fragment=True, zoom=100).render(lay_out(tmp_path, build), out)
+    page = out.getvalue()
+    # 2 pt is 2 px at zoom 100; a double's lines 2 px each in a box of three thicknesses
+    assert ';height:2px"' in page
+    assert ';height:6px;border-width:2px"' in page
+
+
 def test_superscript_is_drawn_smaller_in_html(tmp_path):
     def build(ws):
         ws["A1"] = "HHH"

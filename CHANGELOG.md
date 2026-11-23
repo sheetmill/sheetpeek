@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `TextRule.thickness`: each underline and strikethrough line's thickness in points at zoom 100,
+  from xlformat's `rule_metrics` (2 pt for Calibri 36, where Excel draws it 2 screen points
+  thick). The HTML output draws a rule thicker than a point at its thickness.
+
+### Changed
+- Row heights come from xlformat's row model at the font's own face and size: Arial, Times New
+  Roman, Courier New, Georgia, Calibri and Aptos Narrow at every size from 1 to 72 points, half
+  sizes included, where the nearest of nine measured sizes, and Calibri's heights for another
+  face, were taken before. Calibri 19 is 25 pt (was 24), Calibri 40 52 pt (was 31), and a
+  Times New Roman or Georgia 11 Normal font gives 14 pt rows (was 15), as Excel fits them. Past 72 points a row stops at 409.5,
+  Excel's tallest.
+- Bottom-aligned text in a row sits on one baseline, set by the largest font in the row, empty
+  styled cells and accounting underlines included: Calibri 11 beside Calibri 17 in a 60 pt row
+  sits 5 pt above the bottom (was 3), plain text beside an accounting underline 6 pt (was 3),
+  in fitted and fixed rows alike. Wrapped text in a face with a smaller line inset than the
+  row's sits that much higher, as Excel draws it.
+- Top-aligned text has its baseline at its own size plus 1 point, and centered text is placed by
+  its own font's height, at every size (the nearest measured size's before): Calibri 13 and 17
+  now sit where Excel draws them. Shrunk text top and centered is placed by its drawn size.
+- Underlines and strikethrough are placed by xlformat's `rule_metrics` for the face and drawn
+  size: at 36 points a single underline is 4 pt below the baseline (was 3), a strikethrough
+  9 pt above (was 10).
+- An accounting underline adds xlformat's points to the row (3 at Calibri 11, more at larger
+  sizes) and to each wrapped line: three wrapped lines of Calibri 11 with one take 57 pt (was
+  48), distributed text 19 (was 18), and each line is 18 pt below the last (was 15).
+- A fitted row is at least its fonts' largest ascent plus their largest descent: an accounting
+  underline at Calibri 6 or 8 under Calibri 11 makes a row of 17 pt (was 15), at Calibri 10
+  18 pt (was 17).
+
 ### Fixed
 - An indent level is three spaces of the Normal font, as Excel draws it (captured, screen suite
   `text_steps`): 6 pt under a Calibri 9 Normal font, 9 pt under Calibri 12, 12 pt under

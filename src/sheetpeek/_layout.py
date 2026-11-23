@@ -34,7 +34,7 @@ from sheetpeek._rendered import (
     RenderedRow,
     RenderedSheet,
 )
-from sheetpeek._rows import font_row_height, row_height
+from sheetpeek._rows import baseline_offsets, font_row_height, line_inset, row_height
 from sheetpeek._text_styles import right_to_left, vert_scale
 
 # Characters per indent level in the characters layout: a level is three spaces of the Normal
@@ -305,6 +305,7 @@ class _Fonts:
         # more than the lookup. Each entry holds its font, so an id is not reused while cached.
         self._by_id: dict[int, tuple[Font, xlformat.Font, bool]] = {}
         self._heights: dict[int, tuple[Font, float]] = {}
+        self._bottoms: dict[int, tuple[Font, tuple[float, float, float]]] = {}
 
     def get(self, font: Font, *, measured: bool = True) -> xlformat.Font:
         """The font to pass to xlformat; ``measured`` when its glyph widths decide the layout."""
@@ -337,6 +338,14 @@ class _Fonts:
         hit = self._heights.get(id(font))
         if hit is None or hit[0] is not font:
             hit = self._heights[id(font)] = (font, font_row_height(font))
+        return hit[1]
+
+    def bottom(self, font: Font) -> tuple[float, float, float]:
+        """(bottom offset ``B`` with its accounting addition, line inset, ascent), by identity."""
+        hit = self._bottoms.get(id(font))
+        if hit is None or hit[0] is not font:
+            _, ascent, below = baseline_offsets(font)
+            hit = self._bottoms[id(font)] = (font, (below, line_inset(font), ascent))
         return hit[1]
 
 

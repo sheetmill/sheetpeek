@@ -233,16 +233,9 @@ def _floats(text):
     return [float(part) for part in text.split()]
 
 
-PAST_THE_TABLE = {"C12": {"row_height": 70.0, "baselines": (15.0, 47.0, 67.0)}}
-"""A 28 pt run in a wrapped line, past the row table's 24 pt: sheetpeek gives it 24 pt's line and
-baseline (row 64, baselines 15, 43, 61), where Excel's line is 4 pt taller with its baseline 4 pt
-lower. A known deviation of sizes past 24 (ARCHITECTURE §4.7), pinned here at Excel's values so a
-change on either side shows."""
-
-
 SMALL_RUNS_BASELINE = {"C14": (18.0,)}
 """9 pt runs in a 20 pt cell: the row is the cell font's 26 pt in both, but Excel puts the runs'
-baseline 8 pt above the bottom where sheetpeek puts it 3 pt above (23), a 9 pt line's place. Where
+baseline 8 pt above the bottom where sheetpeek puts it 5 pt above (21), the cell font's. Where
 Excel places small runs in a taller row is not modeled, a known deviation (ARCHITECTURE §4.16)."""
 
 
@@ -253,10 +246,6 @@ def test_runs_fit_rows_as_captured():
     # counts the runs' fonts and not the cell's (C14), superscript and subscript runs (J22, J24).
     captured = _captured()["main"]
     for cell, expected in runs.EXPECTED["main"].items():
-        if cell in PAST_THE_TABLE:
-            assert float(captured[cell]["row_height"]) == PAST_THE_TABLE[cell]["row_height"]
-            assert expected["row_height"] != PAST_THE_TABLE[cell]["row_height"], "unpin " + cell
-            continue
         assert float(captured[cell]["row_height"]) == expected["row_height"], cell
 
 
@@ -269,8 +258,6 @@ def test_wrapped_and_mixed_lines_sit_on_the_baselines_excel_draws():
         bands = _spans(captured[cell]["line_tops"])
         bottoms = [top + height for top, height in bands]
         expected = runs.EXPECTED["main"][cell]["baselines"]
-        if cell in PAST_THE_TABLE:
-            expected = PAST_THE_TABLE[cell]["baselines"]
         if cell in SMALL_RUNS_BASELINE:
             assert expected != SMALL_RUNS_BASELINE[cell], "unpin " + cell
             expected = SMALL_RUNS_BASELINE[cell]

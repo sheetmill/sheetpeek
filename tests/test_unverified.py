@@ -38,14 +38,19 @@ LABELS: dict[str, tuple[str, ...]] = {
         "degrees at the sizes xlformat measures; the 7 held below 9 pt is unverified).",
         "else:  # bottom; justify as bottom (unverified); a box taller than the row (captured)",
         "# An accounting underline runs under the text's width, turned with it (unverified).",
+        "with values; empty styled cells and the other kinds unverified).",
+        "also leaves out other cells' runs (unverified).",
+        "(xlformat's row model). A merge's text takes its last row's (unverified).",
+        "unverified).",
     ),
     "src/sheetpeek/_rows.py": (
-        "size takes the nearest measured size's, another face Calibri's (unverified).",
+        "if font.size > _LARGEST:  # 72's scaled with the size (unverified; 409 caps at "
+        "TALLEST_ROW)",
+        "measures it as Calibri. Past 72 points, 72's height scaled with the size (unverified), at",
     ),
     "src/sheetpeek/_style/font.py": ("taken alike (unverified).",),
     "src/sheetpeek/_text_styles.py": (
-        "other than those captured are scaled from them, unverified.",
-        "# scaled with the drawn size elsewhere (unverified).",
+        "# size, 1 point thick (unverified).",
         'at Calibri 11 at zoom 100; the step at other sizes is unverified)."""',
         "never below 0 (unverified).",
     ),
@@ -53,10 +58,11 @@ LABELS: dict[str, tuple[str, ...]] = {
         "# segment's (unverified).",
         "# digit. At other sizes the digit term scales with the size (unverified).",
     ),
-    "src/sheetpeek/backends/html/_workbook.py": ('unverified)."""',),
-    "tests/test_excel.py": (
-        "# captured and takes the nearest size's, the smaller on a tie, 18 (unverified).",
+    "src/sheetpeek/backends/html/_text.py": (
+        "thicknesses apart (unverified past zoom 100). The rule of an angled run turns with it, "
+        "about",
     ),
+    "src/sheetpeek/backends/html/_workbook.py": ('unverified)."""',),
     "tests/test_theme.py": (
         "# the line through the two nearest (unverified), positive at every size Excel accepts.",
     ),

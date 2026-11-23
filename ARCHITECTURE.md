@@ -290,22 +290,47 @@ text outside is cut through a glyph), `align` (the point a different font keeps 
 An angled run has an `angle` (degrees counterclockwise) and is turned about `(x, y)`, the start
 of its baseline, with its rules; its `clip` stays upright (§4.17).
 
-- **Baselines** (the screen; suite `text_style`, group `align`, Calibri 11 in 60 pt rows), from
-  `xlformat.vertical_metrics` for the line's font (the nearest measured size, Calibri for a face
-  not measured, unverified): a top-aligned line's baseline is 12 pt below the block's top, a
-  bottom-aligned one 3 pt above its bottom gridline, wrapped lines 15 pt apart (the font's
-  height), and a centered block midway between the two, a half point dropped. Print differs: a
-  top-aligned baseline 11 pt below the top, lines 16 pt apart (`layout` rows 1 and 152 to 154);
-  `_rows.print_baseline_offsets` keeps those for a print output, and angled text keeps them,
-  since its insets were fitted with them (§4.17). When the lines do not fit the row, bottom and
-  center text places the first lines that reach the row's bottom as a block of their own, and
-  the rest follow, clipped; top text starts at the top. A Calibri 11 row of 15 pt shows its
-  first line either way (captured, rows 161 to 168); three lines in a 20 pt row show the end of
-  the first and the top of the second, bottom aligned, and the first and the top of the second,
-  centered (`text_style_more`, groups `shrunk` and `overflow`: two and three lines in rows of 15
-  to 32 pt, every visible line within half a point). A line taller than its row is placed so:
-  Calibri 14 and 20 in a 15 pt row sit 4 and 5 pt above the bottom, bottom aligned; vertical
-  justify and distributed lines that do not fit start at the top (`overflow`).
+- **Baselines** (the screen). A face's height `F` at its size `S` is xlformat's row model
+  (`row_metrics`, six faces at every size from 1 to 72 pt); its bottom offset is
+  `B = F - ceil(S) - 1`, plus `A`, the points an accounting underline adds (xlformat's, 3 at
+  Calibri 11), and its line inset `I = B - 2`.
+  - Top-aligned text has its first baseline `ceil(S) + 1` below the row's top, its own font's.
+  - Bottom-aligned text in a row shares one last baseline, `B_row` above the row's bottom:
+    the largest `B` over the Normal font and the fonts of the row's cells, empty styled cells
+    and accounting underlines included, in fitted and fixed rows alike. Wrapped text in a face
+    whose `I` is smaller than the row's largest sits that difference higher. A rich-text cell's
+    last line sits on its own line's bottom, not on a larger run of another of its lines.
+  - Centered text has its first baseline `ceil(S) + 1 + trunc((H - k·F)/2)` below the top,
+    `H` the row's height and `k` its lines, its own font's: the row's other fonts do not move it.
+  - Wrapped lines are `F` apart, `F + A` with an accounting underline. Vertical justify and
+    distributed lines go evenly from the top position to the bottom one.
+  - Shrunk text is placed by its drawn size's metrics.
+
+  Captured: `text_style`, group `align` (Calibri 11 in 60 pt rows: 12 pt below the top, 3 above
+  the bottom, lines 15 apart); `text_style_more` group `faces` (Calibri 11, 13 and 17, Arial,
+  Times New Roman and Courier New 11, one and three lines in 60 and 90 pt rows; every bottom line
+  of a row on its largest font's `B`, the wrapped lines of smaller insets higher), `rules` (plain
+  text beside an accounting underline 6 pt above the bottom in rows fixed at 15, 20 and 30 pt;
+  three wrapped accounting lines 18 pt apart), `shrunk` (rows 10 to 16: shrunk text beside a
+  larger neighbor; top and centered text at 4/7 and 6/7 by the drawn size) and `runs` (C8, C10
+  and C12). Unverified (no capture in this repository yet): which other cells count in `B_row`
+  (empty styled cells, hidden columns, angled and stacked cells, a merge anchored in another row, superscript and
+  subscript cells, row and column styles without a cell), the spread alignments' bottom beside
+  larger fonts, text merged across rows (it takes its last row's `B_row`), and other cells'
+  runs. Known deviations: text shrunk to 2/7 sits top and centered as about 6 pt would; small
+  runs in a cell of a larger font sit higher in Excel (`runs` C14).
+
+  Print differs: a top-aligned baseline 11 pt below the top, lines 16 pt apart (`layout` rows 1
+  and 152 to 154); `_rows.print_baseline_offsets` keeps those for a print output, and angled
+  text keeps them, since its insets were fitted with them (§4.17). When the lines do not fit the
+  row, bottom and center text places the first `k = min(n, ceil(H/F))` lines as a block of
+  their own, and the rest follow, clipped; top text starts at the top. A Calibri 11 row of 15 pt
+  shows its first line either way (captured, rows 161 to 168); three lines in a 20 pt row show
+  the end of the first and the top of the second, bottom aligned, and the first and the top of
+  the second, centered (`text_style_more`, groups `shrunk` and `overflow`: two and three lines
+  in rows of 15 to 32 pt, every visible line within half a point). A line taller than its row is
+  placed so: Calibri 14 and 20 in a 15 pt row sit 4 and 5 pt above the bottom, bottom aligned;
+  vertical justify and distributed lines that do not fit start at the top (`overflow`).
 - **Glyphs** sit at `x` plus the running sum of `xlformat.glyph_widths`, in whole points, as Excel
   draws them: outside the competing spills, all 3,480 glyphs of 185 `layout` runs are within
   0.02 pt of the PDF's. (The other 35 runs have nothing to compare: lines a fixed row height hides,
@@ -623,36 +648,36 @@ at, in order:
    which font the rule follows; a workbook opened where the standard font differs is a stated
    limitation, since that font is an Excel preference outside the file, set by a person);
 5. otherwise the Normal font's height from xlformat's row model (`row_metrics`, captured from
-   Excel for Mac; this repository's suite `row_height` agrees at 9 to 16): Calibri 12, 14, 15, 16,
-   19, 21, 24, 26, 31 pt at 9, 10, 11, 12, 14, 16, 18, 20, 24; Aptos Narrow 13, 14, 15, 16, 19,
-   22, 24, 27, 32; Arial at the same sizes (13 at 10, 14 at 11, 18 at 14: `row_height_more`
-   and `package_more` agree); at 13, 15, 17 and 22 the heights suite `row_height_more`
-   captured, Calibri 17, 20, 23, 29 and Aptos Narrow 18, 20, 23, 29. Another size takes the
-   nearest of these (the smaller on a tie), a known deviation: as a cell font, Excel's rows at
-   half sizes, at Calibri 19, 21 and 23 and past 24 differ (`row_height_fitted`, group `styled`:
-   Calibri 40 is 52 pt where sheetpeek gives 31). Another face takes Calibri's height, a
-   known deviation: Excel's rows in Times New Roman and Georgia are a point shorter at 11 and
-   14, and Courier New's agree (`row_height_more`). Plus 1 pt each for `thickTop` and `thickBottom` when the row has no
-   `<row>` element.
+   Excel for Mac) at the font's face and size: Calibri, Aptos Narrow, Arial, Times New Roman,
+   Courier New and Georgia at every size from 1 to 72 pt, half sizes taking the next whole one
+   (Calibri 12, 14, 15, 16, 19, 21, 24, 26, 31 pt at 9, 10, 11, 12, 14, 16, 18, 20, 24; Times
+   New Roman and Georgia 14 and 18 at 11 and 14). Suites `row_height` (9 to 16), `row_height_more`
+   (the six faces at 11 and 14, Calibri and Aptos Narrow at 13, 15, 17 and 22: all 72 rows) and
+   `row_height_fitted` (as a cell font: 241 of 241 rows, every face to 40 pt, Calibri every half
+   size to 40 and every size to 72) agree. Another face takes Calibri's height at its size. Past
+   72 pt, 72's height scaled with the size (unverified), at most Excel's tallest row, 409.5 pt
+   (`package_more`: a 409 pt Normal font). Plus 1 pt each for `thickTop` and `thickBottom` when
+   the row has no `<row>` element.
 
 **Rows are fitted to their cells** when Excel opens a file (captured, suite `row_height`): a row
 with a `<row>` element and no `ht`, in a sheet without `customHeight`, takes the largest of those
-heights and of each cell font's height from the table, merged cells included, and of its wrapped
-text, merged cells excluded. Wrapped text follows xlformat's row model (`row_metrics`, from the
-heights Excel gives one to six wrapped lines in each face under each Normal font, measured by
-xlformat's `capture/row_heights.py` for Calibri, Aptos Narrow and Arial at 9 to 24 pt): k lines in
-a face of height F take k(F + 1) points, so even one wrapped line is a point taller than the row,
+heights and of each cell font's height, merged cells included, and of its wrapped text, merged
+cells excluded. It is at least the largest ascent `ceil(S) + 1` plus the largest bottom offset
+`B + A` of its fonts (xlformat's row model), so faces that split their heights differently make
+a taller row (Arial 11 beside Calibri 10: 15 pt), and an accounting underline adds its `A`
+(`row_height_fitted`, group `styled`: Calibri 6 to 40 pt under Calibri 11). Wrapped text follows
+xlformat's row model (`row_metrics`, from the heights Excel gives one to six wrapped lines in each
+face under each Normal font, measured by xlformat's `capture/row_heights.py`): k lines in a face
+of height F take k(F + 1 + A) points, so even one wrapped line is a point taller than the row,
 plus max(0, P - p), p the face's line inset and P the largest of the Normal font's and the row's
 other cell fonts' (Calibri 11 has 1, Calibri 20 has 3); Calibri 11 gives 16 pt a line (suite
-`row_height`: 48 and 96 pt for three and six lines). Several wrapped cells in one row take the
-tallest (not captured); rich-text runs and faces or sizes xlformat has not measured keep the line
-height plus 1 a line, without the inset. `thickTop` or `thickBottom` together with
-`customHeight` was not captured. A font not in
-the table uses Calibri's height at the nearest captured size, as xlformat scales widths: the
-known deviation of other faces above, and each wrapped line in them a point taller than Excel's
-(`row_height_more`: three lines of Times New Roman 11 are 45 pt, where sheetpeek gives 48).
-Arial's follow xlformat's model: three lines of Arial 11 are 45 pt under an Arial Normal font
-and 46 under Calibri 11, as captured.
+`row_height`: 48 and 96 pt for three and six lines), 19 with an accounting underline
+(`text_style_more`, group `rules`: three lines take 57 pt; distributed text fits as wrapped, 19
+pt for one line). Several wrapped cells in one row take the tallest (not captured); rich-text
+runs and faces xlformat has not measured keep the line height plus 1 a line, without the inset.
+`thickTop` or `thickBottom` together with `customHeight` was not captured. Times New Roman,
+Georgia and Arial follow xlformat's model: three lines of Times New Roman 11 are 45 pt under its
+own Normal font and 46 under Calibri 11, as captured (`row_height_more`).
 
 Excel ignores a stored `defaultRowHeight` without `customHeight` (15, 20 and 30 captured): with
 openpyxl's 15, a Calibri 14 workbook shows 19 pt rows and a Calibri 9 one 12 pt rows, so that
@@ -936,28 +961,33 @@ kinds grows 1 pt more at 11 pt (18 pt), half the one-kind growth at other sizes.
 rows differ by 1 to 3 pt below 25 pt and more above, a known deviation: Excel's growth is
 not linear and a row of both kinds is not one-kind growth plus half (not yet modeled). `TextRun.scale` carries the drawn size over `font.size`.
 
-**Underlines and strikethrough** are lines **1 screen pt thick at any zoom**, as gridlines and
-outline symbols are: one CSS pixel at any page scale (decided), at whole-pixel positions. The
-model gives each run its `TextRule`s (`TextRun.rules`): where a line starts and ends and the top
-of the first line, in points, offset from the run's baseline by the 11 pt captures scaled with
-the drawn size (unverified at other sizes). A second line is 2 screen pt below the first.
-- Single: 1 pt below the baseline; double: 0 pt, and a second line. Both run from the text's
-  start to 1 pt past its end (Excel 16.115, screen suite `text_style`, Calibri 11).
+**Underlines and strikethrough** are placed and sized by xlformat's `rule_metrics` for the face
+at the drawn size, at zoom 100: each run's `TextRule`s (`TextRun.rules`) give where a line starts
+and ends, the top of its first line and its `thickness`, in points. A double underline's second
+line lies two thicknesses below the first's top. A 1 pt rule is drawn 1 screen pt thick at any
+zoom, as gridlines and outline symbols are: one CSS pixel at any page scale (decided); a thicker
+one scales with the zoom (unverified past zoom 100). Captured (`text_style_more`, group `rules`,
+at 9, 11, 14, 20 and 36 pt, zoom 100): every rule's top and thickness (1 pt to 20 pt, 2 pt at
+36, a double's lines 4 pt apart there), but a double underline at 9 pt, which Excel draws on the
+baseline where xlformat's rule steps it a point up, a known deviation. At zoom 200 the model keeps
+zoom 100's rules, a known deviation. Courier New, for which xlformat has no rules, and sizes past
+72 pt keep Calibri 11's offsets scaled with the size, 1 pt thick (unverified).
+- Single: 1 pt below the baseline at 11 pt; double: 0 pt, and a second line. Both run from the
+  text's start to 1 pt past its end (Excel 16.115, screen suite `text_style`, Calibri 11; at 36
+  pt Excel starts them 6 pt into the cell where sheetpeek starts them 3, a known deviation).
   Accounting underlines and strikethrough end as below.
-- Single accounting: 3 pt below the baseline; double accounting a second line. **On text they
-  span the cell**, from 3 pt after its left gridline to 2 pt before the next one, even under
-  two letters in a 213 pt cell; a merge spans the merge (captured, `text_style_more`); wrapped
-  text gets one line per line and distributed words one line under the whole line, a known
-  deviation: Excel draws one rule, under the last wrapped line, fits each wrapped line 3 pt
-  taller (three lines take 57 pt), and puts the distributed rule a point lower
-  (`text_style_more`, group `rules`). **On a number, boolean or
-  error they span the value**, like a single underline (captured on the Mac only: a stated
-  limitation until the platform setting brings Windows captures, §11). They add 3 pt under the text: a fitted row is 18 pt, not 15, and
-  a bottom-aligned baseline sits 6 pt above the cell's bottom, also in a row of fixed height
-  (captured, `text_style_more` group `rules`, rows fixed at 15, 20 and 30 pt). Plain
-  bottom-aligned text beside it in that row sits on the same baseline in Excel, where sheetpeek
-  keeps it 3 pt above the bottom, a known deviation.
-- Strikethrough: 3 pt above the baseline, the text's width.
+- Single accounting: 3 pt below the baseline at 11 pt; double accounting a second line. **On text
+  they span the cell**, from 3 pt after its left gridline to 2 pt before the next one, even under
+  two letters in a 213 pt cell; a merge spans the merge (captured, `text_style_more`). Wrapped
+  text and distributed words get one rule, under the last line (`text_style_more`, group `rules`:
+  three wrapped lines draw one). **On a number, boolean or error they span the value**, like a
+  single underline (captured on the Mac only: a stated limitation until the platform setting
+  brings Windows captures, §11). They add xlformat's `A` under the text and to each wrapped line
+  (3 pt at Calibri 11: a fitted row is 18 pt, not 15, and three wrapped lines 57), and a
+  bottom-aligned baseline sits `B + A` above the cell's bottom, also in a row of fixed height,
+  where plain bottom-aligned text beside it sits on the same baseline (§3.6; captured,
+  `text_style_more` group `rules`, rows fixed at 15, 20 and 30 pt).
+- Strikethrough: 3 pt above the baseline at 11 pt, the text's width.
 
 **Outline, shadow, condense and extend** are drawn as plain text by Excel for Mac (the same ink
 at both zooms): they are not read, and nothing is reported.
@@ -978,8 +1008,9 @@ text). **Wrap overrides it**, as do horizontal and vertical justify and distribu
 text keeps its size and breaks where wrap alone breaks it (captured, `text_style` group `wrap`: 28
 pairs of cases, identical). **Shrunk text never spills**, in every mode. **Rows fit the unshrunk
 size** (captured at 20 pt). A merge with the flag on its anchor is not shrunk, clipped at the
-merge's edge (captured once, doubtful). The baseline stays where unshrunk text would sit, a
-known deviation: Excel's is not the unshrunk size's (`text_style_more`, group `shrunk`).
+merge's edge (captured once, doubtful). Bottom-aligned shrunk text sits on its row's shared
+baseline, top and centered text where its drawn size's metrics put it (§3.6; `text_style_more`,
+group `shrunk`); at 2/7 Excel places it as about 6 pt would, a known deviation.
 
 **Vertical justify and distributed** wrap text whose wrap flag is off (captured: the file still
 says it does not wrap). One line sits at the top (justify) or the center (distributed). Several
@@ -1231,13 +1262,14 @@ size, for spill, `####`, wrapping, shrink to fit and alignment:
 - **Each line takes the height of its largest run** (one 20 pt run in an 11 pt cell fits
   the row to 26 pt, as a 20 pt cell, and the small runs sit on the large run's baseline). Wrapped
   lines are each their largest run's row height plus 1 ("aaa" / "BBB" / "ccc ddd" with "BBB" at
-  20 pt is 16 + 27 + 16 = 59 pt). With "BBB" at 28 pt, past the row table's 24 (§4.7), Excel's
-  row is 70 pt and sheetpeek's 64, a known deviation. Calibri 20's 26 pt is in the row-height table (§4.7). The baseline at 20 pt is 5 pt
-  above the cell's bottom, as for a 20 pt cell (§3.6). Wrapped lines are drawn their largest
+  20 pt is 16 + 27 + 16 = 59 pt; at 28 pt, 70 pt, as captured). The baseline at 20 pt is 5 pt
+  above the cell's bottom, as for a 20 pt cell (§3.6); the last of wrapped lines sits on its own
+  line's bottom, not on a larger run of an earlier line (`runs` C8, C10 and C12). Wrapped lines are drawn their largest
   run's line pitch apart, the point each adds to a fitted row lying below the last.
 - A fitted row counts its runs' fonts and the cell's own, even when every run is smaller: 9 pt
   runs in a 20 pt cell fit the row to 26 pt. Where Excel places the small runs in that row is not
-  modeled, a known deviation (`runs`, C14): their baseline is 8 pt above the bottom, sheetpeek's 3.
+  modeled, a known deviation (`runs`, C14): their baseline is 8 pt above the bottom, sheetpeek's 5
+  (the cell font's).
 - **Superscript and subscript runs** follow §4.13 (rows of 17 pt, as whole cells),
   each run raised or lowered on its own; the cell's own font counts only through the runs that
   take it.

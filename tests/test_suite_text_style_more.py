@@ -29,7 +29,8 @@ def drawn(path, group):
     ``baselines`` from the row's top; ``left`` the first glyph's advance from the cell's left
     edge, ``right`` the end of the widest line from the (last) cell's right edge; ``scale`` the
     drawn size over the font's in sevenths; ``rules`` (kind, lines, offset from the run's
-    baseline, top from the row's top, start from the cell's left, end from the right).
+    baseline, top from the row's top, start from the cell's left, end from the right,
+    thickness).
     """
     rendered = sheetpeek.read(path, group.capitalize()).layout("excel")
     columns = {c.index: c for c in rendered.columns}
@@ -50,7 +51,15 @@ def drawn(path, group):
             "right": max(t.x + t.width for t in runs) - right,
             "scale": round(runs[0].scale * 7, 4),
             "rules": tuple(
-                (u.kind, u.lines, u.y - t.y, u.y - row.y_pt, u.x0 - left, u.x1 - right)
+                (
+                    u.kind,
+                    u.lines,
+                    u.y - t.y,
+                    u.y - row.y_pt,
+                    u.x0 - left,
+                    u.x1 - right,
+                    u.thickness,
+                )
                 for t in runs
                 for u in t.rules
             ),
@@ -250,48 +259,9 @@ def _group(name, zoom=100):
 
 
 PINNED: dict[str, frozenset[str]] = {
-    "test_accounting_underlines_in_merges_wrapped_and_distributed_text": frozenset(
-        (
-            "doubleAccounting distributed",
-            "doubleAccounting wrapped",
-            "singleAccounting distributed",
-            "singleAccounting wrapped",
-        )
-    ),
-    "test_an_accounting_baseline_in_a_fixed_row": frozenset(
-        ("plain fixed 15", "plain fixed 20", "plain fixed 30")
-    ),
-    "test_baselines_of_sizes_and_faces_xlformat_has_not_measured": frozenset(
-        (
-            "Arial 11 bottom one line",
-            "Arial 11 bottom three lines",
-            "Arial 11 center one line",
-            "Arial 11 center three lines",
-            "Calibri 11 bottom one line",
-            "Calibri 11 bottom three lines",
-            "Calibri 13 bottom one line",
-            "Calibri 13 bottom three lines",
-            "Calibri 13 center three lines",
-            "Calibri 13 top one line",
-            "Calibri 13 top three lines",
-            "Calibri 17 bottom one line",
-            "Calibri 17 bottom three lines",
-            "Calibri 17 center three lines",
-            "Calibri 17 top one line",
-            "Calibri 17 top three lines",
-            "Courier New 11 bottom one line",
-            "Courier New 11 bottom three lines",
-            "Times New Roman 11 bottom one line",
-            "Times New Roman 11 bottom three lines",
-            "Times New Roman 11 center one line",
-            "Times New Roman 11 center three lines",
-            "Times New Roman 11 top three lines",
-        )
-    ),
     "test_rules_sit_where_sheetpeek_puts_them_at_other_sizes:100": frozenset(
         (
-            "double 14",
-            "double 20",
+            "double 9",
             "double 36",
             "doubleAccounting 36",
             "single 36",
@@ -338,51 +308,19 @@ PINNED: dict[str, frozenset[str]] = {
     ),
     "test_shrunk_text_keeps_the_baseline_sheetpeek_gives_it:100": frozenset(
         (
-            "26 plain 11, row 12",
-            "26 shrunk 4/7, row 12",
             "center 15 shrunk 2/7",
-            "center 15 shrunk 4/7",
-            "center 15 shrunk 6/7",
             "center 30 shrunk 2/7",
-            "center 30 shrunk 4/7",
             "center 60 shrunk 2/7",
-            "center 60 shrunk 4/7",
-            "fitted plain 11, row 14",
-            "fitted shrunk 4/7 beside 20 pt shrunk",
-            "fitted shrunk 4/7, row 14",
             "top 15 shrunk 2/7",
-            "top 15 shrunk 4/7",
-            "top 15 shrunk 6/7",
             "top 30 shrunk 2/7",
-            "top 30 shrunk 4/7",
-            "top 30 shrunk 6/7",
             "top 60 shrunk 2/7",
-            "top 60 shrunk 4/7",
-            "top 60 shrunk 6/7",
         )
     ),
     "test_shrunk_text_keeps_the_baseline_sheetpeek_gives_it:200": frozenset(
         (
-            "26 plain 11, row 12",
-            "26 shrunk 4/7, row 12",
             "center 15 shrunk 2/7",
-            "center 15 shrunk 4/7",
             "center 30 shrunk 2/7",
-            "center 30 shrunk 4/7",
             "center 60 shrunk 2/7",
-            "center 60 shrunk 4/7",
-            "fitted plain 11, row 14",
-            "fitted shrunk 4/7 beside 20 pt shrunk",
-            "fitted shrunk 4/7, row 14",
-            "top 15 shrunk 2/7",
-            "top 15 shrunk 4/7",
-            "top 15 shrunk 6/7",
-            "top 30 shrunk 2/7",
-            "top 30 shrunk 4/7",
-            "top 30 shrunk 6/7",
-            "top 60 shrunk 2/7",
-            "top 60 shrunk 4/7",
-            "top 60 shrunk 6/7",
         )
     ),
     "test_superscript_and_subscript_fit_rows_and_baselines_as_captured": frozenset(
@@ -393,7 +331,6 @@ PINNED: dict[str, frozenset[str]] = {
             "both 24 superscript",
             "both 36 subscript",
             "both 36 superscript",
-            "plain 36",
             "subscript 14",
             "subscript 18",
             "subscript 36",
@@ -407,25 +344,19 @@ PINNED: dict[str, frozenset[str]] = {
 these, so a new difference fails and so does a fixed one (unpin it). Their reasons (the vertical
 metrics of styled text, not yet modeled):
 
-- test_accounting_underlines_in_merges_wrapped_and_distributed_text: Excel fits wrapped lines with
-  an accounting underline 3 pt taller each (three lines take 57 pt) and draws the one rule under
-  the last line there; under distributed words its rule lies a point lower.
-- test_an_accounting_baseline_in_a_fixed_row: in a fixed row holding an accounting underline, Excel
-  puts the plain bottom-aligned text beside it on the accounting cell's baseline, 6 pt above the
-  bottom (sheetpeek 3).
-- test_baselines_of_sizes_and_faces_xlformat_has_not_measured: bottom-aligned text in a tall fixed
-  row sits higher in Excel (Calibri 11: 5 pt above the bottom of a 60 pt row for one line, 7 in 90
-  for three; sheetpeek 3), and sizes and faces xlformat has not measured take other pitches.
 - test_lines_that_do_not_fit_their_block_start_where_sheetpeek_starts_them: three wrapped lines in
   a 20 pt row: Excel starts the block where its lines fall, sheetpeek shows one line.
-- test_rules_sit_where_sheetpeek_puts_them_at_other_sizes: rule offsets and ends at sizes other
-  than 11 (and at 36, past the row table) are scaled from 11 pt; Excel's differ by a point or two.
+- test_rules_sit_where_sheetpeek_puts_them_at_other_sizes: at zoom 100, the rules at 36 pt start
+  6 pt into the cell where sheetpeek starts them 3 pt in (a rule's ends are not modeled past
+  11 pt), and a double underline at 9 pt: xlformat's rule steps its first line up to 1 pt above
+  the baseline, Excel draws it on the baseline. At zoom 200, sheetpeek keeps zoom 100's rules.
 - test_shrink_steps_at_other_sizes: the step at sizes and faces other than Calibri 11 differs from
   the largest seventh that fits.
-- test_shrunk_text_keeps_the_baseline_sheetpeek_gives_it: shrunk text's baseline in Excel is not
-  the unshrunk size's that sheetpeek keeps.
+- test_shrunk_text_keeps_the_baseline_sheetpeek_gives_it: text shrunk to 2/7 (3.1 pt) sits top
+  and centered as about 6 pt would at zoom 100, centered so at 200 too, where sheetpeek places it
+  by its drawn size.
 - test_superscript_and_subscript_fit_rows_and_baselines_as_captured: superscript and subscript rows
-  and baselines at 9 to 36 pt are not the 11 pt growth scaled, and 36 is past the row table.
+  and baselines at 9 to 36 pt are not the 11 pt growth scaled.
 """
 
 
@@ -490,8 +421,10 @@ def test_rules_sit_where_sheetpeek_puts_them_at_other_sizes(zoom):
         record, expected = captured[case.cell], suite.EXPECTED["rules"][case.cell]
         offsets = sorted(_floats(record["rule_offset"]))
         want = []
-        for _, lines, offset, _, start, end in expected["rules"]:
-            want += [offset, offset + 200 / zoom] if lines == 2 else [offset]
+        thick = []
+        for _, lines, offset, _, start, end, thickness in expected["rules"]:
+            want += [offset, offset + _gap(thickness, zoom)] if lines == 2 else [offset]
+            thick += [thickness] * lines
             starts, ends = _floats(record["rule_start"]), _floats(record["rule_end"])
             if any(abs(s - start) > 1 for s in starts) or any(abs(e - end) > 1 for e in ends):
                 wrong.append((case.name, "ends", starts, ends, start, end))
@@ -499,7 +432,17 @@ def test_rules_sit_where_sheetpeek_puts_them_at_other_sizes(zoom):
             abs(a - b) > 0.5 for a, b in zip(offsets, sorted(want), strict=True)
         ):
             wrong.append((case.name, "offsets", offsets, want))
+        if zoom == 100 and sorted(_floats(record["rule_thickness"])) != sorted(thick):
+            wrong.append((case.name, "thickness", record["rule_thickness"], thick))
     _pinned(f"test_rules_sit_where_sheetpeek_puts_them_at_other_sizes:{zoom}", wrong)
+
+
+def _gap(thickness, zoom):
+    """Points from a double rule's first line's top to its second's, as sheetpeek draws them.
+
+    Two thicknesses; a 1 point rule is 1 screen point at any zoom, so 2 screen points.
+    """
+    return 2 * thickness if thickness > 1 else 200 / zoom
 
 
 @pytest.mark.excel
@@ -515,13 +458,13 @@ def test_accounting_underlines_in_merges_wrapped_and_distributed_text():
         record, expected = captured[case.cell], suite.EXPECTED["rules"][case.cell]
         tops = _floats(record["rule_tops"])
         want = []
-        for _, lines, _, top, _, _ in expected["rules"]:
-            want += [top, top + 2] if lines == 2 else [top]
+        for _, lines, _, top, _, _, thickness in expected["rules"]:
+            want += [top, top + _gap(thickness, 100)] if lines == 2 else [top]
         if len(tops) != len(want) or any(
             abs(a - b) > 0.5 for a, b in zip(sorted(tops), sorted(want), strict=True)
         ):
             wrong.append((case.name, "tops", tops, want))
-        _, _, _, _, start, end = expected["rules"][0]
+        _, _, _, _, start, end, _ = expected["rules"][0]
         starts, ends = _floats(record["rule_start"]), _floats(record["rule_end"])
         if any(abs(s - start) > 1 for s in starts) or any(abs(e - end) > 1 for e in ends):
             wrong.append((case.name, "ends", starts, ends, start, end))
