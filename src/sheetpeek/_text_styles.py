@@ -25,9 +25,9 @@ UNDERLINE_OVERRUN = 1.0
 """An accounting underline under text spans the cell, less these from its left and right
 gridlines (from the left gridline, and before the next one)."""
 
-# Where xlformat has no rule positions (Courier New, sizes past 72 points): the offsets of the
-# first line's top from the baseline at Calibri 11 (positive is down), scaled with the drawn
-# size, 1 point thick (unverified).
+# Where xlformat has no rule positions (sizes past 72 points, Courier New below 6): the offsets
+# of the first line's top from the baseline at Calibri 11 (positive is down), scaled with the
+# drawn size, 1 point thick (unverified).
 _CAPTURED_SIZE = 11.0
 _UNDERLINE_OFFSET = {
     "single": 1.0,
@@ -36,9 +36,11 @@ _UNDERLINE_OFFSET = {
     "doubleAccounting": 3.0,
 }
 _STRIKE_OFFSET = -3.0
-_RULE_FACES = frozenset(("calibri", "aptos narrow", "arial", "times new roman", "georgia"))
-"""The faces xlformat's ``rule_metrics`` covers; another face but Courier New is drawn as
-Calibri, as it is measured."""
+_RULE_FACES = frozenset(
+    ("calibri", "aptos narrow", "arial", "times new roman", "courier new", "georgia")
+)
+"""The faces xlformat's ``rule_metrics`` covers; another face is drawn as Calibri, as it is
+measured."""
 
 
 SHRINK_STEPS = 7
@@ -152,8 +154,6 @@ def rules(
 def _rule_metrics(name: str, size: float, bold: bool, italic: bool) -> xlformat.RuleMetrics | None:
     """Xlformat's rules for the face at ``size``, zoom 100; ``None`` where it has none."""
     face = name if name.lower() in _RULE_FACES else "Calibri"
-    if name.lower() == "courier new":  # its rules raise in xlformat 0.6
-        return None
     try:
         return xlformat.rule_metrics(xlformat.Font(face, size, bold, italic))
     except LookupError:

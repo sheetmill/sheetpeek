@@ -986,15 +986,15 @@ drawn size over `font.size`.
 **Underlines and strikethrough** are placed and sized by xlformat's `rule_metrics` for the face
 at the drawn size, at zoom 100: each run's `TextRule`s (`TextRun.rules`) give where a line starts
 and ends, the top of its first line, its `thickness` and, for a double underline, its `gap`,
-the second line's top below the first's: two thicknesses, 3 pt for Times New Roman at 38 and 40
+the second line's top below the first's: two thicknesses, 3 pt for Times New Roman at 37 to 40
 pt (xlformat's). A 1 pt rule is drawn 1 screen pt thick at any
 zoom, as gridlines and outline symbols are: one CSS pixel at any page scale (decided); a thicker
 one scales with the zoom (unverified past zoom 100). Captured (`text_style_more`, group `rules`,
 at 9, 11, 14, 20 and 36 pt, zoom 100): every rule's top and thickness (1 pt to 20 pt, 2 pt at
 36, a double's lines 4 pt apart there), a double underline at 9 pt included, which starts a
 point above the baseline. At zoom 200 the model keeps
-zoom 100's rules, a known deviation. Courier New, for which xlformat has no rules, and sizes past
-72 pt keep Calibri 11's offsets scaled with the size, 1 pt thick (unverified).
+zoom 100's rules, a known deviation. Sizes past 72 pt, and Courier New below 6 pt, where
+xlformat has no rules, keep Calibri 11's offsets scaled with the size, 1 pt thick (unverified).
 - Single: 1 pt below the baseline at 11 pt; double: 0 pt, and a second line. Both run from the
   text's start to 1 pt past its end (Excel 16.115, screen suite `text_style`, Calibri 11; at 36
   pt Excel starts them 6 pt into the cell where sheetpeek starts them 3, a known deviation).
@@ -2355,7 +2355,7 @@ attribute of `<dimension>`, `<mergeCell>` and `<autoFilter>` in the file format.
 
 - `xlio==0.4.*` (§5): the sheetmill project's reader, pinned to a minor.
 - `xlrecalc>=0.8.1,<1` (§5.7), imported normally: it is required.
-- `xlformat>=0.6,<1` (§6.4), imported normally: it is required.
+- `xlformat>=0.7,<1` (§6.4), imported normally: it is required.
 - openpyxl is a dev dependency only: the tests and the documentation's examples build workbooks
   with it, and the tests that need it are left out without it.
 - Extra `sheetpeek[rich]`: `rich>=13`.

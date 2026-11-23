@@ -22,8 +22,8 @@ TALLEST_ROW = 409.5
 NO_SHEET_FORMAT = 16.0  # an unlisted row of a file without <sheetFormatPr>, every font
 WRAPPED_LEADING = 1.0  # wrapped lines are the font's row height plus 1 apart (Calibri 11: 16)
 ACCOUNTING_FALLBACK = 3.0
-"""Points an accounting underline adds where xlformat has no rule for the face (Courier New in
-xlformat 0.6): Calibri 11's 3, the value sheetpeek used for every face before."""
+"""Points an accounting underline adds where xlformat has no accounting rows (Courier New below
+5.5 points): Calibri 11's 3 (unverified)."""
 
 _ROW_FACES = frozenset(
     ("calibri", "aptos narrow", "arial", "times new roman", "courier new", "georgia")
@@ -46,9 +46,8 @@ def face_metrics(font: Font) -> tuple[float, float, float, float]:
     ascent, the top-aligned baseline's distance below a row's top, and ``B = F - ceil(S) - 1``,
     the bottom-aligned baseline's distance above a row's bottom in a row of this font alone.
     ``A`` is what the font's accounting underline adds to ``B`` and to each wrapped line, 0
-    without one: xlformat gives it only inside a row's height, so it is that height less the
-    plain row's. A face xlformat has no rows for takes Calibri's at the size (a known deviation
-    for a face other than xlformat's six).
+    without one (xlformat's ``RowMetrics.accounting_height``). A face xlformat has no rows for
+    takes Calibri's at the size (a known deviation for a face other than xlformat's six).
     """
     plain = xlformat.row_metrics(_row_font(font)).font_height
     ascent = float(math.ceil(min(max(font.size, 1.0), _LARGEST))) + 1.0
@@ -58,8 +57,8 @@ def face_metrics(font: Font) -> tuple[float, float, float, float]:
     extra = 0.0
     if font.underline in ("singleAccounting", "doubleAccounting"):
         try:
-            extra = xlformat.row_metrics(_row_font(font, font.underline)).height - plain
-        except LookupError:  # Courier New's accounting rows are not in xlformat 0.6
+            extra = xlformat.row_metrics(_row_font(font, font.underline)).accounting_height
+        except LookupError:  # Courier New below 5.5 points
             extra = ACCOUNTING_FALLBACK
     return plain, ascent, plain - ascent, extra
 

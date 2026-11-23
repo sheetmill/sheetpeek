@@ -12,8 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   from xlformat's `rule_metrics` (2 pt for Calibri 36, where Excel draws it 2 screen points
   thick). The HTML output draws a rule thicker than a point at its thickness.
 - `TextRule.gap`: a double underline's second line's top below the first's, in points at zoom
-  100, from xlformat's `rule_metrics`: two thicknesses, but 3 pt for Times New Roman at 38 and
-  40 points, whose lines are 1 pt thick. The HTML output draws it.
+  100, from xlformat's `rule_metrics`: two thicknesses, but 3 pt for Times New Roman at 37 to
+  40 points, whose lines are 1 pt thick, and Courier New's own gap (3 pt at 20 points, 5 at
+  36, 9 at 72). The HTML output draws it.
 
 ### Changed
 - Row heights come from xlformat's row model at the font's own face and size: Arial, Times New
@@ -35,9 +36,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   now sit where Excel draws them. Shrunk text top and centered is placed by its drawn size.
 - Underlines and strikethrough are placed by xlformat's `rule_metrics` for the face and drawn
   size: at 36 points a single underline is 4 pt below the baseline (was 3), a strikethrough
-  9 pt above (was 10).
+  9 pt above (was 10). Courier New is included from 6 to 72 points, where Calibri 11's
+  offsets scaled with the size were taken: at Courier New 11 a single underline is 2 pt below
+  the baseline (was 1).
 - An accounting underline adds xlformat's points to the row (3 at Calibri 11, more at larger
-  sizes) and to each wrapped line: three wrapped lines of Calibri 11 with one take 57 pt (was
+  sizes, Courier New's own from 5.5 to 72 points, where 3 was taken: a Courier New 72 row
+  with one is 106 pt) and to each wrapped line: three wrapped lines of Calibri 11 with one take 57 pt (was
   48), distributed text 19 (was 18), and each line is 18 pt below the last (was 15).
 - The fonts of a row's own style and of the sheet's column styles count in row heights and in
   the shared bottom baseline, as Excel counts them for the cells the file has no element for: a
@@ -51,6 +55,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   largest part above the baseline plus its largest part below, a superscript's part above from
   Excel's rows: a Calibri 24 superscript or subscript fits 35 pt (was 37), a row with both 37
   (was 40), and a 12.5 pt superscript the 13 pt row, 20 (was 18).
+- A number in a cell font whose column padding is wider than the Normal font's (a digit of 9
+  points or more under a smaller Normal font, such as Calibri 18 or Arial 16 cells in a
+  Calibri 11 workbook) loses the difference from its budget in Excel mode, as Excel shows it
+  (xlformat 0.7): Calibri 18 `123456` in a column of width 10 shows `1E+05` (was `123456`),
+  `12` at width 4 shows `#`.
 - A fitted row is at least its fonts' largest ascent plus their largest descent: an accounting
   underline at Calibri 6 or 8 under Calibri 11 makes a row of 17 pt (was 15), at Calibri 10
   18 pt (was 17).

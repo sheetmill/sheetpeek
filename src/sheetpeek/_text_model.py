@@ -34,5 +34,5 @@ class TextRule:
     """The thickness of each line, in points at zoom 100."""
     gap: float = 2.0
     """For a double underline, points at zoom 100 from the first line's top to the second's
-    (xlformat's ``rule_metrics``: 3 for Times New Roman at 38 and 40 points, where the lines are
+    (xlformat's ``rule_metrics``: 3 for Times New Roman at 37 to 40 points, where the lines are
     1 point thick); not used for one line."""
