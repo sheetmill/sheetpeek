@@ -735,7 +735,7 @@ the screen: the text insets and the baselines of angled text, which come from pr
 From Excel for Windows (Excel 16.0.20527.20196, Microsoft 365, 96 dpi, en-US), read from capture
 jobs (`capture/job.py`, `CAPTURING.md`): `windows/merge_width` and `windows/error_width`, every
 cell as sheetpeek shows it with `platform="windows"` (§3.2): merged widths, `#` runs and General
-in whole pixels.
+in whole pixels. The lines and tiles of `windows/borders` and `windows/fills`: §4.12.
 ### 4.10 Hyperlinks
 
 The look and where a link goes are captured (`links`, Excel 16.115, zoom 100; the places through
@@ -953,6 +953,13 @@ them exactly too. Every dashed side of `borders` (zoom 100 and 200) has the tile
 lengths (captured); where Excel starts a dash period is not modeled, and a run starts its own.
 **slantDashDot is drawn as mediumDashDot with square gaps** and reported
 (`border.slant_dash_dot`).
+
+On Excel for Windows (`windows/borders`, `windows/fills`, zoom 100 and 200) every line and tile is
+the Mac's in the same counts of the platform's unit, the device pixel at 96 dpi where the Mac's
+is the screen point, unscaled by zoom: dash and gap lengths, line widths and where they sit
+against the gridline, every pattern's tile up to where it starts. The gridline gray is `#E0E0E0`
+(the Mac's `#D4D4D4`). slantDashDot reads as a dash-dot of period 18 px along every edge (4, 2,
+10, 2 or 5, 1, 11, 1 by device row).
 
 Not captured: a dash's phase, the light and dark appearances' effect (none expected), double
 lines meeting at a corner (drawn crossing), what Excel does with a gradient without stops, and

@@ -294,21 +294,24 @@ def test_windows_units_are_96_pixels_an_inch():
     assert nominal_scale(200, 2.0, "mac") == 4.0
 
 
-def test_the_borders_control_takes_its_platforms_gridline_or_is_skipped(capsys):
+@pytest.mark.parametrize("platform", ["mac", "windows"])
+def test_the_borders_control_takes_its_platforms_gridline_or_is_skipped(
+    capsys, monkeypatch, platform
+):
     ws = openpyxl.Workbook().active
     borders.fill(ws)
     canvas = Canvas(ws, list(borders.CELLS.values()))
     x0, _, x1, bottom = canvas.box(borders.CELLS["none"])
-    canvas.paint(x0 - 2, bottom - 1, x1 + 2, bottom, GRIDLINE["mac"])
+    canvas.paint(x0 - 2, bottom - 1, x1 + 2, bottom, GRIDLINE[platform])
 
-    def control(platform):
+    def control():
         capture = dataclasses.replace(canvas.capture(), platform=platform)
         records = borders.measure(capture)
         return [r for r in records if r["style"] == "none" and r["edge"] == "bottom"]
 
-    assert control("mac")
-    assert GRIDLINE["windows"] is None  # stated once a capture here records it
-    assert control("windows") == []
+    assert control()
+    monkeypatch.setitem(GRIDLINE, platform, None)  # a platform no capture here records
+    assert control() == []
     assert NO_GRIDLINE in capsys.readouterr().out
 
 

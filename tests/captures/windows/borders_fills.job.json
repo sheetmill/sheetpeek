@@ -1,0 +1,153 @@
+{
+ "schema": 1,
+ "job_id": "sheetpeek-20261123-145342-borders-fills",
+ "package": "sheetpeek",
+ "purpose": "sheetpeek capture group borders_fills: window pictures of each border line style and each pattern fill at zoom 100 and 200 (suites borders and fills)",
+ "limits": {
+  "job_seconds": 1800,
+  "step_seconds": 600
+ },
+ "audit": false,
+ "workbooks": [
+  {
+   "file": "borders.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "view",
+     "sheet": "Sheet",
+     "select": "Sheet!AZ300",
+     "zoom": 100,
+     "scroll_row": 1,
+     "scroll_column": 1
+    },
+    {
+     "op": "read",
+     "id": "geometry",
+     "range": "Sheet!A1:K12",
+     "props": [
+      "left",
+      "top",
+      "width",
+      "height",
+      "text"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "display",
+     "range": "Sheet!A1:K12",
+     "props": [
+      "interior.color",
+      "interior.pattern"
+     ],
+     "display": true
+    },
+    {
+     "op": "view",
+     "sheet": "Sheet",
+     "select": "Sheet!AZ300",
+     "id": "view_z100",
+     "zoom": 100,
+     "scroll_row": 1,
+     "scroll_column": 1
+    },
+    {
+     "op": "capture_window",
+     "id": "shot_z100",
+     "name": "borders_z100.png"
+    },
+    {
+     "op": "view",
+     "sheet": "Sheet",
+     "select": "Sheet!AZ300",
+     "id": "view_z200",
+     "zoom": 200,
+     "scroll_row": 1,
+     "scroll_column": 1
+    },
+    {
+     "op": "capture_window",
+     "id": "shot_z200",
+     "name": "borders_z200.png"
+    },
+    {
+     "op": "close",
+     "save": false
+    }
+   ]
+  },
+  {
+   "file": "fills.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "view",
+     "sheet": "Sheet",
+     "select": "Sheet!AZ300",
+     "zoom": 100,
+     "scroll_row": 1,
+     "scroll_column": 1
+    },
+    {
+     "op": "read",
+     "id": "geometry",
+     "range": "Sheet!A1:M22",
+     "props": [
+      "left",
+      "top",
+      "width",
+      "height",
+      "text"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "display",
+     "range": "Sheet!A1:M22",
+     "props": [
+      "interior.color",
+      "interior.pattern"
+     ],
+     "display": true
+    },
+    {
+     "op": "view",
+     "sheet": "Sheet",
+     "select": "Sheet!AZ300",
+     "id": "view_z100",
+     "zoom": 100,
+     "scroll_row": 1,
+     "scroll_column": 1
+    },
+    {
+     "op": "capture_window",
+     "id": "shot_z100",
+     "name": "fills_z100.png"
+    },
+    {
+     "op": "view",
+     "sheet": "Sheet",
+     "select": "Sheet!AZ300",
+     "id": "view_z200",
+     "zoom": 200,
+     "scroll_row": 1,
+     "scroll_column": 1
+    },
+    {
+     "op": "capture_window",
+     "id": "shot_z200",
+     "name": "fills_z200.png"
+    },
+    {
+     "op": "close",
+     "save": false
+    }
+   ]
+  }
+ ]
+}

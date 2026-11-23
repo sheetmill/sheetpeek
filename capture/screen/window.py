@@ -34,10 +34,14 @@ MARKER_HEIGHT = 12
 POINT_PIXELS = {"mac": 1.0, "windows": 96 / 72}
 """Screen pixels per sheet point at zoom 100 on a display of scale 1, by platform."""
 
-GRIDLINE: dict[str, tuple[int, int, int] | None] = {"mac": (212, 212, 212), "windows": None}
-"""The default gridline's gray in sRGB, by platform: ``#D4D4D4`` on the Mac (captured). A
-platform's gray is stated once a capture in this repository records it; until then it is
-``None``, and what needs it is skipped with :data:`NO_GRIDLINE`."""
+GRIDLINE: dict[str, tuple[int, int, int] | None] = {
+    "mac": (212, 212, 212),
+    "windows": (224, 224, 224),
+}
+"""The default gridline's gray in sRGB, by platform: ``#D4D4D4`` on the Mac, ``#E0E0E0`` on
+Windows (``windows/borders`` and ``windows/fills``, measured on each picture). A platform's gray
+is stated once a capture in this repository records it; until then it is ``None``, and what needs
+it is skipped with :data:`NO_GRIDLINE`."""
 
 NO_GRIDLINE = "no capture in this repository records this platform's gridline gray yet"
 """Why a gridline control is skipped."""

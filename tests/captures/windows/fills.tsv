@@ -1,0 +1,92 @@
+# platform: windows
+# excel_build: 16.0.20527.20196
+# job: borders_fills.job.json
+# job_id: sheetpeek-20261123-145342-borders-fills
+# captured: 2026-11-23; method: capture_window (capture job)
+# job_header: {"environment": {"audit": false, "checks": {"dde_server_launch_disabled": true, "dde_server_lookup_disabled": true, "vba_warnings": 4}, "display": {"screen_px": [2560, 1440], "system_dpi": 96}, "edition": {"found": "Microsoft 365", "source": "office products"}, "excel": {"build": "16.0.20527.20196", "build_number": 20527.0, "calculation_version": 191029, "decimal_separator": ".", "international": {"country": 1.0, "decimal": ".", "list": ","}, "operating_system": "Windows (64-bit ARM) NT 10.00", "process": {"native_machine": "0xaa64", "process_machine": "0x8664"}, "standard_font": "Aptos Narrow", "standard_font_size": 11.0, "thousands_separator": ",", "use_system_separators": true, "version": "16.0"}, "font_smoothing": {"expected": {"contrast": 1200, "directwrite": {}, "enabled": true, "orientation": "rgb", "type": "cleartype"}, "found": {"contrast": 1200, "directwrite": {}, "enabled": true, "orientation": "rgb", "type": "cleartype"}, "ok": true}, "fonts": [{"cloud": true, "family": "Aptos", "head_revision": 2.00999, "style": "Bold", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos", "head_revision": 2.00999, "style": "Bold Italic", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos", "head_revision": 2.00999, "style": "Italic", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos", "head_revision": 2.00999, "style": "Regular", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos Display", "head_revision": 2.00999, "style": "Bold", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos Display", "head_revision": 2.00999, "style": "Bold Italic", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos Display", "head_revision": 2.00999, "style": "Italic", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos Display", "head_revision": 2.00999, "style": "Regular", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos Narrow", "head_revision": 2.00999, "style": "Bold", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos Narrow", "head_revision": 2.00999, "style": "Bold Italic", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos Narrow", "head_revision": 2.00999, "style": "Italic", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos Narrow", "head_revision": 2.00999, "style": "Regular", "version": "Version 2.01;O365"}, {"cloud": false, "family": "Calibri", "head_revision": 6.27, "style": "Bold", "version": "Version 6.27"}, {"cloud": false, "family": "Calibri", "head_revision": 6.27, "style": "Bold Italic", "version": "Version 6.27"}, {"cloud": false, "family": "Calibri", "head_revision": 6.27, "style": "Italic", "version": "Version 6.27"}, {"cloud": false, "family": "Calibri", "head_revision": 6.27, "style": "Regular", "version": "Version 6.27"}, {"cloud": false, "family": "Cambria", "head_revision": 6.98, "style": "Bold", "version": "Version 6.98"}, {"cloud": false, "family": "Cambria", "head_revision": 6.98, "style": "Bold Italic", "version": "Version 6.98"}, {"cloud": false, "family": "Cambria", "head_revision": 6.98, "style": "Italic", "version": "Version 6.98"}, {"cloud": false, "family": "Cambria", "head_revision": 6.99001, "style": "Regular", "version": "Version 6.99"}, {"cloud": false, "family": "Segoe UI", "head_revision": 5.72, "style": "Bold", "version": "Version 5.72"}, {"cloud": false, "family": "Segoe UI", "head_revision": 5.72, "style": "Bold Italic", "version": "Version 5.72"}, {"cloud": false, "family": "Segoe UI", "head_revision": 5.72, "style": "Italic", "version": "Version 5.72"}, {"cloud": false, "family": "Segoe UI", "head_revision": 5.72, "style": "Regular", "version": "Version 5.72"}], "fonts_missing": [], "geometry": {"expected": {"excel_window_px": [-8, -8, 2568, 1400], "screen_px": [2560, 1440], "system_dpi": 96}, "found": {"excel_window_points": [-5.0, -6.0, 1932.0, 1056.0], "excel_window_px": [-8, -8, 2568, 1400], "screen_px": [2560, 1440], "system_dpi": 96}, "ok": true}, "locale": {"ansi_code_page": 1252, "decimal": ".", "list": ",", "long_date": "dddd, MMMM d, yyyy", "name": "en-US", "oem_code_page": 437, "short_date": "M/d/yyyy", "sort_locale": "en-US", "sort_version": {"custom": "01000000ee575c1e00b4d0000bb1e11e", "defined": 394498, "nls": 394498}, "time": "h:mm:ss tt", "two_digit_year_max": 2049, "two_digit_year_max_setting": null}, "office": {"channel": "Current Channel", "platform": "x64", "products": "O365HomePremRetail", "version": "16.0.20527.20196"}, "printer": {"orientation": "portrait", "paper": "A4", "paper_mm": [215.9, 279.4]}, "theme": {"office_ui_theme": 6, "windows_apps_light": 1, "windows_system_light": 1}, "windows": {"architecture": "ARM64", "build": "26300.9974", "display_version": "26H2", "edition": "Core"}}, "format": 1, "inputs": {"borders.xlsx": {"bytes": 5342, "sha256": "bd291af1eed9e0dd217f80e07d48b8b4f59616a9b509212a6324b7bb7a16c986"}, "fills.xlsx": {"bytes": 5529, "sha256": "cee994dd6d67ef96161531f9f234994346e047eb988501e62cdf351266b38abd"}}, "job_id": "sheetpeek-20261123-145342-borders-fills", "manifest_sha256": "e96a65e911a891ff164a7b81d26d4fe035c44599e05c92a7c7dd88590b9904a4", "runner_version": "0.1.28"}
+# zooms: 100,200
+# gridline: E0E0E0 (measured: C4's bottom edge)
+# suite: fills
+zoom	pattern	colors	cell	fg_share	unclassified	period_x	period_y	whole_points	snap_px	tile_unit	tile_sheet	tile_cell	fill_left	fill_right	fill_top	fill_bottom	gridline_pixels	display_pattern	display_fill
+100	none	bw	C4	0	0						uniform	uniform							
+100	none	color	C6	0	1						uniform	uniform						-4142	255,255,255
+100	solid	bw	E4	1	0						uniform	uniform							
+100	solid	color	E6	1	0						uniform	uniform	0	0.75	0	0.75		1	0,0,255
+100	mediumGray	bw	G4	0.5	0	1.5	1.5	yes	0,0	device_px	#./.#	#./.#							
+100	mediumGray	color	G6	0.5	0	1.5	1.5	yes	0,0	device_px	#./.#	.#/#.	0	0.75	0	0.75		-4125	255,255,0
+100	darkGray	bw	I4	0.75	0	3	1.5	yes	0,0	device_px	.###/##.#	##.#/.###							
+100	darkGray	color	I6	0.75	0	3	1.5	yes	0,0	device_px	.###/##.#	.###/##.#	0	0.75	0	0.75		-4126	255,255,0
+100	lightGray	bw	K4	0.25	0	3	1.5	yes	0,0	device_px	.#../...#	.#../...#							
+100	lightGray	color	K6	0.25	0	3	1.5	yes	0,0	device_px	.#../...#	...#/.#..	0	0.75	0	0.75		-4124	255,255,0
+100	darkHorizontal	bw	C8	0.5	0	0.75	3	yes	0,0	device_px	./#/#/.	#/././#							
+100	darkHorizontal	color	C10	0.5	0	0.75	3	yes	0,0	device_px	./#/#/.	././#/#	0	0.75	0	0.75		-4128	255,255,0
+100	darkVertical	bw	E8	0.5	0	3	0.75	yes	0,0	device_px	#..#	.##.							
+100	darkVertical	color	E10	0.5	0	3	0.75	yes	0,0	device_px	#..#	.##.	0	0.75	0	0.75		-4166	255,255,0
+100	darkDown	bw	G8	0.5	0	3	3	yes	0,0	device_px	..##/#..#/##../.##.	##../.##./..##/#..#							
+100	darkDown	color	G10	0.5	0	3	3	yes	0,0	device_px	..##/#..#/##../.##.	.##./..##/#..#/##..	0	0.75	0	0.75		-4121	255,255,0
+100	darkUp	bw	I8	0.5	0	3	3	yes	0,0	device_px	..##/.##./##../#..#	..##/.##./##../#..#							
+100	darkUp	color	I10	0.5	0	3	3	yes	0,0	device_px	..##/.##./##../#..#	.##./##../#..#/..##	0	0.75	0	0.75		-4162	255,255,0
+100	darkGrid	bw	K8	0.5	0	3	3	yes	0,0	device_px	..##/..##/##../##..	##../##../..##/..##							
+100	darkGrid	color	K10	0.5	0	3	3	yes	0,0	device_px	..##/..##/##../##..	##../..##/..##/##..	0	0.75	0	0.75		9	255,255,0
+100	darkTrellis	bw	C12	0.75	0	3	3	yes	0,0	device_px	..##/####/##../####	..##/####/##../####							
+100	darkTrellis	color	C14	0.75	0	3	3	yes	0,0	device_px	..##/####/##../####	####/##../####/..##	0	0.75	0	0.75		10	255,255,0
+100	lightHorizontal	bw	E12	0.25	0	0.75	3	yes	0,0	device_px	./#/./.	./#/./.							
+100	lightHorizontal	color	E14	0.25	0	0.75	3	yes	0,0	device_px	./#/./.	#/././.	0	0.75	0	0.75		11	255,255,0
+100	lightVertical	bw	G12	0.25	0	3	0.75	yes	0,0	device_px	...#	...#							
+100	lightVertical	color	G14	0.25	0	3	0.75	yes	0,0	device_px	...#	...#	0	0.75	0	0.75		12	255,255,0
+100	lightDown	bw	I12	0.25	0	3	3	yes	0,0	device_px	..#./...#/#.../.#..	#.../.#../..#./...#							
+100	lightDown	color	I14	0.25	0	3	3	yes	0,0	device_px	..#./...#/#.../.#..	.#../..#./...#/#...	0	0.75	0	0.75		13	255,255,0
+100	lightUp	bw	K12	0.25	0	3	3	yes	0,0	device_px	...#/..#./.#../#...	...#/..#./.#../#...							
+100	lightUp	color	K14	0.25	0	3	3	yes	0,0	device_px	...#/..#./.#../#...	..#./.#../#.../...#	0	0.75	0	0.75		14	255,255,0
+100	lightGrid	bw	C16	0.4375	0	3	3	yes	0,0	device_px	...#/####/...#/...#	...#/...#/...#/####							
+100	lightGrid	color	C18	0.4375	0	3	3	yes	0,0	device_px	...#/####/...#/...#	...#/...#/####/...#	0	0.75	0	0.75		15	255,255,0
+100	lightTrellis	bw	E16	0.375	0	3	3	yes	0,0	device_px	#.#./...#/#.#./.#..	#.#./...#/#.#./.#..							
+100	lightTrellis	color	E18	0.375	0	3	3	yes	0,0	device_px	#.#./...#/#.#./.#..	...#/#.#./.#../#.#.	0	0.75	0	0.75		16	255,255,0
+100	gray125	bw	G16	0.125	0	3	3	yes	0,0	device_px	..../...#/..../.#..	..../.#../..../...#							
+100	gray125	color	G18	0.125	0	3	3	yes	0,0	device_px	..../...#/..../.#..	.#../..../...#/....	0	0.75	0	0.75		17	255,255,0
+100	gray0625	bw	I16	0.0625	0	6	3	yes	0,0	device_px	......../.......#/......../...#....	......../.....#../......../.#......							
+100	gray0625	color	I18	0.0625	0	6	3	yes	0,0	device_px	......../.......#/......../...#....	.....#../......../.#....../........	0	0.75	0	0.75		18	255,255,0
+100	darkUp	anchor	C20	0.5	0	3	3	yes	0,0	device_px	..##/.##./##../#..#	..##/.##./##../#..#					0		
+100	darkUp	anchor	D20	0.5	0	3	3	yes	0,0	device_px	..##/.##./##../#..#	..##/.##./##../#..#					0		
+100	darkUp	anchor	E20	0.5	0	3	3	yes	0,0	device_px	..##/.##./##../#..#	##../#..#/..##/.##.					0		
+200	none	bw	C4	0	0						uniform	uniform							
+200	none	color	C6	0	1						uniform	uniform						-4142	255,255,255
+200	solid	bw	E4	1	0						uniform	uniform							
+200	solid	color	E6	1	0						uniform	uniform	0	0.375	0	0.375		1	0,0,255
+200	mediumGray	bw	G4	0.5	0	0.75	0.75	yes	0,0	device_px	#./.#	#./.#							
+200	mediumGray	color	G6	0.5	0	0.75	0.75	yes	0,0	device_px	#./.#	#./.#	0	0.375	0	0.375		-4125	255,255,0
+200	darkGray	bw	I4	0.75	0	1.5	0.75	yes	0,0	device_px	.###/##.#	.###/##.#							
+200	darkGray	color	I6	0.75	0	1.5	0.75	yes	0,0	device_px	.###/##.#	.###/##.#	0	0.375	0	0.375		-4126	255,255,0
+200	lightGray	bw	K4	0.25	0	1.5	0.75	yes	0,0	device_px	.#../...#	.#../...#							
+200	lightGray	color	K6	0.25	0	1.5	0.75	yes	0,0	device_px	.#../...#	.#../...#	0	0.375	0	0.375		-4124	255,255,0
+200	darkHorizontal	bw	C8	0.5	0	0.375	1.5	yes	0,0	device_px	#/././#	#/././#							
+200	darkHorizontal	color	C10	0.5	0	0.375	1.5	yes	0,0	device_px	#/././#	./#/#/.	0	0.375	0	0.375		-4128	255,255,0
+200	darkVertical	bw	E8	0.5	0	1.5	0.375	yes	0,0	device_px	#..#	#..#							
+200	darkVertical	color	E10	0.5	0	1.5	0.375	yes	0,0	device_px	#..#	#..#	0	0.375	0	0.375		-4166	255,255,0
+200	darkDown	bw	G8	0.5	0	1.5	1.5	yes	0,0	device_px	##../.##./..##/#..#	##../.##./..##/#..#							
+200	darkDown	color	G10	0.5	0	1.5	1.5	yes	0,0	device_px	##../.##./..##/#..#	..##/#..#/##../.##.	0	0.375	0	0.375		-4121	255,255,0
+200	darkUp	bw	I8	0.5	0	1.5	1.5	yes	0,0	device_px	##../#..#/..##/.##.	##../#..#/..##/.##.							
+200	darkUp	color	I10	0.5	0	1.5	1.5	yes	0,0	device_px	##../#..#/..##/.##.	..##/.##./##../#..#	0	0.375	0	0.375		-4162	255,255,0
+200	darkGrid	bw	K8	0.5	0	1.5	1.5	yes	0,0	device_px	##../##../..##/..##	##../##../..##/..##							
+200	darkGrid	color	K10	0.5	0	1.5	1.5	yes	0,0	device_px	##../##../..##/..##	..##/..##/##../##..	0	0.375	0	0.375		9	255,255,0
+200	darkTrellis	bw	C12	0.75	0	1.5	1.5	yes	0,0	device_px	##../####/..##/####	##../####/..##/####							
+200	darkTrellis	color	C14	0.75	0	1.5	1.5	yes	0,0	device_px	##../####/..##/####	..##/####/##../####	0	0.375	0	0.375		10	255,255,0
+200	lightHorizontal	bw	E12	0.25	0	0.375	1.5	yes	0,0	device_px	./././#	./././#							
+200	lightHorizontal	color	E14	0.25	0	0.375	1.5	yes	0,0	device_px	./././#	./#/./.	0	0.375	0	0.375		11	255,255,0
+200	lightVertical	bw	G12	0.25	0	1.5	0.375	yes	0,0	device_px	...#	...#							
+200	lightVertical	color	G14	0.25	0	1.5	0.375	yes	0,0	device_px	...#	...#	0	0.375	0	0.375		12	255,255,0
+200	lightDown	bw	I12	0.25	0	1.5	1.5	yes	0,0	device_px	#.../.#../..#./...#	#.../.#../..#./...#							
+200	lightDown	color	I14	0.25	0	1.5	1.5	yes	0,0	device_px	#.../.#../..#./...#	..#./...#/#.../.#..	0	0.375	0	0.375		13	255,255,0
+200	lightUp	bw	K12	0.25	0	1.5	1.5	yes	0,0	device_px	.#../#.../...#/..#.	.#../#.../...#/..#.							
+200	lightUp	color	K14	0.25	0	1.5	1.5	yes	0,0	device_px	.#../#.../...#/..#.	...#/..#./.#../#...	0	0.375	0	0.375		14	255,255,0
+200	lightGrid	bw	C16	0.4375	0	1.5	1.5	yes	0,0	device_px	...#/...#/...#/####	...#/...#/...#/####							
+200	lightGrid	color	C18	0.4375	0	1.5	1.5	yes	0,0	device_px	...#/...#/...#/####	...#/####/...#/...#	0	0.375	0	0.375		15	255,255,0
+200	lightTrellis	bw	E16	0.375	0	1.5	1.5	yes	0,0	device_px	#.#./.#../#.#./...#	#.#./.#../#.#./...#							
+200	lightTrellis	color	E18	0.375	0	1.5	1.5	yes	0,0	device_px	#.#./.#../#.#./...#	#.#./...#/#.#./.#..	0	0.375	0	0.375		16	255,255,0
+200	gray125	bw	G16	0.125	0	1.5	1.5	yes	0,0	device_px	..../.#../..../...#	..../.#../..../...#							
+200	gray125	color	G18	0.125	0	1.5	1.5	yes	0,0	device_px	..../.#../..../...#	..../...#/..../.#..	0	0.375	0	0.375		17	255,255,0
+200	gray0625	bw	I16	0.0625	0	3	1.5	yes	0,0	device_px	......../.......#/......../...#....	......../...#..../......../.......#							
+200	gray0625	color	I18	0.0625	0	3	1.5	yes	0,0	device_px	......../.......#/......../...#....	......../.......#/......../...#....	0	0.375	0	0.375		18	255,255,0
+200	darkUp	anchor	C20	0.5	0	1.5	1.5	yes	0,0	device_px	##../#..#/..##/.##.	##../#..#/..##/.##.					0		
+200	darkUp	anchor	D20	0.5	0	1.5	1.5	yes	0,0	device_px	##../#..#/..##/.##.	##../#..#/..##/.##.					0		
+200	darkUp	anchor	E20	0.5	0	1.5	1.5	yes	0,0	device_px	##../#..#/..##/.##.	##../#..#/..##/.##.					0		

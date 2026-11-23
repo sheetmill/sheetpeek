@@ -288,3 +288,6 @@ result's header whole as one line (`job_header`); the job's manifest lies beside
 | `windows/cells` | | the job of the group `cells`: `capture/cell_text.py`'s workbook opened, and each cell's displayed text read (`read` of `text`) |
 | `windows/merge_width` | 150 | as the Mac's `merge_width`: numbers alone and merged across two to four columns, one hidden, at six widths |
 | `windows/error_width` | 56 | as the Mac's `error_width`: the seven error values at eight widths |
+| `windows/borders_fills` | | the job of the group `borders_fills`: the windows of `borders` and `fills`, each opened, its cells' geometry and displayed fill read, and Excel's window captured at zoom 100 and 200 (`capture_window`) |
+| `windows/borders` | 176 | as the Mac's `borders`, measured on the job's pictures at their device pixels a point; the header's `gridline` is the gray measured on the control cell |
+| `windows/fills` | 82 | as the Mac's `fills`; tiles in device pixels (`tile_unit` `device_px`), `display_pattern` Windows' `XlPattern` number |
