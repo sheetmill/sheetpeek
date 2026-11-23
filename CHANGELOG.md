@@ -15,6 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   font, 11 at half size (was 3/7) and 22 at 0.3 (was 1/7), where sevenths were taken at every
   size before.
 
+### Fixed
+- A merge across rows fits no row with its font, as Excel fits them (captured, `merge_rows`):
+  Calibri 24 merged over A1:A2 leaves both rows 15 pt (was 31 and 15). A merge across columns
+  still fits its row to its font, and no merge to its wrapped lines.
+
 ## [0.4.0] - 2026-11-23
 
 ### Added

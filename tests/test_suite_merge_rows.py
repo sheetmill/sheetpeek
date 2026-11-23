@@ -1,9 +1,10 @@
 """The capture suite ``merge_rows`` (rows Excel fits around vertical merges, ARCHITECTURE.md §4.7),
 without Excel.
 
-The workbook is built and laid out with sheetpeek, whose heights must be the suite's
-``sheetpeek`` predictions; the reading of Excel's answer runs on a synthetic answer. The
-comparison with ``tests/captures/merge_rows.tsv`` is skipped until that capture exists.
+The workbook is built and laid out with sheetpeek, whose heights must be Excel's in
+``tests/captures/merge_rows.tsv``. ``PREDICTIONS`` stays as written before the run: sheetpeek's
+then held for 18 of the 22 rows, counting a merge's font in its first row, which Excel does not.
+The reading of Excel's answer runs on a synthetic answer.
 """
 
 import pytest
@@ -38,12 +39,6 @@ def test_each_case_is_built_and_merged_as_described(built):
     assert len(suite.CASES) == sum(b.rows for b in suite.BLOCKS)
 
 
-def test_sheetpeek_lays_the_rows_out_as_predicted(built):
-    heights = _heights(built)
-    found = {(c.block.label, c.offset): heights[c.row] for c in suite.CASES}
-    assert found == suite.PREDICTIONS["sheetpeek"]
-
-
 def test_the_candidates_predict_every_row_and_differ():
     keys = {(c.block.label, c.offset) for c in suite.CASES}
     tables = list(suite.PREDICTIONS.values())
@@ -65,18 +60,30 @@ def test_an_answer_reads_into_records(tmp_path):
         suite.records("\n".join(lines[:-1]))
 
 
-@pytest.mark.excel
-def test_excel_fits_the_rows_sheetpeek_predicts():
-    if not suite.OUTPUT.exists():
-        pytest.skip("not captured yet: run python -m capture.merge_rows run")
+def _captured():
     rows = [
         r.split("\t")
         for r in suite.OUTPUT.read_text(encoding="utf-8").splitlines()
         if r and not r.startswith("#")
     ]
     header, body = rows[0], rows[1:]
-    found = {
+    return {
         (r["label"], int(r["offset"])): float(r["height"])
         for r in (dict(zip(header, row, strict=True)) for row in body)
     }
-    assert found == suite.PREDICTIONS["sheetpeek"]
+
+
+@pytest.mark.excel
+def test_sheetpeek_fits_the_rows_excel_fits(built):
+    heights = _heights(built)
+    assert {(c.block.label, c.offset): heights[c.row] for c in suite.CASES} == _captured()
+
+
+@pytest.mark.excel
+def test_the_predictions_written_before_the_run_score_as_recorded():
+    captured = _captured()
+    score = {
+        name: sum(table[key] == height for key, height in captured.items())
+        for name, table in suite.PREDICTIONS.items()
+    }
+    assert score == {"sheetpeek": 18, "last_row": 11, "first_row": 12, "font_every_row": 13}

@@ -612,9 +612,8 @@ cell's style, and the layout ignores it.
 
 **Decided:** a merge whose anchor lies outside the range read shows no text (there is nothing to
 capture: the anchor is in the sheet, only not read). Wrapped text in a vertical merge flows over
-the merged rows. **Unverified:** a fitted row does not grow for it. Excel leaves a horizontal
-merge's wrapped lines out of fitting (captured, suite `row_height`: a merge over A1:C1, §4.7);
-sheetpeek does the same for a vertical merge, which no capture covers.
+the merged rows, and no fitted row grows for it, nor for the merge's font (captured, suite
+`merge_rows`, §4.7).
 
 ### 4.5 Hidden columns and rows
 
@@ -673,9 +672,10 @@ at, in order:
 **Rows are fitted to their cells** when Excel opens a file (captured, suite `row_height`): a row
 with a `<row>` element and no `ht`, in a sheet without `customHeight`, takes the largest of those
 heights and of each cell font's height and of its wrapped text; in a horizontal merge the font
-counts and the wrapped lines do not (a merge over A1:C1). **Unverified:** sheetpeek treats a
-vertical merge the same way, its font counting in the merge's first row and its wrapped lines in
-none; no capture covers one. It is at least the largest ascent `ceil(S) + 1` plus the largest
+counts and the wrapped lines do not (a merge over A1:C1), and a merge across rows counts in no
+row, neither its font nor its wrapped lines (`merge_rows`: wrapped text, and Calibri 14 and 20,
+over two and three rows leave every row at 15 pt; superscript and subscript in such a merge are
+left out likewise, unverified). It is at least the largest ascent `ceil(S) + 1` plus the largest
 bottom offset `B + A` of its fonts (xlformat's row model), so faces that split their heights
 differently make a taller row (Arial 11 beside Calibri 10: 15 pt), and an accounting underline adds
 its `A` (`row_height_fitted`, group `styled`: Calibri 6 to 40 pt under Calibri 11). Wrapped text
@@ -723,7 +723,7 @@ a cached value (as openpyxl writes it) has no `t`. The same file confirms Excel 
 
 Captured so far, in `tests/captures/`: by print (route B) `layout` (§3.6, §4.1 to §4.7); read
 from Excel `theme_colors` and `theme_colors_more` (§3.3), `merge_width` and `error_width` (§4.2,
-§4.4, no deviation), `row_height`, `row_height_more` and `row_height_fitted` (§4.7, §4.16, §4.17), `color_kinds` (§3.3), `package` and `package_more` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14), `theme_fonts_palette`
+§4.4, no deviation), `row_height`, `row_height_more`, `row_height_fitted` and `merge_rows` (§4.7, §4.16, §4.17), `color_kinds` (§3.3), `package` and `package_more` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14), `theme_fonts_palette`
 and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts`, `gradients` and `diagonals` (§4.12), `text_style`, `text_style_more` and `text_steps` (§4.6, §4.7, §4.13), `row_bottoms` (§3.6), `runs` (§4.16), `tab_strip` (§4.15), `outline` (§4.11), `rotation`, `rotation_more` and `rotation_placement` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
 Excel 16.115 (Microsoft 365). Every section here rests on one of them; what no capture covers
 is marked unverified where it is stated, as are the parts of §4.12, §4.14 and §4.18 that say so. What still waits for

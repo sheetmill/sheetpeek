@@ -35,7 +35,7 @@ LABELS: dict[str, tuple[str, ...]] = {
         "settles",
     ),
     "src/sheetpeek/_excel.py": (
-        "# a vertical one unverified).",
+        "# superscript and subscript likewise, unverified).",
         "degrees at the sizes xlformat measures; the 7 held below 9 pt is unverified).",
         "else:  # bottom; justify as bottom (unverified); a box taller than the row (captured)",
         "# An accounting underline runs under the text's width, turned with it (unverified).",
@@ -44,7 +44,6 @@ LABELS: dict[str, tuple[str, ...]] = {
         "(unverified).",
     ),
     "src/sheetpeek/_rows.py": (
-        "the same, its font in its first row (unverified). A stored ``ht`` and ``customHeight``",
         '5.5 points): Calibri 11\'s 3 (unverified)."""',
         "drawn size's ascent (unverified). A subscript's line grows by ``g = l + B(d) - B(s)`` on",
         "if font.size > _LARGEST:  # 72's scaled with the size (unverified; 409 caps at "

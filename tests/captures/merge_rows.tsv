@@ -1,0 +1,27 @@
+# suite: merge_rows (capture.merge_rows); Excel 16.115 (16.115.26110837, Microsoft 365, Current channel) for Mac, en_US
+# one workbook, Calibri 11 Normal, openpyxl's <sheetFormatPr baseColWidth="8" defaultRowHeight="15"> (no customHeight)
+# captured: 2026-11-23; method: row height (AppleScript)
+# label: the case (BLOCKS in capture/merge_rows.py); offset: the row within it; rows: the rows merged; font: column A's font; wrapped_lines: its wrapped lines (0: one "H"); applied: the font Excel applied; height: the row's height in points
+label	offset	rows	font	wrapped_lines	applied	height
+control: 3 wrapped lines, one cell	1	1	Calibri 11	3	Calibri 11	48
+control: 3 wrapped lines, merge A:C	1	1	Calibri 11	3	Calibri 11	15
+2 wrapped lines over 2 rows	1	2	Calibri 11	2	Calibri 11	15
+2 wrapped lines over 2 rows	2	2	Calibri 11	2	Calibri 11	15
+3 wrapped lines over 2 rows	1	2	Calibri 11	3	Calibri 11	15
+3 wrapped lines over 2 rows	2	2	Calibri 11	3	Calibri 11	15
+6 wrapped lines over 3 rows	1	3	Calibri 11	6	Calibri 11	15
+6 wrapped lines over 3 rows	2	3	Calibri 11	6	Calibri 11	15
+6 wrapped lines over 3 rows	3	3	Calibri 11	6	Calibri 11	15
+3 wrapped lines in 14 pt over 2 rows	1	2	Calibri 14	3	Calibri 14	15
+3 wrapped lines in 14 pt over 2 rows	2	2	Calibri 14	3	Calibri 11	15
+H in 14 pt over 2 rows	1	2	Calibri 14	0	Calibri 14	15
+H in 14 pt over 2 rows	2	2	Calibri 14	0	Calibri 11	15
+H in 20 pt over 2 rows	1	2	Calibri 20	0	Calibri 20	15
+H in 20 pt over 2 rows	2	2	Calibri 20	0	Calibri 11	15
+H in 20 pt over 3 rows	1	3	Calibri 20	0	Calibri 20	15
+H in 20 pt over 3 rows	2	3	Calibri 20	0	Calibri 11	15
+H in 20 pt over 3 rows	3	3	Calibri 20	0	Calibri 11	15
+3 wrapped lines over 2 rows, 14 pt beside in the second	1	2	Calibri 11	3	Calibri 11	15
+3 wrapped lines over 2 rows, 14 pt beside in the second	2	2	Calibri 11	3	Calibri 11	19
+3 wrapped lines over 2 rows and 2 columns	1	2	Calibri 11	3	Calibri 11	15
+3 wrapped lines over 2 rows and 2 columns	2	2	Calibri 11	3	Calibri 11	15

@@ -218,7 +218,8 @@ def _fitted(
         # smaller (captured, runs: 9 pt runs in a 20 pt cell fit the row to 26 pt; §4.16).
         spans = drawn_spans(cell, _UNDRAWN.sub("", str(cell.value))) if cell.runs else None
         angled = valued and bool(style.rotation or style.stacked)
-        if not (angled or (merge and merge.max_row > merge.min_row)):
+        down = merge is not None and merge.max_row > merge.min_row
+        if not (angled or down):
             if cell.font is not last:
                 last = cell.font
                 b, n, _ = fonts.bottom(last)
@@ -229,9 +230,14 @@ def _fitted(
                 below, inset = max(below, b), max(inset, n)
         if not fits:
             continue
+        if down:
+            # A merge across rows fits no row, by its font or its wrapped lines (captured,
+            # merge_rows: Calibri 14 and 20 over two and three rows leave them 15 pt; its
+            # superscript and subscript likewise, unverified).
+            continue
         own = [span.font for span in spans] if spans else [cell.font]
-        # A merged cell's font counts, its wrapped lines do not (captured for a horizontal merge;
-        # a vertical one unverified).
+        # A merge across columns: its font counts, its wrapped lines do not (captured,
+        # row_height).
         turned = angled and merge is None
         if not (turned and _upright(style)):
             # Text at 90 degrees fits the row by its width alone, at least the Normal font's
