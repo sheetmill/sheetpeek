@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-23
+
 ### Added
 - `TextRule.thickness`: each underline and strikethrough line's thickness in points at zoom 100,
   from xlformat's `rule_metrics` (2 pt for Calibri 36, where Excel draws it 2 screen points
@@ -579,7 +581,8 @@ First release.
 - Borders, conditional formatting, charts, images and comments are not shown; rich text within
   a cell takes the cell's font.
 
-[Unreleased]: https://github.com/sheetmill/sheetpeek/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/sheetmill/sheetpeek/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/sheetmill/sheetpeek/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/sheetmill/sheetpeek/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/sheetmill/sheetpeek/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/sheetmill/sheetpeek/releases/tag/v0.1.0

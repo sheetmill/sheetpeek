@@ -81,7 +81,7 @@ from sheetpeek._view_model import SheetView
 from sheetpeek.backends import Backend, notices, register_backend, render
 from sheetpeek.backends.html._workbook import render_workbook
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 __all__ = [
     "FEATURES",
