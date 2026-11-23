@@ -87,6 +87,7 @@ class _Session:
 
 
 def test_a_capture_checks_the_geometry_before_its_first_view(recorded, tmp_path, monkeypatch):
+    pytest.importorskip("openpyxl")  # the capture builds its workbook with it
     geometry.record(FOUND)
     monkeypatch.setattr(screen_run, "CONTAINER", tmp_path / "container")
     monkeypatch.setenv("EXCEL_EDITION", "Microsoft 365")
