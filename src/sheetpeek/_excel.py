@@ -140,7 +140,18 @@ def lay_out(draft: Draft) -> tuple[tuple[RenderedColumn, ...], tuple[RenderedRow
 
     grid.units = units
     read = [p for p in range(len(every)) if p not in added]
-    fitted = [_fitted(grid, i, row, sheet, read, widths, base, fonts) for i, row in enumerate(rows)]
+    # Hidden columns the grid leaves out still set each row's bottom (captured, row_bottoms).
+    shown = {c.index for c in every}
+    ref = sheet.ref
+    hidden = tuple(
+        c.index
+        for c in sheet.columns
+        if c.index not in shown and ref.min_col <= c.index <= ref.max_col
+    )
+    fitted = [
+        _fitted(grid, i, row, sheet, read, widths, base, fonts, hidden)
+        for i, row in enumerate(rows)
+    ]
     heights = [f[0] for f in fitted]
     bottoms = [f[1] for f in fitted]
     layout = _Points(grid, widths, heights, base, fonts, notes, sheet.normal_font, bottoms)
@@ -169,17 +180,20 @@ def _fitted(
     widths: list[float],
     base: xlformat.ColumnMetrics,
     fonts: _Fonts,
+    hidden: tuple[int, ...] = (),
 ) -> tuple[float, tuple[float, float, float, float]]:
     """A row's height, fitted to its cells as Excel fits it on opening (§4.7), and its bottom.
 
     The bottom is ``(B_row, I_row)``: bottom-aligned text in the row sits on one baseline,
     ``B_row`` above the row's bottom, the largest bottom offset over the Normal font and the
-    fonts of the row's cells, empty styled cells and accounting underlines included (§3.6); and
-    ``I_row``, the largest line inset ``B - 2`` over the same fonts, which lifts wrapped text
-    in a face with a smaller one by the difference (captured, ``text_style_more`` group
-    ``faces``: three wrapped lines of five faces beside Calibri 17 in a 90 pt row). A fixed row
-    has a bottom too. The cells counted are those whose fonts fit the row (captured for cells
-    with values; empty styled cells and the other kinds unverified).
+    fonts of the row's cells (§3.6), and ``I_row``, the largest line inset ``B - 2`` over the
+    same fonts, which lifts wrapped text in a face with a smaller one by the difference
+    (captured, ``text_style_more`` group ``faces``). A fixed row has a bottom too. Counted
+    (captured, ``row_bottoms``): cells with values, empty styled cells, cells in ``hidden``
+    columns (column numbers the grid leaves out), superscript, subscript and accounting fonts
+    and other cells' rich-text runs; not counted: angled and stacked cells with values, at any
+    angle, and cells of a merge across rows, in any of its rows. A merge across columns counts
+    (unverified).
 
     The bottom is given twice: with the fonts of rich-text runs, and with each cell's own font
     alone. A rich-text cell's last line sits on its own line's bottom, not on a larger run's
@@ -188,60 +202,63 @@ def _fitted(
     """
     below, inset, ascent = fonts.bottom(sheet.normal_font)
     plain_below, plain_inset = below, inset
-    if not fits_cells(row, sheet):
-        for p in read:
-            cell = grid.cell(i, p)
-            style = cell.style
-            if (style.rotation or style.stacked) and cell.kind != "empty" and _upright(style):
-                continue
-            b, n, _ = fonts.bottom(cell.font)
-            plain_below, plain_inset = max(plain_below, b), max(plain_inset, n)
-            own = [cell.font]
-            if cell.runs:
-                content = _UNDRAWN.sub("", str(cell.value))
-                own += [span.font for span in drawn_spans(cell, content) or ()]
-            for font in own:
-                b, n, _ = fonts.bottom(font)
-                below, inset = max(below, b), max(inset, n)
-        return row_height(row, sheet), (below, inset, plain_below, plain_inset)
+    fit_below, fit_ascent = below, ascent  # what fits the row's height
+    fits = fits_cells(row, sheet)
     height = row_height(row, sheet)
     styled = []
     cell_fonts: list[Font] = []  # fonts of the row's cells that do not wrap
     wrapped: list[tuple[Font, int]] = []  # each plain wrapped cell's font and lines
+    merges = grid.merge_of
+    # neighboring cells mostly share one font object: each is looked up once
+    last: Font | None = None
+    last_fit: Font | None = None
     for p in read:
         cell = grid.cell(i, p)
+        style = cell.style
+        merge = merges.get((row.index, grid.columns[p].index)) if merges else None
+        valued = cell.kind != "empty"
         # A cell with rich-text runs counts its runs' fonts and its own, even when every run is
         # smaller (captured, runs: 9 pt runs in a 20 pt cell fit the row to 26 pt; §4.16).
         spans = drawn_spans(cell, _UNDRAWN.sub("", str(cell.value))) if cell.runs else None
+        angled = valued and bool(style.rotation or style.stacked)
+        if not (angled or (merge and merge.max_row > merge.min_row)):
+            if cell.font is not last:
+                last = cell.font
+                b, n, _ = fonts.bottom(last)
+                below, inset = max(below, b), max(inset, n)
+                plain_below, plain_inset = max(plain_below, b), max(plain_inset, n)
+            for span in spans or ():
+                b, n, _ = fonts.bottom(span.font)
+                below, inset = max(below, b), max(inset, n)
+        if not fits:
+            continue
         own = [span.font for span in spans] if spans else [cell.font]
         # A merged cell's font counts, its wrapped lines do not (captured).
-        merged = (row.index, grid.columns[p].index) in grid.merge_of
-        turned = cell.kind != "empty" and (cell.style.rotation or cell.style.stacked) and not merged
-        if not (turned and _upright(cell.style)):
+        turned = angled and merge is None
+        if not (turned and _upright(style)):
             # Text at 90 degrees fits the row by its width alone, at least the Normal font's
-            # row: its own font's row does not count (captured, row_height_fitted).
-            height = max(height, *map(fonts.row_height, own), fonts.row_height(cell.font))
-            for font in (*own, cell.font):
-                b, n, a = fonts.bottom(font)
-                below, inset, ascent = max(below, b), max(inset, n), max(ascent, a)
-            b, n, _ = fonts.bottom(cell.font)
-            plain_below, plain_inset = max(plain_below, b), max(plain_inset, n)
-        if cell.kind != "empty":
+            # row: its own font's row does not count (captured, row_height_fitted). A font's
+            # row is its ascent and bottom: the row's largest of each, after the loop.
+            if cell.font is not last_fit:
+                last_fit = cell.font
+                b, _, a = fonts.bottom(last_fit)
+                fit_below, fit_ascent = max(fit_below, b), max(fit_ascent, a)
+            for span in spans or ():
+                b, _, a = fonts.bottom(span.font)
+                fit_below, fit_ascent = max(fit_below, b), max(fit_ascent, a)
+        if valued:
             styled += [f for f in own if f.vert_align]
         if turned:
             height = max(height, _turned_height(grid, cell, p, fonts))
             continue
         # Distributed and justified text, across or down, wraps when drawn, and Excel 16.115
         # fits the row to the lines drawn, wrap flag or not (captured, text_style, text_style_more).
-        style = cell.style
         wraps = style.wrap or style.h_align in _SPREAD or style.v_align in _SPREAD
-        if cell.kind == "text" and wraps and widths[p] and not merged:
+        if cell.kind == "text" and wraps and widths[p] and merge is None:
             budget = widths[p] - base.left_inset - base.right_inset
             # between the indents, as drawn
             budget -= (
-                _indents(cell.style.h_align)
-                * cell.style.indent
-                * indent_points(fonts.get(sheet.normal_font))
+                _indents(style.h_align) * style.indent * indent_points(fonts.get(sheet.normal_font))
             )
             if spans:
                 text = Text.of_spans(spans, fonts.get, breaks=True)
@@ -252,17 +269,27 @@ def _fitted(
                 wrapped.append((cell.font, len(lines)))
             continue
         cell_fonts += own
+    for column in hidden:
+        cell = sheet.cell(row.index, column)
+        if cell.kind != "empty" and (cell.style.rotation or cell.style.stacked):
+            continue
+        b, n, _ = fonts.bottom(cell.font)
+        below, inset = max(below, b), max(inset, n)
+        plain_below, plain_inset = max(plain_below, b), max(plain_inset, n)
+    bottoms = (below, inset, plain_below, plain_inset)
+    if not fits:
+        return height, bottoms
     # The row holds its fonts' largest ascent and largest bottom, an accounting underline's
     # points included (xlformat's row model; captured, row_height_fitted group styled: an
     # accounting underline at 6 to 10 pt under Calibri 11 makes a row of 17 or 18 pt).
-    height = max(height, ascent + below)
+    height = max(height, fit_ascent + fit_below)
     # Superscript and subscript grow the row (§4.13); the row fits the unshrunk size of shrunk
     # text, so shrink adds nothing.
     for font, extra in row_extras(styled):
         height = max(height, font_row_height(font) + extra)
     if wrapped:
         height = max(height, _row_model(sheet.normal_font, frozenset(cell_fonts), tuple(wrapped)))
-    return min(height, TALLEST_ROW), (below, inset, plain_below, plain_inset)
+    return min(height, TALLEST_ROW), bottoms
 
 
 _INDENT_SPACES = 3
@@ -426,7 +453,7 @@ class _Points:
 
         On the row's shared bottom ``B_row``, at least the line's own (an accounting run), and
         for wrapped text the difference of the row's line inset and its face's higher
-        (xlformat's row model). A merge's text takes its last row's (unverified).
+        (xlformat's row model).
         """
         if self.bottoms is None:
             return own
@@ -586,7 +613,13 @@ class _Points:
             )
             metrics = [self.plain_metrics(placed_font, n)] * n
         face = line_font(text.fonts(*lines[-1])) if spans else cell_font
-        row_below = self.row_below(origin.rows[-1], metrics[-1][2], face, wraps, bool(spans))
+        # A merge across rows takes its first row's bottom; the vertical spreads their own
+        # (captured, row_bottoms).
+        row_below = (
+            metrics[-1][2]
+            if v_align in _SPREAD
+            else self.row_below(origin.rows[0], metrics[-1][2], face, wraps, bool(spans))
+        )
         if n == 1 and v_align == "bottom" and metrics[0][0] <= bottom - top:
             # One bottom-aligned line, as most cells are: ``_baselines``' arithmetic, inline.
             baselines = [bottom - row_below]
@@ -1073,8 +1106,8 @@ def _baselines(
       ``faces`` and ``overflow``); the row's other fonts do not move it.
     - Vertical distributed and justify: lines go evenly from the top position to the bottom
       one, each a whole number of points below the first, a half point dropped (captured, suite
-      ``text_style``, group ``align``; the bottom's ``row_below`` beside larger fonts
-      unverified).
+      ``text_style``, group ``align``); the caller passes the line's own bottom, which the
+      row's other fonts do not move (captured, ``row_bottoms``).
 
     When the lines do not fit, bottom and center text places the first ``k = min(n, ceil(H /
     F))`` lines that reach the bottom as a block of its own, and the rest follow, clipped

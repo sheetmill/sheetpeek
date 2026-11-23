@@ -1,0 +1,35 @@
+# excel: 16.115
+# build: 16.115.26110837
+# edition: Microsoft 365
+# channel: Current
+# macos: 26.6.2
+# appearance: dark
+# date: 2026-11-22
+# settling: still 0.4 s, give up 8 s, audit off
+# geometry: {"display_scale":2.0,"screen_pt":[2560.0,1440.0],"usable_pt":[2560.0,1089.0],"window_pt":[0.0,30.0,2560.0,1320.0],"window_state":"window state maximized"}
+# display_scale: 2.000
+# colors: captures converted to sRGB (sips --matchTo sRGB Profile.icc)
+# platform: mac
+# suite: row_bottoms
+group	name	zoom	cell	row_height	lines	line_tops	baselines
+cells	probe alone	100	C4	32.0	1	22+7	29
+cells	neighbor with a value	100	C5	32.0	1	19+7	26
+cells	empty styled neighbor	100	C6	32.0	1	19+7	26
+cells	neighbor in a hidden column	100	C7	32.0	1	19+7	26
+cells	neighbor at 45 degrees	100	C8	32.0	1	22+7	29
+cells	neighbor at 90 degrees	100	C9	32.0	1	22+7	29
+cells	stacked neighbor	100	C10	32.0	1	22+7	29
+cells	merge anchored above, first row	100	C11	32.0	1	22+7	29
+cells	merge anchored above, second row	100	C12	32.0	1	22+7	29
+cells	superscript neighbor	100	C13	32.0	1	19+7	26
+cells	subscript neighbor	100	C14	32.0	1	17+7	24
+cells	row style	100	C15	32.0	1	19+7	26
+cells	neighbor with a large run	100	C16	32.0	1	19+7	26
+cells	merged probe, neighbor in its first row	100	C17	32.0	1	51+7	58
+cells	merged probe, neighbor in its last row	100	C19	32.0	1	54+7	61
+cells	distributed beside the neighbor	100	C21	70.0	3	5+7 32+7 60+7	12 39 67
+cells	justify beside the neighbor	100	C22	70.0	3	5+7 32+7 60+7	12 39 67
+cells	distributed alone	100	C23	70.0	3	5+7 32+7 60+7	12 39 67
+cells	justify alone	100	C24	70.0	3	5+7 32+7 60+7	12 39 67
+column_style	column style, fixed row	100	C4	32.0	1	19+7	26
+column_style	column style, fitted row	100	C5	31.0	1	18+7	25

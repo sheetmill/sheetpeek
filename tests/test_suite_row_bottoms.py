@@ -122,7 +122,14 @@ def test_baselines_are_the_bottoms_of_the_line_bands():
 
 # --- the comparison with the capture
 
-PINNED: dict[str, str] = {}
+PINNED: dict[str, str] = {
+    "subscript neighbor": "Excel puts the probe 8 pt above the bottom beside a Calibri 24 "
+    "subscript, no candidate's place; sheetpeek counts the font's own 6 (not yet modeled)",
+    "row style": "a row's own style counts in Excel; sheetpeek does not read the fonts of row and "
+    "column styles for cells the file has no element for",
+    "column style, fixed row": "the same, for a column's style",
+    "column style, fitted row": "the same: Excel fits the row to the column style's font (31 pt)",
+}
 """Cases where sheetpeek's baseline differs from Excel's, each with its reason."""
 
 
@@ -135,6 +142,10 @@ def _captured():
     return {r["name"]: r for r in (dict(zip(header, row, strict=True)) for row in body)}
 
 
+NO_CANDIDATE = {"subscript neighbor": 24.0}
+"""Cases whose captured baseline no candidate gave, with that baseline."""
+
+
 @pytest.mark.excel
 def test_each_case_matches_one_candidate():
     # The ink of "H" ends on a device pixel: half a point at zoom 100 on a 2x display.
@@ -143,7 +154,10 @@ def test_each_case_matches_one_candidate():
     for name, candidates in suite.PREDICTIONS.items():
         last = suite.baselines(captured[name]["line_tops"])[-1]
         report[name] = [k for k, v in candidates.items() if abs(v - last) <= 0.5]
-        assert report[name], (name, last, candidates)
+        assert report[name] or name in NO_CANDIDATE, (name, last, candidates)
+    for name, last in NO_CANDIDATE.items():
+        assert suite.baselines(captured[name]["line_tops"])[-1] == last, name
+        assert not report[name], name
     REPORT["row_bottoms candidates"] = "row_bottoms: " + "; ".join(
         f"{name}: {'/'.join(which)}" for name, which in report.items()
     )

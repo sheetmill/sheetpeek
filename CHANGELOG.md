@@ -22,8 +22,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bottom-aligned text in a row sits on one baseline, set by the largest font in the row, empty
   styled cells and accounting underlines included: Calibri 11 beside Calibri 17 in a 60 pt row
   sits 5 pt above the bottom (was 3), plain text beside an accounting underline 6 pt (was 3),
-  in fitted and fixed rows alike. Wrapped text in a face with a smaller line inset than the
-  row's sits that much higher, as Excel draws it.
+  in fitted and fixed rows alike, and cells in hidden columns too; angled and stacked cells
+  and merges across rows leave it, as Excel draws them. Wrapped text in a face with a smaller
+  line inset than the row's sits that much higher. Text merged across rows sits on its first
+  row's baseline, and vertically distributed or justified text on its own font's, whatever the
+  row's other fonts.
 - Top-aligned text has its baseline at its own size plus 1 point, and centered text is placed by
   its own font's height, at every size (the nearest measured size's before): Calibri 13 and 17
   now sit where Excel draws them. Shrunk text top and centered is placed by its drawn size.

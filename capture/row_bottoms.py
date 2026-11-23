@@ -109,26 +109,27 @@ SHEETPEEK: dict[str, str] = {
     "probe alone": "own",
     "neighbor with a value": "counted",
     "empty styled neighbor": "counted",
-    "neighbor in a hidden column": "not counted",
-    "neighbor at 45 degrees": "counted",
+    "neighbor in a hidden column": "counted",
+    "neighbor at 45 degrees": "not counted",
     "neighbor at 90 degrees": "not counted",
-    "stacked neighbor": "counted",
-    "merge anchored above, first row": "counted",
+    "stacked neighbor": "not counted",
+    "merge anchored above, first row": "not counted",
     "merge anchored above, second row": "not counted",
     "superscript neighbor": "counted",
     "subscript neighbor": "counted",
     "row style": "not counted",
     "neighbor with a large run": "counted",
-    "merged probe, neighbor in its first row": "last row's",
-    "merged probe, neighbor in its last row": "last row's",
-    "distributed beside the neighbor": "counted, inset",
-    "justify beside the neighbor": "counted, inset",
+    "merged probe, neighbor in its first row": "first row's",
+    "merged probe, neighbor in its last row": "first row's",
+    "distributed beside the neighbor": "not counted",
+    "justify beside the neighbor": "not counted",
     "distributed alone": "own",
     "justify alone": "own",
     "column style, fixed row": "not counted",
     "column style, fitted row": "not counted",
 }
-"""The candidate sheetpeek's layout takes for each case before the capture."""
+"""The candidate sheetpeek's layout takes for each case (before the capture, the suite's first
+commit records them)."""
 
 
 def _probe(ws: Any, cell: str, *, vertical: str = "bottom", text: str = PROBE) -> None:

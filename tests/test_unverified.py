@@ -38,10 +38,8 @@ LABELS: dict[str, tuple[str, ...]] = {
         "degrees at the sizes xlformat measures; the 7 held below 9 pt is unverified).",
         "else:  # bottom; justify as bottom (unverified); a box taller than the row (captured)",
         "# An accounting underline runs under the text's width, turned with it (unverified).",
-        "with values; empty styled cells and the other kinds unverified).",
         "also leaves out other cells' runs (unverified).",
-        "(xlformat's row model). A merge's text takes its last row's (unverified).",
-        "unverified).",
+        "(unverified).",
     ),
     "src/sheetpeek/_rows.py": (
         "if font.size > _LARGEST:  # 72's scaled with the size (unverified; 409 caps at "

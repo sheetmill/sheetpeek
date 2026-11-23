@@ -296,14 +296,19 @@ of its baseline, with its rules; its `clip` stays upright (§4.17).
   Calibri 11), and its line inset `I = B - 2`.
   - Top-aligned text has its first baseline `ceil(S) + 1` below the row's top, its own font's.
   - Bottom-aligned text in a row shares one last baseline, `B_row` above the row's bottom:
-    the largest `B` over the Normal font and the fonts of the row's cells, empty styled cells
-    and accounting underlines included, in fitted and fixed rows alike. Wrapped text in a face
-    whose `I` is smaller than the row's largest sits that difference higher. A rich-text cell's
-    last line sits on its own line's bottom, not on a larger run of another of its lines.
+    the largest `B` over the Normal font and the fonts of the row's cells, in fitted and fixed
+    rows alike. Counted: cells with values, empty styled cells, cells in hidden columns,
+    superscript, subscript and accounting fonts (at the font's size), and other cells'
+    rich-text runs. Not counted: angled and stacked cells with values, at any angle, and the
+    cells of a merge across rows, in each of its rows. Wrapped text in a face whose `I` is
+    smaller than the row's largest sits that difference higher. A rich-text cell's last line
+    sits on its own line's bottom, not on a larger run of another of its lines. Text merged
+    across rows takes its first row's `B_row`.
   - Centered text has its first baseline `ceil(S) + 1 + trunc((H - k·F)/2)` below the top,
     `H` the row's height and `k` its lines, its own font's: the row's other fonts do not move it.
   - Wrapped lines are `F` apart, `F + A` with an accounting underline. Vertical justify and
-    distributed lines go evenly from the top position to the bottom one.
+    distributed lines go evenly from the top position to the bottom one, their own font's `B`
+    above the bottom: the row's other fonts do not move them.
   - Shrunk text is placed by its drawn size's metrics.
 
   Captured: `text_style`, group `align` (Calibri 11 in 60 pt rows: 12 pt below the top, 3 above
@@ -313,12 +318,15 @@ of its baseline, with its rules; its `clip` stays upright (§4.17).
   text beside an accounting underline 6 pt above the bottom in rows fixed at 15, 20 and 30 pt;
   three wrapped accounting lines 18 pt apart), `shrunk` (rows 10 to 16: shrunk text beside a
   larger neighbor; top and centered text at 4/7 and 6/7 by the drawn size) and `runs` (C8, C10
-  and C12). Unverified (no capture in this repository yet): which other cells count in `B_row`
-  (empty styled cells, hidden columns, angled and stacked cells, a merge anchored in another row, superscript and
-  subscript cells, row and column styles without a cell), the spread alignments' bottom beside
-  larger fonts, text merged across rows (it takes its last row's `B_row`), and other cells'
-  runs. Known deviations: text shrunk to 2/7 sits top and centered as about 6 pt would; small
-  runs in a cell of a larger font sit higher in Excel (`runs` C14).
+  and C12), and `row_bottoms` (which cells count, text merged across rows and the vertical
+  spreads beside a Calibri 24 cell in 32 and 70 pt rows; 21 cases, written as candidates before
+  the run). Unverified (no capture in this repository yet): a merge across columns (counted),
+  and an empty cell styled angled (counted). Known deviations: a row's or a column's own style
+  counts in Excel, where sheetpeek does not read the fonts of row and column styles (a column
+  style also fits a row to its font: 31 pt for Calibri 24); a Calibri 24 subscript puts the
+  row's bottom line 8 pt above the bottom, where sheetpeek counts its 6; text shrunk to 2/7
+  sits top and centered as about 6 pt would; small runs in a cell of a larger font sit higher
+  in Excel (`runs` C14).
 
   Print differs: a top-aligned baseline 11 pt below the top, lines 16 pt apart (`layout` rows 1
   and 152 to 154); `_rows.print_baseline_offsets` keeps those for a print output, and angled
@@ -711,7 +719,7 @@ a cached value (as openpyxl writes it) has no `t`. The same file confirms Excel 
 Captured so far, in `tests/captures/`: by print (route B) `layout` (§3.6, §4.1 to §4.7); read
 from Excel `theme_colors` and `theme_colors_more` (§3.3), `merge_width` and `error_width` (§4.2,
 §4.4, no deviation), `row_height`, `row_height_more` and `row_height_fitted` (§4.7, §4.16, §4.17), `color_kinds` (§3.3), `package` and `package_more` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14), `theme_fonts_palette`
-and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts`, `gradients` and `diagonals` (§4.12), `text_style`, `text_style_more` and `text_steps` (§4.6, §4.7, §4.13), `runs` (§4.16), `tab_strip` (§4.15), `outline` (§4.11), `rotation`, `rotation_more` and `rotation_placement` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
+and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts`, `gradients` and `diagonals` (§4.12), `text_style`, `text_style_more` and `text_steps` (§4.6, §4.7, §4.13), `row_bottoms` (§3.6), `runs` (§4.16), `tab_strip` (§4.15), `outline` (§4.11), `rotation`, `rotation_more` and `rotation_placement` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
 Excel 16.115 (Microsoft 365). Every section here rests on one of them; what no capture covers
 is marked unverified where it is stated, as are the parts of §4.12, §4.14 and §4.18 that say so. What still waits for
 the screen: the text insets and the baselines of angled text, which come from print, and the 15 pt rows that print
