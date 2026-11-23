@@ -39,6 +39,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - An accounting underline adds xlformat's points to the row (3 at Calibri 11, more at larger
   sizes) and to each wrapped line: three wrapped lines of Calibri 11 with one take 57 pt (was
   48), distributed text 19 (was 18), and each line is 18 pt below the last (was 15).
+- The fonts of a row's own style and of the sheet's column styles count in row heights and in
+  the shared bottom baseline, as Excel counts them for the cells the file has no element for: a
+  column styled Calibri 24 fits every row without a style of its own to 31 pt (was 15 under
+  Calibri 11). A style index past the stylesheet's formats is ignored.
 - A fitted row is at least its fonts' largest ascent plus their largest descent: an accounting
   underline at Calibri 6 or 8 under Calibri 11 makes a row of 17 pt (was 15), at Calibri 10
   18 pt (was 17).

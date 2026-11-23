@@ -492,6 +492,22 @@ class Book:
             notices=notes.notices(),
             max_cells=self._limits.max_cells,
             _normal_color=MappingProxyType(dict(self._normal_color)) if tables else {},
+            _row_fonts=MappingProxyType(
+                {
+                    row: font
+                    for row, style in structure.row_styles
+                    if ref
+                    and ref.min_row <= row <= ref.max_row
+                    and (font := self._style_font(style)) is not None
+                }
+            ),
+            _column_fonts=tuple(
+                dict.fromkeys(
+                    font
+                    for _, _, style in structure.column_styles
+                    if (font := self._style_font(style)) is not None
+                )
+            ),
         )
 
     def _report_structure(
@@ -898,6 +914,16 @@ class Book:
             if font_aspect.color_key(cell_format.font) == self._normal_key:
                 self._normal_color[id(found[0])] = found[0]
         return found
+
+    def _style_font(self, index: int) -> Font | None:
+        """The font of a row's or column's style; ``None`` for an index past the cell formats.
+
+        A row or column style is not needed to read the sheet, so a bad one is not refused.
+        """
+        assert self._book is not None
+        if not 0 <= index < len(self._book.styles.cell_formats):
+            return None
+        return self._style(index)[0].font
 
     def _cell_color(self, color: Any) -> str | None:
         """An ``xlio.Color`` as ``RRGGBB`` or ``None``.

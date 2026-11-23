@@ -375,6 +375,13 @@ class Sheet:
     _normal_color: Mapping[int, CellStyle] = field(default_factory=dict, repr=False, compare=False)
     """The cell styles whose font color is the Normal style's, as the file states it, by ``id``:
     a table style's font color shows through them (§4.20)."""
+    _row_fonts: Mapping[int, Font] = field(default_factory=dict, repr=False, compare=False)
+    """The font of each row's own style (``customFormat``), by row number, for the rows of
+    ``ref``: the positions without a ``<c>`` take it, and it counts in the row's height and
+    bottom baseline (§3.6)."""
+    _column_fonts: tuple[Font, ...] = field(default=(), repr=False, compare=False)
+    """The fonts of the sheet's column styles, every column's, once each: they count in the
+    height and bottom baseline of every row without a style of its own (§3.6)."""
 
     @property
     def warnings(self) -> tuple[str, ...]:

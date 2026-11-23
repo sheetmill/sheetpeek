@@ -370,6 +370,12 @@ ODD_FIELDS = {
         "<sheetData>",
         '<cols><col min="1" max="16384" outlineLevel="{}"/></cols><sheetData>',
     ),
+    # A row's and a column's style index: its font counts in row heights and baselines.
+    "row style": ('<row r="1"', '<row r="1" customFormat="1" s="{}"'),
+    "column style": (
+        "<sheetData>",
+        '<cols><col min="1" max="16384" style="{}"/></cols><sheetData>',
+    ),
     "zoom": ('<sheetView workbookViewId="0">', '<sheetView workbookViewId="0" zoomScale="{}">'),
     "frozen rows": (
         '<sheetView workbookViewId="0">',

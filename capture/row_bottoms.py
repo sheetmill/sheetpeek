@@ -117,7 +117,7 @@ SHEETPEEK: dict[str, str] = {
     "merge anchored above, second row": "not counted",
     "superscript neighbor": "counted",
     "subscript neighbor": "counted",
-    "row style": "not counted",
+    "row style": "counted",
     "neighbor with a large run": "counted",
     "merged probe, neighbor in its first row": "first row's",
     "merged probe, neighbor in its last row": "first row's",
@@ -125,8 +125,8 @@ SHEETPEEK: dict[str, str] = {
     "justify beside the neighbor": "not counted",
     "distributed alone": "own",
     "justify alone": "own",
-    "column style, fixed row": "not counted",
-    "column style, fitted row": "not counted",
+    "column style, fixed row": "counted",
+    "column style, fitted row": "counted",
 }
 """The candidate sheetpeek's layout takes for each case (before the capture, the suite's first
 commit records them)."""

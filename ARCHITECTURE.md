@@ -299,7 +299,10 @@ of its baseline, with its rules; its `clip` stays upright (§4.17).
     the largest `B` over the Normal font and the fonts of the row's cells, in fitted and fixed
     rows alike. Counted: cells with values, empty styled cells, cells in hidden columns,
     superscript, subscript and accounting fonts (at the font's size), and other cells'
-    rich-text runs. Not counted: angled and stacked cells with values, at any angle, and the
+    rich-text runs, and a row's own style and the sheet's column styles, whose fonts the
+    positions without a `<c>` take (a column style also fits a row to its font: 31 pt for
+    Calibri 24; a row with a style of its own takes it, not the columns', unverified). Not
+    counted: angled and stacked cells with values, at any angle, and the
     cells of a merge across rows, in each of its rows. Wrapped text in a face whose `I` is
     smaller than the row's largest sits that difference higher. A rich-text cell's last line
     sits on its own line's bottom, not on a larger run of another of its lines. Text merged
@@ -321,9 +324,7 @@ of its baseline, with its rules; its `clip` stays upright (§4.17).
   and C12), and `row_bottoms` (which cells count, text merged across rows and the vertical
   spreads beside a Calibri 24 cell in 32 and 70 pt rows; 21 cases, written as candidates before
   the run). Unverified (no capture in this repository yet): a merge across columns (counted),
-  and an empty cell styled angled (counted). Known deviations: a row's or a column's own style
-  counts in Excel, where sheetpeek does not read the fonts of row and column styles (a column
-  style also fits a row to its font: 31 pt for Calibri 24); a Calibri 24 subscript puts the
+  and an empty cell styled angled (counted). Known deviations: a Calibri 24 subscript puts the
   row's bottom line 8 pt above the bottom, where sheetpeek counts its 6; text shrunk to 2/7
   sits top and centered as about 6 pt would; small runs in a cell of a larger font sit higher
   in Excel (`runs` C14).

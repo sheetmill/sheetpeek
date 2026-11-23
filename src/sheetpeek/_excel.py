@@ -276,6 +276,15 @@ def _fitted(
         b, n, _ = fonts.bottom(cell.font)
         below, inset = max(below, b), max(inset, n)
         plain_below, plain_inset = max(plain_below, b), max(plain_inset, n)
+    # The positions without a <c> take the row's own style, else their column's: those fonts
+    # count in the height and the bottom (captured, row_bottoms: a row's and a column's style;
+    # a row with a style of its own taking it before the columns', unverified).
+    own_style = sheet._row_fonts.get(row.index)
+    for font in (own_style,) if own_style is not None else sheet._column_fonts:
+        b, n, a = fonts.bottom(font)
+        below, inset = max(below, b), max(inset, n)
+        plain_below, plain_inset = max(plain_below, b), max(plain_inset, n)
+        fit_below, fit_ascent = max(fit_below, b), max(fit_ascent, a)
     bottoms = (below, inset, plain_below, plain_inset)
     if not fits:
         return height, bottoms

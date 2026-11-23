@@ -125,10 +125,6 @@ def test_baselines_are_the_bottoms_of_the_line_bands():
 PINNED: dict[str, str] = {
     "subscript neighbor": "Excel puts the probe 8 pt above the bottom beside a Calibri 24 "
     "subscript, no candidate's place; sheetpeek counts the font's own 6 (not yet modeled)",
-    "row style": "a row's own style counts in Excel; sheetpeek does not read the fonts of row and "
-    "column styles for cells the file has no element for",
-    "column style, fixed row": "the same, for a column's style",
-    "column style, fitted row": "the same: Excel fits the row to the column style's font (31 pt)",
 }
 """Cases where sheetpeek's baseline differs from Excel's, each with its reason."""
 
