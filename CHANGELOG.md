@@ -16,9 +16,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   40 points, whose lines are 1 pt thick. The HTML output draws it.
 
 ### Changed
-- Requires xlrecalc 0.9 (`xlrecalc>=0.9,<1`): the formulas a sheet's range recalculates on
-  opening are computed in one pass (xlrecalc's `Workbook.values_at`), with the values reading
-  them one by one gave; if that pass fails, each cell is computed alone, as before.
 - Row heights come from xlformat's row model at the font's own face and size: Arial, Times New
   Roman, Courier New, Georgia, Calibri and Aptos Narrow at every size from 1 to 72 points, half
   sizes included, where the nearest of nine measured sizes, and Calibri's heights for another
