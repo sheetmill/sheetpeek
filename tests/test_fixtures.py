@@ -52,9 +52,22 @@ def test_no_personal_data(path):
 
 
 CAPTURES = sorted((ROOT / "tests" / "captures").glob("*.tsv*"))
-CONTROL = re.compile(r"[\x00-\x08\x0b-\x1f\x7f]")
-"""Control characters other than tab and newline: git and GitHub take a file holding one for
-binary."""
+CONTROL = re.compile(r"[\x00-\x08\x0b-\x1f\x7f-\x9f]")
+"""Control characters other than tab and newline, C1 included: git and GitHub take a file
+holding one for binary."""
+
+
+def control_lines(text: str) -> list[tuple[int, str]]:
+    """The lines of ``text`` that hold a control character, numbered from 1.
+
+    Split on newline alone: ``str.splitlines`` also splits on carriage return, form feed, the
+    file, group and record separators and others, which would never reach the pattern.
+    """
+    return [
+        (number, line[:60])
+        for number, line in enumerate(text.split("\n"), 1)
+        if CONTROL.search(line)
+    ]
 
 
 @pytest.mark.parametrize("path", CAPTURES, ids=lambda p: p.name)
@@ -62,9 +75,18 @@ def test_a_text_capture_holds_no_control_character(path):
     import gzip
 
     data = gzip.decompress(path.read_bytes()) if path.suffix == ".gz" else path.read_bytes()
-    found = [
-        (number, line[:60])
-        for number, line in enumerate(data.decode("utf-8").splitlines(), 1)
-        if CONTROL.search(line)
-    ]
+    found = control_lines(data.decode("utf-8"))
     assert not found, found
+
+
+@pytest.mark.parametrize(
+    "char",
+    ["\x00", "\x0b", "\x0c", "\r", "\x1c", "\x1d", "\x1e", "\x1f", "\x7f", "\x80", "\x85", "\x9f"],
+)
+def test_every_control_character_is_found(char):
+    text = f"case\tvalue\nrow\t1{char}2\tdone\n"
+    assert control_lines(text) == [(2, f"row\t1{char}2\tdone")]
+
+
+def test_tab_newline_and_other_text_pass():
+    assert control_lines("a\tb\nc\u00a0d\u2028e\u2029f\n") == []
