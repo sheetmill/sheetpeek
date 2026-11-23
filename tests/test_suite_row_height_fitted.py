@@ -8,6 +8,8 @@ cases that differ are named in ``PINNED`` with their reason, so a new difference
 does a fixed one.
 """
 
+import collections
+
 import pytest
 from capture import row_height_fitted as suite
 
@@ -198,13 +200,40 @@ def test_rows_of_plain_text_at_every_size_as_captured(captured, laid_out):
 @pytest.mark.excel
 def test_rows_of_superscript_subscript_and_accounting_text_as_captured(captured, laid_out):
     # §4.16, §4.13: the rows superscript, subscript and accounting-underlined text fit.
-    cases = [c for c in suite.CASES if c.vert_align or c.underline]
+    cases = [c for c in suite.CASES if c.group == "styled" and (c.vert_align or c.underline)]
     _compare("styled", captured, laid_out, cases)
+
+
+def test_every_scripts_case_has_its_predictions():
+    names = {c.name for c in suite.CASES if c.group == "scripts"}
+    assert set(suite.PREDICTIONS) == names
+
+
+@pytest.mark.excel
+def test_half_sizes_of_superscript_and_subscript_as_captured(captured, laid_out):
+    # §4.13: superscript, subscript and both at the half sizes; which prediction each matches
+    # is reported, and sheetpeek's row is compared as the other groups' are.
+    cases = [c for c in suite.CASES if c.group == "scripts"]
+    if any(c.name not in captured for c in cases):
+        pytest.skip("scripts not captured yet: run python -m capture.row_height_fitted run")
+    matched = collections.Counter(
+        k
+        for c in cases
+        for k, v in suite.PREDICTIONS[c.name].items()
+        if float(captured[c.name]["height"]) == v
+    )
+    REPORT["row_height_fitted scripts candidates"] = (
+        f"row_height_fitted scripts: of {len(cases)} rows, "
+        + ", ".join(f"{k} {n}" for k, n in sorted(matched.items()))
+    )
+    _compare("scripts", captured, laid_out, cases)
 
 
 @pytest.mark.excel
 def test_excel_applied_each_font_as_written(captured):
     for case in suite.CASES:
+        if case.group == "scripts" and case.name not in captured:
+            continue  # not captured yet
         # Excel reports a half size cut to the whole one below (12.5 as 12), as for 409.5
         # (package_more).
         assert captured[case.name]["applied"] == f"{case.face} {int(case.size)}", case.name

@@ -22,6 +22,10 @@ case a row, from row 1, in column A; no row has a stored height. Groups, a workb
   a subscript one (column B), at 6 to 40; and Arial, Times New Roman, Courier New and Aptos Narrow
   at 6 to 40. They settle the row a font fits at any size and the row superscript and subscript
   text fits.
+- ``scripts`` (§4.13): superscript, subscript and both (as in ``styled``) at every half size from
+  6.5 to 39.5: whether a half size fits the row of the whole size above it. ``PREDICTIONS``,
+  written before the run, holds for each case that row (``styled``'s captured row at the next
+  whole size) and the row sheetpeek gave before.
 
 ``run`` saves Excel's answer, with the Excel it came from, to ``capture/build/row_height_fitted/
 answer.tsv``; ``read`` writes ``tests/captures/row_height_fitted.tsv`` from it again, one record
@@ -54,7 +58,7 @@ CONTAINER_DIR = (
     / "row_height_fitted"
 )
 SCRIPT = Path(__file__).with_name("row_height_more.applescript")
-GROUPS = ("turned", "styled")
+GROUPS = ("turned", "styled", "scripts")
 TEXTS = {
     "short": "Rot",
     "medium": "Rotated text here",
@@ -130,7 +134,134 @@ def _styled() -> list[Case]:
     return found
 
 
-CASES = _turned() + _styled()
+def _scripts() -> list[Case]:
+    found = []
+    for size in (s + 0.5 for s in range(6, 40)):
+        found += [
+            Case("scripts", f"superscript {size:g}", STYLED, size, vert_align="superscript"),
+            Case("scripts", f"subscript {size:g}", STYLED, size, vert_align="subscript"),
+            Case(
+                "scripts",
+                f"both {size:g}",
+                STYLED,
+                size,
+                vert_align="superscript",
+                beside="subscript",
+            ),
+        ]
+    return found
+
+
+CASES = _turned() + _styled() + _scripts()
+
+
+# fmt: off
+PREDICTIONS: dict[str, dict[str, float]] = {
+    "superscript 6.5": {"next whole size": 15, "sheetpeek before": 15},
+    "subscript 6.5": {"next whole size": 15, "sheetpeek before": 15},
+    "both 6.5": {"next whole size": 15, "sheetpeek before": 15},
+    "superscript 7.5": {"next whole size": 15, "sheetpeek before": 15},
+    "subscript 7.5": {"next whole size": 15, "sheetpeek before": 15},
+    "both 7.5": {"next whole size": 15, "sheetpeek before": 15},
+    "superscript 8.5": {"next whole size": 15, "sheetpeek before": 15},
+    "subscript 8.5": {"next whole size": 15, "sheetpeek before": 15},
+    "both 8.5": {"next whole size": 15, "sheetpeek before": 15},
+    "superscript 9.5": {"next whole size": 16, "sheetpeek before": 16},
+    "subscript 9.5": {"next whole size": 16, "sheetpeek before": 16},
+    "both 9.5": {"next whole size": 17, "sheetpeek before": 17},
+    "superscript 10.5": {"next whole size": 17, "sheetpeek before": 17},
+    "subscript 10.5": {"next whole size": 17, "sheetpeek before": 17},
+    "both 10.5": {"next whole size": 18, "sheetpeek before": 18},
+    "superscript 11.5": {"next whole size": 19, "sheetpeek before": 18},
+    "subscript 11.5": {"next whole size": 18, "sheetpeek before": 18},
+    "both 11.5": {"next whole size": 20, "sheetpeek before": 19},
+    "superscript 12.5": {"next whole size": 20, "sheetpeek before": 19},
+    "subscript 12.5": {"next whole size": 19, "sheetpeek before": 19},
+    "both 12.5": {"next whole size": 21, "sheetpeek before": 20},
+    "superscript 13.5": {"next whole size": 22, "sheetpeek before": 22},
+    "subscript 13.5": {"next whole size": 19, "sheetpeek before": 22},
+    "both 13.5": {"next whole size": 22, "sheetpeek before": 24},
+    "superscript 14.5": {"next whole size": 23, "sheetpeek before": 23},
+    "subscript 14.5": {"next whole size": 24, "sheetpeek before": 23},
+    "both 14.5": {"next whole size": 25, "sheetpeek before": 25},
+    "superscript 15.5": {"next whole size": 24, "sheetpeek before": 24},
+    "subscript 15.5": {"next whole size": 25, "sheetpeek before": 24},
+    "both 15.5": {"next whole size": 26, "sheetpeek before": 26},
+    "superscript 16.5": {"next whole size": 25, "sheetpeek before": 27},
+    "subscript 16.5": {"next whole size": 25, "sheetpeek before": 27},
+    "both 16.5": {"next whole size": 26, "sheetpeek before": 29},
+    "superscript 17.5": {"next whole size": 27, "sheetpeek before": 28},
+    "subscript 17.5": {"next whole size": 26, "sheetpeek before": 28},
+    "both 17.5": {"next whole size": 28, "sheetpeek before": 30},
+    "superscript 18.5": {"next whole size": 28, "sheetpeek before": 29},
+    "subscript 18.5": {"next whole size": 27, "sheetpeek before": 29},
+    "both 18.5": {"next whole size": 29, "sheetpeek before": 31},
+    "superscript 19.5": {"next whole size": 29, "sheetpeek before": 31},
+    "subscript 19.5": {"next whole size": 30, "sheetpeek before": 31},
+    "both 19.5": {"next whole size": 31, "sheetpeek before": 33},
+    "superscript 20.5": {"next whole size": 31, "sheetpeek before": 33},
+    "subscript 20.5": {"next whole size": 32, "sheetpeek before": 33},
+    "both 20.5": {"next whole size": 33, "sheetpeek before": 35},
+    "superscript 21.5": {"next whole size": 33, "sheetpeek before": 34},
+    "subscript 21.5": {"next whole size": 33, "sheetpeek before": 34},
+    "both 21.5": {"next whole size": 35, "sheetpeek before": 36},
+    "superscript 22.5": {"next whole size": 33, "sheetpeek before": 36},
+    "subscript 22.5": {"next whole size": 34, "sheetpeek before": 36},
+    "both 22.5": {"next whole size": 35, "sheetpeek before": 39},
+    "superscript 23.5": {"next whole size": 35, "sheetpeek before": 37},
+    "subscript 23.5": {"next whole size": 35, "sheetpeek before": 37},
+    "both 23.5": {"next whole size": 37, "sheetpeek before": 40},
+    "superscript 24.5": {"next whole size": 37, "sheetpeek before": 39},
+    "subscript 24.5": {"next whole size": 39, "sheetpeek before": 39},
+    "both 24.5": {"next whole size": 40, "sheetpeek before": 42},
+    "superscript 25.5": {"next whole size": 38, "sheetpeek before": 40},
+    "subscript 25.5": {"next whole size": 40, "sheetpeek before": 40},
+    "both 25.5": {"next whole size": 41, "sheetpeek before": 43},
+    "superscript 26.5": {"next whole size": 39, "sheetpeek before": 42},
+    "subscript 26.5": {"next whole size": 41, "sheetpeek before": 42},
+    "both 26.5": {"next whole size": 42, "sheetpeek before": 46},
+    "superscript 27.5": {"next whole size": 42, "sheetpeek before": 44},
+    "subscript 27.5": {"next whole size": 41, "sheetpeek before": 44},
+    "both 27.5": {"next whole size": 44, "sheetpeek before": 48},
+    "superscript 28.5": {"next whole size": 42, "sheetpeek before": 45},
+    "subscript 28.5": {"next whole size": 42, "sheetpeek before": 45},
+    "both 28.5": {"next whole size": 44, "sheetpeek before": 49},
+    "superscript 29.5": {"next whole size": 44, "sheetpeek before": 47},
+    "subscript 29.5": {"next whole size": 45, "sheetpeek before": 47},
+    "both 29.5": {"next whole size": 47, "sheetpeek before": 51},
+    "superscript 30.5": {"next whole size": 45, "sheetpeek before": 48},
+    "subscript 30.5": {"next whole size": 48, "sheetpeek before": 48},
+    "both 30.5": {"next whole size": 49, "sheetpeek before": 52},
+    "superscript 31.5": {"next whole size": 48, "sheetpeek before": 50},
+    "subscript 31.5": {"next whole size": 48, "sheetpeek before": 50},
+    "both 31.5": {"next whole size": 51, "sheetpeek before": 54},
+    "superscript 32.5": {"next whole size": 49, "sheetpeek before": 52},
+    "subscript 32.5": {"next whole size": 49, "sheetpeek before": 52},
+    "both 32.5": {"next whole size": 52, "sheetpeek before": 56},
+    "superscript 33.5": {"next whole size": 51, "sheetpeek before": 53},
+    "subscript 33.5": {"next whole size": 50, "sheetpeek before": 53},
+    "both 33.5": {"next whole size": 54, "sheetpeek before": 57},
+    "superscript 34.5": {"next whole size": 51, "sheetpeek before": 54},
+    "subscript 34.5": {"next whole size": 53, "sheetpeek before": 54},
+    "both 34.5": {"next whole size": 55, "sheetpeek before": 58},
+    "superscript 35.5": {"next whole size": 54, "sheetpeek before": 57},
+    "subscript 35.5": {"next whole size": 53, "sheetpeek before": 57},
+    "both 35.5": {"next whole size": 57, "sheetpeek before": 62},
+    "superscript 36.5": {"next whole size": 55, "sheetpeek before": 58},
+    "subscript 36.5": {"next whole size": 56, "sheetpeek before": 58},
+    "both 36.5": {"next whole size": 59, "sheetpeek before": 63},
+    "superscript 37.5": {"next whole size": 56, "sheetpeek before": 59},
+    "subscript 37.5": {"next whole size": 57, "sheetpeek before": 59},
+    "both 37.5": {"next whole size": 60, "sheetpeek before": 64},
+    "superscript 38.5": {"next whole size": 57, "sheetpeek before": 60},
+    "subscript 38.5": {"next whole size": 58, "sheetpeek before": 60},
+    "both 38.5": {"next whole size": 61, "sheetpeek before": 65},
+    "superscript 39.5": {"next whole size": 60, "sheetpeek before": 63},
+    "subscript 39.5": {"next whole size": 60, "sheetpeek before": 63},
+    "both 39.5": {"next whole size": 64, "sheetpeek before": 69},
+}
+# fmt: on
+"""scripts: each case's row, written before the run, under each candidate."""
 
 
 def stored_rotation(angle: int) -> int:

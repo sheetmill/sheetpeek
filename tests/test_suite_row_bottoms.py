@@ -129,6 +129,16 @@ PINNED: dict[str, str] = {
 """Cases where sheetpeek's baseline differs from Excel's, each with its reason."""
 
 
+def _uncaptured(captured):
+    """The scripts groups' cases a capture made before those groups existed lacks."""
+    return {
+        case.name
+        for group in suite.SCRIPT_GROUPS
+        for case in suite.cases(group)
+        if case.name not in captured
+    }
+
+
 def _captured():
     if not suite.OUTPUT.exists():
         pytest.skip("not captured yet: run python -m capture.row_bottoms run")
@@ -146,8 +156,11 @@ NO_CANDIDATE = {"subscript neighbor": 24.0}
 def test_each_case_matches_one_candidate():
     # The ink of "H" ends on a device pixel: half a point at zoom 100 on a 2x display.
     captured = _captured()
+    missing = _uncaptured(captured)
     report = {}
     for name, candidates in suite.PREDICTIONS.items():
+        if name in missing:
+            continue
         last = suite.baselines(captured[name]["line_tops"])[-1]
         report[name] = [k for k, v in candidates.items() if abs(v - last) <= 0.5]
         assert report[name] or name in NO_CANDIDATE, (name, last, candidates)
@@ -162,11 +175,15 @@ def test_each_case_matches_one_candidate():
 @pytest.mark.excel
 def test_sheetpeek_places_each_probe_where_excel_does(built):
     captured = _captured()
+    missing = _uncaptured(captured)
     found = laid_out(built)
     differ = {
         name
         for name, (height, last) in found.items()
-        if abs(suite.baselines(captured[name]["line_tops"])[-1] - last) > 0.5
-        or (name in suite.FITTED_HEIGHTS and float(captured[name]["row_height"]) != height)
+        if name not in missing
+        and (
+            abs(suite.baselines(captured[name]["line_tops"])[-1] - last) > 0.5
+            or (name in suite.FITTED_HEIGHTS and float(captured[name]["row_height"]) != height)
+        )
     }
     assert differ == set(PINNED), sorted(differ ^ set(PINNED))
