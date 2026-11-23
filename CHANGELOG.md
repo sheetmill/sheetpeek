@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   36, 9 at 72). The HTML output draws it.
 
 ### Changed
+- Requires xlrecalc 0.9 (`xlrecalc>=0.9,<1`), whose `RATE` finds rates where 0.8.1 gave
+  `#NUM!`: `RATE(120,62725.56,-5000000,0)` under a percent format shows `0.73109%`, as Excel
+  does (was `#NUM!`).
 - Row heights come from xlformat's row model at the font's own face and size: Arial, Times New
   Roman, Courier New, Georgia, Calibri and Aptos Narrow at every size from 1 to 72 points, half
   sizes included, where the nearest of nine measured sizes, and Calibri's heights for another
