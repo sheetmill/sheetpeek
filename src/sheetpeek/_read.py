@@ -739,7 +739,17 @@ class Book:
             except Exception as error:  # a cell xlrecalc fails on keeps its value
                 return error
 
-        taken = iter([read(row, column) for row, column in places()])
+        # One pass for the range (xlrecalc's Workbook.values_at, the values reading the cells
+        # in turn would give); if it raises, each cell is read alone, so that only the cells
+        # xlrecalc fails on keep their values.
+        wanted = list(places())
+        try:
+            computed: list[object] = list(
+                engine.values_at([xlrecalc.CellRef(name, row, column) for row, column in wanted])
+            )
+        except Exception:
+            computed = [read(row, column) for row, column in wanted]
+        taken = iter(computed)
 
         def value(row: int, column: int, formula: bool) -> tuple[CellValue, CellKind] | None:
             """The engine's value, or ``None`` where the file's value stays (and is reported)."""

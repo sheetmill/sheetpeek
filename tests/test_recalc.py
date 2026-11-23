@@ -210,6 +210,31 @@ def test_values_of_every_kind(tmp_path):
     ]
 
 
+def test_a_range_is_read_in_one_pass_and_alone_when_that_fails(tmp_path, monkeypatch):
+    # xlrecalc's values_at gives the range in one call; if it raises, each cell is read alone,
+    # so the values are the same and only a cell xlrecalc fails on keeps the file's.
+    cells = [A1, '<c r="B1"><f>A1/4</f></c>', '<c r="C1"><f>A1&amp;"x"</f></c>']
+    path = book(tmp_path, row(1, *cells), by_excel=False)
+    calls = []
+    original = xlrecalc.Workbook.values_at
+
+    def counted(self, refs):
+        refs = list(refs)
+        calls.append(len(refs))
+        return original(self, refs)
+
+    monkeypatch.setattr(xlrecalc.Workbook, "values_at", counted)
+    expected = [[(2, "number"), (0.5, "number"), ("2x", "text")]]
+    assert values(sheetpeek.read(path)) == expected
+    assert calls == [2]
+
+    def failing(self, refs):
+        raise RuntimeError("one cell fails")
+
+    monkeypatch.setattr(xlrecalc.Workbook, "values_at", failing)
+    assert values(sheetpeek.read(path)) == expected
+
+
 def test_shared_formulas_are_computed(tmp_path):
     rows = [
         row(1, A1, '<c r="B1"><f t="shared" ref="B1:B2" si="0">A1*2</f></c>'),
@@ -269,9 +294,11 @@ def test_a_function_xlrecalc_does_not_compute_keeps_its_value(tmp_path):
 
 
 def test_a_failure_inside_xlrecalc_keeps_the_value(tmp_path, monkeypatch):
+    # The range's one pass fails, then the cell read alone.
     def fail(self, ref):
         raise RuntimeError("inside")
 
+    monkeypatch.setattr(xlrecalc.Workbook, "values_at", fail)
     monkeypatch.setattr(xlrecalc.Workbook, "value", fail)
     sheet = sheetpeek.read(book(tmp_path, row(1, A1, STALE), by_excel=False))
     assert sheet.cell(1, 2).value == 99
@@ -280,7 +307,7 @@ def test_a_failure_inside_xlrecalc_keeps_the_value(tmp_path, monkeypatch):
 
 
 def test_a_value_sheetpeek_does_not_show_keeps_the_cached_one(tmp_path, monkeypatch):
-    monkeypatch.setattr(xlrecalc.Workbook, "value", lambda self, ref: [[1]])
+    monkeypatch.setattr(xlrecalc.Workbook, "values_at", lambda self, refs: [[[1]] for _ in refs])
     sheet = sheetpeek.read(book(tmp_path, row(1, A1, STALE), by_excel=False))
     assert sheet.cell(1, 2).value == 99
     (notice,) = notices(sheet)
@@ -498,23 +525,24 @@ def test_the_engine_computes_cell_by_cell_without_a_whole_recalculation(tmp_path
 
 
 def test_every_value_is_read_before_any_status(tmp_path, monkeypatch):
-    # xlrecalc's report passes then run once for the range, not once a cell.
+    # The range's values in one pass, then each status: xlrecalc's report passes then run once
+    # for the range, not once a cell.
     calls = []
-    value, status = xlrecalc.Workbook.value, xlrecalc.Workbook.status
+    values_at, status = xlrecalc.Workbook.values_at, xlrecalc.Workbook.status
 
-    def counted_value(self, ref):
-        calls.append("value")
-        return value(self, ref)
+    def counted_values(self, refs):
+        calls.append("values")
+        return values_at(self, refs)
 
     def counted_status(self, ref):
         calls.append("status")
         return status(self, ref)
 
-    monkeypatch.setattr(xlrecalc.Workbook, "value", counted_value)
+    monkeypatch.setattr(xlrecalc.Workbook, "values_at", counted_values)
     monkeypatch.setattr(xlrecalc.Workbook, "status", counted_status)
     cells = [A1, *(f'<c r="{c}1"><f>A1*2</f><v>0</v></c>' for c in "BCD")]
     sheetpeek.read(book(tmp_path, row(1, *cells), by_excel=False))
-    assert calls == ["value"] * 3 + ["status"] * 3
+    assert calls == ["values"] + ["status"] * 3
 
 
 def test_a_failure_to_build_the_engine_keeps_every_cached_value(tmp_path, monkeypatch):
