@@ -21,8 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Roman, Courier New, Georgia, Calibri and Aptos Narrow at every size from 1 to 72 points, half
   sizes included, where the nearest of nine measured sizes, and Calibri's heights for another
   face, were taken before. Calibri 19 is 25 pt (was 24), Calibri 40 52 pt (was 31), and a
-  Times New Roman or Georgia 11 Normal font gives 14 pt rows (was 15), as Excel fits them. Past 72 points a row stops at 409.5,
-  Excel's tallest.
+  Times New Roman or Georgia 11 Normal font gives 14 pt rows (was 15), as Excel fits them.
+  Past 72 points a row takes 72's height scaled with the size (unverified; Calibri 100 is 127
+  pt, was 31), at most 409.5, Excel's tallest.
 - Bottom-aligned text in a row sits on one baseline, set by the largest font in the row, empty
   styled cells and accounting underlines included: Calibri 11 beside Calibri 17 in a 60 pt row
   sits 5 pt above the bottom (was 3), plain text beside an accounting underline 6 pt (was 3),
