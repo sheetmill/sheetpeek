@@ -57,7 +57,6 @@ from sheetpeek._text_styles import (
     SHRINK_STEPS,
     accounting,
     right_to_left,
-    row_extras,
     rules,
     scaled,
     shrink_step,
@@ -292,10 +291,8 @@ def _fitted(
     # points included (xlformat's row model; captured, row_height_fitted group styled: an
     # accounting underline at 6 to 10 pt under Calibri 11 makes a row of 17 or 18 pt).
     height = max(height, fit_ascent + fit_below)
-    # Superscript and subscript grow the row (§4.13); the row fits the unshrunk size of shrunk
-    # text, so shrink adds nothing.
-    for font, extra in row_extras(styled):
-        height = max(height, font_row_height(font) + extra)
+    # Superscript and subscript are in the parts above and below (§4.13); the row fits the
+    # unshrunk size of shrunk text, so shrink adds nothing.
     if wrapped:
         height = max(height, _row_model(sheet.normal_font, frozenset(cell_fonts), tuple(wrapped)))
     return min(height, TALLEST_ROW), bottoms

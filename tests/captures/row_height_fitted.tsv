@@ -1,6 +1,6 @@
 # suite: row_height_fitted (capture.row_height_fitted); Excel 16.115 (16.115.26110837, Microsoft 365, Current channel) for Mac, en_US
 # a workbook per group, openpyxl's default styles (Normal Calibri 11, no customHeight); one case a row in column A, fitted by Excel on opening
-# captured: 2026-11-19; method: row height (AppleScript)
+# captured: 2026-11-22; method: row height (AppleScript)
 # name: the case (CASES in capture/row_height_fitted.py); rotation: degrees; size: the cell's font size; applied: the font Excel applied to column A; height: the row's height in points
 group	name	row	rotation	size	applied	height	text
 turned	90 short 9	1	90	9	Calibri 9	20	Rot
@@ -917,3 +917,105 @@ styled	Arial 40	378	0	40	Arial 40	49	HHH
 styled	Times New Roman 40	379	0	40	Times New Roman 40	50	HHH
 styled	Courier New 40	380	0	40	Courier New 40	53	HHH
 styled	Aptos Narrow 40	381	0	40	Aptos Narrow 40	52	HHH
+scripts	superscript 6.5	1	0	6.5	Calibri 6	15	HHH
+scripts	subscript 6.5	2	0	6.5	Calibri 6	15	HHH
+scripts	both 6.5	3	0	6.5	Calibri 6	15	HHH
+scripts	superscript 7.5	4	0	7.5	Calibri 7	15	HHH
+scripts	subscript 7.5	5	0	7.5	Calibri 7	15	HHH
+scripts	both 7.5	6	0	7.5	Calibri 7	15	HHH
+scripts	superscript 8.5	7	0	8.5	Calibri 8	15	HHH
+scripts	subscript 8.5	8	0	8.5	Calibri 8	15	HHH
+scripts	both 8.5	9	0	8.5	Calibri 8	15	HHH
+scripts	superscript 9.5	10	0	9.5	Calibri 9	16	HHH
+scripts	subscript 9.5	11	0	9.5	Calibri 9	16	HHH
+scripts	both 9.5	12	0	9.5	Calibri 9	17	HHH
+scripts	superscript 10.5	13	0	10.5	Calibri 10	17	HHH
+scripts	subscript 10.5	14	0	10.5	Calibri 10	17	HHH
+scripts	both 10.5	15	0	10.5	Calibri 10	18	HHH
+scripts	superscript 11.5	16	0	11.5	Calibri 11	19	HHH
+scripts	subscript 11.5	17	0	11.5	Calibri 11	18	HHH
+scripts	both 11.5	18	0	11.5	Calibri 11	20	HHH
+scripts	superscript 12.5	19	0	12.5	Calibri 12	20	HHH
+scripts	subscript 12.5	20	0	12.5	Calibri 12	19	HHH
+scripts	both 12.5	21	0	12.5	Calibri 12	21	HHH
+scripts	superscript 13.5	22	0	13.5	Calibri 13	22	HHH
+scripts	subscript 13.5	23	0	13.5	Calibri 13	19	HHH
+scripts	both 13.5	24	0	13.5	Calibri 13	22	HHH
+scripts	superscript 14.5	25	0	14.5	Calibri 14	23	HHH
+scripts	subscript 14.5	26	0	14.5	Calibri 14	24	HHH
+scripts	both 14.5	27	0	14.5	Calibri 14	25	HHH
+scripts	superscript 15.5	28	0	15.5	Calibri 15	24	HHH
+scripts	subscript 15.5	29	0	15.5	Calibri 15	25	HHH
+scripts	both 15.5	30	0	15.5	Calibri 15	26	HHH
+scripts	superscript 16.5	31	0	16.5	Calibri 16	25	HHH
+scripts	subscript 16.5	32	0	16.5	Calibri 16	25	HHH
+scripts	both 16.5	33	0	16.5	Calibri 16	26	HHH
+scripts	superscript 17.5	34	0	17.5	Calibri 17	27	HHH
+scripts	subscript 17.5	35	0	17.5	Calibri 17	26	HHH
+scripts	both 17.5	36	0	17.5	Calibri 17	28	HHH
+scripts	superscript 18.5	37	0	18.5	Calibri 18	28	HHH
+scripts	subscript 18.5	38	0	18.5	Calibri 18	27	HHH
+scripts	both 18.5	39	0	18.5	Calibri 18	29	HHH
+scripts	superscript 19.5	40	0	19.5	Calibri 19	29	HHH
+scripts	subscript 19.5	41	0	19.5	Calibri 19	30	HHH
+scripts	both 19.5	42	0	19.5	Calibri 19	31	HHH
+scripts	superscript 20.5	43	0	20.5	Calibri 20	31	HHH
+scripts	subscript 20.5	44	0	20.5	Calibri 20	32	HHH
+scripts	both 20.5	45	0	20.5	Calibri 20	33	HHH
+scripts	superscript 21.5	46	0	21.5	Calibri 21	33	HHH
+scripts	subscript 21.5	47	0	21.5	Calibri 21	33	HHH
+scripts	both 21.5	48	0	21.5	Calibri 21	35	HHH
+scripts	superscript 22.5	49	0	22.5	Calibri 22	33	HHH
+scripts	subscript 22.5	50	0	22.5	Calibri 22	34	HHH
+scripts	both 22.5	51	0	22.5	Calibri 22	35	HHH
+scripts	superscript 23.5	52	0	23.5	Calibri 23	35	HHH
+scripts	subscript 23.5	53	0	23.5	Calibri 23	35	HHH
+scripts	both 23.5	54	0	23.5	Calibri 23	37	HHH
+scripts	superscript 24.5	55	0	24.5	Calibri 24	37	HHH
+scripts	subscript 24.5	56	0	24.5	Calibri 24	39	HHH
+scripts	both 24.5	57	0	24.5	Calibri 24	40	HHH
+scripts	superscript 25.5	58	0	25.5	Calibri 25	38	HHH
+scripts	subscript 25.5	59	0	25.5	Calibri 25	40	HHH
+scripts	both 25.5	60	0	25.5	Calibri 25	41	HHH
+scripts	superscript 26.5	61	0	26.5	Calibri 26	39	HHH
+scripts	subscript 26.5	62	0	26.5	Calibri 26	41	HHH
+scripts	both 26.5	63	0	26.5	Calibri 26	42	HHH
+scripts	superscript 27.5	64	0	27.5	Calibri 27	42	HHH
+scripts	subscript 27.5	65	0	27.5	Calibri 27	41	HHH
+scripts	both 27.5	66	0	27.5	Calibri 27	44	HHH
+scripts	superscript 28.5	67	0	28.5	Calibri 28	42	HHH
+scripts	subscript 28.5	68	0	28.5	Calibri 28	42	HHH
+scripts	both 28.5	69	0	28.5	Calibri 28	44	HHH
+scripts	superscript 29.5	70	0	29.5	Calibri 29	44	HHH
+scripts	subscript 29.5	71	0	29.5	Calibri 29	45	HHH
+scripts	both 29.5	72	0	29.5	Calibri 29	47	HHH
+scripts	superscript 30.5	73	0	30.5	Calibri 30	45	HHH
+scripts	subscript 30.5	74	0	30.5	Calibri 30	48	HHH
+scripts	both 30.5	75	0	30.5	Calibri 30	49	HHH
+scripts	superscript 31.5	76	0	31.5	Calibri 31	48	HHH
+scripts	subscript 31.5	77	0	31.5	Calibri 31	48	HHH
+scripts	both 31.5	78	0	31.5	Calibri 31	51	HHH
+scripts	superscript 32.5	79	0	32.5	Calibri 32	49	HHH
+scripts	subscript 32.5	80	0	32.5	Calibri 32	49	HHH
+scripts	both 32.5	81	0	32.5	Calibri 32	52	HHH
+scripts	superscript 33.5	82	0	33.5	Calibri 33	51	HHH
+scripts	subscript 33.5	83	0	33.5	Calibri 33	50	HHH
+scripts	both 33.5	84	0	33.5	Calibri 33	54	HHH
+scripts	superscript 34.5	85	0	34.5	Calibri 34	51	HHH
+scripts	subscript 34.5	86	0	34.5	Calibri 34	53	HHH
+scripts	both 34.5	87	0	34.5	Calibri 34	55	HHH
+scripts	superscript 35.5	88	0	35.5	Calibri 35	54	HHH
+scripts	subscript 35.5	89	0	35.5	Calibri 35	53	HHH
+scripts	both 35.5	90	0	35.5	Calibri 35	57	HHH
+scripts	superscript 36.5	91	0	36.5	Calibri 36	55	HHH
+scripts	subscript 36.5	92	0	36.5	Calibri 36	56	HHH
+scripts	both 36.5	93	0	36.5	Calibri 36	59	HHH
+scripts	superscript 37.5	94	0	37.5	Calibri 37	56	HHH
+scripts	subscript 37.5	95	0	37.5	Calibri 37	57	HHH
+scripts	both 37.5	96	0	37.5	Calibri 37	60	HHH
+scripts	superscript 38.5	97	0	38.5	Calibri 38	57	HHH
+scripts	subscript 38.5	98	0	38.5	Calibri 38	58	HHH
+scripts	both 38.5	99	0	38.5	Calibri 38	61	HHH
+scripts	superscript 39.5	100	0	39.5	Calibri 39	60	HHH
+scripts	subscript 39.5	101	0	39.5	Calibri 39	60	HHH
+scripts	both 39.5	102	0	39.5	Calibri 39	64	HHH

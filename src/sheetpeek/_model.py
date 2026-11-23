@@ -176,8 +176,8 @@ class Font:
     """The color Excel draws, ``RRGGBB`` (a theme color resolved through the workbook's theme, its
     tint applied), or ``None`` for automatic."""
     vert_align: VerticalTextPosition | None = None
-    """``superscript`` or ``subscript``: the whole cell's text drawn at two thirds of the size,
-    raised or lowered (``ARCHITECTURE.md`` §4.13); ``None`` on the baseline."""
+    """``superscript`` or ``subscript``: the whole cell's text drawn smaller (about two thirds of
+    the size), raised or lowered (``ARCHITECTURE.md`` §4.13); ``None`` on the baseline."""
     scheme: Literal["major", "minor"] | None = None
     """The font scheme the file gives, ``major`` (headings) or ``minor`` (body) for a theme font,
     whose ``name`` is then the theme's typeface (§4.14); ``None`` for a font named for itself."""

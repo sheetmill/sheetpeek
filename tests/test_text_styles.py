@@ -14,7 +14,8 @@ from openpyxl.styles import Alignment, Font
 import sheetpeek
 from sheetpeek import TextRule
 from sheetpeek._model import Font as ModelFont
-from sheetpeek._text_styles import row_extras, shrink_step, vert_extra
+from sheetpeek._rows import script_parts, script_size
+from sheetpeek._text_styles import shrink_step
 from sheetpeek.backends.html import HTMLBackend
 from tests.workbooks import rewrite, save
 
@@ -91,7 +92,7 @@ def test_a_reading_order_no_interface_writes_reads_as_context(tmp_path, value):
 # Superscript and subscript (suite text_style).
 
 
-def test_superscript_and_subscript_are_two_thirds_raised_and_lowered(tmp_path):
+def test_superscript_and_subscript_are_drawn_smaller_raised_and_lowered(tmp_path):
     def build(ws):
         for column, position in (("A", None), ("B", "superscript"), ("C", "subscript")):
             ws[f"{column}1"] = "HHH"
@@ -99,12 +100,13 @@ def test_superscript_and_subscript_are_two_thirds_raised_and_lowered(tmp_path):
 
     rendered = lay_out(tmp_path, build)
     plain, sup, sub = runs_of(rendered, 1)
-    assert (sup.scale, sub.scale) == (pytest.approx(2 / 3), pytest.approx(2 / 3))
+    # drawn at round(2 * 11 / 3) = 7 pt
+    assert (sup.scale, sub.scale) == (pytest.approx(7 / 11), pytest.approx(7 / 11))
     assert plain.scale == 1
     # Raised 5 pt and lowered 2 pt at 11 pt; a row with both is fitted to 18 pt.
     assert (plain.y - sup.y, sub.y - plain.y) == (5, 2)
     assert rendered.rows[0].height_pt == 18
-    # Measured at the drawn size: an H is 5 pt at 7.33 pt, 7 at 11.
+    # Measured at the drawn size: an H is 5 pt at 7 pt, 7 at 11.
     assert (plain.width, sup.width) == (21, 15)
 
 
@@ -117,12 +119,12 @@ def test_one_kind_grows_a_fitted_row_by_two_points(tmp_path, position):
     assert lay_out(tmp_path, build).rows[0].height_pt == 17  # 15 plain
 
 
-def test_the_growth_at_24_points(tmp_path):
-    # Captured: 37 pt against 31 plain, raised 12 pt and lowered 4 pt. The plain height of a
-    # 24 pt row is not in the row-height table (§4.7), so only the difference is compared.
-    font = ModelFont("Calibri", 24.0, vert_align="superscript")
-    assert vert_extra(font) == 6
-    assert vert_extra(ModelFont("Calibri", 11.0, vert_align="subscript")) == 2
+def test_the_raise_and_lowering_at_24_points(tmp_path):
+    # Captured (row_bottoms, scripts groups): raised floor(24/2) = 12 and lowered
+    # floor(24/5) = 4 from the row's baseline; drawn at round(2 * 24 / 3) = 16.
+    assert script_size(ModelFont("Calibri", 24.0, vert_align="superscript")) == (24, 16, 12, 4)
+    # a half size acts at the whole size above it
+    assert script_size(ModelFont("Calibri", 23.5, vert_align="subscript")) == (24, 16, 12, 4)
 
     def build(ws):
         ws["A1"], ws["B1"] = "HHH", "HHH"
@@ -135,11 +137,31 @@ def test_the_growth_at_24_points(tmp_path):
     assert (plain.y - sup.y, sub.y - plain.y) == (12, 4)
 
 
+def test_a_subscript_lowers_the_rows_shared_bottom(tmp_path):
+    # Captured (row_bottoms, "subscript 24 probe"): beside a Calibri 24 subscript, plain 11 pt
+    # text in a 64 pt row sits on l + B(d) = 4 + 4 = 8 above the bottom; beside a superscript,
+    # on the 24 pt font's own B, 6.
+    assert script_parts(ModelFont("Calibri", 24.0, vert_align="subscript"))[1] == 8
+    assert script_parts(ModelFont("Calibri", 24.0, vert_align="superscript"))[1] == 6
+
+    def build(ws):
+        ws.row_dimensions[1].height = 64
+        ws["A1"], ws["B1"] = "HHH", "HHH"
+        ws["B1"].font = Font(size=24, vertAlign="subscript")
+
+    rendered = lay_out(tmp_path, build)
+    row = rendered.rows[0]
+    (probe,) = runs_of(rendered, 1, 1)
+    assert row.y_pt + row.height_pt - probe.y == 8
+
+
 def test_a_tiny_superscript_never_lowers_a_row(tmp_path):
-    # The guard: a 1 pt font's addition, extrapolated, would be negative.
-    font = ModelFont("Calibri", 1.0, vert_align="superscript")
-    assert vert_extra(font) == 0
-    assert row_extras([font]) == [(font, 0)]
+    # A 1 pt superscript's parts stay under the Normal font's: the row is 15 pt.
+    def build(ws):
+        ws["A1"] = "HHH"
+        ws["A1"].font = Font(size=1, vertAlign="superscript")
+
+    assert lay_out(tmp_path, build).rows[0].height_pt == 15
 
 
 # Underlines and strikethrough (suite text_style).
@@ -279,7 +301,7 @@ def test_superscript_is_drawn_smaller_in_html(tmp_path):
         ws["A1"] = "HHH"
         ws["A1"].font = Font(vertAlign="superscript")
 
-    assert "font:7.333pt 'sheetpeek-calibri'" in html(lay_out(tmp_path, build))
+    assert "font:7pt 'sheetpeek-calibri'" in html(lay_out(tmp_path, build))
 
 
 # Shrink to fit (suite text_style).

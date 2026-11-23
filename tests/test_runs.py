@@ -237,7 +237,7 @@ def test_superscript_and_subscript_runs(excel):
     (formula,) = runs_of(excel, 16)
     plain, raised = formula.spans
     assert (plain.scale, plain.shift) == (1, 0)
-    assert raised.scale == pytest.approx(2 / 3)
+    assert raised.scale == pytest.approx(7 / 11)  # drawn at round(2 * 11 / 3) = 7 pt
     assert raised.shift == -5  # as a superscript cell at 11 pt (§4.13)
     (water,) = runs_of(excel, 18)
     assert [s.shift for s in water.spans] == [0, 2, 0]
@@ -350,7 +350,7 @@ def test_html_raises_a_superscript_run_by_offset(excel):
     assert "vertical-align" not in page
     raised = re.search(r'<span style="([^"]*)">2</span>', page)[1]
     assert "position:relative;top:-7px" in raised  # 5 pt
-    assert "font:7.333pt" in raised
+    assert "font:7pt" in raised
 
 
 def test_html_escapes_each_run(tmp_path):

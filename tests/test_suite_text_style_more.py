@@ -321,22 +321,6 @@ PINNED: dict[str, frozenset[str]] = {
             "center 60 shrunk 2/7",
         )
     ),
-    "test_superscript_and_subscript_fit_rows_and_baselines_as_captured": frozenset(
-        (
-            "both 14 subscript",
-            "both 14 superscript",
-            "both 24 subscript",
-            "both 24 superscript",
-            "both 36 subscript",
-            "both 36 superscript",
-            "subscript 14",
-            "subscript 18",
-            "subscript 36",
-            "subscript 9",
-            "superscript 18",
-            "superscript 36",
-        )
-    ),
 }
 """Known deviations by test (and zoom), the cases that differ; each comparison asserts exactly
 these, so a new difference fails and so does a fixed one (unpin it). Their reasons (the vertical
@@ -352,8 +336,6 @@ metrics of styled text, not yet modeled):
 - test_shrunk_text_keeps_the_baseline_sheetpeek_gives_it: text shrunk to 2/7 (3.1 pt) sits top
   and centered as about 6 pt would at zoom 100, centered so at 200 too, where sheetpeek places it
   by its drawn size.
-- test_superscript_and_subscript_fit_rows_and_baselines_as_captured: superscript and subscript rows
-  and baselines at 9 to 36 pt are not the 11 pt growth scaled.
 """
 
 

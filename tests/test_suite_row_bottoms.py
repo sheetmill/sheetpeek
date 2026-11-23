@@ -122,9 +122,21 @@ def test_baselines_are_the_bottoms_of_the_line_bands():
 
 # --- the comparison with the capture
 
+SMALL_SUBSCRIPT = (
+    "Excel's subscript at 6 to 8 pt sits a point higher: its bottom is the Normal font's 3, where "
+    "l + B(d) gives 4 (the drawn size's small-size metrics)"
+)
 PINNED: dict[str, str] = {
-    "subscript neighbor": "Excel puts the probe 8 pt above the bottom beside a Calibri 24 "
-    "subscript, no candidate's place; sheetpeek counts the font's own 6 (not yet modeled)",
+    "superscript 6 glyph": "Excel raises a 6 pt superscript 4 pt, where floor(6/2) is 3",
+    "subscript 6 probe": SMALL_SUBSCRIPT,
+    "subscript 6.5 probe": SMALL_SUBSCRIPT,
+    "subscript 6.5 glyph": SMALL_SUBSCRIPT,
+    "subscript 7 probe": SMALL_SUBSCRIPT,
+    "subscript 7 glyph": SMALL_SUBSCRIPT,
+    "subscript 7.5 probe": SMALL_SUBSCRIPT,
+    "subscript 7.5 glyph": SMALL_SUBSCRIPT,
+    "subscript 8 probe": SMALL_SUBSCRIPT,
+    "subscript 8 glyph": SMALL_SUBSCRIPT,
 }
 """Cases where sheetpeek's baseline differs from Excel's, each with its reason."""
 
@@ -148,7 +160,7 @@ def _captured():
     return {r["name"]: r for r in (dict(zip(header, row, strict=True)) for row in body)}
 
 
-NO_CANDIDATE = {"subscript neighbor": 24.0}
+NO_CANDIDATE = {"superscript 6 glyph": 57.0}
 """Cases whose captured baseline no candidate gave, with that baseline."""
 
 

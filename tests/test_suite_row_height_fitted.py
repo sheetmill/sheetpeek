@@ -136,21 +136,11 @@ PINNED: dict[str, frozenset[str]] = {
         "90 ox4 31|90 ix3 31|90 ix3 32|90 ox1 33|90 ox2 33|90 ox4 33|90 ox1 35|90 ox2 35|"
         "90 ox4 35|90 ix3 35|90 ox1 36|90 ox2 36|90 ox4 36|90 ix3 36"
     ),
-    # Superscript and subscript text, alone and side by side, from 12 pt: sheetpeek's linear
-    # growth is not Excel's, which is not yet modeled (§4.13).
-    "styled": _names(
-        "both 12|both 13|both 14|both 16|both 17|both 18|both 19|both 20|both 21|both 22|both 23|"
-        "both 24|both 25|both 26|both 27|both 28|both 29|both 30|both 31|both 32|both 33|both 34|"
-        "both 35|both 36|both 37|both 38|both 39|both 40|subscript 13|subscript 14|subscript 15|"
-        "subscript 17|subscript 18|subscript 19|subscript 20|subscript 21|subscript 22|"
-        "subscript 23|subscript 24|subscript 26|subscript 27|subscript 28|subscript 29|"
-        "subscript 30|subscript 32|subscript 33|subscript 34|subscript 35|subscript 36|"
-        "subscript 37|subscript 38|subscript 39|subscript 40|superscript 12|superscript 16|"
-        "superscript 17|superscript 18|superscript 19|superscript 20|superscript 21|superscript 22|"
-        "superscript 23|superscript 24|superscript 25|superscript 26|superscript 27|superscript 28|"
-        "superscript 29|superscript 30|superscript 31|superscript 32|superscript 33|superscript 34|"
-        "superscript 35|superscript 36|superscript 37|superscript 38|superscript 39|superscript 40"
-    ),
+    # A subscript, alone or beside a superscript, at 6 to 8 pt: Excel's row is 15, the Normal
+    # font's, where l + B(d) gives a bottom of 4 and a row of 16 (the drawn size's small-size
+    # metrics; row_bottoms' screen shows the same point at those sizes).
+    "styled": _names("both 6|both 7|both 8|subscript 6|subscript 7|subscript 8"),
+    "scripts": _names("both 6.5|both 7.5|subscript 6.5|subscript 7.5"),
 }
 """Cases where sheetpeek's row differs from Excel's, by comparison, with their reasons."""
 

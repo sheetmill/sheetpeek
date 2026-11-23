@@ -10,19 +10,13 @@ from __future__ import annotations
 
 import functools
 import unicodedata
-from collections.abc import Iterable
 from typing import Literal
 
 import xlformat
 
 from sheetpeek._model import Font
+from sheetpeek._rows import script_size
 from sheetpeek._text_model import TextRule
-
-VERT_SCALE = 2 / 3
-"""Superscript and subscript are drawn at about two thirds of the size (cap heights 0.64 to
-0.68 of the plain text's at 11 and 24 pt)."""
-_RAISE = 0.48  # em of the font's size: 5 pt at 11 pt, 12 pt at 24 pt
-_LOWER = 0.18  # 2 pt at 11 pt, 4 pt at 24 pt
 
 ACCOUNTING_INSETS = (3.0, 2.0)
 UNDERLINE_OVERRUN = 1.0
@@ -53,50 +47,27 @@ at Calibri 11 at zoom 100; the step at other sizes is unverified)."""
 
 
 def vert_scale(font: Font) -> float:
-    """The drawn size over the font's size for superscript and subscript, else 1."""
-    return VERT_SCALE if font.vert_align is not None else 1.0
+    """The drawn size over the font's size for superscript and subscript, else 1.
+
+    The drawn size is ``round(2s/3)`` of the whole size ``s`` (``_rows.script_size``).
+    """
+    if font.vert_align is None or font.size <= 0:
+        return 1.0
+    return script_size(font)[1] / font.size
 
 
 def vert_shift(font: Font) -> float:
     """Points the baseline moves down (positive) or up for superscript and subscript.
 
-    Captured at 11 and 24 pt: raised 5 and 12 pt, lowered 2 and 4 pt, about 0.48 and 0.18 em.
+    Raised ``floor(s/2)`` and lowered ``floor(s/5)`` from the row's baseline, ``s`` the size
+    rounded up (captured, ``row_bottoms`` groups ``scripts_1`` to ``scripts_11``, Calibri 6 to
+    40; other faces unverified).
     """
     if font.vert_align == "superscript":
-        return -float(round(_RAISE * font.size))
+        return -float(script_size(font)[2])
     if font.vert_align == "subscript":
-        return float(round(_LOWER * font.size))
+        return float(script_size(font)[3])
     return 0.0
-
-
-def vert_extra(font: Font) -> float:
-    """Points superscript or subscript add to a fitted row.
-
-    Captured: 2 at 11 pt (17 pt rows for 15), 6 at 24 pt (37 for 31); linear between and beyond,
-    never below 0 (unverified).
-    """
-    if font.vert_align is None:
-        return 0.0
-    return float(max(0, round(2 + (font.size - 11) * 4 / 13)))
-
-
-def row_extras(fonts: Iterable[Font]) -> list[tuple[Font, float]]:
-    """Each font of a row's cells with values, with what its text styles add to its row height.
-
-    A fitted row takes the largest font row height plus addition (an accounting underline's is
-    in the row's bottom, ``_excel._fitted``). A row holding both superscript and subscript grows
-    1 pt more at 11 pt (18 pt, captured), half the one-kind addition at other sizes: from 12 pt
-    Excel's rows differ, a known deviation (row_height_fitted, group styled).
-    """
-    fonts = list(fonts)
-    both = {f.vert_align for f in fonts} >= {"superscript", "subscript"}
-    result = []
-    for font in fonts:
-        extra = vert_extra(font)
-        if both and extra:
-            extra += round(extra / 2)
-        result.append((font, extra))
-    return result
 
 
 def accounting(font: Font) -> bool:

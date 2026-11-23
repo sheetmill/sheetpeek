@@ -43,6 +43,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the shared bottom baseline, as Excel counts them for the cells the file has no element for: a
   column styled Calibri 24 fits every row without a style of its own to 31 pt (was 15 under
   Calibri 11). A style index past the stylesheet's formats is ignored.
+- Superscript and subscript follow Excel at every size (Calibri; other faces take the same
+  rules, unverified): a cell acts at its size rounded up and is drawn at round(2s/3) of it,
+  raised floor(s/2) or lowered floor(s/5) (was 2/3 of the size, raised round(0.48 × size),
+  lowered round(0.18 × size)). A subscript lowers the row's shared baseline to l + B(d): plain
+  text beside a Calibri 24 subscript sits 8 pt above the bottom (was 3). A fitted row is its
+  largest part above the baseline plus its largest part below, a superscript's part above from
+  Excel's rows: a Calibri 24 superscript or subscript fits 35 pt (was 37), a row with both 37
+  (was 40), and a 12.5 pt superscript the 13 pt row, 20 (was 18).
 - A fitted row is at least its fonts' largest ascent plus their largest descent: an accounting
   underline at Calibri 6 or 8 under Calibri 11 makes a row of 17 pt (was 15), at Calibri 10
   18 pt (was 17).

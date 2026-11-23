@@ -453,7 +453,7 @@ EXPECTED: dict[str, dict[str, dict[str, Any]]] = {
         "J46": {
             "row_height": 17.0,
             "text": "HH",
-            "baselines": (16.0,),
+            "baselines": (15.0,),
             "words": (("Calibri 11 subscript", "000000", 0.0),),
         },
     },
@@ -521,6 +521,7 @@ EXPECTED: dict[str, dict[str, dict[str, Any]]] = {
         },
     },
 }
+
 
 """What sheetpeek draws for each case, by group and cell: the row's height, the text drawn, each
 line's baseline below the row's top, each word's font (as the references name it), color and

@@ -8,6 +8,7 @@ is set, and gives the row the Normal font's height from xlformat's row model.
 from __future__ import annotations
 
 import math
+from dataclasses import replace
 from functools import lru_cache
 
 import xlformat
@@ -144,3 +145,49 @@ def print_baseline_offsets(font: Font) -> tuple[float, float, float]:
     line = font_row_height(font)
     above = round(line * 11 / 15)
     return line, float(above), line - above - 1
+
+
+# The part of a Calibri superscript's row above the shared baseline, by its whole size: its
+# fitted row less its bottom (captured, row_height_fitted group styled, every size from 10 to
+# 40; below 10 the Normal font's 12 is the larger). No closed form fits every size: the raise
+# plus the drawn size's ascent gives it from 16 to 31 and a point less at 10 to 15 and 32 to 40.
+_SUPERSCRIPT_ABOVE = {
+    10: 13, 11: 14, 12: 16, 13: 17, 14: 18, 15: 19, 16: 20, 17: 20, 18: 22, 19: 23, 20: 24,
+    21: 25, 22: 27, 23: 27, 24: 29, 25: 30, 26: 31, 27: 32, 28: 34, 29: 34, 30: 36, 31: 37,
+    32: 39, 33: 40, 34: 42, 35: 42, 36: 44, 37: 45, 38: 46, 39: 47, 40: 49,
+}  # fmt: skip
+
+
+def script_size(font: Font) -> tuple[int, int, int, int]:
+    """(whole size ``s``, drawn size ``d``, raise, lowering) of a script font, in points.
+
+    A superscript or subscript cell acts at its size rounded up, ``s = ceil(S)``, and draws at
+    ``d = round(2s/3)``, raised ``floor(s/2)`` or lowered ``floor(s/5)`` (captured,
+    ``row_bottoms`` groups ``scripts_1`` to ``scripts_11`` and ``row_height_fitted`` group
+    ``scripts``: Calibri at every whole and half size from 6 to 40).
+    """
+    s = math.ceil(min(max(font.size, 1.0), 409.0))
+    return s, math.floor(2 * s / 3 + 0.5), s // 2, s // 5
+
+
+@lru_cache(maxsize=256)
+def script_parts(font: Font) -> tuple[float, float, float]:
+    """(part above the shared baseline, part below it, line inset) of a script font's row.
+
+    For a superscript or subscript font (§4.13). A superscript's below is its whole size's
+    ``B``, its above the Calibri table above; for another face or size, the raise plus the
+    drawn size's ascent (unverified). A subscript's line grows by ``g = l + B(d) - B(s)`` on
+    both sides: ``ceil(s) + 1 + g`` above and ``l + B(d)`` below, which is also the row's
+    shared bottom (captured, ``row_bottoms`` and ``row_height_fitted``; at 6 to 8 pt Excel's
+    subscript bottom is a point less).
+    """
+    s, d, r, lower = script_size(font)
+    whole = replace(font, size=float(s), vert_align=None)
+    _, ascent, bottom, extra = face_metrics(whole)
+    drawn = face_metrics(replace(font, size=float(d), vert_align=None, underline=None))
+    if font.vert_align == "superscript":
+        table = _SUPERSCRIPT_ABOVE if font.name.lower() == "calibri" else {}
+        above = float(table.get(s, r + drawn[1]))
+        return above, bottom + extra, bottom - 2.0
+    below = lower + drawn[2]
+    return ascent + below - bottom, below + extra, bottom - 2.0

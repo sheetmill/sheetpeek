@@ -959,16 +959,29 @@ plain text, Markdown, CSV and TSV show neither fills nor borders.
 Microsoft 365, Calibri 11 at zoom 100 and 200). Sizes other than those captured are
 scaled from them, unverified. The rules live in `_text_styles.py` and `_excel.py`.
 
-**Superscript and subscript** (`Font.vert_align`). The whole cell's text is drawn at 2/3 of its
-size (cap heights 0.64 to 0.68 of the plain text's at 11 and 24 pt), its baseline raised by
-`round(0.48 × size)` or lowered by `round(0.18 × size)` from the cell's baseline (5 and 2 pt at
-11 pt, 12 and 4 pt at 24 pt). It is measured at the drawn size, for wrapping, `####` and spill
-as for its runs (unverified for `####`). A fitted row grows by 2 pt at 11 pt (17 pt) and 6 pt at
-24 pt (37 pt against 31), linearly between and beyond and never below 0; a row holding both
-kinds grows 1 pt more at 11 pt (18 pt), half the one-kind growth at other sizes. Against
-`row_height_fitted` (group `styled`, Calibri 6 to 40 pt) that holds to 11 pt; from 12 pt the
-rows differ by 1 to 3 pt below 25 pt and more above, a known deviation: Excel's growth is
-not linear and a row of both kinds is not one-kind growth plus half (not yet modeled). `TextRun.scale` carries the drawn size over `font.size`.
+**Superscript and subscript** (`Font.vert_align`). A superscript or subscript cell acts at its
+size rounded up, `s = ceil(S)`; its text is drawn at `d = round(2s/3)`, raised `r = floor(s/2)`
+or lowered `l = floor(s/5)` from the row's baseline (5 and 2 pt at 11 pt, 12 and 4 at 24). It
+is measured at the drawn size, for wrapping, `####` and spill as for its runs (unverified for
+`####`). In the row (§3.6, §4.7) it has a part above the shared baseline and a part below:
+- a superscript: below, its whole size's `B`; above, a table by whole size (its fitted rows from
+  10 to 40 pt less that `B`: 14 at 11 pt, 29 at 24), which the raise plus the drawn size's
+  ascent gives from 16 to 31 pt and misses by a point at 10 to 15 and 32 to 40;
+- a subscript: below, `l + B(d)`, which is also what it sets the row's shared bottom to (8 pt
+  for 24 pt, where its own `B` is 6); above, its ascent plus the same growth `l + B(d) - B(s)`.
+
+A fitted row is the largest part above plus the largest part below, so a row holding both kinds
+is the superscript's row plus the subscript's growth. Captured: `row_height_fitted` (groups
+`styled`, every whole size from 6 to 40, and `scripts`, every half size: 102 of 102 half sizes
+fit the row of the whole size above) and `row_bottoms` (groups `scripts_1` to `scripts_11`: the
+shared bottom and the glyph's baseline beside a superscript or subscript at every whole and half
+size from 6 to 40, 266 of 276 as these rules give, written as candidates before the run). Known
+deviations: a subscript at 6 to 8 pt (Excel's bottom is the Normal font's 3, the rule gives 4,
+so its fitted rows are a point taller in sheetpeek) and a 6 pt superscript (raised 4, not 3).
+Unverified (no capture in this repository yet): every face but Calibri, which takes the same
+rules with its own metrics and, for a superscript's part above, the raise plus the drawn size's
+ascent; sizes past 40 pt; and top-aligned or centered script text. `TextRun.scale` carries the
+drawn size over `font.size`.
 
 **Underlines and strikethrough** are placed and sized by xlformat's `rule_metrics` for the face
 at the drawn size, at zoom 100: each run's `TextRule`s (`TextRun.rules`) give where a line starts
