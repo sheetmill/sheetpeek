@@ -18,6 +18,8 @@ import warnings
 from collections.abc import Callable
 from typing import IO, Any, Literal, TextIO
 
+import xlformat
+
 from sheetpeek._model import one_line
 from sheetpeek._notices import Collector, Notice, NotShownWarning, deliver
 from sheetpeek._package import LimitError, ReadLimits
@@ -74,6 +76,8 @@ def render_workbook(
     tabs: Literal["bottom", "top"] = "bottom",
     out: TextIO | None = None,
     limits: ReadLimits | None = None,
+    platform: str | xlformat.Platform | None = None,
+    regional_settings: xlformat.RegionalSettings | None = None,
     on_notice: Callable[[Notice], object] | Literal["ignore"] | None = None,
     **html_options: Any,
 ) -> str | None:
@@ -97,6 +101,10 @@ def render_workbook(
         out: A text stream to write to. Without one, the page is returned as a string.
         limits: What reading may cost. ``max_cells`` bounds the whole page's cells, every
             sheet's together. By default, ``ReadLimits()``.
+        platform: Which Excel to show it as, when ``source`` is a workbook: ``"mac"`` (the
+            default), ``"windows"`` or an ``xlformat.Platform``, imported from xlformat. An open
+            book is shown as the platform it was opened with.
+        regional_settings: The viewer's regional settings, when ``source`` is a workbook.
         on_notice: Called with each notice, ``"ignore"``, or ``None`` for one
             :class:`~sheetpeek.NotShownWarning` per sheet with something to report.
         **html_options: Options of :class:`~sheetpeek.backends.HTMLBackend`, such as
@@ -110,15 +118,31 @@ def render_workbook(
         LimitError: The file, a sheet, or the page's cells exceed ``limits``.
         PackageError: The file is not a readable xlsx workbook, or it is refused.
     """
+    from sheetpeek._platform import resolve
     from sheetpeek._read import Book, book_limits
 
     if tabs not in ("bottom", "top"):
         raise ValueError(f"tabs must be 'bottom' or 'top', not {tabs!r}")
     backend = HTMLBackend(**html_options)
     if isinstance(source, Book):
+        if (platform is not None and resolve(platform) != source._platform) or (
+            regional_settings not in (None, source._regional)
+        ):
+            raise ValueError(
+                "an open book is shown as the platform it was opened with: pass platform= and "
+                "regional_settings= to open()"
+            )
         book, owned = source, False
     else:
-        book, owned = Book(source, limits=limits), True
+        book, owned = (
+            Book(
+                source,
+                limits=limits,
+                platform=platform,
+                regional_settings=regional_settings,
+            ),
+            True,
+        )
     try:
         page = _WorkbookPage(book, backend, hidden_sheets, show_hidden, limits or book_limits(book))
         page.tabs_first = tabs == "top"

@@ -19,6 +19,7 @@ from typing import Any
 
 import xlformat
 
+from sheetpeek import _platform
 from sheetpeek._layout import (
     _UNDRAWN,
     Draft,
@@ -96,6 +97,7 @@ def lay_out(draft: Draft) -> tuple[tuple[RenderedColumn, ...], tuple[RenderedRow
             base_col_width=sheet.base_column_width,
             default_col_width=sheet.default_column_width,
             normal_font=normal,
+            platform=sheet.platform,
         )
 
     base = metrics(Column(1))
@@ -129,7 +131,9 @@ def lay_out(draft: Draft) -> tuple[tuple[RenderedColumn, ...], tuple[RenderedRow
         if key not in blocks:
             total = sum(widths[p] for p in cols)
             blocks[key] = (
-                xlformat.column_metrics_from_points(total, normal_font=normal).width
+                xlformat.column_metrics_from_points(
+                    total, normal_font=normal, platform=sheet.platform
+                ).width
                 if total > 0
                 else None
             )
@@ -312,7 +316,7 @@ def indent_points(normal: xlformat.Font | None) -> float:
 
     The cell's own font does not change it.
     """
-    return _INDENT_SPACES * xlformat.text_width(" ", font=normal)
+    return _INDENT_SPACES * _platform.text_width(" ", font=normal)
 
 
 def _indents(align: str) -> int:
@@ -370,7 +374,7 @@ def _turned_height(grid: _Grid, cell: Any, p: int, fonts: _Fonts) -> float:
     if spans:
         width = Text.of_spans(spans, fonts.get, breaks=False).width(0, len(content))
     else:
-        width = xlformat.text_width(content, font=fonts.get(cell.font))
+        width = _platform.text_width(content, font=fonts.get(cell.font))
     size = max(font.size for font in own)
     if _upright(style):
         return _upright_height(width, size)  # the Normal font's row bounds it (the caller)
@@ -599,10 +603,10 @@ class _Points:
                 whole = Text.of_spans(spans, self.fonts.get, breaks=False)
                 unshrunk = whole.width(0, len(whole.text))
             else:
-                unshrunk = xlformat.text_width(shown.text, font=font)
+                unshrunk = _platform.text_width(shown.text, font=font)
             shrink = shrink_scale(
                 unshrunk,
-                xlformat.text_width("H", font=font),
+                _platform.text_width("H", font=font),
                 (x1 - x0) - indent,
                 budget - indent,
             )
@@ -696,7 +700,7 @@ class _Points:
                 scale = shrink
             else:
                 width = (
-                    line_width if line_width is not None else xlformat.text_width(piece, font=font)
+                    line_width if line_width is not None else _platform.text_width(piece, font=font)
                 )
                 ruled = rules(cell_font, size, baseline, (x, x + width), own)
                 scale = size / cell_font.size
@@ -1096,7 +1100,7 @@ def _wrap(text: str, budget: float, font: xlformat.Font) -> list[str]:
     text = text.replace("\r", "")
     return [
         text[a:b]
-        for a, b in wrap(text, budget, lambda a, b: xlformat.text_width(text[a:b], font=font))
+        for a, b in wrap(text, budget, lambda a, b: _platform.text_width(text[a:b], font=font))
     ]
 
 
@@ -1180,7 +1184,7 @@ def _spans(
                 TextSpan(
                     piece,
                     font,
-                    xlformat.text_width(piece, font=part.measured),
+                    _platform.text_width(piece, font=part.measured),
                     vert_scale(part.font) * shrink,
                     vert_shift(part.font),
                 )

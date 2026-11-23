@@ -163,6 +163,7 @@ text styles into `Font` and `CellStyle` (§4.13). Rich-text runs inside one cell
 | `palette` | xlio: `<indexedColors>` as the indexed colors take it (64 entries, the default's for an entry missing or not a color), `None` without it (§4.14) |
 | `normal_font` | the font of xlio's `Normal` cell style, else the workbook's first font |
 | `date1904` | xlio: `<workbookPr date1904>` |
+| `platform`, `regional_settings` | the reader's `platform=` and `regional_settings=`, resolved to xlformat's `Platform` and `RegionalSettings` (`_platform.py`); the reader's built-in formats and the Normal font's digit, the layout's column widths, formats and text measurement follow them; rows, vertical placement and rules keep Excel for Mac's rules until xlformat has Windows tables for them |
 | `notices` | what the file uses that sheetpeek does not read yet, as `Notice`s (§3.7) |
 | `cells` | a dense row-major grid over `ref` |
 

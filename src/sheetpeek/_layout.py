@@ -24,6 +24,7 @@ from sheetpeek._pass_borders import borders_pass
 from sheetpeek._pass_buttons import buttons_pass
 from sheetpeek._pass_outline import outline_pass
 from sheetpeek._pass_tables import tables_pass
+from sheetpeek._platform import current, measuring
 from sheetpeek._rendered import (
     Alignment,
     Gap,
@@ -73,7 +74,27 @@ def layout(
     max_width: int | None = None,
     range_edge: RangeEdge = "extend",
 ) -> RenderedSheet:
-    """Lay out a sheet; see :meth:`sheetpeek.Sheet.layout`."""
+    """Lay out a sheet as its platform's Excel shows it; see :meth:`sheetpeek.Sheet.layout`."""
+    with measuring(sheet.platform):
+        return _laid_out(
+            sheet,
+            mode,
+            show_hidden=show_hidden,
+            scale=scale,
+            max_width=max_width,
+            range_edge=range_edge,
+        )
+
+
+def _laid_out(
+    sheet: Sheet,
+    mode: Mode,
+    *,
+    show_hidden: bool,
+    scale: float,
+    max_width: int | None,
+    range_edge: RangeEdge,
+) -> RenderedSheet:
     if mode not in ("excel", "characters", "none"):
         raise ValueError(f"unknown width mode {mode!r}; expected 'excel', 'characters' or 'none'")
     if scale <= 0:
@@ -278,6 +299,7 @@ def _characters(
         base_col_width=sheet.base_column_width,
         default_col_width=sheet.default_column_width,
         normal_font=normal_font,
+        platform=sheet.platform,
     )
     chars = min(max(1, round(metrics.width * scale)), _WIDEST_CHARACTERS)
     return min(chars, max_width) if max_width else chars
@@ -304,7 +326,7 @@ class _Fonts:
 
     def __init__(self, notes: Collector) -> None:
         self._notes = notes
-        self._measured = {name.lower() for name in xlformat.measured_fonts()}
+        self._measured = {name.lower() for name in xlformat.measured_fonts(platform=current())}
         self._fonts: dict[Font, xlformat.Font] = {}
         self._warned: set[str] = set()
         # By identity, since every cell of a style shares its font and hashing a font costs
@@ -438,6 +460,8 @@ class _Formatter:
             normal_font=normal,
             date1904=self._date1904,
             show_zeros=self._show_zeros,
+            platform=self._sheet.platform,
+            regional_settings=self._sheet.regional_settings,
         )
 
 

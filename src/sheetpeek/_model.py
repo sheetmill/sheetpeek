@@ -12,6 +12,7 @@ from collections.abc import Iterator, Mapping
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Literal, TypeAlias
 
+import xlformat
 from xlformat import ExcelError
 
 from sheetpeek._fill_border_model import Borders, Fill
@@ -370,6 +371,12 @@ class Sheet:
     through the workbook's theme (§4.20)."""
     notices: tuple[Notice, ...] = field(default=())
     """What the file uses that sheetpeek does not read yet (:class:`~sheetpeek.Notice`)."""
+    platform: xlformat.Platform = xlformat.Platform.MAC
+    """The Excel the sheet is shown as, read with it (``platform=`` of :func:`~sheetpeek.read`):
+    an :class:`xlformat.Platform`, imported from xlformat. Its layout and every output follow it."""
+    regional_settings: xlformat.RegionalSettings = xlformat.RegionalSettings.EN_US_MAC
+    """The viewer's regional settings, as an :class:`xlformat.RegionalSettings` (imported from
+    xlformat): the platform's en-US settings unless given."""
     max_cells: int | None = field(default=None, repr=False, compare=False)
     """The largest grid its layout may build (:class:`~sheetpeek.ReadLimits`), or ``None``."""
     _normal_color: Mapping[int, CellStyle] = field(default_factory=dict, repr=False, compare=False)

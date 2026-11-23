@@ -13,7 +13,9 @@ from __future__ import annotations
 import io
 import os
 from collections.abc import Callable
-from typing import IO, Literal, Protocol, TextIO, runtime_checkable
+from typing import IO, Any, Literal, Protocol, TextIO, runtime_checkable
+
+import xlformat
 
 from sheetpeek._model import CellRange, Sheet
 from sheetpeek._notices import Notice, Reason, deliver, merge
@@ -88,6 +90,8 @@ def render(
     limits: ReadLimits | None = None,
     on_notice: Callable[[Notice], object] | Literal["ignore"] | None = None,
     print_area: bool = False,
+    platform: str | xlformat.Platform | None = None,
+    regional_settings: xlformat.RegionalSettings | None = None,
 ) -> str | None:
     """Render a sheet with a backend.
 
@@ -107,6 +111,11 @@ def render(
         out: A text stream to write to. Without one, the output is returned as a string.
         limits: What reading may cost, when ``source`` is a workbook. By default,
             ``ReadLimits()``.
+        platform: Which Excel to show it as, when ``source`` is a workbook: ``"mac"`` (the
+            default), ``"windows"`` or an ``xlformat.Platform``, imported from xlformat, as
+            :func:`~sheetpeek.read` takes it. A sheet is shown as the platform it was read with.
+        regional_settings: The viewer's regional settings, when ``source`` is a workbook, as
+            :func:`~sheetpeek.read` takes them.
         on_notice: Called with each notice, ``"ignore"``, or ``None`` for one warning.
         print_area: Show the sheet's print area instead of its used range, as Excel prints it:
             each of its ranges as a block of its own, in the file's order, a range of whole
@@ -119,13 +128,16 @@ def render(
         The output, or ``None`` when it was written to ``out``.
 
     Raises:
-        ValueError: ``print_area`` with a ``ref``, or with a sheet as ``source``.
+        ValueError: ``print_area`` with a ``ref``, or with a sheet as ``source``; a ``platform``
+            or ``regional_settings`` other than the one a sheet given as ``source`` was read
+            with.
     """
     backend = get_backend(to)
+    reading = _reading(source, limits, platform, regional_settings)
     if print_area:
-        blocks, problem = _print_area(source, backend, sheet, ref, limits)
+        blocks, problem = _print_area(source, backend, sheet, ref, reading)
     else:
-        blocks, problem = [_laid_out(source, backend, sheet, ref, limits)], None
+        blocks, problem = [_laid_out(source, backend, sheet, ref, reading)], None
     buffer = io.StringIO() if out is None else None
     target = out if out is not None else buffer
     assert target is not None
@@ -161,7 +173,7 @@ def _print_area(
     backend: Backend,
     sheet: str | None,
     ref: str | CellRange | None,
-    limits: ReadLimits | None,
+    reading: dict[str, Any],
 ) -> tuple[list[RenderedSheet], str | None]:
     """The print area's blocks, laid out, and why a part of it was left out."""
     if ref is not None:
@@ -170,7 +182,7 @@ def _print_area(
         raise ValueError("print_area reads the workbook: pass a path or a binary file object")
     from sheetpeek._read import Book
 
-    with Book(source, limits=limits) as book:
+    with Book(source, **reading) as book:
         sheets, problem = book._print_area_sheets(sheet)
         if not sheets:  # nothing of any area is on the sheet: the sheet, empty
             sheets = (book.sheet(sheet),)
@@ -184,6 +196,8 @@ def notices(
     sheet: str | None = None,
     ref: str | CellRange | None = None,
     limits: ReadLimits | None = None,
+    platform: str | xlformat.Platform | None = None,
+    regional_settings: xlformat.RegionalSettings | None = None,
 ) -> tuple[Notice, ...]:
     """What a render of ``source`` to ``to`` would leave out or approximate, without rendering.
 
@@ -196,9 +210,42 @@ def notices(
         sheet: The sheet to read, when ``source`` is a workbook.
         ref: The range to read, when ``source`` is a workbook.
         limits: What reading may cost, when ``source`` is a workbook.
+        platform: Which Excel to show it as, as for :func:`render`.
+        regional_settings: The viewer's regional settings, as for :func:`render`.
     """
     backend = get_backend(to)
-    return _all_notices(_laid_out(source, backend, sheet, ref, limits), backend)
+    reading = _reading(source, limits, platform, regional_settings)
+    return _all_notices(_laid_out(source, backend, sheet, ref, reading), backend)
+
+
+def _reading(
+    source: object,
+    limits: ReadLimits | None,
+    platform: str | xlformat.Platform | None,
+    regional_settings: xlformat.RegionalSettings | None,
+) -> dict[str, Any]:
+    """The options to read ``source`` with; a sheet keeps the platform it was read with.
+
+    Raises:
+        ValueError: ``platform`` or ``regional_settings`` other than a given sheet's.
+    """
+    from sheetpeek._platform import regional, resolve
+
+    shown = source.sheet if isinstance(source, RenderedSheet) else source
+    if isinstance(shown, Sheet):
+        given = resolve(platform) if platform is not None else shown.platform
+        if given != shown.platform or regional_settings not in (None, shown.regional_settings):
+            raise ValueError(
+                "a sheet is shown as the platform it was read with: pass platform= and "
+                "regional_settings= to read()"
+            )
+        return {}
+    chosen = resolve(platform)
+    return {
+        "limits": limits,
+        "platform": chosen,
+        "regional_settings": regional(regional_settings, chosen),
+    }
 
 
 def _laid_out(
@@ -206,14 +253,14 @@ def _laid_out(
     backend: Backend,
     sheet: str | None,
     ref: str | CellRange | None,
-    limits: ReadLimits | None,
+    reading: dict[str, Any],
 ) -> RenderedSheet:
     if isinstance(source, RenderedSheet):
         return source if source.mode == backend.mode else source.sheet.layout(backend.mode)
     if not isinstance(source, Sheet):
         from sheetpeek._read import read
 
-        source = read(source, sheet, ref=ref, limits=limits)
+        source = read(source, sheet, ref=ref, **reading)
     return source.layout(backend.mode)
 
 

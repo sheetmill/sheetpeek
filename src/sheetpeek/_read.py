@@ -58,6 +58,8 @@ from sheetpeek._package import (
     worksheet_parts,
 )
 from sheetpeek._page import MAX_COLUMN, MAX_ROW, manual_breaks, print_areas
+from sheetpeek._platform import PlatformLike, regional
+from sheetpeek._platform import resolve as resolve_platform
 from sheetpeek._read_filters import read_autofilters
 from sheetpeek._read_links import Found as Links
 from sheetpeek._read_links import add_formula, cell_links, with_elements, with_formulas
@@ -166,7 +168,11 @@ class Book:
         *,
         limits: ReadLimits | None = None,
         recalc_on_load: RecalcOnLoad = "excel",
+        platform: PlatformLike = None,
+        regional_settings: xlformat.RegionalSettings | None = None,
     ) -> None:
+        self._platform = resolve_platform(platform)
+        self._regional = regional(regional_settings, self._platform)
         self._limits = limits or ReadLimits()
         self._mode = recalc_mode(recalc_on_load)
         self._recalc_state: Recalc | None = None
@@ -196,7 +202,7 @@ class Book:
             self._own_palette = tuple(self._palette) if custom else None
             self._theme_fonts = xlio_theme_fonts(self._book.theme)
             self._normal_font = self._read_normal_font()
-            self._normal_digit = _normal_digit(self._normal_font)
+            self._normal_digit = _normal_digit(self._normal_font, self._platform)
             self._info = workbook_info(self._book.parts)
             self._context = styles.Context(
                 self._cell_color, self._normal_font, self._theme_fonts, self._palette
@@ -467,6 +473,8 @@ class Book:
             merges=tuple(m for m in structure.merges if ref and m.intersects(ref)),
             normal_font=self._normal_font,
             date1904=self.date1904,
+            platform=self._platform,
+            regional_settings=self._regional,
             default_column_width=structure.default_column_width,
             base_column_width=structure.base_column_width,
             default_row_height=structure.default_row_height,
@@ -905,7 +913,7 @@ class Book:
             cell_format = self._book.styles.cell_formats[index]
             code = cell_format.number_format
             if code is None:
-                code = _builtin_format(cell_format.number_format_id)
+                code = _builtin_format(cell_format.number_format_id, self._platform, self._regional)
             cell_format = dataclasses.replace(cell_format, number_format=code)
             found = self._styles[index] = styles.resolve(cell_format, self._context)
             # By identity: a style whose font color is the Normal style's and one with another
@@ -1000,6 +1008,8 @@ def open(  # noqa: A001 - the module-level open() of gzip, tarfile, shelve
     *,
     limits: ReadLimits | None = None,
     recalc_on_load: RecalcOnLoad = "excel",
+    platform: PlatformLike = None,
+    regional_settings: xlformat.RegionalSettings | None = None,
 ) -> Book:
     """Open a workbook to read several sheets with one load.
 
@@ -1013,17 +1023,29 @@ def open(  # noqa: A001 - the module-level open() of gzip, tarfile, shelve
             saved; in a file Excel saved, those it marked, its volatile cells and their
             dependents); ``"always"``, every formula; ``"never"``, none but those without a
             cached value and the volatile ones.
+        platform: Which Excel the sheets are shown as: ``"mac"`` (the default, Excel for Mac),
+            ``"windows"`` (Excel for Windows at 96 dpi) or an ``xlformat.Platform``, imported
+            from xlformat. Column widths, built-in formats and text measure as that Excel's.
+        regional_settings: The viewer's regional settings, an ``xlformat.RegionalSettings``
+            imported from xlformat; by default the platform's en-US settings.
 
     Raises:
         OSError: A path that cannot be opened.
-        ValueError: ``recalc_on_load`` is not one of the three.
+        ValueError: ``recalc_on_load`` is not one of the three, or ``platform`` names another.
+        TypeError: ``platform`` or ``regional_settings`` is not of a type it takes.
         LimitError: The file exceeds ``limits``.
         PackageError: The file is not a readable xlsx workbook, or it is refused.
 
     Example:
         ``with sheetpeek.open("book.xlsx") as book: sheet = book.sheet("Data")``
     """
-    return Book(source, limits=limits, recalc_on_load=recalc_on_load)
+    return Book(
+        source,
+        limits=limits,
+        recalc_on_load=recalc_on_load,
+        platform=platform,
+        regional_settings=regional_settings,
+    )
 
 
 def read(
@@ -1033,6 +1055,8 @@ def read(
     ref: str | CellRange | None = None,
     limits: ReadLimits | None = None,
     recalc_on_load: RecalcOnLoad = "excel",
+    platform: PlatformLike = None,
+    regional_settings: xlformat.RegionalSettings | None = None,
 ) -> Sheet:
     """Read one sheet of a workbook.
 
@@ -1043,16 +1067,27 @@ def read(
         limits: What reading may cost. By default, ``ReadLimits()``; lower them for files from
             people you do not trust.
         recalc_on_load: Which formulas show a computed value, as :func:`open` takes it.
+        platform: Which Excel the sheet is shown as, as :func:`open` takes it (``"mac"`` by
+            default, ``"windows"``, or an ``xlformat.Platform`` imported from xlformat).
+        regional_settings: The viewer's regional settings, as :func:`open` takes them.
 
     Raises:
         OSError: A path that cannot be opened.
         KeyError: There is no sheet with that name.
         NotAWorksheetError: The sheet is a chartsheet or a dialog sheet (a :class:`ValueError`).
-        ValueError: ``ref`` is not a range, or ``recalc_on_load`` not one of the three.
+        ValueError: ``ref`` is not a range, ``recalc_on_load`` not one of the three, or
+            ``platform`` names another.
+        TypeError: ``platform`` or ``regional_settings`` is not of a type it takes.
         LimitError: The file, or the range, exceeds ``limits``.
         PackageError: The file is not a readable xlsx workbook, or it is refused.
     """
-    with Book(source, limits=limits, recalc_on_load=recalc_on_load) as book:
+    with Book(
+        source,
+        limits=limits,
+        recalc_on_load=recalc_on_load,
+        platform=platform,
+        regional_settings=regional_settings,
+    ) as book:
         return book.sheet(sheet, ref=ref)
 
 
@@ -1068,15 +1103,16 @@ def _clip(area: CellRange, used: CellRange | None) -> CellRange | None:
     return CellRange(area.min_row, area.min_col, max_row, max_col)
 
 
-def _normal_digit(font: Font) -> float:
-    """The Normal font's digit in points, as the layout measures it.
+def _normal_digit(font: Font, platform: xlformat.Platform) -> float:
+    """The Normal font's digit in points on ``platform``, as the layout measures it.
 
     A face xlformat has not measured keeps xlio's 6 pt (the layout measures it as Calibri, §4.7).
     """
-    if font.name.lower() not in {name.lower() for name in xlformat.measured_fonts()}:
+    measured_names = xlformat.measured_fonts(platform=platform)
+    if font.name.lower() not in {name.lower() for name in measured_names}:
         return XLIO_DIGIT
     measured = xlformat.Font(font.name, font.size, font.bold, font.italic)
-    return xlformat.file_column_metrics(None, normal_font=measured).digit_width
+    return xlformat.file_column_metrics(None, normal_font=measured, platform=platform).digit_width
 
 
 def _columns(structure: Structure, ref: CellRange | None, digit: float) -> tuple[Column, ...]:
@@ -1102,13 +1138,17 @@ def _rows(structure: Structure, ref: CellRange | None) -> tuple[Row, ...]:
     return tuple(result)
 
 
-def _builtin_format(number_format_id: int) -> str:
-    """The code of a built-in format id, as Excel shows it (xlformat's captured table).
+def _builtin_format(
+    number_format_id: int, platform: xlformat.Platform, settings: xlformat.RegionalSettings
+) -> str:
+    """The code of a built-in format id, as Excel on ``platform`` shows it (xlformat's table).
 
     A custom id the file does not define reads as General (captured, suite ``odd_values``).
     """
     try:
-        return xlformat.builtin_format(number_format_id)
+        return xlformat.builtin_format(
+            number_format_id, platform=platform, regional_settings=settings
+        )
     except ValueError:
         return "General"
 

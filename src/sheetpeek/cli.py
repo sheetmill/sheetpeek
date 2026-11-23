@@ -112,6 +112,7 @@ def _parser() -> argparse.ArgumentParser:
     )
     _add_limits(view, ReadLimits())
     _add_recalc(view)
+    _add_platform(view)
     serve = commands.add_parser(
         "serve",
         help="serve a folder of workbooks as HTML",
@@ -128,6 +129,7 @@ def _parser() -> argparse.ArgumentParser:
     serve.add_argument("-p", "--port", type=int, default=8000, help="port (default: 8000)")
     _add_limits(serve, SERVE_LIMITS)
     _add_recalc(serve)
+    _add_platform(serve)
     return parser
 
 
@@ -162,6 +164,16 @@ def _add_recalc(command: argparse.ArgumentParser) -> None:
     )
 
 
+def _add_platform(command: argparse.ArgumentParser) -> None:
+    command.add_argument(
+        "--platform",
+        choices=("mac", "windows"),
+        default="mac",
+        help="which Excel to show the workbook as: Excel for Mac (mac, the default) or Excel "
+        "for Windows at 96 dpi (windows)",
+    )
+
+
 def _count(text: str) -> int:
     value = int(text)
     if value < 0:
@@ -184,6 +196,7 @@ def _serve(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
             args.port,
             limits=_limits(args),
             recalc_on_load=args.recalc_on_load,
+            platform=args.platform,
         )
     except (NotADirectoryError, OSError) as error:
         _say(err, f"sheetpeek: {error}")
@@ -221,7 +234,12 @@ def _view(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
         _say(err, "sheetpeek: --hidden-sheets goes with --all-sheets (-s names a hidden sheet)")
         return 2
     try:
-        with open_book(args.file, limits=_limits(args), recalc_on_load=args.recalc_on_load) as book:
+        with open_book(
+            args.file,
+            limits=_limits(args),
+            recalc_on_load=args.recalc_on_load,
+            platform=args.platform,
+        ) as book:
             if args.list:
                 for info in book.sheets:
                     _say(out, _listed(info))

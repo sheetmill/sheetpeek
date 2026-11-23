@@ -11,6 +11,7 @@ from dataclasses import dataclass
 
 import xlformat
 
+from sheetpeek import _platform
 from sheetpeek._layout import _UNDRAWN
 from sheetpeek._model import Cell, Font
 from sheetpeek._rows import WRAPPED_LEADING, baseline_offsets, face_metrics, font_row_height
@@ -91,8 +92,8 @@ class Text:
     def width(self, start: int, end: int) -> float:
         """The width in points of the text from ``start`` to ``end``: its pieces' widths added."""
         if len(self.parts) == 1:
-            return xlformat.text_width(self.text[start:end], font=self.parts[0].measured)
-        return sum(xlformat.text_width(t, font=p.measured) for t, p in self.pieces(start, end))
+            return _platform.text_width(self.text[start:end], font=self.parts[0].measured)
+        return sum(_platform.text_width(t, font=p.measured) for t, p in self.pieces(start, end))
 
     def fonts(self, start: int, end: int) -> list[Font]:
         """The fonts of the text from ``start`` to ``end``; an empty line takes the font there."""
