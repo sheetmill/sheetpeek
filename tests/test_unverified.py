@@ -54,7 +54,6 @@ LABELS: dict[str, tuple[str, ...]] = {
     "src/sheetpeek/_style/font.py": ("taken alike (unverified).",),
     "src/sheetpeek/_text_styles.py": (
         "# drawn size, 1 point thick (unverified).",
-        'at Calibri 11 at zoom 100; the step at other sizes is unverified)."""',
         "40; other faces unverified).",
     ),
     "src/sheetpeek/backends/html/_headings.py": (

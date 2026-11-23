@@ -48,18 +48,16 @@ from sheetpeek._runs import (
     fitted_height,
     line_font,
     line_metrics,
-    runs_shrink_step,
     wrap,
 )
 from sheetpeek._runs_model import TextSpan
 from sheetpeek._text_model import TextDirection, TextRule
 from sheetpeek._text_styles import (
-    SHRINK_STEPS,
     accounting,
     right_to_left,
     rules,
     scaled,
-    shrink_step,
+    shrink_scale,
     vert_scale,
     vert_shift,
 )
@@ -593,10 +591,15 @@ class _Points:
                 shown.overflow = False
             if spans:
                 whole = Text.of_spans(spans, self.fonts.get, breaks=False)
-                step = runs_shrink_step(whole, budget - indent, SHRINK_STEPS)
+                unshrunk = whole.width(0, len(whole.text))
             else:
-                step = shrink_step(shown.text, font, budget - indent)
-            shrink = step / SHRINK_STEPS
+                unshrunk = xlformat.text_width(shown.text, font=font)
+            shrink = shrink_scale(
+                unshrunk,
+                xlformat.text_width("H", font=font),
+                (x1 - x0) - indent,
+                budget - indent,
+            )
             font = scaled(font, shrink)
             size *= shrink
         # a line break in a cell without wrapping is not drawn

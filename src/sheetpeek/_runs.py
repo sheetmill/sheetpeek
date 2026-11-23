@@ -171,11 +171,3 @@ def fitted_height(text: Text, lines: list[tuple[int, int]]) -> float:
     """The height a fitted row gives the text's lines: each its largest run's, +1 pt if several."""
     extra = WRAPPED_LEADING if len(lines) > 1 else 0.0
     return sum(line_metrics(text.fonts(a, b), len(lines))[0] + extra for a, b in lines)
-
-
-def runs_shrink_step(text: Text, budget: float, steps: int) -> int:
-    """The largest ``k`` from 1 to ``steps`` at which the text at ``k / steps`` fits ``budget``."""
-    for k in range(steps, 0, -1):
-        if text.scaled(k / steps).width(0, len(text.text)) <= budget:
-            return k
-    return 1

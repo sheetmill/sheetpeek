@@ -27,8 +27,9 @@ def drawn(path, group):
     """What sheetpeek draws for each case of ``group`` in the workbook at ``path``, by cell.
 
     ``baselines`` from the row's top; ``left`` the first glyph's advance from the cell's left
-    edge, ``right`` the end of the widest line from the (last) cell's right edge; ``scale`` the
-    drawn size over the font's in sevenths; ``rules`` (kind, lines, offset from the run's
+    edge, ``right`` the end of the widest line from the (last) cell's right edge; ``level`` the
+    drawn "H" advance in points, shrink to fit's level (the unshrunk advance when not shrunk);
+    ``rules`` (kind, lines, offset from the run's
     baseline, top from the row's top, start from the cell's left, end from the right,
     thickness).
     """
@@ -49,7 +50,7 @@ def drawn(path, group):
             "baselines": tuple(sorted({t.y - row.y_pt for t in runs})),
             "left": min(t.x for t in runs) - left,
             "right": max(t.x + t.width for t in runs) - right,
-            "scale": round(runs[0].scale * 7, 4),
+            "level": round(runs[0].scale * _advance(runs[0].font), 4),
             "rules": tuple(
                 (
                     u.kind,
@@ -68,11 +69,19 @@ def drawn(path, group):
     return found
 
 
+def _advance(font):
+    """The unshrunk "H" advance of a font in points; an unmeasured face is measured as Calibri."""
+    import xlformat
+
+    name = font.name if font.name in xlformat.measured_fonts() else "Calibri"
+    return xlformat.text_width("H", font=xlformat.Font(name, font.size, font.bold, font.italic))
+
+
 FIELDS = {
     "vert": ("row_height", "text", "baselines"),
     "rules": ("baselines", "rules"),
-    "steps": ("scale",),
-    "shrunk": ("row_height", "baselines", "left", "scale"),
+    "steps": ("level",),
+    "shrunk": ("row_height", "baselines", "left", "level"),
     "wrap": ("row_height", "lines", "left"),
     "faces": ("baselines",),
     "overflow": ("row_height", "baselines"),
@@ -102,11 +111,13 @@ def test_the_workbook_reads_back_as_built(built):
 def test_the_cases_are_what_their_names_say(built):
     path, _ = built
     expected = suite.EXPECTED
-    # the shrunk texts take the steps their names give, in every row
+    # the shrunk texts take the levels their names give, in every row: the names are the
+    # sevenths the suite was designed with, and the "2/7" text (16 "H"s and a "g") is drawn at
+    # level 3, as the capture's ink shows (49.5 pt, where level 2 would draw about 33)
     for case in suite.cases("shrunk"):
         if " shrunk " in case.name and "/7" in case.name and "20 pt" not in case.name:
             step = int(case.name.split(" shrunk ")[1].split("/")[0])
-            assert expected["shrunk"][case.cell]["scale"] == step, case.name
+            assert expected["shrunk"][case.cell]["level"] == {2: 3}.get(step, step), case.name
     # the wrapped pairs measure what their keys say, and sheetpeek wraps the wider ones
     import xlformat
 
@@ -285,25 +296,7 @@ PINNED: dict[str, frozenset[str]] = {
             "strike 9",
         )
     ),
-    "test_shrink_steps_at_other_sizes": frozenset(
-        (
-            "E10",
-            "E11",
-            "E12",
-            "E6",
-            "E9",
-            "G10",
-            "G13",
-            "G14",
-            "G15",
-            "G16",
-            "G4",
-            "G6",
-            "G7",
-            "G9",
-            "I10",
-        )
-    ),
+    "test_shrink_steps_at_other_sizes": frozenset(("C10", "E7", "G4", "G7")),
     "test_shrunk_text_keeps_the_baseline_sheetpeek_gives_it:100": frozenset(
         (
             "center 15 shrunk 2/7",
@@ -316,9 +309,11 @@ PINNED: dict[str, frozenset[str]] = {
     ),
     "test_shrunk_text_keeps_the_baseline_sheetpeek_gives_it:200": frozenset(
         (
-            "center 15 shrunk 2/7",
             "center 30 shrunk 2/7",
             "center 60 shrunk 2/7",
+            "top 15 shrunk 2/7",
+            "top 30 shrunk 2/7",
+            "top 60 shrunk 2/7",
         )
     ),
 }
@@ -331,11 +326,13 @@ metrics of styled text, not yet modeled):
 - test_rules_sit_where_sheetpeek_puts_them_at_other_sizes: at zoom 100, the rules at 36 pt start
   6 pt into the cell where sheetpeek starts them 3 pt in (a rule's ends are not modeled past
   11 pt). At zoom 200, sheetpeek keeps zoom 100's rules.
-- test_shrink_steps_at_other_sizes: the step at sizes and faces other than Calibri 11 differs from
-  the largest seventh that fits.
-- test_shrunk_text_keeps_the_baseline_sheetpeek_gives_it: text shrunk to 2/7 (3.1 pt) sits top
-  and centered as about 6 pt would at zoom 100, centered so at 200 too, where sheetpeek places it
-  by its drawn size.
+- test_shrink_steps_at_other_sizes: in a cell font larger or smaller than the Calibri 11 Normal
+  font, four lengths take a level one below the levels' fit test (Calibri 9, 10 "H"s; Calibri 16
+  and 20, 7 "H"s), and Calibri 20's 4 "H"s, exactly the budget, are shrunk: the test's margin
+  seems to depend on the fonts, which the text_steps capture does not vary.
+- test_shrunk_text_keeps_the_baseline_sheetpeek_gives_it: the text named 2/7, drawn at level 3
+  (4.7 pt), sits top and centered a point lower than its drawn size gives at zoom 100 and, top,
+  a point higher at zoom 200, where sheetpeek keeps zoom 100's placement.
 """
 
 
@@ -474,15 +471,16 @@ KNOWN_STEPS: dict[str, int] = {}
 
 @pytest.mark.excel
 def test_shrink_steps_at_other_sizes():
-    # The step is the ink width over the unshrunk reference's, in sevenths: Calibri 11's
-    # captures put that ratio within 0.04 of k/7 (0.8723 for 6/7 the worst), against 0.14
-    # between steps, so the nearest seventh is the step.
+    # The level is the ink width over the unshrunk reference's times the unshrunk "H" advance:
+    # a run drawn at advance a is a/F of its unshrunk width (Calibri 11's captures put the ratio
+    # within 0.04 of a/7, against 0.14 between levels), so the nearest whole point is the level.
     captured = _group("steps")
     wrong = {}
     for case in suite.cases("steps"):
         record = captured[case.cell]
-        step = round(float(record["width_ratio"]) * 7)
-        expected = suite.EXPECTED["steps"][case.cell]["scale"]
+        face, size = case.name.split(" scale ")[0].rsplit(" ", 1)
+        step = round(float(record["width_ratio"]) * _advance(sheetpeek.Font(face, float(size))))
+        expected = suite.EXPECTED["steps"][case.cell]["level"]
         if step != expected:
             wrong[case.cell] = step
     _pinned("test_shrink_steps_at_other_sizes", wrong)

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Shrink to fit draws text at a whole-point "H" advance, every one from the unshrunk advance
+  down to 1, choosing the largest at which the text, plus 3/8 of an advance, fits the cell less
+  a point, as Excel draws it (captured, `text_steps`): ten "H"s in a default Calibri 11 column
+  are drawn at 5/7 of their size (was 4/7) and 25 at 2/7 (was 1/7); under a Calibri 16 Normal
+  font, 11 at half size (was 3/7) and 22 at 0.3 (was 1/7), where sevenths were taken at every
+  size before.
+
 ## [0.4.0] - 2026-11-23
 
 ### Added

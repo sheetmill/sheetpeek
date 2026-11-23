@@ -153,9 +153,8 @@ def test_each_indent_level_moves_the_text_as_sheetpeek_moves_it(built):
     assert wrong == {}
 
 
-KNOWN_STEPS = {"shrunk 10": (5, 4.0), "shrunk 25": (2, 1.0)}
-"""Known deviations (§4.13): at the step Excel draws, xlformat measures the text at 50 pt in the
-48 pt budget, so sheetpeek takes the step below."""
+KNOWN_STEPS: dict[str, tuple[int, float]] = {}
+"""Known deviations (§4.13), each with its reason: none since the levels' fit test (§4.13)."""
 
 
 @pytest.mark.excel
@@ -204,3 +203,36 @@ def test_shrunk_text_takes_every_whole_point_advance(group, unshrunk):
         assert abs(found - round(found)) < 0.15, case.name
         drawn.add(round(found))
     assert drawn == set(range(1, unshrunk + 1))
+
+
+@pytest.mark.excel
+@pytest.mark.parametrize(
+    ("group", "unshrunk"), [("shrink_calibri16", 10), ("shrink_aptos_narrow11", 7)]
+)
+def test_each_shrunk_length_takes_the_level_sheetpeek_gives_it(built, group, unshrunk):
+    # The level Excel draws, read as above (the "H" advance from the ink width and the unshrunk
+    # text's side bearings), against sheetpeek's scale times the unshrunk advance (§4.13).
+    captured = _captured()
+    drawn = _drawn(built[group], group)
+    short, long = (_ink_width(captured[(group, cell)]) for cell in suite.REFERENCES)
+    bearings = 10 * ((long - short) / 10) - short
+    wrong = {}
+    compared = 0
+    for case in suite.cases(group):
+        width = _ink_width(captured[(group, case.cell)])
+        if not case.name.startswith("shrunk") or width is None:
+            continue
+        level = round((width + bearings) / int(case.name.split()[1]))
+        ours = round(drawn[case.cell][2] / 7 * unshrunk)
+        compared += 1
+        if level != ours:
+            wrong[case.name] = (level, ours)
+    assert compared > 30
+    assert wrong == {}
+
+
+def _ink_width(record):
+    """The ink's width in points, from the cell's left edge to its right; None without ink."""
+    if not record["ink_left"]:
+        return None
+    return float(record["cell_width"]) - float(record["ink_left"]) + float(record["ink_right"])

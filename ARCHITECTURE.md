@@ -1022,17 +1022,21 @@ xlformat has no rules, keep Calibri 11's offsets scaled with the size, 1 pt thic
 **Outline, shadow, condense and extend** are drawn as plain text by Excel for Mac (the same ink
 at both zooms): they are not read, and nothing is reported.
 
-**Shrink to fit** (`CellStyle.shrink`). Text too wide for its cell is drawn at the largest `k/7` of
-its size, `k` from 1 to 7, that fits between the insets, less the indent: a fixed screen step (1/14
-at zoom 200), so the layout, made at zoom 100, uses sevenths. 25 of the 27 captured lengths (4 to 30
-Hs in a default column, `text_style` and `text_steps`) take Excel's step; ten Hs take 4/7 where Excel
-draws 5/7, and 25 take 1/7 where it draws 2/7 (each measures 50 pt in a 48 pt budget at Excel's step),
-a known deviation. At other sizes the steps are not sevenths (captured, `text_style_more` group `steps`
-and `text_steps` groups `shrink_calibri16` and `shrink_aptos_narrow11`): the text is drawn with every
-"H" advance a whole point, and every whole point from the unshrunk advance down to 1 is a step (under
-Calibri 16, 10 pt down to 1; under Aptos Narrow 11, 7 down to 1). Sevenths are that rule at Calibri 11,
-whose "H" is 7 pt; sheetpeek keeps sevenths, a known deviation at other sizes (which length takes which
-advance is not yet modeled). When even the smallest step does not fit, the text is clipped (decided). **It replaces
+**Shrink to fit** (`CellStyle.shrink`). Text too wide for its cell is drawn at a level: a whole-point
+"H" advance `a`, every one from the unshrunk advance `F` down to 1 (captured, `text_steps` groups
+`shrink`, `shrink_calibri16` and `shrink_aptos_narrow11`, and `text_style_more` group `steps`: under
+Calibri 11 7 pt down to 1, which are sevenths of the size; under Calibri 16 10 down to 1), drawn at
+`a/F` of its size. Text that fits between the insets, less the indent, is not shrunk; otherwise the
+level is the largest `a` below `F` at which the text's unshrunk width scaled by `a/F`, plus `0.375 a`,
+fits the cell less 1 pt and the indent: for `n` "H"s, `(n + 0.375)·a <= W − 1` (`SHRINK_PADDING`,
+`SHRINK_MARGIN`). The 0.375 and the 1 pt are fitted, not derived: the test charges about 3/8 of an
+advance more per level than the text's own width. Every captured length in the three `text_steps`
+groups takes Excel's level; in `text_style_more`'s `steps`, where the cell font differs from the
+Calibri 11 Normal font, four lengths take a level one above Excel's (Calibri 9, 10 "H"s; Calibri 16
+and 20, 7 "H"s) and Calibri 20's 4 "H"s, exactly the budget, are shrunk by Excel and not by
+sheetpeek, a known deviation (the margin seems to depend on the fonts). Long runs at levels 2 and 1
+in wider columns are unverified. When even the smallest level does not fit, the text is clipped
+(decided). **It replaces
 `####`**: a value whose format overflows shows its full text, shrunk (`RenderedCell.text` is that
 text). **Wrap overrides it**, as do horizontal and vertical justify and distributed, which wrap: the
 text keeps its size and breaks where wrap alone breaks it (captured, `text_style` group `wrap`: 28
@@ -1040,7 +1044,8 @@ pairs of cases, identical). **Shrunk text never spills**, in every mode. **Rows 
 size** (captured at 20 pt). A merge with the flag on its anchor is not shrunk, clipped at the
 merge's edge (captured once, doubtful). Bottom-aligned shrunk text sits on its row's shared
 baseline, top and centered text where its drawn size's metrics put it (§3.6; `text_style_more`,
-group `shrunk`); at 2/7 Excel places it as about 6 pt would, a known deviation.
+group `shrunk`); the text drawn at level 3 (4.7 pt) Excel places a point lower at zoom 100, a known
+deviation.
 
 **Vertical justify and distributed** wrap text whose wrap flag is off (captured: the file still
 says it does not wrap). One line sits at the top (justify) or the center (distributed). Several
@@ -1315,7 +1320,7 @@ size, for spill, `####`, wrapping, shrink to fit and alignment:
   in the cell's font.
 
 A `TextRun` of a cell with runs carries `spans`: each piece of its line as a `TextSpan` with its
-width, drawn size (`scale`) and baseline shift; the run's own `scale` is then the step of shrink
+width, drawn size (`scale`) and baseline shift; the run's own `scale` is then the level of shrink
 to fit alone.
 
 **HTML.** A run with spans is the positioned run of §7.3, in the font of its largest span, with a

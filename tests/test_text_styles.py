@@ -15,7 +15,7 @@ import sheetpeek
 from sheetpeek import TextRule
 from sheetpeek._model import Font as ModelFont
 from sheetpeek._rows import script_parts, script_size
-from sheetpeek._text_styles import shrink_step
+from sheetpeek._text_styles import shrink_scale
 from sheetpeek.backends.html import HTMLBackend
 from tests.workbooks import rewrite, save
 
@@ -314,29 +314,36 @@ CAPTURED_STEPS = {
     **dict.fromkeys(range(13, 17), 3),
     **dict.fromkeys(range(17, 23), 2),
 }
-KNOWN_STEP_DEVIATIONS = {10: 4}  # Excel draws ten Hs at 5/7; their measure at 5/7 is 50 pt > 48
 
 
-def test_shrink_to_fit_steps_by_sevenths(tmp_path):
+def test_shrink_to_fit_takes_the_captured_levels(tmp_path):
     def build(ws):
         for n in CAPTURED_STEPS:
             ws.cell(n, 1, "H" * n).alignment = Alignment(horizontal="left", shrink_to_fit=True)
 
     rendered = lay_out(tmp_path, build)
     found = {n: round(runs_of(rendered, n)[0].scale * 7, 6) for n in CAPTURED_STEPS}
-    assert found == CAPTURED_STEPS | KNOWN_STEP_DEVIATIONS
+    assert found == CAPTURED_STEPS
     for n in CAPTURED_STEPS:
         (run,) = runs_of(rendered, n)
         assert run.clip[2] == rendered.columns[0].width_pt  # never spills
 
 
-def test_shrink_step_is_bounded():
-    import xlformat
+def test_shrink_scale_takes_the_largest_level_that_fits():
+    # Calibri 11 in a 53 pt cell (budget 48), "H" 7 pt: 7 Hs (49) take level 6, 6 Hs fit.
+    assert shrink_scale(49, 7, 53, 48) == 6 / 7
+    assert shrink_scale(42, 7, 53, 48) == 1.0
+    # Calibri 16 in 69 pt, "H" 10 pt: 11 Hs are refused at 6 ((11 + 0.375)·6 > 68), take 5;
+    # 22 Hs take 3, the same 66 pt of advances that a single budget could not tell apart.
+    assert shrink_scale(110, 10, 69, 64) == 5 / 10
+    assert shrink_scale(220, 10, 69, 64) == 3 / 10
 
-    font = xlformat.Font("Calibri", 11)
-    assert shrink_step("H", font, 100) == 7
-    assert shrink_step("H" * 1000, font, 48) == 1  # nothing fits: the smallest step, clipped
-    assert shrink_step("H", font, -10) == 1
+
+def test_shrink_scale_is_bounded():
+    assert shrink_scale(7000, 7, 53, 48) == 1 / 7  # nothing fits: the smallest level, clipped
+    assert shrink_scale(7, 7, -5, -10) == 1 / 7
+    assert shrink_scale(100, 1, 53, 48) == 1.0  # no level below a 1 pt advance
+    assert shrink_scale(100, 0, 53, 48) == 1.0
 
 
 def test_shrink_replaces_hashes_and_wrap_wins(tmp_path):
