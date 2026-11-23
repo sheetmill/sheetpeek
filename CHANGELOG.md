@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   36, 9 at 72). The HTML output draws it.
 
 ### Changed
+- Requires xlformat 0.7 (`xlformat>=0.7,<1`), whose row and rule measurements cover Courier New
+  and whose column budgets take a large cell font's padding (the entries below).
 - Requires xlrecalc 0.9 (`xlrecalc>=0.9,<1`), whose `RATE` finds rates where 0.8.1 gave
   `#NUM!`: `RATE(120,62725.56,-5000000,0)` under a percent format shows `0.73109%`, as Excel
   does (was `#NUM!`).
@@ -45,8 +47,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the baseline (was 1).
 - An accounting underline adds xlformat's points to the row (3 at Calibri 11, more at larger
   sizes, Courier New's own from 5.5 to 72 points, where 3 was taken: a Courier New 72 row
-  with one is 106 pt) and to each wrapped line: three wrapped lines of Calibri 11 with one take 57 pt (was
-  48), distributed text 19 (was 18), and each line is 18 pt below the last (was 15).
+  with one is 106 pt) and to each wrapped line: three wrapped lines of Calibri 11 with one
+  take 57 pt (was 48), distributed text 19 (was 18), and each line is 18 pt below the last
+  (was 15).
 - The fonts of a row's own style and of the sheet's column styles count in row heights and in
   the shared bottom baseline, as Excel counts them for the cells the file has no element for: a
   column styled Calibri 24 fits every row without a style of its own to 31 pt (was 15 under
@@ -67,6 +70,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A fitted row is at least its fonts' largest ascent plus their largest descent: an accounting
   underline at Calibri 6 or 8 under Calibri 11 makes a row of 17 pt (was 15), at Calibri 10
   18 pt (was 17).
+- Laying out a sheet takes as long as in 0.3.0; on the largest public workbook, at 264,432 rows,
+  its peak memory is about 2 % higher (3.6 GiB, `ARCHITECTURE.md` §5.2).
 
 ### Fixed
 - An indent level is three spaces of the Normal font, as Excel draws it (captured, screen suite
