@@ -612,8 +612,9 @@ cell's style, and the layout ignores it.
 
 **Decided:** a merge whose anchor lies outside the range read shows no text (there is nothing to
 capture: the anchor is in the sheet, only not read). Wrapped text in a vertical merge flows over
-the merged rows, and a fitted row does not grow for it: Excel leaves merged cells' wrapped lines
-out of fitting (captured, suite `row_height`, §4.7).
+the merged rows. **Unverified:** a fitted row does not grow for it. Excel leaves a horizontal
+merge's wrapped lines out of fitting (captured, suite `row_height`: a merge over A1:C1, §4.7);
+sheetpeek does the same for a vertical merge, which no capture covers.
 
 ### 4.5 Hidden columns and rows
 
@@ -671,23 +672,25 @@ at, in order:
 
 **Rows are fitted to their cells** when Excel opens a file (captured, suite `row_height`): a row
 with a `<row>` element and no `ht`, in a sheet without `customHeight`, takes the largest of those
-heights and of each cell font's height, merged cells included, and of its wrapped text, merged
-cells excluded. It is at least the largest ascent `ceil(S) + 1` plus the largest bottom offset
-`B + A` of its fonts (xlformat's row model), so faces that split their heights differently make
-a taller row (Arial 11 beside Calibri 10: 15 pt), and an accounting underline adds its `A`
-(`row_height_fitted`, group `styled`: Calibri 6 to 40 pt under Calibri 11). Wrapped text follows
-xlformat's row model (`row_metrics`, from the heights Excel gives one to six wrapped lines in each
-face under each Normal font, measured by xlformat's `capture/row_heights.py`): k lines in a face
-of height F take k(F + 1 + A) points, so even one wrapped line is a point taller than the row,
+heights and of each cell font's height and of its wrapped text; in a horizontal merge the font
+counts and the wrapped lines do not (a merge over A1:C1). **Unverified:** sheetpeek treats a
+vertical merge the same way, its font counting in the merge's first row and its wrapped lines in
+none; no capture covers one. It is at least the largest ascent `ceil(S) + 1` plus the largest
+bottom offset `B + A` of its fonts (xlformat's row model), so faces that split their heights
+differently make a taller row (Arial 11 beside Calibri 10: 15 pt), and an accounting underline adds
+its `A` (`row_height_fitted`, group `styled`: Calibri 6 to 40 pt under Calibri 11). Wrapped text
+follows xlformat's row model (`row_metrics`, from the heights Excel gives one to six wrapped lines
+in each face under each Normal font, measured by xlformat's `capture/row_heights.py`): k lines in a
+face of height F take k(F + 1 + A) points, so even one wrapped line is a point taller than the row,
 plus max(0, P - p), p the face's line inset and P the largest of the Normal font's and the row's
 other cell fonts' (Calibri 11 has 1, Calibri 20 has 3); Calibri 11 gives 16 pt a line (suite
 `row_height`: 48 and 96 pt for three and six lines), 19 with an accounting underline
-(`text_style_more`, group `rules`: three lines take 57 pt; distributed text fits as wrapped, 19
-pt for one line). Several wrapped cells in one row take the tallest (not captured); rich-text
-runs and faces xlformat has not measured keep the line height plus 1 a line, without the inset.
-`thickTop` or `thickBottom` together with `customHeight` was not captured. Times New Roman,
-Georgia and Arial follow xlformat's model: three lines of Times New Roman 11 are 45 pt under its
-own Normal font and 46 under Calibri 11, as captured (`row_height_more`).
+(`text_style_more`, group `rules`: three lines take 57 pt; distributed text fits as wrapped, 19 pt
+for one line). Several wrapped cells in one row take the tallest (not captured); rich-text runs and
+faces xlformat has not measured keep the line height plus 1 a line, without the inset. `thickTop`
+or `thickBottom` together with `customHeight` was not captured. Times New Roman, Georgia and Arial
+follow xlformat's model: three lines of Times New Roman 11 are 45 pt under its own Normal font and
+46 under Calibri 11, as captured (`row_height_more`).
 
 Excel ignores a stored `defaultRowHeight` without `customHeight` (15, 20 and 30 captured): with
 openpyxl's 15, a Calibri 14 workbook shows 19 pt rows and a Calibri 9 one 12 pt rows, so that
@@ -1386,7 +1389,8 @@ boxes match a rigid rotation of the upright box (captured: 45°, 58.5 × 57.5 pt
   to 9 pt. At the other sizes from 13 to 36 the pad's steps hold, but `W` comes from xlformat's
   table scaled from the nearest measured size, so those rows are off by up to 20 pt, a known
   deviation. The pad held at 7 below 9 pt is unverified (no capture in this repository yet).
-  A merge does not count, as for wrapped text.
+  **Unverified:** a merge does not count, as for wrapped text in a merge (the merges the
+  `rotation_more` capture holds sit in rows of a stored height).
 - **Wrapped angled text** (wrap, justify or distributed) wraps along the turned direction: a line
   holds what a fitted row of this height would, `W·|sin θ| + S·|cos θ| + 7 ≤ h`, with a word joining
   a line only if the space after it fits too (§4.7); the lines step one font line (15 pt at Calibri

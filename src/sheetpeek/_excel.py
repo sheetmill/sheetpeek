@@ -232,7 +232,8 @@ def _fitted(
         if not fits:
             continue
         own = [span.font for span in spans] if spans else [cell.font]
-        # A merged cell's font counts, its wrapped lines do not (captured).
+        # A merged cell's font counts, its wrapped lines do not (captured for a horizontal merge;
+        # a vertical one unverified).
         turned = angled and merge is None
         if not (turned and _upright(style)):
             # Text at 90 degrees fits the row by its width alone, at least the Normal font's

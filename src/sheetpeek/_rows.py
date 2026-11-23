@@ -93,8 +93,10 @@ def fits_cells(row: Row, sheet: Sheet) -> bool:
     """Whether Excel fits this row to its cells when it opens the file.
 
     Captured (suite ``row_height``): a row with a ``<row>`` element and no ``ht`` grows to its
-    largest cell font, merged cells included, or to its wrapped lines, merged ones excluded, and
-    never below the Normal font's height. A stored ``ht`` and ``customHeight`` defaults are kept.
+    largest cell font, or to its wrapped lines, and never below the Normal font's height; in a
+    horizontal merge the font counts and the wrapped lines do not. A vertical merge is treated
+    the same, its font in its first row (unverified). A stored ``ht`` and ``customHeight``
+    defaults are kept.
     """
     return row.height is None and row.listed and not sheet.custom_row_height
 
