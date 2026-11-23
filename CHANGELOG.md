@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `TextRule.thickness`: each underline and strikethrough line's thickness in points at zoom 100,
   from xlformat's `rule_metrics` (2 pt for Calibri 36, where Excel draws it 2 screen points
   thick). The HTML output draws a rule thicker than a point at its thickness.
+- `TextRule.gap`: a double underline's second line's top below the first's, in points at zoom
+  100, from xlformat's `rule_metrics`: two thicknesses, but 3 pt for Times New Roman at 38 and
+  40 points, whose lines are 1 pt thick. The HTML output draws it.
 
 ### Changed
 - Row heights come from xlformat's row model at the font's own face and size: Arial, Times New

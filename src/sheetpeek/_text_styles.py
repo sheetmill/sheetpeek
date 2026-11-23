@@ -134,7 +134,7 @@ def rules(
     Each line's top and thickness come from xlformat's ``rule_metrics`` for the face at the
     drawn size, at zoom 100 (captured in xlformat's suites; here, ``text_style_more`` group
     ``rules`` at 9, 11, 14, 20 and 36 points): a single underline, a double one (both lines
-    the double's thickness, the second two thicknesses below), an accounting one (its first
+    the double's thickness, the second its gap below), an accounting one (its first
     line at the accounting top) and a strikethrough above the baseline.
 
     Args:
@@ -155,6 +155,7 @@ def rules(
         elif kind in ("single", "double") and x1 > x0:
             x1 += UNDERLINE_OVERRUN
         lines: Literal[1, 2] = 2 if kind in ("double", "doubleAccounting") else 1
+        gap = 2.0 if metrics is None else metrics.double_gap
         if metrics is None:
             top, thickness = float(round(_UNDERLINE_OFFSET[kind] * size / _CAPTURED_SIZE)), 1.0
         elif kind == "single":
@@ -166,7 +167,7 @@ def rules(
         else:
             top, thickness = metrics.accounting_top, metrics.double_thickness
         if x1 > x0:
-            found.append(TextRule("underline", x0, x1, baseline + top, lines, thickness))
+            found.append(TextRule("underline", x0, x1, baseline + top, lines, thickness, gap))
     if font.strike and span[1] > span[0]:
         if metrics is None:
             top, thickness = float(round(_STRIKE_OFFSET * size / _CAPTURED_SIZE)), 1.0

@@ -57,8 +57,7 @@ LABELS: dict[str, tuple[str, ...]] = {
         "# digit. At other sizes the digit term scales with the size (unverified).",
     ),
     "src/sheetpeek/backends/html/_text.py": (
-        "thicknesses apart (unverified past zoom 100). The rule of an angled run turns with it, "
-        "about",
+        "gap apart (unverified past zoom 100). The rule of an angled run turns with it, about",
     ),
     "src/sheetpeek/backends/html/_workbook.py": ('unverified)."""',),
     "tests/test_theme.py": (

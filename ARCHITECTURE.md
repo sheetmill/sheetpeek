@@ -971,8 +971,9 @@ not linear and a row of both kinds is not one-kind growth plus half (not yet mod
 
 **Underlines and strikethrough** are placed and sized by xlformat's `rule_metrics` for the face
 at the drawn size, at zoom 100: each run's `TextRule`s (`TextRun.rules`) give where a line starts
-and ends, the top of its first line and its `thickness`, in points. A double underline's second
-line lies two thicknesses below the first's top. A 1 pt rule is drawn 1 screen pt thick at any
+and ends, the top of its first line, its `thickness` and, for a double underline, its `gap`,
+the second line's top below the first's: two thicknesses, 3 pt for Times New Roman at 38 and 40
+pt (xlformat's). A 1 pt rule is drawn 1 screen pt thick at any
 zoom, as gridlines and outline symbols are: one CSS pixel at any page scale (decided); a thicker
 one scales with the zoom (unverified past zoom 100). Captured (`text_style_more`, group `rules`,
 at 9, 11, 14, 20 and 36 pt, zoom 100): every rule's top and thickness (1 pt to 20 pt, 2 pt at

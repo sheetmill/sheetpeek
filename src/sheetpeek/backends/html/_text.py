@@ -114,8 +114,8 @@ def _rule(
 ) -> str:
     """An underline or strikethrough: 1 px thick, a double one 1 px lines 2 px apart.
 
-    A rule thicker than a point is its thickness at the page's zoom, a double one's lines two
-    thicknesses apart (unverified past zoom 100). The rule of an angled run turns with it, about
+    A rule thicker than a point is its thickness at the page's zoom, a double one's lines its
+    gap apart (unverified past zoom 100). The rule of an angled run turns with it, about
     the start of the run's baseline.
     """
     left = page.x(rule.x0)
@@ -124,12 +124,14 @@ def _rule(
         return ""
     classes = "sp-rule sp-double" if rule.lines == 2 else "sp-rule"
     tint = f";color:#{color}" if color else ""
-    if rule.thickness > 1:
-        thick = max(1, round(page.size(rule.thickness)))
+    double = rule.lines == 2
+    if rule.thickness > 1 or (double and rule.gap != 2 * rule.thickness):
+        # a 1 pt rule stays 1 px at any zoom, and so does its 2 px gap
+        thin = rule.thickness <= 1
+        thick = 1 if thin else max(1, round(page.size(rule.thickness)))
+        gap = 2 * thick if rule.gap == 2 * rule.thickness else max(1, round(page.size(rule.gap)))
         tint += (
-            f";height:{3 * thick}px;border-width:{thick}px"
-            if rule.lines == 2
-            else f";height:{thick}px"
+            f";height:{gap + thick}px;border-width:{thick}px" if double else f";height:{thick}px"
         )
     top = page.y(rule.y)
     turn = ""

@@ -244,6 +244,22 @@ def test_rules_at_36_points_are_two_points_thick(tmp_path):
     assert small.rules[0].thickness == 1
 
 
+def test_a_double_underlines_gap_is_xlformats(tmp_path):
+    # xlformat's rule_metrics: Times New Roman 38 draws a double underline's 1 pt lines 3 pt
+    # apart, not two thicknesses; Calibri 36's 2 pt lines are 4 apart.
+    def build(ws):
+        ws["A1"], ws["B1"] = "HHH", "HHH"
+        ws["A1"].font = Font(name="Times New Roman", size=38, underline="double")
+        ws["B1"].font = Font(size=36, underline="double")
+
+    times, calibri = runs_of(lay_out(tmp_path, build), 1)
+    assert (times.rules[0].thickness, times.rules[0].gap) == (1, 3)
+    assert (calibri.rules[0].thickness, calibri.rules[0].gap) == (2, 4)
+    out = io.StringIO()
+    HTMLBackend(fragment=True, zoom=100).render(lay_out(tmp_path, build), out)
+    assert ';height:4px;border-width:1px"' in out.getvalue()
+
+
 def test_a_thick_rule_is_drawn_at_its_thickness_in_html(tmp_path):
     def build(ws):
         ws["A1"], ws["B1"] = "HHH", "HHH"
