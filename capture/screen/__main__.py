@@ -40,6 +40,7 @@ SUITES = (
     "filters_more",
     "extensions",
     "text_steps",
+    "row_bottoms",
 )
 
 
