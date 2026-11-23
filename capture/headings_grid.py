@@ -14,7 +14,7 @@ appearance; ``run grid_65``, ``run grid_99999`` and ``run grid_x`` run those gro
 since Excel may refuse their files (16.115 refused colorIds 65 and 99999 with a parameter
 error): the refusal is kept (``refused.txt``) and written as the group's one row, its ``kind``
 ``refused`` and Excel's message in ``item``. ``run light`` captures ``grid_default`` and
-``grid_10_teal`` again at zoom 100 once macOS is switched to the light appearance (a person's
+``grid_10_teal`` again at zoom 100 once macOS is switched to the light appearance (a manual
 step: System Settings, Appearance), into ``capture/build/headings_grid/light/``. Each run
 refuses to start in the other appearance. The groups:
 

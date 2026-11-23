@@ -312,7 +312,7 @@ def _all_sheets(args: argparse.Namespace, book: Book, out: TextIO, err: TextIO) 
 
 
 def _say(stream: TextIO, line: str) -> None:
-    """One line for a person. It can quote a sheet, a part or a file, so it may not be trusted."""
+    """One line for the reader. It can quote a sheet, a part or a file, so it may not be trusted."""
     stream.write(one_line(line) + "\n")
 
 

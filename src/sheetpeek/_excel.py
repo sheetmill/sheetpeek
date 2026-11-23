@@ -339,7 +339,7 @@ def _row_model(
             cell_fonts=[spec(f) for f in cell_fonts],
             wrapped=[(spec(f), lines) for f, lines in wrapped],
         ).height
-    except LookupError:  # a face or size the model has not measured: the table's heights
+    except LookupError:  # a face or size the model has not measured: the fonts' own heights
         return 0.0
 
 

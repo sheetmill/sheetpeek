@@ -556,11 +556,7 @@ def test_control_characters_are_not_drawn(excel):
 # packages ------------------------------------------------------------------------------------
 
 PACKAGE_CAPTURE = Path(__file__).with_name("captures") / "package.tsv"
-PACKAGE_DEVIATIONS = {
-    # Excel gives a row of font size 1 a height of 4 pt; sizes under 9 are outside the row-height
-    # table (ARCHITECTURE.md §4.7).
-    "font_size_negative": "a font size outside the row-height table",
-}
+PACKAGE_DEVIATIONS: dict[str, str] = {}
 
 
 def package_rows():
@@ -619,7 +615,7 @@ def test_a_package_is_taken_as_excel_takes_it():
     deviations = in_child(compare_packages)
     REPORT["package"] = (
         f"package: {len(package_probe.CASES)} cases compared with Excel, "
-        f"{len(PACKAGE_DEVIATIONS)} known deviations: "
-        + "; ".join(f"{case} ({why})" for case, why in PACKAGE_DEVIATIONS.items())
+        f"{len(PACKAGE_DEVIATIONS)} known deviations"
+        + "".join(f"; {case} ({why})" for case, why in PACKAGE_DEVIATIONS.items())
     )
     assert deviations == {}

@@ -238,9 +238,9 @@ def test_write_measures_saved_answers_again(tmp_path):
 # --- the comparison with Excel
 #
 # Tolerance none. Excel answers whole or half points for widths (``width`` of a range) and
-# heights, and the ``package`` suite's 68 cases matched sheetpeek's widths, heights and font sizes
-# exactly but for one row height outside the row-height table; a width a point off here is the
-# rule failing (the 6 pt digit, or the edge where 0 starts), not noise. The comparison uses the
+# heights, and the ``package`` suite's 68 cases match sheetpeek's widths, heights and font sizes
+# exactly; a width a point off here is the rule failing (the 6 pt digit, or the edge where 0
+# starts), not noise. The comparison uses the
 # width in points, which needs no font measurements (xlformat has none for Arial), and records
 # the width in characters as Excel reports it beside it.
 

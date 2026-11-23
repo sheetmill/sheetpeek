@@ -14,20 +14,18 @@ project captures layout: spill, alignment, merges, overflow, indent.
   on every exit path, errors included. Left off, Excel would afterwards fail to show its dialogs.
 - A script opens only the workbook it built, and closes it without saving unless saving is the
   point. It stops before opening anything when a workbook of the same name is already open in
-  Excel: that workbook is not the script's (a person may have left it open to compare), and
+  Excel: that workbook is not the script's (it may have been left open to compare), and
   Excel would hand the script that copy instead of the file just built. It never touches another open workbook, and never runs an application-wide command such
   as `calculate`.
 - Two captures never run at once.
-- No sweep of crafted or extreme input runs during a capture. Before a capture, check that Excel
-  answers and that no sweep is still running: a machine out of memory pauses Excel, which then looks
-  like a hang.
-- A case that hangs ends the run. It is reported and looked into, not retried: a retry hides
-  what made Excel hang, and a hang that comes from Excel's state comes back.
+- No sweep of crafted or extreme input runs during a capture, and a capture starts only when
+  Excel answers: a machine out of memory pauses Excel, which then looks like a hang.
+- A case that hangs ends the run and is reported, not retried: a retry hides what made Excel
+  hang, and a hang that comes from Excel's state comes back.
 - Anything that feeds crafted or extreme input to the package runs in a child process under a memory
-  watchdog that samples its size and kills it at 4 GB (`tests/watchdog.py`). A time limit alone does
-  not count, and `ulimit -v` is not a limit on macOS. A killed run, a missing result or an exit status
-  of 137 means stop and find out why, not run it again: the same input does the same harm, and an
-  unbounded run once took the machine past its memory and paused every application.
+  watchdog that samples its size and kills it at 4 GB (`tests/watchdog.py`): a time limit alone
+  does not bound memory, and `ulimit -v` is not a limit on macOS. A killed run, a missing result or
+  an exit status of 137 is a finding, not noise to rerun past: the same input does the same again.
 - The page setup a capture needs (orientation, scale, gridlines, margins) is written into the
   workbook by openpyxl, not set through AppleScript.
 

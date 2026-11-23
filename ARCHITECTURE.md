@@ -1,6 +1,6 @@
 # Architecture
 
-Rules about Excel's layout cite the capture that pins them (§4); a rule no capture has pinned yet
+Rules about Excel's layout cite the capture that covers them (§4); a rule no capture covers yet
 is marked **unverified**. A choice of sheetpeek's own, where Excel has nothing to copy (an output
 that cannot draw what Excel draws, or the shape of the API), is marked **decided**. The reader's
 figures (§5) were measured on Python 3.11, macOS, Apple
@@ -113,7 +113,7 @@ layout fields marked *layout*. The style fields (`number_format` to `indent`) li
 | `kind` | `"empty" \| "number" \| "text" \| "bool" \| "error"` | `cell.data_type` | a date is a `number` whose format is a date format; `d` cells (ISO 8601, rare) become serials |
 | `number_format` | `str` | `cell.number_format` | |
 | `font` | `Font(name, size, bold, italic, underline, strike, color, ..., theme_color)` | the cell format's font (xlio); a missing name or size inherits the Normal style's | `color` is resolved `RRGGBB`, or `None` for automatic; `theme_color` the theme index it comes from (§3.3) |
-| `fill` | `str \| None` | `fgColor` of a `solid` pattern fill, resolved | other patterns map to their foreground color, a documented approximation; gradients are ignored |
+| `fill` | `str \| None` | `fgColor` of a `solid` pattern fill, resolved | one representative color for outputs that show one: a pattern's two colors blended by the foreground's share of the tile, a gradient's color at its midpoint (§4.12) |
 | `fill_spec` | `Pattern \| Gradient \| None` | `cell.fill` (§4.12) | the fill itself: a pattern's kind and two colors, or a gradient's kind, angle, rectangle and stops; `fill` is its one color |
 | `borders` | `Borders \| None` | `cell.border` (§4.12) | four `Side`s (style, color) and the diagonal with its two flags; `start` and `end` read as `left` and `right`, over them where both are given |
 | `h_align` | `"general" \| "left" \| "center" \| "right" \| "fill" \| "justify" \| "distributed" \| "center_across"` | `cell.alignment.horizontal` | as stored; `centerContinuous` is `center_across` |
@@ -163,7 +163,7 @@ text styles into `Font` and `CellStyle` (§4.13). Rich-text runs inside one cell
 | `palette` | xlio: `<indexedColors>` as the indexed colors take it (64 entries, the default's for an entry missing or not a color), `None` without it (§4.14) |
 | `normal_font` | the font of xlio's `Normal` cell style, else the workbook's first font |
 | `date1904` | xlio: `<workbookPr date1904>` |
-| `warnings` | reading and layout: formulas without cached values, approximated fonts, refused number formats |
+| `notices` | what the file uses that sheetpeek does not read yet, as `Notice`s (§3.7) |
 | `cells` | a dense row-major grid over `ref` |
 
 Column widths are kept as the file states them (file units, §6.4). Hidden rows and columns stay in
@@ -184,7 +184,7 @@ background in it is white (`auto_colors`).
 - `indexed`: the workbook's custom palette if `styles.xml` has one, else the default 64-entry
   palette (`_colors.DEFAULT_PALETTE`), entry by entry (§4.14). Index 64 is the system foreground
   (black), 65 the system background (white) (§4.12, §4.14).
-- `theme`: the `clrScheme` of the theme part (`wb.loaded_theme`, raw XML), six hex digits or the
+- `theme`: the `clrScheme` of the theme part, as xlio reads it, six hex digits or the
   theme is treated as unreadable, since its text would reach CSS as it stands, then `tint` applied
   as ECMA-376 §18.8.19 describes. **Captured** (suite `theme_colors`: theme indices 0 to 11 with
   tints from −0.5 to +0.8 as fills and font colors, 96 cells read back through AppleScript's
@@ -226,7 +226,7 @@ Excel draws it.
 | hyperlinks (§4.10) | `<a>` around the cell's runs; links to shown cells go to their id | terminal hyperlinks (OSC 8), external targets only | text only | `[text](url)`, external targets only | text only |
 | outline symbols (§4.11) | gutter cells beside the headings, `buttons` | a gutter of characters, `buttons` | as rich | no | no |
 | superscript, subscript, shrink to fit (§4.13) | drawn | full size, shrunk text clipped | as rich | plain | no |
-| underline kinds, strikethrough (§4.13) | 1 px rules at Excel's offsets | the terminal's underlines | no | no | no |
+| underline kinds, strikethrough (§4.13) | rules at Excel's offsets and thickness (1 px for a 1 pt rule) | the terminal's underlines | no | no | no |
 | rich-text runs (§4.16) | a nested span per run | the cell's font | no | bold and italic per run, with `emphasis` | no |
 
 Spill in HTML is computed in the model, not left to the browser, and the browser's font must not
@@ -610,9 +610,10 @@ widths, read with `string value`): `excel` mode shows what Excel shows in every 
 covered cell's own fill is ignored**, also when the anchor has none. The reader keeps a covered
 cell's style, and the layout ignores it.
 
-**Assumed:** a merge whose anchor lies outside the range read shows no text (there is nothing to
+**Decided:** a merge whose anchor lies outside the range read shows no text (there is nothing to
 capture: the anchor is in the sheet, only not read). Wrapped text in a vertical merge flows over
-the merged rows; if it needs more lines, the last row grows.
+the merged rows, and a fitted row does not grow for it: Excel leaves merged cells' wrapped lines
+out of fitting (captured, suite `row_height`, §4.7).
 
 ### 4.5 Hidden columns and rows
 
@@ -655,7 +656,7 @@ at, in order:
    of Excel's application standard font, which is Aptos Narrow 12 under Microsoft 365 and was
    Calibri 12 under Office 2021: both give 16 pt in the table below, so the captures cannot tell
    which font the rule follows; a workbook opened where the standard font differs is a stated
-   limitation, since that font is an Excel preference outside the file, set by a person);
+   limitation, since that font is an Excel preference outside the file);
 5. otherwise the Normal font's height from xlformat's row model (`row_metrics`, captured from
    Excel for Mac) at the font's face and size: Calibri, Aptos Narrow, Arial, Times New Roman,
    Courier New and Georgia at every size from 1 to 72 pt, half sizes taking the next whole one
@@ -828,7 +829,7 @@ tiles and dashes on whole screen points, and a tile is a texture of single-point
 - A dot is 2 × 2 spt, centered on its row at the bar's x.
 - The level buttons are 12 × 12 spt, one per lane: the row levels across the column-heading band,
   centered in its height; the column levels down the row-heading column, centered in its width,
-with no gridline term: their top at `⌈(h − b) / 2⌉` (5 in bands of 21 and 22).
+  with no gridline term: their top at `⌈(h − b) / 2⌉` (5 in bands of 21 and 22).
 - Colors (gray levels): the gutter 85 in the dark appearance and 230 in the light one; bars,
   ticks and dots 153 in both; a button's border 51 dark and 138 light, its paper white and its
   stroke 51 in both.
@@ -955,9 +956,12 @@ plain text, Markdown, CSV and TSV show neither fills nor borders.
 
 ### 4.13 Text styles
 
-**Captures:** the screen suite `text_style` (`tests/captures/text_style.tsv`, Excel 16.115,
-Microsoft 365, Calibri 11 at zoom 100 and 200). Sizes other than those captured are
-scaled from them, unverified. The rules live in `_text_styles.py` and `_excel.py`.
+**Captures:** the screen suites `text_style` (Calibri 11 at zoom 100 and 200), `text_style_more`
+(rules at 9, 11, 14, 20 and 36 pt, wrapped and distributed text, accounting underlines),
+`row_bottoms` and `row_height_fitted` (where text sits in a row and the row it fits, superscript
+and subscript at Calibri 6 to 40 included), all Excel 16.115, Microsoft 365. Where rules sit and
+how thick they are comes from xlformat's `rule_metrics` (§6.4); what no capture covers is marked
+unverified below. The rules live in `_text_styles.py`, `_rows.py` and `_excel.py`.
 
 **Superscript and subscript** (`Font.vert_align`). A superscript or subscript cell acts at its
 size rounded up, `s = ceil(S)`; its text is drawn at `d = round(2s/3)`, raised `r = floor(s/2)`
@@ -1060,9 +1064,10 @@ or without it: two lines of Calibri 11 take 32 pt (Excel 16.115, screen suite `t
 Justify and the vertical spreads wrap and fit the row the same way, with the wrap flag or
 without it (`text_style_more`: six lines take 96 pt).
 
-**Indent** is 6 pt a level (§4.6) on the side the alignment resolves to, `general` included:
-right-aligned text and numbers end `2 + 6n` pt before the next gridline (captured as ink 3, 9
-and 21 pt for indents 0, 1 and 3, and 15 pt for a `general` number with indent 2).
+**Indent** is three spaces of the Normal font a level (§4.6), 6 pt under Calibri 11, on the side
+the alignment resolves to, `general` included: under Calibri 11 right-aligned text and numbers end
+`2 + 6n` pt before the next gridline (captured as ink 3, 9 and 21 pt for indents 0, 1 and 3, and
+15 pt for a `general` number with indent 2).
 
 **Reading order** (`CellStyle.reading_order`: 0 context, 1 left to right, 2 right to left).
 **`general` text whose first strong character is right-to-left aligns right whatever the
@@ -1073,8 +1078,9 @@ text changed nothing (captured once, doubtful), so it is not applied. A file's v
 0, 1 or 2 is read as 0.
 
 **Drawn in HTML** (`backends/html/_text.py`): a run's `font` size is `font.size × scale`; its
-rules are `<i class="sp-rule">` elements beside it in its clip window, 1 px high, a double
-underline one `sp-double` element 3 px high with a top and a bottom border; a right-to-left run
+rules are `<i class="sp-rule">` elements beside it in its clip window, `TextRule.thickness` high
+(1 px for a 1 pt rule at any page scale), a double underline one `sp-double` element with a top
+and a bottom border, its lines `TextRule.gap` apart (3 px high for 1 pt lines); a right-to-left run
 has `direction: rtl`.
 
 **Other outputs** (decided; each declared in `backends/_support.py`):
@@ -1345,10 +1351,10 @@ boxes match a rigid rotation of the upright box (captured: 45°, 58.5 × 57.5 pt
   their negatives, 90 and −90: the switch is exactly at ±90). Left and right use insets of 3 and 4
   pt, fitted to the capture: every captured ink edge is within 1.1 pt. Center centers the box on
   the cell (captured at 45°); right puts it against the right inset (captured at 45°). An indent
-  moves the box in by 6 pt a level (captured: 12 pt for 2, left and right). Fill, justify and
-  distributed do not switch sides at ±90° as general does: they are placed as left at positive
-  angles, 90° included, and as right at negative ones, but distributed at 90° is centered
-  and −90° (captured, `rotation` at 45°, `rotation_more` at 15°, 75°, −45° and 90°,
+  moves the box in by one indent a level, three spaces of the Normal font (captured under
+  Calibri 11: 12 pt for 2, left and right). Fill, justify and distributed do not switch sides at
+  ±90° as general does: they are placed as left at positive angles, 90° included, and as right
+  at negative ones, −90° included, but distributed text at 90° and −90° is centered (captured, `rotation` at 45°, `rotation_more` at 15°, 75°, −45° and 90°,
   `rotation_placement` at 30°, 60°, 85°, −15°, −75° and −90°: across within 1.5 pt but for fill
   and justify at ±90°, 1.55 pt, distributed at 90°, 2.0 pt, and right placement at −15°, 1.9 pt,
   known deviations). Bottom-aligned angled text sits 1.2 to 4.4 pt higher in Excel at 30° to 85°
@@ -1421,7 +1427,7 @@ characters, three lengths, left, center and right, top and center, 20 pt, indent
 toward the ascent side (left at positive angles, general included; right at negative ones) keeps its
 ascent 2 pt inside that side, measured across the line; text aligned toward the other side keeps its
 descent 1.5 pt inside it; centered text centers its line box between them; an indent moves the text
-horizontally, `6n` pt (`SLANT_INSETS`). How high the text sits is as without borders. None of row
+horizontally by `n` indents of three spaces of the Normal font (6 pt each under Calibri 11). How high the text sits is as without borders. None of row
 height, column width and length changes it. Against the capture, with each end letter's own height,
 the ink edges lie within 1.5 pt across the line (median 0.6) but for three cases: top alignment at
 15° in a 45 pt row (2.1, `rotation_more`, a known deviation), −60° (1.9; the
@@ -1432,7 +1438,7 @@ further. At negative angles left, center and right are the mirror of the positiv
 column width right of the left side (the measured gaps, 56.5, 54.5 and 54 pt at 15°, 45° and 90° in
 a 53 pt column, are that width plus a 1 pt line's run across a row, `1/|sin θ|`); the top border
 lies along the cell's top edge, shifted `h·cot θ` with the box, over the neighbors' cells, and the
-gridlines stay (seen in the crops).
+gridlines stay (seen in the captured window).
 
 The layout records each unmerged angled cell's own sides as `SlantedBorders` (`shift_pt` is `h·cot
 θ`), takes them out of the upright grid, where a neighbor's own side on a shared edge is still drawn
@@ -1453,7 +1459,6 @@ the larger differences are at the far end, where the fallback font's width diffe
 outputs** draw angled and stacked text horizontally (`text.rotation`, `text.stacked`, approximated
 in `rich` and text, omitted in Markdown and CSV, which show the full text).
 
-
 ### 4.18 Sheet view and page layout
 
 **Read.** The first `<sheetView>` gives `Sheet.view` (`SheetView`, `_read_view.py`):
@@ -1461,7 +1466,7 @@ the saved zoom (`zoomScale`, 100 when absent; a value not whole, or not a number
 Excel opens it; a whole one is kept past Excel's zoom control's 10 to 400, as Excel opens and
 draws a sheet at 5 and 401, `freeze_view`, within 1 to 1000, a bound of sheetpeek's own against
 crafted files (wider zooms not captured), 100 past it;
-the `zoom=` override keeps 10 to 400, Excel's range for a person), `showZeros`, and a frozen pane's rows and columns (`ySplit`, `xSplit` of a pane
+the `zoom=` override keeps 10 to 400, the range of Excel's zoom control), `showZeros`, and a frozen pane's rows and columns (`ySplit`, `xSplit` of a pane
 whose state is `frozen` or `frozenSplit`) from the view's top-left cell; a `split` pane is kept
 as its state only. The sheet's defined name `Print_Area` (reserved, local to the sheet) gives
 `Sheet.print_areas`,
@@ -1676,6 +1681,15 @@ grows with the range (`max_cells`, §5.5, bounds it). On the largest of the 15,9
 workbooks of §5.5 (42 MB, 15.2 million cells over its sheets, every sheet read) the reader takes
 38.0 s at 863 MiB peak RSS without recalculation (§5.7, which gives the run).
 
+Laying out every sheet of that workbook in `excel` mode (264,432 rows, `bench/layout.py`, read
+time apart) takes 63.8 s and peaks at 3,695 MiB RSS, against 62.8 s and 3,625 to 3,630 MiB for
+the previous release: measured together, best of three, each version from its own source with the
+dependency versions it was published with, alternating, on a quiet machine. The time is within
+the runs' variation of about 5 %. Each version's peak repeats within 5 MiB, while between commits
+that add no data of that size it moves about 60 MiB up and down (a 22-line change to the indent
+width alone moved it 56 MiB); a difference of that size is therefore read as where the
+allocator's peak falls rather than as data kept, an inference that no memory trace has tested.
+
 ### 5.3 Dates stay serials
 
 A date is a number under a date format, and the reader keeps the number: xlformat formats the
@@ -1791,11 +1805,11 @@ The suite `package_more` settles the edges (Excel 16.115): a width past 1e30 is 
 xlio reads these numbers as Excel takes them, a width at Calibri 11's 6 pt digit; sheetpeek
 wraps a width again at the Normal font's own digit, as Excel does (`_structure.width_at_digit`:
 under Calibri 14, 7 pt, 1e6 is 53,184 pt and -1 is 65,530). A Normal font xlformat has not
-measured keeps the 6 pt digit. Where 0 starts between 1e300 and 1e308 is not captured. Known
-deviations of sheetpeek's own: a row of font size 1 is 4 pt
-in Excel, and sizes under 9 are outside the row-height table (§4.7); past 24 pt the table gives
-24's height, where Excel gives a 409 pt Normal font its tallest row, 409.5; and a size of
-409.5 is kept, where Excel reports 409.
+measured keeps the 6 pt digit. Where 0 starts between 1e300 and 1e308 is not captured. Row heights
+come from xlformat's row model from 1 to 72 points (a font size of 1 gives a 4 pt row, as in
+Excel), and past 72 from 72's height scaled with the size (unverified), at most 409.5, Excel's
+tallest row, which a 409 pt Normal font gives (§4.7). A known deviation of sheetpeek's own: a size
+of 409.5 is kept, where Excel reports 409.
 
 **A column in `characters` mode is at most 255 characters**, Excel's own limit, whatever its width
 in points. Each character costs about 10 bytes in every row while the rows are built (the canvas),
@@ -2002,8 +2016,8 @@ text. sheetpeek does not re-export `ExcelError`.
 
 ### 6.4 What sheetpeek takes from xlformat
 
-xlformat provides the measurements and formatting below; row heights (§4.7) are captured by
-sheetpeek itself.
+xlformat provides the measurements and formatting below, row heights (§4.7) and the positions of
+underlines and strikethrough (§4.13) included.
 
 | from xlformat | used for |
 |---|---|
@@ -2012,6 +2026,9 @@ sheetpeek itself.
 | `file_column_metrics(file_width, base_col_width=, default_col_width=, normal_font=)` → `ColumnMetrics` | column widths: characters from `width` (§2.2), points from `points` (§3.6); `left_inset`, `right_inset` and `digit_width` place text and indent it |
 | `column_metrics_from_points(points, normal_font=)` → `ColumnMetrics` | a merged cell's width: its `width` is the `column_width` of the merge's sum of points (§3.6) |
 | `text_width(text, font=)` | `excel` mode: spill, placement, wrapping, `distributed` spacing, `fill` copies and `TextRun.width` (§3.6) |
+| `row_metrics(normal_font, cell_fonts=, wrapped=)` → `RowMetrics` | row heights: a font's height at its face and size (`font_height`), what an accounting underline adds (`accounting_height`), and a fitted row's height with its cell fonts and wrapped lines (§4.7) |
+| `rule_metrics(font)` → `RuleMetrics` | where underlines and strikethrough sit below or above the baseline, their thickness and a double underline's gap, at zoom 100 (§4.13) |
+| `builtin_format(id)` | the code of a built-in number format id a cell names without defining it; an id xlformat does not list reads as General |
 | `glyph_widths(text, font=)` | where the glyphs of a `TextRun` sit, as the model documents it (§3.6); the layout itself measures whole texts |
 | `ExcelError` | cached error values, formatted like any value (§6.3) |
 | `FormatError` | a refused number format, shown as `General` (§6.2) |
@@ -2152,7 +2169,8 @@ points.
   drawn only with both headings. `buttons="none"` leaves the gutter out; `"static"`, the
   default, draws it, and leaves room for working buttons later. Its stylesheet is written only on
   a page that draws a gutter. Its colors are captured in the light appearance and the dark one.
-- **The CSS surface is public interface**, changed only with a changelog entry: the custom
+- **The CSS surface is public interface** (docs/html.md's tables list it for users), changed
+  only with a changelog entry: the custom
   properties `--sheetpeek-paper`, `--sheetpeek-ink`, `--sheetpeek-grid`,
   `--sheetpeek-heading-paper`, `--sheetpeek-heading-ink`, `--sheetpeek-heading-grid`,
   `--sheetpeek-outline-paper`, `--sheetpeek-outline-ink`, `--sheetpeek-outline-button`,
@@ -2166,8 +2184,8 @@ points.
   draws a link. `href` only for an allowed URL (with `rel="noopener noreferrer"`, and
   `target="_blank"` with `new_tab=True`) or a cell on the page (`#sp-C2`, the id on the cell
   that draws it, a merge's first visible cell); `title` is the tooltip alone.
-- **Text styles** (§4.13): underlines and strikethrough are `<i class="sp-rule">` elements, 1 px
-  at any page scale, a double one `sp-double`; `sp-rule` and `sp-double` join the public classes.
+- **Text styles** (§4.13): underlines and strikethrough are `<i class="sp-rule">` elements at
+  their thickness (1 px for a 1 pt rule, at any page scale), a double one `sp-double`; `sp-rule` and `sp-double` join the public classes.
   Superscript, subscript and shrunk runs take their drawn size; a right-to-left run
   `direction: rtl`.
 - **Rich text** (§4.16): a nested span per run inside the positioned run, each with
@@ -2181,13 +2199,12 @@ points.
   (`sp-t-` and letters, a tab color, is generated).
 - **Size** (`bench/html_size.py`, 5,000 rows × 20 columns, 100,000 cells and 97,144 runs, Apple
   M4 Pro): 11.1 MB of HTML, 111 bytes per cell, 0.58 MB gzipped. The same grid with every cell
-  using a newer feature (borders, pattern fills, runs, angled text, links, outlines) is 33.8 MB,
+  using a drawn feature (borders, pattern fills, runs, angled text, links, outlines) is 33.8 MB,
   338 bytes per cell (`bench/README.md` gives the commands). A sheet pays only for the features it
   uses: the passes and the HTML layers skip what is absent, and fonts, heights and line
   metrics are looked up by the identity of the style's font, which every cell of a style
-  shares. The first version, with a clip span and a `calc()` baseline on
-  every run, was 19.8 MB (198 bytes per cell); dropping clip spans a run does not need and
-  writing the baseline as a number halved it. Layout time is mostly xlformat's formatting.
+  shares. A clip span on every run and a `calc()` baseline would take 19.8 MB (198 bytes per
+  cell); clip spans only where a run needs one, and the baseline written as a number, halve it. Layout time is mostly xlformat's formatting.
 
 **Ruled out:**
 - **Plain `colspan` for spill** (Excel's own web export, route A): a spanned cell has one
@@ -2227,6 +2244,10 @@ src/sheetpeek/
   _read_outline.py   the outline from xlio: its rows, columns and settings
   _read_filters.py   the sheet's and tables' filters from xlio (§4.19)
   _read_tables.py    the sheet's tables and the styles they name, from xlio (§4.20)
+  _read_view.py      the sheet view as the file states it: zoom, zero display, panes (§4.18)
+  _view_model.py     the sheet view's model (§4.18)
+  _page.py           the print area and manual page breaks (§4.18)
+  _dates.py          ISO 8601 date cells as the serials Excel reads them as (§5.3)
   _read.py           the reader: xlio's models and cell stream into a Sheet (§5.4)
   _recalc.py         the values on opening through xlrecalc: the check, the engine (§5.7)
   _style/            a cell's style, one module per aspect: number format, border, fill, font,
@@ -2257,7 +2278,8 @@ src/sheetpeek/
                      _text (runs), _headings, _links (anchors, ids), _outline (the gutter), _notices
                      _patterns (the fill layer), _borders (the border layer)
                      _workbook (render_workbook: the workbook page, §4.15),
-                     _buttons (the filter buttons, §4.19)
+                     _buttons (the filter buttons, §4.19), _panes (frozen panes and page
+                     breaks, §4.18)
   cli.py             `sheetpeek view`, `sheetpeek serve`
   _serve.py          the server behind `sheetpeek serve`
   _carlito.py        Carlito's advance widths, generated by tools/carlito_widths.py
@@ -2266,7 +2288,7 @@ tests/               unit tests; captures/ (TSV) and their loader
 capture/             capture tooling (not in the wheel)
 tools/               the generator of _carlito.py; reader_snapshot.py, which snapshots what the
                      reader gives for a folder of workbooks and diffs two snapshots (not in the wheel)
-bench/               scripts that rerun §5 and §7.3's figures; README.md records them
+bench/               scripts that rerun §5 and §7.3's figures, which those sections record
 docs/                Sphinx, as in xlformat
 ```
 

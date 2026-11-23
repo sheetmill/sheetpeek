@@ -88,3 +88,21 @@ def test_every_capture_is_listed():
         suite = path.name.split(".")[0]
         assert f"| `{suite}` |" in capturing, suite
         assert f"`{suite}`" in section, suite
+
+
+RETIRED = ("6 pt a level", "row-height table", "loaded_theme")
+"""Phrases for rules that have changed: an indent is three spaces of the Normal font, rows come from
+xlformat's row model, and the theme is read through xlio. The changelog keeps its history."""
+
+
+def test_no_retired_phrase():
+    left = {ROOT / "CHANGELOG.md", Path(__file__)}
+    found = [
+        f"{path.relative_to(ROOT)}:{number}: {phrase}"
+        for path in tracked()
+        if path not in left
+        for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1)
+        for phrase in RETIRED
+        if phrase in line.lower()
+    ]
+    assert found == []

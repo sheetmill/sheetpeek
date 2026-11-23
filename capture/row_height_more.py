@@ -1,4 +1,4 @@
-"""Capture row heights under Normal fonts the row-height table has not measured, and wrapped rows.
+"""Capture row heights under Normal fonts of other faces and sizes, and wrapped rows.
 
     uv run --group capture python -m capture.row_height_more build PATH  # the workbooks only
     EXCEL_EDITION="Microsoft 365" uv run --group capture python -m capture.row_height_more run

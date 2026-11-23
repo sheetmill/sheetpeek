@@ -9,8 +9,8 @@ macOS, kilobytes on Linux).
 
 - ``plain`` (the default): numbers with a format, texts (some long enough to spill into an empty
   column), dates, integers, a bold filled header and a fill on every 50th row: what a sheet
-  without the newer features costs.
-- ``features``: every cell uses a feature 0.2.0 did not draw: borders of several
+  without the features below costs.
+- ``features``: every cell uses a drawn feature: borders of several
   styles and diagonals, pattern and gradient fills, underlines, strikethrough, superscript and
   subscript, theme fonts, rich-text runs (as shared strings, as Excel writes them), wrapped,
   shrunk, distributed and indented text, reading order, angled and stacked text, hyperlinks,
@@ -19,7 +19,7 @@ macOS, kilobytes on Linux).
 ``frozen`` freezes the sheet at B2 (one row, one column) after reading it, as a ``<pane>`` would,
 so the HTML holds the frozen-pane copies (ARCHITECTURE.md §4.18).
 
-``bench/README.md`` records the figures.
+``ARCHITECTURE.md`` §7.3 records the figures.
 """
 
 from __future__ import annotations

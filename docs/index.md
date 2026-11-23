@@ -12,6 +12,7 @@ pip install "sheetpeek[rich]"   # with styled terminal output
 Python 3.11 or later. The source is at <https://github.com/sheetmill/sheetpeek>.
 
 sheetpeek is part of the [sheetmill](https://github.com/sheetmill) project, with
+[xlio](https://github.com/sheetmill/xlio), which reads and writes the workbooks,
 [xlformat](https://github.com/sheetmill/xlformat), which applies Excel number formats, and
 [xlrecalc](https://github.com/sheetmill/xlrecalc), a formula engine.
 

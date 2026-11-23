@@ -7,7 +7,7 @@
     uv run --group capture python -m capture.outline build PATH  # every group's workbook
 
 ``run`` takes the dark appearance and ``run light`` the light one: each refuses to start in the
-other, so a person switches macOS's appearance (System Settings > Appearance) once between them.
+other, so macOS's appearance is switched by hand (System Settings > Appearance) between them.
 ``run flag_yes`` goes first and alone: Excel may refuse that file (-50 with alerts off), which is
 the answer, kept in ``refused.txt`` and written as the group's one row.
 

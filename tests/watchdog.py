@@ -35,7 +35,8 @@ from typing import Any
 
 GIB = 1 << 30
 LIMIT = 4 * GIB
-"""What anything may use. A run past it is killed, and that is a finding: find out why."""
+"""What anything may use. A run past it is killed, and that is a finding: the same input would
+do the same again."""
 TEST_LIMIT = 1 * GIB
 """What one crafted case may use: far more than a refusal needs, and quickly reached by a bomb."""
 TEST_SECONDS = 120.0
@@ -209,7 +210,7 @@ def _watch_process(pid: int, limit: int) -> None:
         if size > limit:
             sys.stderr.write(
                 f"\ntests/watchdog.py: the test run used {size / GIB:.1f} GiB, past the limit of "
-                f"{limit / GIB:.1f} GiB, and was killed. Find out why before running it again.\n"
+                f"{limit / GIB:.1f} GiB, and was killed; the same input would use as much again.\n"
             )
             os.kill(pid, signal.SIGKILL)
             return

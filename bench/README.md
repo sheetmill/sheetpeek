@@ -7,11 +7,13 @@ one, never into the repository.
 - `load_modes.py`: time and peak memory of reading a large workbook through xlio's cell stream
   (what sheetpeek's reader runs) and sheetpeek's package check, with openpyxl's modes for
   comparison.
+- `layout.py`: time and peak memory of laying out every sheet of a workbook in `excel` mode,
+  read time apart (§5.2 gives the figures for the largest public workbook).
 - `date_fidelity.py`: how often a date's conversion through `datetime` (openpyxl's) changes what a
   format displays, which is why the reader keeps serials.
 - `html_size.py`: size and time of the HTML output for a 5,000 × 20 sheet, in two cases:
   `plain` (formatted numbers, dates, text that spills, a bold filled header) and `features`
-  (every cell uses a feature 0.2.0 did not draw: borders and diagonals, pattern and
+  (every cell uses a drawn feature: borders and diagonals, pattern and
   gradient fills, underlines, strikethrough, superscript and subscript, rich-text runs, wrapped,
   shrunk, distributed and angled text, links, outlines, merges, a grid color).
 

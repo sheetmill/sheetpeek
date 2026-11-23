@@ -31,7 +31,7 @@ Groups, each its own workbook:
   ``kind`` ``refused`` and Excel's message in ``item``.
 
 ``run`` takes ``normal`` and ``page_break`` in the dark appearance; ``run light`` captures
-``normal`` again at zoom 100 once macOS is switched to the light appearance (a person's step:
+``normal`` again at zoom 100 once macOS is switched to the light appearance (a manual step:
 System Settings, Appearance), into ``capture/build/freeze_view/light/``. Each run refuses to start
 in the other appearance. After each view the window's state is read (zoom, view, freeze panes,
 split row and column: ``ExcelSession.window``) and written as a ``window`` row.
