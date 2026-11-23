@@ -69,11 +69,15 @@ class Capture:
     rows: list[tuple[str, str, str]] = field(repr=False)
     platform: str
     """``mac`` or ``windows``: every capture states the platform it was taken on."""
+    measured_gridline: tuple[int, int, int] | None = None
+    """The gridline's gray as measured in this picture (:func:`gridline_gray`), where a reader
+    measures it; it takes the place of the platform's recorded gray."""
 
     @property
     def gridline(self) -> tuple[int, int, int] | None:
-        """The default gridline's gray on this run's platform, in sRGB; ``None`` until recorded."""
-        return GRIDLINE[self.platform]
+        """The default gridline's gray: the measured one, else the platform's recorded gray, in
+        sRGB; ``None`` when neither is known."""
+        return self.measured_gridline or GRIDLINE[self.platform]
 
     @property
     def scale(self) -> float:
@@ -335,6 +339,27 @@ def box(
         max(p[0] for p in pts),
         max(p[1] for p in pts),
     )
+
+
+def gridline_gray(cap: Capture, cell: str, clear: int = 12) -> tuple[int, int, int] | None:
+    """The gray of the gridline on ``cell``'s bottom edge, from the picture alone.
+
+    ``cell`` and the cell below it must be unstyled. Each image row within 4 pixels of the edge is
+    scanned between ``clear`` pixels in from the cell's corners; a row of which at least 95 % of
+    the pixels are one color other than white is a gridline row. The rows' color when they agree,
+    else ``None`` (no gridline row, or two grays).
+    """
+    from collections import Counter
+
+    bottom = round(cap.edge(cell, "bottom"))
+    left, right = round(cap.edge(cell, "left")) + clear, round(cap.edge(cell, "right")) - clear
+    found = set()
+    for y in range(bottom - 4, bottom + 5):
+        colors = Counter(cap.image.pixel(x, y) for x in range(left, right))
+        color, count = colors.most_common(1)[0]
+        if color != (255, 255, 255) and count >= 0.95 * (right - left):
+            found.add(color)
+    return found.pop() if len(found) == 1 else None
 
 
 def write_tsv(path: Path, header: dict[str, str], rows: list[tuple[str, str, str]]) -> None:

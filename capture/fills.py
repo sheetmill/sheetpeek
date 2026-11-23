@@ -21,10 +21,11 @@ same), and then the tile one character a screen point (``#`` foreground, ``.`` b
 joined by ``/``), anchored once at the sheet's origin and once at the cell's top left, each moved
 to the nearest screen-point boundary (``snap_px``: the move at the sheet's origin, in image
 pixels). When it is not drawn in whole screen points, the tile is given in image pixels and
-``tile_unit`` says so. For the colored cells, the fill's extent against the cell's edges (does
-a pattern cover its gridlines like a solid fill?) and the pattern and color ``display format``
-reads; for the row 20 cells, how many gridline-gray pixels the middle row shows across the cell
-and 2 pixels past each edge.
+``tile_unit`` says so. On Excel for Windows the unit is the device pixel where the Mac's is the
+screen point (``tile_unit`` ``device_px``). For the colored cells, the fill's extent against the
+cell's edges (does a pattern cover its gridlines like a solid fill?) and the pattern and color
+``display format`` reads; for the row 20 cells, how many gridline-gray pixels the middle row
+shows across the cell and 2 pixels past each edge.
 
 ``read`` writes ``tests/captures/fills.tsv``: one row per zoom and cell.
 """
@@ -226,13 +227,16 @@ def _tiles(cap: Any, cell: str, fg: str, bg: str) -> dict[str, str]:
         return found
     sheet = (round(cap.grid.x(0)), round(cap.grid.y(0)))
     own = (round(cap.edge(cell, "left")), round(cap.edge(cell, "top")))
-    screen = cap.scale * 100 / cap.zoom  # image pixels a screen point
+    from capture.screen.window import POINT_PIXELS
+
+    # image pixels a screen unit: the Mac's screen point, Windows' device pixel
+    screen = cap.scale * 100 / (cap.zoom * POINT_PIXELS[cap.platform])
     step = round(screen)
     qx, qy = math.lcm(px, step), math.lcm(py, step)
     phase = _phase(rows, origin, step) if abs(screen - step) < 0.05 else None
     found["whole_points"] = "yes" if phase else "no"
     if phase:
-        found["tile_unit"] = "screen_pt"
+        found["tile_unit"] = "screen_pt" if cap.platform == "mac" else "device_px"
         snapped = {name: _snap(at, phase, step) for name, at in (("sheet", sheet), ("cell", own))}
         found["snap_px"] = ",".join(
             str(s - a) for s, a in zip(snapped["sheet"], sheet, strict=True)

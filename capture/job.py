@@ -19,6 +19,14 @@ Groups:
 - ``cells``: ``capture/cell_text.py``'s workbook (suites ``merge_width`` and ``error_width``),
   opened, and the text each cell shows at its width read (``read`` of ``text``, one cell at a
   time), as the Mac's ``string value`` reads it.
+- ``borders_fills``: the windows of the screen suites ``borders`` and ``fills``, a workbook each,
+  built as the Mac's run builds them (the suite's ``fill`` and the two magenta markers). Each is
+  opened, its cells' geometry and displayed fill read with the selection parked off the picture,
+  and Excel's window captured at each of the suite's zooms (``view``, then ``capture_window``).
+  ``read`` measures each picture with the suite's own ``measure``, as the Mac's ``read`` does, on
+  a grid from the two markers at the picture's device pixels a point. The gridline's gray is
+  measured in each picture (``capture.screen.run.gridline_gray``, on the control cell) and
+  written in the file's header, so that what needs it uses the gray the picture shows.
 """
 
 from __future__ import annotations
@@ -30,19 +38,67 @@ import shutil
 import sys
 import tempfile
 import zipfile
+from collections.abc import Callable
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from capture import cell_text
+from capture import borders, cell_text, fills
 
 ROOT = Path(__file__).resolve().parents[1]
 WINDOWS = ROOT / "tests" / "captures" / "windows"
 FIXED_TIME = "2026-01-01T00:00:00Z"
 ZIP_TIME = (1980, 1, 1, 0, 0, 0)
-GROUPS = {"cells": ("merge_width", "error_width")}
+GROUPS = {"cells": ("merge_width", "error_width"), "borders_fills": ("borders", "fills")}
 PURPOSES = {
     "cells": "sheetpeek capture group cells: the text Excel shows in merged cells and for "
     "error values at set column widths (suites merge_width and error_width)",
+    "borders_fills": "sheetpeek capture group borders_fills: window pictures of each border "
+    "line style and each pattern fill at zoom 100 and 200 (suites borders and fills)",
+}
+PARK = "AZ300"
+"""The active cell while a window is captured: off every picture."""
+SHEET = "Sheet"
+
+
+@dataclass(frozen=True)
+class Window:
+    """One screen suite's window: how its workbook is filled, its cells and how it is measured."""
+
+    suite: str
+    fill: Callable[[Any], object]
+    cells: tuple[str, ...]
+    markers: tuple[str, str]
+    zooms: tuple[int, ...]
+    measure: Callable[[Any], list[dict[str, str]]]
+    columns: tuple[str, ...]
+    control: str
+    """An unstyled cell above an unstyled one, whose bottom gridline gives the gray."""
+
+
+WINDOWS_OF = {
+    "borders_fills": (
+        Window(
+            "borders",
+            borders.fill,
+            tuple(borders.CELLS.values()),
+            borders.MARKERS,
+            borders.ZOOMS,
+            borders.measure,
+            borders.COLUMNS,
+            borders.CELLS["none"],
+        ),
+        Window(
+            "fills",
+            fills.fill,
+            tuple(cell for _, _, cell in fills.cases()),
+            fills.MARKERS,
+            fills.ZOOMS,
+            fills.measure,
+            fills.COLUMNS,
+            next(c for p, s, c in fills.cases() if p == "none" and s == "bw"),
+        ),
+    ),
 }
 
 
@@ -74,6 +130,53 @@ def _cells_workbook(files: Path) -> dict[str, Any]:
     return {"file": "cell_text.xlsx", "steps": steps}
 
 
+def _bounds(cells: list[str]) -> str:
+    """``A1:<last column><last row>`` over ``cells``."""
+    from openpyxl.utils.cell import (
+        column_index_from_string,
+        coordinate_from_string,
+        get_column_letter,
+    )
+
+    found = [coordinate_from_string(c) for c in cells]
+    last_column = max(column_index_from_string(letter) for letter, _ in found)
+    return f"A1:{get_column_letter(last_column)}{max(row for _, row in found)}"
+
+
+def _window_workbook(window: Window, files: Path) -> dict[str, Any]:
+    from openpyxl import Workbook
+    from openpyxl.styles import PatternFill
+
+    from capture.screen.window import MARKER
+
+    name = f"{window.suite}.xlsx"
+    with tempfile.TemporaryDirectory() as tmp:
+        raw = Path(tmp) / name
+        wb = Workbook()
+        window.fill(wb.active)
+        for cell in window.markers:
+            wb.active[cell].fill = PatternFill("solid", fgColor="FF" + MARKER)
+        wb.save(raw)
+        fixed_copy(raw, files / name)
+    span = f"{SHEET}!{_bounds([*window.markers, *window.cells])}"
+    park = {"op": "view", "sheet": SHEET, "select": f"{SHEET}!{PARK}"}
+    steps: list[dict[str, Any]] = [
+        {"op": "open"},
+        {**park, "zoom": window.zooms[0], "scroll_row": 1, "scroll_column": 1},
+        {"op": "read", "id": "geometry", "range": span,
+         "props": ["left", "top", "width", "height", "text"]},
+        {"op": "read_format", "id": "display", "range": span,
+         "props": ["interior.color", "interior.pattern"], "display": True},
+    ]  # fmt: skip
+    for zoom in window.zooms:
+        steps.append({**park, "id": f"view_z{zoom}", "zoom": zoom, "scroll_row": 1,
+                      "scroll_column": 1})  # fmt: skip
+        steps.append({"op": "capture_window", "id": f"shot_z{zoom}",
+                      "name": f"{window.suite}_z{zoom}.png"})  # fmt: skip
+    steps.append({"op": "close", "save": False})
+    return {"file": name, "steps": steps}
+
+
 def manifest(group: str, job_id: str, workbooks: list[dict[str, Any]]) -> dict[str, Any]:
     return {
         "schema": 1,
@@ -93,7 +196,11 @@ def write(group: str, job_id: str, out: Path) -> Path:
     folder = out / job_id
     files = folder / "files"
     files.mkdir(parents=True)
-    doc = manifest(group, job_id, [_cells_workbook(files)])
+    if group in WINDOWS_OF:
+        books = [_window_workbook(w, files) for w in WINDOWS_OF[group]]
+    else:
+        books = [_cells_workbook(files)]
+    doc = manifest(group, job_id, books)
     (folder / "job.json").write_text(json.dumps(doc, indent=1) + "\n", encoding="utf-8")
     return folder
 
@@ -114,6 +221,107 @@ def _results(workbook: dict[str, Any]) -> dict[str, Any]:
     return found
 
 
+def _cell_rows(steps: dict[str, Any]) -> list[tuple[str, str, str]]:
+    """The geometry and display reads as the Mac's run keeps them: ``(cell, property, value)``.
+
+    ``display.fill`` is the displayed fill color as ``r,g,b`` (Windows returns it as one number,
+    red in the low byte); ``display.pattern`` is Windows' ``XlPattern`` number as returned.
+    """
+    from openpyxl.utils.cell import get_column_letter
+
+    geometry, display = steps["geometry"], steps["display"]
+    rows: list[tuple[str, str, str]] = []
+    for r in range(int(geometry["rows"])):
+        for c in range(int(geometry["columns"])):
+            name = f"{get_column_letter(c + 1)}{r + 1}"
+            rows.extend(
+                (name, f"geometry.{key}", repr(float(geometry[key][r][c])))
+                for key in ("left", "top", "width", "height")
+            )
+            rows.append((name, "geometry.text", str(geometry["text"][r][c] or "")))
+            cell = display["cells"][r][c]
+            v = int(cell["interior.color"])
+            rows.append((name, "display.fill", f"{v & 0xFF},{(v >> 8) & 0xFF},{(v >> 16) & 0xFF}"))
+            rows.append((name, "display.pattern", str(int(cell["interior.pattern"]))))
+    return rows
+
+
+def window_captures(window: Window, steps: dict[str, Any], artifacts: Path) -> list[Any]:
+    """The window's ``Capture`` at each zoom, its gridline gray measured in the picture."""
+    import dataclasses
+
+    from capture.screen import png
+    from capture.screen.run import Capture, _geometry, gridline_gray
+    from capture.screen.window import locate, nominal_scale
+
+    rows = _cell_rows(steps)
+    geometry = _geometry(rows)
+    found = []
+    for zoom in window.zooms:
+        seen, shot = steps[f"view_z{zoom}"], steps[f"shot_z{zoom}"]
+        if float(seen["zoom"]) != zoom:
+            raise ValueError(f"{window.suite}: zoom {seen['zoom']} where {zoom} was asked")
+        display = float(shot["dpi"]) / 96
+        image = png.read(artifacts / shot["artifact"])
+        nominal = nominal_scale(zoom, display, "windows")
+        grid, check = locate(
+            image, geometry[window.markers[0]], geometry[window.markers[1]], nominal
+        )
+        if float(str(check.get("nominal_off", 1))) > 0.01:
+            raise ValueError(f"{window.suite} zoom {zoom}: the markers' scale is not nominal")
+        cap = Capture(zoom, image, grid, check, geometry, rows, "windows")
+        gray = gridline_gray(cap, window.control)
+        if gray is None:
+            raise ValueError(f"{window.suite} zoom {zoom}: no gridline gray at {window.control}")
+        found.append(dataclasses.replace(cap, measured_gridline=gray))
+    return found
+
+
+def _job_lines(
+    group: str, outcome: dict[str, Any], manifest_doc: dict[str, Any], method: str
+) -> tuple[str, tuple[str, ...]]:
+    header = outcome["header"]
+    build = str(header.get("environment", {}).get("excel", {}).get("build", ""))
+    lines = (
+        "# platform: windows",
+        f"# excel_build: {build}",
+        f"# job: {group}.job.json",
+        f"# job_id: {manifest_doc['job_id']}",
+        f"# captured: {str(outcome.get('started', ''))[:10]}; method: {method}",
+        f"# job_header: {json.dumps(header, sort_keys=True, ensure_ascii=False)}",
+    )
+    return build, lines
+
+
+def _read_windows(
+    group: str,
+    outcome: dict[str, Any],
+    manifest_doc: dict[str, Any],
+    result: Path,
+    folder: Path,
+) -> list[Path]:
+    by_file = {wb["file"]: wb for wb in outcome["workbooks"]}
+    written = []
+    for window in WINDOWS_OF[group]:
+        steps = _results(by_file[f"{window.suite}.xlsx"])
+        captures = window_captures(window, steps, result / "artifacts")
+        grays = {"".join(f"{c:02X}" for c in cap.gridline) for cap in captures}
+        if len(grays) != 1:
+            raise ValueError(f"{window.suite}: the zooms show different gridline grays {grays}")
+        _, lines = _job_lines(group, outcome, manifest_doc, "capture_window (capture job)")
+        records = [record for cap in captures for record in window.measure(cap)]
+        path = folder / f"{window.suite}.tsv"
+        with path.open("w", encoding="utf-8", newline="\n") as out:
+            out.write("\n".join(lines) + "\n")
+            out.write(f"# zooms: {','.join(str(z) for z in window.zooms)}\n")
+            out.write(f"# gridline: {grays.pop()} (measured: {window.control}'s bottom edge)\n")
+            out.write(f"# suite: {window.suite}\n" + "\t".join(window.columns) + "\n")
+            for record in records:
+                out.write("\t".join(record.get(c, "") for c in window.columns) + "\n")
+        written.append(path)
+    return written
+
+
 def read(group: str, job: Path, result: Path, folder: Path = WINDOWS) -> list[Path]:
     """The suite files from a job folder and its result folder (``result.json``)."""
     outcome = json.loads((result / "result.json").read_text(encoding="utf-8"))
@@ -126,6 +334,11 @@ def read(group: str, job: Path, result: Path, folder: Path = WINDOWS) -> list[Pa
         if entry["sha256"] != _sha256(job / "files" / name):
             raise ValueError(f"the result's input {name} is not this job's")
     manifest_doc = json.loads((job / "job.json").read_text(encoding="utf-8"))
+    folder.mkdir(parents=True, exist_ok=True)
+    if group in WINDOWS_OF:
+        written = _read_windows(group, outcome, manifest_doc, result, folder)
+        shutil.copyfile(job / "job.json", folder / f"{group}.job.json")
+        return written
     by_file = {wb["file"]: wb for wb in outcome["workbooks"]}
     results = _results(by_file["cell_text.xlsx"])
     shown: dict[tuple[str, int, int], str] = {}
@@ -133,18 +346,8 @@ def read(group: str, job: Path, result: Path, folder: Path = WINDOWS) -> list[Pa
         for r, row in enumerate(results[f"text_{k}"]["text"], 1):
             for c, text in enumerate(row, 1):
                 shown[(spec, r, c)] = str(text)
-    build = str(header.get("environment", {}).get("excel", {}).get("build", ""))
-    method = "\n".join(
-        (
-            "# platform: windows",
-            f"# excel_build: {build}",
-            f"# job: {group}.job.json",
-            f"# job_id: {manifest_doc['job_id']}",
-            f"# captured: {str(outcome.get('started', ''))[:10]}; method: read text (capture job)",
-            f"# job_header: {json.dumps(header, sort_keys=True, ensure_ascii=False)}",
-        )
-    )
-    folder.mkdir(parents=True, exist_ok=True)
+    build, lines = _job_lines(group, outcome, manifest_doc, "read text (capture job)")
+    method = "\n".join(lines)
     written = cell_text.write_tsvs(shown, f"Excel {build} for Windows", method, folder)
     shutil.copyfile(job / "job.json", folder / f"{group}.job.json")
     return written
