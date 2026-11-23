@@ -731,6 +731,11 @@ is marked unverified where it is stated, as are the parts of §4.12, §4.14 and 
 the screen: the text insets and the baselines of angled text, which come from print, and the 15 pt rows that print
 14 pt apart.
 
+
+From Excel for Windows (Excel 16.0.20527.20196, Microsoft 365, 96 dpi, en-US), read from capture
+jobs (`capture/job.py`, `CAPTURING.md`): `windows/merge_width` and `windows/error_width`, every
+cell as sheetpeek shows it with `platform="windows"` (§3.2): merged widths, `#` runs and General
+in whole pixels.
 ### 4.10 Hyperlinks
 
 The look and where a link goes are captured (`links`, Excel 16.115, zoom 100; the places through

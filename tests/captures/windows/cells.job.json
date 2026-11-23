@@ -1,0 +1,125 @@
+{
+ "schema": 1,
+ "job_id": "sheetpeek-20261123-143236-cells",
+ "package": "sheetpeek",
+ "purpose": "sheetpeek capture group cells: the text Excel shows in merged cells and for error values at set column widths (suites merge_width and error_width)",
+ "limits": {
+  "job_seconds": 1800,
+  "step_seconds": 600
+ },
+ "audit": false,
+ "workbooks": [
+  {
+   "file": "cell_text.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "text_0",
+     "range": "w2.7109375!A1:A20",
+     "props": [
+      "text"
+     ]
+    },
+    {
+     "op": "read",
+     "id": "text_1",
+     "range": "w3.7109375!A1:A20",
+     "props": [
+      "text"
+     ]
+    },
+    {
+     "op": "read",
+     "id": "text_2",
+     "range": "w4.7109375!A1:A20",
+     "props": [
+      "text"
+     ]
+    },
+    {
+     "op": "read",
+     "id": "text_3",
+     "range": "w5.7109375!A1:A20",
+     "props": [
+      "text"
+     ]
+    },
+    {
+     "op": "read",
+     "id": "text_4",
+     "range": "w6.7109375!A1:A20",
+     "props": [
+      "text"
+     ]
+    },
+    {
+     "op": "read",
+     "id": "text_5",
+     "range": "w8.7109375!A1:A20",
+     "props": [
+      "text"
+     ]
+    },
+    {
+     "op": "read",
+     "id": "text_6",
+     "range": "h2.7109375!A1:A5",
+     "props": [
+      "text"
+     ]
+    },
+    {
+     "op": "read",
+     "id": "text_7",
+     "range": "h3.7109375!A1:A5",
+     "props": [
+      "text"
+     ]
+    },
+    {
+     "op": "read",
+     "id": "text_8",
+     "range": "h4.7109375!A1:A5",
+     "props": [
+      "text"
+     ]
+    },
+    {
+     "op": "read",
+     "id": "text_9",
+     "range": "h5.7109375!A1:A5",
+     "props": [
+      "text"
+     ]
+    },
+    {
+     "op": "read",
+     "id": "text_10",
+     "range": "h6.7109375!A1:A5",
+     "props": [
+      "text"
+     ]
+    },
+    {
+     "op": "read",
+     "id": "text_11",
+     "range": "h8.7109375!A1:A5",
+     "props": [
+      "text"
+     ]
+    },
+    {
+     "op": "read",
+     "id": "text_12",
+     "range": "errors!B1:I7",
+     "props": [
+      "text"
+     ]
+    }
+   ]
+  }
+ ]
+}

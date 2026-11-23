@@ -275,3 +275,16 @@ Excel makes of them. A case that hangs ends the run and nothing is written.
 | `row_height_more` | 72 | read from Excel: row heights under Normal fonts Arial, Times New Roman, Courier New and Georgia at 11 and 14, and Calibri and Aptos Narrow at 13, 15, 17 and 22 (a listed row, a row without `<row>`, three wrapped lines); under Calibri 11, a number in each of those fonts and three wrapped lines in Calibri 11, 14, 20, Aptos Narrow 11 and the four faces |
 | `row_height_fitted` | 1016 | read from Excel, under Calibri 11: the rows Excel fits to text at 90 degrees at every size from 9 to 36 (three texts) and to runs of one glyph, 1 to 40, at 11, 14 and 20 and short runs at 16 to 36, and the three texts at 88, 89 and -90 at 20; and to "HHH" in Calibri at every half size from 6 to 40 and to 72, superscript, subscript, both side by side and accounting at 6 to 40, and Arial, Times New Roman, Courier New and Aptos Narrow at 6 to 40; superscript, subscript and both at every half size from 6.5 to 39.5 (group `scripts`) |
 | `merge_rows` | 22 | read from Excel, under Calibri 11: the rows Excel fits around merges across rows, wrapped text (2, 3 and 6 lines over 2 and 3 rows, 14 pt, a 14 pt neighbor, a merge two columns wide) and one "H" in 14 and 20 pt over 2 and 3 rows, with one wrapped cell and a horizontal merge as controls; predictions in the module before the run, of which sheetpeek's held for 18 rows: a merge's font fits no row either |
+
+**Captures from Excel for Windows** (`tests/captures/windows/`), each read from a capture job in
+sheetmill's job format by `capture/job.py` (`python -m capture.job write GROUP JOB_ID OUT` makes
+the job; `read GROUP JOB_DIR RESULT_DIR` writes the suite files from its result). Each file has its
+Mac suite's schema, under a header naming the platform, the Excel build and the job, with the
+result's header whole as one line (`job_header`); the job's manifest lies beside it as
+`<group>.job.json`. Excel 16.0.20527.20196 (Microsoft 365), Windows at 96 dpi, en-US.
+
+| file | rows | what |
+|---|---|---|
+| `windows/cells` | | the job of the group `cells`: `capture/cell_text.py`'s workbook opened, and each cell's displayed text read (`read` of `text`) |
+| `windows/merge_width` | 150 | as the Mac's `merge_width`: numbers alone and merged across two to four columns, one hidden, at six widths |
+| `windows/error_width` | 56 | as the Mac's `error_width`: the seven error values at eight widths |

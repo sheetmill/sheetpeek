@@ -85,9 +85,14 @@ def test_every_capture_is_listed():
     start = ARCHITECTURE.index("### 4.9 Captures")
     section = ARCHITECTURE[start : ARCHITECTURE.index("\n### ", start + 1)]
     for path in sorted((ROOT / "tests" / "captures").iterdir()):
+        if path.is_dir():
+            continue
         suite = path.name.split(".")[0]
         assert f"| `{suite}` |" in capturing, suite
         assert f"`{suite}`" in section, suite
+    # Each capture from Excel for Windows and its job are rows of the Windows table.
+    for path in sorted((ROOT / "tests" / "captures" / "windows").glob("*")):
+        assert f"`windows/{path.name.split('.')[0]}`" in capturing, path.name
 
 
 RETIRED = ("6 pt a level", "row-height table", "loaded_theme")

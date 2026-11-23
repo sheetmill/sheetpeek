@@ -65,7 +65,7 @@ def _result(folder, job_folder, grids, *, manifest_sha=None):
     header = {
         "manifest_sha256": manifest_sha or _sha(job_folder / "job.json"),
         "inputs": {"cell_text.xlsx": {"sha256": _sha(job_folder / "files" / "cell_text.xlsx")}},
-        "excel": {"build": "16.0.0.0"},
+        "environment": {"excel": {"build": "16.0.0.0"}},
     }
     outcome = {
         "status": "ok",
@@ -89,6 +89,7 @@ def test_a_result_reads_into_the_macs_schema_and_rows(tmp_path):
         theirs = (CAPTURES / path.name).read_text(encoding="utf-8").splitlines()
         assert ours == [x for x in theirs if not x.startswith("# ")], path.name
         assert "# platform: windows" in path.read_text(encoding="utf-8")
+        assert "# excel_build: 16.0.0.0" in path.read_text(encoding="utf-8")
     assert (out / "cells.job.json").read_bytes() == (job_folder / "job.json").read_bytes()
 
 

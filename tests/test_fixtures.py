@@ -51,7 +51,7 @@ def test_no_personal_data(path):
             assert not FILLED.search(data), f"{name} names a company or manager"
 
 
-CAPTURES = sorted((ROOT / "tests" / "captures").glob("*.tsv*"))
+CAPTURES = sorted((ROOT / "tests" / "captures").rglob("*.tsv*"))
 CONTROL = re.compile(r"[\x00-\x08\x0b-\x1f\x7f-\x9f]")
 """Control characters other than tab and newline, C1 included: git and GitHub take a file
 holding one for binary."""
@@ -70,7 +70,7 @@ def control_lines(text: str) -> list[tuple[int, str]]:
     ]
 
 
-@pytest.mark.parametrize("path", CAPTURES, ids=lambda p: p.name)
+@pytest.mark.parametrize("path", CAPTURES, ids=lambda p: p.relative_to(ROOT).as_posix())
 def test_a_text_capture_holds_no_control_character(path):
     import gzip
 

@@ -133,10 +133,11 @@ def read(group: str, job: Path, result: Path, folder: Path = WINDOWS) -> list[Pa
         for r, row in enumerate(results[f"text_{k}"]["text"], 1):
             for c, text in enumerate(row, 1):
                 shown[(spec, r, c)] = str(text)
-    excel = header.get("excel", {})
+    build = str(header.get("environment", {}).get("excel", {}).get("build", ""))
     method = "\n".join(
         (
             "# platform: windows",
+            f"# excel_build: {build}",
             f"# job: {group}.job.json",
             f"# job_id: {manifest_doc['job_id']}",
             f"# captured: {str(outcome.get('started', ''))[:10]}; method: read text (capture job)",
@@ -144,9 +145,7 @@ def read(group: str, job: Path, result: Path, folder: Path = WINDOWS) -> list[Pa
         )
     )
     folder.mkdir(parents=True, exist_ok=True)
-    written = cell_text.write_tsvs(
-        shown, f"Excel {excel.get('build', '')} for Windows", method, folder
-    )
+    written = cell_text.write_tsvs(shown, f"Excel {build} for Windows", method, folder)
     shutil.copyfile(job / "job.json", folder / f"{group}.job.json")
     return written
 
