@@ -422,7 +422,12 @@ def _words(cap: Any, box: tuple[int, int, int, int], left: float) -> str:
 def _rules(
     cap: Any, box: tuple[int, int, int, int], glyph: tuple[int, int, int, int], edges: Any
 ) -> dict[str, str]:
-    """The baseline and the horizontal rules (underlines, strike) under or through the glyphs."""
+    """The baseline and the horizontal rules (underlines, strike) under or through the glyphs.
+
+    A rule that covers the glyphs' bottom pixel row (a double underline at 9 pt starts a point
+    above the baseline) takes that row: the baseline then reads high, and so do its offsets.
+    ``rule_tops``, from the cell's top, does not depend on it.
+    """
     from capture.screen.ink import bands, pt, rule_rows
 
     left, right, top = edges

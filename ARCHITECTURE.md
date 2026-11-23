@@ -978,8 +978,8 @@ pt (xlformat's). A 1 pt rule is drawn 1 screen pt thick at any
 zoom, as gridlines and outline symbols are: one CSS pixel at any page scale (decided); a thicker
 one scales with the zoom (unverified past zoom 100). Captured (`text_style_more`, group `rules`,
 at 9, 11, 14, 20 and 36 pt, zoom 100): every rule's top and thickness (1 pt to 20 pt, 2 pt at
-36, a double's lines 4 pt apart there), but a double underline at 9 pt, which Excel draws on the
-baseline where xlformat's rule steps it a point up, a known deviation. At zoom 200 the model keeps
+36, a double's lines 4 pt apart there), a double underline at 9 pt included, which starts a
+point above the baseline. At zoom 200 the model keeps
 zoom 100's rules, a known deviation. Courier New, for which xlformat has no rules, and sizes past
 72 pt keep Calibri 11's offsets scaled with the size, 1 pt thick (unverified).
 - Single: 1 pt below the baseline at 11 pt; double: 0 pt, and a second line. Both run from the

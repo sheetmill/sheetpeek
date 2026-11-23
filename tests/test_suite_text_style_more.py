@@ -261,7 +261,6 @@ def _group(name, zoom=100):
 PINNED: dict[str, frozenset[str]] = {
     "test_rules_sit_where_sheetpeek_puts_them_at_other_sizes:100": frozenset(
         (
-            "double 9",
             "double 36",
             "doubleAccounting 36",
             "single 36",
@@ -272,7 +271,6 @@ PINNED: dict[str, frozenset[str]] = {
     "test_rules_sit_where_sheetpeek_puts_them_at_other_sizes:200": frozenset(
         (
             "double 14",
-            "double 20",
             "double 36",
             "double 9",
             "doubleAccounting 20",
@@ -348,8 +346,7 @@ metrics of styled text, not yet modeled):
   a 20 pt row: Excel starts the block where its lines fall, sheetpeek shows one line.
 - test_rules_sit_where_sheetpeek_puts_them_at_other_sizes: at zoom 100, the rules at 36 pt start
   6 pt into the cell where sheetpeek starts them 3 pt in (a rule's ends are not modeled past
-  11 pt), and a double underline at 9 pt: xlformat's rule steps its first line up to 1 pt above
-  the baseline, Excel draws it on the baseline. At zoom 200, sheetpeek keeps zoom 100's rules.
+  11 pt). At zoom 200, sheetpeek keeps zoom 100's rules.
 - test_shrink_steps_at_other_sizes: the step at sizes and faces other than Calibri 11 differs from
   the largest seventh that fits.
 - test_shrunk_text_keeps_the_baseline_sheetpeek_gives_it: text shrunk to 2/7 (3.1 pt) sits top
@@ -404,13 +401,14 @@ def test_superscript_numbers_show_what_their_drawn_size_allows():
 @pytest.mark.excel
 @pytest.mark.parametrize("zoom", [100, 200])
 def test_rules_sit_where_sheetpeek_puts_them_at_other_sizes(zoom):
-    # Each rule's top below the glyphs' baseline (``rule_offset``, a strike's negative):
-    # sheetpeek scales the 11 pt offsets with the size, rounded to whole points, and puts a
-    # double's second line 2 screen points (2 sheet points at zoom 100, 1 at 200) below the
-    # first. The baseline and each rule start on a device pixel, so the offset is within half a
-    # point at zoom 100 and a quarter at 200 of where Excel puts it; sheetpeek's own offsets are
-    # whole points, so half a point at both. Ends are compared within a point (a device pixel and
-    # the 1 pt overrun of single and double underlines).
+    # Each rule's top from the cell's top (``rule_tops``): sheetpeek's baseline plus
+    # rule_metrics' offset, a double's second line its gap below the first. Not from the
+    # measured baseline: a double underline at 9 pt starts a point above the baseline, over the
+    # bottom pixel row of the "H"s, which the measurer then counts as the rule's, so it reads
+    # that baseline a point high (11 where its row's other cases read 12). Each rule starts on
+    # a device pixel, so its top is within half a point at zoom 100 of where Excel puts it;
+    # sheetpeek's are whole points, so half a point at both zooms. Ends are compared within a
+    # point (a device pixel and the 1 pt overrun of single and double underlines).
     captured = _group("rules", zoom)
     wrong = []
     for case in suite.cases("rules"):
@@ -419,11 +417,11 @@ def test_rules_sit_where_sheetpeek_puts_them_at_other_sizes(zoom):
         ):
             continue
         record, expected = captured[case.cell], suite.EXPECTED["rules"][case.cell]
-        offsets = sorted(_floats(record["rule_offset"]))
+        offsets = sorted(_floats(record["rule_tops"]))
         want = []
         thick = []
-        for _, lines, offset, _, start, end, thickness in expected["rules"]:
-            want += [offset, offset + _gap(thickness, zoom)] if lines == 2 else [offset]
+        for _, lines, _, top, start, end, thickness in expected["rules"]:
+            want += [top, top + _gap(thickness, zoom)] if lines == 2 else [top]
             thick += [thickness] * lines
             starts, ends = _floats(record["rule_start"]), _floats(record["rule_end"])
             if any(abs(s - start) > 1 for s in starts) or any(abs(e - end) > 1 for e in ends):
@@ -431,7 +429,7 @@ def test_rules_sit_where_sheetpeek_puts_them_at_other_sizes(zoom):
         if len(offsets) != len(want) or any(
             abs(a - b) > 0.5 for a, b in zip(offsets, sorted(want), strict=True)
         ):
-            wrong.append((case.name, "offsets", offsets, want))
+            wrong.append((case.name, "tops", offsets, want))
         if zoom == 100 and sorted(_floats(record["rule_thickness"])) != sorted(thick):
             wrong.append((case.name, "thickness", record["rule_thickness"], thick))
     _pinned(f"test_rules_sit_where_sheetpeek_puts_them_at_other_sizes:{zoom}", wrong)
