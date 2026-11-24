@@ -337,7 +337,11 @@ def _results(workbook: dict[str, Any]) -> dict[str, Any]:
 
 def _shown(prop: str, value: Any) -> str:
     """A displayed property as the Mac's reads keep it: a color as ``r,g,b`` (Windows returns one
-    number, red in the low byte), a size as a number, an enumeration as Windows' number."""
+    number, red in the low byte), a size as a number, an enumeration as Windows' number; a
+    property the cell holds several of (a rich-text cell's fonts), which Windows returns as
+    nothing, as an empty field."""
+    if value is None:
+        return ""
     if prop in ("interior.color", "font.color"):
         v = int(value)
         return f"{v & 0xFF},{(v >> 8) & 0xFF},{(v >> 16) & 0xFF}"

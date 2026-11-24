@@ -342,3 +342,7 @@ def test_the_font_cut_job_rewrites_its_themes_and_reads_font_colors(tmp_path):
     steps = {"geometry": _geometry_grid(1, 1), "display": {"cells": [[cell]]}}
     rows = {(c, key): value for c, key, value in job._cell_rows(steps)}
     assert rows[("A1", "display.font_color")] == "255,0,0"  # red in the low byte
+    mixed = {"font.name": None, "font.size": None, "font.color": None}  # a rich-text cell
+    steps = {"geometry": _geometry_grid(1, 1), "display": {"cells": [[mixed]]}}
+    rows = {(c, key): value for c, key, value in job._cell_rows(steps)}
+    assert rows[("A1", "display.font_size")] == rows[("A1", "display.font_color")] == ""
