@@ -43,6 +43,7 @@ LABELS: dict[str, tuple[str, ...]] = {
         "# a row with a style of its own taking it before the columns', unverified).",
         "(unverified).",
     ),
+    "src/sheetpeek/_layout.py": ("Normal font's (unverified, no capture in this repository yet).",),
     "src/sheetpeek/_rows.py": (
         '5.5 points): Calibri 11\'s 3 (unverified)."""',
         "drawn size's ascent (unverified). A subscript's line grows by ``g = l + B(d) - B(s)`` on",
@@ -52,6 +53,7 @@ LABELS: dict[str, tuple[str, ...]] = {
     ),
     "src/sheetpeek/_style/font.py": ("taken alike (unverified).",),
     "src/sheetpeek/_text_styles.py": (
+        '(unverified). Under upright text it spans the cell less its font\'s insets (§3.6)."""',
         "# drawn size, 1 point thick (unverified).",
         "40; other faces unverified).",
     ),

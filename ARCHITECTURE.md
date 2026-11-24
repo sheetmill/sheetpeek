@@ -268,9 +268,14 @@ left gridline, y down from the first visible row's top gridline.
 - **Text edges:** left text starts at `x + left_inset` plus three Normal-font spaces per indent
   level; right text ends `right_inset` before the next gridline; centered text sits at
   `x + 1 + ceil((interior − width) / 2)`, the odd point going to its right. The insets are
-  xlformat's `ColumnMetrics`, from the Normal font: the gridline and `ceil(D / 4)` screen units on
-  the left, `ceil(D / 4)` on the right, `D` the digit width at its screen size (Calibri 11: 3 and
-  2 pt on the Mac, 3 and 2 px on Windows).
+  xlformat's `text_insets` of the cell's font: the gridline and `ceil(D / 4)` screen units on the
+  left, `ceil(D / 4)` on the right, `D` the cell font's digit width at its screen size (Calibri
+  11: 3 and 2 pt on the Mac, 3 and 2 px on Windows; Calibri 24 on the Mac: 4 and 3 pt). Wrapping
+  and shrink to fit fit the cell less them; shrunk text is placed by its drawn size's (Calibri 11
+  drawn at 3/7 starts 2 pt in). Captured: `text_steps`, `text_style`, `text_style_more` and
+  `runs`, the ink starting a glyph's side bearing after the inset at Calibri 1 to 36 pt on the
+  Mac, and `windows/text_steps`, `windows/line_budget`. Faces xlformat has no tables for take
+  Calibri's at the same size; sizes past 72 pt the Normal font's (unverified).
 - **A fill covers its cell and its far gridlines**, `[x, x + width + 1) × [y, y + height + 1)`
   (captured from the PDF's fill rectangles).
 - **Rows** are laid out by §4.7; **columns** by `file_column_metrics` with the Normal font.
@@ -744,11 +749,9 @@ levels of `windows/text_steps`: §4.6, §4.13. `windows/text_style` (zoom 100): 
 and every line count as sheetpeek's; rows fitted to text, which sheetpeek still fits with Excel for
 Mac's rules, differ (28 rows, waiting for xlformat's Windows vertical metrics). Vertical justify
 and distributed text keeps "bbbb cccc", 59 px, on one line of a 64 px cell, between the Normal
-font's insets of 3 and 2 px. `windows/line_budget`: under cell fonts to 12 points Excel for
-Windows keeps a line of any of the four alignments the cell less 5 px wide, its insets 3 px left
-and 2 px right; Calibri 14 breaks texts the cell less 6 and 5 px wide, its own insets larger.
-sheetpeek takes the Normal font's insets for every cell, a known deviation (24 of 136 cells, the
-Calibri 14 ones).
+font's insets of 3 and 2 px. `windows/line_budget`: Excel for Windows keeps a line of any of the four alignments the cell
+less its font's insets wide, 3 px left and 2 px right under cell fonts to 12 points, larger for
+Calibri 14 (136 of 136 cells as sheetpeek breaks them).
 ### 4.10 Hyperlinks
 
 The look and where a link goes are captured (`links`, Excel 16.115, zoom 100; the places through
@@ -1032,12 +1035,14 @@ point above the baseline. At zoom 200 the model keeps
 zoom 100's rules, a known deviation. Sizes past 72 pt, and Courier New below 6 pt, where
 xlformat has no rules, keep Calibri 11's offsets scaled with the size, 1 pt thick (unverified).
 - Single: 1 pt below the baseline at 11 pt; double: 0 pt, and a second line. Both run from the
-  text's start to 1 pt past its end (Excel 16.115, screen suite `text_style`, Calibri 11; at 36
-  pt Excel starts them 6 pt into the cell where sheetpeek starts them 3, a known deviation).
-  Accounting underlines and strikethrough end as below.
+  text's start to 1 pt past its end (Excel 16.115, screen suite `text_style`, Calibri 11; the
+  text, and so the rule, starts after the cell font's left inset, 6 pt into the cell at 36 pt,
+  §3.6). Accounting underlines and strikethrough end as below.
 - Single accounting: 3 pt below the baseline at 11 pt; double accounting a second line. **On text
-  they span the cell**, from 3 pt after its left gridline to 2 pt before the next one, even under
-  two letters in a 213 pt cell; a merge spans the merge (captured, `text_style_more`). Wrapped
+  they span the cell** less the cell font's insets (§3.6), from 3 pt after its left gridline to
+  2 pt before the next one at Calibri 11 (4 and 3 at 20 pt, 6 and 5 at 36), even under two
+  letters in a 213 pt cell; a merge spans the merge (captured, `text_style_more`). Under turned
+  text they span the text less 3 and 2 pt (unverified). Wrapped
   text and distributed words get one rule, under the last line (`text_style_more`, group `rules`:
   three wrapped lines draw one). **On a number, boolean or error they span the value**, like a
   single underline (captured on the Mac only: a stated limitation until the platform setting

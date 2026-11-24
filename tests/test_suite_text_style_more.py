@@ -270,15 +270,6 @@ def _group(name, zoom=100):
 
 
 PINNED: dict[str, frozenset[str]] = {
-    "test_rules_sit_where_sheetpeek_puts_them_at_other_sizes:100": frozenset(
-        (
-            "double 36",
-            "doubleAccounting 36",
-            "single 36",
-            "singleAccounting 36",
-            "strike 36",
-        )
-    ),
     "test_rules_sit_where_sheetpeek_puts_them_at_other_sizes:200": frozenset(
         (
             "double 14",
@@ -287,16 +278,13 @@ PINNED: dict[str, frozenset[str]] = {
             "doubleAccounting 20",
             "doubleAccounting 36",
             "single 14",
-            "single 36",
             "single 9",
             "singleAccounting 36",
             "strike 14",
-            "strike 20",
-            "strike 36",
             "strike 9",
         )
     ),
-    "test_shrink_steps_at_other_sizes": frozenset(("C10", "E7", "G4", "G7")),
+    "test_shrink_steps_at_other_sizes": frozenset(("C10", "E7", "G7")),
     "test_shrunk_text_keeps_the_baseline_sheetpeek_gives_it:100": frozenset(
         (
             "center 15 shrunk 2/7",
@@ -323,13 +311,12 @@ metrics of styled text, not yet modeled):
 
 - test_lines_that_do_not_fit_their_block_start_where_sheetpeek_starts_them: three wrapped lines in
   a 20 pt row: Excel starts the block where its lines fall, sheetpeek shows one line.
-- test_rules_sit_where_sheetpeek_puts_them_at_other_sizes: at zoom 100, the rules at 36 pt start
-  6 pt into the cell where sheetpeek starts them 3 pt in (a rule's ends are not modeled past
-  11 pt). At zoom 200, sheetpeek keeps zoom 100's rules.
+- test_rules_sit_where_sheetpeek_puts_them_at_other_sizes: at zoom 200, sheetpeek keeps zoom
+  100's rules.
 - test_shrink_steps_at_other_sizes: in a cell font larger or smaller than the Calibri 11 Normal
-  font, four lengths take a level one below the levels' fit test (Calibri 9, 10 "H"s; Calibri 16
-  and 20, 7 "H"s), and Calibri 20's 4 "H"s, exactly the budget, are shrunk: the test's margin
-  seems to depend on the fonts, which the text_steps capture does not vary.
+  font, three lengths take a level one below the levels' fit test (Calibri 9, 10 "H"s; Calibri 16
+  and 20, 7 "H"s): the test's margin seems to depend on the fonts, which the text_steps capture
+  does not vary.
 - test_shrunk_text_keeps_the_baseline_sheetpeek_gives_it: the text named 2/7, drawn at level 3
   (4.7 pt), sits top and centered a point lower than its drawn size gives at zoom 100 and, top,
   a point higher at zoom 200, where sheetpeek keeps zoom 100's placement.

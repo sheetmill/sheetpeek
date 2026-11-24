@@ -20,11 +20,11 @@ from sheetpeek._rows import script_size
 from sheetpeek._text_model import TextRule
 
 ACCOUNTING_INSETS = (3.0, 2.0)
+"""An accounting underline under turned text spans the text less these from its left and right
+(unverified). Under upright text it spans the cell less its font's insets (§3.6)."""
 UNDERLINE_OVERRUN = 1.0
 """Points a single or double underline runs past its text's end (Excel 16.115, screen suite
 ``text_style``, Calibri 11; accounting underlines and strikethrough end with the text)."""
-"""An accounting underline under text spans the cell, less these from its left and right
-gridlines (from the left gridline, and before the next one)."""
 
 # Where xlformat has no rule positions (sizes past 72 points, Courier New below 6): the offsets
 # of the first line's top from the baseline at Calibri 11 (positive is down), scaled with the
@@ -153,8 +153,8 @@ def rules(
         size: The drawn size, in points.
         baseline: The run's baseline.
         span: Where the run's text starts and ends.
-        cell: The left and next gridline of the cell, for an accounting underline under text,
-            which spans the cell; ``None`` for a number, whose underline spans the number.
+        cell: Where an accounting underline under text starts and ends, the cell less its
+            insets; ``None`` for a number, whose underline spans the number.
     """
     found: list[TextRule] = []
     kind = font.underline
@@ -162,7 +162,7 @@ def rules(
     if kind in _UNDERLINE_OFFSET:
         x0, x1 = span
         if cell is not None and kind in ("singleAccounting", "doubleAccounting"):
-            x0, x1 = cell[0] + ACCOUNTING_INSETS[0], cell[1] - ACCOUNTING_INSETS[1]
+            x0, x1 = cell
         elif kind in ("single", "double") and x1 > x0:
             x1 += UNDERLINE_OVERRUN
         lines: Literal[1, 2] = 2 if kind in ("double", "doubleAccounting") else 1

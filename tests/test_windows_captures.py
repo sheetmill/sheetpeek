@@ -439,10 +439,9 @@ def test_windows_shrink_levels_hold_on_fonts_of_their_own():
 @pytest.mark.excel
 def test_windows_line_budget_against_sheetpeek():
     # Excel's lines from the capture's line bands, an "i"'s dots left out: on Windows they stand
-    # 2 px above their stems, a band of 1 or 2 px of their own. Known deviations, one reason:
-    # Excel for Windows' insets follow the cell's font (Calibri 14 takes larger ones than the
-    # Calibri 11 Normal font's 3 and 2 px), and sheetpeek takes the Normal font's for every cell,
-    # so Calibri 14 text the cell less 6 and 5 px breaks in Excel and fits one line in sheetpeek.
+    # 2 px above their stems, a band of 1 or 2 px of their own. Every cell's insets follow its
+    # font: 3 and 2 px under cell fonts to 12 points, larger ones for Calibri 14, which breaks
+    # texts the cell less 6 and 5 px wide.
     pytest.importorskip("openpyxl")
     import openpyxl
     from capture import text_style
@@ -467,17 +466,11 @@ def test_windows_line_budget_against_sheetpeek():
         ours = len({round(t.y, 3) for t in by_row[r].runs if t.source == (r, c)})
         if excel != ours:
             wrong.add(case.name)
-    known = {
-        case.name
-        for case in found
-        if "Calibri 14" in case.name and case.name.endswith(("cell-6px", "cell-5px"))
-    }
     REPORT["line budget (Windows)"] = (
-        f"line budget, Excel for Windows: {len(found)} cells, {len(wrong)} known deviations "
-        "(insets of the cell's font)"
+        f"line budget, Excel for Windows: {len(found)} cells, {len(wrong)} deviations"
     )
     assert len(found) == 136
-    assert wrong == known
+    assert wrong == set()
 
 
 # --- font_cut: Excel for Windows' font table cut

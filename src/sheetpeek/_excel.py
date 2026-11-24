@@ -54,6 +54,7 @@ from sheetpeek._runs import (
 from sheetpeek._runs_model import TextSpan
 from sheetpeek._text_model import TextDirection, TextRule
 from sheetpeek._text_styles import (
+    ACCOUNTING_INSETS,
     accounting,
     right_to_left,
     rules,
@@ -263,7 +264,8 @@ def _fitted(
         # fits the row to the lines drawn, wrap flag or not (captured, text_style, text_style_more).
         wraps = style.wrap or style.h_align in _SPREAD or style.v_align in _SPREAD
         if cell.kind == "text" and wraps and widths[p] and merge is None:
-            budget = widths[p] - base.left_inset - base.right_inset
+            left, right = fonts.insets(cell.font, base)
+            budget = widths[p] - left - right
             # between the indents, as drawn
             budget -= (
                 _indents(style.h_align) * style.indent * indent_points(fonts.get(sheet.normal_font))
@@ -446,8 +448,7 @@ class _Points:
         self.normal = normal
         self.widths = widths
         self.heights = heights
-        self.left_inset = base.left_inset
-        self.right_inset = base.right_inset
+        self.base = base
         self.indent = indent_points(fonts.get(normal) if normal is not None else None)
         self.fonts = fonts
         self.xs = _running(widths)
@@ -584,7 +585,11 @@ class _Points:
         font = self.fonts.get(cell_font)  # at the drawn size of superscript and subscript
         size = cell_font.size * vert_scale(cell_font)
         align = shown.align
-        budget = (x1 - x0) - self.left_inset - self.right_inset
+        left_inset, right_inset = self.fonts.insets(cell_font, self.base)  # §3.6
+        budget = (x1 - x0) - left_inset - right_inset
+        # An accounting underline under text spans the cell less its font's insets (captured,
+        # text_style_more group rules at 9 to 36 points).
+        own = (x0 + left_inset, x1 - right_inset) if cell.kind == "text" else None
         v_align = style.v_align
         # Distributed and justified text wraps, horizontally or vertically (§3.6, §4.13).
         wraps = cell.kind == "text" and (
@@ -613,6 +618,8 @@ class _Points:
             )
             font = scaled(font, shrink)
             size *= shrink
+            if shrink < 1:  # placed by its drawn size's insets (captured, text_style_more shrunk)
+                left_inset, right_inset = self.fonts.insets(cell_font, self.base, shrink)
         # a line break in a cell without wrapping is not drawn
         if spans:
             text = Text.of_spans(spans, self.fonts.get, breaks=wraps, scale=shrink)
@@ -653,7 +660,6 @@ class _Points:
         )
         source = (cell.row, cell.column)
         low, high = first, last
-        own = (x0, x1) if cell.kind == "text" else None  # an accounting underline's span
         # Each piece: start, end and copies of the text, x, anchor, baseline, whether first, and
         # the line's width when the piece is the whole line once (measured already).
         placed: list[tuple[int, int, int, float, str, float, bool, float | None]] = []
@@ -664,22 +670,28 @@ class _Points:
             pieces: list[tuple[int, int, int, float, str]]
             if align == "fill":
                 copies = max(1, math.floor(budget / width)) if width else 1
-                pieces = [(a, b, copies, x0 + self.left_inset, "left")]
+                pieces = [(a, b, copies, x0 + left_inset, "left")]
             elif align == "distributed" or (align == "justify" and k < n - 1 and len(words) > 1):
                 distributed = align == "distributed"
                 # A line broken at a space keeps it as a last gap (captured, text_style lone).
                 trailing = b < len(text.text) and text.text[b] == " "
                 pieces = self.spread(
-                    words, text, x0, x1, distributed, indent if distributed else 0.0, trailing
+                    words,
+                    text,
+                    x0 + left_inset,
+                    x1 - right_inset,
+                    distributed,
+                    indent if distributed else 0.0,
+                    trailing,
                 )
             elif align == "right" and not shown.overflow:
-                pieces = [(a, b, 1, x1 - self.right_inset - indent - width, "right")]
+                pieces = [(a, b, 1, x1 - right_inset - indent - width, "right")]
             elif align == "center" or shown.overflow:
                 # A # run is centered whatever the alignment (captured, layout rows 130 to 136).
                 x = x0 + 1 + math.ceil((x1 - x0 - 1 - width) / 2)
                 pieces = [(a, b, 1, x, "center")]
             else:
-                pieces = [(a, b, 1, x0 + self.left_inset + indent, "left")]
+                pieces = [(a, b, 1, x0 + left_inset + indent, "left")]
             if origin.spills and n == 1 and align in ("left", "right", "center"):
                 x = pieces[0][3]
                 low, high = self.spill(origin, x, x + width, align)
@@ -881,7 +893,11 @@ class _Points:
             # down in the turned frame for superscript and subscript
             rx, ry = x + dx + shift * sin, y + shift * cos
             # An accounting underline runs under the text's width, turned with it (unverified).
-            own = (rx, rx + width) if cell.kind == "text" else None
+            own = (
+                (rx + ACCOUNTING_INSETS[0], rx + width - ACCOUNTING_INSETS[1])
+                if cell.kind == "text"
+                else None
+            )
             if spans:
                 drawn = _spans(text, a, b, 1, 1.0, shown.format_color)
                 ruled = _span_rules(drawn, rx, ry, own)
@@ -998,7 +1014,7 @@ class _Points:
         indent: float = 0.0,
         trailing: bool = False,
     ) -> list[tuple[int, int, int, float, str]]:
-        """Words spread across the cell between its insets, less ``indent`` at both ends.
+        """Words spread between ``x0`` and ``x1`` (the cell less its insets), less ``indent``.
 
         Each word is its start and end in ``text``; each piece returned is a word's start, end,
         copies, x and anchor. The room left is shared by the gaps between words and, when
@@ -1006,7 +1022,7 @@ class _Points:
         shares it (captured, ``text_style`` group ``lone``). A line without a gap, a single word
         ending its paragraph, is centered when ``distributed`` and left-aligned otherwise.
         """
-        lo, hi = x0 + self.left_inset + indent, x1 - self.right_inset - indent
+        lo, hi = x0 + indent, x1 - indent
         widths = [text.width(a, b) for a, b in words]
         gaps = len(words) - 1 + trailing
         if not gaps:

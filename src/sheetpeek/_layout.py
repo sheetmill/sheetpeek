@@ -334,6 +334,7 @@ class _Fonts:
         self._by_id: dict[int, tuple[Font, xlformat.Font, bool]] = {}
         self._heights: dict[int, tuple[Font, float]] = {}
         self._bottoms: dict[int, tuple[Font, tuple[float, float, float]]] = {}
+        self._insets: dict[tuple[str, float, bool, bool], tuple[float, float]] = {}
 
     def get(self, font: Font, *, measured: bool = True) -> xlformat.Font:
         """The font to pass to xlformat; ``measured`` when its glyph widths decide the layout."""
@@ -360,6 +361,30 @@ class _Fonts:
         # Checked for the warning once it was measured, or when it needs none.
         self._by_id[id(font)] = (font, found, measured or known)
         return found
+
+    def insets(
+        self, font: Font, base: xlformat.ColumnMetrics, scale: float = 1.0
+    ) -> tuple[float, float]:
+        """Where a cell in ``font`` starts and ends its text, from its boundaries.
+
+        ``xlformat.text_insets`` of the cell's font at its whole size times ``scale`` (§3.6;
+        shrunk text is placed by its drawn size's), a face without a glyph table as Calibri, as
+        it is measured. A size xlformat has no insets for (past 72 points) takes ``base``'s, the
+        Normal font's (unverified, no capture in this repository yet).
+        """
+        measured = self.get(font)
+        key = (measured.name, font.size * scale, measured.bold, measured.italic)
+        hit = self._insets.get(key)
+        if hit is None:
+            try:
+                found = xlformat.text_insets(
+                    replace(measured, size=font.size * scale), platform=current()
+                )
+                hit = (found.left, found.right)
+            except LookupError:
+                hit = (base.left_inset, base.right_inset)
+            self._insets[key] = hit
+        return hit
 
     def row_height(self, font: Font) -> float:
         """``font_row_height``, by the font's identity."""

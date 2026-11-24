@@ -389,9 +389,46 @@ def test_shrink_fits_what_the_indent_leaves(tmp_path):
         ws["A1"] = "H" * 12
         ws["A1"].alignment = Alignment(horizontal="left", indent=2, shrink_to_fit=True)
 
+    # Fitted between the cell font's insets, 3 and 2 points; drawn at 3/7, so placed by the
+    # drawn size's, 2 points (§3.6).
     (run,) = runs_of(lay_out(tmp_path, build), 1)
-    assert run.x == 3 + 12
+    assert run.x == 2 + 12
     assert run.x + run.width <= 53 - 2
+
+
+def test_text_sits_between_its_own_fonts_insets(tmp_path):
+    # §3.6: xlformat's text_insets of the cell's font. Calibri 24 takes 4 and 3 points on the
+    # Mac, Times New Roman (no glyph table) Calibri's at its size, and a size past 72 points,
+    # where xlformat has none, the Normal font's 3 and 2.
+    def build(ws):
+        ws.column_dimensions["A"].width = 60
+        fonts = {2: ("Calibri", 24), 3: ("Times New Roman", 24), 4: ("Calibri", 100)}
+        for r in (1, 2, 3, 4):
+            ws[f"A{r}"] = ws[f"B{r}"] = "H"
+            ws[f"B{r}"].alignment = Alignment(horizontal="right")
+            if r in fonts:
+                name, size = fonts[r]
+                ws[f"A{r}"].font = Font(name=name, size=size)
+                ws[f"B{r}"].font = Font(name=name, size=size)
+
+    rendered = lay_out(tmp_path, build)
+    b = next(c for c in rendered.columns if c.index == 2)
+    lefts = [runs_of(rendered, r, 1)[0].x for r in (1, 2, 3, 4)]
+    rights = [
+        b.x_pt + b.width_pt - (lambda t: t.x + t.width)(runs_of(rendered, r, 2)[0])
+        for r in (1, 2, 3, 4)
+    ]
+    assert lefts == [3, 4, 4, 3]
+    assert rights == [2, 3, 3, 2]
+
+
+def test_windows_insets_are_device_pixels_of_the_cells_font(tmp_path):
+    def build(ws):
+        ws["A1"], ws["A2"] = "H", "H"
+        ws["A2"].font = Font(name="Calibri", size=24)
+
+    rendered = sheetpeek.read(book(tmp_path, build), platform="windows").layout("excel")
+    assert [runs_of(rendered, r, 1)[0].x for r in (1, 2)] == [2.25, 3.75]
 
 
 def test_a_merge_is_not_shrunk(tmp_path):
