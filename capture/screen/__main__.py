@@ -41,6 +41,7 @@ SUITES = (
     "extensions",
     "text_steps",
     "row_bottoms",
+    "rules_below",
 )
 
 
