@@ -147,11 +147,11 @@ def test_hidden_column_is_crossed(tmp_path):
 def test_unmeasured_cell_font_warns_in_excel_mode(tmp_path):
     def build(ws):
         ws["A1"] = "x"
-        ws["A1"].font = Font(name="Verdana", size=10)
+        ws["A1"].font = Font(name="Segoe UI", size=10)
 
     rendered = lay_out(tmp_path, build)
     assert rendered.warnings == (
-        "font 'Verdana' has no glyph table in xlformat; measured as Calibri at the same size",
+        "font 'Segoe UI' has no glyph table in xlformat; measured as Calibri at the same size",
     )
 
 

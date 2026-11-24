@@ -106,8 +106,9 @@ def test_superscript_and_subscript_are_drawn_smaller_raised_and_lowered(tmp_path
     # Raised 5 pt and lowered 2 pt at 11 pt; a row with both is fitted to 18 pt.
     assert (plain.y - sup.y, sub.y - plain.y) == (5, 2)
     assert rendered.rows[0].height_pt == 18
-    # Measured at the drawn size: an H is 5 pt at 7 pt, 7 at 11.
-    assert (plain.width, sup.width) == (21, 15)
+    # Measured at the drawn size: an H is 4 pt at 7 pt (ten of them span 4 pt a letter in
+    # text_steps' Calibri 7 ladder row), 7 at 11.
+    assert (plain.width, sup.width) == (21, 12)
 
 
 @pytest.mark.parametrize("position", ["superscript", "subscript"])
@@ -398,8 +399,8 @@ def test_shrink_fits_what_the_indent_leaves(tmp_path):
 
 def test_text_sits_between_its_own_fonts_insets(tmp_path):
     # §3.6: xlformat's text_insets of the cell's font. Calibri 24 takes 4 and 3 points on the
-    # Mac, Times New Roman (no glyph table) Calibri's at its size, and a size past 72 points,
-    # where xlformat has none, the Normal font's 3 and 2.
+    # Mac, Times New Roman its own (the same at 24), and a size past 72 points, where xlformat
+    # has none, the Normal font's 3 and 2.
     def build(ws):
         ws.column_dimensions["A"].width = 60
         fonts = {2: ("Calibri", 24), 3: ("Times New Roman", 24), 4: ("Calibri", 100)}

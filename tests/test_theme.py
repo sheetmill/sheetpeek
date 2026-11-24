@@ -86,8 +86,8 @@ def test_a_scheme_font_is_drawn_in_the_theme_typeface(tmp_path):
 
 def test_the_normal_font_follows_the_theme(tmp_path):
     # Captured: the Normal style's Calibri (minor) is replaced as well, so the default
-    # column takes the theme font's digits (61 pt for Courier New). xlformat has no glyph table
-    # for Courier New, so it is measured as Calibri and reported.
+    # column takes the theme font's digits (61 pt for Courier New, theme_fonts_palette), measured
+    # by xlformat, so nothing is reported.
     path = themed(build(tmp_path, {"A1": (1, {})}))
     sheet = sheetpeek.read(path)
     assert sheet.normal_font == ModelFont(
@@ -95,11 +95,10 @@ def test_the_normal_font_follows_the_theme(tmp_path):
     )
     assert sheet.cell(1, 1).font.name == "Courier New"
     rendered = sheet.layout("excel")
-    assert [n.context for n in rendered.notices if n.code == "font.no_metrics"] == [
-        {"font": "Courier New"}
-    ]
+    assert [n.context for n in rendered.notices if n.code == "font.no_metrics"] == []
+    assert rendered.columns[0].width_pt == 61
     plain = sheetpeek.read(build(tmp_path, {"A1": (1, {})}, "plain.xlsx")).layout("excel")
-    assert rendered.columns[0].width_pt == plain.columns[0].width_pt  # measured as Calibri
+    assert plain.columns[0].width_pt == 53  # Calibri's
 
 
 def test_a_theme_font_with_glyph_tables_sets_the_widths(tmp_path):

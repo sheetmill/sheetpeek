@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Requires xlformat 0.9 (`xlformat>=0.9,<1`), which measures text on the Mac by a rule per
+  glyph, captured from Excel for Mac. 0.5.0 already runs with xlformat 0.9 when it is installed,
+  so these changes reach 0.5.0 users through it as well:
+  - 24 more families are measured, 27 in all (Times New Roman, Courier New, Courier, Tahoma,
+    Arial Narrow, Verdana and Impact among them), where they were measured as Calibri with a
+    `font.no_metrics` notice: "Hello world" in Times New Roman 11 is 55 points wide, where it
+    was 53, and a theme whose minor font is Courier New gives Excel's 61-point default column,
+    where it gave 53 (captured, `theme_fonts_palette`).
+  - Calibri, Aptos Narrow and Arial at sizes without a captured table are measured by the rule
+    where they were scaled from the nearest table: a Normal font of Calibri 13 has a 7-point
+    digit and a 61-point default column, where it had 6 and 53, and every row fitted to text
+    turned 90 degrees at 13 to 36 points now matches Excel's (captured, `row_height_fitted`). A
+    superscript in Calibri 11, drawn at 7 points, is 4 points an "H", where it was 5 (captured,
+    `text_steps`).
+  - Each character outside ASCII in Windows-1252 is measured by its own width, where it was
+    measured as a digit: "25°C ± 0.5" in Calibri 11 is 46 points wide, where it was 49.
+  - Right-aligned italic text ends further from the cell's right edge, as Excel places it: 4
+    points in Calibri 11 italic, where it was 2 (xlformat's captures).
+  - A Normal font of 409 points gives Excel's 1,761-point default column, where it gave 1,735
+    (captured, `package_more`).
+
 ## [0.5.0] - 2026-11-24
 
 ### Added

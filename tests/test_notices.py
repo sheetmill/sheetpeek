@@ -93,7 +93,7 @@ def build_every_feature(path: Path) -> Path:
     # What the model carries (the census).
     ws["A1"] = "names"
     ws["A1"].font = Font(
-        name="Verdana",
+        name="Segoe UI",
         size=14,
         bold=True,
         italic=True,

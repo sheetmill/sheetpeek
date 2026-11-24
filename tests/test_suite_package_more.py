@@ -241,17 +241,15 @@ def test_write_measures_saved_answers_again(tmp_path):
 # heights, and the ``package`` suite's 68 cases match sheetpeek's widths, heights and font sizes
 # exactly; a width a point off here is the rule failing (the 6 pt digit, or the edge where 0
 # starts), not noise. The comparison uses the
-# width in points, which needs no font measurements (xlformat has none for Arial), and records
+# width in points, which needs no font measurements, and records
 # the width in characters as Excel reports it beside it.
 
 KNOWN_DEVIATIONS: dict[str, str] = {}
 
 PINNED = {
-    # The default column (1,761 pt) is xlformat's digit at 409 pt, 26 pt wider than sheetpeek's.
-    "font_size_409": "xlformat's digit at 409 pt",
-    # The same, and Excel reports a size of 409.5 as 409 where sheetpeek keeps 409.5 (Excel lays
-    # it out wider than 409: 1,769 pt).
-    "font_size_409.5": "xlformat's digit at 409.5 pt",
+    # Excel reports a size of 409.5 as 409 where sheetpeek keeps 409.5; both lay it out at 1,769 pt,
+    # wider than 409's 1,761.
+    "font_size_409.5": "Excel reports 409.5 pt as 409",
 }
 """Cases where sheetpeek differs from Excel for a reason recorded here, most of them in a sibling
 package. Each comparison asserts exactly these, so a new difference fails, and so does a fixed

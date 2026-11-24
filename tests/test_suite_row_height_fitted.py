@@ -120,22 +120,6 @@ def _names(text):
 
 
 PINNED: dict[str, frozenset[str]] = {
-    # At sizes xlformat has not measured (13, 15, 17, 19, 21 to 23, 25 to 36) the width W comes
-    # from xlformat's table scaled from the nearest measured size, which is off by up to 20 pt in
-    # the long text; every row at a measured size, 90 and -90 degrees, is exact.
-    "turned": _names(
-        "90 medium 13|90 long 13|90 medium 15|90 long 15|90 short 17|90 medium 17|90 long 17|"
-        "90 short 19|90 medium 19|90 long 19|90 short 21|90 medium 21|90 long 21|"
-        "90 medium 22|90 long 22|90 medium 23|90 long 23|90 short 25|90 medium 25|90 long 25|"
-        "90 medium 26|90 long 26|90 short 27|90 medium 27|90 long 27|90 medium 28|90 long 28|"
-        "90 short 29|90 medium 29|90 long 29|90 medium 30|90 short 31|90 medium 31|"
-        "90 medium 32|90 short 33|90 medium 33|90 medium 34|90 short 35|90 medium 35|"
-        "90 short 36|90 ox1 17|90 ox2 17|90 ox4 17|90 ix3 19|90 ox1 21|90 ox2 21|90 ox4 21|"
-        "90 ix3 22|90 ix3 23|90 ox1 25|90 ox2 25|90 ox4 25|90 ox1 27|90 ox2 27|90 ox4 27|"
-        "90 ix3 27|90 ix3 28|90 ox1 29|90 ox2 29|90 ox4 29|90 ix3 30|90 ox1 31|90 ox2 31|"
-        "90 ox4 31|90 ix3 31|90 ix3 32|90 ox1 33|90 ox2 33|90 ox4 33|90 ox1 35|90 ox2 35|"
-        "90 ox4 35|90 ix3 35|90 ox1 36|90 ox2 36|90 ox4 36|90 ix3 36"
-    ),
     # A subscript, alone or beside a superscript, at 6 to 8 pt: Excel's row is 15, the Normal
     # font's, where l + B(d) gives a bottom of 4 and a row of 16 (the drawn size's small-size
     # metrics; row_bottoms' screen shows the same point at those sizes).

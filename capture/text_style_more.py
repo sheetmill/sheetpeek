@@ -54,8 +54,7 @@ repeated and "g" (the g's descender shows the line's box below the baseline).
 - ``faces``, zoom 100. Rows 4, 6 and 8 (60 pt) top, center and bottom aligned "Hxg", rows 10, 12
   and 14 (90 pt) three wrapped lines of it, in Calibri 13 (C) and 17 (E), Arial (G), Times New
   Roman (I), Courier New (K), all 11 pt but Calibri's, and Calibri 11 (M) as the control: each
-  line's baseline (sizes and faces xlformat has not measured take the nearest measured size,
-  and Calibri's, §3.6).
+  line's baseline (§3.6).
 - ``overflow``, zoom 100. Rows 4 to 21, fixed at 15 to 32 pt: "Haa", "Hbb", "Hcc" wrapped in
   Calibri 11, centered (C), bottom (E) and top (G), and "Haa", "Hbb" centered (I) and bottom
   (K): which lines Excel places as the block when they do not fit (§3.6). Rows 23 and 25, fixed

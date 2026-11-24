@@ -188,7 +188,7 @@ EXPECTED: dict[str, dict[str, str | float | None]] = {
         "B4": "Courier New", "B5": "Courier New", "B6": "Georgia", "B7": "Calibri",
         "B8": "Courier New", "B9": "Courier New", "B10": "Georgia", "B11": "Times New Roman",
         "B13": "Courier New", "B14": "Georgia", "B15": "Calibri", "B16": MINCHO, "B17": MARU,
-        "D4": 53.0, "E4": 120.0,
+        "D4": 61.0, "E4": 140.0,
     },
     "palette": {
         "B4": "FF0000", "B5": OLIVE, "B6": TEAL, "B7": "00FF00", "B8": BROWN,

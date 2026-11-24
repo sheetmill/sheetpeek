@@ -1226,7 +1226,7 @@ font (`_style/font.py`): `Font.name` is the typeface Excel draws, `Font.scheme` 
 default column takes the theme font's digits (61 pt for Courier New, against 53 pt for Calibri
 11), and so does every width in `excel` mode. A typeface without xlformat glyph tables is
 measured as Calibri at the same size, with `font.no_metrics` (§6.2), so such a theme's widths are
-approximate (Courier New's default column: 53 pt in sheetpeek, a known deviation). Without a
+approximate; Courier New is measured, and its default column is Excel's 61 pt. Without a
 theme, minor-scheme text, the Normal style's included, is drawn in Excel's own default theme's
 minor font, Aptos Narrow (the major font is not captured: its stored name); with an empty
 typeface the stored name is drawn.
@@ -1501,9 +1501,9 @@ boxes match a rigid rotation of the upright box (captured: 45°, 58.5 × 57.5 pt
   fits 15. Captured (`row_height_fitted`, group `turned`, and `rotation`): at every size
   xlformat measures (9 to 12, 14, 16, 18, 20, 24), three texts and one-glyph runs of 1 to 40,
   every row at 90° and −90° matches exactly, where `W·|sin θ| + S·|cos θ| + 7` was short by up
-  to 9 pt. At the other sizes from 13 to 36 the pad's steps hold, but `W` comes from xlformat's
-  table scaled from the nearest measured size, so those rows are off by up to 20 pt, a known
-  deviation. The pad held at 7 below 9 pt is unverified (no capture in this repository yet).
+  to 9 pt, and so does every row at the other sizes from 13 to 36, where xlformat measures `W` by
+  its per-glyph rule. The pad held at 7 below 9 pt is unverified (no capture in this repository
+  yet).
   **Unverified:** a merge does not count, as for wrapped text in a merge (the merges the
   `rotation_more` capture holds sit in rows of a stored height).
 - **Wrapped angled text** (wrap, justify or distributed) wraps along the turned direction: a line
@@ -2113,8 +2113,8 @@ xlformat.format_cell(value, number_format, font=cell_font,
 
 - **`FormatError`**: the cell is formatted again with `"General"` at the same width, and the sheet
   records one warning naming the format. This is what Excel's repair does.
-- **A font without a glyph table** (xlformat measures Calibri, Aptos Narrow and Arial; others
-  would raise `LookupError`): **decided**, the layout measures it as Calibri at the same
+- **A font without a glyph table** (xlformat measures the families `xlformat.measured_fonts`
+  lists, 27 on the Mac; others would raise `LookupError`): **decided**, the layout measures it as Calibri at the same
   size and style, and records one warning per family, only where the font's widths decide the
   layout (the Normal font for column widths; cell fonts in `excel` mode). `xlformat.measured_fonts`
   tells which families are measured. Character mode was rejected because it counts a comma like a
@@ -2499,7 +2499,7 @@ attribute of `<dimension>`, `<mergeCell>` and `<autoFilter>` in the file format.
 
 - `xlio==0.4.*` (§5): the sheetmill project's reader, pinned to a minor.
 - `xlrecalc>=0.10.1,<1` (§5.7), imported normally: it is required.
-- `xlformat>=0.8,<1` (§6.4), imported normally: it is required.
+- `xlformat>=0.9,<1` (§6.4), imported normally: it is required.
 - openpyxl is a dev dependency only: the tests and the documentation's examples build workbooks
   with it, and the tests that need it are left out without it.
 - Extra `sheetpeek[rich]`: `rich>=13`.

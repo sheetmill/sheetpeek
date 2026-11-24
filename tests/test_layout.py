@@ -90,14 +90,14 @@ def test_unmeasured_normal_font(tmp_path):
     # Decided (ARCHITECTURE.md §6.2): column widths use Calibri at the same size, with a warning
     # in characters mode, which measures the Normal font; none mode measures nothing.
     path = save(openpyxl.Workbook(), tmp_path / "book.xlsx")
-    rewrite(path, "xl/styles.xml", replace_once('<name val="Calibri"', '<name val="Verdana"'))
+    rewrite(path, "xl/styles.xml", replace_once('<name val="Calibri"', '<name val="Segoe UI"'))
     rewrite(path, "xl/styles.xml", replace_once('<scheme val="minor" />', ""))  # §4.14
     sheet = sheetpeek.read(path, ref="A1")
-    assert sheet.normal_font.name == "Verdana"
+    assert sheet.normal_font.name == "Segoe UI"
     rendered = sheet.layout()
     assert rendered.columns[0].width == 8
     assert rendered.warnings == (
-        "font 'Verdana' has no glyph table in xlformat; measured as Calibri at the same size",
+        "font 'Segoe UI' has no glyph table in xlformat; measured as Calibri at the same size",
     )
     assert sheet.layout("none").warnings == ()
 
@@ -519,13 +519,13 @@ def test_fonts_for_xlformat():
     assert fonts.get(bold) is fonts.get(bold)
     assert fonts.get(sheetpeek.Font("aptos narrow", 10.0)) == xlformat.Font("aptos narrow", 10.0)
     assert notes.notices() == ()
-    verdana = sheetpeek.Font("Verdana", 10.0, italic=True)
-    assert fonts.get(verdana, measured=False) == xlformat.Font("Calibri", 10.0, italic=True)
+    segoe = sheetpeek.Font("Segoe UI", 10.0, italic=True)
+    assert fonts.get(segoe, measured=False) == xlformat.Font("Calibri", 10.0, italic=True)
     assert notes.notices() == ()
-    fonts.get(verdana)
-    fonts.get(sheetpeek.Font("Verdana", 12.0))
+    fonts.get(segoe)
+    fonts.get(sheetpeek.Font("Segoe UI", 12.0))
     assert [n.message for n in notes.notices()] == [
-        "font 'Verdana' has no glyph table in xlformat; measured as Calibri at the same size"
+        "font 'Segoe UI' has no glyph table in xlformat; measured as Calibri at the same size"
     ]
 
 

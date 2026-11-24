@@ -31,10 +31,7 @@ INK_TOLERANCE = 16
 6, and what smoothing leaves in the pixels at 90 % of the farthest from the background."""
 DEFAULT_COLUMN = 53.0
 """Excel for Mac's default column at Calibri 11, in points (``layout``, ARCHITECTURE §4.1)."""
-KNOWN = {
-    ("fonts", "D4"): "xlformat has no glyph tables for Courier New: measured as Calibri (§4.14)",
-    ("fonts", "E4"): "xlformat has no glyph tables for Courier New: measured as Calibri (§4.14)",
-}
+KNOWN: dict[tuple[str, str], str] = {}
 """Width cases where sheetpeek is known to differ from Excel, with the reason."""
 
 
