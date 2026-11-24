@@ -27,8 +27,9 @@ CLI views a file and serves a folder of workbooks as HTML.
   Excel would refuse falls back to `General`. A Normal font without glyph tables is approximated.
   The exception is a package refused as unsafe or a request over a limit (§5.5): those raise
   `PackageError` or `LimitError`, since nothing can be shown of a file that may not be read.
-- **Excel is the reference.** Correct means what Excel for Mac (Microsoft 365) shows; each
-  capture records its build and update channel. ECMA-376 is secondary; LibreOffice is a
+- **Excel is the reference.** Correct means what Excel (Microsoft 365) shows on the chosen
+  platform, Excel for Mac by default or Excel for Windows (`platform=`); each capture records
+  its platform, build and update channel. ECMA-376 is secondary; LibreOffice is a
   lower-trust secondary reference.
 - **Scope grows by feature groups.** Each group is read, drawn in Excel-mode HTML, and given a
   stated judgment per other output, with notices for the rest. In scope and built: cell styles
@@ -1060,8 +1061,7 @@ xlformat has no rules, keep Calibri 11's offsets scaled with the size, 1 pt thic
   text they span the text less 3 and 2 pt (unverified). Wrapped
   text and distributed words get one rule, under the last line (`text_style_more`, group `rules`:
   three wrapped lines draw one). **On a number, boolean or error they span the value**, like a
-  single underline (captured on the Mac only: a stated limitation until the platform setting
-  brings Windows captures, §11). They add xlformat's `A` under the text and to each wrapped line
+  single underline (captured on the Mac; unverified on Windows). They add xlformat's `A` under the text and to each wrapped line
   (3 pt at Calibri 11: a fitted row is 18 pt, not 15, and three wrapped lines 57), and a
   bottom-aligned baseline sits `B + A` above the cell's bottom, also in a row of fixed height,
   where plain bottom-aligned text beside it sits on the same baseline (§3.6; captured,
@@ -2717,8 +2717,8 @@ are read.
   `pytest.importorskip`. Doc examples are doctests.
 - **Latest openpyxl:** one CI job upgrades openpyxl, which builds the test workbooks, to the
   newest release before testing.
-- **Real-world files:** workbooks saved by Excel for Mac (later Windows and LibreOffice) under
-  `tests/files/`, a few KB each. The first, `excel_formulas.xlsx`, holds Excel's own cached
+- **Real-world files:** workbooks saved by Excel for Mac under `tests/files/` (none yet from
+  Excel for Windows or LibreOffice), a few KB each. The first, `excel_formulas.xlsx`, holds Excel's own cached
   formula results (§4.8).
 
 ## 11. Roadmap
@@ -2729,14 +2729,13 @@ are read.
    tables. Their parts come from xlio; those it does not read yet (pivot tables) are on its list.
 2. **Conditional formats driven by formulas**, evaluated through xlrecalc as Excel evaluates
    them. Charts, possibly as a package of their own. Planned options (§9) as they are asked for.
-3. **Excel for Windows and the Mac.** The platform becomes a setting, with Excel for Windows as
-   the default (most Excel users have it) and Excel for Mac kept; xlformat, which measures the
-   Mac only so far, takes it where the platforms turn out to differ, and xlrecalc and xlio
-   likewise. Parity on both platforms comes before a beta: every rule measured on the Mac is
-   measured on Windows too, and where the two differ each platform gets its own. To measure on
-   Windows: column widths, row heights and glyph tables (xlformat measures the Mac only so far),
-   and the automatic gridline gray, which the HTML backend draws (`--sheetpeek-grid`) and the
-   capture controls take per platform.
+3. **Excel for Windows as the default.** `platform=` takes either Excel (§3.2); Excel for
+   Windows becomes the default (most Excel users have it), with Excel for Mac kept. Parity on
+   both platforms comes before a beta: every rule captured on the Mac is captured on Windows too,
+   and where the two differ each platform gets its own. Still to capture on Windows: the rules
+   labeled unverified there (superscript and subscript rows, font sizes and faces outside
+   xlformat's Windows tables, a merge across rows), the screen suites not yet run there, and
+   the zoom-dependent layout both platforms share.
 4. **After 1.0:** a PDF backend drawing from the `excel` mode geometry (§2.1), possibly as an
    optional extra.
 5. **Other viewers and refinements**, logged here until they are taken up:

@@ -67,8 +67,8 @@ there too.
 ## Expected outputs
 
 Where a behavior is Excel's layout (how far text spills, when a value shows `####`, what a merge
-shows), the expected output is captured from Excel for Mac by the scripts in `capture/`, never
-written from memory; `CAPTURING.md` describes the methods. Captured files are never edited by
+shows), the expected output is captured from Excel for Mac or for Windows by the scripts in
+`capture/`, never written from memory; `CAPTURING.md` describes the methods. Captured files are never edited by
 hand. A capture that changes any expected output is reviewed as a change of evidence.
 
 ## Commit messages

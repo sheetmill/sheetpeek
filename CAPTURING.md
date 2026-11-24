@@ -1,8 +1,9 @@
 # Capturing how Excel lays out a sheet
 
-Expected layouts are captured from Excel 16 for Mac, never written from memory. Each capture
-builds a workbook with openpyxl, has Excel open it through AppleScript, and reads back what Excel
-produced. The number formats themselves are xlformat's concern and are captured there; this
+Expected layouts are captured from Excel (Microsoft 365) for Mac and for Windows, never written
+from memory. A Mac capture builds a workbook with openpyxl, has Excel open it through AppleScript,
+and reads back what Excel produced; a Windows capture is a job in the public capture-job format
+(the Windows table below). The number formats themselves are xlformat's concern and are captured there; this
 project captures layout: spill, alignment, merges, overflow, indent.
 
 ## Rules for every capture
@@ -173,10 +174,9 @@ pt high in the file prints 14 pt apart). `capture/screen/` captures Excel's wind
   captures from one marker gave the same results; at other zooms Excel rounds rows and columns
   to whole pixels (zoom 150: 3.008 across and 3.060 down against 3.0), so a one-marker grid holds
   only where a two-marker run's check shows the nominal scale holds.
-- **Gridlines** are `#D4D4D4` on the Mac. A control that finds a gridline takes its run's
-  platform's gray (`window.GRIDLINE`, from the header's `platform`, `mac` for runs before the
-  field); a platform whose gray no capture here records yet has none, and the control is skipped
-  with the reason.
+- **Gridlines** are `#D4D4D4` on the Mac and `#E0E0E0` on Windows (`windows/borders`,
+  `windows/fills`). A control that finds a gridline takes its run's platform's gray
+  (`window.GRIDLINE`, from the header's `platform`, `mac` for runs before the field).
 - **Reads:** for every cell measured, its display format (with conditional formatting and table
   styles), its own format, its own borders and its geometry, each property in its own `try`.
 - **Headers** record Excel's version and build, the edition (stated in `EXCEL_EDITION`, which

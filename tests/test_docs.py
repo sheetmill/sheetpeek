@@ -95,19 +95,32 @@ def test_every_capture_is_listed():
         assert f"`windows/{path.name.split('.')[0]}`" in capturing, path.name
 
 
-RETIRED = ("6 pt a level", "row-height table", "loaded_theme")
+RETIRED = (
+    "6 pt a level",
+    "row-height table",
+    "loaded_theme",
+    "for now",
+    "not yet rows",
+    "measures the mac only so far",
+    "until the platform setting",
+    "as excel for mac lays",
+    "captured from excel for mac by",
+    "captured from excel 16 for mac, never",
+)
 """Phrases for rules that have changed: an indent is three spaces of the Normal font, rows come from
-xlformat's row model, and the theme is read through xlio. The changelog keeps its history."""
+xlformat's row model, the theme is read through xlio, and Excel for Windows is a platform
+sheetpeek shows, not future work. The changelog keeps its history."""
 
 
 def test_no_retired_phrase():
+    # Whitespace is joined, so a phrase broken across lines is found too.
     left = {ROOT / "CHANGELOG.md", Path(__file__)}
     found = [
-        f"{path.relative_to(ROOT)}:{number}: {phrase}"
+        f"{path.relative_to(ROOT)}: {phrase}"
         for path in tracked()
         if path not in left
-        for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1)
+        for text in [" ".join(path.read_text(encoding="utf-8").lower().split())]
         for phrase in RETIRED
-        if phrase in line.lower()
+        if phrase in text
     ]
     assert found == []

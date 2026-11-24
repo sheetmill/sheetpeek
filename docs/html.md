@@ -238,6 +238,5 @@ The outline gutter's colors and sizes, the headings' sizes and colors and the gr
 from Excel's screen, in the light appearance and the dark one. The heading bands are in points, so they
 scale with the page like the cells, and grow with the Normal font's size. A sheet's own grid
 color draws its gridlines half a CSS pixel wide, one device pixel on a high-density display, as
-Excel draws it. The text's baseline comes from Excel's screen; its insets, and the baseline of
-angled text, come from Excel's print layout and are provisional until they are measured on
-screen.
+Excel draws it. The text's baseline and its insets come from Excel's screen; the baseline of
+angled text comes from Excel's print layout and is unverified on screen.

@@ -15,7 +15,7 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-WORD = re.compile("unverified", re.IGNORECASE)
+WORD = re.compile("unverified|provisional", re.IGNORECASE)
 LEFT_OUT = {"ARCHITECTURE.md", "CHANGELOG.md", "tests/test_unverified.py"}
 DATA = (".tsv", ".tsv.gz", ".xlsx")
 
@@ -28,6 +28,16 @@ LABELS: dict[str, tuple[str, ...]] = {
     "capture/package_more.py": (
         '"Numbers no column, row or font can have", unverified; this suite asks them in the same '
         "way.",
+    ),
+    "README.md": ("outside xlformat's Windows tables are unverified.",),
+    "docs/html.md": ("angled text comes from Excel's print layout and is unverified on screen.",),
+    "tests/test_suite_diagonals.py": (
+        "quarter of it; provisional until the capture's spread is known. "
+        "The thickness is the darkness",
+    ),
+    "tests/test_suite_gradients.py": (
+        '"""Levels of 255 a sample may differ by in any channel, '
+        "provisional until the capture's spread",
     ),
     "src/sheetpeek/_census.py": ("unverified, so any side counts.",),
     "src/sheetpeek/_detect.py": (

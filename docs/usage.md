@@ -121,9 +121,10 @@ from.
 
 ## Excel's geometry
 
-In `excel` mode the layout is in points, as Excel for Mac lays the sheet out: each column's x
-and width, each row's y and height, and each text as a {class}`sheetpeek.TextRun` with its
-start, baseline, width and clip window. A number shows as many `#` as Excel shows.
+In `excel` mode the layout is in points, as Excel lays the sheet out on the sheet's platform
+(Excel for Mac unless read with `platform="windows"`): each column's x and width, each row's y
+and height, and each text as a {class}`sheetpeek.TextRun` with its start, baseline, width and
+clip window. A number shows as many `#` as Excel shows.
 
 ```python
 >>> excel = sheet.layout("excel")

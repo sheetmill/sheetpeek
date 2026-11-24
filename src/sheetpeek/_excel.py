@@ -1,4 +1,4 @@
-"""``excel`` mode: a sheet laid out in points, as Excel for Mac lays it out.
+"""``excel`` mode: a sheet laid out in points, as Excel lays it out on the sheet's platform.
 
 Columns take xlformat's widths in points and rows the heights of ``ARCHITECTURE.md`` §4.7. Each
 cell is formatted at its column's width in dialog units (a merge at its merged width), then
