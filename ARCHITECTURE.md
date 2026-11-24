@@ -1089,8 +1089,12 @@ xlformat has no rules, keep Calibri 11's offsets scaled with the size, 1 pt thic
   capture).
   The two platforms differ (observed at Excel's default settings): Excel for Windows draws a cut
   cell in its standard font, Aptos Narrow 11, and Excel for Mac in Calibri 12, not its standard
-  font, Aptos Narrow 12. sheetpeek keeps the cell's own font on Windows and reports
-  every cell from entry 999 (`font.cut`, not implemented).
+  font, Aptos Narrow 12. With `platform="windows"` sheetpeek draws and measures such a cell as
+  Excel for Windows does, in Aptos Narrow 11 (`_read.CUT_FONT`), from entry 1,000, or 999 when the
+  Normal font's name is not the theme's minor typeface (the name taken for "the theme's body
+  font", unverified), and reports it (`font.cut`); every captured row matches but eight, under
+  faces xlformat has no Windows tables for (Times New Roman 16 as the Normal font, a Segoe UI 11
+  reference), measured as Calibri.
 - **A line past its row** (center or top aligned, or a font too large for its row): Excel for Mac
   draws nothing past the row in 62 of 63 cases (`rules_below`: underlines at 11 to 36 pt in rows
   of 12, 15 and 20 pt), and sheetpeek clips every line at the row. The one exception, a double

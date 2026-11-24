@@ -480,11 +480,9 @@ def test_windows_line_budget_against_sheetpeek():
 def test_windows_cuts_the_font_table_where_captured():
     # Excel for Windows draws a probe past its font table's cut in an 11-point face, black for a
     # list font and in its own color for a rich-text run, its row the larger of 15 pt and the
-    # Normal font's. Unexplained, listed: the cut is at entry 1,000 under a Calibri 11 Normal font
-    # (groups list and rich) and at 999 under a Times New Roman Normal font (the theme groups);
-    # and the face is neither Calibri 11 nor Aptos Narrow 11 (its glyphs start at 2.25, 9.75 and
-    # 13.5 pt where Calibri 11's start at 3, 9 and 13.5, and its "H" on the inset, where both
-    # faces' start a pixel inside it).
+    # Normal font's. The cut is at entry 1,000 under a Calibri 11 Normal font, the theme's body
+    # font (groups list and rich), and at 999 under a Times New Roman Normal font (the theme
+    # groups); the face is Aptos Narrow 11 (font_faces).
     _, body = _table("font_cut.tsv")
     first_cut = {"list": 1000, "rich": 1000, "theme_10": 999, "theme_16": 999}
     assert len(body) == 50
@@ -505,9 +503,8 @@ def test_windows_cuts_the_font_table_where_captured():
 def test_windows_draws_a_cut_cell_in_aptos_narrow_11():
     # font_faces: a cut probe's glyphs and ink equal the Aptos Narrow 11 reference's exactly (its
     # standard font), and no other reference's; the cut is at entry 1,000 under a Calibri 11
-    # Normal font and at 999 under Times New Roman 10, both under openpyxl's theme. Open: whether
-    # the extra entry comes with a Normal font other than the theme's body font, or other than
-    # Calibri (they part under an Aptos Narrow theme with an Aptos Narrow Normal font).
+    # Normal font and at 999 under Times New Roman 10, both under openpyxl's theme (font_aptos
+    # tells which: the Normal font other than the theme's body font).
     _, body = _table("font_faces.tsv")
     assert len(body) == 22
     for group, first_cut in (("faces_calibri", 1000), ("faces_times", 999)):
@@ -550,3 +547,45 @@ def test_windows_cuts_at_1000_under_its_theme_body_font():
             assert float(r["row_height"]) == 15.0, r
         else:
             assert float(r["row_height"]) == 30.0, r
+
+
+KNOWN_CUT_ROWS = {
+    # Known deviations, one reason: faces without Windows tables in xlformat, which sheetpeek
+    # measures as Calibri at their size (reported font.no_metrics). A Times New Roman 16 Normal
+    # font makes 27 px rows in Excel, Calibri 16's 28 in sheetpeek; a Segoe UI 11 cell makes a
+    # 22 px row, Calibri 11's 20.
+    **{("theme_16", f"C{r}"): (20.25, 21.0) for r in range(8, 14)},
+    ("faces_times", "C6"): (16.5, 15.0),
+    ("faces_times", "E6"): (16.5, 15.0),
+}
+
+
+@pytest.mark.excel
+def test_windows_font_cut_rows_are_sheetpeeks():
+    # Every captured row of the three font_cut jobs against sheetpeek's layout with
+    # platform="windows": Arial 24 probes 30 pt, cut probes Aptos Narrow 11, their rows the
+    # larger of 15 pt and the Normal row.
+    pytest.importorskip("openpyxl")
+    from capture import font_cut
+
+    with tempfile.TemporaryDirectory() as tmp:
+        paths = font_cut.build(Path(tmp))
+        layouts = {
+            group: sheetpeek.read(path, platform="windows").layout("excel")
+            for group, path in paths.items()
+        }
+    compared, wrong = 0, {}
+    for name in ("font_cut.tsv", "font_faces.tsv", "font_aptos.tsv"):
+        _, body = _table(name)
+        for r in body:
+            heights = {row.index: row.height_pt for row in layouts[r["group"]].rows}
+            ours = heights[int(r["cell"][1:])]
+            compared += 1
+            if ours != float(r["row_height"]):
+                wrong[(r["group"], r["cell"])] = (float(r["row_height"]), ours)
+    REPORT["font cut (Windows)"] = (
+        f"font cut, Excel for Windows: {compared} rows, {len(wrong)} known deviations (faces "
+        "without Windows tables)"
+    )
+    assert compared == 50 + 22 + 11
+    assert wrong == KNOWN_CUT_ROWS

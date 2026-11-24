@@ -31,8 +31,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A cell whose font lies at entry 1,000 or later of the workbook's font table (`styles.xml`'s
   font list, then each rich-text run's own font in cell order) is drawn and measured as Excel for
   Mac draws it, in Calibri 12 (its row fitted and its column autofitted to it), black, or a run in
-  its own color, and reported as `font.cut`. With `platform="windows"` the cell keeps its own font
-  and is reported from entry 999.
+  its own color, and reported as `font.cut`. With `platform="windows"` it is drawn as Excel for
+  Windows draws it, in Aptos Narrow 11, from entry 1,000, or 999 when the Normal font is not the
+  theme's body font (a Times New Roman Normal font under a Calibri theme).
 
 ### Changed
 - Requires xlformat 0.8. Text sits between insets that follow the cell's font, as Excel

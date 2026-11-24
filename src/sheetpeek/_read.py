@@ -48,7 +48,7 @@ from sheetpeek._model import (
     Sheet,
     SheetState,
 )
-from sheetpeek._notices import CellSet, Collector, Notice, Reason
+from sheetpeek._notices import CellSet, Collector, Notice
 from sheetpeek._package import (
     LimitError,
     PackageError,
@@ -232,6 +232,7 @@ class Book:
         self._cut_styles: dict[int, bool] = {}
         """Cell formats whose font lies past the font table's cut (``FONT_TABLE_CUT``)."""
         self._run_entry = 0
+        self._cut_entry: int | None = None
         """The font table entry of the next rich-text run with a font of its own."""
 
     def _unreadable(self, error: Exception) -> PackageError:
@@ -893,8 +894,8 @@ class Book:
         they leave out is the default, not the cell's, and a missing name or size the
         Normal font's (both captured, ``runs``). Adjacent runs in one font are joined. Each run
         with properties is an entry of the font table after the font list, in cell order on
-        the sheet; at the cut or later it is drawn in ``CUT_FONT`` in its own color on Excel for
-        Mac (captured, ``font_cut``) and reported on both platforms.
+        the sheet; at the cut or later it is drawn in the platform's ``CUT_FONT`` in its own
+        color and reported (captured, ``font_cut``, ``windows/font_cut``).
         """
         if rich is None or not rich.runs:
             return None
@@ -919,9 +920,9 @@ class Book:
                 own = font_aspect.to_font(
                     run.font, self._normal_font, self._cell_color, self._theme_fonts
                 )
-                if entry >= cut and self._platform.name == "mac":
+                if entry >= cut:
                     own = dataclasses.replace(
-                        CUT_FONT, color=own.color, theme_color=own.theme_color
+                        CUT_FONT[self._platform.name], color=own.color, theme_color=own.theme_color
                     )
                 entry += 1
             if not run.text:
@@ -937,30 +938,36 @@ class Book:
         return runs
 
     def _cut(self) -> int:
-        """The first font table entry Excel draws in ``CUT_FONT`` on this platform."""
-        return FONT_TABLE_CUT[self._platform.name]
+        """The first font table entry Excel draws in ``CUT_FONT`` on this platform.
+
+        ``FONT_TABLE_CUT``, an entry less on Windows when the Normal font is not the theme's body
+        font: its name is not the theme's minor typeface (captured, ``windows/font_cut``,
+        ``windows/font_faces``, ``windows/font_aptos``; Excel's own test is unverified, as the
+        Normal font's ``scheme="minor"`` and its name agree in every capture).
+        """
+        if self._cut_entry is None:
+            cut = FONT_TABLE_CUT[self._platform.name]
+            if self._platform.name == "windows":
+                body = self._theme_fonts.get("minor", "")
+                if self._normal_font.name.casefold() != body.casefold():
+                    cut -= 1
+            self._cut_entry = cut
+        return self._cut_entry
 
     def _report_cut(self, notes: Collector, row: int, column: int) -> None:
-        reason: Reason
-        if self._platform.name == "mac":
-            reason = "file"
-            detail = (
-                "drawn and measured in Calibri 12, as Excel for Mac draws a font at entry 1,000 "
-                "or later of the workbook's font table"
-            )
-        else:
-            reason = "not_implemented"
-            detail = (
-                "drawn in its own font, where Excel for Windows draws a font at entry 999 or "
-                "1,000 or later of the workbook's font table in another"
-            )
-        notes.add("font.cut", "approximated", reason, detail=detail, row=row, column=column)
+        font = CUT_FONT[self._platform.name]
+        excel = "Excel for Mac" if self._platform.name == "mac" else "Excel for Windows"
+        detail = (
+            f"drawn and measured in {font.name} {font.size:g}, as {excel} draws a font at entry "
+            f"{self._cut():,} or later of the workbook's font table"
+        )
+        notes.add("font.cut", "approximated", "file", detail=detail, row=row, column=column)
 
     def _style(self, index: int) -> tuple[CellStyle, tuple[Code, ...], tuple[Code, ...]]:
         """Cell format ``index``'s style, and what it uses that is not read (any cell, values).
 
-        A font at the font table's cut or later is drawn as Excel for Mac draws it, in
-        ``CUT_FONT``, black (captured, ``font_cut``); on Windows it is kept and reported.
+        A font at the font table's cut or later is drawn as Excel draws it, in the platform's
+        ``CUT_FONT``, black (captured, ``font_cut``, ``windows/font_cut``).
         """
         found = self._styles.get(index)
         if found is None:
@@ -974,8 +981,9 @@ class Book:
                 code = _builtin_format(cell_format.number_format_id, self._platform, self._regional)
             cell_format = dataclasses.replace(cell_format, number_format=code)
             found = styles.resolve(cell_format, self._context)
-            if cut and self._platform.name == "mac":
-                found = (dataclasses.replace(found[0], font=CUT_FONT), *found[1:])
+            if cut:
+                font = CUT_FONT[self._platform.name]
+                found = (dataclasses.replace(found[0], font=font), *found[1:])
             self._styles[index] = found
             # By identity: a style whose font color is the Normal style's and one with another
             # color can compare equal (colors stated differently resolve alike). Interning
@@ -1042,15 +1050,16 @@ class Book:
         return font
 
 
-FONT_TABLE_CUT = {"mac": 1000, "windows": 999}
+FONT_TABLE_CUT = {"mac": 1000, "windows": 1000}
 """The first entry of a workbook's font table, its font list and then each rich-text run's own
-font in cell order, that Excel does not draw: 1,000 on the Mac (captured, ``font_cut``); on
-Windows 1,000 under a Calibri 11 Normal font and 999 under a Times New Roman one (captured,
-``windows/font_cut``, ``windows/font_faces``, unexplained), where it draws Aptos Narrow 11: 999 is
-where it is reported."""
-CUT_FONT = Font("Calibri", 12.0)
-"""What Excel for Mac draws a font past the cut in, whatever the theme, the Normal font or its
-standard font (Aptos Narrow 12 there): captured, ``font_cut``, at Excel's default settings."""
+font in cell order, that Excel does not draw: 1,000 on the Mac whatever the Normal font
+(captured, ``font_cut``); on Windows 1,000 when the Normal font is the theme's body font and 999
+otherwise (``Book._cut``; captured, ``windows/font_cut``, ``windows/font_faces``,
+``windows/font_aptos``)."""
+CUT_FONT = {"mac": Font("Calibri", 12.0), "windows": Font("Aptos Narrow", 11.0)}
+"""What Excel draws a font past the cut in, whatever the theme or the Normal font: Calibri 12 on
+the Mac, not its standard font (Aptos Narrow 12 there), and on Windows its standard font, Aptos
+Narrow 11 (captured, ``font_cut``, ``windows/font_faces``, at Excel's default settings)."""
 
 
 def whole_characters(text: str) -> str:

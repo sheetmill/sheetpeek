@@ -44,6 +44,9 @@ LABELS: dict[str, tuple[str, ...]] = {
         "(unverified).",
     ),
     "src/sheetpeek/_layout.py": ("Normal font's (unverified, no capture in this repository yet).",),
+    "src/sheetpeek/_read.py": (
+        "``windows/font_faces``, ``windows/font_aptos``; Excel's own test is unverified, as the",
+    ),
     "src/sheetpeek/_rows.py": (
         "(reported ``font.no_metrics``; unverified). A size xlformat has no Windows rows for takes",
         "offset, as at every tabled size (unverified). An accounting underline adds three of its",

@@ -63,13 +63,31 @@ def test_a_run_past_the_cut_keeps_its_color_on_the_mac(built):
     assert _cut_cells(sheet) == {_at(c) for c, e in font_cut.probes("rich") if e >= 1000}
 
 
-def test_windows_keeps_the_font_and_reports_the_cut_from_999(built):
-    sheet = sheetpeek.read(built["list"], platform="windows")
-    for cell, _ in font_cut.probes("list"):
-        assert sheet.cell(*_at(cell)).style.font.name == "Arial", cell
-    assert _cut_cells(sheet) == {_at(c) for c, e in font_cut.probes("list") if e >= 999}
-    (notice,) = {(n.outcome, n.reason) for n in sheet.notices if n.code == "font.cut"}
-    assert notice == ("approximated", "not_implemented")
+def test_windows_draws_a_font_past_the_cut_in_aptos_narrow_11(built):
+    # The cut is at 1,000 under openpyxl's Calibri theme and Calibri 11 Normal font (group list)
+    # and at 999 under a Times New Roman Normal font, not the theme's body font (theme_10).
+    for group, first in (("list", 1000), ("theme_10", 999), ("faces_aptos", 1000)):
+        sheet = sheetpeek.read(built[group], platform="windows")
+        found = font_cut.probes(group)
+        for cell, entry in found:
+            font = sheet.cell(*_at(cell)).style.font
+            if entry >= first:
+                assert (font.name, font.size, font.color) == ("Aptos Narrow", 11.0, None), cell
+        assert _cut_cells(sheet) == {_at(c) for c, e in found if e >= first}, group
+        notices = {(n.outcome, n.reason) for n in sheet.notices if n.code == "font.cut"}
+        assert notices == (
+            {("approximated", "file")} if any(e >= first for _, e in found) else set()
+        )
+
+
+def test_a_run_past_the_cut_keeps_its_color_on_windows(built):
+    sheet = sheetpeek.read(built["rich"], platform="windows")
+    for cell, entry in font_cut.probes("rich"):
+        (span,) = sheet.cell(*_at(cell)).runs
+        if entry >= 1000:
+            assert (span.font.name, span.font.size) == ("Aptos Narrow", 11.0), cell
+        assert span.font.color is not None, cell
+        assert span.font.color.upper().endswith("0000"), cell  # its own red
 
 
 def test_a_workbook_short_of_the_cut_reports_nothing(tmp_path):
