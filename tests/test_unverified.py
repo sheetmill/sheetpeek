@@ -45,7 +45,7 @@ LABELS: dict[str, tuple[str, ...]] = {
         "settles",
     ),
     "src/sheetpeek/_excel.py": (
-        "# superscript and subscript likewise, unverified).",
+        "# three rows leave them 15 pt; its superscript and subscript likewise, unverified).",
         "degrees at the sizes xlformat measures; the 7 held below 9 pt is unverified).",
         "else:  # bottom; justify as bottom (unverified); a box taller than the row (captured)",
         "# An accounting underline runs under the text's width, turned with it (unverified).",

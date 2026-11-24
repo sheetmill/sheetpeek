@@ -237,9 +237,9 @@ def _fitted(
         if not fits:
             continue
         if down:
-            # A merge across rows fits no row, by its font or its wrapped lines (captured,
-            # merge_rows: Calibri 14 and 20 over two and three rows leave them 15 pt; its
-            # superscript and subscript likewise, unverified).
+            # A merge across rows fits no row, by its font or its wrapped lines (captured on
+            # both platforms, merge_rows and windows/merge_rows: Calibri 14 and 20 over two and
+            # three rows leave them 15 pt; its superscript and subscript likewise, unverified).
             continue
         own = [span.font for span in spans] if spans else [cell.font]
         # A merge across columns: its font counts, its wrapped lines do not (captured,

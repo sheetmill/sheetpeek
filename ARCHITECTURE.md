@@ -684,8 +684,9 @@ at, in order:
 with a `<row>` element and no `ht`, in a sheet without `customHeight`, takes the largest of those
 heights and of each cell font's height and of its wrapped text; in a horizontal merge the font
 counts and the wrapped lines do not (a merge over A1:C1), and a merge across rows counts in no
-row, neither its font nor its wrapped lines (`merge_rows`: wrapped text, and Calibri 14 and 20,
-over two and three rows leave every row at 15 pt; superscript and subscript in such a merge are
+row, neither its font nor its wrapped lines (`merge_rows`, and on Windows `windows/merge_rows`,
+22 of 22 rows as sheetpeek's in pixels: wrapped text, and Calibri 14 and 20, over two and three
+rows leave every row at 15 pt; superscript and subscript in such a merge are
 left out likewise, unverified). It is at least the largest ascent `ceil(S) + 1` plus the largest
 bottom offset `B + A` of its fonts (xlformat's row model), so faces that split their heights
 differently make a taller row (Arial 11 beside Calibri 10: 15 pt), and an accounting underline adds
@@ -774,7 +775,8 @@ px cell, between its font's insets of 3 and 2 px. `windows/line_budget`: Excel f
 line of any of the four alignments the cell less its font's insets wide, 3 px left and 2 px right
 under cell fonts to 12 points, larger for Calibri 14 (136 of 136 cells as sheetpeek breaks them).
 `windows/shrink_fonts`: the shrink levels on fonts of their own (§4.13); `windows/font_cut`,
-`windows/font_faces` and `windows/font_aptos`: the font table's cut (§4.13).
+`windows/font_faces` and `windows/font_aptos`: the font table's cut (§4.13); `windows/merge_rows`:
+a merge across rows fits no row, as on the Mac (§4.7).
 
 ### 4.10 Hyperlinks
 
@@ -2745,7 +2747,7 @@ are read.
    both platforms comes before a beta: every rule captured on the Mac is captured on Windows too,
    and where the two differ each platform gets its own. Still to capture on Windows: the rules
    labeled unverified there (superscript and subscript rows, font sizes and faces outside
-   xlformat's Windows tables, a merge across rows), the screen suites not yet run there, and
+   xlformat's Windows tables), the screen suites not yet run there, and
    the zoom-dependent layout both platforms share.
 4. **After 1.0:** a PDF backend drawing from the `excel` mode geometry (§2.1), possibly as an
    optional extra.

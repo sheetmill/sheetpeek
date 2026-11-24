@@ -589,3 +589,31 @@ def test_windows_font_cut_rows_are_sheetpeeks():
     )
     assert compared == 50 + 22 + 11
     assert wrong == KNOWN_CUT_ROWS
+
+
+# --- merge_rows: a merge across rows on Excel for Windows
+
+
+@pytest.mark.excel
+def test_windows_merge_rows_are_sheetpeeks():
+    # Every captured row against sheetpeek's layout with platform="windows": a merge across rows
+    # fits no row, by its font or its wrapped lines, as on the Mac; the controls are the row of
+    # three wrapped lines in one cell (60 px) and in a merge over A:C (15 pt).
+    pytest.importorskip("openpyxl")
+    from capture import merge_rows
+
+    _, body = _table("merge_rows.tsv")
+    with tempfile.TemporaryDirectory() as tmp:
+        path = merge_rows.build(Path(tmp))
+        rendered = sheetpeek.read(path, platform="windows").layout("excel")
+    heights = {row.index: row.height_pt for row in rendered.rows}
+    wrong = {}
+    for case, record in zip(merge_rows.CASES, body, strict=True):
+        assert (record["label"], int(record["offset"])) == (case.block.label, case.offset)
+        if heights[case.row] != float(record["height"]):
+            wrong[(case.block.label, case.offset)] = (float(record["height"]), heights[case.row])
+    REPORT["merge rows (Windows)"] = (
+        f"merge rows, Excel for Windows: {len(body)} rows, {len(wrong)} deviations"
+    )
+    assert len(body) == 22
+    assert wrong == {}

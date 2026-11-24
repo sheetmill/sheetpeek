@@ -164,7 +164,8 @@ def fits_cells(row: Row, sheet: Sheet) -> bool:
     Captured (suite ``row_height``): a row with a ``<row>`` element and no ``ht`` grows to its
     largest cell font, or to its wrapped lines, and never below the Normal font's height; in a
     horizontal merge the font counts and the wrapped lines do not, and a merge across rows counts
-    in no row (suite ``merge_rows``). A stored ``ht`` and ``customHeight`` defaults are kept.
+    in no row (suites ``merge_rows`` and ``windows/merge_rows``, both platforms). A stored ``ht``
+    and ``customHeight`` defaults are kept.
     """
     return row.height is None and row.listed and not sheet.custom_row_height
 

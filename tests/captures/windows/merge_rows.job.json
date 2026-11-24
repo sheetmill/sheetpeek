@@ -1,0 +1,38 @@
+{
+ "schema": 1,
+ "job_id": "sheetpeek-20261124-103508-merge-rows",
+ "package": "sheetpeek",
+ "purpose": "sheetpeek capture group merge_rows: the heights Excel fits to rows around merges across rows, and the font it applies in each merge, read from Excel.",
+ "limits": {
+  "job_seconds": 1800,
+  "step_seconds": 600
+ },
+ "audit": false,
+ "workbooks": [
+  {
+   "file": "merge_rows.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "heights",
+     "range": "A1:A32",
+     "props": [
+      "row_height"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "fonts",
+     "range": "A1:A32",
+     "props": [
+      "font.name",
+      "font.size"
+     ]
+    }
+   ]
+  }
+ ]
+}

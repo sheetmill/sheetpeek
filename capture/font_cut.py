@@ -76,9 +76,9 @@ FACES = {
     "faces_aptos": ("Aptos Narrow", 11),
 }
 """``faces_<normal>``: the Normal font (``None``: openpyxl's Calibri 11), under openpyxl's theme;
-``faces_aptos``' a theme font, its theme's body font (``APTOS_THEME``)."""
+``faces_aptos``'s a theme font, its theme's body font (``APTOS_THEME``)."""
 APTOS_THEME = {"minor": "Aptos Narrow", "major": "Aptos Display"}
-"""``faces_aptos``' theme fonts, as Excel for Windows' default workbook has them."""
+"""``faces_aptos``'s theme fonts, as Excel for Windows' default workbook has them."""
 REFERENCES = (
     ("Arial", 11),
     ("Aptos Narrow", 11),

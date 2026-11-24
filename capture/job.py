@@ -30,8 +30,8 @@ Groups:
 - ``text_style``: the suite ``text_style``, a workbook a group (``text_style_<group>.xlsx``),
   captured at the group's zooms as ``text_steps`` is, with the displayed font and alignment read
   for every cell; the gray is measured on D1.
-- ``shrink_fonts``: ``text_steps``' group of that name alone, as ``text_steps`` captures its
-  groups, read into ``tests/captures/windows/shrink_fonts.tsv`` (``text_steps``' columns).
+- ``shrink_fonts``: ``text_steps``'s group of that name alone, as ``text_steps`` captures its
+  groups, read into ``tests/captures/windows/shrink_fonts.tsv`` (``text_steps``'s columns).
 - ``font_cut``: the suite ``font_cut``, a workbook a group (``font_cut_<group>.xlsx``, the
   theme groups' themes rewritten before the copy), at zoom 100, with the displayed font and its
   color read for every cell; Excel's standard font is in the result's header.
@@ -39,7 +39,7 @@ Groups:
   into ``tests/captures/windows/font_faces.tsv``.
 - ``font_aptos``: ``font_cut``'s group ``faces_aptos`` alone, read into
   ``tests/captures/windows/font_aptos.tsv``.
-- ``merge_rows``: the suite ``merge_rows``' workbook opened, and every case row's height and
+- ``merge_rows``: the suite ``merge_rows``'s workbook opened, and every case row's height and
   column A's font read from Excel (``read`` of ``row_height``, ``read_format`` of ``font.name``
   and ``font.size``), into ``tests/captures/windows/merge_rows.tsv`` (the suite's columns).
 - ``line_budget``: ``text_style``'s group of that name alone, as ``text_style`` captures its
