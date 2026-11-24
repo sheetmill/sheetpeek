@@ -2498,7 +2498,7 @@ attribute of `<dimension>`, `<mergeCell>` and `<autoFilter>` in the file format.
 ### 8.3 Dependencies
 
 - `xlio==0.4.*` (§5): the sheetmill project's reader, pinned to a minor.
-- `xlrecalc>=0.9,<1` (§5.7), imported normally: it is required.
+- `xlrecalc>=0.10.1,<1` (§5.7), imported normally: it is required.
 - `xlformat>=0.8,<1` (§6.4), imported normally: it is required.
 - openpyxl is a dev dependency only: the tests and the documentation's examples build workbooks
   with it, and the tests that need it are left out without it.

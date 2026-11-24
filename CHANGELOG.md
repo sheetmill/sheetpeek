@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-24
+
 ### Added
 - `platform=` and `regional_settings=` on `read()`, `open()`, `render()`, `render_workbook()`
   and `notices()`, and `--platform` on `sheetpeek view` and `sheetpeek serve`: `"windows"`
@@ -18,7 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   wrapped lines of Calibri 11 take 60 px, 45 points, where the Mac's take 48 points; an
   underline is 1 px thick). In HTML a line that reaches past its row is drawn on into the row
   below, as Windows draws it; Excel for Mac cuts it at the row. Superscript and subscript rows
-  keep Excel for Mac's rules. `platform` takes
+  keep Excel for Mac's rules. Font sizes outside xlformat's Windows row tables (which cover
+  mostly 9 to 24 points), including the sizes shrunk text is drawn at, take Excel for Mac's
+  heights and baselines rounded to whole pixels: unverified on Windows. `platform` takes
   `"mac"` (the default), `"windows"` or an `xlformat.Platform`; `regional_settings` an
   `xlformat.RegionalSettings`, by default the platform's en-US settings. A sheet keeps the
   platform it was read with, as `Sheet.platform` and `Sheet.regional_settings`.
@@ -36,6 +40,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   theme's body font (a Times New Roman Normal font under a Calibri theme).
 
 ### Changed
+- Requires xlrecalc 0.10.1 (`xlrecalc>=0.10.1,<1`), whose `XIRR` finds its rate as Excel does,
+  Excel's own digits where the last places differed, and finds a negative rate from a negative
+  guess: -1,000 then 100 and 100 a year apart, guessed at -0.5, give -0.6293 (was `#NUM!`).
 - Requires xlformat 0.8. Text sits between insets that follow the cell's font, as Excel
   places it (captured), where they were 3 and 2 points for every font: Calibri 20 text starts
   4 points into its cell and ends 3 points before the next gridline, Calibri 36 6 and 5 (Calibri
@@ -631,7 +638,8 @@ First release.
 - Borders, conditional formatting, charts, images and comments are not shown; rich text within
   a cell takes the cell's font.
 
-[Unreleased]: https://github.com/sheetmill/sheetpeek/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/sheetmill/sheetpeek/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/sheetmill/sheetpeek/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/sheetmill/sheetpeek/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/sheetmill/sheetpeek/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/sheetmill/sheetpeek/compare/v0.1.0...v0.2.0

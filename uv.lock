@@ -1149,7 +1149,7 @@ requires-dist = [
     { name = "rich", marker = "extra == 'rich'", specifier = ">=13" },
     { name = "xlformat", specifier = ">=0.8,<1" },
     { name = "xlio", specifier = "==0.4.*" },
-    { name = "xlrecalc", specifier = ">=0.9,<1" },
+    { name = "xlrecalc", specifier = ">=0.10.1,<1" },
 ]
 provides-extras = ["rich"]
 
