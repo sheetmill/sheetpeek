@@ -258,3 +258,32 @@ def test_a_text_steps_job_has_a_window_a_group_and_reads_into_one_file(tmp_path)
     assert "# zooms: 100" in lines
     columns = next(x for x in lines if not x.startswith("# "))
     assert columns.split("\t") == list(text_steps.COLUMNS)
+
+
+def test_a_text_style_job_reads_the_displayed_font_and_alignment(tmp_path):
+    from capture import text_style
+
+    folder = job.write("text_style", "sheetpeek-test-tst", tmp_path / "a")
+    doc = json.loads((folder / "job.json").read_text(encoding="utf-8"))
+    assert [wb["file"] for wb in doc["workbooks"]] == [
+        f"text_style_{group}.xlsx" for group in text_style.GROUPS
+    ]
+    for wb, group in zip(doc["workbooks"], text_style.GROUPS, strict=True):
+        (read,) = [s for s in wb["steps"] if s["op"] == "read_format"]
+        assert read["props"] == [
+            "font.name", "font.size", "font.underline", "align.horizontal", "align.vertical"
+        ]  # fmt: skip
+        zooms = [s["zoom"] for s in wb["steps"] if s.get("id", "").startswith("view_z")]
+        assert zooms == list(text_style.ZOOMS[group])
+
+
+def test_displayed_fonts_and_alignments_keep_the_macs_keys():
+    cell = {"font.name": "Calibri", "font.size": 11.0, "font.underline": -4142.0,
+            "align.horizontal": 1.0, "align.vertical": -4107.0}  # fmt: skip
+    steps = {"geometry": _geometry_grid(1, 1), "display": {"cells": [[cell]]}}
+    rows = {(c, key): value for c, key, value in job._cell_rows(steps)}
+    assert rows[("A1", "display.font_name")] == "Calibri"
+    assert rows[("A1", "display.font_size")] == "11"
+    assert rows[("A1", "display.underline")] == "-4142"
+    assert rows[("A1", "display.h_align")] == "1"
+    assert rows[("A1", "display.v_align")] == "-4107"

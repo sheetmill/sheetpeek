@@ -495,6 +495,28 @@ def measure(cap: Any, case: Case) -> dict[str, str] | None:
     return found
 
 
+def group_records(cap: Any, group: str) -> list[dict[str, str]]:
+    """Every case of ``group`` measured in one capture of its window, in ``COLUMNS``' keys; a
+    case outside the window is left out."""
+    records = []
+    for case in cases(group):
+        found = measure(cap, case)
+        if found is None:
+            continue
+        reads = {key: cap.value(case.cell, read) or "" for key, read in READS.items()}
+        records.append(
+            {
+                "group": case.group,
+                "name": case.name,
+                "zoom": str(cap.zoom),
+                "cell": case.cell,
+                **reads,
+                **found,
+            }
+        )
+    return records
+
+
 def write() -> None:
     """Measure the saved captures again (no Excel) and write ``text_style.tsv``."""
     from capture.screen.run import header, load
@@ -508,21 +530,7 @@ def write() -> None:
             continue
         first = first or header(out)
         for cap in load(out):
-            for case in cases(group):
-                found = measure(cap, case)
-                if found is None:
-                    continue
-                reads = {key: cap.value(case.cell, read) or "" for key, read in READS.items()}
-                records.append(
-                    {
-                        "group": case.group,
-                        "name": case.name,
-                        "zoom": str(cap.zoom),
-                        "cell": case.cell,
-                        **reads,
-                        **found,
-                    }
-                )
+            records += group_records(cap, group)
     with open(OUTPUT, "w", encoding="utf-8") as out:
         for key, value in first.items():
             if key not in ("markers", "suite", "workbooks_open_after", "zooms"):

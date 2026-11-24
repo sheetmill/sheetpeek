@@ -27,6 +27,9 @@ Groups:
   a grid from the two markers at the picture's device pixels a point. The gridline's gray is
   measured in each picture (``capture.screen.run.gridline_gray``, on the control cell) and
   written in the file's header, so that what needs it uses the gray the picture shows.
+- ``text_style``: the suite ``text_style``, a workbook a group (``text_style_<group>.xlsx``),
+  captured at the group's zooms as ``text_steps`` is, with the displayed font and alignment read
+  for every cell; the gray is measured on D1.
 - ``text_steps``: the suite ``text_steps``, a workbook a group (``text_steps_<group>.xlsx``, each
   under the group's Normal font), captured at zoom 100 as ``borders_fills``' windows are and
   measured with the suite's own code into one file; the gray is measured on D1 in each picture.
@@ -46,7 +49,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from capture import borders, cell_text, fills, text_steps
+from capture import borders, cell_text, fills, text_steps, text_style
 
 ROOT = Path(__file__).resolve().parents[1]
 WINDOWS = ROOT / "tests" / "captures" / "windows"
@@ -56,6 +59,7 @@ GROUPS = {
     "cells": ("merge_width", "error_width"),
     "borders_fills": ("borders", "fills"),
     "text_steps": ("text_steps",),
+    "text_style": ("text_style",),
 }
 PURPOSES = {
     "cells": "sheetpeek capture group cells: the text Excel shows in merged cells and for "
@@ -64,6 +68,9 @@ PURPOSES = {
     "line style and each pattern fill at zoom 100 and 200 (suites borders and fills)",
     "text_steps": "sheetpeek capture group text_steps: window pictures of indents under seven "
     "Normal fonts and of shrink to fit by single characters, at zoom 100 (suite text_steps)",
+    "text_style": "sheetpeek capture group text_style: window pictures of alignment, shrink to "
+    "fit, underlines and font effects, wrapping and distributed text, at zoom 100 and 200 "
+    "(suite text_style)",
 }
 PARK = "AZ300"
 """The active cell while a window is captured: off every picture."""
@@ -86,10 +93,27 @@ class Window:
     name: str = ""
     """The workbook's and its pictures' stem, by default the suite's: a suite of several windows
     names each."""
+    display: tuple[str, ...] = ("interior.color", "interior.pattern")
+    """The properties of the format Excel displays read for every cell (``DISPLAYED``)."""
 
     @property
     def stem(self) -> str:
         return self.name or self.suite
+
+
+def _text_style_window(group: str) -> Window:
+    return Window(
+        "text_style",
+        lambda ws: text_style.fill(ws, group),
+        tuple(text_style._cells(text_style.cases(group))),
+        ("B2", "J20"),
+        text_style.ZOOMS[group],
+        lambda cap: text_style.group_records(cap, group),
+        text_style.COLUMNS,
+        "D1",
+        f"text_style_{group}",
+        ("font.name", "font.size", "font.underline", "align.horizontal", "align.vertical"),
+    )
 
 
 def _text_steps_window(group: str) -> Window:
@@ -130,7 +154,18 @@ WINDOWS_OF = {
         ),
     ),
     "text_steps": tuple(_text_steps_window(group) for group in text_steps.GROUPS),
+    "text_style": tuple(_text_style_window(group) for group in text_style.GROUPS),
 }
+DISPLAYED = {
+    "interior.color": "display.fill",
+    "interior.pattern": "display.pattern",
+    "font.name": "display.font_name",
+    "font.size": "display.font_size",
+    "font.underline": "display.underline",
+    "align.horizontal": "display.h_align",
+    "align.vertical": "display.v_align",
+}
+"""Each displayed property's key in the Mac's reads."""
 
 
 def fixed_copy(raw: Path, path: Path) -> None:
@@ -197,7 +232,7 @@ def _window_workbook(window: Window, files: Path) -> dict[str, Any]:
         {"op": "read", "id": "geometry", "range": span,
          "props": ["left", "top", "width", "height", "text"]},
         {"op": "read_format", "id": "display", "range": span,
-         "props": ["interior.color", "interior.pattern"], "display": True},
+         "props": list(window.display), "display": True},
     ]  # fmt: skip
     for zoom in window.zooms:
         steps.append({**park, "id": f"view_z{zoom}", "zoom": zoom, "scroll_row": 1,
@@ -252,11 +287,25 @@ def _results(workbook: dict[str, Any]) -> dict[str, Any]:
     return found
 
 
+def _shown(prop: str, value: Any) -> str:
+    """A displayed property as the Mac's reads keep it: a color as ``r,g,b`` (Windows returns one
+    number, red in the low byte), a size as a number, an enumeration as Windows' number."""
+    if prop == "interior.color":
+        v = int(value)
+        return f"{v & 0xFF},{(v >> 8) & 0xFF},{(v >> 16) & 0xFF}"
+    if prop == "font.name":
+        return str(value)
+    if prop == "font.size":
+        return f"{float(value):g}"
+    return str(int(value))
+
+
 def _cell_rows(steps: dict[str, Any]) -> list[tuple[str, str, str]]:
     """The geometry and display reads as the Mac's run keeps them: ``(cell, property, value)``.
 
-    ``display.fill`` is the displayed fill color as ``r,g,b`` (Windows returns it as one number,
-    red in the low byte); ``display.pattern`` is Windows' ``XlPattern`` number as returned.
+    Displayed properties are keyed as the Mac's (``DISPLAYED``); ``display.pattern``,
+    ``display.underline``, ``display.h_align`` and ``display.v_align`` are Windows' numbers
+    (``XlPattern``, ``XlUnderlineStyle``, ``XlHAlign``, ``XlVAlign``) as returned.
     """
     from openpyxl.utils.cell import get_column_letter
 
@@ -271,9 +320,11 @@ def _cell_rows(steps: dict[str, Any]) -> list[tuple[str, str, str]]:
             )
             rows.append((name, "geometry.text", str(geometry["text"][r][c] or "")))
             cell = display["cells"][r][c]
-            v = int(cell["interior.color"])
-            rows.append((name, "display.fill", f"{v & 0xFF},{(v >> 8) & 0xFF},{(v >> 16) & 0xFF}"))
-            rows.append((name, "display.pattern", str(int(cell["interior.pattern"]))))
+            rows.extend(
+                (name, DISPLAYED[prop], _shown(prop, value))
+                for prop, value in cell.items()
+                if prop in DISPLAYED
+            )
     return rows
 
 
@@ -298,7 +349,9 @@ def window_captures(window: Window, steps: dict[str, Any], artifacts: Path) -> l
         grid, check = locate(
             image, geometry[window.markers[0]], geometry[window.markers[1]], nominal
         )
-        if float(str(check.get("nominal_off", 1))) > 0.01:
+        # two markers: their scale must be the nominal one; one (the second below the window at
+        # zoom 200): the grid is the first marker's at the nominal scale (CAPTURING.md)
+        if check.get("scale") != "nominal" and float(str(check.get("nominal_off", 1))) > 0.01:
             raise ValueError(f"{window.suite} zoom {zoom}: the markers' scale is not nominal")
         cap = Capture(zoom, image, grid, check, geometry, rows, "windows")
         gray = gridline_gray(cap, window.control)
