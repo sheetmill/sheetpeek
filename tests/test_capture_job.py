@@ -330,7 +330,7 @@ def test_the_font_cut_job_rewrites_its_themes_and_reads_font_colors(tmp_path):
     folder = job.write("font_cut", "sheetpeek-test-fc", tmp_path / "a")
     doc = json.loads((folder / "job.json").read_text(encoding="utf-8"))
     assert [wb["file"] for wb in doc["workbooks"]] == [
-        f"font_cut_{group}.xlsx" for group in font_cut.GROUPS
+        f"font_cut_{group}.xlsx" for group in font_cut.GROUPS if group not in font_cut.FACES
     ]
     for wb in doc["workbooks"]:
         (read,) = [s for s in wb["steps"] if s["op"] == "read_format"]

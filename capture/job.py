@@ -35,6 +35,8 @@ Groups:
 - ``font_cut``: the suite ``font_cut``, a workbook a group (``font_cut_<group>.xlsx``, the
   theme groups' themes rewritten before the copy), at zoom 100, with the displayed font and its
   color read for every cell; Excel's standard font is in the result's header.
+- ``font_faces``: ``font_cut``'s ``faces_*`` groups, as ``font_cut`` writes its groups, read
+  into ``tests/captures/windows/font_faces.tsv``.
 - ``line_budget``: ``text_style``' group of that name alone, as ``text_style`` captures its
   groups, read into ``tests/captures/windows/line_budget.tsv`` (``text_style``' columns).
 - ``text_steps``: the suite ``text_steps``, a workbook a group (``text_steps_<group>.xlsx``, each
@@ -70,6 +72,7 @@ GROUPS = {
     "shrink_fonts": ("shrink_fonts",),
     "line_budget": ("line_budget",),
     "font_cut": ("font_cut",),
+    "font_faces": ("font_faces",),
 }
 PURPOSES = {
     "cells": "sheetpeek capture group cells: the text Excel shows in merged cells and for "
@@ -84,6 +87,9 @@ PURPOSES = {
     "font_cut": "sheetpeek capture group font_cut: window pictures of cells whose fonts lie "
     "past the workbook's font table's cut, under other themes and Normal fonts, at zoom 100 "
     "(suite font_cut)",
+    "font_faces": "sheetpeek capture group font_faces: window pictures of cells past the font "
+    "table's cut beside reference cells in five faces, under two Normal fonts, at zoom 100 "
+    "(font_cut's faces groups)",
     "line_budget": "sheetpeek capture group line_budget: window pictures of two-word texts as "
     "wide as the cell less a few pixels, wrapped, justified and distributed, at zoom 100 "
     "(text_style's group line_budget)",
@@ -138,9 +144,9 @@ def _text_style_window(group: str, suite: str = "text_style") -> Window:
     )
 
 
-def _font_cut_window(group: str) -> Window:
+def _font_cut_window(group: str, suite: str = "font_cut") -> Window:
     return Window(
-        "font_cut",
+        suite,
         lambda ws: font_cut.fill(ws, group),
         tuple(font_cut.references(group)),
         font_cut.MARKERS,
@@ -199,7 +205,10 @@ WINDOWS_OF = {
         _text_style_window(group) for group in text_style.GROUPS if group != "line_budget"
     ),
     "line_budget": (_text_style_window("line_budget", "line_budget"),),
-    "font_cut": tuple(_font_cut_window(group) for group in font_cut.GROUPS),
+    "font_cut": tuple(
+        _font_cut_window(group) for group in font_cut.GROUPS if group not in font_cut.FACES
+    ),
+    "font_faces": tuple(_font_cut_window(group, "font_faces") for group in font_cut.FACES),
 }
 DISPLAYED = {
     "interior.color": "display.fill",

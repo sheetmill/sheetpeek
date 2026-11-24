@@ -132,3 +132,19 @@ def test_excel_for_mac_draws_a_cut_cell_in_calibri_12_whatever_the_theme_and_nor
             assert (int(r["red"]), int(r["dark"])) == (0, 235)
         else:
             assert float(r["row_height"]) == 30.0
+
+
+def test_the_faces_groups_put_references_and_probes_at_their_entries(built):
+    for group, normal in suite.FACES.items():
+        styles, sheet = _parts(built[group])
+        fonts = re.findall(r"<font>(.*?)</font>", styles, re.S)
+        assert len(fonts) == suite.FACES_FIRST + suite.FACES_PROBES
+        first = "Calibri" if normal is None else normal[0]
+        assert f'<name val="{first}"' in fonts[0]
+        xfs = re.search(r"<cellXfs[^>]*>(.*?)</cellXfs>", styles, re.S).group(1)
+        font_of = [int(f) for f in re.findall(r'<xf [^>]*fontId="(\d+)"', xfs)]
+        for cell, entry in suite.probes(group):
+            style = re.search(rf'<c r="{cell}"[^>]* s="(\d+)"', sheet)
+            assert font_of[int(style.group(1))] == entry, (group, cell)
+        for k, (face, _) in enumerate(suite.REFERENCES, 1):
+            assert f'<name val="{face}"' in fonts[k], (group, face)

@@ -16,6 +16,11 @@ under openpyxl's Calibri 11 Normal font (font 0):
   run each, in Arial 24 and a red of its own, whose inline fonts follow the list in cell order:
   entries 995 to 1,004 (``RICH_FIRST``). All on one sheet: the order of runs spread over several
   sheets is not asked.
+- ``faces_calibri`` and ``faces_times``: openpyxl's theme, a Normal font of Calibri 11 or Times
+  New Roman 10; "Hxg" in black in Arial, Aptos Narrow, Segoe UI, Tahoma and Calibri 11 (E4 to E8,
+  list entries 1 to 5, ``REFERENCES``), then filler, then probes at entries 997 to 1,002 (C4 to
+  C9): which face a cut cell takes on Excel for Windows, by its glyphs against the references',
+  and whether the cut moves with the Normal font alone.
 - ``theme_10`` and ``theme_16``: the theme's body font Arial and heading font Aptos Narrow
   (``THEME_FONTS``, for openpyxl's Calibri and Cambria, rewritten before Excel opens the file),
   a Normal font of Times New Roman 10 or 16 (``NORMALS``); 994 filler fonts, then the probes at
@@ -47,7 +52,7 @@ from openpyxl.utils.indexed_list import IndexedList
 ROOT = Path(__file__).resolve().parents[1]
 BUILD_DIR = ROOT / "capture" / "build" / "font_cut"
 OUTPUT = ROOT / "tests" / "captures" / "font_cut.tsv"
-GROUPS = ("list", "rich", "theme_10", "theme_16")
+GROUPS = ("list", "rich", "theme_10", "theme_16", "faces_calibri", "faces_times")
 LIST_FIRST = 990
 """``list``: the font table entry of the first probe (C4); C23 is entry 1,009."""
 LIST_PROBES = 20
@@ -62,6 +67,20 @@ THEME_FONTS = {"minor": "Arial", "major": "Aptos Narrow"}
 and Cambria."""
 NORMALS = {"theme_10": ("Times New Roman", 10), "theme_16": ("Times New Roman", 16)}
 """``theme_<size>``: the Normal font, neither theme font nor Calibri."""
+FACES = {"faces_calibri": None, "faces_times": ("Times New Roman", 10)}
+"""``faces_<normal>``: the Normal font (``None``: openpyxl's Calibri 11), under openpyxl's theme."""
+REFERENCES = (
+    ("Arial", 11),
+    ("Aptos Narrow", 11),
+    ("Segoe UI", 11),
+    ("Tahoma", 11),
+    ("Calibri", 11),
+)
+"""``faces_<normal>``: "Hxg" in black in each, E4 to E8, list entries 1 to 5: the faces a cut cell
+may be drawn in on Excel for Windows."""
+FACES_FIRST = 997
+"""``faces_<normal>``: the list entry of the first probe (C4); C9's is 1,002."""
+FACES_PROBES = 6
 STANDARD = BUILD_DIR / "standard_font.txt"
 """Excel's standard font and size, as the run found them (Excel for Mac's settings)."""
 FIRST_ROW = 4
@@ -89,6 +108,9 @@ def _red(k: int) -> str:
 
 def probes(group: str) -> list[tuple[str, int]]:
     """Each probe's cell and font table entry."""
+    if group in FACES:
+        found = [(f"C{FIRST_ROW + k}", FACES_FIRST + k) for k in range(FACES_PROBES)]
+        return found + [(f"E{FIRST_ROW + k}", 1 + k) for k in range(len(REFERENCES))]
     first, count = {
         "list": (LIST_FIRST, LIST_PROBES),
         "rich": (RICH_FIRST, RICH_PROBES),
@@ -100,7 +122,27 @@ def fill(ws: Any, group: str) -> list[tuple[str, int]]:
     """Lay one group out: its filler fonts first, then its probes; each probe's cell and entry."""
     ws.column_dimensions["C"].width = 14
     found = probes(group)
-    if group in NORMALS:
+    if group in FACES:
+        if FACES[group] is not None:
+            name, size = FACES[group]
+            normal = Font(name=name, sz=size, family=1)
+            ws.parent._fonts = IndexedList([normal])
+            for style in ws.parent._named_styles:
+                if style.name == "Normal":
+                    style.font = normal
+        ws.column_dimensions["E"].width = 14
+        for k, (face, size) in enumerate(REFERENCES):  # entries 1 to 5, before the filler
+            ws[f"E{FIRST_ROW + k}"] = TEXT
+            ws[f"E{FIRST_ROW + k}"].font = Font(name=face, size=size, color="FF000000")
+        sheet = ws.parent.create_sheet("filler")
+        for k in range(len(REFERENCES) + 1, FACES_FIRST):
+            cell = sheet.cell(k, 1, "f")
+            cell.font = Font(name="Calibri", size=11, color=f"FF{k // 256:02X}{k % 256:02X}00")
+        for k in range(FACES_PROBES):
+            cell = f"C{FIRST_ROW + k}"
+            ws[cell] = TEXT
+            ws[cell].font = Font(name="Arial", size=24, color=_red(k))
+    elif group in NORMALS:
         name, size = NORMALS[group]
         normal = Font(name=name, sz=size, family=1)
         ws.parent._fonts = IndexedList([normal])
