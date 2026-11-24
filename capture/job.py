@@ -32,6 +32,8 @@ Groups:
   for every cell; the gray is measured on D1.
 - ``shrink_fonts``: ``text_steps``' group of that name alone, as ``text_steps`` captures its
   groups, read into ``tests/captures/windows/shrink_fonts.tsv`` (``text_steps``' columns).
+- ``line_budget``: ``text_style``' group of that name alone, as ``text_style`` captures its
+  groups, read into ``tests/captures/windows/line_budget.tsv`` (``text_style``' columns).
 - ``text_steps``: the suite ``text_steps``, a workbook a group (``text_steps_<group>.xlsx``, each
   under the group's Normal font), captured at zoom 100 as ``borders_fills``' windows are and
   measured with the suite's own code into one file; the gray is measured on D1 in each picture.
@@ -63,6 +65,7 @@ GROUPS = {
     "text_steps": ("text_steps",),
     "text_style": ("text_style",),
     "shrink_fonts": ("shrink_fonts",),
+    "line_budget": ("line_budget",),
 }
 PURPOSES = {
     "cells": "sheetpeek capture group cells: the text Excel shows in merged cells and for "
@@ -74,6 +77,9 @@ PURPOSES = {
     "shrink_fonts": "sheetpeek capture group shrink_fonts: window pictures of shrink to fit "
     "under cell fonts the group text_steps does not hold, at zoom 100 (text_steps' group "
     "shrink_fonts)",
+    "line_budget": "sheetpeek capture group line_budget: window pictures of two-word texts as "
+    "wide as the cell less a few pixels, wrapped, justified and distributed, at zoom 100 "
+    "(text_style's group line_budget)",
     "text_style": "sheetpeek capture group text_style: window pictures of alignment, shrink to "
     "fit, underlines and font effects, wrapping and distributed text, at zoom 100 and 200 "
     "(suite text_style)",
@@ -107,9 +113,9 @@ class Window:
         return self.name or self.suite
 
 
-def _text_style_window(group: str) -> Window:
+def _text_style_window(group: str, suite: str = "text_style") -> Window:
     return Window(
-        "text_style",
+        suite,
         lambda ws: text_style.fill(ws, group),
         tuple(text_style._cells(text_style.cases(group))),
         ("B2", "J20"),
@@ -163,7 +169,10 @@ WINDOWS_OF = {
         _text_steps_window(group) for group in text_steps.GROUPS if group != "shrink_fonts"
     ),
     "shrink_fonts": (_text_steps_window("shrink_fonts", "shrink_fonts"),),
-    "text_style": tuple(_text_style_window(group) for group in text_style.GROUPS),
+    "text_style": tuple(
+        _text_style_window(group) for group in text_style.GROUPS if group != "line_budget"
+    ),
+    "line_budget": (_text_style_window("line_budget", "line_budget"),),
 }
 DISPLAYED = {
     "interior.color": "display.fill",

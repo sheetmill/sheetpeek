@@ -46,6 +46,11 @@ markers B2 and J20. Rows are fitted by Excel on opening unless a group sets a he
   (row 6): distributed without and with wrap (C, E), wrapped (G), distributed at the top (I);
   row 8 distributed: "spilled" and "abc" alone (C, E), a lone word in the middle line (G), at
   the end (I). Measured: the lines, the ink box and each line's ink (``line_inks``).
+- ``line_budget``, zoom 100. The width a line of wrapped text may take: two words exactly as wide
+  as the cell less 6, 5 and 4 device pixels on Excel for Windows (``BUDGET_TEXTS``), in four cell
+  fonts (``BUDGET_FONTS``) and three widths (default, 15 and 25 characters), a column each from
+  C, wrapped, justified, distributed and vertically justified, rows 4 to 15. Measured: the lines
+  and the ink box.
 
 A cell outside the window at zoom 200 is skipped at that zoom. ``read`` writes
 ``tests/captures/text_style.tsv``: one row per case and zoom, lengths in points: x from the
@@ -66,13 +71,15 @@ from typing import Any
 
 import openpyxl
 from openpyxl.styles import Alignment, Font
+from openpyxl.utils import get_column_letter
 
 ROOT = Path(__file__).resolve().parents[1]
 BUILD_DIR = ROOT / "capture" / "build" / "text_style"
 OUTPUT = ROOT / "tests" / "captures" / "text_style.tsv"
-GROUPS = ("align", "shrink", "fonts", "wrap", "lone")
+GROUPS = ("align", "shrink", "fonts", "wrap", "lone", "line_budget")
 ZOOMS = {
     "align": (100,), "shrink": (100, 200), "fonts": (100, 200), "wrap": (100, 200), "lone": (100,),
+    "line_budget": (100,),
 }  # fmt: skip
 COLUMNS = (
     "group", "name", "zoom", "cell", "row_height", "cell_width", "lines", "line_tops", "ink_left",
@@ -279,6 +286,39 @@ WORDS = {
 }  # fmt: skip
 """Single words of these widths: a word wider than a line is broken between characters."""
 SPILLED = "spilled text that is much wider than one column"
+BUDGET_FONTS = (("Calibri", 11), ("Arial", 11), ("Aptos Narrow", 12), ("Calibri", 14))
+BUDGET_WIDTHS = (None, 15, 25)
+"""``line_budget``: column widths in characters, ``None`` the default."""
+BUDGET_ALIGNS = ("wrap", "justify", "distributed", "vertical justify")
+BUDGET_TEXTS: dict[tuple[str, int, int | None], dict[int, str]] = {
+    # two words exactly as wide as the cell less 6, 5 and 4 device pixels on Excel for Windows at
+    # 96 dpi (xlformat's Windows widths; the cells 64, 105 and 175 px); none found for two
+    ("Calibri", 11, None): {6: "aaaaa biii", 5: "aaaa bbiii", 4: "aaa bbbiii"},
+    ("Calibri", 11, 15): {6: "aaaaii bbbbbbiii", 5: "aaaaaaa bbbbbii", 4: "aaaaaa bbbbbbii"},
+    ("Calibri", 11, 25): {
+        6: "aaaaaaaaaa bbbbbbbbbbbii",
+        5: "aaaaaaaaa bbbbbbbbbbbbii",
+        4: "aaaaaaaai bbbbbbbbbbbbiii",
+    },
+    ("Arial", 11, None): {6: "aaii bbbb", 5: "aaii bbbiii", 4: "aaa bbbb"},
+    ("Arial", 11, 15): {6: "aaaaii bbbbbbiii", 5: "aaaaa bbbbbbb", 4: "aaaai bbbbbbbii"},
+    ("Arial", 11, 25): {
+        6: "aaaaaaat bbbbbbbbbbbbiii",
+        5: "aaaaaaai bbbbbbbbbbbbbi",
+        4: "aaaaaaaii bbbbbbbbbbbbiii",
+    },
+    ("Aptos Narrow", 12, None): {5: "aai bbbiii", 4: "aie bbbet"},
+    ("Aptos Narrow", 12, 15): {6: "aaaai bbbbbbiii", 5: "aaaie bbbbbbet", 4: "aaaat bbbbbbet"},
+    ("Aptos Narrow", 12, 25): {6: "aaaaaati bbbbbbbbbbbbet", 4: "aaaaaaai bbbbbbbbbbbbiii"},
+    ("Calibri", 14, None): {6: "aai bbiii", 5: "aaa bbii", 4: "aai bbbi"},
+    ("Calibri", 14, 15): {6: "aaaii bbbbbb", 5: "aaaa bbbbbb", 4: "aaaii bbbbbiii"},
+    ("Calibri", 14, 25): {
+        6: "aaaaaaa bbbbbbbbbiii",
+        5: "aaaaaai bbbbbbbbbbii",
+        4: "aaaaaaa bbbbbbbbbbi",
+    },
+}
+"""``line_budget``: each font and width's texts, by the pixels they leave of the cell."""
 
 
 def _wrap(ws: Any) -> list[Case]:
@@ -351,8 +391,38 @@ def _lone(ws: Any) -> list[Case]:
     return found
 
 
+def _line_budget(ws: Any) -> list[Case]:
+    found = []
+    column = 3
+    for face, size in BUDGET_FONTS:
+        for width in BUDGET_WIDTHS:
+            letter = get_column_letter(column)
+            if width is not None:
+                ws.column_dimensions[letter].width = width
+            texts = BUDGET_TEXTS[(face, size, width)]
+            row = 4
+            for align in BUDGET_ALIGNS:
+                for left in (6, 5, 4):
+                    if left in texts:
+                        cell = ws[f"{letter}{row}"]
+                        cell.value = texts[left]
+                        cell.font = Font(name=face, size=size)
+                        if align == "vertical justify":
+                            cell.alignment = Alignment(vertical="justify")
+                        elif align == "wrap":
+                            cell.alignment = Alignment(wrap_text=True)
+                        else:
+                            cell.alignment = Alignment(horizontal=align, wrap_text=True)
+                        label = f"{align} {face} {size} {width or 'default'} cell-{left}px"
+                        found.append(Case("line_budget", label, cell.coordinate, ("lines", "ink")))
+                    row += 1
+            column += 1
+    return found
+
+
 FILLS = {
     "align": _align, "shrink": _shrink, "fonts": _fonts, "wrap": _wrap, "lone": _lone,
+    "line_budget": _line_budget,
 }  # fmt: skip
 
 

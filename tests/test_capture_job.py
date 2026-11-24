@@ -267,10 +267,11 @@ def test_a_text_style_job_reads_the_displayed_font_and_alignment(tmp_path):
 
     folder = job.write("text_style", "sheetpeek-test-tst", tmp_path / "a")
     doc = json.loads((folder / "job.json").read_text(encoding="utf-8"))
+    groups = [g for g in text_style.GROUPS if g != "line_budget"]  # a job of its own
     assert [wb["file"] for wb in doc["workbooks"]] == [
-        f"text_style_{group}.xlsx" for group in text_style.GROUPS
+        f"text_style_{group}.xlsx" for group in groups
     ]
-    for wb, group in zip(doc["workbooks"], text_style.GROUPS, strict=True):
+    for wb, group in zip(doc["workbooks"], groups, strict=True):
         (read,) = [s for s in wb["steps"] if s["op"] == "read_format"]
         assert read["props"] == [
             "font.name", "font.size", "font.underline", "align.horizontal", "align.vertical"
@@ -304,3 +305,18 @@ def test_the_shrink_fonts_job_reads_into_a_file_of_its_own(tmp_path):
     lines = path.read_text(encoding="utf-8").splitlines()
     columns = next(x for x in lines if not x.startswith("# "))
     assert columns.split("\t") == list(text_steps.COLUMNS)
+
+
+def test_the_line_budget_job_reads_into_a_file_of_its_own(tmp_path):
+    from capture import text_style
+
+    first = job.write("line_budget", "sheetpeek-test-lb", tmp_path / "a")
+    doc = json.loads((first / "job.json").read_text(encoding="utf-8"))
+    assert [wb["file"] for wb in doc["workbooks"]] == ["text_style_line_budget.xlsx"]
+    result = _screen_result(tmp_path / "result", first, group="line_budget", rows_n=22)
+    (path,) = job.read("line_budget", first, result, tmp_path / "windows")
+    assert path.name == "line_budget.tsv"
+    lines = path.read_text(encoding="utf-8").splitlines()
+    columns = next(x for x in lines if not x.startswith("# "))
+    assert columns.split("\t") == list(text_style.COLUMNS)
+    assert len(text_style.cases("line_budget")) == 136  # 34 texts, four alignments each
