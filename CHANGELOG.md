@@ -12,8 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and `notices()`, and `--platform` on `sheetpeek view` and `sheetpeek serve`: `"windows"`
   shows a workbook as Excel for Windows at 96 dpi shows it, through xlformat's Windows tables:
   column widths in whole pixels (a default column is 48 pt, where the Mac's is 53), built-in
-  formats from the regional settings (format 14 is `m/d/yyyy`), text measured in pixels, and
-  rows, where text sits in them and its underlines and strikethrough in whole pixels (three
+  formats from the regional settings (format 14 is `m/d/yyyy`), text measured in pixels between
+  insets in pixels (3 and 2 at Calibri 11), and rows, where text sits in them and its
+  underlines and strikethrough in whole pixels (three
   wrapped lines of Calibri 11 take 60 px, 45 points, where the Mac's take 48 points; an
   underline is 1 px thick). In HTML a line that reaches past its row is drawn on into the row
   below, as Windows draws it; Excel for Mac cuts it at the row. Superscript and subscript rows
@@ -40,11 +41,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   places it (captured), where they were 3 and 2 points for every font: Calibri 20 text starts
   4 points into its cell and ends 3 points before the next gridline, Calibri 36 6 and 5 (Calibri
   11 keeps 3 and 2), and wrapping, shrink to fit and an accounting underline's span under text
-  take the same room. Shrunk text starts by its drawn size's inset (Calibri 11 drawn at 3/7,
-  2 points in), and shrink to fit can choose a smaller level in a large font (four "H"s in
-  Calibri 20 in a default column, drawn whole before, are shrunk to an 11-point advance). With `platform="windows"` Calibri 11's
-  insets are 3 and 2 pixels (they were 3 and 2 points), so a line the cell less 5 pixels wide
-  stays on one line, as Windows keeps it.
+  take the same room. Shrunk text starts by its drawn size's inset (twelve "H"s of Calibri 11
+  in a default column, drawn at 4/7, start 2 points in, where they started 3), and shrink to
+  fit can choose a smaller level in a large font (four "H"s of Calibri 20 in a default column,
+  drawn whole before, are shrunk to an 11-point advance).
 - Shrink to fit draws text at a whole-point "H" advance, every one from the unshrunk advance
   down to 1, choosing the largest at which the text, plus 3/8 of an advance, fits the cell less
   a point, as Excel draws it (captured, `text_steps`): ten "H"s in a default Calibri 11 column
