@@ -609,6 +609,7 @@ class _Points:
                 _platform.text_width("H", font=font),
                 (x1 - x0) - indent,
                 budget - indent,
+                _platform.current().name,
             )
             font = scaled(font, shrink)
             size *= shrink

@@ -346,6 +346,20 @@ def test_shrink_scale_is_bounded():
     assert shrink_scale(100, 0, 53, 48) == 1.0
 
 
+def test_windows_shrinks_by_whole_pixels_never_6_down_to_2():
+    from sheetpeek._text_styles import shrink_levels
+
+    # Calibri 11's "H" is 9 px on Windows (6.75 pt), Calibri 16's 13 px (9.75 pt)
+    assert [round(a / 0.75) for a in shrink_levels(6.75, "windows")] == [8, 7, 5, 4, 3, 2]
+    assert [round(a / 0.75) for a in shrink_levels(9.75, "windows")] == [
+        12, 11, 10, 9, 8, 7, 5, 4, 3, 2
+    ]  # fmt: skip
+    assert shrink_levels(7, "mac") == (6, 5, 4, 3, 2, 1)
+    # nothing fits: the smallest level, 2 px, clipped
+    assert shrink_scale(7000, 6.75, 48, 43.5, "windows") == 1.5 / 6.75
+    assert shrink_scale(100, 1.5, 48, 43.5, "windows") == 1.0  # no level below a 2 px advance
+
+
 def test_shrink_replaces_hashes_and_wrap_wins(tmp_path):
     def build(ws):
         ws["A1"] = 123456789012

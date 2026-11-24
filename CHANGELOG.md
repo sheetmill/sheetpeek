@@ -20,6 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   In HTML, Excel for Windows' `slantDashDot` side borders are drawn as Windows draws them, a
   dash-dot of period 18 px whose dashes lean, and no longer reported; a `slantDashDot` diagonal
   is still drawn as `mediumDashDot` and reported.
+  Shrink to fit on Excel for Windows draws text at whole-pixel "H" advances, every one below
+  the unshrunk advance except 6, down to 2, as Windows draws it (Calibri 11's 9 px "H" takes
+  8, 7, 5, 4, 3 and 2 px).
 
 ### Changed
 - Shrink to fit draws text at a whole-point "H" advance, every one from the unshrunk advance

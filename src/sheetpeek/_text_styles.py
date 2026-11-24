@@ -48,7 +48,8 @@ SHRINK_PADDING = 0.375
 """Advances a shrunk text's fit test charges beyond the text, at the level tried (fitted to the
 ``text_steps`` capture, §4.13)."""
 SHRINK_MARGIN = 1.0
-"""Points of the cell a shrunk text's fit test leaves free (fitted with ``SHRINK_PADDING``)."""
+"""Units of the cell a shrunk text's fit test leaves free (fitted with ``SHRINK_PADDING``): points
+on the Mac, device pixels on Windows."""
 
 
 def vert_scale(font: Font) -> float:
@@ -87,28 +88,49 @@ def scaled(font: xlformat.Font, scale: float) -> xlformat.Font:
     return xlformat.Font(font.name, font.size * scale, font.bold, font.italic)
 
 
-def shrink_scale(width: float, advance: float, cell: float, budget: float) -> float:
+def shrink_levels(advance: float, platform: str = "mac") -> tuple[float, ...]:
+    """The "H" advances, in points, shrink to fit may draw a text at, largest first.
+
+    Excel for Mac draws every whole point below the unshrunk ``advance`` down to 1; Excel for
+    Windows every whole device pixel below it except 6, down to 2 (captured, ``text_steps`` and
+    ``windows/text_steps``, §4.13).
+    """
+    if platform == "windows":
+        unit = 0.75
+        steps = [n for n in range(math.ceil(advance / unit - 1e-9) - 1, 1, -1) if n != 6]
+    else:
+        unit = 1.0
+        steps = list(range(math.ceil(advance - 1e-9) - 1, 0, -1))
+    return tuple(n * unit for n in steps)
+
+
+def shrink_scale(
+    width: float, advance: float, cell: float, budget: float, platform: str = "mac"
+) -> float:
     """The scale shrink to fit draws a text at: 1 when it fits, else a level's ``a / advance``.
 
-    Excel draws shrunk text at a whole-point "H" advance ``a``, every one from the unshrunk
-    ``advance`` down to 1 (captured, ``text_steps``, §4.13). Text that fits ``budget``, the
-    cell less its insets, is not shrunk. Otherwise the level is the largest ``a`` below the
-    unshrunk advance at which the text's width scaled to it, plus ``SHRINK_PADDING`` advances,
-    fits ``cell`` less ``SHRINK_MARGIN``: for a run of n "H"s, ``(n + 0.375)·a <= cell - 1``.
-    The smallest level when nothing fits, the text then clipped (decided).
+    Excel draws shrunk text at a whole-unit "H" advance ``a`` (:func:`shrink_levels`: points on
+    the Mac, device pixels on Windows). Text that fits ``budget``, the cell less its insets, is
+    not shrunk. Otherwise the level is the largest ``a`` at which the text's width scaled to it,
+    plus ``SHRINK_PADDING`` advances, fits ``cell`` less ``SHRINK_MARGIN`` units: for a run of n
+    "H"s, ``(n + 0.375)·a <= cell - 1`` on the Mac. The smallest level when nothing fits, the
+    text then clipped (decided).
 
     Args:
         width: The text's unshrunk width, in points.
         advance: The unshrunk "H" advance of the cell's font, in points.
         cell: The cell's width less any indent, in points.
         budget: What text may take unshrunk: ``cell`` less the insets.
+        platform: ``"mac"`` or ``"windows"``.
     """
-    if width <= budget or advance <= 1:
+    levels = shrink_levels(advance, platform)
+    if width <= budget or not levels:
         return 1.0
-    for level in range(math.ceil(advance) - 1, 0, -1):
-        if (width / advance + SHRINK_PADDING) * level <= cell - SHRINK_MARGIN:
+    margin = SHRINK_MARGIN * (0.75 if platform == "windows" else 1.0)
+    for level in levels:
+        if (width / advance + SHRINK_PADDING) * level <= cell - margin:
             return level / advance
-    return 1 / advance
+    return levels[-1] / advance
 
 
 def rules(

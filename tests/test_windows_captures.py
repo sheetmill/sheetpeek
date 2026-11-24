@@ -252,16 +252,6 @@ def test_windows_indents_move_text_as_sheetpeek_moves_it(steps_built):
     assert wrong == {}
 
 
-KNOWN_SHRINK: dict[str, tuple[int, ...]] = {
-    # Known deviations, the lengths by group, one reason for all: sheetpeek draws Windows' shrink
-    # at the Mac's whole-point levels (every 4/3 px) where Excel for Windows draws whole pixels,
-    # never 6, 2 the smallest.
-    "shrink": (8, 9, 10, 11, 12, *range(16, 31)),
-    "shrink_calibri16": (8, 9, 10, 12, 13, 14, 15, 16, 17, 18, *range(24, 52)),
-    "shrink_aptos_narrow11": (8, 9, 10, 11, 12, *range(16, 52)),
-}
-
-
 @pytest.mark.excel
 def test_windows_shrinks_each_length_to_the_pixel_level_sheetpeek_gives_it(steps_built):
     # The "H" advance Excel draws each length at, in device pixels: its ink width plus the
@@ -308,8 +298,7 @@ def test_windows_shrinks_each_length_to_the_pixel_level_sheetpeek_gives_it(steps
                 wrong[(group, case.name)] = (level, ours)
     REPORT["shrink (Windows)"] = (
         f"shrink, Excel for Windows: {compared} lengths compared ({clipped} clipped), "
-        f"{len(wrong)} deviations, known (whole-point levels)"
+        f"{len(wrong)} deviations"
     )
     assert compared == 27 + 48 + 48
-    known = {(group, f"shrunk {n}") for group, lengths in KNOWN_SHRINK.items() for n in lengths}
-    assert set(wrong) == known
+    assert wrong == {}

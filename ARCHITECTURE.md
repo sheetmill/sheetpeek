@@ -1062,8 +1062,8 @@ text keeps its size and breaks where wrap alone breaks it (captured, `text_style
 pairs of cases, identical). On Excel for Windows the levels are whole device pixels where the
 Mac's are whole points: every one below the unshrunk advance except 6, down to 2 (`windows/text_steps`,
 the three shrink groups: Calibri 11's "H" 9 px takes 8, 7, 5, 4, 3 and 2; a text that does not fit
-at 2 px is clipped). sheetpeek still draws Windows' shrink at whole-point levels, a known
-deviation (99 of 123 lengths). **Shrunk text never spills**, in every mode. **Rows fit the unshrunk
+at 2 px is clipped), as sheetpeek draws them with `platform="windows"` (`shrink_levels`; the fit
+test as the Mac's, its margin a pixel): all 123 lengths. **Shrunk text never spills**, in every mode. **Rows fit the unshrunk
 size** (captured at 20 pt). A merge with the flag on its anchor is not shrunk, clipped at the
 merge's edge (captured once, doubtful). Bottom-aligned shrunk text sits on its row's shared
 baseline, top and centered text where its drawn size's metrics put it (§3.6; `text_style_more`,
