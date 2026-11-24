@@ -39,6 +39,7 @@ ELSEWHERE = {
     "format.refused": "tests/test_layout.py and tests/test_cli.py",
     "value.unshowable": "tests/test_layout.py",
     "outline.cut": "only with a range that cuts a group; tests/test_outline.py",
+    "font.cut": "only past 999 fonts; tests/test_font_cut.py",
     "grid.color": "only where gridlines are shown, and All hides them; tests/test_theme.py",
     "sheet.hidden": "only on the workbook page, which leaves hidden sheets out; "
     "tests/test_workbook.py",

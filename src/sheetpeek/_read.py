@@ -48,7 +48,7 @@ from sheetpeek._model import (
     Sheet,
     SheetState,
 )
-from sheetpeek._notices import CellSet, Collector, Notice
+from sheetpeek._notices import CellSet, Collector, Notice, Reason
 from sheetpeek._package import (
     LimitError,
     PackageError,
@@ -229,6 +229,10 @@ class Book:
         # A position without a <c> shows the Normal style, as a table's empty cells do.
         self._normal_color[id(self._default_style)] = self._default_style
         self._run_cache: dict[int, tuple[Any, Font, tuple[TextSpan, ...] | None]] = {}
+        self._cut_styles: dict[int, bool] = {}
+        """Cell formats whose font lies past the font table's cut (``FONT_TABLE_CUT``)."""
+        self._run_entry = 0
+        """The font table entry of the next rich-text run with a font of its own."""
 
     def _unreadable(self, error: Exception) -> PackageError:
         """The refusal for a failure to read: its reason, without where the file lives."""
@@ -616,6 +620,8 @@ class Book:
         line: list[Cell] = []
         current = 0
         stream = recalc.cells(sheet) if name is not None else sheet.cells(rich=True)
+        assert self._book is not None
+        self._run_entry = len(self._book.styles.fonts)  # a sheet's runs follow the font list
         for source in stream:
             row, column = source.row, source.column
             if row == current:
@@ -653,6 +659,8 @@ class Book:
                 continue
             value, kind = self._value(source)
             style, every, text = self._style(source.style)
+            if self._cut_styles.get(source.style):
+                self._report_cut(notes, row, column)
             for code in every:
                 report_style(notes, code, row, column)
             if text and value is not None:
@@ -668,7 +676,9 @@ class Book:
                     kind,
                     style,
                     None,
-                    self._runs(rich, style.font, source.value) if kind == "text" else None,
+                    self._runs(rich, style.font, source.value, notes, row, column)
+                    if kind == "text"
+                    else None,
                 )
             )
         used = CellRange(min_row, min_col, max_row, max_col) if max_row else None
@@ -869,30 +879,51 @@ class Book:
         return whole_characters(value), "text"
 
     def _runs(
-        self, rich: xlio.RichString | None, font: Font, value: Any
+        self,
+        rich: xlio.RichString | None,
+        font: Font,
+        value: Any,
+        notes: Collector | None = None,
+        row: int = 0,
+        column: int = 0,
     ) -> tuple[TextSpan, ...] | None:
         """A string's runs in their fonts; ``None`` when every run is in ``font``.
 
         A run without properties takes the cell's font. A run with properties stands alone: what
         they leave out is the default, not the cell's, and a missing name or size the
-        Normal font's (both captured, ``runs``). Adjacent runs in one font are joined.
+        Normal font's (both captured, ``runs``). Adjacent runs in one font are joined. Each run
+        with properties is an entry of the font table after the font list, in cell order on
+        the sheet; at the cut or later it is drawn in ``CUT_FONT`` in its own color on Excel for
+        Mac (captured, ``font_cut``) and reported on both platforms.
         """
         if rich is None or not rich.runs:
             return None
+        own_fonts = sum(1 for run in rich.runs if run.font is not None)
+        first = self._run_entry
+        self._run_entry += own_fonts
+        cut = self._cut()
+        crosses = first + own_fonts > cut
+        if crosses and notes is not None:
+            self._report_cut(notes, row, column)
         if "".join(run.text for run in rich.runs) != value:
             return None  # a string with text of its own outside its runs shows that text alone
         cached = self._run_cache.get(id(rich))
-        if cached is not None and cached[0] is rich and cached[1] == font:
+        if not crosses and cached is not None and cached[0] is rich and cached[1] == font:
             return cached[2]
         spans: list[TextSpan] = []
+        entry = first
         for run in rich.runs:
-            own = (
-                font
-                if run.font is None
-                else font_aspect.to_font(
+            if run.font is None:
+                own = font
+            else:
+                own = font_aspect.to_font(
                     run.font, self._normal_font, self._cell_color, self._theme_fonts
                 )
-            )
+                if entry >= cut and self._platform.name == "mac":
+                    own = dataclasses.replace(
+                        CUT_FONT, color=own.color, theme_color=own.theme_color
+                    )
+                entry += 1
             if not run.text:
                 continue
             text = whole_characters(run.text)
@@ -901,21 +932,51 @@ class Book:
             else:
                 spans.append(TextSpan(text, own))
         runs = tuple(spans) if any(_drawn(span.font) != _drawn(font) for span in spans) else None
-        self._run_cache[id(rich)] = (rich, font, runs)  # the string keeps its id from reuse
+        if not crosses:
+            self._run_cache[id(rich)] = (rich, font, runs)  # the string keeps its id from reuse
         return runs
 
+    def _cut(self) -> int:
+        """The first font table entry Excel draws in ``CUT_FONT`` on this platform."""
+        return FONT_TABLE_CUT[self._platform.name]
+
+    def _report_cut(self, notes: Collector, row: int, column: int) -> None:
+        reason: Reason
+        if self._platform.name == "mac":
+            reason = "file"
+            detail = (
+                "drawn and measured in Calibri 12, as Excel for Mac draws a font at entry 1,000 "
+                "or later of the workbook's font table"
+            )
+        else:
+            reason = "not_implemented"
+            detail = (
+                "drawn in its own font, where Excel for Windows draws a font at entry 999 or "
+                "1,000 or later of the workbook's font table in another"
+            )
+        notes.add("font.cut", "approximated", reason, detail=detail, row=row, column=column)
+
     def _style(self, index: int) -> tuple[CellStyle, tuple[Code, ...], tuple[Code, ...]]:
-        """Cell format ``index``'s style, and what it uses that is not read (any cell, values)."""
+        """Cell format ``index``'s style, and what it uses that is not read (any cell, values).
+
+        A font at the font table's cut or later is drawn as Excel for Mac draws it, in
+        ``CUT_FONT``, black (captured, ``font_cut``); on Windows it is kept and reported.
+        """
         found = self._styles.get(index)
         if found is None:
             assert self._book is not None
             # An index past the cell formats raises IndexError: the sheet is unreadable.
             cell_format = self._book.styles.cell_formats[index]
+            cut = cell_format.font_id >= self._cut()
+            self._cut_styles[index] = cut
             code = cell_format.number_format
             if code is None:
                 code = _builtin_format(cell_format.number_format_id, self._platform, self._regional)
             cell_format = dataclasses.replace(cell_format, number_format=code)
-            found = self._styles[index] = styles.resolve(cell_format, self._context)
+            found = styles.resolve(cell_format, self._context)
+            if cut and self._platform.name == "mac":
+                found = (dataclasses.replace(found[0], font=CUT_FONT), *found[1:])
+            self._styles[index] = found
             # By identity: a style whose font color is the Normal style's and one with another
             # color can compare equal (colors stated differently resolve alike). Interning
             # equal styles would mark both; test_table_layout's equal-style test fails if so.
@@ -979,6 +1040,16 @@ class Book:
         if font is None and found.fonts:
             font = found.fonts[0]
         return font
+
+
+FONT_TABLE_CUT = {"mac": 1000, "windows": 999}
+"""The first entry of a workbook's font table, its font list and then each rich-text run's own
+font in cell order, that Excel does not draw: 1,000 on the Mac (captured, ``font_cut``); on
+Windows 1,000 under a Calibri 11 Normal font and 999 under a Times New Roman one (captured,
+``windows/font_cut``, unexplained): 999 is where it is reported."""
+CUT_FONT = Font("Calibri", 12.0)
+"""What Excel for Mac draws a font past the cut in, whatever the theme, the Normal font or its
+standard font (Aptos Narrow 12 there): captured, ``font_cut``, at Excel's default settings."""
 
 
 def whole_characters(text: str) -> str:

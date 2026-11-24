@@ -204,6 +204,7 @@ for _code, _name, _level in (
     ("drawing.ole", "embedded objects", "sheet"),
     ("control", "form controls", "sheet"),
     ("picture.background", "background pictures", "sheet"),
+    ("font.cut", "fonts past Excel's font table", "cells"),
     ("comment", "notes", "cells"),
     ("comment.threaded", "threaded comments", "cells"),
     ("sheet.tab_color", "tab colors", "sheet"),

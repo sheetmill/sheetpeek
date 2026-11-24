@@ -24,6 +24,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the unshrunk advance except 6, down to 2, as Windows draws it (Calibri 11's 9 px "H" takes
   8, 7, 5, 4, 3 and 2 px).
 
+- A cell whose font lies at entry 1,000 or later of the workbook's font table (`styles.xml`'s
+  font list, then each rich-text run's own font in cell order) is drawn and measured as Excel for
+  Mac draws it, in Calibri 12 (its row fitted and its column autofitted to it), black, or a run in
+  its own color, and reported as `font.cut`. With `platform="windows"` the cell keeps its own font
+  and is reported from entry 999.
+
 ### Changed
 - Shrink to fit draws text at a whole-point "H" advance, every one from the unshrunk advance
   down to 1, choosing the largest at which the text, plus 3/8 of an advance, fits the cell less

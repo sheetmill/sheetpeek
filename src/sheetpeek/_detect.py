@@ -31,6 +31,7 @@ _DRAWING = "http://schemas.openxmlformats.org/drawingml/2006/main"
 # What each reader code reports: outcome, reason, and what is drawn instead (or why not).
 CODES: dict[str, tuple[Outcome, Reason, str]] = {
     "text.phonetic": ("omitted", "not_implemented", ""),
+    "font.cut": ("approximated", "file", "drawn in Excel's font for fonts past its font table"),
     "style.row_column": (
         "omitted",
         "not_implemented",
