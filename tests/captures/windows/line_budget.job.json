@@ -1,0 +1,72 @@
+{
+ "schema": 1,
+ "job_id": "sheetpeek-20261123-165130-line-budget",
+ "package": "sheetpeek",
+ "purpose": "sheetpeek capture group line_budget: window pictures of two-word texts as wide as the cell less a few pixels, wrapped, justified and distributed, at zoom 100 (text_style's group line_budget)",
+ "limits": {
+  "job_seconds": 1800,
+  "step_seconds": 600
+ },
+ "audit": false,
+ "workbooks": [
+  {
+   "file": "text_style_line_budget.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "view",
+     "sheet": "Sheet",
+     "select": "Sheet!AZ300",
+     "zoom": 100,
+     "scroll_row": 1,
+     "scroll_column": 1
+    },
+    {
+     "op": "read",
+     "id": "geometry",
+     "range": "Sheet!A1:N20",
+     "props": [
+      "left",
+      "top",
+      "width",
+      "height",
+      "text"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "display",
+     "range": "Sheet!A1:N20",
+     "props": [
+      "font.name",
+      "font.size",
+      "font.underline",
+      "align.horizontal",
+      "align.vertical"
+     ],
+     "display": true
+    },
+    {
+     "op": "view",
+     "sheet": "Sheet",
+     "select": "Sheet!AZ300",
+     "id": "view_z100",
+     "zoom": 100,
+     "scroll_row": 1,
+     "scroll_column": 1
+    },
+    {
+     "op": "capture_window",
+     "id": "shot_z100",
+     "name": "text_style_line_budget_z100.png"
+    },
+    {
+     "op": "close",
+     "save": false
+    }
+   ]
+  }
+ ]
+}

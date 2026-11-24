@@ -286,6 +286,7 @@ result's header whole as one line (`job_header`); the job's manifest lies beside
 | file | rows | what |
 |---|---|---|
 | `windows/cells` | | the job of the group `cells`: `capture/cell_text.py`'s workbook opened, and each cell's displayed text read (`read` of `text`) |
+| `windows/line_budget` | 136 | `text_style`' group `line_budget` alone, captured at zoom 100 by the job of the same name: two words the cell less 6, 5 and 4 px; an "i"'s dots on Windows are a line band of their own (1 or 2 px), left out when lines are counted |
 | `windows/merge_width` | 150 | as the Mac's `merge_width`: numbers alone and merged across two to four columns, one hidden, at six widths |
 | `windows/error_width` | 56 | as the Mac's `error_width`: the seven error values at eight widths |
 | `windows/borders_fills` | | the job of the group `borders_fills`: the windows of `borders` and `fills`, each opened, its cells' geometry and displayed fill read, and Excel's window captured at zoom 100 and 200 (`capture_window`) |

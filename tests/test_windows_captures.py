@@ -433,3 +433,51 @@ def test_windows_shrink_levels_hold_on_fonts_of_their_own():
     assert len(levels) == 55
     assert 6 not in levels.values()
     assert wrong == KNOWN_FIT
+
+
+# --- line_budget: two words a few pixels short of the cell
+
+
+@pytest.mark.excel
+def test_windows_line_budget_against_sheetpeek():
+    # Excel's lines from the capture's line bands, an "i"'s dots left out: on Windows they stand
+    # 2 px above their stems, a band of 1 or 2 px of their own. Known deviations, one reason:
+    # Excel for Windows' cell insets are 3 px left and 2 px right under cell fonts to 12 points
+    # (2.25 and 1.5 pt, where sheetpeek takes xlformat's 3 and 2 pt on both platforms), so the
+    # texts the cell less 6 and 5 px fit one line; larger cell fonts take larger insets (Calibri
+    # 14 breaks them too), as yet unmodeled.
+    pytest.importorskip("openpyxl")
+    import openpyxl
+    from capture import text_style
+    from openpyxl.utils import column_index_from_string
+    from openpyxl.utils.cell import coordinate_from_string
+
+    _, body = _table("line_budget.tsv")
+    records = {r["name"]: r for r in body}
+    wb = openpyxl.Workbook()
+    found = text_style.fill(wb.active, "line_budget")
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "line_budget.xlsx"
+        wb.save(path)
+        rendered = sheetpeek.read(path, platform="windows").layout("excel")
+    by_row = {r.index: r for r in rendered.rows}
+    wrong = set()
+    for case in found:
+        bands = records[case.name]["line_tops"].split()
+        excel = sum(1 for band in bands if float(band.split("+")[1]) > 2.25)
+        letters, r = coordinate_from_string(case.cell)
+        c = column_index_from_string(letters)
+        ours = len({round(t.y, 3) for t in by_row[r].runs if t.source == (r, c)})
+        if excel != ours:
+            wrong.add(case.name)
+    known = {
+        case.name
+        for case in found
+        if "Calibri 14" not in case.name and case.name.endswith(("cell-6px", "cell-5px"))
+    }
+    REPORT["line budget (Windows)"] = (
+        f"line budget, Excel for Windows: {len(found)} cells, {len(wrong)} known deviations "
+        "(insets 3 + 2 px under fonts to 12 points)"
+    )
+    assert len(found) == 136
+    assert wrong == known

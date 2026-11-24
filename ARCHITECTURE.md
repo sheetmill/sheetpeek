@@ -743,6 +743,14 @@ as sheetpeek's; rows fitted to text, which sheetpeek still fits with Excel for M
 (28 rows, waiting for xlformat's Windows vertical metrics); vertical justify and distributed text
 keeps on one line what sheetpeek breaks (10 cells: "bbbb cccc", 59 px, on one line of a 64 px
 cell), their line budget on Windows not modeled; wrapped text breaks as sheetpeek breaks it.
+`windows/line_budget` traces those to the insets: under cell fonts to 12 points Excel for Windows
+keeps a line of any of the four alignments the cell less 5 px wide, its insets 3 px left and 2 px
+right (the Mac's 3 and 2 pt in device pixels; sheetpeek takes xlformat's 3 and 2 pt on both
+platforms, a known deviation, 64 of 136 cells); Calibri 14 breaks texts the cell less 6 and 5 px
+wide, so larger cell fonts take larger insets. The ink edges of `text_steps` agree on both
+platforms: the insets come to 5 units up to Calibri 16 on the Mac and Calibri 12 on Windows, 7 at
+Calibri 24 on the Mac and Calibri 16 on Windows, 9 at Calibri 24 on Windows (unverified beyond
+these sizes; how the extra splits between left and right is not settled).
 ### 4.10 Hyperlinks
 
 The look and where a link goes are captured (`links`, Excel 16.115, zoom 100; the places through

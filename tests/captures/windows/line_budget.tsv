@@ -1,0 +1,146 @@
+# platform: windows
+# excel_build: 16.0.20527.20196
+# job: line_budget.job.json
+# job_id: sheetpeek-20261123-165130-line-budget
+# captured: 2026-11-24; method: capture_window (capture job)
+# job_header: {"environment": {"audit": false, "checks": {"dde_server_launch_disabled": true, "dde_server_lookup_disabled": true, "vba_warnings": 4}, "display": {"screen_px": [2560, 1440], "system_dpi": 96}, "edition": {"found": "Microsoft 365", "source": "office products"}, "excel": {"build": "16.0.20527.20196", "build_number": 20527.0, "calculation_version": 191029, "decimal_separator": ".", "international": {"country": 1.0, "decimal": ".", "list": ","}, "operating_system": "Windows (64-bit ARM) NT 10.00", "process": {"native_machine": "0xaa64", "process_machine": "0x8664"}, "standard_font": "Aptos Narrow", "standard_font_size": 11.0, "thousands_separator": ",", "use_system_separators": true, "version": "16.0"}, "font_smoothing": {"expected": {"contrast": 1200, "directwrite": {}, "enabled": true, "orientation": "rgb", "type": "cleartype"}, "found": {"contrast": 1200, "directwrite": {}, "enabled": true, "orientation": "rgb", "type": "cleartype"}, "ok": true}, "fonts": [{"cloud": true, "family": "Aptos", "head_revision": 2.00999, "style": "Bold", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos", "head_revision": 2.00999, "style": "Bold Italic", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos", "head_revision": 2.00999, "style": "Italic", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos", "head_revision": 2.00999, "style": "Regular", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos Display", "head_revision": 2.00999, "style": "Bold", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos Display", "head_revision": 2.00999, "style": "Bold Italic", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos Display", "head_revision": 2.00999, "style": "Italic", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos Display", "head_revision": 2.00999, "style": "Regular", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos Narrow", "head_revision": 2.00999, "style": "Bold", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos Narrow", "head_revision": 2.00999, "style": "Bold Italic", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos Narrow", "head_revision": 2.00999, "style": "Italic", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos Narrow", "head_revision": 2.00999, "style": "Regular", "version": "Version 2.01;O365"}, {"cloud": false, "family": "Arial", "head_revision": 7.07001, "style": "Bold", "version": "Version 7.07"}, {"cloud": false, "family": "Arial", "head_revision": 7.07001, "style": "Bold Italic", "version": "Version 7.07"}, {"cloud": false, "family": "Arial", "head_revision": 7.07001, "style": "Italic", "version": "Version 7.07"}, {"cloud": false, "family": "Arial", "head_revision": 7.07001, "style": "Regular", "version": "Version 7.07"}, {"cloud": false, "family": "Calibri", "head_revision": 6.27, "style": "Bold", "version": "Version 6.27"}, {"cloud": false, "family": "Calibri", "head_revision": 6.27, "style": "Bold Italic", "version": "Version 6.27"}, {"cloud": false, "family": "Calibri", "head_revision": 6.27, "style": "Italic", "version": "Version 6.27"}, {"cloud": false, "family": "Calibri", "head_revision": 6.27, "style": "Regular", "version": "Version 6.27"}, {"cloud": false, "family": "Cambria", "head_revision": 6.98, "style": "Bold", "version": "Version 6.98"}, {"cloud": false, "family": "Cambria", "head_revision": 6.98, "style": "Bold Italic", "version": "Version 6.98"}, {"cloud": false, "family": "Cambria", "head_revision": 6.98, "style": "Italic", "version": "Version 6.98"}, {"cloud": false, "family": "Cambria", "head_revision": 6.99001, "style": "Regular", "version": "Version 6.99"}, {"cloud": false, "family": "Segoe UI", "head_revision": 5.72, "style": "Bold", "version": "Version 5.72"}, {"cloud": false, "family": "Segoe UI", "head_revision": 5.72, "style": "Bold Italic", "version": "Version 5.72"}, {"cloud": false, "family": "Segoe UI", "head_revision": 5.72, "style": "Italic", "version": "Version 5.72"}, {"cloud": false, "family": "Segoe UI", "head_revision": 5.72, "style": "Regular", "version": "Version 5.72"}], "fonts_missing": [], "geometry": {"expected": {"excel_window_px": [-8, -8, 2568, 1400], "screen_px": [2560, 1440], "system_dpi": 96}, "found": {"excel_window_points": [-5.0, -6.0, 1932.0, 1056.0], "excel_window_px": [-8, -8, 2568, 1400], "screen_px": [2560, 1440], "system_dpi": 96}, "ok": true}, "locale": {"ansi_code_page": 1252, "decimal": ".", "list": ",", "long_date": "dddd, MMMM d, yyyy", "name": "en-US", "oem_code_page": 437, "short_date": "M/d/yyyy", "sort_locale": "en-US", "sort_version": {"custom": "01000000ee575c1e00b4d0000bb1e11e", "defined": 394498, "nls": 394498}, "time": "h:mm:ss tt", "two_digit_year_max": 2049, "two_digit_year_max_setting": null}, "office": {"channel": "Current Channel", "platform": "x64", "products": "O365HomePremRetail", "version": "16.0.20527.20196"}, "printer": {"orientation": "portrait", "paper": "A4", "paper_mm": [215.9, 279.4]}, "theme": {"office_ui_theme": 6, "windows_apps_light": 1, "windows_system_light": 1}, "windows": {"architecture": "ARM64", "build": "26300.9974", "display_version": "26H2", "edition": "Core"}}, "format": 1, "inputs": {"text_style_line_budget.xlsx": {"bytes": 5947, "sha256": "d92d218e73cd0143a5305e196680e04e3646c9de334e97377ce19d489ecb9666"}}, "job_id": "sheetpeek-20261123-165130-line-budget", "manifest_sha256": "4b5d4ccd9c31c26b8fb2f722ec08218ae9ccb47df50697c6867fc6cb12520d26", "runner_version": "0.1.28"}
+# zooms: 100
+# gridline: E0E0E0 (measured: D1's bottom edge)
+# suite: line_budget
+group	name	zoom	cell	row_height	cell_width	lines	line_tops	ink_left	ink_right	ink_top	ink_bottom	words	baseline	glyph_top	rule_offset	rule_thickness	rule_start	rule_end	width_ratio	height_ratio	ink_width	ref_width	font_name	font_size	underline	h_align	v_align	text	line_inks
+line_budget	wrap Calibri 11 default cell-6px	100	C4	37.5	48.0	1	25.5+7.5	3	-3	25.5	33												Calibri	11	-4142	1	-4107	aaaaa biii	
+line_budget	wrap Calibri 11 default cell-5px	100	C5	37.5	48.0	1	25.5+7.5	3	-2.25	25.5	33												Calibri	11	-4142	1	-4107	aaaa bbiii	
+line_budget	wrap Calibri 11 default cell-4px	100	C6	37.5	48.0	2	12.75+5.25 25.5+7.5	3	-19.5	12.75	33												Calibri	11	-4142	1	-4107	aaa bbbiii	
+line_budget	justify Calibri 11 default cell-6px	100	C7	37.5	48.0	1	25.5+7.5	3	-3	25.5	33												Calibri	11	-4142	-4130	-4107	aaaaa biii	
+line_budget	justify Calibri 11 default cell-5px	100	C8	37.5	48.0	1	25.5+7.5	3	-2.25	25.5	33												Calibri	11	-4142	-4130	-4107	aaaa bbiii	
+line_budget	justify Calibri 11 default cell-4px	100	C9	37.5	48.0	2	12.75+5.25 25.5+7.5	3	-19.5	12.75	33												Calibri	11	-4142	-4130	-4107	aaa bbbiii	
+line_budget	distributed Calibri 11 default cell-6px	100	C10	37.5	48.0	1	25.5+7.5	3	-2.25	25.5	33												Calibri	11	-4142	-4117	-4107	aaaaa biii	
+line_budget	distributed Calibri 11 default cell-5px	100	C11	37.5	48.0	1	25.5+7.5	3	-2.25	25.5	33												Calibri	11	-4142	-4117	-4107	aaaa bbiii	
+line_budget	distributed Calibri 11 default cell-4px	100	C12	37.5	48.0	2	12.75+5.25 25.5+7.5	12	-10.5	12.75	33												Calibri	11	-4142	-4117	-4107	aaa bbbiii	
+line_budget	vertical justify Calibri 11 default cell-6px	100	C13	37.5	48.0	1	4.5+7.5	3	-3	4.5	12												Calibri	11	-4142	1	-4130	aaaaa biii	
+line_budget	vertical justify Calibri 11 default cell-5px	100	C14	37.5	48.0	1	4.5+7.5	3	-2.25	4.5	12												Calibri	11	-4142	1	-4130	aaaa bbiii	
+line_budget	vertical justify Calibri 11 default cell-4px	100	C15	37.5	48.0	2	6.75+5.25 27+7.5	3	-19.5	6.75	34.5												Calibri	11	-4142	1	-4130	aaa bbbiii	
+line_budget	wrap Calibri 11 15 cell-6px	100	D4	37.5	78.75	1	25.5+7.5	3	-3	25.5	33												Calibri	11	-4142	1	-4107	aaaaii bbbbbbiii	
+line_budget	wrap Calibri 11 15 cell-5px	100	D5	37.5	78.75	1	25.5+7.5	3	-2.25	25.5	33												Calibri	11	-4142	1	-4107	aaaaaaa bbbbbii	
+line_budget	wrap Calibri 11 15 cell-4px	100	D6	37.5	78.75	2	12.75+5.25 25.5+7.5	3	-35.25	12.75	33												Calibri	11	-4142	1	-4107	aaaaaa bbbbbbii	
+line_budget	justify Calibri 11 15 cell-6px	100	D7	37.5	78.75	1	25.5+7.5	3	-3	25.5	33												Calibri	11	-4142	-4130	-4107	aaaaii bbbbbbiii	
+line_budget	justify Calibri 11 15 cell-5px	100	D8	37.5	78.75	1	25.5+7.5	3	-2.25	25.5	33												Calibri	11	-4142	-4130	-4107	aaaaaaa bbbbbii	
+line_budget	justify Calibri 11 15 cell-4px	100	D9	37.5	78.75	2	12.75+5.25 25.5+7.5	3	-35.25	12.75	33												Calibri	11	-4142	-4130	-4107	aaaaaa bbbbbbii	
+line_budget	distributed Calibri 11 15 cell-6px	100	D10	37.5	78.75	1	25.5+7.5	3	-2.25	25.5	33												Calibri	11	-4142	-4117	-4107	aaaaii bbbbbbiii	
+line_budget	distributed Calibri 11 15 cell-5px	100	D11	37.5	78.75	1	25.5+7.5	3	-2.25	25.5	33												Calibri	11	-4142	-4117	-4107	aaaaaaa bbbbbii	
+line_budget	distributed Calibri 11 15 cell-4px	100	D12	37.5	78.75	2	12.75+5.25 25.5+7.5	19.5	-18.75	12.75	33												Calibri	11	-4142	-4117	-4107	aaaaaa bbbbbbii	
+line_budget	vertical justify Calibri 11 15 cell-6px	100	D13	37.5	78.75	1	4.5+7.5	3	-3	4.5	12												Calibri	11	-4142	1	-4130	aaaaii bbbbbbiii	
+line_budget	vertical justify Calibri 11 15 cell-5px	100	D14	37.5	78.75	1	4.5+7.5	3	-2.25	4.5	12												Calibri	11	-4142	1	-4130	aaaaaaa bbbbbii	
+line_budget	vertical justify Calibri 11 15 cell-4px	100	D15	37.5	78.75	2	6.75+5.25 27+7.5	3	-35.25	6.75	34.5												Calibri	11	-4142	1	-4130	aaaaaa bbbbbbii	
+line_budget	wrap Calibri 11 25 cell-6px	100	E4	37.5	131.25	1	25.5+7.5	3	-3	25.5	33												Calibri	11	-4142	1	-4107	aaaaaaaaaa bbbbbbbbbbbii	
+line_budget	wrap Calibri 11 25 cell-5px	100	E5	37.5	131.25	1	25.5+7.5	3	-2.25	25.5	33												Calibri	11	-4142	1	-4107	aaaaaaaaa bbbbbbbbbbbbii	
+line_budget	wrap Calibri 11 25 cell-4px	100	E6	37.5	131.25	2	11.25+6.75 25.5+7.5	3	-48.75	11.25	33												Calibri	11	-4142	1	-4107	aaaaaaaai bbbbbbbbbbbbiii	
+line_budget	justify Calibri 11 25 cell-6px	100	E7	37.5	131.25	1	25.5+7.5	3	-3	25.5	33												Calibri	11	-4142	-4130	-4107	aaaaaaaaaa bbbbbbbbbbbii	
+line_budget	justify Calibri 11 25 cell-5px	100	E8	37.5	131.25	1	25.5+7.5	3	-2.25	25.5	33												Calibri	11	-4142	-4130	-4107	aaaaaaaaa bbbbbbbbbbbbii	
+line_budget	justify Calibri 11 25 cell-4px	100	E9	37.5	131.25	2	11.25+6.75 25.5+7.5	3	-48.75	11.25	33												Calibri	11	-4142	-4130	-4107	aaaaaaaai bbbbbbbbbbbbiii	
+line_budget	distributed Calibri 11 25 cell-6px	100	E10	37.5	131.25	1	25.5+7.5	3	-2.25	25.5	33												Calibri	11	-4142	-4117	-4107	aaaaaaaaaa bbbbbbbbbbbii	
+line_budget	distributed Calibri 11 25 cell-5px	100	E11	37.5	131.25	1	25.5+7.5	3	-2.25	25.5	33												Calibri	11	-4142	-4117	-4107	aaaaaaaaa bbbbbbbbbbbbii	
+line_budget	distributed Calibri 11 25 cell-4px	100	E12	37.5	131.25	2	11.25+6.75 25.5+7.5	26.25	-25.5	11.25	33												Calibri	11	-4142	-4117	-4107	aaaaaaaai bbbbbbbbbbbbiii	
+line_budget	vertical justify Calibri 11 25 cell-6px	100	E13	37.5	131.25	1	4.5+7.5	3	-3	4.5	12												Calibri	11	-4142	1	-4130	aaaaaaaaaa bbbbbbbbbbbii	
+line_budget	vertical justify Calibri 11 25 cell-5px	100	E14	37.5	131.25	1	4.5+7.5	3	-2.25	4.5	12												Calibri	11	-4142	1	-4130	aaaaaaaaa bbbbbbbbbbbbii	
+line_budget	vertical justify Calibri 11 25 cell-4px	100	E15	37.5	131.25	2	5.25+6.75 27+7.5	3	-48.75	5.25	34.5												Calibri	11	-4142	1	-4130	aaaaaaaai bbbbbbbbbbbbiii	
+line_budget	wrap Arial 11 default cell-6px	100	F4	37.5	48.0	1	24+8.25	3	-3	24	32.25												Arial	11	-4142	1	-4107	aaii bbbb	
+line_budget	wrap Arial 11 default cell-5px	100	F5	37.5	48.0	1	24+8.25	3	-2.25	24	32.25												Arial	11	-4142	1	-4107	aaii bbbiii	
+line_budget	wrap Arial 11 default cell-4px	100	F6	37.5	48.0	2	12+6 24+8.25	3	-22.5	12	32.25												Arial	11	-4142	1	-4107	aaa bbbb	
+line_budget	justify Arial 11 default cell-6px	100	F7	37.5	48.0	1	24+8.25	3	-3	24	32.25												Arial	11	-4142	-4130	-4107	aaii bbbb	
+line_budget	justify Arial 11 default cell-5px	100	F8	37.5	48.0	1	24+8.25	3	-2.25	24	32.25												Arial	11	-4142	-4130	-4107	aaii bbbiii	
+line_budget	justify Arial 11 default cell-4px	100	F9	37.5	48.0	2	12+6 24+8.25	3	-22.5	12	32.25												Arial	11	-4142	-4130	-4107	aaa bbbb	
+line_budget	distributed Arial 11 default cell-6px	100	F10	37.5	48.0	1	24+8.25	3	-2.25	24	32.25												Arial	11	-4142	-4117	-4107	aaii bbbb	
+line_budget	distributed Arial 11 default cell-5px	100	F11	37.5	48.0	1	24+8.25	3	-2.25	24	32.25												Arial	11	-4142	-4117	-4107	aaii bbbiii	
+line_budget	distributed Arial 11 default cell-4px	100	F12	37.5	48.0	2	12+6 24+8.25	13.5	-12	12	32.25												Arial	11	-4142	-4117	-4107	aaa bbbb	
+line_budget	vertical justify Arial 11 default cell-6px	100	F13	37.5	48.0	1	3.75+8.25	3	-3	3.75	12												Arial	11	-4142	1	-4130	aaii bbbb	
+line_budget	vertical justify Arial 11 default cell-5px	100	F14	37.5	48.0	1	3.75+8.25	3	-2.25	3.75	12												Arial	11	-4142	1	-4130	aaii bbbiii	
+line_budget	vertical justify Arial 11 default cell-4px	100	F15	37.5	48.0	2	6+6 27+8.25	3	-22.5	6	35.25												Arial	11	-4142	1	-4130	aaa bbbb	
+line_budget	wrap Arial 11 15 cell-6px	100	G4	37.5	78.75	1	24+8.25	3	-3	24	32.25												Arial	11	-4142	1	-4107	aaaaii bbbbbbiii	
+line_budget	wrap Arial 11 15 cell-5px	100	G5	37.5	78.75	1	24+8.25	3	-2.25	24	32.25												Arial	11	-4142	1	-4107	aaaaa bbbbbbb	
+line_budget	wrap Arial 11 15 cell-4px	100	G6	37.5	78.75	3	9.75+0.75 12+6 24+8.25	3	-30.75	9.75	32.25												Arial	11	-4142	1	-4107	aaaai bbbbbbbii	
+line_budget	justify Arial 11 15 cell-6px	100	G7	37.5	78.75	1	24+8.25	3	-3	24	32.25												Arial	11	-4142	-4130	-4107	aaaaii bbbbbbiii	
+line_budget	justify Arial 11 15 cell-5px	100	G8	37.5	78.75	1	24+8.25	3	-2.25	24	32.25												Arial	11	-4142	-4130	-4107	aaaaa bbbbbbb	
+line_budget	justify Arial 11 15 cell-4px	100	G9	37.5	78.75	3	9.75+0.75 12+6 24+8.25	3	-30.75	9.75	32.25												Arial	11	-4142	-4130	-4107	aaaai bbbbbbbii	
+line_budget	distributed Arial 11 15 cell-6px	100	G10	37.5	78.75	1	24+8.25	3	-2.25	24	32.25												Arial	11	-4142	-4117	-4107	aaaaii bbbbbbiii	
+line_budget	distributed Arial 11 15 cell-5px	100	G11	37.5	78.75	1	24+8.25	3	-2.25	24	32.25												Arial	11	-4142	-4117	-4107	aaaaa bbbbbbb	
+line_budget	distributed Arial 11 15 cell-4px	100	G12	37.5	78.75	3	9.75+0.75 12+6 24+8.25	17.25	-16.5	9.75	32.25												Arial	11	-4142	-4117	-4107	aaaai bbbbbbbii	
+line_budget	vertical justify Arial 11 15 cell-6px	100	G13	37.5	78.75	1	3.75+8.25	3	-3	3.75	12												Arial	11	-4142	1	-4130	aaaaii bbbbbbiii	
+line_budget	vertical justify Arial 11 15 cell-5px	100	G14	37.5	78.75	1	3.75+8.25	3	-2.25	3.75	12												Arial	11	-4142	1	-4130	aaaaa bbbbbbb	
+line_budget	vertical justify Arial 11 15 cell-4px	100	G15	37.5	78.75	3	3.75+0.75 6+6 27+8.25	3	-30.75	3.75	35.25												Arial	11	-4142	1	-4130	aaaai bbbbbbbii	
+line_budget	wrap Arial 11 25 cell-6px	100	H4	37.5	131.25	1	24+8.25	3	-3	24	32.25												Arial	11	-4142	1	-4107	aaaaaaat bbbbbbbbbbbbiii	
+line_budget	wrap Arial 11 25 cell-5px	100	H5	37.5	131.25	1	24+8.25	3	-2.25	24	32.25												Arial	11	-4142	1	-4107	aaaaaaai bbbbbbbbbbbbbi	
+line_budget	wrap Arial 11 25 cell-4px	100	H6	37.5	131.25	3	9.75+0.75 12+6 24+8.25	3	-51	9.75	32.25												Arial	11	-4142	1	-4107	aaaaaaaii bbbbbbbbbbbbiii	
+line_budget	justify Arial 11 25 cell-6px	100	H7	37.5	131.25	1	24+8.25	3	-3	24	32.25												Arial	11	-4142	-4130	-4107	aaaaaaat bbbbbbbbbbbbiii	
+line_budget	justify Arial 11 25 cell-5px	100	H8	37.5	131.25	1	24+8.25	3	-2.25	24	32.25												Arial	11	-4142	-4130	-4107	aaaaaaai bbbbbbbbbbbbbi	
+line_budget	justify Arial 11 25 cell-4px	100	H9	37.5	131.25	3	9.75+0.75 12+6 24+8.25	3	-51	9.75	32.25												Arial	11	-4142	-4130	-4107	aaaaaaaii bbbbbbbbbbbbiii	
+line_budget	distributed Arial 11 25 cell-6px	100	H10	37.5	131.25	1	24+8.25	3	-2.25	24	32.25												Arial	11	-4142	-4117	-4107	aaaaaaat bbbbbbbbbbbbiii	
+line_budget	distributed Arial 11 25 cell-5px	100	H11	37.5	131.25	1	24+8.25	3	-2.25	24	32.25												Arial	11	-4142	-4117	-4107	aaaaaaai bbbbbbbbbbbbbi	
+line_budget	distributed Arial 11 25 cell-4px	100	H12	37.5	131.25	3	9.75+0.75 12+6 24+8.25	27.75	-26.25	9.75	32.25												Arial	11	-4142	-4117	-4107	aaaaaaaii bbbbbbbbbbbbiii	
+line_budget	vertical justify Arial 11 25 cell-6px	100	H13	37.5	131.25	1	3.75+8.25	3	-3	3.75	12												Arial	11	-4142	1	-4130	aaaaaaat bbbbbbbbbbbbiii	
+line_budget	vertical justify Arial 11 25 cell-5px	100	H14	37.5	131.25	1	3.75+8.25	3	-2.25	3.75	12												Arial	11	-4142	1	-4130	aaaaaaai bbbbbbbbbbbbbi	
+line_budget	vertical justify Arial 11 25 cell-4px	100	H15	37.5	131.25	3	3.75+0.75 6+6 27+8.25	3	-51	3.75	35.25												Arial	11	-4142	1	-4130	aaaaaaaii bbbbbbbbbbbbiii	
+line_budget	wrap Aptos Narrow 12 default cell-5px	100	I5	37.5	48.0	1	24.75+8.25	3	-2.25	24.75	33												Aptos Narrow	12	-4142	1	-4107	aai bbbiii	
+line_budget	wrap Aptos Narrow 12 default cell-4px	100	I6	37.5	48.0	2	9.75+7.5 24.75+8.25	3	-18	9.75	33												Aptos Narrow	12	-4142	1	-4107	aie bbbet	
+line_budget	justify Aptos Narrow 12 default cell-5px	100	I8	37.5	48.0	1	24.75+8.25	3	-2.25	24.75	33												Aptos Narrow	12	-4142	-4130	-4107	aai bbbiii	
+line_budget	justify Aptos Narrow 12 default cell-4px	100	I9	37.5	48.0	2	9.75+7.5 24.75+8.25	3	-18	9.75	33												Aptos Narrow	12	-4142	-4130	-4107	aie bbbet	
+line_budget	distributed Aptos Narrow 12 default cell-5px	100	I11	37.5	48.0	1	24.75+8.25	3	-2.25	24.75	33												Aptos Narrow	12	-4142	-4117	-4107	aai bbbiii	
+line_budget	distributed Aptos Narrow 12 default cell-4px	100	I12	37.5	48.0	2	9.75+7.5 24.75+8.25	11.25	-9.75	9.75	33												Aptos Narrow	12	-4142	-4117	-4107	aie bbbet	
+line_budget	vertical justify Aptos Narrow 12 default cell-5px	100	I14	37.5	48.0	1	4.5+8.25	3	-2.25	4.5	12.75												Aptos Narrow	12	-4142	1	-4130	aai bbbiii	
+line_budget	vertical justify Aptos Narrow 12 default cell-4px	100	I15	37.5	48.0	2	5.25+7.5 26.25+8.25	3	-18	5.25	34.5												Aptos Narrow	12	-4142	1	-4130	aie bbbet	
+line_budget	wrap Aptos Narrow 12 15 cell-6px	100	J4	37.5	78.75	1	24.75+8.25	3	-3	24.75	33												Aptos Narrow	12	-4142	1	-4107	aaaai bbbbbbiii	
+line_budget	wrap Aptos Narrow 12 15 cell-5px	100	J5	37.5	78.75	1	24.75+8.25	3	-1.5	24.75	33												Aptos Narrow	12	-4142	1	-4107	aaaie bbbbbbet	
+line_budget	wrap Aptos Narrow 12 15 cell-4px	100	J6	37.5	78.75	2	9.75+7.5 24.75+8.25	3	-30.75	9.75	33												Aptos Narrow	12	-4142	1	-4107	aaaat bbbbbbet	
+line_budget	justify Aptos Narrow 12 15 cell-6px	100	J7	37.5	78.75	1	24.75+8.25	3	-3	24.75	33												Aptos Narrow	12	-4142	-4130	-4107	aaaai bbbbbbiii	
+line_budget	justify Aptos Narrow 12 15 cell-5px	100	J8	37.5	78.75	1	24.75+8.25	3	-1.5	24.75	33												Aptos Narrow	12	-4142	-4130	-4107	aaaie bbbbbbet	
+line_budget	justify Aptos Narrow 12 15 cell-4px	100	J9	37.5	78.75	2	9.75+7.5 24.75+8.25	3	-30.75	9.75	33												Aptos Narrow	12	-4142	-4130	-4107	aaaat bbbbbbet	
+line_budget	distributed Aptos Narrow 12 15 cell-6px	100	J10	37.5	78.75	1	24.75+8.25	3	-2.25	24.75	33												Aptos Narrow	12	-4142	-4117	-4107	aaaai bbbbbbiii	
+line_budget	distributed Aptos Narrow 12 15 cell-5px	100	J11	37.5	78.75	1	24.75+8.25	3	-1.5	24.75	33												Aptos Narrow	12	-4142	-4117	-4107	aaaie bbbbbbet	
+line_budget	distributed Aptos Narrow 12 15 cell-4px	100	J12	37.5	78.75	2	9.75+7.5 24.75+8.25	18	-15.75	9.75	33												Aptos Narrow	12	-4142	-4117	-4107	aaaat bbbbbbet	
+line_budget	vertical justify Aptos Narrow 12 15 cell-6px	100	J13	37.5	78.75	1	4.5+8.25	3	-3	4.5	12.75												Aptos Narrow	12	-4142	1	-4130	aaaai bbbbbbiii	
+line_budget	vertical justify Aptos Narrow 12 15 cell-5px	100	J14	37.5	78.75	1	4.5+8.25	3	-1.5	4.5	12.75												Aptos Narrow	12	-4142	1	-4130	aaaie bbbbbbet	
+line_budget	vertical justify Aptos Narrow 12 15 cell-4px	100	J15	37.5	78.75	2	5.25+7.5 26.25+8.25	3	-30.75	5.25	34.5												Aptos Narrow	12	-4142	1	-4130	aaaat bbbbbbet	
+line_budget	wrap Aptos Narrow 12 25 cell-6px	100	K4	37.5	131.25	1	24.75+8.25	3	-2.25	24.75	33												Aptos Narrow	12	-4142	1	-4107	aaaaaati bbbbbbbbbbbbet	
+line_budget	wrap Aptos Narrow 12 25 cell-4px	100	K6	37.5	131.25	2	9.75+7.5 24.75+8.25	3	-48.75	9.75	33												Aptos Narrow	12	-4142	1	-4107	aaaaaaai bbbbbbbbbbbbiii	
+line_budget	justify Aptos Narrow 12 25 cell-6px	100	K7	37.5	131.25	1	24.75+8.25	3	-2.25	24.75	33												Aptos Narrow	12	-4142	-4130	-4107	aaaaaati bbbbbbbbbbbbet	
+line_budget	justify Aptos Narrow 12 25 cell-4px	100	K9	37.5	131.25	2	9.75+7.5 24.75+8.25	3	-48.75	9.75	33												Aptos Narrow	12	-4142	-4130	-4107	aaaaaaai bbbbbbbbbbbbiii	
+line_budget	distributed Aptos Narrow 12 25 cell-6px	100	K10	37.5	131.25	1	24.75+8.25	3	-1.5	24.75	33												Aptos Narrow	12	-4142	-4117	-4107	aaaaaati bbbbbbbbbbbbet	
+line_budget	distributed Aptos Narrow 12 25 cell-4px	100	K12	37.5	131.25	2	9.75+7.5 24.75+8.25	26.25	-25.5	9.75	33												Aptos Narrow	12	-4142	-4117	-4107	aaaaaaai bbbbbbbbbbbbiii	
+line_budget	vertical justify Aptos Narrow 12 25 cell-6px	100	K13	37.5	131.25	1	4.5+8.25	3	-2.25	4.5	12.75												Aptos Narrow	12	-4142	1	-4130	aaaaaati bbbbbbbbbbbbet	
+line_budget	vertical justify Aptos Narrow 12 25 cell-4px	100	K15	37.5	131.25	2	5.25+7.5 26.25+8.25	3	-48.75	5.25	34.5												Aptos Narrow	12	-4142	1	-4130	aaaaaaai bbbbbbbbbbbbiii	
+line_budget	wrap Calibri 14 default cell-6px	100	L4	37.5	48.0	3	5.25+1.5 8.25+6.75 24+9.75	3.75	-21.75	5.25	33.75												Calibri	14	-4142	1	-4107	aai bbiii	
+line_budget	wrap Calibri 14 default cell-5px	100	L5	37.5	48.0	2	8.25+6.75 24+9.75	3.75	-24.75	8.25	33.75												Calibri	14	-4142	1	-4107	aaa bbii	
+line_budget	wrap Calibri 14 default cell-4px	100	L6	37.5	48.0	3	5.25+1.5 8.25+6.75 24+9.75	3.75	-20.25	5.25	33.75												Calibri	14	-4142	1	-4107	aai bbbi	
+line_budget	justify Calibri 14 default cell-6px	100	L7	37.5	48.0	3	5.25+1.5 8.25+6.75 24+9.75	3.75	-21.75	5.25	33.75												Calibri	14	-4142	-4130	-4107	aai bbiii	
+line_budget	justify Calibri 14 default cell-5px	100	L8	37.5	48.0	2	8.25+6.75 24+9.75	3.75	-24.75	8.25	33.75												Calibri	14	-4142	-4130	-4107	aaa bbii	
+line_budget	justify Calibri 14 default cell-4px	100	L9	37.5	48.0	3	5.25+1.5 8.25+6.75 24+9.75	3.75	-20.25	5.25	33.75												Calibri	14	-4142	-4130	-4107	aai bbbi	
+line_budget	distributed Calibri 14 default cell-6px	100	L10	37.5	48.0	3	5.25+1.5 8.25+6.75 24+9.75	14.25	-12	5.25	33.75												Calibri	14	-4142	-4117	-4107	aai bbiii	
+line_budget	distributed Calibri 14 default cell-5px	100	L11	37.5	48.0	2	8.25+6.75 24+9.75	15	-13.5	8.25	33.75												Calibri	14	-4142	-4117	-4107	aaa bbii	
+line_budget	distributed Calibri 14 default cell-4px	100	L12	37.5	48.0	3	5.25+1.5 8.25+6.75 24+9.75	13.5	-11.25	5.25	33.75												Calibri	14	-4142	-4117	-4107	aai bbbi	
+line_budget	vertical justify Calibri 14 default cell-6px	100	L13	37.5	48.0	3	5.25+1.5 8.25+6.75 24+9.75	3.75	-21.75	5.25	33.75												Calibri	14	-4142	1	-4130	aai bbiii	
+line_budget	vertical justify Calibri 14 default cell-5px	100	L14	37.5	48.0	2	8.25+6.75 24+9.75	3.75	-24.75	8.25	33.75												Calibri	14	-4142	1	-4130	aaa bbii	
+line_budget	vertical justify Calibri 14 default cell-4px	100	L15	37.5	48.0	3	5.25+1.5 8.25+6.75 24+9.75	3.75	-20.25	5.25	33.75												Calibri	14	-4142	1	-4130	aai bbbi	
+line_budget	wrap Calibri 14 15 cell-6px	100	M4	37.5	78.75	3	5.25+1.5 8.25+6.75 24+9.75	3.75	-31.5	5.25	33.75												Calibri	14	-4142	1	-4107	aaaii bbbbbb	
+line_budget	wrap Calibri 14 15 cell-5px	100	M5	37.5	78.75	2	8.25+6.75 24+9.75	3.75	-31.5	8.25	33.75												Calibri	14	-4142	1	-4107	aaaa bbbbbb	
+line_budget	wrap Calibri 14 15 cell-4px	100	M6	37.5	78.75	3	5.25+1.5 8.25+6.75 24+9.75	3.75	-30	5.25	33.75												Calibri	14	-4142	1	-4107	aaaii bbbbbiii	
+line_budget	justify Calibri 14 15 cell-6px	100	M7	37.5	78.75	3	5.25+1.5 8.25+6.75 24+9.75	3.75	-31.5	5.25	33.75												Calibri	14	-4142	-4130	-4107	aaaii bbbbbb	
+line_budget	justify Calibri 14 15 cell-5px	100	M8	37.5	78.75	2	8.25+6.75 24+9.75	3.75	-31.5	8.25	33.75												Calibri	14	-4142	-4130	-4107	aaaa bbbbbb	
+line_budget	justify Calibri 14 15 cell-4px	100	M9	37.5	78.75	3	5.25+1.5 8.25+6.75 24+9.75	3.75	-30	5.25	33.75												Calibri	14	-4142	-4130	-4107	aaaii bbbbbiii	
+line_budget	distributed Calibri 14 15 cell-6px	100	M10	37.5	78.75	3	5.25+1.5 8.25+6.75 24+9.75	18.75	-17.25	5.25	33.75												Calibri	14	-4142	-4117	-4107	aaaii bbbbbb	
+line_budget	distributed Calibri 14 15 cell-5px	100	M11	37.5	78.75	2	8.25+6.75 24+9.75	18.75	-17.25	8.25	33.75												Calibri	14	-4142	-4117	-4107	aaaa bbbbbb	
+line_budget	distributed Calibri 14 15 cell-4px	100	M12	37.5	78.75	3	5.25+1.5 8.25+6.75 24+9.75	18	-16.5	5.25	33.75												Calibri	14	-4142	-4117	-4107	aaaii bbbbbiii	
+line_budget	vertical justify Calibri 14 15 cell-6px	100	M13	37.5	78.75	3	5.25+1.5 8.25+6.75 24+9.75	3.75	-31.5	5.25	33.75												Calibri	14	-4142	1	-4130	aaaii bbbbbb	
+line_budget	vertical justify Calibri 14 15 cell-5px	100	M14	37.5	78.75	2	8.25+6.75 24+9.75	3.75	-31.5	8.25	33.75												Calibri	14	-4142	1	-4130	aaaa bbbbbb	
+line_budget	vertical justify Calibri 14 15 cell-4px	100	M15	37.5	78.75	3	5.25+1.5 8.25+6.75 24+9.75	3.75	-30	5.25	33.75												Calibri	14	-4142	1	-4130	aaaii bbbbbiii	
+line_budget	wrap Calibri 14 25 cell-6px	100	N4	37.5	131.25	2	8.25+6.75 24+9.75	3.75	-52.5	8.25	33.75												Calibri	14	-4142	1	-4107	aaaaaaa bbbbbbbbbiii	
+line_budget	wrap Calibri 14 25 cell-5px	100	N5	37.5	131.25	3	5.25+1.5 8.25+6.75 24+9.75	3.75	-48	5.25	33.75												Calibri	14	-4142	1	-4107	aaaaaai bbbbbbbbbbii	
+line_budget	wrap Calibri 14 25 cell-4px	100	N6	37.5	131.25	2	8.25+6.75 24+9.75	3.75	-51	8.25	33.75												Calibri	14	-4142	1	-4107	aaaaaaa bbbbbbbbbbi	
+line_budget	justify Calibri 14 25 cell-6px	100	N7	37.5	131.25	2	8.25+6.75 24+9.75	3.75	-52.5	8.25	33.75												Calibri	14	-4142	-4130	-4107	aaaaaaa bbbbbbbbbiii	
+line_budget	justify Calibri 14 25 cell-5px	100	N8	37.5	131.25	3	5.25+1.5 8.25+6.75 24+9.75	3.75	-48	5.25	33.75												Calibri	14	-4142	-4130	-4107	aaaaaai bbbbbbbbbbii	
+line_budget	justify Calibri 14 25 cell-4px	100	N9	37.5	131.25	2	8.25+6.75 24+9.75	3.75	-51	8.25	33.75												Calibri	14	-4142	-4130	-4107	aaaaaaa bbbbbbbbbbi	
+line_budget	distributed Calibri 14 25 cell-6px	100	N10	37.5	131.25	2	8.25+6.75 24+9.75	29.25	-27.75	8.25	33.75												Calibri	14	-4142	-4117	-4107	aaaaaaa bbbbbbbbbiii	
+line_budget	distributed Calibri 14 25 cell-5px	100	N11	37.5	131.25	3	5.25+1.5 8.25+6.75 24+9.75	27	-25.5	5.25	33.75												Calibri	14	-4142	-4117	-4107	aaaaaai bbbbbbbbbbii	
+line_budget	distributed Calibri 14 25 cell-4px	100	N12	37.5	131.25	2	8.25+6.75 24+9.75	28.5	-27	8.25	33.75												Calibri	14	-4142	-4117	-4107	aaaaaaa bbbbbbbbbbi	
+line_budget	vertical justify Calibri 14 25 cell-6px	100	N13	37.5	131.25	2	8.25+6.75 24+9.75	3.75	-52.5	8.25	33.75												Calibri	14	-4142	1	-4130	aaaaaaa bbbbbbbbbiii	
+line_budget	vertical justify Calibri 14 25 cell-5px	100	N14	37.5	131.25	3	5.25+1.5 8.25+6.75 24+9.75	3.75	-48	5.25	33.75												Calibri	14	-4142	1	-4130	aaaaaai bbbbbbbbbbii	
+line_budget	vertical justify Calibri 14 25 cell-4px	100	N15	37.5	131.25	2	8.25+6.75 24+9.75	3.75	-51	8.25	33.75												Calibri	14	-4142	1	-4130	aaaaaaa bbbbbbbbbbi	
