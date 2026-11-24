@@ -1,0 +1,44 @@
+# excel: 16.115
+# build: 16.115.26110837
+# edition: Microsoft 365
+# channel: Current
+# macos: 26.6.2
+# appearance: dark
+# date: 2026-11-23
+# settling: still 0.4 s, give up 8 s, audit off
+# geometry: {"display_scale":2.0,"screen_pt":[2560.0,1440.0],"usable_pt":[2560.0,1089.0],"window_pt":[0.0,30.0,2560.0,1320.0],"window_state":"window state maximized"}
+# display_scale: 2.000
+# colors: captures converted to sRGB (sips --matchTo sRGB Profile.icc)
+# platform: mac
+# suite: font_cut
+group	entry	cell	row_height	font_name	font_size	font_color	ink_top	ink_bottom	red	dark
+list	990	C4	30.0	Arial	24	255,0,0	7.5	30	1144	0
+list	991	C5	30.0	Arial	24	254,0,0	7.5	30	1144	0
+list	992	C6	30.0	Arial	24	253,0,0	7.5	30	1144	0
+list	993	C7	30.0	Arial	24	252,0,0	7.5	30	1144	0
+list	994	C8	30.0	Arial	24	251,0,0	7.5	30	1144	0
+list	995	C9	30.0	Arial	24	250,0,0	7.5	30	1144	0
+list	996	C10	30.0	Arial	24	249,0,0	7.5	30	1144	0
+list	997	C11	30.0	Arial	24	248,0,0	7.5	30	1144	0
+list	998	C12	30.0	Arial	24	247,0,0	7.5	30	1144	0
+list	999	C13	30.0	Arial	24	246,0,0	7.5	30	1144	0
+list	1000	C14	16.0	Arial	24	245,0,0	5	15	0	235
+list	1001	C15	16.0	Arial	24	244,0,0	5	15	0	235
+list	1002	C16	16.0	Arial	24	243,0,0	5	15	0	235
+list	1003	C17	16.0	Arial	24	242,0,0	5	15	0	235
+list	1004	C18	16.0	Arial	24	241,0,0	5	15	0	235
+list	1005	C19	16.0	Arial	24	240,0,0	5	15	0	235
+list	1006	C20	16.0	Arial	24	239,0,0	5	15	0	235
+list	1007	C21	16.0	Arial	24	238,0,0	5	15	0	235
+list	1008	C22	16.0	Arial	24	237,0,0	5	15	0	235
+list	1009	C23	16.0	Arial	24	236,0,0	5	15	0	235
+rich	995	C4	30.0	missing value	0	4,0,2	7.5	30	1144	0
+rich	996	C5	30.0	missing value	0	4,0,2	7.5	30	1144	0
+rich	997	C6	30.0	missing value	0	4,0,2	7.5	30	1144	0
+rich	998	C7	30.0	missing value	0	4,0,2	7.5	30	1144	0
+rich	999	C8	30.0	missing value	0	4,0,2	7.5	30	1144	0
+rich	1000	C9	16.0	missing value	0	4,0,2	5	15	242	0
+rich	1001	C10	16.0	missing value	0	4,0,2	5	15	242	0
+rich	1002	C11	16.0	missing value	0	4,0,2	5	15	242	0
+rich	1003	C12	16.0	missing value	0	4,0,2	5	15	242	0
+rich	1004	C13	16.0	missing value	0	4,0,2	5	15	242	0

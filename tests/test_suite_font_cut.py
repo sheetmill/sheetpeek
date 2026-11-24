@@ -63,3 +63,32 @@ def test_the_suite_is_a_screen_suite():
     from capture.screen.__main__ import SUITES
 
     assert "font_cut" in SUITES
+
+
+# --- the comparison with Excel's capture
+
+
+@pytest.mark.excel
+def test_excel_for_mac_cuts_the_font_table_at_entry_1000():
+    # Captured, Excel 16.115 for Mac, Calibri 11 Normal font: entries 990 to 999 of the font list,
+    # and rich-text runs 995 to 999 after it, keep their Arial 24 (rows fitted at 30 pt, red ink);
+    # from entry 1,000 the row fits at 16 pt and the ink is "Hxg" in Calibri 12, Excel for Mac's
+    # standard size; a cut list font is drawn black, a cut run in its own red. Excel's object
+    # model reports each list probe's own font, cut or not.
+    if not suite.OUTPUT.exists():
+        pytest.skip("not captured yet: run python -m capture.screen run font_cut")
+    lines = suite.OUTPUT.read_text(encoding="utf-8").split("\n")
+    rows = [line.split("\t") for line in lines if line and not line.startswith("#")]
+    records = [dict(zip(rows[0], row, strict=True)) for row in rows[1:]]
+    assert len(records) == suite.LIST_PROBES + suite.RICH_PROBES
+    for r in records:
+        cut = int(r["entry"]) >= 1000
+        assert float(r["row_height"]) == (16.0 if cut else 30.0), r
+        assert (r["ink_top"], r["ink_bottom"]) == (("5", "15") if cut else ("7.5", "30")), r
+        if r["group"] == "list":
+            assert (r["font_name"], r["font_size"]) == ("Arial", "24"), r
+            assert (int(r["red"]) > 0, int(r["dark"]) > 0) == (
+                (False, True) if cut else (True, False)
+            )
+        else:
+            assert int(r["red"]) > 0, r
