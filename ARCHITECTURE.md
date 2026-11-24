@@ -265,10 +265,12 @@ left gridline, y down from the first visible row's top gridline.
   its gridline is `[x, x + 1)` and its interior `[x + 1, x + width)`. x positions are running
   sums of `width_pt` (captured: the `layout` gridlines are 53 pt apart for 53 pt columns, and the
   runs of rows 130 to 136 put the 22 pt column N right after the 53 pt column M).
-- **Text edges:** left text starts at `x + left_inset` (3 pt) plus three Normal-font spaces per indent
-  level; right text ends `right_inset` (2 pt) before the next gridline; centered text sits at
+- **Text edges:** left text starts at `x + left_inset` plus three Normal-font spaces per indent
+  level; right text ends `right_inset` before the next gridline; centered text sits at
   `x + 1 + ceil((interior − width) / 2)`, the odd point going to its right. The insets are
-  xlformat's `ColumnMetrics`, provisional from print.
+  xlformat's `ColumnMetrics`, from the Normal font: the gridline and `ceil(D / 4)` screen units on
+  the left, `ceil(D / 4)` on the right, `D` the digit width at its screen size (Calibri 11: 3 and
+  2 pt on the Mac, 3 and 2 px on Windows).
 - **A fill covers its cell and its far gridlines**, `[x, x + width + 1) × [y, y + height + 1)`
   (captured from the PDF's fill rectangles).
 - **Rows** are laid out by §4.7; **columns** by `file_column_metrics` with the Normal font.
@@ -739,18 +741,14 @@ jobs (`capture/job.py`, `CAPTURING.md`): `windows/merge_width` and `windows/erro
 cell as sheetpeek shows it with `platform="windows"` (§3.2): merged widths, `#` runs and General
 in whole pixels. The lines and tiles of `windows/borders` and `windows/fills`: §4.12; the indents and shrink
 levels of `windows/text_steps`: §4.6, §4.13. `windows/text_style` (zoom 100): every cell's width
-as sheetpeek's; rows fitted to text, which sheetpeek still fits with Excel for Mac's rules, differ
-(28 rows, waiting for xlformat's Windows vertical metrics); vertical justify and distributed text
-keeps on one line what sheetpeek breaks (10 cells: "bbbb cccc", 59 px, on one line of a 64 px
-cell), their line budget on Windows not modeled; wrapped text breaks as sheetpeek breaks it.
-`windows/line_budget` traces those to the insets: under cell fonts to 12 points Excel for Windows
-keeps a line of any of the four alignments the cell less 5 px wide, its insets 3 px left and 2 px
-right (the Mac's 3 and 2 pt in device pixels; sheetpeek takes xlformat's 3 and 2 pt on both
-platforms, a known deviation, 64 of 136 cells); Calibri 14 breaks texts the cell less 6 and 5 px
-wide, so larger cell fonts take larger insets. The ink edges of `text_steps` agree on both
-platforms: the insets come to 5 units up to Calibri 16 on the Mac and Calibri 12 on Windows, 7 at
-Calibri 24 on the Mac and Calibri 16 on Windows, 9 at Calibri 24 on Windows (unverified beyond
-these sizes; how the extra splits between left and right is not settled).
+and every line count as sheetpeek's; rows fitted to text, which sheetpeek still fits with Excel for
+Mac's rules, differ (28 rows, waiting for xlformat's Windows vertical metrics). Vertical justify
+and distributed text keeps "bbbb cccc", 59 px, on one line of a 64 px cell, between the Normal
+font's insets of 3 and 2 px. `windows/line_budget`: under cell fonts to 12 points Excel for
+Windows keeps a line of any of the four alignments the cell less 5 px wide, its insets 3 px left
+and 2 px right; Calibri 14 breaks texts the cell less 6 and 5 px wide, its own insets larger.
+sheetpeek takes the Normal font's insets for every cell, a known deviation (24 of 136 cells, the
+Calibri 14 ones).
 ### 4.10 Hyperlinks
 
 The look and where a link goes are captured (`links`, Excel 16.115, zoom 100; the places through
@@ -2457,7 +2455,7 @@ attribute of `<dimension>`, `<mergeCell>` and `<autoFilter>` in the file format.
 
 - `xlio==0.4.*` (§5): the sheetmill project's reader, pinned to a minor.
 - `xlrecalc>=0.9,<1` (§5.7), imported normally: it is required.
-- `xlformat>=0.7,<1` (§6.4), imported normally: it is required.
+- `xlformat>=0.8,<1` (§6.4), imported normally: it is required.
 - openpyxl is a dev dependency only: the tests and the documentation's examples build workbooks
   with it, and the tests that need it are left out without it.
 - Extra `sheetpeek[rich]`: `rich>=13`.

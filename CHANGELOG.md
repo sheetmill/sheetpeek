@@ -31,6 +31,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and is reported from entry 999.
 
 ### Changed
+- Requires xlformat 0.8. A cell's text insets follow the workbook's Normal font, as Excel
+  places text, where they were 3 and 2 points for every font: under a Calibri 24 Normal font
+  text starts 4 points into the cell on the Mac and ends 3 points before its right gridline
+  (Calibri 11 keeps 3 and 2 points), and with `platform="windows"` a Calibri 11 workbook's
+  insets are 3 and 2 pixels, so a line the cell less 5 pixels wide stays on one line.
 - Shrink to fit draws text at a whole-point "H" advance, every one from the unshrunk advance
   down to 1, choosing the largest at which the text, plus 3/8 of an advance, fits the cell less
   a point, as Excel draws it (captured, `text_steps`): ten "H"s in a default Calibri 11 column

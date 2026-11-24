@@ -317,11 +317,9 @@ KNOWN_ROWS: dict[str, tuple[int, ...]] = {
     "lone": (4, 8),
 }
 KNOWN_LINES: dict[str, tuple[str, ...]] = {
-    # Known deviations. Vertical justify and distributed text on Windows keeps on one line what
-    # sheetpeek breaks (Excel fits "bbbb cccc", 59 px, on one line of a 64 px cell): their line
-    # budget on Windows is not modeled.
-    "align": ("G8", "G10", "G14", "G16", "G18"),
-    "lone": ("C4", "E4", "G4", "I4", "I8"),
+    # Known deviations: none. Vertical justify and distributed text keeps on one line what fits
+    # the cell less Windows' insets of the Normal font (Excel fits "bbbb cccc", 59 px, on one
+    # line of a 64 px cell between insets of 3 and 2 px).
 }
 SHOWN_LINES: dict[str, tuple[str, ...]] = {
     # Not compared: a 15 pt row shows one line of several, and the capture counts the lines shown.
@@ -372,7 +370,7 @@ def test_windows_text_style_widths_rows_and_lines_are_sheetpeeks():
     REPORT["text_style (Windows)"] = (
         f"text_style, Excel for Windows: {widths} cell widths, {len(wrong_widths)} deviations; "
         f"{len(known_rows)} of the rows a known deviation (vertical metrics); {lines} line counts, "
-        f"{len(known_lines)} a known deviation (justify and distributed line budget)"
+        f"{len(known_lines)} known deviations"
     )
     assert (widths, rows, lines) == (141, 141, 78)
     assert wrong_widths == []
@@ -442,10 +440,9 @@ def test_windows_shrink_levels_hold_on_fonts_of_their_own():
 def test_windows_line_budget_against_sheetpeek():
     # Excel's lines from the capture's line bands, an "i"'s dots left out: on Windows they stand
     # 2 px above their stems, a band of 1 or 2 px of their own. Known deviations, one reason:
-    # Excel for Windows' cell insets are 3 px left and 2 px right under cell fonts to 12 points
-    # (2.25 and 1.5 pt, where sheetpeek takes xlformat's 3 and 2 pt on both platforms), so the
-    # texts the cell less 6 and 5 px fit one line; larger cell fonts take larger insets (Calibri
-    # 14 breaks them too), as yet unmodeled.
+    # Excel for Windows' insets follow the cell's font (Calibri 14 takes larger ones than the
+    # Calibri 11 Normal font's 3 and 2 px), and sheetpeek takes the Normal font's for every cell,
+    # so Calibri 14 text the cell less 6 and 5 px breaks in Excel and fits one line in sheetpeek.
     pytest.importorskip("openpyxl")
     import openpyxl
     from capture import text_style
@@ -473,11 +470,11 @@ def test_windows_line_budget_against_sheetpeek():
     known = {
         case.name
         for case in found
-        if "Calibri 14" not in case.name and case.name.endswith(("cell-6px", "cell-5px"))
+        if "Calibri 14" in case.name and case.name.endswith(("cell-6px", "cell-5px"))
     }
     REPORT["line budget (Windows)"] = (
         f"line budget, Excel for Windows: {len(found)} cells, {len(wrong)} known deviations "
-        "(insets 3 + 2 px under fonts to 12 points)"
+        "(insets of the cell's font)"
     )
     assert len(found) == 136
     assert wrong == known
