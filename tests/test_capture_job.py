@@ -280,8 +280,9 @@ def test_a_text_style_job_reads_the_displayed_font_and_alignment(tmp_path):
 def test_displayed_fonts_and_alignments_keep_the_macs_keys():
     cell = {"font.name": "Calibri", "font.size": 11.0, "font.underline": -4142.0,
             "align.horizontal": 1.0, "align.vertical": -4107.0}  # fmt: skip
-    steps = {"geometry": _geometry_grid(1, 1), "display": {"cells": [[cell]]}}
+    steps = {"geometry": _geometry_grid(1, 1, "aaa\nbbb\r\nc\td"), "display": {"cells": [[cell]]}}
     rows = {(c, key): value for c, key, value in job._cell_rows(steps)}
+    assert rows[("A1", "geometry.text")] == "aaa bbb  c d"  # as the Mac's reads are written
     assert rows[("A1", "display.font_name")] == "Calibri"
     assert rows[("A1", "display.font_size")] == "11"
     assert rows[("A1", "display.underline")] == "-4142"

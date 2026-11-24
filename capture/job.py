@@ -318,7 +318,9 @@ def _cell_rows(steps: dict[str, Any]) -> list[tuple[str, str, str]]:
                 (name, f"geometry.{key}", repr(float(geometry[key][r][c])))
                 for key in ("left", "top", "width", "height")
             )
-            rows.append((name, "geometry.text", str(geometry["text"][r][c] or "")))
+            # as the Mac's run writes a read (write_tsv): a tab or line break as a space
+            text = str(geometry["text"][r][c] or "")
+            rows.append((name, "geometry.text", re.sub(r"[\t\r\n]", " ", text)))
             cell = display["cells"][r][c]
             rows.extend(
                 (name, DISPLAYED[prop], _shown(prop, value))
