@@ -10,7 +10,8 @@ text. This suite sets rows too short for that: "HHH" under a double accounting u
 and 36 pt, a single accounting one at 36 pt and a single one at 36 pt, with plain "HHH" at 36 and
 20 pt as controls (columns ``COLUMNS``, C to O, 14 characters, Calibri 11 Normal font), in rows
 fixed at 12, 15 and 20 pt (``HEIGHTS``), bottom, center and top aligned, rows 4 to 20, each case
-row followed by an empty row fixed at 30 pt (``GAP``) where a line drawn on past the row would show.
+row followed by an empty row fixed at 60 pt (``GAP``) where a line drawn on past the row would show:
+deeper than the 41 pt below its row that the deepest line here would reach.
 One window at zoom 100.
 
 Measured per case, with ``text_style_more``'s code: the ink box and each rule's top in the cell;
@@ -49,7 +50,7 @@ COLUMNS: tuple[tuple[str, str | None, int], ...] = (
 """Each column's underline (``None``: plain, a control) and size."""
 HEIGHTS = (12, 15, 20)
 VERTICALS = ("bottom", "center", "top")
-GAP = 30
+GAP = 60
 """The empty row under each case row, fixed in points."""
 MARKERS = ("B2", "Q3")
 ZOOMS = (100,)
