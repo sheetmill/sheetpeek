@@ -282,6 +282,34 @@ def test_slant_dash_dot_is_drawn_as_medium_dash_dot_and_reported(tmp_path):
     assert len(rules(page)) == 1  # one class for both
 
 
+def test_slant_dash_dot_on_windows_is_its_own_dash_dot_and_not_reported(tmp_path):
+    path = bordered(
+        tmp_path,
+        {
+            "A1": ("x", Border(bottom=Side("slantDashDot"))),
+            "C1": ("x", Border(bottom=Side("mediumDashDot"))),
+        },
+    )
+    assert sheetpeek.notices(path, "html", platform="windows") == ()
+    page = sheetpeek.render(path, "html", platform="windows")
+    assert len(rules(page)) == 2  # a class each
+    from sheetpeek.backends.html._borders import style_tile
+
+    # windows/borders: period 18 px, the row before the gridline 11 1 5 1, the row on it 10 2 4 2
+    assert [_tile_runs("slantDashDot", "windows", row) for row in (0, 2)] == [
+        [11, 1, 5, 1],
+        [10, 2, 4, 2],
+    ]
+    assert style_tile("slantDashDot", "mac") == style_tile("mediumDashDot", "mac")
+
+
+def test_a_slant_dash_dot_diagonal_is_reported_on_windows_too(tmp_path):
+    side = Side("slantDashDot")
+    path = bordered(tmp_path, {"A1": ("x", Border(diagonal=side, diagonalDown=True))})
+    codes = {n.code for n in sheetpeek.notices(path, "html", platform="windows")}
+    assert "border.slant_dash_dot" in codes
+
+
 def lines(page):
     return re.findall(r'<i class="(sp-b-[a-z]+)" style="([^"]*)"></i>', page)
 
@@ -381,11 +409,13 @@ def test_no_border_layer_without_borders(tmp_path):
 # --- dashes against the screen capture (borders.tsv): lengths, not phase
 
 
-def _tile_runs(style):
-    """One period of sheetpeek's dash tile for ``style``: on, off, ... in screen points."""
-    from sheetpeek.backends.html._borders import _TILES
+def _tile_runs(style, platform="mac", row=0):
+    """One period of sheetpeek's dash tile for ``style``, its device row ``row`` (two to a CSS
+    px): on, off, ... in CSS px, the platform's screen unit."""
+    from sheetpeek.backends.html._borders import style_tile
 
-    tile = _TILES[style][0]
+    tile = style_tile(style, platform)
+    tile = tile[row % len(tile)]  # a thin style's two rows are alike
     return [len(run) / 2 for run in re.findall(r"#+|\.+", tile)]
 
 

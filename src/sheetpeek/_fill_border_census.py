@@ -45,10 +45,13 @@ def fill_border_codes(sheet: Sheet, rendered: RenderedCell) -> list[str]:
     sides = [s for s in borders.sides if s is not None]
     if sides:
         codes.append("border")
+    # Excel for Windows' slantDashDot sides are drawn as captured; a diagonal is approximated on
+    # either platform
+    approximated = [] if sheet.platform.name == "windows" else list(sides)
     diagonal = borders.diagonal
     if diagonal is not None and (rendered.merge is None or rendered.is_merge_anchor):
         codes.append("border.diagonal")
-        sides.append(diagonal)
-    if any(s.style == "slantDashDot" for s in sides):
+        approximated.append(diagonal)
+    if any(s.style == "slantDashDot" for s in approximated):
         codes.append("border.slant_dash_dot")
     return codes

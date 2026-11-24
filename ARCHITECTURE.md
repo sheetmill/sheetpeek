@@ -952,14 +952,17 @@ page scale. Tiles and dashes are in whole screen points, one to a CSS px, so a 1
 them exactly too. Every dashed side of `borders` (zoom 100 and 200) has the tiles' dash and gap
 lengths (captured); where Excel starts a dash period is not modeled, and a run starts its own.
 **slantDashDot is drawn as mediumDashDot with square gaps** and reported
-(`border.slant_dash_dot`).
+(`border.slant_dash_dot`), except a side on Excel for Windows, drawn as captured below.
 
 On Excel for Windows (`windows/borders`, `windows/fills`, zoom 100 and 200) every line and tile is
 the Mac's in the same counts of the platform's unit, the device pixel at 96 dpi where the Mac's
 is the screen point, unscaled by zoom: dash and gap lengths, line widths and where they sit
 against the gridline, every pattern's tile up to where it starts. The gridline gray is `#E0E0E0`
 (the Mac's `#D4D4D4`). slantDashDot reads as a dash-dot of period 18 px along every edge (4, 2,
-10, 2 or 5, 1, 11, 1 by device row).
+10, 2 or 5, 1, 11, 1 by device row). HTML draws Windows' lines and tiles with the Mac's tiles, a
+Windows device pixel a CSS px, and its slantDashDot sides as captured: the row before the
+gridline 11 on, 1 off, 5 on, 1 off, the row on it 10, 2, 4, 2, both starting together; a
+slantDashDot diagonal as on the Mac.
 
 Not captured: a dash's phase, the light and dark appearances' effect (none expected), double
 lines meeting at a corner (drawn crossing), what Excel does with a gradient without stops, and

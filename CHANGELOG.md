@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `"mac"` (the default), `"windows"` or an `xlformat.Platform`; `regional_settings` an
   `xlformat.RegionalSettings`, by default the platform's en-US settings. A sheet keeps the
   platform it was read with, as `Sheet.platform` and `Sheet.regional_settings`.
+  In HTML, Excel for Windows' `slantDashDot` side borders are drawn as Windows draws them, a
+  dash-dot of period 18 px whose dashes lean, and no longer reported; a `slantDashDot` diagonal
+  is still drawn as `mediumDashDot` and reported.
 
 ### Changed
 - Shrink to fit draws text at a whole-point "H" advance, every one from the unshrunk advance

@@ -107,11 +107,12 @@ def test_the_gridline_gray_is_the_one_recorded_for_windows():
 def test_windows_dashes_have_sheetpeeks_lengths_in_device_pixels():
     # As the Mac's test (tests/test_borders.py): every dashed side, dash and gap lengths exact in
     # the platform's unit (a device pixel here, where the Mac's is a screen point), the starting
-    # point free. slantDashDot is counted apart: Windows' slanted dash-dot is not drawn.
+    # point free; each device row against its own row of the tile (slantDashDot's two differ:
+    # the row before the gridline is the tile's first, the row on it its third).
     from tests.test_borders import _fits_cycle, _tile_runs
 
     _, body = _table("borders.tsv")
-    checked, wrong, slant = 0, [], 0
+    checked, wrong = 0, []
     for row in body:
         style, pattern = row["style"], row["pattern"]
         if style == "none" or pattern in ("solid", "empty", ""):
@@ -121,20 +122,15 @@ def test_windows_dashes_have_sheetpeeks_lengths_in_device_pixels():
             (kind == "on", _px(length, row["zoom"]))
             for kind, length in zip(tokens[::2], tokens[1::2], strict=True)
         ]
-        if style == "slantDashDot":
-            slant += not _fits_cycle(measured, _tile_runs(style))
-            continue
+        tile_row = 0 if float(row["offset"]) < 0 else 2
         checked += 1
-        if not _fits_cycle(measured, _tile_runs(style)):
-            wrong.append((row["zoom"], style, row["edge"], pattern))
+        if not _fits_cycle(measured, _tile_runs(style, "windows", tile_row)):
+            wrong.append((row["zoom"], style, row["edge"], row["offset"], pattern))
     REPORT["borders (Windows)"] = (
-        f"borders, Excel for Windows: {checked} dashed sides compared, {len(wrong)} deviations; "
-        f"{slant} slantDashDot sides a known deviation (drawn as mediumDashDot)"
+        f"borders, Excel for Windows: {checked} dashed sides compared, {len(wrong)} deviations"
     )
-    assert checked == 88  # one device row a unit, where the Mac has two
+    assert checked == 104  # one device row a unit, where the Mac has two; slantDashDot's 16
     assert wrong == []
-    # a known deviation: sheetpeek draws slantDashDot as mediumDashDot on both platforms
-    assert slant == 16
 
 
 @pytest.mark.excel

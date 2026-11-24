@@ -10,7 +10,10 @@ a line on its gridline are Excel's in screen points, which are CSS px at any pag
 - dashed, dotted, hair and the dash-dot styles as tiles in device pixels, two to a CSS px, in
   whole screen points (hair 1 on 1 off, dotted 2/2, dashed 3/1), their gaps white: no gridline
   shows under any border;
-- slantDashDot as mediumDashDot, its gaps square (reported);
+- slantDashDot on Excel for Windows as Windows draws it, a dash-dot of period 18 px whose dashes
+  lean (``windows/borders``: the row before the gridline 11 on, 1 off, 5 on, 1 off, the row on
+  it 10, 2, 4, 2, both starting together); on the Mac as mediumDashDot, its gaps square
+  (reported);
 - where two lines meet, each reaches over the other's band, so corners are square.
 
 Diagonals are an SVG line from corner to corner of the cell or merge, in a second layer written
@@ -71,6 +74,10 @@ _TILES: dict[str, tuple[str, ...] | None] = {
     "mediumDashDotDot": (_DASH_DOT_DOT,) * 4,
     "slantDashDot": (_DASH_DOT,) * 4,
 }
+_WINDOWS_TILES: dict[str, tuple[str, ...] | None] = {
+    # one Windows device pixel a CSS px, so two tile pixels each (captured, windows/borders)
+    "slantDashDot": (_dashes(22, 2, 10, 2),) * 2 + (_dashes(20, 4, 8, 4),) * 2,
+}
 # Diagonals: stroke width and dashes in CSS px; hair is drawn as thin (captured, diagonals).
 _DIAGONAL: dict[str, tuple[float, str]] = {
     "thin": (1, ""),
@@ -87,6 +94,13 @@ _DIAGONAL: dict[str, tuple[float, str]] = {
     "thick": (3, ""),
     "double": (1, ""),
 }
+
+
+def style_tile(style: BorderStyle, platform: str = "mac") -> tuple[str, ...] | None:
+    """A style's tile on ``platform`` (``"mac"`` or ``"windows"``), ``None`` for a solid band."""
+    if platform == "windows" and style in _WINDOWS_TILES:
+        return _WINDOWS_TILES[style]
+    return _TILES[style]
 
 
 def band(style: BorderStyle) -> tuple[int, int]:
@@ -107,6 +121,7 @@ class Borders:
         (captured, diagonals)."""
         self.over_at: list[tuple[int, int]] = []
         sheet = page.sheet
+        self.platform = sheet.sheet.platform.name
         resolved = rendered_borders(sheet)
         rows, columns = sheet.rows, sheet.columns
         if resolved is None or not rows or not columns:
@@ -151,7 +166,7 @@ class Borders:
         if width <= 0 or height <= 0:
             return
         color = side.drawn_color
-        tile = _TILES[side.style]
+        tile = style_tile(side.style, self.platform)
         if tile is None:
             body = f"background:#{color}"
         else:
