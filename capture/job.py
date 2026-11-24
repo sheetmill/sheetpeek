@@ -30,6 +30,8 @@ Groups:
 - ``text_style``: the suite ``text_style``, a workbook a group (``text_style_<group>.xlsx``),
   captured at the group's zooms as ``text_steps`` is, with the displayed font and alignment read
   for every cell; the gray is measured on D1.
+- ``shrink_fonts``: ``text_steps``' group of that name alone, as ``text_steps`` captures its
+  groups, read into ``tests/captures/windows/shrink_fonts.tsv`` (``text_steps``' columns).
 - ``text_steps``: the suite ``text_steps``, a workbook a group (``text_steps_<group>.xlsx``, each
   under the group's Normal font), captured at zoom 100 as ``borders_fills``' windows are and
   measured with the suite's own code into one file; the gray is measured on D1 in each picture.
@@ -60,6 +62,7 @@ GROUPS = {
     "borders_fills": ("borders", "fills"),
     "text_steps": ("text_steps",),
     "text_style": ("text_style",),
+    "shrink_fonts": ("shrink_fonts",),
 }
 PURPOSES = {
     "cells": "sheetpeek capture group cells: the text Excel shows in merged cells and for "
@@ -68,6 +71,9 @@ PURPOSES = {
     "line style and each pattern fill at zoom 100 and 200 (suites borders and fills)",
     "text_steps": "sheetpeek capture group text_steps: window pictures of indents under seven "
     "Normal fonts and of shrink to fit by single characters, at zoom 100 (suite text_steps)",
+    "shrink_fonts": "sheetpeek capture group shrink_fonts: window pictures of shrink to fit "
+    "under cell fonts the group text_steps does not hold, at zoom 100 (text_steps' group "
+    "shrink_fonts)",
     "text_style": "sheetpeek capture group text_style: window pictures of alignment, shrink to "
     "fit, underlines and font effects, wrapping and distributed text, at zoom 100 and 200 "
     "(suite text_style)",
@@ -116,9 +122,9 @@ def _text_style_window(group: str) -> Window:
     )
 
 
-def _text_steps_window(group: str) -> Window:
+def _text_steps_window(group: str, suite: str = "text_steps") -> Window:
     return Window(
-        "text_steps",
+        suite,
         lambda ws: text_steps.fill(ws, group),
         tuple(text_steps.references(group)),
         text_steps.MARKERS[group],
@@ -153,7 +159,10 @@ WINDOWS_OF = {
             next(c for p, s, c in fills.cases() if p == "none" and s == "bw"),
         ),
     ),
-    "text_steps": tuple(_text_steps_window(group) for group in text_steps.GROUPS),
+    "text_steps": tuple(
+        _text_steps_window(group) for group in text_steps.GROUPS if group != "shrink_fonts"
+    ),
+    "shrink_fonts": (_text_steps_window("shrink_fonts", "shrink_fonts"),),
     "text_style": tuple(_text_style_window(group) for group in text_style.GROUPS),
 }
 DISPLAYED = {

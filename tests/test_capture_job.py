@@ -246,7 +246,9 @@ def test_a_text_steps_job_has_a_window_a_group_and_reads_into_one_file(tmp_path)
     second = job.write("text_steps", "sheetpeek-test-ts", tmp_path / "b")
     doc = json.loads((first / "job.json").read_text(encoding="utf-8"))
     names = [wb["file"] for wb in doc["workbooks"]]
-    assert names == [f"text_steps_{group}.xlsx" for group in text_steps.GROUPS]
+    # shrink_fonts, added later, is a job of its own, so that this one is written as it ran
+    groups = [g for g in text_steps.GROUPS if g != "shrink_fonts"]
+    assert names == [f"text_steps_{group}.xlsx" for group in groups]
     for name in ["job.json", *(f"files/{n}" for n in names)]:
         assert _sha(first / name) == _sha(second / name), name
     # a hand-built result: pictures with markers and gridlines only, so no case has ink
@@ -288,3 +290,17 @@ def test_displayed_fonts_and_alignments_keep_the_macs_keys():
     assert rows[("A1", "display.underline")] == "-4142"
     assert rows[("A1", "display.h_align")] == "1"
     assert rows[("A1", "display.v_align")] == "-4107"
+
+
+def test_the_shrink_fonts_job_reads_into_a_file_of_its_own(tmp_path):
+    from capture import text_steps
+
+    first = job.write("shrink_fonts", "sheetpeek-test-sf", tmp_path / "a")
+    doc = json.loads((first / "job.json").read_text(encoding="utf-8"))
+    assert [wb["file"] for wb in doc["workbooks"]] == ["text_steps_shrink_fonts.xlsx"]
+    result = _screen_result(tmp_path / "result", first, group="shrink_fonts", rows_n=16)
+    (path,) = job.read("shrink_fonts", first, result, tmp_path / "windows")
+    assert path.name == "shrink_fonts.tsv"
+    lines = path.read_text(encoding="utf-8").splitlines()
+    columns = next(x for x in lines if not x.startswith("# "))
+    assert columns.split("\t") == list(text_steps.COLUMNS)

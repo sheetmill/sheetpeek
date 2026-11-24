@@ -25,6 +25,10 @@ appearance as the other suites; its Normal font is the group's.
   times with shrink to fit, left aligned, in the default columns C (4 to 19), E (20 to 35) and G
   (36 to 51), rows 4 to 19; unshrunk "H" repeated 10 (I4) and 20 times (I5) in a column of 60
   characters: each length's ink width against the unshrunk advance, so the size it is drawn at.
+- ``shrink_fonts``, Calibri 11. Cell fonts none of the groups above holds (``FONTS``: Calibri 14
+  and 20, Arial 11, Aptos Narrow 12 and 16), a column each: "H" repeated 4 to 10 times with
+  shrink to fit in default columns (C to G) and 11 to 14 times in columns of 12 characters (H to
+  L), rows 4 on; each font's unshrunk 10 and 20 "H"s in N (60 characters), two rows a font.
 
 Geometry is read for one cell a column (row 1) and one a row (column A). ``read`` writes
 ``tests/captures/text_steps.tsv``: one row per case, measured as ``text_style`` measures (its
@@ -60,6 +64,7 @@ FACES = {
     "shrink": ("Calibri", 11),
     "shrink_calibri16": ("Calibri", 16),
     "shrink_aptos_narrow11": ("Aptos Narrow", 11),
+    "shrink_fonts": ("Calibri", 11),
 }
 """Each group's Normal font."""
 GROUPS = tuple(FACES)
@@ -67,7 +72,7 @@ MARKERS = {
     group: (
         "B2",
         "O3"
-        if group == "indent_calibri11"
+        if group in ("indent_calibri11", "shrink_fonts")
         else "I3"
         if group == "shrink"
         else "K3"
@@ -86,6 +91,25 @@ LENGTHS = range(4, 31)
 SHRUNK_COLUMNS = (("C", range(4, 20)), ("E", range(20, 36)), ("G", range(36, 52)))
 """``shrink_<face>``: the default columns holding "H" repeated 4 to 51 times, 16 lengths each."""
 REFERENCES = {"I4": 10, "I5": 20}
+FONTS = (
+    ("Calibri", 14),
+    ("Calibri", 20),
+    ("Arial", 11),
+    ("Aptos Narrow", 12),
+    ("Aptos Narrow", 16),
+)
+"""``shrink_fonts``: the cell fonts, under a Calibri 11 Normal font, none of them the Normal font of
+another shrink group."""
+FONT_COLUMNS = (
+    (("C", "D", "E", "F", "G"), None, range(4, 11)),
+    (("H", "I", "J", "K", "L"), 12, range(11, 15)),
+)
+"""``shrink_fonts``: a column a font, default ones holding "H" repeated 4 to 10 times and ones of
+12 characters 11 to 14 times, rows 4 on: lengths that cross the 6 px level Excel for Windows never
+draws, in two widths."""
+FONT_REFERENCES = "N"
+"""``shrink_fonts``: the column of 60 characters holding each font's unshrunk 10 and 20 "H"s, two
+rows a font from row 4."""
 """``shrink_<face>``: unshrunk "H" repeated 10 and 20 times in a column of 60 characters: their
 ink widths give the face's "H" advance and side bearings, so each shrunk length's drawn size."""
 LADDER = tuple(1 + k / 2 for k in range(21))
@@ -162,11 +186,42 @@ def _shrink_face(ws: Any, group: str) -> list[Case]:
     return found
 
 
+def _shrink_fonts(ws: Any) -> list[Case]:
+    found = []
+    for columns, width, lengths in FONT_COLUMNS:
+        for column, (face, size) in zip(columns, FONTS, strict=True):
+            if width is not None:
+                ws.column_dimensions[column].width = width
+            for row, length in enumerate(lengths, 4):
+                cell = ws[f"{column}{row}"]
+                cell.value = "H" * length
+                cell.font = Font(name=face, size=size)
+                cell.alignment = Alignment(horizontal="left", shrink_to_fit=True)
+                found.append(
+                    Case(
+                        "shrink_fonts", f"{face} {size} shrunk {length}", cell.coordinate, ("ink",)
+                    )
+                )
+    ws.column_dimensions[FONT_REFERENCES].width = 60
+    for k, (face, size) in enumerate(FONTS):
+        for row, length in zip((4 + 2 * k, 5 + 2 * k), (10, 20), strict=True):
+            cell = ws[f"{FONT_REFERENCES}{row}"]
+            cell.value = "H" * length
+            cell.font = Font(name=face, size=size)
+            cell.alignment = Alignment(horizontal="left")
+            found.append(
+                Case("shrink_fonts", f"{face} {size} reference {length}", cell.coordinate, ("ink",))
+            )
+    return found
+
+
 def fill(ws: Any, group: str) -> list[Case]:
     """Lay one group out on the first worksheet of its own workbook; its cases."""
     _normal(ws, group)
     if group == "shrink":
         return _shrink(ws)
+    if group == "shrink_fonts":
+        return _shrink_fonts(ws)
     if group.startswith("shrink_"):
         return _shrink_face(ws, group)
     return _indent(ws, group)
