@@ -134,21 +134,21 @@ def _geometry_grid(rows, columns, text=""):
     }
 
 
-def _picture(path, window, zoom, gray):
+def _picture(path, window, zoom, gray, rows_n=24):
     """A Windows window at 96 dpi: white, gridlines on every cell's bottom and right edge, the
     two markers filled magenta; nothing else drawn."""
     from capture.screen import png
     from openpyxl.utils.cell import column_index_from_string, coordinate_from_string
 
     scale = 96 / 72 * zoom / 100
-    width, height = round(15 * COLUMN_PT * scale), round(24 * ROW_PT * scale)
+    width, height = round(15 * COLUMN_PT * scale), round(rows_n * ROW_PT * scale)
     template = bytearray(b"\xff" * (3 * width))
     for c in range(1, 16):
         x = round(c * COLUMN_PT * scale)
         if x < width:
             template[3 * x : 3 * x + 3] = bytes(gray)
     rows = [bytearray(template) for _ in range(height)]
-    for r in range(1, 25):
+    for r in range(1, rows_n + 1):
         y = round(r * ROW_PT * scale)
         if y < height:
             rows[y] = bytearray(bytes(gray) * width)
@@ -163,25 +163,26 @@ def _picture(path, window, zoom, gray):
     png.write_crop(image, (0, 0, width, height), path)
 
 
-def _screen_result(folder, job_folder, gray=(224, 224, 224)):
+def _screen_result(folder, job_folder, gray=(224, 224, 224), group="borders_fills", rows_n=24):
     (folder / "artifacts").mkdir(parents=True)
     books = []
-    for window in job.WINDOWS_OF["borders_fills"]:
+    for window in job.WINDOWS_OF[group]:
         white = {"interior.color": 16777215.0, "interior.pattern": -4142}
         steps = [
             {"op": "open", "status": "ok"},
-            {"op": "read", "id": "geometry", "status": "ok", "result": _geometry_grid(24, 15)},
+            {"op": "read", "id": "geometry", "status": "ok",
+             "result": _geometry_grid(rows_n, 15)},
             {"op": "read_format", "id": "display", "status": "ok",
-             "result": {"cells": [[white] * 15 for _ in range(24)]}},
+             "result": {"cells": [[white] * 15 for _ in range(rows_n)]}},
         ]  # fmt: skip
         for zoom in window.zooms:
-            name = f"{window.suite}_z{zoom}.png"
-            _picture(folder / "artifacts" / name, window, zoom, gray)
+            name = f"{window.stem}_z{zoom}.png"
+            _picture(folder / "artifacts" / name, window, zoom, gray, rows_n)
             steps.append({"op": "view", "id": f"view_z{zoom}", "status": "ok",
                           "result": {"zoom": float(zoom)}})  # fmt: skip
             steps.append({"op": "capture_window", "id": f"shot_z{zoom}", "status": "ok",
                           "result": {"artifact": name, "dpi": 96}})  # fmt: skip
-        books.append({"file": f"{window.suite}.xlsx", "status": "ok", "steps": steps})
+        books.append({"file": f"{window.stem}.xlsx", "status": "ok", "steps": steps})
     inputs = {wb["file"]: {"sha256": _sha(job_folder / "files" / wb["file"])} for wb in books}
     header = {
         "manifest_sha256": _sha(job_folder / "job.json"),
@@ -236,3 +237,24 @@ def test_display_reads_keep_the_macs_form():
     assert rows[("A1", "display.pattern")] == "-4125"
     assert rows[("A1", "geometry.width")] == repr(COLUMN_PT)
     assert rows[("A1", "geometry.text")] == "x"
+
+
+def test_a_text_steps_job_has_a_window_a_group_and_reads_into_one_file(tmp_path):
+    from capture import text_steps
+
+    first = job.write("text_steps", "sheetpeek-test-ts", tmp_path / "a")
+    second = job.write("text_steps", "sheetpeek-test-ts", tmp_path / "b")
+    doc = json.loads((first / "job.json").read_text(encoding="utf-8"))
+    names = [wb["file"] for wb in doc["workbooks"]]
+    assert names == [f"text_steps_{group}.xlsx" for group in text_steps.GROUPS]
+    for name in ["job.json", *(f"files/{n}" for n in names)]:
+        assert _sha(first / name) == _sha(second / name), name
+    # a hand-built result: pictures with markers and gridlines only, so no case has ink
+    result = _screen_result(tmp_path / "result", first, group="text_steps", rows_n=32)
+    (path,) = job.read("text_steps", first, result, tmp_path / "windows")
+    lines = path.read_text(encoding="utf-8").splitlines()
+    assert path.name == "text_steps.tsv"
+    assert "# gridline: E0E0E0 (measured: D1's bottom edge)" in lines
+    assert "# zooms: 100" in lines
+    columns = next(x for x in lines if not x.startswith("# "))
+    assert columns.split("\t") == list(text_steps.COLUMNS)

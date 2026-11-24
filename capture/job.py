@@ -27,6 +27,9 @@ Groups:
   a grid from the two markers at the picture's device pixels a point. The gridline's gray is
   measured in each picture (``capture.screen.run.gridline_gray``, on the control cell) and
   written in the file's header, so that what needs it uses the gray the picture shows.
+- ``text_steps``: the suite ``text_steps``, a workbook a group (``text_steps_<group>.xlsx``, each
+  under the group's Normal font), captured at zoom 100 as ``borders_fills``' windows are and
+  measured with the suite's own code into one file; the gray is measured on D1 in each picture.
 """
 
 from __future__ import annotations
@@ -43,18 +46,24 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from capture import borders, cell_text, fills
+from capture import borders, cell_text, fills, text_steps
 
 ROOT = Path(__file__).resolve().parents[1]
 WINDOWS = ROOT / "tests" / "captures" / "windows"
 FIXED_TIME = "2026-01-01T00:00:00Z"
 ZIP_TIME = (1980, 1, 1, 0, 0, 0)
-GROUPS = {"cells": ("merge_width", "error_width"), "borders_fills": ("borders", "fills")}
+GROUPS = {
+    "cells": ("merge_width", "error_width"),
+    "borders_fills": ("borders", "fills"),
+    "text_steps": ("text_steps",),
+}
 PURPOSES = {
     "cells": "sheetpeek capture group cells: the text Excel shows in merged cells and for "
     "error values at set column widths (suites merge_width and error_width)",
     "borders_fills": "sheetpeek capture group borders_fills: window pictures of each border "
     "line style and each pattern fill at zoom 100 and 200 (suites borders and fills)",
+    "text_steps": "sheetpeek capture group text_steps: window pictures of indents under seven "
+    "Normal fonts and of shrink to fit by single characters, at zoom 100 (suite text_steps)",
 }
 PARK = "AZ300"
 """The active cell while a window is captured: off every picture."""
@@ -74,6 +83,27 @@ class Window:
     columns: tuple[str, ...]
     control: str
     """An unstyled cell above an unstyled one, whose bottom gridline gives the gray."""
+    name: str = ""
+    """The workbook's and its pictures' stem, by default the suite's: a suite of several windows
+    names each."""
+
+    @property
+    def stem(self) -> str:
+        return self.name or self.suite
+
+
+def _text_steps_window(group: str) -> Window:
+    return Window(
+        "text_steps",
+        lambda ws: text_steps.fill(ws, group),
+        tuple(text_steps.references(group)),
+        text_steps.MARKERS[group],
+        (100,),
+        lambda cap: text_steps.group_records(cap, group),
+        text_steps.COLUMNS,
+        "D1",
+        f"text_steps_{group}",
+    )
 
 
 WINDOWS_OF = {
@@ -99,6 +129,7 @@ WINDOWS_OF = {
             next(c for p, s, c in fills.cases() if p == "none" and s == "bw"),
         ),
     ),
+    "text_steps": tuple(_text_steps_window(group) for group in text_steps.GROUPS),
 }
 
 
@@ -149,7 +180,7 @@ def _window_workbook(window: Window, files: Path) -> dict[str, Any]:
 
     from capture.screen.window import MARKER
 
-    name = f"{window.suite}.xlsx"
+    name = f"{window.stem}.xlsx"
     with tempfile.TemporaryDirectory() as tmp:
         raw = Path(tmp) / name
         wb = Workbook()
@@ -172,7 +203,7 @@ def _window_workbook(window: Window, files: Path) -> dict[str, Any]:
         steps.append({**park, "id": f"view_z{zoom}", "zoom": zoom, "scroll_row": 1,
                       "scroll_column": 1})  # fmt: skip
         steps.append({"op": "capture_window", "id": f"shot_z{zoom}",
-                      "name": f"{window.suite}_z{zoom}.png"})  # fmt: skip
+                      "name": f"{window.stem}_z{zoom}.png"})  # fmt: skip
     steps.append({"op": "close", "save": False})
     return {"file": name, "steps": steps}
 
@@ -301,23 +332,32 @@ def _read_windows(
     folder: Path,
 ) -> list[Path]:
     by_file = {wb["file"]: wb for wb in outcome["workbooks"]}
-    written = []
+    suites: dict[str, list[Window]] = {}
     for window in WINDOWS_OF[group]:
-        steps = _results(by_file[f"{window.suite}.xlsx"])
-        captures = window_captures(window, steps, result / "artifacts")
-        grays = {"".join(f"{c:02X}" for c in cap.gridline) for cap in captures}
+        suites.setdefault(window.suite, []).append(window)
+    written = []
+    for suite, windows in suites.items():
+        records: list[dict[str, str]] = []
+        grays, zooms = set(), {}
+        for window in windows:
+            steps = _results(by_file[f"{window.stem}.xlsx"])
+            for cap in window_captures(window, steps, result / "artifacts"):
+                grays.add("".join(f"{c:02X}" for c in cap.gridline))
+                records += window.measure(cap)
+            zooms.update(dict.fromkeys(window.zooms))
         if len(grays) != 1:
-            raise ValueError(f"{window.suite}: the zooms show different gridline grays {grays}")
+            raise ValueError(f"{suite}: the pictures show different gridline grays {grays}")
         _, lines = _job_lines(group, outcome, manifest_doc, "capture_window (capture job)")
-        records = [record for cap in captures for record in window.measure(cap)]
-        path = folder / f"{window.suite}.tsv"
+        controls = ", ".join(dict.fromkeys(w.control for w in windows))
+        columns = windows[0].columns
+        path = folder / f"{suite}.tsv"
         with path.open("w", encoding="utf-8", newline="\n") as out:
             out.write("\n".join(lines) + "\n")
-            out.write(f"# zooms: {','.join(str(z) for z in window.zooms)}\n")
-            out.write(f"# gridline: {grays.pop()} (measured: {window.control}'s bottom edge)\n")
-            out.write(f"# suite: {window.suite}\n" + "\t".join(window.columns) + "\n")
+            out.write(f"# zooms: {','.join(str(z) for z in zooms)}\n")
+            out.write(f"# gridline: {grays.pop()} (measured: {controls}'s bottom edge)\n")
+            out.write(f"# suite: {suite}\n" + "\t".join(columns) + "\n")
             for record in records:
-                out.write("\t".join(record.get(c, "") for c in window.columns) + "\n")
+                out.write("\t".join(record.get(c, "") for c in columns) + "\n")
         written.append(path)
     return written
 

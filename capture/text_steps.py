@@ -253,6 +253,30 @@ def measure(cap: Any, case: Case) -> dict[str, str] | None:
     return text_style.measure(cap, case)
 
 
+def group_records(cap: Any, group: str) -> list[dict[str, str]]:
+    """Every case of ``group`` measured in one capture of its window, in ``COLUMNS``' keys."""
+    ws = openpyxl.Workbook().active
+    records = []
+    for case in fill(ws, group):
+        measured = measure(cap, case)
+        if measured is None:
+            continue
+        row = coordinate_from_string(case.cell)[1]
+        records.append(
+            {
+                "group": case.group,
+                "name": case.name,
+                "zoom": str(cap.zoom),
+                "cell": case.cell,
+                "row_height": cap.value(f"A{row}", "geometry.height") or "",
+                "cell_width": f"{cap.geometry[case.cell]['width']:g}",
+                **_described(case, ws),
+                **measured,
+            }
+        )
+    return records
+
+
 def write() -> None:
     """Measure the saved captures again (no Excel) and write ``text_steps.tsv``."""
     from capture.screen.run import header, load
@@ -265,26 +289,8 @@ def write() -> None:
             print(f"{group}: not captured yet, left out", file=sys.stderr)
             continue
         first = first or header(out)
-        ws = openpyxl.Workbook().active
-        found = fill(ws, group)
         for cap in load(out):
-            for case in found:
-                measured = measure(cap, case)
-                if measured is None:
-                    continue
-                row = coordinate_from_string(case.cell)[1]
-                records.append(
-                    {
-                        "group": case.group,
-                        "name": case.name,
-                        "zoom": str(cap.zoom),
-                        "cell": case.cell,
-                        "row_height": cap.value(f"A{row}", "geometry.height") or "",
-                        "cell_width": f"{cap.geometry[case.cell]['width']:g}",
-                        **_described(case, ws),
-                        **measured,
-                    }
-                )
+            records += group_records(cap, group)
     with open(OUTPUT, "w", encoding="utf-8") as out:
         for key, value in first.items():
             if key not in ("markers", "suite", "workbooks_open_after", "zooms"):
