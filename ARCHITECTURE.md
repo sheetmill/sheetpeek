@@ -1056,7 +1056,11 @@ xlformat has no rules, keep Calibri 11's offsets scaled with the size, 1 pt thic
   and a Times New Roman 10 or 16 Normal font too, with Excel's standard font Aptos Narrow 12; its
   row fits the larger of Calibri 12's 16 pt and the Normal font's row. Whether the 12 is fixed or
   Excel's standard size (12 here) is not told apart; runs spread over several sheets and runs in
-  `sharedStrings.xml` are unverified. Not modeled yet.
+  `sharedStrings.xml` are unverified. Not modeled yet. Excel for Windows (`windows/font_cut`)
+  draws a cut cell in an 11-point face that is neither Calibri 11 nor Aptos Narrow 11 (its
+  standard font), black for a list font and in a run's own color, its row the larger of 15 pt and
+  the Normal font's; it cuts at entry 1,000 under a Calibri 11 Normal font and at 999 under a
+  Times New Roman one (unexplained).
 - **A line past its row** (center or top aligned, or a font too large for its row): Excel for Mac
   draws nothing past the row in 62 of 63 cases (`rules_below`: underlines at 11 to 36 pt in rows
   of 12, 15 and 20 pt), and sheetpeek clips every line at the row. The one exception, a double

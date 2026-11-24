@@ -481,3 +481,31 @@ def test_windows_line_budget_against_sheetpeek():
     )
     assert len(found) == 136
     assert wrong == known
+
+
+# --- font_cut: Excel for Windows' font table cut
+
+
+@pytest.mark.excel
+def test_windows_cuts_the_font_table_where_captured():
+    # Excel for Windows draws a probe past its font table's cut in an 11-point face, black for a
+    # list font and in its own color for a rich-text run, its row the larger of 15 pt and the
+    # Normal font's. Unexplained, listed: the cut is at entry 1,000 under a Calibri 11 Normal font
+    # (groups list and rich) and at 999 under a Times New Roman Normal font (the theme groups);
+    # and the face is neither Calibri 11 nor Aptos Narrow 11 (its glyphs start at 2.25, 9.75 and
+    # 13.5 pt where Calibri 11's start at 3, 9 and 13.5, and its "H" on the inset, where both
+    # faces' start a pixel inside it).
+    _, body = _table("font_cut.tsv")
+    first_cut = {"list": 1000, "rich": 1000, "theme_10": 999, "theme_16": 999}
+    assert len(body) == 50
+    for r in body:
+        cut = int(r["entry"]) >= first_cut[r["group"]]
+        normal_row = 20.25 if r["group"] == "theme_16" else 15.0
+        assert float(r["row_height"]) == (normal_row if cut else 30.0), r
+        if cut:
+            glyphs = "2.25 9 13.5" if r["group"] == "rich" else "2.25 9.75 13.5"
+            assert r["glyphs"] == glyphs, r
+            if r["group"] == "rich":
+                assert int(r["dark"]) == 0, r  # its own red
+            else:
+                assert int(r["dark"]) > int(r["red"]), r  # black, ClearType fringes aside
