@@ -1,0 +1,70 @@
+{
+ "schema": 1,
+ "job_id": "sheetpeek-20261123-201755-font-aptos",
+ "package": "sheetpeek",
+ "purpose": "sheetpeek capture group font_aptos: window pictures of cells past the font table's cut beside reference cells, under an Aptos Narrow theme and Normal font, at zoom 100 (font_cut's group faces_aptos)",
+ "limits": {
+  "job_seconds": 1800,
+  "step_seconds": 600
+ },
+ "audit": false,
+ "workbooks": [
+  {
+   "file": "font_cut_faces_aptos.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "view",
+     "sheet": "Sheet",
+     "select": "Sheet!AZ300",
+     "zoom": 100,
+     "scroll_row": 1,
+     "scroll_column": 1
+    },
+    {
+     "op": "read",
+     "id": "geometry",
+     "range": "Sheet!A1:E14",
+     "props": [
+      "left",
+      "top",
+      "width",
+      "height",
+      "text"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "display",
+     "range": "Sheet!A1:E14",
+     "props": [
+      "font.name",
+      "font.size",
+      "font.color"
+     ],
+     "display": true
+    },
+    {
+     "op": "view",
+     "sheet": "Sheet",
+     "select": "Sheet!AZ300",
+     "id": "view_z100",
+     "zoom": 100,
+     "scroll_row": 1,
+     "scroll_column": 1
+    },
+    {
+     "op": "capture_window",
+     "id": "shot_z100",
+     "name": "font_cut_faces_aptos_z100.png"
+    },
+    {
+     "op": "close",
+     "save": false
+    }
+   ]
+  }
+ ]
+}

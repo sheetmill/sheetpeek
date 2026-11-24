@@ -536,3 +536,27 @@ def test_windows_draws_a_cut_cell_in_aptos_narrow_11():
                 assert matches == {"Aptos Narrow"}, r
             else:
                 assert float(r["row_height"]) == 30.0, r
+
+
+@pytest.mark.excel
+def test_windows_cuts_at_1000_under_its_theme_body_font():
+    # font_aptos: under a theme of Aptos Narrow body text and an Aptos Narrow 11 Normal font, the
+    # cut is at entry 1,000 (not 999), the cut probes in Aptos Narrow 11: the extra entry comes
+    # with a Normal font other than the theme's body font, not with one other than Calibri.
+    _, body = _table("font_aptos.tsv")
+    assert len(body) == 11
+    refs = {r["font_name"]: r for r in body if int(r["entry"]) <= 5}
+    for r in body:
+        entry = int(r["entry"])
+        if entry <= 5:
+            continue
+        if entry >= 1000:
+            aptos = refs["Aptos Narrow"]
+            assert (r["glyphs"], r["red"], r["dark"]) == (
+                aptos["glyphs"],
+                aptos["red"],
+                aptos["dark"],
+            )
+            assert float(r["row_height"]) == 15.0, r
+        else:
+            assert float(r["row_height"]) == 30.0, r

@@ -289,6 +289,7 @@ result's header whole as one line (`job_header`); the job's manifest lies beside
 |---|---|---|
 | `windows/cells` | | the job of the group `cells`: `capture/cell_text.py`'s workbook opened, and each cell's displayed text read (`read` of `text`) |
 | `windows/font_cut` | 50 | as the Mac's `font_cut`, all four groups, by the job of the same name (themes rewritten before the copy, the displayed font and its color read; a rich-text cell's font, which Windows returns as nothing, an empty field) |
+| `windows/font_aptos` | 11 | `font_cut`'s group `faces_aptos` by the job `font_aptos`: the references and probes of `windows/font_faces` under a theme of Aptos Narrow body and Aptos Display heading fonts with an Aptos Narrow 11 Normal font |
 | `windows/font_faces` | 22 | `font_cut`'s groups `faces_calibri` and `faces_times` by the job `font_faces`: "Hxg" in Arial, Aptos Narrow, Segoe UI, Tahoma and Calibri 11 at font-list entries 1 to 5 beside Arial 24 probes at entries 997 to 1,002, under a Calibri 11 or Times New Roman 10 Normal font and openpyxl's theme |
 | `windows/line_budget` | 136 | `text_style`' group `line_budget` alone, captured at zoom 100 by the job of the same name: two words the cell less 6, 5 and 4 px; an "i"'s dots on Windows are a line band of their own (1 or 2 px), left out when lines are counted |
 | `windows/merge_width` | 150 | as the Mac's `merge_width`: numbers alone and merged across two to four columns, one hidden, at six widths |

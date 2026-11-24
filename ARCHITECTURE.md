@@ -1064,9 +1064,11 @@ xlformat has no rules, keep Calibri 11's offsets scaled with the size, 1 pt thic
   draws a cut cell in Aptos Narrow 11, its standard font (`windows/font_faces`: glyphs and ink equal
   to an Aptos Narrow 11 reference's, and to no Arial, Segoe UI, Tahoma or Calibri 11 one), black for
   a list font and in a run's own color, its row the larger of 15 pt and the Normal font's; it cuts
-  at entry 1,000 under a Calibri 11 Normal font and at 999 under a Times New Roman one, under
-  openpyxl's theme or another (unexplained: a Normal font other than the theme's body font, or
-  other than Calibri, fits every capture; the two part under an Aptos Narrow theme and Normal font).
+  at entry 1,000, and at 999 when the Normal font is not the theme's body font (`windows/font_cut`,
+  `font_faces`, `font_aptos`: 1,000 under Calibri 11 and a Calibri theme and under Aptos Narrow 11
+  and an Aptos Narrow theme, 999 under Times New Roman under either theme; whether "the theme's
+  body font" is the Normal font's `scheme` or its name is not told apart, as they coincide in every
+  capture).
   The two platforms differ (observed at Excel's default settings): Excel for Windows draws a cut
   cell in its standard font, Aptos Narrow 11, and Excel for Mac in Calibri 12, not its standard
   font, Aptos Narrow 12. sheetpeek keeps the cell's own font on Windows and reports
