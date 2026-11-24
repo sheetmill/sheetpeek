@@ -632,7 +632,9 @@ spaces of the Normal font**, for left and right alignment alike, whatever the ce
 6 pt under Calibri 9 and 11 and Aptos Narrow 11 and 12, 9 pt under Calibri 12, 12 pt under Calibri 16,
 15 pt under Calibri 24, and 6 pt for Calibri 16 and Aptos Narrow 12 cells under a Calibri 11 Normal
 font (indents 0 to 5, every step exact). At Calibri 11 that is one digit's width. Indented text
-spills as usual. The `characters` layout uses one character per level.
+spills as usual. The `characters` layout uses one character per level. On Excel for Windows the
+rule is the same in device pixels, three spaces of the Normal font at 96 dpi (`windows/text_steps`:
+all 108 steps within a pixel of sheetpeek's with `platform="windows"`; 9 px a level at Calibri 11).
 
 ### 4.7 Wrapped text and row heights
 
@@ -735,7 +737,8 @@ the screen: the text insets and the baselines of angled text, which come from pr
 From Excel for Windows (Excel 16.0.20527.20196, Microsoft 365, 96 dpi, en-US), read from capture
 jobs (`capture/job.py`, `CAPTURING.md`): `windows/merge_width` and `windows/error_width`, every
 cell as sheetpeek shows it with `platform="windows"` (§3.2): merged widths, `#` runs and General
-in whole pixels. The lines and tiles of `windows/borders` and `windows/fills`: §4.12.
+in whole pixels. The lines and tiles of `windows/borders` and `windows/fills`: §4.12; the indents and shrink
+levels of `windows/text_steps`: §4.6, §4.13.
 ### 4.10 Hyperlinks
 
 The look and where a link goes are captured (`links`, Excel 16.115, zoom 100; the places through
@@ -1056,7 +1059,11 @@ in wider columns are unverified. When even the smallest level does not fit, the 
 `####`**: a value whose format overflows shows its full text, shrunk (`RenderedCell.text` is that
 text). **Wrap overrides it**, as do horizontal and vertical justify and distributed, which wrap: the
 text keeps its size and breaks where wrap alone breaks it (captured, `text_style` group `wrap`: 28
-pairs of cases, identical). **Shrunk text never spills**, in every mode. **Rows fit the unshrunk
+pairs of cases, identical). On Excel for Windows the levels are whole device pixels where the
+Mac's are whole points: every one below the unshrunk advance except 6, down to 2 (`windows/text_steps`,
+the three shrink groups: Calibri 11's "H" 9 px takes 8, 7, 5, 4, 3 and 2; a text that does not fit
+at 2 px is clipped). sheetpeek still draws Windows' shrink at whole-point levels, a known
+deviation (99 of 123 lengths). **Shrunk text never spills**, in every mode. **Rows fit the unshrunk
 size** (captured at 20 pt). A merge with the flag on its anchor is not shrunk, clipped at the
 merge's edge (captured once, doubtful). Bottom-aligned shrunk text sits on its row's shared
 baseline, top and centered text where its drawn size's metrics put it (§3.6; `text_style_more`,

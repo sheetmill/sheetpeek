@@ -291,3 +291,4 @@ result's header whole as one line (`job_header`); the job's manifest lies beside
 | `windows/borders_fills` | | the job of the group `borders_fills`: the windows of `borders` and `fills`, each opened, its cells' geometry and displayed fill read, and Excel's window captured at zoom 100 and 200 (`capture_window`) |
 | `windows/borders` | 176 | as the Mac's `borders`, measured on the job's pictures at their device pixels a point; the header's `gridline` is the gray measured on the control cell |
 | `windows/fills` | 82 | as the Mac's `fills`; tiles in device pixels (`tile_unit` `device_px`), `display_pattern` Windows' `XlPattern` number |
+| `windows/text_steps` | 256 | as the Mac's `text_steps`: a workbook a group under its Normal font, captured at zoom 100 by the job of the same name; the gray measured on D1 |
