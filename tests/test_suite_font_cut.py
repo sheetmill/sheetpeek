@@ -107,3 +107,28 @@ def test_the_theme_groups_rewrite_the_theme_and_set_the_normal_font(built):
         assert f'<sz val="{size}"' in first
         fonts = re.search(r"<fonts[^>]*>(.*?)</fonts>", styles, re.S).group(1)
         assert len(re.findall(r"<font[ >]", fonts)) == suite.THEME_FIRST + suite.THEME_PROBES
+
+
+@pytest.mark.excel
+def test_excel_for_mac_draws_a_cut_cell_in_calibri_12_whatever_the_theme_and_normal_font():
+    # Captured, Excel 16.115 for Mac (standard font Aptos Narrow 12): under a theme of Arial body
+    # and Aptos Narrow heading fonts and a Times New Roman 10 or 16 Normal font, a cut probe's
+    # glyphs start where Calibri 12's advances put them (7 and 5.5 points apart, as under Calibri
+    # 11 and a Calibri theme), not Arial's (9, 6) or Aptos Narrow's (8, 5); the row fits the
+    # larger of Calibri 12's 16 pt and the Normal font's row.
+    if not suite.OUTPUT.exists():
+        pytest.skip("not captured yet")
+    lines = suite.OUTPUT.read_text(encoding="utf-8").split("\n")
+    assert "# standard_font: Aptos Narrow 12.0" in lines
+    rows = [line.split("\t") for line in lines if line and not line.startswith("#")]
+    records = [dict(zip(rows[0], row, strict=True)) for row in rows[1:]]
+    cut = [r for r in records if int(r["entry"]) >= 1000]
+    assert {r["glyphs"] for r in cut} == {"3 10 15.5"}
+    themed = [r for r in records if r["group"] in suite.NORMALS]
+    assert len(themed) == 2 * suite.THEME_PROBES
+    for r in themed:
+        if int(r["entry"]) >= 1000:
+            assert float(r["row_height"]) == {"theme_10": 16.0, "theme_16": 20.0}[r["group"]]
+            assert (int(r["red"]), int(r["dark"])) == (0, 235)
+        else:
+            assert float(r["row_height"]) == 30.0

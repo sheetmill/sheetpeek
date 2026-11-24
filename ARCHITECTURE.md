@@ -1050,11 +1050,13 @@ xlformat has no rules, keep Calibri 11's offsets scaled with the size, 1 pt thic
   `text_style_more` group `rules`, rows fixed at 15, 20 and 30 pt).
 - **The font table's cut** (captured, `font_cut`, Excel 16.115 for Mac): Excel keeps one font table
   per workbook, `styles.xml`'s font list and then each rich-text run's inline font in cell order;
-  a cell or run at entry 1,000 or later is drawn and measured in Calibri 12 under a Calibri 11 Normal
-  font (its row fitted at 16 pt), a list font in black and a run in its own color, while Excel's
-  object model reports the cell's own font. Not modeled yet. Which font a cut cell takes beyond this
-  workbook (the theme's body font at Excel's standard size is one reading), runs spread over several
-  sheets and runs in `sharedStrings.xml` are unverified.
+  a cell or run at entry 1,000 or later is drawn and measured in Calibri 12, a list font in black
+  and a run in its own color, while Excel's object model reports the cell's own font. Calibri 12
+  whatever the theme and the Normal font: under a theme of Arial body and Aptos Narrow heading fonts
+  and a Times New Roman 10 or 16 Normal font too, with Excel's standard font Aptos Narrow 12; its
+  row fits the larger of Calibri 12's 16 pt and the Normal font's row. Whether the 12 is fixed or
+  Excel's standard size (12 here) is not told apart; runs spread over several sheets and runs in
+  `sharedStrings.xml` are unverified. Not modeled yet.
 - **A line past its row** (center or top aligned, or a font too large for its row): Excel for Mac
   draws nothing past the row in 62 of 63 cases (`rules_below`: underlines at 11 to 36 pt in rows
   of 12, 15 and 20 pt), and sheetpeek clips every line at the row. The one exception, a double

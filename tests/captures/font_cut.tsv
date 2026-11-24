@@ -10,6 +10,7 @@
 # display_scale: 2.000
 # colors: captures converted to sRGB (sips --matchTo sRGB Profile.icc)
 # platform: mac
+# standard_font: Aptos Narrow 12.0
 # suite: font_cut
 group	entry	cell	row_height	font_name	font_size	font_color	ink_top	ink_bottom	red	dark	glyphs
 list	990	C4	30.0	Arial	24	255,0,0	7.5	30	1144	0	6 21 33.5
@@ -42,3 +43,23 @@ rich	1001	C10	16.0	missing value	0	4,0,2	5	15	242	0	3 10 15.5
 rich	1002	C11	16.0	missing value	0	4,0,2	5	15	242	0	3 10 15.5
 rich	1003	C12	16.0	missing value	0	4,0,2	5	15	242	0	3 10 15.5
 rich	1004	C13	16.0	missing value	0	4,0,2	5	15	242	0	3 10 15.5
+theme_10	995	C4	30.0	Arial	24	255,0,0	7.5	30	1144	0	6 21 33.5
+theme_10	996	C5	30.0	Arial	24	254,0,0	7.5	30	1144	0	6 21 33.5
+theme_10	997	C6	30.0	Arial	24	253,0,0	7.5	30	1144	0	6 21 33.5
+theme_10	998	C7	30.0	Arial	24	252,0,0	7.5	30	1144	0	6 21 33.5
+theme_10	999	C8	30.0	Arial	24	251,0,0	7.5	30	1144	0	6 21 33.5
+theme_10	1000	C9	16.0	Arial	24	250,0,0	5	15	0	235	3 10 15.5
+theme_10	1001	C10	16.0	Arial	24	249,0,0	5	15	0	235	3 10 15.5
+theme_10	1002	C11	16.0	Arial	24	248,0,0	5	15	0	235	3 10 15.5
+theme_10	1003	C12	16.0	Arial	24	247,0,0	5	15	0	235	3 10 15.5
+theme_10	1004	C13	16.0	Arial	24	246,0,0	5	15	0	235	3 10 15.5
+theme_16	995	C4	30.0	Arial	24	255,0,0	7.5	30	1144	0	6 21 33.5
+theme_16	996	C5	30.0	Arial	24	254,0,0	7.5	30	1144	0	6 21 33.5
+theme_16	997	C6	30.0	Arial	24	253,0,0	7.5	30	1144	0	6 21 33.5
+theme_16	998	C7	30.0	Arial	24	252,0,0	7.5	30	1144	0	6 21 33.5
+theme_16	999	C8	30.0	Arial	24	251,0,0	7.5	30	1144	0	6 21 33.5
+theme_16	1000	C9	20.0	Arial	24	250,0,0	9	19	0	235	3 10 15.5
+theme_16	1001	C10	20.0	Arial	24	249,0,0	9	19	0	235	3 10 15.5
+theme_16	1002	C11	20.0	Arial	24	248,0,0	9	19	0	235	3 10 15.5
+theme_16	1003	C12	20.0	Arial	24	247,0,0	9	19	0	235	3 10 15.5
+theme_16	1004	C13	20.0	Arial	24	246,0,0	9	19	0	235	3 10 15.5
