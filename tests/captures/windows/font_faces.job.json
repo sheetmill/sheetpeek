@@ -1,0 +1,127 @@
+{
+ "schema": 1,
+ "job_id": "sheetpeek-20261123-195437-font-faces",
+ "package": "sheetpeek",
+ "purpose": "sheetpeek capture group font_faces: window pictures of cells past the font table's cut beside reference cells in five faces, under two Normal fonts, at zoom 100 (font_cut's faces groups)",
+ "limits": {
+  "job_seconds": 1800,
+  "step_seconds": 600
+ },
+ "audit": false,
+ "workbooks": [
+  {
+   "file": "font_cut_faces_calibri.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "view",
+     "sheet": "Sheet",
+     "select": "Sheet!AZ300",
+     "zoom": 100,
+     "scroll_row": 1,
+     "scroll_column": 1
+    },
+    {
+     "op": "read",
+     "id": "geometry",
+     "range": "Sheet!A1:E14",
+     "props": [
+      "left",
+      "top",
+      "width",
+      "height",
+      "text"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "display",
+     "range": "Sheet!A1:E14",
+     "props": [
+      "font.name",
+      "font.size",
+      "font.color"
+     ],
+     "display": true
+    },
+    {
+     "op": "view",
+     "sheet": "Sheet",
+     "select": "Sheet!AZ300",
+     "id": "view_z100",
+     "zoom": 100,
+     "scroll_row": 1,
+     "scroll_column": 1
+    },
+    {
+     "op": "capture_window",
+     "id": "shot_z100",
+     "name": "font_cut_faces_calibri_z100.png"
+    },
+    {
+     "op": "close",
+     "save": false
+    }
+   ]
+  },
+  {
+   "file": "font_cut_faces_times.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "view",
+     "sheet": "Sheet",
+     "select": "Sheet!AZ300",
+     "zoom": 100,
+     "scroll_row": 1,
+     "scroll_column": 1
+    },
+    {
+     "op": "read",
+     "id": "geometry",
+     "range": "Sheet!A1:E14",
+     "props": [
+      "left",
+      "top",
+      "width",
+      "height",
+      "text"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "display",
+     "range": "Sheet!A1:E14",
+     "props": [
+      "font.name",
+      "font.size",
+      "font.color"
+     ],
+     "display": true
+    },
+    {
+     "op": "view",
+     "sheet": "Sheet",
+     "select": "Sheet!AZ300",
+     "id": "view_z100",
+     "zoom": 100,
+     "scroll_row": 1,
+     "scroll_column": 1
+    },
+    {
+     "op": "capture_window",
+     "id": "shot_z100",
+     "name": "font_cut_faces_times_z100.png"
+    },
+    {
+     "op": "close",
+     "save": false
+    }
+   ]
+  }
+ ]
+}

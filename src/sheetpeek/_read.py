@@ -1046,7 +1046,8 @@ FONT_TABLE_CUT = {"mac": 1000, "windows": 999}
 """The first entry of a workbook's font table, its font list and then each rich-text run's own
 font in cell order, that Excel does not draw: 1,000 on the Mac (captured, ``font_cut``); on
 Windows 1,000 under a Calibri 11 Normal font and 999 under a Times New Roman one (captured,
-``windows/font_cut``, unexplained): 999 is where it is reported."""
+``windows/font_cut``, ``windows/font_faces``, unexplained), where it draws Aptos Narrow 11: 999 is
+where it is reported."""
 CUT_FONT = Font("Calibri", 12.0)
 """What Excel for Mac draws a font past the cut in, whatever the theme, the Normal font or its
 standard font (Aptos Narrow 12 there): captured, ``font_cut``, at Excel's default settings."""

@@ -509,3 +509,30 @@ def test_windows_cuts_the_font_table_where_captured():
                 assert int(r["dark"]) == 0, r  # its own red
             else:
                 assert int(r["dark"]) > int(r["red"]), r  # black, ClearType fringes aside
+
+
+@pytest.mark.excel
+def test_windows_draws_a_cut_cell_in_aptos_narrow_11():
+    # font_faces: a cut probe's glyphs and ink equal the Aptos Narrow 11 reference's exactly (its
+    # standard font), and no other reference's; the cut is at entry 1,000 under a Calibri 11
+    # Normal font and at 999 under Times New Roman 10, both under openpyxl's theme. Open: whether
+    # the extra entry comes with a Normal font other than the theme's body font, or other than
+    # Calibri (they part under an Aptos Narrow theme with an Aptos Narrow Normal font).
+    _, body = _table("font_faces.tsv")
+    assert len(body) == 22
+    for group, first_cut in (("faces_calibri", 1000), ("faces_times", 999)):
+        rows = [r for r in body if r["group"] == group]
+        refs = {r["font_name"]: r for r in rows if int(r["entry"]) <= 5}
+        for r in rows:
+            if int(r["entry"]) <= 5:
+                continue
+            if int(r["entry"]) >= first_cut:
+                matches = {
+                    name
+                    for name, ref in refs.items()
+                    if (ref["glyphs"], ref["red"], ref["dark"])
+                    == (r["glyphs"], r["red"], r["dark"])
+                }
+                assert matches == {"Aptos Narrow"}, r
+            else:
+                assert float(r["row_height"]) == 30.0, r
