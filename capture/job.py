@@ -32,6 +32,9 @@ Groups:
   for every cell; the gray is measured on D1.
 - ``shrink_fonts``: ``text_steps``' group of that name alone, as ``text_steps`` captures its
   groups, read into ``tests/captures/windows/shrink_fonts.tsv`` (``text_steps``' columns).
+- ``font_cut``: the suite ``font_cut``, a workbook a group (``font_cut_<group>.xlsx``, the
+  theme groups' themes rewritten before the copy), at zoom 100, with the displayed font and its
+  color read for every cell; Excel's standard font is in the result's header.
 - ``line_budget``: ``text_style``' group of that name alone, as ``text_style`` captures its
   groups, read into ``tests/captures/windows/line_budget.tsv`` (``text_style``' columns).
 - ``text_steps``: the suite ``text_steps``, a workbook a group (``text_steps_<group>.xlsx``, each
@@ -53,7 +56,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from capture import borders, cell_text, fills, text_steps, text_style
+from capture import borders, cell_text, fills, font_cut, text_steps, text_style
 
 ROOT = Path(__file__).resolve().parents[1]
 WINDOWS = ROOT / "tests" / "captures" / "windows"
@@ -66,6 +69,7 @@ GROUPS = {
     "text_style": ("text_style",),
     "shrink_fonts": ("shrink_fonts",),
     "line_budget": ("line_budget",),
+    "font_cut": ("font_cut",),
 }
 PURPOSES = {
     "cells": "sheetpeek capture group cells: the text Excel shows in merged cells and for "
@@ -77,6 +81,9 @@ PURPOSES = {
     "shrink_fonts": "sheetpeek capture group shrink_fonts: window pictures of shrink to fit "
     "under cell fonts the group text_steps does not hold, at zoom 100 (text_steps' group "
     "shrink_fonts)",
+    "font_cut": "sheetpeek capture group font_cut: window pictures of cells whose fonts lie "
+    "past the workbook's font table's cut, under other themes and Normal fonts, at zoom 100 "
+    "(suite font_cut)",
     "line_budget": "sheetpeek capture group line_budget: window pictures of two-word texts as "
     "wide as the cell less a few pixels, wrapped, justified and distributed, at zoom 100 "
     "(text_style's group line_budget)",
@@ -107,6 +114,9 @@ class Window:
     names each."""
     display: tuple[str, ...] = ("interior.color", "interior.pattern")
     """The properties of the format Excel displays read for every cell (``DISPLAYED``)."""
+    postprocess: Callable[[Path], None] | None = None
+    """An edit of the saved workbook before it is copied into the job (``capture.screen.run``'s
+    ``postprocess``)."""
 
     @property
     def stem(self) -> str:
@@ -125,6 +135,22 @@ def _text_style_window(group: str, suite: str = "text_style") -> Window:
         "D1",
         f"text_style_{group}",
         ("font.name", "font.size", "font.underline", "align.horizontal", "align.vertical"),
+    )
+
+
+def _font_cut_window(group: str) -> Window:
+    return Window(
+        "font_cut",
+        lambda ws: font_cut.fill(ws, group),
+        tuple(font_cut.references(group)),
+        font_cut.MARKERS,
+        font_cut.ZOOMS,
+        lambda cap: font_cut.group_records(cap, group),
+        font_cut.FIELDS,
+        "D1",
+        f"font_cut_{group}",
+        ("font.name", "font.size", "font.color"),
+        font_cut.postprocess(group),
     )
 
 
@@ -173,11 +199,13 @@ WINDOWS_OF = {
         _text_style_window(group) for group in text_style.GROUPS if group != "line_budget"
     ),
     "line_budget": (_text_style_window("line_budget", "line_budget"),),
+    "font_cut": tuple(_font_cut_window(group) for group in font_cut.GROUPS),
 }
 DISPLAYED = {
     "interior.color": "display.fill",
     "interior.pattern": "display.pattern",
     "font.name": "display.font_name",
+    "font.color": "display.font_color",
     "font.size": "display.font_size",
     "font.underline": "display.underline",
     "align.horizontal": "display.h_align",
@@ -241,6 +269,8 @@ def _window_workbook(window: Window, files: Path) -> dict[str, Any]:
         for cell in window.markers:
             wb.active[cell].fill = PatternFill("solid", fgColor="FF" + MARKER)
         wb.save(raw)
+        if window.postprocess is not None:
+            window.postprocess(raw)
         fixed_copy(raw, files / name)
     span = f"{SHEET}!{_bounds([*window.markers, *window.cells])}"
     park = {"op": "view", "sheet": SHEET, "select": f"{SHEET}!{PARK}"}
@@ -308,7 +338,7 @@ def _results(workbook: dict[str, Any]) -> dict[str, Any]:
 def _shown(prop: str, value: Any) -> str:
     """A displayed property as the Mac's reads keep it: a color as ``r,g,b`` (Windows returns one
     number, red in the low byte), a size as a number, an enumeration as Windows' number."""
-    if prop == "interior.color":
+    if prop in ("interior.color", "font.color"):
         v = int(value)
         return f"{v & 0xFF},{(v >> 8) & 0xFF},{(v >> 16) & 0xFF}"
     if prop == "font.name":

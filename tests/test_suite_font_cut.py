@@ -80,6 +80,7 @@ def test_excel_for_mac_cuts_the_font_table_at_entry_1000():
     lines = suite.OUTPUT.read_text(encoding="utf-8").split("\n")
     rows = [line.split("\t") for line in lines if line and not line.startswith("#")]
     records = [dict(zip(rows[0], row, strict=True)) for row in rows[1:]]
+    records = [r for r in records if r["group"] in ("list", "rich")]
     assert len(records) == suite.LIST_PROBES + suite.RICH_PROBES
     for r in records:
         cut = int(r["entry"]) >= 1000
@@ -92,3 +93,17 @@ def test_excel_for_mac_cuts_the_font_table_at_entry_1000():
             )
         else:
             assert int(r["red"]) > 0, r
+
+
+def test_the_theme_groups_rewrite_the_theme_and_set_the_normal_font(built):
+    for group, (name, size) in suite.NORMALS.items():
+        with zipfile.ZipFile(built[group]) as z:
+            theme = z.read("xl/theme/theme1.xml").decode()
+            styles = z.read("xl/styles.xml").decode()
+        assert '<a:minorFont>\n        <a:latin typeface="Arial"/>' in theme
+        assert '<a:majorFont>\n        <a:latin typeface="Aptos Narrow"/>' in theme
+        first = re.search(r"<fonts[^>]*>\s*<font>(.*?)</font>", styles, re.S).group(1)
+        assert f'<name val="{name}"' in first
+        assert f'<sz val="{size}"' in first
+        fonts = re.search(r"<fonts[^>]*>(.*?)</fonts>", styles, re.S).group(1)
+        assert len(re.findall(r"<font[ >]", fonts)) == suite.THEME_FIRST + suite.THEME_PROBES

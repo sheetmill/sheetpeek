@@ -320,3 +320,25 @@ def test_the_line_budget_job_reads_into_a_file_of_its_own(tmp_path):
     columns = next(x for x in lines if not x.startswith("# "))
     assert columns.split("\t") == list(text_style.COLUMNS)
     assert len(text_style.cases("line_budget")) == 136  # 34 texts, four alignments each
+
+
+def test_the_font_cut_job_rewrites_its_themes_and_reads_font_colors(tmp_path):
+    import zipfile
+
+    from capture import font_cut
+
+    folder = job.write("font_cut", "sheetpeek-test-fc", tmp_path / "a")
+    doc = json.loads((folder / "job.json").read_text(encoding="utf-8"))
+    assert [wb["file"] for wb in doc["workbooks"]] == [
+        f"font_cut_{group}.xlsx" for group in font_cut.GROUPS
+    ]
+    for wb in doc["workbooks"]:
+        (read,) = [s for s in wb["steps"] if s["op"] == "read_format"]
+        assert read["props"] == ["font.name", "font.size", "font.color"]
+    with zipfile.ZipFile(folder / "files" / "font_cut_theme_16.xlsx") as z:
+        theme = z.read("xl/theme/theme1.xml").decode()
+    assert '<a:minorFont>\n        <a:latin typeface="Arial"/>' in theme
+    cell = {"font.name": "Arial", "font.size": 24.0, "font.color": 0x0000FF + 0.0}
+    steps = {"geometry": _geometry_grid(1, 1), "display": {"cells": [[cell]]}}
+    rows = {(c, key): value for c, key, value in job._cell_rows(steps)}
+    assert rows[("A1", "display.font_color")] == "255,0,0"  # red in the low byte
