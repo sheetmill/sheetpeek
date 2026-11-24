@@ -5,6 +5,7 @@ Each file is the Mac suite's schema, read from a capture job's result by ``captu
 header names the job and holds the result's header. A comparison is skipped until its file exists.
 """
 
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -377,3 +378,58 @@ def test_windows_text_style_widths_rows_and_lines_are_sheetpeeks():
     assert wrong_widths == []
     assert wrong_rows == known_rows
     assert wrong_lines == known_lines
+
+
+# --- shrink_fonts: the Windows shrink levels on fonts text_steps' other groups do not hold
+
+KNOWN_FIT = {
+    # Known deviations: Excel draws one level lower than sheetpeek's fit test gives, (n + 0.375)
+    # times the level no more than the cell less a pixel; which length takes which level is not
+    # modeled exactly on either platform (§4.13).
+    "Calibri 20 shrunk 4": (13, 14),
+    "Arial 11 shrunk 7": (7, 8),
+}
+
+
+@pytest.mark.excel
+def test_windows_shrink_levels_hold_on_fonts_of_their_own():
+    # Excel's level per case in device pixels: the ink width over the length less the side
+    # bearings in advances (the font's two unshrunk references give its advance and bearings;
+    # bearings scale with the drawn size). Every level is a whole pixel within 0.25, never 6.
+    from capture import text_steps
+
+    _, body = _table("shrink_fonts.tsv")
+    records = {r["name"]: r for r in body}
+
+    def ink(record):
+        width = float(record["cell_width"]) - float(record["ink_left"])
+        return (width + float(record["ink_right"])) * 4 / 3
+
+    with tempfile.TemporaryDirectory() as tmp:
+        path = text_steps.build(Path(tmp))["shrink_fonts"]
+        drawn = _steps_drawn(path, "shrink_fonts")
+    levels, wrong = {}, {}
+    for face, size in text_steps.FONTS:
+        font = f"{face} {size}"
+        short = ink(records[f"{font} reference 10"])
+        long = ink(records[f"{font} reference 20"])
+        advance = (long - short) / 10
+        bearings = 10 * advance - short
+        for case in text_steps.cases("shrink_fonts"):
+            if not case.name.startswith(f"{font} shrunk "):
+                continue
+            n = int(case.name.split()[-1])
+            found = ink(records[case.name]) / (n - bearings / advance)
+            assert abs(found - round(found)) <= 0.25, (case.name, found)
+            level = round(found)
+            levels[case.name] = level
+            ours = round(drawn[case.cell][2] * advance, 6)
+            if level != ours:
+                wrong[case.name] = (level, ours)
+    REPORT["shrink fonts (Windows)"] = (
+        f"shrink, fresh fonts, Excel for Windows: {len(levels)} lengths, {len(wrong)} known "
+        "deviations (the fit test)"
+    )
+    assert len(levels) == 55
+    assert 6 not in levels.values()
+    assert wrong == KNOWN_FIT

@@ -1,0 +1,75 @@
+# platform: windows
+# excel_build: 16.0.20527.20196
+# job: shrink_fonts.job.json
+# job_id: sheetpeek-20261123-163602-shrink-fonts
+# captured: 2026-11-24; method: capture_window (capture job)
+# job_header: {"environment": {"audit": false, "checks": {"dde_server_launch_disabled": true, "dde_server_lookup_disabled": true, "vba_warnings": 4}, "display": {"screen_px": [2560, 1440], "system_dpi": 96}, "edition": {"found": "Microsoft 365", "source": "office products"}, "excel": {"build": "16.0.20527.20196", "build_number": 20527.0, "calculation_version": 191029, "decimal_separator": ".", "international": {"country": 1.0, "decimal": ".", "list": ","}, "operating_system": "Windows (64-bit ARM) NT 10.00", "process": {"native_machine": "0xaa64", "process_machine": "0x8664"}, "standard_font": "Aptos Narrow", "standard_font_size": 11.0, "thousands_separator": ",", "use_system_separators": true, "version": "16.0"}, "font_smoothing": {"expected": {"contrast": 1200, "directwrite": {}, "enabled": true, "orientation": "rgb", "type": "cleartype"}, "found": {"contrast": 1200, "directwrite": {}, "enabled": true, "orientation": "rgb", "type": "cleartype"}, "ok": true}, "fonts": [{"cloud": true, "family": "Aptos", "head_revision": 2.00999, "style": "Bold", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos", "head_revision": 2.00999, "style": "Bold Italic", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos", "head_revision": 2.00999, "style": "Italic", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos", "head_revision": 2.00999, "style": "Regular", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos Display", "head_revision": 2.00999, "style": "Bold", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos Display", "head_revision": 2.00999, "style": "Bold Italic", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos Display", "head_revision": 2.00999, "style": "Italic", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos Display", "head_revision": 2.00999, "style": "Regular", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos Narrow", "head_revision": 2.00999, "style": "Bold", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos Narrow", "head_revision": 2.00999, "style": "Bold Italic", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos Narrow", "head_revision": 2.00999, "style": "Italic", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos Narrow", "head_revision": 2.00999, "style": "Regular", "version": "Version 2.01;O365"}, {"cloud": false, "family": "Arial", "head_revision": 7.07001, "style": "Bold", "version": "Version 7.07"}, {"cloud": false, "family": "Arial", "head_revision": 7.07001, "style": "Bold Italic", "version": "Version 7.07"}, {"cloud": false, "family": "Arial", "head_revision": 7.07001, "style": "Italic", "version": "Version 7.07"}, {"cloud": false, "family": "Arial", "head_revision": 7.07001, "style": "Regular", "version": "Version 7.07"}, {"cloud": false, "family": "Calibri", "head_revision": 6.27, "style": "Bold", "version": "Version 6.27"}, {"cloud": false, "family": "Calibri", "head_revision": 6.27, "style": "Bold Italic", "version": "Version 6.27"}, {"cloud": false, "family": "Calibri", "head_revision": 6.27, "style": "Italic", "version": "Version 6.27"}, {"cloud": false, "family": "Calibri", "head_revision": 6.27, "style": "Regular", "version": "Version 6.27"}, {"cloud": false, "family": "Cambria", "head_revision": 6.98, "style": "Bold", "version": "Version 6.98"}, {"cloud": false, "family": "Cambria", "head_revision": 6.98, "style": "Bold Italic", "version": "Version 6.98"}, {"cloud": false, "family": "Cambria", "head_revision": 6.98, "style": "Italic", "version": "Version 6.98"}, {"cloud": false, "family": "Cambria", "head_revision": 6.99001, "style": "Regular", "version": "Version 6.99"}, {"cloud": false, "family": "Segoe UI", "head_revision": 5.72, "style": "Bold", "version": "Version 5.72"}, {"cloud": false, "family": "Segoe UI", "head_revision": 5.72, "style": "Bold Italic", "version": "Version 5.72"}, {"cloud": false, "family": "Segoe UI", "head_revision": 5.72, "style": "Italic", "version": "Version 5.72"}, {"cloud": false, "family": "Segoe UI", "head_revision": 5.72, "style": "Regular", "version": "Version 5.72"}], "fonts_missing": [], "geometry": {"expected": {"excel_window_px": [-8, -8, 2568, 1400], "screen_px": [2560, 1440], "system_dpi": 96}, "found": {"excel_window_points": [-5.0, -6.0, 1932.0, 1056.0], "excel_window_px": [-8, -8, 2568, 1400], "screen_px": [2560, 1440], "system_dpi": 96}, "ok": true}, "locale": {"ansi_code_page": 1252, "decimal": ".", "list": ",", "long_date": "dddd, MMMM d, yyyy", "name": "en-US", "oem_code_page": 437, "short_date": "M/d/yyyy", "sort_locale": "en-US", "sort_version": {"custom": "01000000ee575c1e00b4d0000bb1e11e", "defined": 394498, "nls": 394498}, "time": "h:mm:ss tt", "two_digit_year_max": 2049, "two_digit_year_max_setting": null}, "office": {"channel": "Current Channel", "platform": "x64", "products": "O365HomePremRetail", "version": "16.0.20527.20196"}, "printer": {"orientation": "portrait", "paper": "A4", "paper_mm": [215.9, 279.4]}, "theme": {"office_ui_theme": 6, "windows_apps_light": 1, "windows_system_light": 1}, "windows": {"architecture": "ARM64", "build": "26300.9974", "display_version": "26H2", "edition": "Core"}}, "format": 1, "inputs": {"text_steps_shrink_fonts.xlsx": {"bytes": 5454, "sha256": "1a3ad3358bfc186bc011a0dcd116ef2511e9d1d25d6f7f3f5ed8fa1c6e8e8139"}}, "job_id": "sheetpeek-20261123-163602-shrink-fonts", "manifest_sha256": "47a214f2c94416abef11df6cd99d66c46fc52a49c3c8a21dddf2d3a6fa03535b", "runner_version": "0.1.28"}
+# zooms: 100
+# gridline: E0E0E0 (measured: D1's bottom edge)
+# suite: shrink_fonts
+group	name	zoom	cell	normal_font	cell_font	align	indent	row_height	cell_width	ink_left	ink_right	ink_top	ink_bottom	width_ratio	height_ratio	ink_width	ref_width
+shrink_fonts	Calibri 14 shrunk 4	100	C4	Calibri 11	Calibri 14	left	0	26.25	48	4.5	-10.5	12	21				
+shrink_fonts	Calibri 14 shrunk 5	100	C5	Calibri 11	Calibri 14	left	0	26.25	48	4.5	-4.5	12.75	21				
+shrink_fonts	Calibri 14 shrunk 6	100	C6	Calibri 11	Calibri 14	left	0	26.25	48	3	-6	14.25	21				
+shrink_fonts	Calibri 14 shrunk 7	100	C7	Calibri 11	Calibri 14	left	0	26.25	48	3	-4.5	15	21				
+shrink_fonts	Calibri 14 shrunk 8	100	C8	Calibri 11	Calibri 14	left	0	26.25	48	3	-4.5	15.75	21				
+shrink_fonts	Calibri 14 shrunk 9	100	C9	Calibri 11	Calibri 14	left	0	26.25	48	3	-12	16.5	21				
+shrink_fonts	Calibri 14 shrunk 10	100	C10	Calibri 11	Calibri 14	left	0	26.25	48	3	-8.25	16.5	21				
+shrink_fonts	Calibri 20 shrunk 4	100	D4	Calibri 11	Calibri 20	left	0	26.25	48	4.5	-7.5	11.25	21				
+shrink_fonts	Calibri 20 shrunk 5	100	D5	Calibri 11	Calibri 20	left	0	26.25	48	4.5	-4.5	12.75	21				
+shrink_fonts	Calibri 20 shrunk 6	100	D6	Calibri 11	Calibri 20	left	0	26.25	48	3	-6	14.25	21				
+shrink_fonts	Calibri 20 shrunk 7	100	D7	Calibri 11	Calibri 20	left	0	26.25	48	3	-4.5	15	21				
+shrink_fonts	Calibri 20 shrunk 8	100	D8	Calibri 11	Calibri 20	left	0	26.25	48	3	-4.5	15.75	21				
+shrink_fonts	Calibri 20 shrunk 9	100	D9	Calibri 11	Calibri 20	left	0	26.25	48	3	-12	16.5	21				
+shrink_fonts	Calibri 20 shrunk 10	100	D10	Calibri 11	Calibri 20	left	0	26.25	48	3	-8.25	16.5	21				
+shrink_fonts	Arial 11 shrunk 4	100	E4	Calibri 11	Arial 11	left	0	26.25	48	3	-16.5	12.75	21				
+shrink_fonts	Arial 11 shrunk 5	100	E5	Calibri 11	Arial 11	left	0	26.25	48	3	-9	12.75	21				
+shrink_fonts	Arial 11 shrunk 6	100	E6	Calibri 11	Arial 11	left	0	26.25	48	3	-6	13.5	21				
+shrink_fonts	Arial 11 shrunk 7	100	E7	Calibri 11	Arial 11	left	0	26.25	48	3	-9.75	15	21				
+shrink_fonts	Arial 11 shrunk 8	100	E8	Calibri 11	Arial 11	left	0	26.25	48	3	-4.5	15	21				
+shrink_fonts	Arial 11 shrunk 9	100	E9	Calibri 11	Arial 11	left	0	26.25	48	3	-12	16.5	21				
+shrink_fonts	Arial 11 shrunk 10	100	E10	Calibri 11	Arial 11	left	0	26.25	48	3	-8.25	16.5	21				
+shrink_fonts	Aptos Narrow 12 shrunk 4	100	F4	Calibri 11	Aptos Narrow 12	left	0	26.25	48	3	-17.25	12.75	21				
+shrink_fonts	Aptos Narrow 12 shrunk 5	100	F5	Calibri 11	Aptos Narrow 12	left	0	26.25	48	3	-9.75	12.75	21				
+shrink_fonts	Aptos Narrow 12 shrunk 6	100	F6	Calibri 11	Aptos Narrow 12	left	0	26.25	48	3	-6	13.5	21				
+shrink_fonts	Aptos Narrow 12 shrunk 7	100	F7	Calibri 11	Aptos Narrow 12	left	0	26.25	48	3	-4.5	14.25	21				
+shrink_fonts	Aptos Narrow 12 shrunk 8	100	F8	Calibri 11	Aptos Narrow 12	left	0	26.25	48	3	-4.5	15.75	21				
+shrink_fonts	Aptos Narrow 12 shrunk 9	100	F9	Calibri 11	Aptos Narrow 12	left	0	26.25	48	3	-12	16.5	21				
+shrink_fonts	Aptos Narrow 12 shrunk 10	100	F10	Calibri 11	Aptos Narrow 12	left	0	26.25	48	3	-8.25	16.5	21				
+shrink_fonts	Aptos Narrow 16 shrunk 4	100	G4	Calibri 11	Aptos Narrow 16	left	0	26.25	48	4.5	-4.5	10.5	21				
+shrink_fonts	Aptos Narrow 16 shrunk 5	100	G5	Calibri 11	Aptos Narrow 16	left	0	26.25	48	3.75	-4.5	12.75	21				
+shrink_fonts	Aptos Narrow 16 shrunk 6	100	G6	Calibri 11	Aptos Narrow 16	left	0	26.25	48	3	-6	14.25	21				
+shrink_fonts	Aptos Narrow 16 shrunk 7	100	G7	Calibri 11	Aptos Narrow 16	left	0	26.25	48	3	-4.5	15	21				
+shrink_fonts	Aptos Narrow 16 shrunk 8	100	G8	Calibri 11	Aptos Narrow 16	left	0	26.25	48	3	-4.5	15.75	21				
+shrink_fonts	Aptos Narrow 16 shrunk 9	100	G9	Calibri 11	Aptos Narrow 16	left	0	26.25	48	3	-12	16.5	21				
+shrink_fonts	Aptos Narrow 16 shrunk 10	100	G10	Calibri 11	Aptos Narrow 16	left	0	26.25	48	3	-8.25	16.5	21				
+shrink_fonts	Calibri 14 shrunk 11	100	H4	Calibri 11	Calibri 14	left	0	26.25	63	3	-3.75	15.75	21				
+shrink_fonts	Calibri 14 shrunk 12	100	H5	Calibri 11	Calibri 14	left	0	26.25	63	3	-15.75	16.5	21				
+shrink_fonts	Calibri 14 shrunk 13	100	H6	Calibri 11	Calibri 14	left	0	26.25	63	3	-12	16.5	21				
+shrink_fonts	Calibri 14 shrunk 14	100	H7	Calibri 11	Calibri 14	left	0	26.25	63	3	-8.25	16.5	21				
+shrink_fonts	Calibri 20 shrunk 11	100	I4	Calibri 11	Calibri 20	left	0	26.25	63	3	-3.75	15.75	21				
+shrink_fonts	Calibri 20 shrunk 12	100	I5	Calibri 11	Calibri 20	left	0	26.25	63	3	-15.75	16.5	21				
+shrink_fonts	Calibri 20 shrunk 13	100	I6	Calibri 11	Calibri 20	left	0	26.25	63	3	-12	16.5	21				
+shrink_fonts	Calibri 20 shrunk 14	100	I7	Calibri 11	Calibri 20	left	0	26.25	63	3	-8.25	16.5	21				
+shrink_fonts	Arial 11 shrunk 11	100	J4	Calibri 11	Arial 11	left	0	26.25	63	3	-3	15	21				
+shrink_fonts	Arial 11 shrunk 12	100	J5	Calibri 11	Arial 11	left	0	26.25	63	3	-15.75	16.5	21				
+shrink_fonts	Arial 11 shrunk 13	100	J6	Calibri 11	Arial 11	left	0	26.25	63	3	-12	16.5	21				
+shrink_fonts	Arial 11 shrunk 14	100	J7	Calibri 11	Arial 11	left	0	26.25	63	3	-8.25	16.5	21				
+shrink_fonts	Aptos Narrow 12 shrunk 11	100	K4	Calibri 11	Aptos Narrow 12	left	0	26.25	63	3	-3.75	15.75	21				
+shrink_fonts	Aptos Narrow 12 shrunk 12	100	K5	Calibri 11	Aptos Narrow 12	left	0	26.25	63	3	-15.75	16.5	21				
+shrink_fonts	Aptos Narrow 12 shrunk 13	100	K6	Calibri 11	Aptos Narrow 12	left	0	26.25	63	3	-12	16.5	21				
+shrink_fonts	Aptos Narrow 12 shrunk 14	100	K7	Calibri 11	Aptos Narrow 12	left	0	26.25	63	3	-8.25	16.5	21				
+shrink_fonts	Aptos Narrow 16 shrunk 11	100	L4	Calibri 11	Aptos Narrow 16	left	0	26.25	63	3	-3.75	15.75	21				
+shrink_fonts	Aptos Narrow 16 shrunk 12	100	L5	Calibri 11	Aptos Narrow 16	left	0	26.25	63	3	-15.75	16.5	21				
+shrink_fonts	Aptos Narrow 16 shrunk 13	100	L6	Calibri 11	Aptos Narrow 16	left	0	26.25	63	3	-12	16.5	21				
+shrink_fonts	Aptos Narrow 16 shrunk 14	100	L7	Calibri 11	Aptos Narrow 16	left	0	26.25	63	3	-8.25	16.5	21				
+shrink_fonts	Calibri 14 reference 10	100	N4	Calibri 11	Calibri 14	left	0	26.25	315	4.5	-223.5	12	21				
+shrink_fonts	Calibri 14 reference 20	100	N5	Calibri 11	Calibri 14	left	0	26.25	315	4.5	-133.5	12	21				
+shrink_fonts	Calibri 20 reference 10	100	N6	Calibri 11	Calibri 20	left	0	26.25	315	5.25	-185.25	8.25	21				
+shrink_fonts	Calibri 20 reference 20	100	N7	Calibri 11	Calibri 20	left	0	26.25	315	5.25	-57.75	8.25	21				
+shrink_fonts	Arial 11 reference 10	100	N8	Calibri 11	Arial 11	left	0	26.25	315	3	-238.5	12.75	21				
+shrink_fonts	Arial 11 reference 20	100	N9	Calibri 11	Arial 11	left	0	26.25	315	3	-163.5	12.75	21				
+shrink_fonts	Aptos Narrow 12 reference 10	100	N10	Calibri 11	Aptos Narrow 12	left	0	26.25	315	3	-239.25	12.75	21				
+shrink_fonts	Aptos Narrow 12 reference 20	100	N11	Calibri 11	Aptos Narrow 12	left	0	15.75	315	3	-164.25	4.5	12.75				
+shrink_fonts	Aptos Narrow 16 reference 10	100	N12	Calibri 11	Aptos Narrow 16	left	0	21.0	315	4.5	-208.5	6	16.5				
+shrink_fonts	Aptos Narrow 16 reference 20	100	N13	Calibri 11	Aptos Narrow 16	left	0	21.0	315	4.5	-103.5	6	16.5				

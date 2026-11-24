@@ -1067,7 +1067,10 @@ pairs of cases, identical). On Excel for Windows the levels are whole device pix
 Mac's are whole points: every one below the unshrunk advance except 6, down to 2 (`windows/text_steps`,
 the three shrink groups: Calibri 11's "H" 9 px takes 8, 7, 5, 4, 3 and 2; a text that does not fit
 at 2 px is clipped), as sheetpeek draws them with `platform="windows"` (`shrink_levels`; the fit
-test as the Mac's, its margin a pixel): all 123 lengths. **Shrunk text never spills**, in every mode. **Rows fit the unshrunk
+test as the Mac's, its margin a pixel): all 123 lengths. On five cell fonts no other group holds
+(`windows/shrink_fonts`: Calibri 14 and 20, Arial 11, Aptos Narrow 12 and 16) every level is a
+whole pixel, none 6, and 53 of 55 lengths take sheetpeek's; two take a level lower than its fit
+test gives (Calibri 20, 4 "H"s at 13 px; Arial 11, 7 at 7 px), a known deviation. **Shrunk text never spills**, in every mode. **Rows fit the unshrunk
 size** (captured at 20 pt). A merge with the flag on its anchor is not shrunk, clipped at the
 merge's edge (captured once, doubtful). Bottom-aligned shrunk text sits on its row's shared
 baseline, top and centered text where its drawn size's metrics put it (§3.6; `text_style_more`,
