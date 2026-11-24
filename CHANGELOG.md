@@ -7,7 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- A face xlformat measures for widths but not for rows, lines or insets is reported: one
+  `font.no_metrics` notice for each such function, naming the face and the function in its
+  context (`{"font": "Verdana", "function": "row_metrics"}`), where nothing was reported. The
+  function's answer is Calibri's at the same size, as before for rows and lines. The notice
+  for a face without glyph tables names `text_width` as its function (`{"font": "Segoe UI",
+  "function": "text_width"}`, where the context held the face alone).
+
 ### Changed
+- On the Mac, MS Sans Serif is measured as Times New Roman, the face xlformat substitutes for
+  it, as Excel measures it, where it was measured as Calibri with a `font.no_metrics` notice:
+  "Hello world" in MS Sans Serif 10 is 48 points wide, where it was 44.
+- A row fitted to text in a face xlformat has no row metrics for is fitted by xlformat's row
+  model with Calibri at the same size, as the text is measured, where the model was left out
+  for it: one wrapped line of Verdana 11 makes its row 16 points, Calibri 11's, where it made
+  15 (unverified, no capture in this repository yet).
 - Requires xlformat 0.9 (`xlformat>=0.9,<1`), which measures text on the Mac by a rule per
   glyph, captured from Excel for Mac. 0.5.0 already runs with xlformat 0.9 when it is installed,
   so these changes reach 0.5.0 users through it as well:

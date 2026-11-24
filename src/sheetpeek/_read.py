@@ -58,7 +58,7 @@ from sheetpeek._package import (
     worksheet_parts,
 )
 from sheetpeek._page import MAX_COLUMN, MAX_ROW, manual_breaks, print_areas
-from sheetpeek._platform import PlatformLike, regional
+from sheetpeek._platform import PlatformLike, covers, regional
 from sheetpeek._platform import resolve as resolve_platform
 from sheetpeek._read_filters import read_autofilters
 from sheetpeek._read_links import Found as Links
@@ -1187,13 +1187,18 @@ def _clip(area: CellRange, used: CellRange | None) -> CellRange | None:
 def _normal_digit(font: Font, platform: xlformat.Platform) -> float:
     """The Normal font's digit in points on ``platform``, as the layout measures it.
 
-    A face xlformat has not measured keeps xlio's 6 pt (the layout measures it as Calibri, §4.7).
+    A face xlformat has not measured, or a size it raises ``LookupError`` for, keeps xlio's 6 pt
+    (the layout measures the face as Calibri, §4.7); a face the platform lacks is measured in
+    xlformat's substitute for it.
     """
-    measured_names = xlformat.measured_fonts(platform=platform)
-    if font.name.lower() not in {name.lower() for name in measured_names}:
+    if not covers("text_width", font.name, platform):
         return XLIO_DIGIT
     measured = xlformat.Font(font.name, font.size, font.bold, font.italic)
-    return xlformat.file_column_metrics(None, normal_font=measured, platform=platform).digit_width
+    try:
+        metrics = xlformat.file_column_metrics(None, normal_font=measured, platform=platform)
+    except LookupError:
+        return XLIO_DIGIT
+    return metrics.digit_width
 
 
 def _columns(structure: Structure, ref: CellRange | None, digit: float) -> tuple[Column, ...]:

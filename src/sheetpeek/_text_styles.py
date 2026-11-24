@@ -38,11 +38,6 @@ _UNDERLINE_OFFSET = {
     "doubleAccounting": 3.0,
 }
 _STRIKE_OFFSET = -3.0
-_RULE_FACES = frozenset(
-    ("calibri", "aptos narrow", "arial", "times new roman", "courier new", "georgia")
-)
-"""The faces xlformat's ``rule_metrics`` covers; another face is drawn as Calibri, as it is
-measured."""
 
 
 SHRINK_PADDING = 0.375
@@ -203,20 +198,13 @@ def _platform_rules(
 ) -> xlformat.RuleMetrics | None:
     """``_rule_metrics`` on ``platform``.
 
-    On Windows a face without Windows tables takes Calibri's at the size, as it is measured
-    (unverified).
+    A face xlformat has no rules for takes Calibri's at the size, as the layout measures it
+    (reported ``font.no_metrics``; unverified).
     """
-    face = name if name.lower() in _RULE_FACES else "Calibri"
+    face = _platform.metrics_face(name, "rule_metrics", platform)
     try:
         return xlformat.rule_metrics(xlformat.Font(face, size, bold, italic), platform=platform)
-    except LookupError:
-        if platform.name != "windows" or face == "Calibri":
-            return None
-    try:
-        return xlformat.rule_metrics(
-            xlformat.Font("Calibri", size, bold, italic), platform=platform
-        )
-    except LookupError:
+    except LookupError:  # a size xlformat has no rules for
         return None
 
 

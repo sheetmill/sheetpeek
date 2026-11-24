@@ -109,10 +109,11 @@ def test_wrapped_rows_follow_xlformats_row_model(tmp_path):
         ws["B2"].font = Font(size=20)
         ws["A3"] = "one"
         ws["A3"].alignment = Alignment(wrap_text=True)
-        ws["A3"].font = Font(name="Verdana", size=11)  # not measured: the table's heights
+        ws["A3"].font = Font(name="Verdana", size=11)  # no row metrics: Calibri's (§6.2)
 
     rendered = lay_out(tmp_path, build, ref="A1:B3")
-    assert [r.height_pt for r in rendered.rows] == [16, 3 * 16 + 2, 15]
+    assert [r.height_pt for r in rendered.rows] == [16, 3 * 16 + 2, 16]
+    assert {n.context["function"] for n in rendered.notices} == {"row_metrics"}
 
 
 def test_rows_fit_their_cells(tmp_path):

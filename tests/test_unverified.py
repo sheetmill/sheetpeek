@@ -70,7 +70,7 @@ LABELS: dict[str, tuple[str, ...]] = {
     ),
     "src/sheetpeek/_style/font.py": ("taken alike (unverified).",),
     "src/sheetpeek/_text_styles.py": (
-        "(unverified).",
+        "(reported ``font.no_metrics``; unverified).",
         '(unverified). Under upright text it spans the cell less its font\'s insets (§3.6)."""',
         "# drawn size, 1 point thick (unverified).",
         "40; other faces unverified).",

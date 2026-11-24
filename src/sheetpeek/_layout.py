@@ -24,7 +24,7 @@ from sheetpeek._pass_borders import borders_pass
 from sheetpeek._pass_buttons import buttons_pass
 from sheetpeek._pass_outline import outline_pass
 from sheetpeek._pass_tables import tables_pass
-from sheetpeek._platform import current, measuring
+from sheetpeek._platform import covers, current, measuring
 from sheetpeek._rendered import (
     Alignment,
     Gap,
@@ -321,14 +321,17 @@ class _Fonts:
 
     A family xlformat has no glyph table for is measured as Calibri at the same size and style
     (decided, ARCHITECTURE.md §6.2), with one warning per family, given only where the font is
-    measured.
+    measured. A family it has glyphs for but no row metrics, or no underline metrics for a font
+    that draws a line, is measured as Calibri by those functions alone, with one warning per
+    family and function (§6.2). A face the platform lacks is measured in the face xlformat
+    substitutes for it, as Excel measures it.
     """
 
     def __init__(self, notes: Collector) -> None:
         self._notes = notes
-        self._measured = {name.lower() for name in xlformat.measured_fonts(platform=current())}
+        self._platform = current()
         self._fonts: dict[Font, xlformat.Font] = {}
-        self._warned: set[str] = set()
+        self._warned: set[tuple[str, str]] = set()
         # By identity, since every cell of a style shares its font and hashing a font costs
         # more than the lookup. Each entry holds its font, so an id is not reused while cached.
         self._by_id: dict[int, tuple[Font, xlformat.Font, bool]] = {}
@@ -341,17 +344,9 @@ class _Fonts:
         hit = self._by_id.get(id(font))
         if hit is not None and hit[0] is font and (hit[2] or not measured):
             return hit[1]
-        known = font.name.lower() in self._measured
-        if measured and not known and font.name not in self._warned:
-            self._warned.add(font.name)
-            self._notes.add(
-                "font.no_metrics",
-                "approximated",
-                "not_implemented",
-                context={"font": font.name},
-                message=f"font {font.name!r} has no glyph table in xlformat; measured as "
-                "Calibri at the same size",
-            )
+        known = covers("text_width", font.name, self._platform)
+        if measured:
+            self._check(font, known)
         found = self._fonts.get(font)
         if found is None:
             name = font.name if known else "Calibri"
@@ -361,6 +356,32 @@ class _Fonts:
         # Checked for the warning once it was measured, or when it needs none.
         self._by_id[id(font)] = (font, found, measured or known)
         return found
+
+    def _check(self, font: Font, known: bool) -> None:
+        """Warn, once per family and function, of what ``font`` is measured by as Calibri."""
+        if not known:
+            self._warn(font.name, "text_width", "has no glyph table in xlformat; measured as")
+            return
+        rows = "vertical_metrics" if self._platform.name == "windows" else "row_metrics"
+        if not covers(rows, font.name, self._platform):
+            self._warn(font.name, rows, "has no row metrics in xlformat; its rows measured as")
+        if not covers("text_insets", font.name, self._platform):
+            self._warn(font.name, "text_insets", "has no text insets in xlformat; placed as")
+        lines = font.underline is not None or font.strike
+        if lines and not covers("rule_metrics", font.name, self._platform):
+            self._warn(font.name, "rule_metrics", "has no line metrics in xlformat; its lines as")
+
+    def _warn(self, name: str, function: str, what: str) -> None:
+        if (name, function) in self._warned:
+            return
+        self._warned.add((name, function))
+        self._notes.add(
+            "font.no_metrics",
+            "approximated",
+            "not_implemented",
+            context={"font": name, "function": function},
+            message=f"font {name!r} {what} Calibri at the same size",
+        )
 
     def insets(
         self, font: Font, base: xlformat.ColumnMetrics, scale: float = 1.0
@@ -373,12 +394,14 @@ class _Fonts:
         Normal font's (unverified, no capture in this repository yet).
         """
         measured = self.get(font)
+        if not covers("text_insets", measured.name, self._platform):
+            measured = replace(measured, name="Calibri")
         key = (measured.name, font.size * scale, measured.bold, measured.italic)
         hit = self._insets.get(key)
         if hit is None:
             try:
                 found = xlformat.text_insets(
-                    replace(measured, size=font.size * scale), platform=current()
+                    replace(measured, size=font.size * scale), platform=self._platform
                 )
                 hit = (found.left, found.right)
             except LookupError:

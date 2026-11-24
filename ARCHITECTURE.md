@@ -2114,14 +2114,27 @@ xlformat.format_cell(value, number_format, font=cell_font,
 - **`FormatError`**: the cell is formatted again with `"General"` at the same width, and the sheet
   records one warning naming the format. This is what Excel's repair does.
 - **A font without a glyph table** (xlformat measures the families `xlformat.measured_fonts`
-  lists, 27 on the Mac; others would raise `LookupError`): **decided**, the layout measures it as Calibri at the same
-  size and style, and records one warning per family, only where the font's widths decide the
-  layout (the Normal font for column widths; cell fonts in `excel` mode). `xlformat.measured_fonts`
-  tells which families are measured. Character mode was rejected because it counts a comma like a
-  digit, which makes HTML disagree with Excel on more cells than a proportional approximation
-  does. What it costs, captured before xlformat measured Arial (`spill_neighbors`): Excel's
-  Arial 11 numbers in a 22 pt column showed `##` where Calibri's widths gave `###`; another
-  face costs the same kind of difference (Times New Roman's rows, §4.7).
+  lists, 27 on the Mac; others would raise `LookupError`): **decided**, the layout measures it as
+  Calibri at the same size and style, and records one warning per family, only where the font's
+  widths decide the layout (the Normal font for column widths; cell fonts in `excel` mode).
+  Character mode was rejected because it counts a comma like a digit, which makes HTML disagree
+  with Excel on more cells than a proportional approximation does. What it costs, captured
+  before xlformat measured Arial (`spill_neighbors`): Excel's Arial 11 numbers in a 22 pt column
+  showed `##` where Calibri's widths gave `###`; another face costs the same kind of difference
+  (Times New Roman's rows, §4.7).
+- **A font with glyph tables but not every metric**: xlformat's row, line and inset functions
+  cover fewer families than its widths (on the Mac, `row_metrics`, `vertical_metrics` and
+  `rule_metrics` cover Calibri, Aptos Narrow, Arial, Times New Roman, Courier New and Georgia).
+  **Decided**: each function that has no metrics for a family is called with Calibri at the
+  same size and style, the others with the family's own, and the layout records one
+  `font.no_metrics` notice per family and function, its context `{"font": ..., "function":
+  ...}` naming the face and the xlformat function (`text_width` for a face without glyph
+  tables, measured as Calibri throughout). Which families a function covers is asked of
+  xlformat (`_platform.covers`), so a family it adds is measured without a change here. A size
+  a function does not cover keeps its own rule: insets past 72 points are the Normal font's
+  (§3.6), rows past 72 points 72's scaled (§4.7). A face the platform does not have is measured
+  in the face xlformat substitutes for it (`xlformat.font_substitutes`: on the Mac, MS Sans
+  Serif as Times New Roman), with no notice.
 - **`ValueError` / `TypeError`** (a value no format shows, or an unexpected type): shown as
   `str(value)`, left-aligned, with one warning per format string naming the first cell. When a
   refused format's `General` retry fails so, the warning names `General`.
@@ -2142,7 +2155,7 @@ underlines and strikethrough (§4.13) included.
 | from xlformat | used for |
 |---|---|
 | `format_cell(value, format, width= or column_width=, font=, normal_font=, date1904=)` → `FormattedCell` | every cell's text, overflow and section color in every mode (`_layout._Formatter`); `FormattedCell.align` is the default alignment (§4.3) |
-| `Font(name, size, bold, italic)` and `measured_fonts()` | the cell font and the Normal font passed to xlformat, built once per font; a family xlformat does not measure becomes Calibri, with a warning (§6.2) |
+| `Font(name, size, bold, italic)` and `font_substitutes()` | the cell font and the Normal font passed to xlformat, built once per font; a family a function does not measure becomes Calibri for that function, with a notice (§6.2) |
 | `file_column_metrics(file_width, base_col_width=, default_col_width=, normal_font=)` → `ColumnMetrics` | column widths: characters from `width` (§2.2), points from `points` (§3.6); `left_inset`, `right_inset` and `digit_width` place text and indent it |
 | `column_metrics_from_points(points, normal_font=)` → `ColumnMetrics` | a merged cell's width: its `width` is the `column_width` of the merge's sum of points (§3.6) |
 | `text_width(text, font=)` | `excel` mode: spill, placement, wrapping, `distributed` spacing, `fill` copies and `TextRun.width` (§3.6) |

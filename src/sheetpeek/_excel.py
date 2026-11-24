@@ -341,7 +341,9 @@ def _platform_row_model(
     wrapped: tuple[tuple[Font, int], ...],
     platform: xlformat.Platform,
 ) -> float:
-    """The height xlformat's captured row model gives, or 0 when a font is not measured.
+    """The height xlformat's captured row model gives, or 0 at a size it has not measured.
+
+    A face the model lacks counts as Calibri at its size, as the layout measures it (§6.2).
 
     Wrapped lines take a point each beyond the font's height, one line included, and a larger
     font in the row adds the difference of the faces' line insets (xlformat's
@@ -355,9 +357,10 @@ def _platform_row_model(
     windows = platform.name == "windows"
 
     def spec(font: Font) -> xlformat.Font:
-        # a single underline adds nothing
+        # a single underline adds nothing; a face the model lacks is Calibri, as it is measured
         underline = font.underline if accounting(font) and not windows else None
-        return xlformat.Font(font.name, font.size, font.bold, font.italic, underline)
+        name = _platform.metrics_face(font.name, "row_metrics", platform)
+        return xlformat.Font(name, font.size, font.bold, font.italic, underline)
 
     try:
         return xlformat.row_metrics(
@@ -366,7 +369,7 @@ def _platform_row_model(
             wrapped=[(spec(f), lines) for f, lines in wrapped],
             platform=platform,
         ).height
-    except LookupError:  # a face or size the model has not measured: the fonts' own heights
+    except LookupError:  # a size the model has not measured: the fonts' own heights
         return 0.0
 
 

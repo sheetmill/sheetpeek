@@ -14,7 +14,7 @@ from functools import lru_cache
 import xlformat
 
 from sheetpeek._model import Font, Row, Sheet
-from sheetpeek._platform import current
+from sheetpeek._platform import current, metrics_face
 
 _LARGEST = 72.0
 """The largest size xlformat's row model covers."""
@@ -25,15 +25,17 @@ ACCOUNTING_FALLBACK = 3.0
 """Points an accounting underline adds where xlformat has no accounting rows (Courier New below
 5.5 points): Calibri 11's 3 (unverified)."""
 
-_ROW_FACES = frozenset(
-    ("calibri", "aptos narrow", "arial", "times new roman", "courier new", "georgia")
-)
-"""The faces xlformat's row model covers, at every size from 1 to 72 points."""
 
+def _row_font(
+    font: Font, platform: xlformat.Platform, underline: str | None = None
+) -> xlformat.Font:
+    """The font xlformat's row model reads on ``platform``.
 
-def _row_font(font: Font, underline: str | None = None) -> xlformat.Font:
-    """The font xlformat's row model reads: Calibri for a face it lacks, the size bounded."""
-    name = font.name if font.name.lower() in _ROW_FACES else "Calibri"
+    Calibri for a face it lacks (reported ``font.no_metrics`` by the layout), the size bounded
+    to the model's 1 to 72 points.
+    """
+    function = "vertical_metrics" if platform.name == "windows" else "row_metrics"
+    name = metrics_face(font.name, function, platform)
     size = min(max(font.size, 1.0), _LARGEST)  # past 72: see face_metrics
     return xlformat.Font(name, size, font.bold, font.italic, underline)
 
@@ -81,7 +83,7 @@ def _face(font: Font, platform: xlformat.Platform) -> tuple[float, float, float,
     """``face_metrics`` and ``line_inset`` of ``font`` on ``platform``."""
     if platform.name == "windows":
         return _windows_face(font, platform)
-    plain = xlformat.row_metrics(_row_font(font)).font_height
+    plain = xlformat.row_metrics(_row_font(font, platform)).font_height
     ascent = float(math.ceil(min(max(font.size, 1.0), _LARGEST))) + 1.0
     if font.size > _LARGEST:  # 72's scaled with the size (unverified; 409 caps at TALLEST_ROW)
         scale = math.ceil(font.size) / _LARGEST
@@ -89,7 +91,8 @@ def _face(font: Font, platform: xlformat.Platform) -> tuple[float, float, float,
     extra = 0.0
     if font.underline in ("singleAccounting", "doubleAccounting"):
         try:
-            extra = xlformat.row_metrics(_row_font(font, font.underline)).accounting_height
+            spec = _row_font(font, platform, font.underline)
+            extra = xlformat.row_metrics(spec).accounting_height
         except LookupError:  # Courier New below 5.5 points
             extra = ACCOUNTING_FALLBACK
     return plain, ascent, plain - ascent, extra, plain - ascent - 2.0
@@ -107,14 +110,11 @@ def _windows_face(
     thicknesses, the Mac's rule in pixels (captured at Calibri 11, ``windows/text_style``
     group ``fonts``: single and double rows of 23 px; other sizes unverified).
     """
-    spec = _row_font(font)
+    spec = _row_font(font, platform)
     plain = replace(font, underline=None)
     try:
-        try:
-            found = xlformat.vertical_metrics(spec, platform=platform)
-        except LookupError:
-            found = xlformat.vertical_metrics(replace(spec, name="Calibri"), platform=platform)
-    except LookupError:
+        found = xlformat.vertical_metrics(spec, platform=platform)
+    except LookupError:  # a size outside the Windows tables
         mac = _face(plain, xlformat.Platform.MAC)
         height = 0.75 * round(mac[0] / 0.75)
         bottom = 0.75 * round(mac[2] / 0.75)
@@ -124,10 +124,8 @@ def _windows_face(
         bottom, inset = found.baseline_from_bottom, found.line_inset
     extra = 0.0
     if font.underline in ("singleAccounting", "doubleAccounting"):
-        try:
-            rules = xlformat.rule_metrics(spec, platform=platform)
-        except LookupError:
-            rules = xlformat.rule_metrics(replace(spec, name="Calibri"), platform=platform)
+        face = metrics_face(font.name, "rule_metrics", platform)
+        rules = xlformat.rule_metrics(replace(spec, name=face), platform=platform)
         extra = 3 * rules.underline_thickness
     return height, ascent, bottom, extra, inset
 
