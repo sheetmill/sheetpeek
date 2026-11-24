@@ -1,0 +1,350 @@
+{
+ "schema": 1,
+ "job_id": "sheetpeek-20261123-162418-text-style",
+ "package": "sheetpeek",
+ "purpose": "sheetpeek capture group text_style: window pictures of alignment, shrink to fit, underlines and font effects, wrapping and distributed text, at zoom 100 and 200 (suite text_style)",
+ "limits": {
+  "job_seconds": 1800,
+  "step_seconds": 600
+ },
+ "audit": false,
+ "workbooks": [
+  {
+   "file": "text_style_align.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "view",
+     "sheet": "Sheet",
+     "select": "Sheet!AZ300",
+     "zoom": 100,
+     "scroll_row": 1,
+     "scroll_column": 1
+    },
+    {
+     "op": "read",
+     "id": "geometry",
+     "range": "Sheet!A1:J26",
+     "props": [
+      "left",
+      "top",
+      "width",
+      "height",
+      "text"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "display",
+     "range": "Sheet!A1:J26",
+     "props": [
+      "font.name",
+      "font.size",
+      "font.underline",
+      "align.horizontal",
+      "align.vertical"
+     ],
+     "display": true
+    },
+    {
+     "op": "view",
+     "sheet": "Sheet",
+     "select": "Sheet!AZ300",
+     "id": "view_z100",
+     "zoom": 100,
+     "scroll_row": 1,
+     "scroll_column": 1
+    },
+    {
+     "op": "capture_window",
+     "id": "shot_z100",
+     "name": "text_style_align_z100.png"
+    },
+    {
+     "op": "close",
+     "save": false
+    }
+   ]
+  },
+  {
+   "file": "text_style_shrink.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "view",
+     "sheet": "Sheet",
+     "select": "Sheet!AZ300",
+     "zoom": 100,
+     "scroll_row": 1,
+     "scroll_column": 1
+    },
+    {
+     "op": "read",
+     "id": "geometry",
+     "range": "Sheet!A1:J22",
+     "props": [
+      "left",
+      "top",
+      "width",
+      "height",
+      "text"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "display",
+     "range": "Sheet!A1:J22",
+     "props": [
+      "font.name",
+      "font.size",
+      "font.underline",
+      "align.horizontal",
+      "align.vertical"
+     ],
+     "display": true
+    },
+    {
+     "op": "view",
+     "sheet": "Sheet",
+     "select": "Sheet!AZ300",
+     "id": "view_z100",
+     "zoom": 100,
+     "scroll_row": 1,
+     "scroll_column": 1
+    },
+    {
+     "op": "capture_window",
+     "id": "shot_z100",
+     "name": "text_style_shrink_z100.png"
+    },
+    {
+     "op": "view",
+     "sheet": "Sheet",
+     "select": "Sheet!AZ300",
+     "id": "view_z200",
+     "zoom": 200,
+     "scroll_row": 1,
+     "scroll_column": 1
+    },
+    {
+     "op": "capture_window",
+     "id": "shot_z200",
+     "name": "text_style_shrink_z200.png"
+    },
+    {
+     "op": "close",
+     "save": false
+    }
+   ]
+  },
+  {
+   "file": "text_style_fonts.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "view",
+     "sheet": "Sheet",
+     "select": "Sheet!AZ300",
+     "zoom": 100,
+     "scroll_row": 1,
+     "scroll_column": 1
+    },
+    {
+     "op": "read",
+     "id": "geometry",
+     "range": "Sheet!A1:J24",
+     "props": [
+      "left",
+      "top",
+      "width",
+      "height",
+      "text"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "display",
+     "range": "Sheet!A1:J24",
+     "props": [
+      "font.name",
+      "font.size",
+      "font.underline",
+      "align.horizontal",
+      "align.vertical"
+     ],
+     "display": true
+    },
+    {
+     "op": "view",
+     "sheet": "Sheet",
+     "select": "Sheet!AZ300",
+     "id": "view_z100",
+     "zoom": 100,
+     "scroll_row": 1,
+     "scroll_column": 1
+    },
+    {
+     "op": "capture_window",
+     "id": "shot_z100",
+     "name": "text_style_fonts_z100.png"
+    },
+    {
+     "op": "view",
+     "sheet": "Sheet",
+     "select": "Sheet!AZ300",
+     "id": "view_z200",
+     "zoom": 200,
+     "scroll_row": 1,
+     "scroll_column": 1
+    },
+    {
+     "op": "capture_window",
+     "id": "shot_z200",
+     "name": "text_style_fonts_z200.png"
+    },
+    {
+     "op": "close",
+     "save": false
+    }
+   ]
+  },
+  {
+   "file": "text_style_wrap.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "view",
+     "sheet": "Sheet",
+     "select": "Sheet!AZ300",
+     "zoom": 100,
+     "scroll_row": 1,
+     "scroll_column": 1
+    },
+    {
+     "op": "read",
+     "id": "geometry",
+     "range": "Sheet!A1:J30",
+     "props": [
+      "left",
+      "top",
+      "width",
+      "height",
+      "text"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "display",
+     "range": "Sheet!A1:J30",
+     "props": [
+      "font.name",
+      "font.size",
+      "font.underline",
+      "align.horizontal",
+      "align.vertical"
+     ],
+     "display": true
+    },
+    {
+     "op": "view",
+     "sheet": "Sheet",
+     "select": "Sheet!AZ300",
+     "id": "view_z100",
+     "zoom": 100,
+     "scroll_row": 1,
+     "scroll_column": 1
+    },
+    {
+     "op": "capture_window",
+     "id": "shot_z100",
+     "name": "text_style_wrap_z100.png"
+    },
+    {
+     "op": "view",
+     "sheet": "Sheet",
+     "select": "Sheet!AZ300",
+     "id": "view_z200",
+     "zoom": 200,
+     "scroll_row": 1,
+     "scroll_column": 1
+    },
+    {
+     "op": "capture_window",
+     "id": "shot_z200",
+     "name": "text_style_wrap_z200.png"
+    },
+    {
+     "op": "close",
+     "save": false
+    }
+   ]
+  },
+  {
+   "file": "text_style_lone.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "view",
+     "sheet": "Sheet",
+     "select": "Sheet!AZ300",
+     "zoom": 100,
+     "scroll_row": 1,
+     "scroll_column": 1
+    },
+    {
+     "op": "read",
+     "id": "geometry",
+     "range": "Sheet!A1:J20",
+     "props": [
+      "left",
+      "top",
+      "width",
+      "height",
+      "text"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "display",
+     "range": "Sheet!A1:J20",
+     "props": [
+      "font.name",
+      "font.size",
+      "font.underline",
+      "align.horizontal",
+      "align.vertical"
+     ],
+     "display": true
+    },
+    {
+     "op": "view",
+     "sheet": "Sheet",
+     "select": "Sheet!AZ300",
+     "id": "view_z100",
+     "zoom": 100,
+     "scroll_row": 1,
+     "scroll_column": 1
+    },
+    {
+     "op": "capture_window",
+     "id": "shot_z100",
+     "name": "text_style_lone_z100.png"
+    },
+    {
+     "op": "close",
+     "save": false
+    }
+   ]
+  }
+ ]
+}

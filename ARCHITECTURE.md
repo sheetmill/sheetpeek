@@ -738,7 +738,11 @@ From Excel for Windows (Excel 16.0.20527.20196, Microsoft 365, 96 dpi, en-US), r
 jobs (`capture/job.py`, `CAPTURING.md`): `windows/merge_width` and `windows/error_width`, every
 cell as sheetpeek shows it with `platform="windows"` (§3.2): merged widths, `#` runs and General
 in whole pixels. The lines and tiles of `windows/borders` and `windows/fills`: §4.12; the indents and shrink
-levels of `windows/text_steps`: §4.6, §4.13.
+levels of `windows/text_steps`: §4.6, §4.13. `windows/text_style` (zoom 100): every cell's width
+as sheetpeek's; rows fitted to text, which sheetpeek still fits with Excel for Mac's rules, differ
+(28 rows, waiting for xlformat's Windows vertical metrics); vertical justify and distributed text
+keeps on one line what sheetpeek breaks (10 cells: "bbbb cccc", 59 px, on one line of a 64 px
+cell), their line budget on Windows not modeled; wrapped text breaks as sheetpeek breaks it.
 ### 4.10 Hyperlinks
 
 The look and where a link goes are captured (`links`, Excel 16.115, zoom 100; the places through

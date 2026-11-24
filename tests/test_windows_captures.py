@@ -302,3 +302,78 @@ def test_windows_shrinks_each_length_to_the_pixel_level_sheetpeek_gives_it(steps
     )
     assert compared == 27 + 48 + 48
     assert wrong == {}
+
+
+# --- text_style: cell widths, fitted rows and line counts at zoom 100
+
+KNOWN_ROWS: dict[str, tuple[int, ...]] = {
+    # Known deviations, rows by group: rows fitted to their text, which sheetpeek fits with Excel
+    # for Mac's rules; they wait for xlformat's Windows vertical metrics.
+    "align": (14, 16, 18),
+    "shrink": (4, 12),
+    "fonts": (10, 12, 14, 16, 18, 20, 24),
+    "wrap": tuple(range(4, 31, 2)),
+    "lone": (4, 8),
+}
+KNOWN_LINES: dict[str, tuple[str, ...]] = {
+    # Known deviations. Vertical justify and distributed text on Windows keeps on one line what
+    # sheetpeek breaks (Excel fits "bbbb cccc", 59 px, on one line of a 64 px cell): their line
+    # budget on Windows is not modeled.
+    "align": ("G8", "G10", "G14", "G16", "G18"),
+    "lone": ("C4", "E4", "G4", "I4", "I8"),
+}
+SHOWN_LINES: dict[str, tuple[str, ...]] = {
+    # Not compared: a 15 pt row shows one line of several, and the capture counts the lines shown.
+    "lone": ("C6", "E6", "G6", "I6"),
+}
+
+
+@pytest.mark.excel
+def test_windows_text_style_widths_rows_and_lines_are_sheetpeeks():
+    pytest.importorskip("openpyxl")
+    import tempfile
+
+    import openpyxl
+    from capture import text_style
+    from openpyxl.utils import column_index_from_string
+    from openpyxl.utils.cell import coordinate_from_string
+
+    _, body = _table("text_style.tsv")
+    widths = rows = lines = 0
+    wrong_widths, wrong_rows, wrong_lines = [], set(), set()
+    with tempfile.TemporaryDirectory() as tmp:
+        for group in text_style.GROUPS:
+            wb = openpyxl.Workbook()
+            text_style.fill(wb.active, group)
+            path = Path(tmp) / f"{group}.xlsx"
+            wb.save(path)
+            rendered = sheetpeek.read(path, platform="windows").layout("excel")
+            columns = {c.index: c for c in rendered.columns}
+            by_row = {r.index: r for r in rendered.rows}
+            for record in body:
+                if record["group"] != group or record["zoom"] != "100":
+                    continue
+                letters, r = coordinate_from_string(record["cell"])
+                c = column_index_from_string(letters)
+                widths += 1
+                if float(record["cell_width"]) != columns[c].width_pt:
+                    wrong_widths.append((group, record["cell"]))
+                rows += 1
+                if float(record["row_height"]) != by_row[r].height_pt:
+                    wrong_rows.add((group, r))
+                if record["lines"] and record["cell"] not in SHOWN_LINES.get(group, ()):
+                    lines += 1
+                    ours = {round(t.y, 3) for t in by_row[r].runs if t.source == (r, c)}
+                    if int(record["lines"]) != len(ours):
+                        wrong_lines.add((group, record["cell"]))
+    known_rows = {(g, r) for g, found in KNOWN_ROWS.items() for r in found}
+    known_lines = {(g, c) for g, found in KNOWN_LINES.items() for c in found}
+    REPORT["text_style (Windows)"] = (
+        f"text_style, Excel for Windows: {widths} cell widths, {len(wrong_widths)} deviations; "
+        f"{len(known_rows)} of the rows a known deviation (vertical metrics); {lines} line counts, "
+        f"{len(known_lines)} a known deviation (justify and distributed line budget)"
+    )
+    assert (widths, rows, lines) == (141, 141, 78)
+    assert wrong_widths == []
+    assert wrong_rows == known_rows
+    assert wrong_lines == known_lines

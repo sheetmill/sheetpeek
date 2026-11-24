@@ -292,3 +292,4 @@ result's header whole as one line (`job_header`); the job's manifest lies beside
 | `windows/borders` | 176 | as the Mac's `borders`, measured on the job's pictures at their device pixels a point; the header's `gridline` is the gray measured on the control cell |
 | `windows/fills` | 82 | as the Mac's `fills`; tiles in device pixels (`tile_unit` `device_px`), `display_pattern` Windows' `XlPattern` number |
 | `windows/text_steps` | 256 | as the Mac's `text_steps`: a workbook a group under its Normal font, captured at zoom 100 by the job of the same name; the gray measured on D1 |
+| `windows/text_style` | 226 | as the Mac's `text_style`: a workbook a group at its zooms, captured by the job of the same name with the displayed font and alignment read (`underline`, `h_align` and `v_align` Windows' numbers); cells outside the window at zoom 200 left out |
