@@ -4,7 +4,7 @@
     uv run python -m capture.job read GROUP JOB_DIR RESULT_DIR
 
 The job format is sheetmill's, version 1:
-https://github.com/sheetmill/sheetmill/blob/e3a5207c251929a8a19d713777b70ace3506fb95/docs/capture-jobs.md
+https://github.com/sheetmill/sheetmill/blob/3adb865500f4d2223e5c1a758b466e081d3fdc79/docs/capture-jobs.md
 A group (``GROUPS``) is one workbook and the suites read from it. ``write`` makes the job folder:
 the manifest (``job.json``) and the workbook in ``files/``, built as the suite's module builds it
 for Excel for Mac, with its zip entries' times and document dates fixed, so that writing it again

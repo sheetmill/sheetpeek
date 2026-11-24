@@ -279,11 +279,12 @@ Excel makes of them. A case that hangs ends the run and nothing is written.
 | `font_cut` | 50 | route C, the screen, zoom 100: Arial 24 "Hxg" probes, each a red of its own, at font-list entries 990 to 1,009 and as rich-text runs at font-table entries 995 to 1,004 (after the list, in cell order), behind filler fonts on a second sheet, under Calibri 11 Normal and theme fonts; and at list entries 995 to 1,004 under a theme of Arial body and Aptos Narrow heading fonts with a Times New Roman 10 or 16 Normal font: the fitted row, the font Excel reports, the ink's height, color and glyph starts, and Excel's standard font (`standard_font`, recorded with the theme groups); predictions before each run |
 
 **Captures from Excel for Windows** (`tests/captures/windows/`), each read from a capture job in
-sheetmill's job format by `capture/job.py` (`python -m capture.job write GROUP JOB_ID OUT` makes
-the job; `read GROUP JOB_DIR RESULT_DIR` writes the suite files from its result). Each file has its
-Mac suite's schema, under a header naming the platform, the Excel build and the job, with the
-result's header whole as one line (`job_header`); the job's manifest lies beside it as
-`<group>.job.json`. Excel 16.0.20527.20196 (Microsoft 365), Windows at 96 dpi, en-US.
+[sheetmill's job format](https://github.com/sheetmill/sheetmill/blob/3adb865500f4d2223e5c1a758b466e081d3fdc79/docs/capture-jobs.md) by `capture/job.py` (`python -m capture.job write GROUP JOB_ID OUT`
+makes the job; `read GROUP JOB_DIR RESULT_DIR` writes the suite files from its result). Each file
+has its Mac suite's schema, under a header of sheetpeek's own lines (`suite`, `platform`,
+`excel_build`, `job`, `job_id`, `captured`, and `zooms` and `gridline` where the suite has them)
+and the result's header whole as one line (`job_header`), whose fields that page defines; the
+job's manifest lies beside it as `<group>.job.json`. Excel 16.0.20527.20196 (Microsoft 365), Windows at 96 dpi, en-US.
 
 | file | rows | what |
 |---|---|---|
