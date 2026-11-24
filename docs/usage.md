@@ -44,8 +44,7 @@ formula xlrecalc does not compute keeps the value the file holds and is reported
 Column widths, built-in number formats and text measure as that Excel's, and the sheet keeps the
 platform it was read with for its layout and every output. `regional_settings` takes an
 `xlformat.RegionalSettings`, by default the platform's en-US settings. On Windows, row heights,
-where text sits vertically, and underlines still follow Excel for Mac's rules, until xlformat
-measures them for Windows.
+where text sits and its underlines are in whole pixels, as Excel for Windows draws them.
 
 ```python
 >>> windows = sheetpeek.read(path, platform="windows")

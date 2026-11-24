@@ -15,6 +15,7 @@ from typing import Literal
 
 import xlformat
 
+from sheetpeek import _platform
 from sheetpeek._model import Font
 from sheetpeek._rows import script_size
 from sheetpeek._text_model import TextRule
@@ -188,12 +189,33 @@ def rules(
     return tuple(found)
 
 
-@functools.lru_cache(maxsize=256)
 def _rule_metrics(name: str, size: float, bold: bool, italic: bool) -> xlformat.RuleMetrics | None:
-    """Xlformat's rules for the face at ``size``, zoom 100; ``None`` where it has none."""
+    """Xlformat's rules for the face at ``size``, zoom 100, on the platform measured.
+
+    ``None`` where it has none.
+    """
+    return _platform_rules(name, size, bold, italic, _platform.current())
+
+
+@functools.lru_cache(maxsize=256)
+def _platform_rules(
+    name: str, size: float, bold: bool, italic: bool, platform: xlformat.Platform
+) -> xlformat.RuleMetrics | None:
+    """``_rule_metrics`` on ``platform``.
+
+    On Windows a face without Windows tables takes Calibri's at the size, as it is measured
+    (unverified).
+    """
     face = name if name.lower() in _RULE_FACES else "Calibri"
     try:
-        return xlformat.rule_metrics(xlformat.Font(face, size, bold, italic))
+        return xlformat.rule_metrics(xlformat.Font(face, size, bold, italic), platform=platform)
+    except LookupError:
+        if platform.name != "windows" or face == "Calibri":
+            return None
+    try:
+        return xlformat.rule_metrics(
+            xlformat.Font("Calibri", size, bold, italic), platform=platform
+        )
     except LookupError:
         return None
 

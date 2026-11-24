@@ -14,7 +14,7 @@ import xlformat
 from sheetpeek import _platform
 from sheetpeek._layout import _UNDRAWN
 from sheetpeek._model import Cell, Font
-from sheetpeek._rows import WRAPPED_LEADING, baseline_offsets, face_metrics, font_row_height
+from sheetpeek._rows import baseline_offsets, face_metrics, font_row_height, wrapped_leading
 from sheetpeek._runs_model import TextSpan
 from sheetpeek._text_styles import scaled
 
@@ -169,6 +169,9 @@ def wrap(text: str, budget: float, width: Callable[[int, int], float]) -> list[t
 
 
 def fitted_height(text: Text, lines: list[tuple[int, int]]) -> float:
-    """The height a fitted row gives the text's lines: each its largest run's, +1 pt if several."""
-    extra = WRAPPED_LEADING if len(lines) > 1 else 0.0
+    """The height a fitted row gives the text's lines: each its largest run's.
+
+    On the Mac each line takes a point more when there are several (``wrapped_leading``).
+    """
+    extra = wrapped_leading() if len(lines) > 1 else 0.0
     return sum(line_metrics(text.fonts(a, b), len(lines))[0] + extra for a, b in lines)

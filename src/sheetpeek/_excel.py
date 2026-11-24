@@ -41,6 +41,7 @@ from sheetpeek._rows import (
     font_row_height,
     print_baseline_offsets,
     row_height,
+    unit,
     wrapped_height,
 )
 from sheetpeek._runs import (
@@ -326,9 +327,19 @@ def _indents(align: str) -> int:
     return 2 if align == "distributed" else 1 if align in ("left", "right") else 0
 
 
-@functools.lru_cache(maxsize=1024)
 def _row_model(
     normal: Font, cell_fonts: frozenset[Font], wrapped: tuple[tuple[Font, int], ...]
+) -> float:
+    """``_platform_row_model`` on the platform measured."""
+    return _platform_row_model(normal, cell_fonts, wrapped, _platform.current())
+
+
+@functools.lru_cache(maxsize=1024)
+def _platform_row_model(
+    normal: Font,
+    cell_fonts: frozenset[Font],
+    wrapped: tuple[tuple[Font, int], ...],
+    platform: xlformat.Platform,
 ) -> float:
     """The height xlformat's captured row model gives, or 0 when a font is not measured.
 
@@ -337,11 +348,15 @@ def _row_model(
     ``capture/row_heights.py``: Excel's heights for one to six wrapped lines in each face under
     each Normal font, and beside unwrapped cells in other fonts, under "Row heights" in its
     CAPTURING.md; several wrapped cells in one row are not captured). Rows repeat the same
-    fonts, so the result is kept by them.
+    fonts, so the result is kept by them. On Windows, wrapped lines take the face's height
+    alone, and xlformat has no accounting rows: those fonts count as plain ones here, their
+    underlines added by the caller's own fit (``face_metrics``).
     """
+    windows = platform.name == "windows"
 
     def spec(font: Font) -> xlformat.Font:
-        underline = font.underline if accounting(font) else None  # a single one adds nothing
+        # a single underline adds nothing
+        underline = font.underline if accounting(font) and not windows else None
         return xlformat.Font(font.name, font.size, font.bold, font.italic, underline)
 
     try:
@@ -349,6 +364,7 @@ def _row_model(
             spec(normal),
             cell_fonts=[spec(f) for f in cell_fonts],
             wrapped=[(spec(f), lines) for f, lines in wrapped],
+            platform=platform,
         ).height
     except LookupError:  # a face or size the model has not measured: the fonts' own heights
         return 0.0
@@ -1152,6 +1168,7 @@ def _baselines(
     rows of 15 to 32 pt, and a line of 14 or 20 pt in a 15 pt row); top text and the spread
     alignments start at the top (captured, ``overflow``).
     """
+    step = unit()  # a point on the Mac, a pixel on Windows
     heights = [m[0] for m in metrics]
     total = sum(heights)
     n = len(metrics)
@@ -1171,10 +1188,10 @@ def _baselines(
     elif v_align in _SPREAD and n > 1:
         first = top + metrics[0][1]
         pitch = (bottom - row_below - first) / (n - 1)
-        return [first + math.floor(k * pitch) for k in range(n)]
+        return [first + step * math.floor(round(k * pitch / step, 9)) for k in range(n)]
     elif v_align in ("center", "distributed"):
         own = bottom - block[-1][2] - block[-1][1] - first_lines
-        line_top = top + math.trunc((own - top) / 2)
+        line_top = top + step * math.trunc(round((own - top) / step, 9) / 2)
     elif v_align == "bottom":
         line_top = bottom - row_below - block[-1][1] - first_lines
     else:  # justify, one line: at the top

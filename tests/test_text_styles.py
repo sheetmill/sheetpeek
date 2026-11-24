@@ -431,6 +431,26 @@ def test_windows_insets_are_device_pixels_of_the_cells_font(tmp_path):
     assert [runs_of(rendered, r, 1)[0].x for r in (1, 2)] == [2.25, 3.75]
 
 
+def test_windows_draws_a_rule_past_its_row_on_into_the_row_below(tmp_path):
+    # A double accounting underline at 11 pt at the top of a 12 pt row reaches past it: Excel
+    # for Windows draws the rest below the next row's top gridline, the Mac cuts it at the row
+    # (captured, rules_below).
+    def build(ws):
+        ws["A1"] = "Hxg"
+        ws["A1"].font = Font(underline="doubleAccounting")
+        ws["A1"].alignment = Alignment(vertical="top")
+        ws.row_dimensions[1].height = 12
+
+    path = book(tmp_path, build)
+    clips = {}
+    for platform in ("mac", "windows"):
+        rendered = sheetpeek.read(path, platform=platform).layout("excel")
+        (run,) = runs_of(rendered, 1, 1)
+        assert max(r.y + r.gap + r.thickness for r in run.rules) > run.clip[3]
+        clips[platform] = html(rendered).count('class="sp-clip"')
+    assert clips == {"mac": 1, "windows": 2}
+
+
 def test_a_merge_is_not_shrunk(tmp_path):
     # Captured with the flag on the anchor only (doubtful): clipped at the merge's edge.
     def build(ws):

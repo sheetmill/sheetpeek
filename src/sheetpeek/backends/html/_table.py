@@ -114,6 +114,7 @@ class Page:
         self.gx, self.gy = _outline.offsets(sheet, backend)  # px, the outline gutters
         self.outline_rows = _outline.row_marks(sheet, backend)
         self.normal = sheet.sheet.normal_font
+        self.platform = sheet.sheet.platform.name
         self.normal_face = _text._face(self.normal, self.normal.size * self.zoom / 100)
         self.width = self.x(sheet.width_pt) + 1  # px, the wrapper's width: the table's
         self.fills = _patterns.Fills(self)

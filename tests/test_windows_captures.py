@@ -308,13 +308,13 @@ def test_windows_shrinks_each_length_to_the_pixel_level_sheetpeek_gives_it(steps
 # --- text_style: cell widths, fitted rows and line counts at zoom 100
 
 KNOWN_ROWS: dict[str, tuple[int, ...]] = {
-    # Known deviations, rows by group: rows fitted to their text, which sheetpeek fits with Excel
-    # for Mac's rules; they wait for xlformat's Windows vertical metrics.
+    # Known deviations, rows by group, two reasons. Horizontally distributed and justified
+    # wrapped text: Excel for Windows fits a row a line taller than its lines (three lines of
+    # Calibri 11 in 80 px, nine in 200 px), not modeled. Superscript and subscript: sheetpeek
+    # fits them by Excel for Mac's rules, not captured on Windows.
     "align": (14, 16, 18),
-    "shrink": (4, 12),
-    "fonts": (10, 12, 14, 16, 18, 20, 24),
-    "wrap": tuple(range(4, 31, 2)),
-    "lone": (4, 8),
+    "fonts": (14, 16, 18, 20),
+    "lone": (4,),
 }
 KNOWN_LINES: dict[str, tuple[str, ...]] = {
     # Known deviations: none. Vertical justify and distributed text keeps on one line what fits
@@ -369,7 +369,7 @@ def test_windows_text_style_widths_rows_and_lines_are_sheetpeeks():
     known_lines = {(g, c) for g, found in KNOWN_LINES.items() for c in found}
     REPORT["text_style (Windows)"] = (
         f"text_style, Excel for Windows: {widths} cell widths, {len(wrong_widths)} deviations; "
-        f"{len(known_rows)} of the rows a known deviation (vertical metrics); {lines} line counts, "
+        f"{len(known_rows)} of the rows known deviations; {lines} line counts, "
         f"{len(known_lines)} known deviations"
     )
     assert (widths, rows, lines) == (141, 141, 78)

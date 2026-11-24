@@ -1,4 +1,4 @@
-"""Row heights in points, as Excel for Mac lays them out (``ARCHITECTURE.md`` §4.7).
+"""Row heights in points, as Excel lays them out on the platform measured (§4.7).
 
 A row's own ``ht`` wins. Otherwise ``<sheetFormatPr>`` decides, together with whether the file
 has a ``<row>`` element for the row: Excel ignores ``defaultRowHeight`` unless ``customHeight``
@@ -14,13 +14,13 @@ from functools import lru_cache
 import xlformat
 
 from sheetpeek._model import Font, Row, Sheet
+from sheetpeek._platform import current
 
 _LARGEST = 72.0
 """The largest size xlformat's row model covers."""
 TALLEST_ROW = 409.5
 """Excel's tallest row, in points: a row fitted to a font or to 90-degree text stops there."""
 NO_SHEET_FORMAT = 16.0  # an unlisted row of a file without <sheetFormatPr>, every font
-WRAPPED_LEADING = 1.0  # wrapped lines are the font's row height plus 1 apart (Calibri 11: 16)
 ACCOUNTING_FALLBACK = 3.0
 """Points an accounting underline adds where xlformat has no accounting rows (Courier New below
 5.5 points): Calibri 11's 3 (unverified)."""
@@ -38,17 +38,49 @@ def _row_font(font: Font, underline: str | None = None) -> xlformat.Font:
     return xlformat.Font(name, size, font.bold, font.italic, underline)
 
 
-@lru_cache(maxsize=1024)
-def face_metrics(font: Font) -> tuple[float, float, float, float]:
-    """(height ``F``, ascent ``ceil(S) + 1``, bottom offset ``B``, accounting addition ``A``).
+def wrapped_leading() -> float:
+    """What each wrapped line adds beyond its face's height.
 
-    From xlformat's row model (``row_metrics``): a face's height ``F`` at its exact size, its
-    ascent, the top-aligned baseline's distance below a row's top, and ``B = F - ceil(S) - 1``,
-    the bottom-aligned baseline's distance above a row's bottom in a row of this font alone.
-    ``A`` is what the font's accounting underline adds to ``B`` and to each wrapped line, 0
-    without one (xlformat's ``RowMetrics.accounting_height``). A face xlformat has no rows for
-    takes Calibri's at the size (a known deviation for a face other than xlformat's six).
+    A point on the Mac (Calibri 11 lines 16 pt apart in a fitted row), nothing on Windows
+    (20 px; xlformat's ``line_height``).
     """
+    return 0.0 if current().name == "windows" else 1.0
+
+
+def unit() -> float:
+    """The screen unit positions round to, in points: a point on the Mac, a pixel on Windows."""
+    return 0.75 if current().name == "windows" else 1.0
+
+
+def face_metrics(font: Font) -> tuple[float, float, float, float]:
+    """(height ``F``, ascent, bottom offset ``B``, accounting addition ``A``), in points.
+
+    On the Mac from xlformat's row model (``row_metrics``): a face's height ``F`` at its exact
+    size, its ascent ``ceil(S) + 1``, the top-aligned baseline's distance below a row's top, and
+    ``B = F - ceil(S) - 1``, the bottom-aligned baseline's distance above a row's bottom in a row
+    of this font alone. On Windows from xlformat's ``vertical_metrics`` in whole pixels: the
+    face's height ``H``, the ascent ``H - D + 1`` and ``B = D - 1``, ``D`` its descent. ``A`` is
+    what the font's accounting underline adds to ``B`` and to each wrapped line, 0 without one
+    (xlformat's ``RowMetrics.accounting_height``). A face xlformat has no rows for takes
+    Calibri's at the size (a known deviation for a face other than xlformat's).
+    """
+    return _face(font, current())[:4]
+
+
+def line_inset(font: Font) -> float:
+    """A face's line inset, xlformat's ``VerticalMetrics.line_inset``: ``B - 2`` on the Mac.
+
+    Wrapped text in a face with a smaller one than the row's unwrapped fonts sits the
+    difference higher.
+    """
+    return _face(font, current())[4]
+
+
+@lru_cache(maxsize=1024)
+def _face(font: Font, platform: xlformat.Platform) -> tuple[float, float, float, float, float]:
+    """``face_metrics`` and ``line_inset`` of ``font`` on ``platform``."""
+    if platform.name == "windows":
+        return _windows_face(font, platform)
     plain = xlformat.row_metrics(_row_font(font)).font_height
     ascent = float(math.ceil(min(max(font.size, 1.0), _LARGEST))) + 1.0
     if font.size > _LARGEST:  # 72's scaled with the size (unverified; 409 caps at TALLEST_ROW)
@@ -60,7 +92,44 @@ def face_metrics(font: Font) -> tuple[float, float, float, float]:
             extra = xlformat.row_metrics(_row_font(font, font.underline)).accounting_height
         except LookupError:  # Courier New below 5.5 points
             extra = ACCOUNTING_FALLBACK
-    return plain, ascent, plain - ascent, extra
+    return plain, ascent, plain - ascent, extra, plain - ascent - 2.0
+
+
+def _windows_face(
+    font: Font, platform: xlformat.Platform
+) -> tuple[float, float, float, float, float]:
+    """``_face`` on Excel for Windows: xlformat's ``vertical_metrics``, in whole pixels.
+
+    A face xlformat has no Windows tables for takes Calibri's at the size, as it is measured
+    (reported ``font.no_metrics``; unverified). A size xlformat has no Windows rows for takes
+    the Mac's height and bottom offset rounded to whole pixels, its line inset the bottom
+    offset, as at every tabled size (unverified). An accounting underline adds three of its
+    thicknesses, the Mac's rule in pixels (captured at Calibri 11, ``windows/text_style``
+    group ``fonts``: single and double rows of 23 px; other sizes unverified).
+    """
+    spec = _row_font(font)
+    plain = replace(font, underline=None)
+    try:
+        try:
+            found = xlformat.vertical_metrics(spec, platform=platform)
+        except LookupError:
+            found = xlformat.vertical_metrics(replace(spec, name="Calibri"), platform=platform)
+    except LookupError:
+        mac = _face(plain, xlformat.Platform.MAC)
+        height = 0.75 * round(mac[0] / 0.75)
+        bottom = 0.75 * round(mac[2] / 0.75)
+        ascent, inset = height - bottom, bottom
+    else:
+        height, ascent = found.font_height, found.baseline_from_top
+        bottom, inset = found.baseline_from_bottom, found.line_inset
+    extra = 0.0
+    if font.underline in ("singleAccounting", "doubleAccounting"):
+        try:
+            rules = xlformat.rule_metrics(spec, platform=platform)
+        except LookupError:
+            rules = xlformat.rule_metrics(replace(spec, name="Calibri"), platform=platform)
+        extra = 3 * rules.underline_thickness
+    return height, ascent, bottom, extra, inset
 
 
 def font_row_height(font: Font) -> float:
@@ -110,7 +179,7 @@ def wrapped_height(lines: int, font: Font) -> float:
     height, _, _, extra = face_metrics(font)
     if lines <= 1:
         return height + extra
-    return lines * (height + WRAPPED_LEADING + extra)
+    return lines * (height + wrapped_leading() + extra)
 
 
 def baseline_offsets(font: Font) -> tuple[float, float, float]:
@@ -123,15 +192,6 @@ def baseline_offsets(font: Font) -> tuple[float, float, float]:
     """
     height, ascent, bottom, extra = face_metrics(font)
     return height + extra, ascent, bottom + extra
-
-
-def line_inset(font: Font) -> float:
-    """A face's line inset ``B - 2``, xlformat's ``VerticalMetrics.line_inset``.
-
-    Wrapped text in a face with a smaller one than the row's unwrapped fonts sits the
-    difference higher.
-    """
-    return face_metrics(font)[2] - 2.0
 
 
 def print_baseline_offsets(font: Font) -> tuple[float, float, float]:
@@ -170,7 +230,6 @@ def script_size(font: Font) -> tuple[int, int, int, int]:
     return s, math.floor(2 * s / 3 + 0.5), s // 2, s // 5
 
 
-@lru_cache(maxsize=256)
 def script_parts(font: Font) -> tuple[float, float, float]:
     """(part above the shared baseline, part below it, line inset) of a script font's row.
 
@@ -181,13 +240,23 @@ def script_parts(font: Font) -> tuple[float, float, float]:
     shared bottom (captured, ``row_bottoms`` and ``row_height_fitted``; at 6 to 8 pt Excel's
     subscript bottom is a point less).
     """
+    return _script_parts(font, current())
+
+
+@lru_cache(maxsize=256)
+def _script_parts(font: Font, platform: xlformat.Platform) -> tuple[float, float, float]:
+    """``script_parts`` on ``platform``.
+
+    On Windows the Mac's rules with Windows' faces (unverified).
+    """
     s, d, r, lower = script_size(font)
     whole = replace(font, size=float(s), vert_align=None)
-    _, ascent, bottom, extra = face_metrics(whole)
-    drawn = face_metrics(replace(font, size=float(d), vert_align=None, underline=None))
+    _, ascent, bottom, extra, inset = _face(whole, platform)
+    drawn = _face(replace(font, size=float(d), vert_align=None, underline=None), platform)
     if font.vert_align == "superscript":
-        table = _SUPERSCRIPT_ABOVE if font.name.lower() == "calibri" else {}
+        mac_calibri = font.name.lower() == "calibri" and platform.name == "mac"
+        table = _SUPERSCRIPT_ABOVE if mac_calibri else {}
         above = float(table.get(s, r + drawn[1]))
-        return above, bottom + extra, bottom - 2.0
+        return above, bottom + extra, inset
     below = lower + drawn[2]
-    return ascent + below - bottom, below + extra, bottom - 2.0
+    return ascent + below - bottom, below + extra, inset

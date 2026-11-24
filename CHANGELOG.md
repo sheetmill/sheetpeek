@@ -12,8 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and `notices()`, and `--platform` on `sheetpeek view` and `sheetpeek serve`: `"windows"`
   shows a workbook as Excel for Windows at 96 dpi shows it, through xlformat's Windows tables:
   column widths in whole pixels (a default column is 48 pt, where the Mac's is 53), built-in
-  formats from the regional settings (format 14 is `m/d/yyyy`) and text measured in pixels.
-  Rows, vertical placement and underlines still follow Excel for Mac. `platform` takes
+  formats from the regional settings (format 14 is `m/d/yyyy`), text measured in pixels, and
+  rows, where text sits in them and its underlines and strikethrough in whole pixels (three
+  wrapped lines of Calibri 11 take 60 px, 45 points, where the Mac's take 48 points; an
+  underline is 1 px thick). In HTML a line that reaches past its row is drawn on into the row
+  below, as Windows draws it; Excel for Mac cuts it at the row. Superscript and subscript rows
+  keep Excel for Mac's rules. `platform` takes
   `"mac"` (the default), `"windows"` or an `xlformat.Platform`; `regional_settings` an
   `xlformat.RegionalSettings`, by default the platform's en-US settings. A sheet keeps the
   platform it was read with, as `Sheet.platform` and `Sheet.regional_settings`.

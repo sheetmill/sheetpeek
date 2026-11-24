@@ -45,6 +45,10 @@ LABELS: dict[str, tuple[str, ...]] = {
     ),
     "src/sheetpeek/_layout.py": ("Normal font's (unverified, no capture in this repository yet).",),
     "src/sheetpeek/_rows.py": (
+        "(reported ``font.no_metrics``; unverified). A size xlformat has no Windows rows for takes",
+        "offset, as at every tabled size (unverified). An accounting underline adds three of its",
+        "group ``fonts``: single and double rows of 23 px; other sizes unverified).",
+        "On Windows the Mac's rules with Windows' faces (unverified).",
         '5.5 points): Calibri 11\'s 3 (unverified)."""',
         "drawn size's ascent (unverified). A subscript's line grows by ``g = l + B(d) - B(s)`` on",
         "if font.size > _LARGEST:  # 72's scaled with the size (unverified; 409 caps at "
@@ -53,6 +57,7 @@ LABELS: dict[str, tuple[str, ...]] = {
     ),
     "src/sheetpeek/_style/font.py": ("taken alike (unverified).",),
     "src/sheetpeek/_text_styles.py": (
+        "(unverified).",
         '(unverified). Under upright text it spans the cell less its font\'s insets (§3.6)."""',
         "# drawn size, 1 point thick (unverified).",
         "40; other faces unverified).",

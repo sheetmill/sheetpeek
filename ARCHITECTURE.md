@@ -163,7 +163,7 @@ text styles into `Font` and `CellStyle` (§4.13). Rich-text runs inside one cell
 | `palette` | xlio: `<indexedColors>` as the indexed colors take it (64 entries, the default's for an entry missing or not a color), `None` without it (§4.14) |
 | `normal_font` | the font of xlio's `Normal` cell style, else the workbook's first font |
 | `date1904` | xlio: `<workbookPr date1904>` |
-| `platform`, `regional_settings` | the reader's `platform=` and `regional_settings=`, resolved to xlformat's `Platform` and `RegionalSettings` (`_platform.py`); the reader's built-in formats and the Normal font's digit, the layout's column widths, formats and text measurement follow them; rows, vertical placement and rules keep Excel for Mac's rules until xlformat has Windows tables for them |
+| `platform`, `regional_settings` | the reader's `platform=` and `regional_settings=`, resolved to xlformat's `Platform` and `RegionalSettings` (`_platform.py`); the reader's built-in formats and the Normal font's digit, the layout's column widths, formats, text measurement and insets, rows, vertical placement and rules follow them |
 | `notices` | what the file uses that sheetpeek does not read yet, as `Notice`s (§3.7) |
 | `cells` | a dense row-major grid over `ref` |
 
@@ -721,6 +721,17 @@ at 2).
 Superscript, subscript and accounting underlines grow a fitted row, and shrunk text fits it at its
 unshrunk size (§4.13).
 
+**On Windows** (`platform="windows"`) the same rules run in whole pixels on xlformat's Windows
+tables (`vertical_metrics`, `row_metrics`): a face's height `H` and descent `D` at its ppem, the
+top-aligned baseline `H - D + 1` px below the row's top, the bottom-aligned one `D - 1` px above
+its bottom, centered text `floor((R - H) / 2)` px below the top-aligned place in a row of `R` px,
+and wrapped lines `H` apart with nothing added (three lines of Calibri 11 take 60 px). Captured:
+`windows/text_style`, every row but eight (§4.9), and its first lines' ink tops. Sizes xlformat
+has no Windows rows for take the Mac's height and bottom offset rounded to whole pixels, faces it
+has none for Calibri's (unverified); an accounting underline adds three of its thicknesses (23 px
+rows at Calibri 11, captured; other sizes unverified); superscript and subscript keep the Mac's
+rules on Windows' faces (a known deviation, §4.9).
+
 ### 4.8 How Excel saves formula results
 
 **Captured** (`capture/excel_saved.py`; the saved file is `tests/files/excel_formulas.xlsx`):
@@ -737,7 +748,7 @@ from Excel `theme_colors` and `theme_colors_more` (§3.3), `merge_width` and `er
 and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts`, `gradients` and `diagonals` (§4.12), `text_style`, `text_style_more`, `text_steps` and `rules_below` (§4.6, §4.7, §4.13), `font_cut` (§4.13), `row_bottoms` (§3.6), `runs` (§4.16), `tab_strip` (§4.15), `outline` (§4.11), `rotation`, `rotation_more` and `rotation_placement` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
 Excel 16.115 (Microsoft 365). Every section here rests on one of them; what no capture covers
 is marked unverified where it is stated, as are the parts of §4.12, §4.14 and §4.18 that say so. What still waits for
-the screen: the text insets and the baselines of angled text, which come from print, and the 15 pt rows that print
+the screen: the baselines of angled text, which come from print, and the 15 pt rows that print
 14 pt apart.
 
 
@@ -746,10 +757,14 @@ jobs (`capture/job.py`, `CAPTURING.md`): `windows/merge_width` and `windows/erro
 cell as sheetpeek shows it with `platform="windows"` (§3.2): merged widths, `#` runs and General
 in whole pixels. The lines and tiles of `windows/borders` and `windows/fills`: §4.12; the indents and shrink
 levels of `windows/text_steps`: §4.6, §4.13. `windows/text_style` (zoom 100): every cell's width
-and every line count as sheetpeek's; rows fitted to text, which sheetpeek still fits with Excel for
-Mac's rules, differ (28 rows, waiting for xlformat's Windows vertical metrics). Vertical justify
-and distributed text keeps "bbbb cccc", 59 px, on one line of a 64 px cell, between the Normal
-font's insets of 3 and 2 px. `windows/line_budget`: Excel for Windows keeps a line of any of the four alignments the cell
+and every line count as sheetpeek's, and every row but eight: rows, baselines and rules on Windows
+come from xlformat's Windows `vertical_metrics` and `rule_metrics` in whole pixels (§4.7, §4.13),
+the first line's ink top and every underline's and strikethrough's offset and thickness (1 px at
+Calibri 11) as captured. The eight, known deviations: rows of horizontally distributed or
+justified wrapped text, which Excel for Windows fits a line taller than its lines (three lines of
+Calibri 11 in 80 px, nine in 200 px; not modeled), and rows of superscript and subscript, which
+keep Excel for Mac's rules (§4.13). Vertical justify and distributed text keeps "bbbb cccc",
+59 px, on one line of a 64 px cell, between its font's insets of 3 and 2 px. `windows/line_budget`: Excel for Windows keeps a line of any of the four alignments the cell
 less its font's insets wide, 3 px left and 2 px right under cell fonts to 12 points, larger for
 Calibri 14 (136 of 136 cells as sheetpeek breaks them).
 ### 4.10 Hyperlinks
@@ -1084,6 +1099,13 @@ xlformat has no rules, keep Calibri 11's offsets scaled with the size, 1 pt thic
   where the same lines in a 12 pt row, centered, fall as far past the row and are not drawn: not
   modeled, a known deviation. Where Excel places such lines in the row also differs from
   sheetpeek's placement of center and top aligned text in a short row (unverified beyond these).
+  With `platform="windows"` the HTML output draws a line past its row on into the row below,
+  under that row's top gridline, as Excel for Windows does (xlformat's `RuleMetrics`; no capture
+  in this repository yet). An angled run's lines are cut at the row on both platforms.
+- **On Windows** underlines and strikethrough come from xlformat's Windows `rule_metrics`, whole
+  pixels at the ppem (captured, `windows/text_style` group `fonts`: every offset and thickness
+  at Calibri 11, single 2 px below the baseline, double 1 and 3 px, accounting 4 px and 6 px,
+  strikethrough 4 px above, each 1 px thick); a face without Windows tables takes Calibri's.
 - Strikethrough: 3 pt above the baseline at 11 pt, the text's width.
 
 **Outline, shadow, condense and extend** are drawn as plain text by Excel for Mac (the same ink

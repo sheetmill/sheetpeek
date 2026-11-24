@@ -9,6 +9,7 @@ angled run and its rules are turned with ``transform: rotate()`` about the start
 from __future__ import annotations
 
 import html
+from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 from sheetpeek._carlito import ADVANCES, FIRST, UNITS_PER_EM
@@ -76,7 +77,7 @@ def run(page: Page, run: TextRun) -> str:
     return (
         f'<span class="sp-clip" style="left:{x0}px;top:{y0}px;width:{x1 - x0}px;'
         f'height:{y1 - y0}px">{span}</span>'
-    )
+    ) + _below(page, run, lambda rule: run.color)
 
 
 _PRINTABLE = "".join(chr(code) for code in range(32, 127))
@@ -199,6 +200,31 @@ def _spanned(page: Page, run: TextRun) -> str:
         f'<span class="sp-clip" style="left:{x0}px;top:{y0}px;width:{x1 - x0}px;'
         f'height:{y1 - y0}px"><span class="{classes}" style="{";".join(style)}">{inner}</span>'
         f"{rules}</span>"
+    ) + _below(page, run, lambda rule: _rule_color(run, rule))
+
+
+def _below(page: Page, run: TextRun, color: Callable[[TextRule], str | None]) -> str:
+    """The part of a run's rules past its row's bottom, on Excel for Windows.
+
+    Windows draws such a line on into the row below, under that row's top gridline (xlformat's
+    ``RuleMetrics``): the rules again, in a clip window from the pixel row after that gridline.
+    The Mac cuts them at the row (captured, ``rules_below``). An angled run's are cut.
+    """
+    if page.platform != "windows" or not run.rules or run.angle:
+        return ""
+    left, _, right, bottom = run.clip
+    reach = max(rule.y + rule.gap * (rule.lines - 1) + rule.thickness for rule in run.rules)
+    if reach <= bottom:
+        return ""
+    x0, x1 = page.x(left), page.x(right)
+    y0 = page.y(bottom) + 1
+    y1 = page.y(reach) + 1
+    if y1 <= y0:
+        return ""
+    rules = "".join(_rule(page, rule, color(rule), x0, y0, run) for rule in run.rules)
+    return (
+        f'<span class="sp-clip" style="left:{x0}px;top:{y0}px;width:{x1 - x0}px;'
+        f'height:{y1 - y0}px">{rules}</span>'
     )
 
 
