@@ -727,7 +727,7 @@ a cached value (as openpyxl writes it) has no `t`. The same file confirms Excel 
 Captured so far, in `tests/captures/`: by print (route B) `layout` (§3.6, §4.1 to §4.7); read
 from Excel `theme_colors` and `theme_colors_more` (§3.3), `merge_width` and `error_width` (§4.2,
 §4.4, no deviation), `row_height`, `row_height_more`, `row_height_fitted` and `merge_rows` (§4.7, §4.16, §4.17), `color_kinds` (§3.3), `package` and `package_more` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14), `theme_fonts_palette`
-and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts`, `gradients` and `diagonals` (§4.12), `text_style`, `text_style_more` and `text_steps` (§4.6, §4.7, §4.13), `row_bottoms` (§3.6), `runs` (§4.16), `tab_strip` (§4.15), `outline` (§4.11), `rotation`, `rotation_more` and `rotation_placement` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
+and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts`, `gradients` and `diagonals` (§4.12), `text_style`, `text_style_more`, `text_steps` and `rules_below` (§4.6, §4.7, §4.13), `row_bottoms` (§3.6), `runs` (§4.16), `tab_strip` (§4.15), `outline` (§4.11), `rotation`, `rotation_more` and `rotation_placement` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
 Excel 16.115 (Microsoft 365). Every section here rests on one of them; what no capture covers
 is marked unverified where it is stated, as are the parts of §4.12, §4.14 and §4.18 that say so. What still waits for
 the screen: the text insets and the baselines of angled text, which come from print, and the 15 pt rows that print
@@ -1048,6 +1048,14 @@ xlformat has no rules, keep Calibri 11's offsets scaled with the size, 1 pt thic
   bottom-aligned baseline sits `B + A` above the cell's bottom, also in a row of fixed height,
   where plain bottom-aligned text beside it sits on the same baseline (§3.6; captured,
   `text_style_more` group `rules`, rows fixed at 15, 20 and 30 pt).
+- **A line past its row** (center or top aligned, or a font too large for its row): Excel for Mac
+  draws nothing past the row in 62 of 63 cases (`rules_below`: underlines at 11 to 36 pt in rows
+  of 12, 15 and 20 pt), and sheetpeek clips every line at the row. The one exception, a double
+  accounting underline at 11 pt at the top of a 15 pt row, draws its second line 2 pt into the
+  row below, its first under that row's gridline, as Excel for Windows does (xlformat's capture),
+  where the same lines in a 12 pt row, centered, fall as far past the row and are not drawn: not
+  modeled, a known deviation. Where Excel places such lines in the row also differs from
+  sheetpeek's placement of center and top aligned text in a short row (unverified beyond these).
 - Strikethrough: 3 pt above the baseline at 11 pt, the text's width.
 
 **Outline, shadow, condense and extend** are drawn as plain text by Excel for Mac (the same ink

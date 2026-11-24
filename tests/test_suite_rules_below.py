@@ -78,3 +78,25 @@ def test_the_suite_is_a_screen_suite(module):
     import importlib
 
     assert "rules_below" in importlib.import_module(module).SUITES
+
+
+# --- the comparison with Excel's capture
+
+KNOWN_BELOW = {
+    # Unexplained: Excel for Mac draws this case's second line 2 pt into the row below, its first
+    # under that row's gridline, where it draws nothing past the row in "doubleAccounting 11 in 12
+    # center", whose lines fall as far past its row; sheetpeek clips every line at the row.
+    "doubleAccounting 11 in 15 top": "2+1",
+}
+
+
+@pytest.mark.excel
+def test_excel_for_mac_draws_no_line_past_its_row_but_one():
+    if not suite.OUTPUT.exists():
+        pytest.skip("not captured yet: run python -m capture.screen run rules_below")
+    lines = suite.OUTPUT.read_text(encoding="utf-8").split("\n")
+    rows = [line.split("\t") for line in lines if line and not line.startswith("#")]
+    records = [dict(zip(rows[0], row, strict=True)) for row in rows[1:]]
+    assert len(records) == 63
+    found = {r["name"]: r["below"] for r in records if r["below"]}
+    assert found == KNOWN_BELOW

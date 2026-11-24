@@ -1,0 +1,77 @@
+# excel: 16.115
+# build: 16.115.26110837
+# edition: Microsoft 365
+# channel: Current
+# macos: 26.6.2
+# appearance: dark
+# date: 2026-11-23
+# settling: still 0.4 s, give up 8 s, audit off
+# geometry: {"display_scale":2.0,"screen_pt":[2560.0,1440.0],"usable_pt":[2560.0,1089.0],"window_pt":[0.0,30.0,2560.0,1320.0],"window_state":"window state maximized"}
+# display_scale: 2.000
+# colors: captures converted to sRGB (sips --matchTo sRGB Profile.icc)
+# platform: mac
+# suite: rules_below
+group	name	zoom	cell	row_height	ink_top	ink_bottom	rule_tops	rule_thickness	below	below_ink
+rules_below	doubleAccounting 11 in 12 bottom	100	C4	12.0	1	2	1	1		0
+rules_below	doubleAccounting 20 in 12 bottom	100	E4	12.0	1	4	1 3	1 1		0
+rules_below	doubleAccounting 36 in 12 bottom	100	G4	12.0	6	12	6 10	2 2		0
+rules_below	singleAccounting 36 in 12 bottom	100	I4	12.0	6	8	6	2		0
+rules_below	single 36 in 12 bottom	100	K4	12.0	1	2	1	1		0
+rules_below	plain 36 in 12 bottom	100	M4	12.0						0
+rules_below	plain 20 in 12 bottom	100	O4	12.0						0
+rules_below	doubleAccounting 11 in 12 center	100	C6	12.0	2	9				0
+rules_below	doubleAccounting 20 in 12 center	100	E6	12.0	1	12				0
+rules_below	doubleAccounting 36 in 12 center	100	G6	12.0	1	12				0
+rules_below	singleAccounting 36 in 12 center	100	I6	12.0	1	12				0
+rules_below	single 36 in 12 center	100	K6	12.0	1	12				0
+rules_below	plain 36 in 12 center	100	M6	12.0	1	12				0
+rules_below	plain 20 in 12 center	100	O6	12.0	1	12				0
+rules_below	doubleAccounting 11 in 12 top	100	C8	12.0	5	12				0
+rules_below	doubleAccounting 20 in 12 top	100	E8	12.0	8	12				0
+rules_below	doubleAccounting 36 in 12 top	100	G8	12.0						0
+rules_below	singleAccounting 36 in 12 top	100	I8	12.0						0
+rules_below	single 36 in 12 top	100	K8	12.0						0
+rules_below	plain 36 in 12 top	100	M8	12.0						0
+rules_below	plain 20 in 12 top	100	O8	12.0	8	12				0
+rules_below	doubleAccounting 11 in 15 bottom	100	C10	15.0	2	5	2 4	1 1		0
+rules_below	doubleAccounting 20 in 15 bottom	100	E10	15.0	4	7	4 6	1 1		0
+rules_below	doubleAccounting 36 in 15 bottom	100	G10	15.0	9	15	9 13	2 2		0
+rules_below	singleAccounting 36 in 15 bottom	100	I10	15.0	9	11	9	2		0
+rules_below	single 36 in 15 bottom	100	K10	15.0	3	5	3	2		0
+rules_below	plain 36 in 15 bottom	100	M10	15.0						0
+rules_below	plain 20 in 15 bottom	100	O10	15.0						0
+rules_below	doubleAccounting 11 in 15 center	100	C12	15.0	3	14	13	1		0
+rules_below	doubleAccounting 20 in 15 center	100	E12	15.0	1	14				0
+rules_below	doubleAccounting 36 in 15 center	100	G12	15.0	1	15				0
+rules_below	singleAccounting 36 in 15 center	100	I12	15.0	1	15				0
+rules_below	single 36 in 15 center	100	K12	15.0	1	15				0
+rules_below	plain 36 in 15 center	100	M12	15.0	1	15				0
+rules_below	plain 20 in 15 center	100	O12	15.0	2	15				0
+rules_below	doubleAccounting 11 in 15 top	100	C14	15.0	5	12			2+1	312
+rules_below	doubleAccounting 20 in 15 top	100	E14	15.0	8	15				0
+rules_below	doubleAccounting 36 in 15 top	100	G14	15.0	14	15				0
+rules_below	singleAccounting 36 in 15 top	100	I14	15.0	14	15				0
+rules_below	single 36 in 15 top	100	K14	15.0	14	15				0
+rules_below	plain 36 in 15 top	100	M14	15.0	14	15				0
+rules_below	plain 20 in 15 top	100	O14	15.0	8	15				0
+rules_below	doubleAccounting 11 in 20 bottom	100	C16	20.0	1	10	7 9	1 1		0
+rules_below	doubleAccounting 20 in 20 bottom	100	E16	20.0	1	12	9 11	1 1		0
+rules_below	doubleAccounting 36 in 20 bottom	100	G16	20.0	1	20	14 18	2 2		0
+rules_below	singleAccounting 36 in 20 bottom	100	I16	20.0	1	16	14	2		0
+rules_below	single 36 in 20 bottom	100	K16	20.0	1	10	8	2		0
+rules_below	plain 36 in 20 bottom	100	M16	20.0	1	4				0
+rules_below	plain 20 in 20 bottom	100	O16	20.0	1	4				0
+rules_below	doubleAccounting 11 in 20 center	100	C18	20.0	6	19	16 18	1 1		0
+rules_below	doubleAccounting 20 in 20 center	100	E18	20.0	3	16				0
+rules_below	doubleAccounting 36 in 20 center	100	G18	20.0	1	20				0
+rules_below	singleAccounting 36 in 20 center	100	I18	20.0	1	20				0
+rules_below	single 36 in 20 center	100	K18	20.0	1	20				0
+rules_below	plain 36 in 20 center	100	M18	20.0	1	20				0
+rules_below	plain 20 in 20 center	100	O18	20.0	5	18				0
+rules_below	doubleAccounting 11 in 20 top	100	C20	20.0	5	18	15 17	1 1		0
+rules_below	doubleAccounting 20 in 20 top	100	E20	20.0	8	20				0
+rules_below	doubleAccounting 36 in 20 top	100	G20	20.0	14	20				0
+rules_below	singleAccounting 36 in 20 top	100	I20	20.0	14	20				0
+rules_below	single 36 in 20 top	100	K20	20.0	14	20				0
+rules_below	plain 36 in 20 top	100	M20	20.0	14	20				0
+rules_below	plain 20 in 20 top	100	O20	20.0	8	20				0
