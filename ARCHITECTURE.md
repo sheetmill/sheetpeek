@@ -1066,7 +1066,10 @@ xlformat has no rules, keep Calibri 11's offsets scaled with the size, 1 pt thic
   a list font and in a run's own color, its row the larger of 15 pt and the Normal font's; it cuts
   at entry 1,000 under a Calibri 11 Normal font and at 999 under a Times New Roman one, under
   openpyxl's theme or another (unexplained: a Normal font other than the theme's body font, or
-  other than Calibri, fits every capture; the two part under an Aptos Narrow theme and Normal font). sheetpeek keeps the cell's own font on Windows and reports
+  other than Calibri, fits every capture; the two part under an Aptos Narrow theme and Normal font).
+  The two platforms differ (observed at Excel's default settings): Excel for Windows draws a cut
+  cell in its standard font, Aptos Narrow 11, and Excel for Mac in Calibri 12, not its standard
+  font, Aptos Narrow 12. sheetpeek keeps the cell's own font on Windows and reports
   every cell from entry 999 (`font.cut`, not implemented).
 - **A line past its row** (center or top aligned, or a font too large for its row): Excel for Mac
   draws nothing past the row in 62 of 63 cases (`rules_below`: underlines at 11 to 36 pt in rows

@@ -140,6 +140,11 @@ def test_the_faces_groups_put_references_and_probes_at_their_entries(built):
         fonts = re.findall(r"<font>(.*?)</font>", styles, re.S)
         assert len(fonts) == suite.FACES_FIRST + suite.FACES_PROBES
         first = "Calibri" if normal is None else normal[0]
+        if group == "faces_aptos":
+            with zipfile.ZipFile(built[group]) as z:
+                theme = z.read("xl/theme/theme1.xml").decode()
+            assert '<a:minorFont>\n        <a:latin typeface="Aptos Narrow"/>' in theme
+            assert '<scheme val="minor"' in fonts[0]
         assert f'<name val="{first}"' in fonts[0]
         xfs = re.search(r"<cellXfs[^>]*>(.*?)</cellXfs>", styles, re.S).group(1)
         font_of = [int(f) for f in re.findall(r'<xf [^>]*fontId="(\d+)"', xfs)]

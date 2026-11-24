@@ -20,7 +20,10 @@ under openpyxl's Calibri 11 Normal font (font 0):
   New Roman 10; "Hxg" in black in Arial, Aptos Narrow, Segoe UI, Tahoma and Calibri 11 (E4 to E8,
   list entries 1 to 5, ``REFERENCES``), then filler, then probes at entries 997 to 1,002 (C4 to
   C9): which face a cut cell takes on Excel for Windows, by its glyphs against the references',
-  and whether the cut moves with the Normal font alone.
+  and whether the cut moves with the Normal font alone. ``faces_aptos`` the same under a theme of
+  Aptos Narrow body and Aptos Display heading fonts with an Aptos Narrow 11 Normal font (a theme
+  font): whether the cut moves with a Normal font other than the theme's body font or other than
+  Calibri.
 - ``theme_10`` and ``theme_16``: the theme's body font Arial and heading font Aptos Narrow
   (``THEME_FONTS``, for openpyxl's Calibri and Cambria, rewritten before Excel opens the file),
   a Normal font of Times New Roman 10 or 16 (``NORMALS``); 994 filler fonts, then the probes at
@@ -52,7 +55,7 @@ from openpyxl.utils.indexed_list import IndexedList
 ROOT = Path(__file__).resolve().parents[1]
 BUILD_DIR = ROOT / "capture" / "build" / "font_cut"
 OUTPUT = ROOT / "tests" / "captures" / "font_cut.tsv"
-GROUPS = ("list", "rich", "theme_10", "theme_16", "faces_calibri", "faces_times")
+GROUPS = ("list", "rich", "theme_10", "theme_16", "faces_calibri", "faces_times", "faces_aptos")
 LIST_FIRST = 990
 """``list``: the font table entry of the first probe (C4); C23 is entry 1,009."""
 LIST_PROBES = 20
@@ -67,8 +70,15 @@ THEME_FONTS = {"minor": "Arial", "major": "Aptos Narrow"}
 and Cambria."""
 NORMALS = {"theme_10": ("Times New Roman", 10), "theme_16": ("Times New Roman", 16)}
 """``theme_<size>``: the Normal font, neither theme font nor Calibri."""
-FACES = {"faces_calibri": None, "faces_times": ("Times New Roman", 10)}
-"""``faces_<normal>``: the Normal font (``None``: openpyxl's Calibri 11), under openpyxl's theme."""
+FACES = {
+    "faces_calibri": None,
+    "faces_times": ("Times New Roman", 10),
+    "faces_aptos": ("Aptos Narrow", 11),
+}
+"""``faces_<normal>``: the Normal font (``None``: openpyxl's Calibri 11), under openpyxl's theme;
+``faces_aptos``' a theme font, its theme's body font (``APTOS_THEME``)."""
+APTOS_THEME = {"minor": "Aptos Narrow", "major": "Aptos Display"}
+"""``faces_aptos``' theme fonts, as Excel for Windows' default workbook has them."""
 REFERENCES = (
     ("Arial", 11),
     ("Aptos Narrow", 11),
@@ -125,7 +135,11 @@ def fill(ws: Any, group: str) -> list[tuple[str, int]]:
     if group in FACES:
         if FACES[group] is not None:
             name, size = FACES[group]
-            normal = Font(name=name, sz=size, family=1)
+            normal = (
+                Font(name=name, sz=size, family=2, scheme="minor")
+                if group == "faces_aptos"
+                else Font(name=name, sz=size, family=1)
+            )
             ws.parent._fonts = IndexedList([normal])
             for style in ws.parent._named_styles:
                 if style.name == "Normal":
@@ -166,27 +180,29 @@ def fill(ws: Any, group: str) -> list[tuple[str, int]]:
     return found
 
 
-def themed(text: str) -> str:
-    """openpyxl's theme with ``THEME_FONTS`` for its body and heading fonts."""
+def themed(text: str, fonts: dict[str, str] = THEME_FONTS) -> str:
+    """openpyxl's theme with ``fonts`` (``THEME_FONTS``) for its body and heading fonts."""
     text = text.replace(
         '<a:minorFont>\n        <a:latin typeface="Calibri"/>',
-        f'<a:minorFont>\n        <a:latin typeface="{THEME_FONTS["minor"]}"/>',
+        f'<a:minorFont>\n        <a:latin typeface="{fonts["minor"]}"/>',
     )
     return text.replace(
         '<a:majorFont>\n        <a:latin typeface="Cambria"/>',
-        f'<a:majorFont>\n        <a:latin typeface="{THEME_FONTS["major"]}"/>',
+        f'<a:majorFont>\n        <a:latin typeface="{fonts["major"]}"/>',
     )
 
 
 def postprocess(group: str) -> Any:
-    """For ``theme_<size>``, the theme rewritten before Excel opens the file; else ``None``."""
-    if group not in NORMALS:
+    """For ``theme_<size>`` and ``faces_aptos``, the theme rewritten before Excel opens the file;
+    else ``None``."""
+    if group not in NORMALS and group != "faces_aptos":
         return None
+    fonts = APTOS_THEME if group == "faces_aptos" else THEME_FONTS
 
     def rewrite(path: Path) -> None:
         from capture.screen.run import patch_part
 
-        patch_part(path, {"xl/theme/theme1.xml": themed})
+        patch_part(path, {"xl/theme/theme1.xml": lambda text: themed(text, fonts)})
 
     return rewrite
 

@@ -37,6 +37,8 @@ Groups:
   color read for every cell; Excel's standard font is in the result's header.
 - ``font_faces``: ``font_cut``'s ``faces_*`` groups, as ``font_cut`` writes its groups, read
   into ``tests/captures/windows/font_faces.tsv``.
+- ``font_aptos``: ``font_cut``'s group ``faces_aptos`` alone, read into
+  ``tests/captures/windows/font_aptos.tsv``.
 - ``line_budget``: ``text_style``' group of that name alone, as ``text_style`` captures its
   groups, read into ``tests/captures/windows/line_budget.tsv`` (``text_style``' columns).
 - ``text_steps``: the suite ``text_steps``, a workbook a group (``text_steps_<group>.xlsx``, each
@@ -73,6 +75,7 @@ GROUPS = {
     "line_budget": ("line_budget",),
     "font_cut": ("font_cut",),
     "font_faces": ("font_faces",),
+    "font_aptos": ("font_aptos",),
 }
 PURPOSES = {
     "cells": "sheetpeek capture group cells: the text Excel shows in merged cells and for "
@@ -90,6 +93,9 @@ PURPOSES = {
     "font_faces": "sheetpeek capture group font_faces: window pictures of cells past the font "
     "table's cut beside reference cells in five faces, under two Normal fonts, at zoom 100 "
     "(font_cut's faces groups)",
+    "font_aptos": "sheetpeek capture group font_aptos: window pictures of cells past the font "
+    "table's cut beside reference cells, under an Aptos Narrow theme and Normal font, at zoom "
+    "100 (font_cut's group faces_aptos)",
     "line_budget": "sheetpeek capture group line_budget: window pictures of two-word texts as "
     "wide as the cell less a few pixels, wrapped, justified and distributed, at zoom 100 "
     "(text_style's group line_budget)",
@@ -208,7 +214,10 @@ WINDOWS_OF = {
     "font_cut": tuple(
         _font_cut_window(group) for group in font_cut.GROUPS if group not in font_cut.FACES
     ),
-    "font_faces": tuple(_font_cut_window(group, "font_faces") for group in font_cut.FACES),
+    "font_faces": tuple(
+        _font_cut_window(group, "font_faces") for group in ("faces_calibri", "faces_times")
+    ),
+    "font_aptos": (_font_cut_window("faces_aptos", "font_aptos"),),
 }
 DISPLAYED = {
     "interior.color": "display.fill",
