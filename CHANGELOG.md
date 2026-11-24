@@ -28,7 +28,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Shrink to fit on Excel for Windows draws text at whole-pixel "H" advances, every one below
   the unshrunk advance except 6, down to 2, as Windows draws it (Calibri 11's 9 px "H" takes
   8, 7, 5, 4, 3 and 2 px).
-
 - A cell whose font lies at entry 1,000 or later of the workbook's font table (`styles.xml`'s
   font list, then each rich-text run's own font in cell order) is drawn and measured as Excel for
   Mac draws it, in Calibri 12 (its row fitted and its column autofitted to it), black, or a run in

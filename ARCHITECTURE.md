@@ -743,31 +743,39 @@ a cached value (as openpyxl writes it) has no `t`. The same file confirms Excel 
 
 ### 4.9 Captures
 
-Captured so far, in `tests/captures/`: by print (route B) `layout` (§3.6, §4.1 to §4.7); read
-from Excel `theme_colors` and `theme_colors_more` (§3.3), `merge_width` and `error_width` (§4.2,
-§4.4, no deviation), `row_height`, `row_height_more`, `row_height_fitted` and `merge_rows` (§4.7, §4.16, §4.17), `color_kinds` (§3.3), `package` and `package_more` (§5.5) and `odd_values` (§4.17, §5); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14), `theme_fonts_palette`
-and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions` (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts`, `gradients` and `diagonals` (§4.12), `text_style`, `text_style_more`, `text_steps` and `rules_below` (§4.6, §4.7, §4.13), `font_cut` (§4.13), `row_bottoms` (§3.6), `runs` (§4.16), `tab_strip` (§4.15), `outline` (§4.11), `rotation`, `rotation_more` and `rotation_placement` (§4.17), `filters` and `filters_more` (§4.19) and `tables` (§4.20). All are
-Excel 16.115 (Microsoft 365). Every section here rests on one of them; what no capture covers
-is marked unverified where it is stated, as are the parts of §4.12, §4.14 and §4.18 that say so. What still waits for
-the screen: the baselines of angled text, which come from print, and the 15 pt rows that print
-14 pt apart.
-
+Captured so far, in `tests/captures/`: by print (route B) `layout` (§3.6, §4.1 to §4.7); read from
+Excel `theme_colors` and `theme_colors_more` (§3.3), `merge_width` and `error_width` (§4.2, §4.4, no
+deviation), `row_height`, `row_height_more`, `row_height_fitted` and `merge_rows` (§4.7, §4.16,
+§4.17), `color_kinds` (§3.3), `package` and `package_more` (§5.5) and `odd_values` (§4.17, §5); on
+the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14),
+`theme_fonts_palette` and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions`
+(§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts`, `gradients` and
+`diagonals` (§4.12), `text_style`, `text_style_more`, `text_steps` and `rules_below` (§4.6, §4.7,
+§4.13), `font_cut` (§4.13), `row_bottoms` (§3.6), `runs` (§4.16), `tab_strip` (§4.15), `outline`
+(§4.11), `rotation`, `rotation_more` and `rotation_placement` (§4.17), `filters` and `filters_more`
+(§4.19) and `tables` (§4.20). All are Excel 16.115 (Microsoft 365). Every section here rests on one
+of them; what no capture covers is marked unverified where it is stated, as are the parts of §4.12,
+§4.14 and §4.18 that say so. What still waits for the screen: the baselines of angled text, which
+come from print, and the 15 pt rows that print 14 pt apart.
 
 From Excel for Windows (Excel 16.0.20527.20196, Microsoft 365, 96 dpi, en-US), read from capture
-jobs (`capture/job.py`, `CAPTURING.md`): `windows/merge_width` and `windows/error_width`, every
-cell as sheetpeek shows it with `platform="windows"` (§3.2): merged widths, `#` runs and General
-in whole pixels. The lines and tiles of `windows/borders` and `windows/fills`: §4.12; the indents and shrink
-levels of `windows/text_steps`: §4.6, §4.13. `windows/text_style` (zoom 100): every cell's width
-and every line count as sheetpeek's, and every row but eight: rows, baselines and rules on Windows
-come from xlformat's Windows `vertical_metrics` and `rule_metrics` in whole pixels (§4.7, §4.13),
-the first line's ink top and every underline's and strikethrough's offset and thickness (1 px at
-Calibri 11) as captured. The eight, known deviations: rows of horizontally distributed or
-justified wrapped text, which Excel for Windows fits a line taller than its lines (three lines of
-Calibri 11 in 80 px, nine in 200 px; not modeled), and rows of superscript and subscript, which
-keep Excel for Mac's rules (§4.13). Vertical justify and distributed text keeps "bbbb cccc",
-59 px, on one line of a 64 px cell, between its font's insets of 3 and 2 px. `windows/line_budget`: Excel for Windows keeps a line of any of the four alignments the cell
-less its font's insets wide, 3 px left and 2 px right under cell fonts to 12 points, larger for
-Calibri 14 (136 of 136 cells as sheetpeek breaks them).
+jobs (`capture/job.py`, `CAPTURING.md`): `windows/merge_width` and `windows/error_width`, every cell
+as sheetpeek shows it with `platform="windows"` (§3.2): merged widths, `#` runs and General in whole
+pixels. The lines and tiles of `windows/borders` and `windows/fills`: §4.12; the indents and shrink
+levels of `windows/text_steps`: §4.6, §4.13. `windows/text_style` (zoom 100): every cell's width and
+every line count as sheetpeek's, and every row but eight: rows, baselines and rules on Windows come
+from xlformat's Windows `vertical_metrics` and `rule_metrics` in whole pixels (§4.7, §4.13), the
+first line's ink top and every underline's and strikethrough's offset and thickness (1 px at Calibri
+11) as captured. The eight, known deviations: rows of horizontally distributed or justified wrapped
+text, which Excel for Windows fits a line taller than its lines (three lines of Calibri 11 in 80 px,
+nine in 200 px; not modeled), and rows of superscript and subscript, which keep Excel for Mac's
+rules (§4.13). Vertical justify and distributed text keeps "bbbb cccc", 59 px, on one line of a 64
+px cell, between its font's insets of 3 and 2 px. `windows/line_budget`: Excel for Windows keeps a
+line of any of the four alignments the cell less its font's insets wide, 3 px left and 2 px right
+under cell fonts to 12 points, larger for Calibri 14 (136 of 136 cells as sheetpeek breaks them).
+`windows/shrink_fonts`: the shrink levels on fonts of their own (§4.13); `windows/font_cut`,
+`windows/font_faces` and `windows/font_aptos`: the font table's cut (§4.13).
+
 ### 4.10 Hyperlinks
 
 The look and where a link goes are captured (`links`, Excel 16.115, zoom 100; the places through
@@ -1791,8 +1799,8 @@ workbooks of §5.5 (42 MB, 15.2 million cells over its sheets, every sheet read)
 38.0 s at 863 MiB peak RSS without recalculation (§5.7, which gives the run).
 
 Laying out every sheet of that workbook in `excel` mode (264,432 rows, `bench/layout.py`, read
-time apart) takes 63.8 s and peaks at 3,695 MiB RSS, against 62.8 s and 3,625 to 3,630 MiB for
-the previous release: measured together, best of three, each version from its own source with the
+time apart) takes 63.8 s and peaks at 3,695 MiB RSS in 0.4.0, against 62.8 s and 3,625 to
+3,630 MiB in 0.3.0: measured together, best of three, each version from its own source with the
 dependency versions it was published with, alternating, on a quiet machine. The time is within
 the runs' variation of about 5 %. Each version's peak repeats within 5 MiB, while between commits
 that add no data of that size it moves about 60 MiB up and down (a 22-line change to the indent
@@ -2035,8 +2043,9 @@ reading of the file. Which formulas Excel recalculates is the loader's `opening`
 when a range read has formulas: the workbook part settles most files; otherwise the formulas fed
 decide, and the worksheets not read yet get a formulas-only reading (xlio's `Sheet.formulas`, no
 values). The answer is the whole workbook's, since a volatile cell or a formula without a value
-on one sheet changes what another shows. A range without formulas asks nothing, and `"none"`
-keeps every cached value without an engine: the loader is let go and has compiled nothing.
+on one sheet changes what another shows. A range without formulas asks nothing, and an
+`opening` of `"none"` (Excel recalculates nothing; the others are `"all"` and `"some"`) keeps
+every cached value without an engine: the loader is let go and has compiled nothing.
 Otherwise one engine per `Book`, taken from the loader on first use (`Loader.workbook`), gives
 the value of each formula cell of the range and of each cell an array formula or data table
 fills there, and its status (`Workbook.status`: computed, or the file's value kept, and why). It
@@ -2457,8 +2466,10 @@ attribute of `<dimension>`, `<mergeCell>` and `<autoFilter>` in the file format.
 **CLI.**
 - `sheetpeek view book.xlsx [--sheet NAME] [--ref A1:H40] [--to rich|text|html|markdown|csv|tsv]
   [--column-headings] [--row-headings] [--hidden] [--list] [--all-sheets] [--hidden-sheets]
-  [--print-area] [--page-breaks] [--zoom PERCENT] [--notices summary|full|none] [--strict] [--suppress CODE] [--max-parts N] [--max-part-bytes N]
-  [--max-total-bytes N] [--max-cells N]`. The default is `rich` on a terminal and `text` when piped
+  [--print-area] [--page-breaks] [--zoom PERCENT] [--notices summary|full|none] [--strict]
+  [--suppress CODE] [--max-parts N] [--max-part-bytes N] [--max-total-bytes N] [--max-cells N]
+  [--recalc-on-load excel|always|never] [--platform mac|windows]`. `--recalc-on-load` and
+  `--platform` are `read()`'s `recalc_on_load=` (§5.7) and `platform=` (§3.2). The default is `rich` on a terminal and `text` when piped
   or when `rich` is not installed. `--all-sheets` writes the workbook page (§4.15), HTML only, with
   `--hidden-sheets` adding hidden and very hidden sheets. `--print-area` shows the print area
   instead of the used range (not with `--ref` or `--all-sheets`); `--page-breaks` and `--zoom`
@@ -2468,7 +2479,7 @@ attribute of `<dimension>`, `<mergeCell>` and `<autoFilter>` in the file format.
   unreadable or refused file, an unknown sheet or a bad range exits with status 1 and one line of
   explanation.
 - `sheetpeek serve DIR [--host 127.0.0.1] [--port 8000]`, with the same `--max-*` options and its
-  own defaults (§5.5) (`_serve.py`): a standard-library `ThreadingHTTPServer`. `/` lists the
+  own defaults (§5.5), and `--recalc-on-load` and `--platform` (`_serve.py`): a standard-library `ThreadingHTTPServer`. `/` lists the
   `.xlsx` files under DIR, under the folder's name and not its path, `/view/<path>` shows a
   workbook's default sheet through the HTML backend (a fragment with headings inside the server's
   page, with links to the other sheets); `?sheet=` and `?ref=` choose a sheet and a range,

@@ -6,8 +6,8 @@
 
 Excel keeps one font table per workbook: ``styles.xml``'s font list in order, then each rich-text
 run's inline font. Past an entry of it, a cell is drawn and measured in the default font while
-Excel's object model reports its own. Two groups, each its own workbook and window at zoom 100,
-under openpyxl's Calibri 11 Normal font (font 0):
+Excel's object model reports its own. Seven groups (``GROUPS``), each its own workbook and
+window at zoom 100, ``list`` and ``rich`` under openpyxl's Calibri 11 Normal font (font 0):
 
 - ``list``: 989 filler fonts (Calibri 11, each a different near-black color) on a second sheet
   take entries 1 to 989; then "Hxg" in Arial 24, each probe a slightly different red, in C4 to

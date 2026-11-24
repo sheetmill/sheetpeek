@@ -91,6 +91,8 @@ LENGTHS = range(4, 31)
 SHRUNK_COLUMNS = (("C", range(4, 20)), ("E", range(20, 36)), ("G", range(36, 52)))
 """``shrink_<face>``: the default columns holding "H" repeated 4 to 51 times, 16 lengths each."""
 REFERENCES = {"I4": 10, "I5": 20}
+"""``shrink_<face>``: unshrunk "H" repeated 10 and 20 times in a column of 60 characters: their
+ink widths give the face's "H" advance and side bearings, so each shrunk length's drawn size."""
 FONTS = (
     ("Calibri", 14),
     ("Calibri", 20),
@@ -110,8 +112,6 @@ draws, in two widths."""
 FONT_REFERENCES = "N"
 """``shrink_fonts``: the column of 60 characters holding each font's unshrunk 10 and 20 "H"s, two
 rows a font from row 4."""
-"""``shrink_<face>``: unshrunk "H" repeated 10 and 20 times in a column of 60 characters: their
-ink widths give the face's "H" advance and side bearings, so each shrunk length's drawn size."""
 LADDER = tuple(1 + k / 2 for k in range(21))
 """The reference ladder's sizes, 1 to 11 pt, in rows 4 to 24."""
 COLUMNS = (

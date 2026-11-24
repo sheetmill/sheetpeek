@@ -39,8 +39,8 @@ Groups:
   into ``tests/captures/windows/font_faces.tsv``.
 - ``font_aptos``: ``font_cut``'s group ``faces_aptos`` alone, read into
   ``tests/captures/windows/font_aptos.tsv``.
-- ``line_budget``: ``text_style``' group of that name alone, as ``text_style`` captures its
-  groups, read into ``tests/captures/windows/line_budget.tsv`` (``text_style``' columns).
+- ``line_budget``: ``text_style``'s group of that name alone, as ``text_style`` captures its
+  groups, read into ``tests/captures/windows/line_budget.tsv`` (``text_style``'s columns).
 - ``text_steps``: the suite ``text_steps``, a workbook a group (``text_steps_<group>.xlsx``, each
   under the group's Normal font), captured at zoom 100 as ``borders_fills``' windows are and
   measured with the suite's own code into one file; the gray is measured on D1 in each picture.
