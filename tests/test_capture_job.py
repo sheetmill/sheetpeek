@@ -346,3 +346,42 @@ def test_the_font_cut_job_rewrites_its_themes_and_reads_font_colors(tmp_path):
     steps = {"geometry": _geometry_grid(1, 1), "display": {"cells": [[mixed]]}}
     rows = {(c, key): value for c, key, value in job._cell_rows(steps)}
     assert rows[("A1", "display.font_size")] == rows[("A1", "display.font_color")] == ""
+
+
+def test_the_merge_rows_job_reads_into_the_macs_rows(tmp_path):
+    # A result made from the Mac's merge_rows capture reads back into its rows exactly.
+    from capture import merge_rows
+
+    job_folder = job.write("merge_rows", "sheetpeek-test-merge-rows", tmp_path / "jobs")
+    mac = (CAPTURES / "merge_rows.tsv").read_text(encoding="utf-8").splitlines()
+    body = [line for line in mac if not line.startswith("# ")]
+    records = [dict(zip(body[0].split("\t"), line.split("\t"), strict=True)) for line in body[1:]]
+    last = max(case.row for case in merge_rows.CASES)
+    heights = [[15.0] for _ in range(last)]
+    fonts = [[{"font.name": "Calibri", "font.size": 11.0}] for _ in range(last)]
+    for case, record in zip(merge_rows.CASES, records, strict=True):
+        name, size = record["applied"].rsplit(" ", 1)
+        heights[case.row - 1] = [float(record["height"])]
+        fonts[case.row - 1] = [{"font.name": name, "font.size": float(size)}]
+    steps = [
+        {"op": "open", "status": "ok"},
+        {"op": "read", "id": "heights", "status": "ok", "result": {"row_height": heights}},
+        {"op": "read_format", "id": "fonts", "status": "ok", "result": {"cells": fonts}},
+    ]
+    files = job_folder / "files"
+    outcome = {
+        "status": "ok",
+        "started": "2026-11-24T00:00:00Z",
+        "header": {
+            "manifest_sha256": _sha(job_folder / "job.json"),
+            "inputs": {"merge_rows.xlsx": {"sha256": _sha(files / "merge_rows.xlsx")}},
+            "environment": {"excel": {"build": "16.0.0.0"}},
+        },
+        "workbooks": [{"file": "merge_rows.xlsx", "status": "ok", "steps": steps}],
+    }
+    result = tmp_path / "result"
+    result.mkdir()
+    (result / "result.json").write_text(json.dumps(outcome), encoding="utf-8")
+    (path,) = job.read("merge_rows", job_folder, result, tmp_path / "windows")
+    ours = [x for x in path.read_text(encoding="utf-8").splitlines() if not x.startswith("# ")]
+    assert ours == body

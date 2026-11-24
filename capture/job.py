@@ -39,6 +39,9 @@ Groups:
   into ``tests/captures/windows/font_faces.tsv``.
 - ``font_aptos``: ``font_cut``'s group ``faces_aptos`` alone, read into
   ``tests/captures/windows/font_aptos.tsv``.
+- ``merge_rows``: the suite ``merge_rows``' workbook opened, and every case row's height and
+  column A's font read from Excel (``read`` of ``row_height``, ``read_format`` of ``font.name``
+  and ``font.size``), into ``tests/captures/windows/merge_rows.tsv`` (the suite's columns).
 - ``line_budget``: ``text_style``'s group of that name alone, as ``text_style`` captures its
   groups, read into ``tests/captures/windows/line_budget.tsv`` (``text_style``'s columns).
 - ``text_steps``: the suite ``text_steps``, a workbook a group (``text_steps_<group>.xlsx``, each
@@ -60,7 +63,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from capture import borders, cell_text, fills, font_cut, text_steps, text_style
+from capture import borders, cell_text, fills, font_cut, merge_rows, text_steps, text_style
 
 ROOT = Path(__file__).resolve().parents[1]
 WINDOWS = ROOT / "tests" / "captures" / "windows"
@@ -76,6 +79,7 @@ GROUPS = {
     "font_cut": ("font_cut",),
     "font_faces": ("font_faces",),
     "font_aptos": ("font_aptos",),
+    "merge_rows": ("merge_rows",),
 }
 PURPOSES = {
     "cells": "sheetpeek capture group cells: the text Excel shows in merged cells and for "
@@ -96,6 +100,8 @@ PURPOSES = {
     "font_aptos": "sheetpeek capture group font_aptos: window pictures of cells past the font "
     "table's cut beside reference cells, under an Aptos Narrow theme and Normal font, at zoom "
     "100 (font_cut's group faces_aptos)",
+    "merge_rows": "sheetpeek capture group merge_rows: the heights Excel fits to rows around "
+    "merges across rows, and the font it applies in each merge, read from Excel.",
     "line_budget": "sheetpeek capture group line_budget: window pictures of two-word texts as "
     "wide as the cell less a few pixels, wrapped, justified and distributed, at zoom 100 "
     "(text_style's group line_budget)",
@@ -309,6 +315,55 @@ def _window_workbook(window: Window, files: Path) -> dict[str, Any]:
     return {"file": name, "steps": steps}
 
 
+def _merge_rows_workbook(files: Path) -> dict[str, Any]:
+    with tempfile.TemporaryDirectory() as tmp:
+        raw = merge_rows.build(Path(tmp))
+        fixed_copy(raw, files / merge_rows.WORKBOOK)
+    last = max(case.row for case in merge_rows.CASES)
+    return {
+        "file": merge_rows.WORKBOOK,
+        "steps": [
+            {"op": "open"},
+            {"op": "read", "id": "heights", "range": f"A1:A{last}", "props": ["row_height"]},
+            {"op": "read_format", "id": "fonts", "range": f"A1:A{last}",
+             "props": ["font.name", "font.size"]},
+        ],
+    }  # fmt: skip
+
+
+def _read_merge_rows(
+    outcome: dict[str, Any], manifest_doc: dict[str, Any], folder: Path
+) -> list[Path]:
+    """``merge_rows.tsv`` in the Mac suite's columns: each case row's height and applied font."""
+    by_file = {wb["file"]: wb for wb in outcome["workbooks"]}
+    results = _results(by_file[merge_rows.WORKBOOK])
+    heights = results["heights"]["row_height"]
+    fonts = results["fonts"]["cells"]
+    answer = []
+    for case in merge_rows.CASES:
+        font = fonts[case.row - 1][0]
+        answer.append(
+            "\t".join(
+                (
+                    merge_rows.WORKBOOK,
+                    str(case.row),
+                    str(font["font.name"]),
+                    f"{float(font['font.size']):g}",
+                    f"{float(heights[case.row - 1][0]):g}",
+                )
+            )
+        )
+    _, found = merge_rows.records("\n".join(answer))
+    _, lines = _job_lines("merge_rows", outcome, manifest_doc, "read row_height (capture job)")
+    path = folder / "merge_rows.tsv"
+    with path.open("w", encoding="utf-8", newline="\n") as out:
+        out.write("\n".join(lines) + "\n")
+        out.write("# suite: merge_rows\n" + "\t".join(merge_rows.COLUMNS) + "\n")
+        for record in found:
+            out.write("\t".join(record[c] for c in merge_rows.COLUMNS) + "\n")
+    return [path]
+
+
 def manifest(group: str, job_id: str, workbooks: list[dict[str, Any]]) -> dict[str, Any]:
     return {
         "schema": 1,
@@ -330,6 +385,8 @@ def write(group: str, job_id: str, out: Path) -> Path:
     files.mkdir(parents=True)
     if group in WINDOWS_OF:
         books = [_window_workbook(w, files) for w in WINDOWS_OF[group]]
+    elif group == "merge_rows":
+        books = [_merge_rows_workbook(files)]
     else:
         books = [_cells_workbook(files)]
     doc = manifest(group, job_id, books)
@@ -500,8 +557,11 @@ def read(group: str, job: Path, result: Path, folder: Path = WINDOWS) -> list[Pa
             raise ValueError(f"the result's input {name} is not this job's")
     manifest_doc = json.loads((job / "job.json").read_text(encoding="utf-8"))
     folder.mkdir(parents=True, exist_ok=True)
-    if group in WINDOWS_OF:
-        written = _read_windows(group, outcome, manifest_doc, result, folder)
+    if group in WINDOWS_OF or group == "merge_rows":
+        if group == "merge_rows":
+            written = _read_merge_rows(outcome, manifest_doc, folder)
+        else:
+            written = _read_windows(group, outcome, manifest_doc, result, folder)
         shutil.copyfile(job / "job.json", folder / f"{group}.job.json")
         return written
     by_file = {wb["file"]: wb for wb in outcome["workbooks"]}
