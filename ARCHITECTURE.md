@@ -746,8 +746,8 @@ a cached value (as openpyxl writes it) has no `t`. The same file confirms Excel 
 
 Captured so far, in `tests/captures/`: by print (route B) `layout` (§3.6, §4.1 to §4.7); read from
 Excel `theme_colors` and `theme_colors_more` (§3.3), `merge_width` and `error_width` (§4.2, §4.4, no
-deviation), `row_height`, `row_height_more`, `row_height_fitted` and `merge_rows` (§4.7, §4.16,
-§4.17), `color_kinds` (§3.3), `package` and `package_more` (§5.5) and `odd_values` (§4.17, §5); on
+deviation), `row_height`, `row_height_more`, `row_height_fitted`, `merge_rows` and `wrap_rows`
+(§4.7, §4.16, §4.17), `color_kinds` (§3.3), `package` and `package_more` (§5.5) and `odd_values` (§4.17, §5); on
 the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14),
 `theme_fonts_palette` and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions`
 (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts`, `gradients` and
@@ -1180,7 +1180,10 @@ is read (`CellStyle.justify_last_line`) and changes nothing: distributed already
 line (captured). A row Excel fits grows to the lines distributed text draws, with the wrap flag
 or without it: two lines of Calibri 11 take 32 pt (Excel 16.115, screen suite `text_style`).
 Justify and the vertical spreads wrap and fit the row the same way, with the wrap flag or
-without it (`text_style_more`: six lines take 96 pt).
+without it (`text_style_more`: six lines take 96 pt). On Excel for Mac the alignment never changes
+the row: one to six lines, wrapped, justified and distributed with the wrap flag or without it,
+fit the rows wrapped text of as many lines fits, in Calibri 11, Calibri 16 and Arial 11 (captured,
+`wrap_rows`).
 
 **Indent** is three spaces of the Normal font a level (§4.6), 6 pt under Calibri 11, on the side
 the alignment resolves to, `general` included: under Calibri 11 right-aligned text and numbers end

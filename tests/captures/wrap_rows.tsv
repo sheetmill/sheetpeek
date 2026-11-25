@@ -1,0 +1,101 @@
+# suite: wrap_rows (capture.wrap_rows); Excel 16.115 (16.115.26110837, Microsoft 365, Current channel) for Mac, en_US
+# one workbook, openpyxl's default styles (Normal Calibri 11, no customHeight); one case a row in column A, fitted by Excel on opening
+# captured: 2026-11-24; method: row height (AppleScript)
+# name: the case (CASES in capture/wrap_rows.py); lines: the lines of its text; applied: the font Excel applied to column A; height: the row's height in points; text: line feeds as \n
+name	row	alignment	form	lines	font	applied	height	text
+wrap words 1 Calibri 11	1	wrap	words	1	Calibri 11	Calibri 11	16	wrapped
+wrap words 2 Calibri 11	2	wrap	words	2	Calibri 11	Calibri 11	32	wrapped wrapped
+wrap words 3 Calibri 11	3	wrap	words	3	Calibri 11	Calibri 11	48	wrapped wrapped wrapped
+wrap words 4 Calibri 11	4	wrap	words	4	Calibri 11	Calibri 11	64	wrapped wrapped wrapped wrapped
+wrap words 5 Calibri 11	5	wrap	words	5	Calibri 11	Calibri 11	80	wrapped wrapped wrapped wrapped wrapped
+wrap words 6 Calibri 11	6	wrap	words	6	Calibri 11	Calibri 11	96	wrapped wrapped wrapped wrapped wrapped wrapped
+justify words 1 Calibri 11	7	justify	words	1	Calibri 11	Calibri 11	16	wrapped
+justify words 2 Calibri 11	8	justify	words	2	Calibri 11	Calibri 11	32	wrapped wrapped
+justify words 3 Calibri 11	9	justify	words	3	Calibri 11	Calibri 11	48	wrapped wrapped wrapped
+justify words 4 Calibri 11	10	justify	words	4	Calibri 11	Calibri 11	64	wrapped wrapped wrapped wrapped
+justify words 5 Calibri 11	11	justify	words	5	Calibri 11	Calibri 11	80	wrapped wrapped wrapped wrapped wrapped
+justify words 6 Calibri 11	12	justify	words	6	Calibri 11	Calibri 11	96	wrapped wrapped wrapped wrapped wrapped wrapped
+distributed words 1 Calibri 11	13	distributed	words	1	Calibri 11	Calibri 11	16	wrapped
+distributed words 2 Calibri 11	14	distributed	words	2	Calibri 11	Calibri 11	32	wrapped wrapped
+distributed words 3 Calibri 11	15	distributed	words	3	Calibri 11	Calibri 11	48	wrapped wrapped wrapped
+distributed words 4 Calibri 11	16	distributed	words	4	Calibri 11	Calibri 11	64	wrapped wrapped wrapped wrapped
+distributed words 5 Calibri 11	17	distributed	words	5	Calibri 11	Calibri 11	80	wrapped wrapped wrapped wrapped wrapped
+distributed words 6 Calibri 11	18	distributed	words	6	Calibri 11	Calibri 11	96	wrapped wrapped wrapped wrapped wrapped wrapped
+distributed unwrapped words 1 Calibri 11	19	distributed unwrapped	words	1	Calibri 11	Calibri 11	16	wrapped
+distributed unwrapped words 2 Calibri 11	20	distributed unwrapped	words	2	Calibri 11	Calibri 11	32	wrapped wrapped
+distributed unwrapped words 3 Calibri 11	21	distributed unwrapped	words	3	Calibri 11	Calibri 11	48	wrapped wrapped wrapped
+distributed unwrapped words 4 Calibri 11	22	distributed unwrapped	words	4	Calibri 11	Calibri 11	64	wrapped wrapped wrapped wrapped
+distributed unwrapped words 5 Calibri 11	23	distributed unwrapped	words	5	Calibri 11	Calibri 11	80	wrapped wrapped wrapped wrapped wrapped
+distributed unwrapped words 6 Calibri 11	24	distributed unwrapped	words	6	Calibri 11	Calibri 11	96	wrapped wrapped wrapped wrapped wrapped wrapped
+wrap breaks 1 Calibri 11	25	wrap	breaks	1	Calibri 11	Calibri 11	16	Hxg
+wrap breaks 2 Calibri 11	26	wrap	breaks	2	Calibri 11	Calibri 11	32	Hxg\nHxg
+wrap breaks 3 Calibri 11	27	wrap	breaks	3	Calibri 11	Calibri 11	48	Hxg\nHxg\nHxg
+wrap breaks 4 Calibri 11	28	wrap	breaks	4	Calibri 11	Calibri 11	64	Hxg\nHxg\nHxg\nHxg
+wrap breaks 5 Calibri 11	29	wrap	breaks	5	Calibri 11	Calibri 11	80	Hxg\nHxg\nHxg\nHxg\nHxg
+wrap breaks 6 Calibri 11	30	wrap	breaks	6	Calibri 11	Calibri 11	96	Hxg\nHxg\nHxg\nHxg\nHxg\nHxg
+justify breaks 1 Calibri 11	31	justify	breaks	1	Calibri 11	Calibri 11	16	Hxg
+justify breaks 2 Calibri 11	32	justify	breaks	2	Calibri 11	Calibri 11	32	Hxg\nHxg
+justify breaks 3 Calibri 11	33	justify	breaks	3	Calibri 11	Calibri 11	48	Hxg\nHxg\nHxg
+justify breaks 4 Calibri 11	34	justify	breaks	4	Calibri 11	Calibri 11	64	Hxg\nHxg\nHxg\nHxg
+justify breaks 5 Calibri 11	35	justify	breaks	5	Calibri 11	Calibri 11	80	Hxg\nHxg\nHxg\nHxg\nHxg
+justify breaks 6 Calibri 11	36	justify	breaks	6	Calibri 11	Calibri 11	96	Hxg\nHxg\nHxg\nHxg\nHxg\nHxg
+distributed breaks 1 Calibri 11	37	distributed	breaks	1	Calibri 11	Calibri 11	16	Hxg
+distributed breaks 2 Calibri 11	38	distributed	breaks	2	Calibri 11	Calibri 11	32	Hxg\nHxg
+distributed breaks 3 Calibri 11	39	distributed	breaks	3	Calibri 11	Calibri 11	48	Hxg\nHxg\nHxg
+distributed breaks 4 Calibri 11	40	distributed	breaks	4	Calibri 11	Calibri 11	64	Hxg\nHxg\nHxg\nHxg
+distributed breaks 5 Calibri 11	41	distributed	breaks	5	Calibri 11	Calibri 11	80	Hxg\nHxg\nHxg\nHxg\nHxg
+distributed breaks 6 Calibri 11	42	distributed	breaks	6	Calibri 11	Calibri 11	96	Hxg\nHxg\nHxg\nHxg\nHxg\nHxg
+distributed unwrapped breaks 1 Calibri 11	43	distributed unwrapped	breaks	1	Calibri 11	Calibri 11	16	Hxg
+distributed unwrapped breaks 2 Calibri 11	44	distributed unwrapped	breaks	2	Calibri 11	Calibri 11	32	Hxg\nHxg
+distributed unwrapped breaks 3 Calibri 11	45	distributed unwrapped	breaks	3	Calibri 11	Calibri 11	48	Hxg\nHxg\nHxg
+distributed unwrapped breaks 4 Calibri 11	46	distributed unwrapped	breaks	4	Calibri 11	Calibri 11	64	Hxg\nHxg\nHxg\nHxg
+distributed unwrapped breaks 5 Calibri 11	47	distributed unwrapped	breaks	5	Calibri 11	Calibri 11	80	Hxg\nHxg\nHxg\nHxg\nHxg
+distributed unwrapped breaks 6 Calibri 11	48	distributed unwrapped	breaks	6	Calibri 11	Calibri 11	96	Hxg\nHxg\nHxg\nHxg\nHxg\nHxg
+wrap words 1 Calibri 16	49	wrap	words	1	Calibri 16	Calibri 16	22	wrap
+wrap words 2 Calibri 16	50	wrap	words	2	Calibri 16	Calibri 16	44	wrap wrap
+wrap words 3 Calibri 16	51	wrap	words	3	Calibri 16	Calibri 16	66	wrap wrap wrap
+wrap words 4 Calibri 16	52	wrap	words	4	Calibri 16	Calibri 16	88	wrap wrap wrap wrap
+wrap words 5 Calibri 16	53	wrap	words	5	Calibri 16	Calibri 16	110	wrap wrap wrap wrap wrap
+wrap words 6 Calibri 16	54	wrap	words	6	Calibri 16	Calibri 16	132	wrap wrap wrap wrap wrap wrap
+justify words 1 Calibri 16	55	justify	words	1	Calibri 16	Calibri 16	22	wrap
+justify words 2 Calibri 16	56	justify	words	2	Calibri 16	Calibri 16	44	wrap wrap
+justify words 3 Calibri 16	57	justify	words	3	Calibri 16	Calibri 16	66	wrap wrap wrap
+justify words 4 Calibri 16	58	justify	words	4	Calibri 16	Calibri 16	88	wrap wrap wrap wrap
+justify words 5 Calibri 16	59	justify	words	5	Calibri 16	Calibri 16	110	wrap wrap wrap wrap wrap
+justify words 6 Calibri 16	60	justify	words	6	Calibri 16	Calibri 16	132	wrap wrap wrap wrap wrap wrap
+distributed words 1 Calibri 16	61	distributed	words	1	Calibri 16	Calibri 16	22	wrap
+distributed words 2 Calibri 16	62	distributed	words	2	Calibri 16	Calibri 16	44	wrap wrap
+distributed words 3 Calibri 16	63	distributed	words	3	Calibri 16	Calibri 16	66	wrap wrap wrap
+distributed words 4 Calibri 16	64	distributed	words	4	Calibri 16	Calibri 16	88	wrap wrap wrap wrap
+distributed words 5 Calibri 16	65	distributed	words	5	Calibri 16	Calibri 16	110	wrap wrap wrap wrap wrap
+distributed words 6 Calibri 16	66	distributed	words	6	Calibri 16	Calibri 16	132	wrap wrap wrap wrap wrap wrap
+distributed unwrapped words 1 Calibri 16	67	distributed unwrapped	words	1	Calibri 16	Calibri 16	22	wrap
+distributed unwrapped words 2 Calibri 16	68	distributed unwrapped	words	2	Calibri 16	Calibri 16	44	wrap wrap
+distributed unwrapped words 3 Calibri 16	69	distributed unwrapped	words	3	Calibri 16	Calibri 16	66	wrap wrap wrap
+distributed unwrapped words 4 Calibri 16	70	distributed unwrapped	words	4	Calibri 16	Calibri 16	88	wrap wrap wrap wrap
+distributed unwrapped words 5 Calibri 16	71	distributed unwrapped	words	5	Calibri 16	Calibri 16	110	wrap wrap wrap wrap wrap
+distributed unwrapped words 6 Calibri 16	72	distributed unwrapped	words	6	Calibri 16	Calibri 16	132	wrap wrap wrap wrap wrap wrap
+wrap words 1 Arial 11	73	wrap	words	1	Arial 11	Arial 11	16	wrapped
+wrap words 2 Arial 11	74	wrap	words	2	Arial 11	Arial 11	31	wrapped wrapped
+wrap words 3 Arial 11	75	wrap	words	3	Arial 11	Arial 11	46	wrapped wrapped wrapped
+wrap words 4 Arial 11	76	wrap	words	4	Arial 11	Arial 11	61	wrapped wrapped wrapped wrapped
+wrap words 5 Arial 11	77	wrap	words	5	Arial 11	Arial 11	76	wrapped wrapped wrapped wrapped wrapped
+wrap words 6 Arial 11	78	wrap	words	6	Arial 11	Arial 11	91	wrapped wrapped wrapped wrapped wrapped wrapped
+justify words 1 Arial 11	79	justify	words	1	Arial 11	Arial 11	16	wrapped
+justify words 2 Arial 11	80	justify	words	2	Arial 11	Arial 11	31	wrapped wrapped
+justify words 3 Arial 11	81	justify	words	3	Arial 11	Arial 11	46	wrapped wrapped wrapped
+justify words 4 Arial 11	82	justify	words	4	Arial 11	Arial 11	61	wrapped wrapped wrapped wrapped
+justify words 5 Arial 11	83	justify	words	5	Arial 11	Arial 11	76	wrapped wrapped wrapped wrapped wrapped
+justify words 6 Arial 11	84	justify	words	6	Arial 11	Arial 11	91	wrapped wrapped wrapped wrapped wrapped wrapped
+distributed words 1 Arial 11	85	distributed	words	1	Arial 11	Arial 11	16	wrapped
+distributed words 2 Arial 11	86	distributed	words	2	Arial 11	Arial 11	31	wrapped wrapped
+distributed words 3 Arial 11	87	distributed	words	3	Arial 11	Arial 11	46	wrapped wrapped wrapped
+distributed words 4 Arial 11	88	distributed	words	4	Arial 11	Arial 11	61	wrapped wrapped wrapped wrapped
+distributed words 5 Arial 11	89	distributed	words	5	Arial 11	Arial 11	76	wrapped wrapped wrapped wrapped wrapped
+distributed words 6 Arial 11	90	distributed	words	6	Arial 11	Arial 11	91	wrapped wrapped wrapped wrapped wrapped wrapped
+distributed unwrapped words 1 Arial 11	91	distributed unwrapped	words	1	Arial 11	Arial 11	16	wrapped
+distributed unwrapped words 2 Arial 11	92	distributed unwrapped	words	2	Arial 11	Arial 11	31	wrapped wrapped
+distributed unwrapped words 3 Arial 11	93	distributed unwrapped	words	3	Arial 11	Arial 11	46	wrapped wrapped wrapped
+distributed unwrapped words 4 Arial 11	94	distributed unwrapped	words	4	Arial 11	Arial 11	61	wrapped wrapped wrapped wrapped
+distributed unwrapped words 5 Arial 11	95	distributed unwrapped	words	5	Arial 11	Arial 11	76	wrapped wrapped wrapped wrapped wrapped
+distributed unwrapped words 6 Arial 11	96	distributed unwrapped	words	6	Arial 11	Arial 11	91	wrapped wrapped wrapped wrapped wrapped wrapped
