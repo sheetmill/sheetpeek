@@ -104,10 +104,10 @@ def _windows_face(
     """``_face`` on Excel for Windows: xlformat's ``vertical_metrics``, in whole pixels.
 
     A face xlformat has no Windows tables for takes Calibri's at the size, as it is measured
-    (reported ``font.no_metrics``; unverified). A size xlformat has no Windows rows for (below
-    6 points, above 40 but in Calibri to 72, half sizes but in Calibri) takes the Mac's height
-    and bottom offset rounded to whole pixels, its line inset the bottom offset, as at every
-    tabled size (unverified). An accounting underline adds three of its
+    (reported ``font.no_metrics``; unverified). A size past xlformat's Windows rows, which
+    cover 1 to 72 points by ppem, takes the Mac's height and bottom offset rounded to whole
+    pixels, its line inset the bottom offset, as at every tabled size (unverified above 72
+    points). An accounting underline adds three of its
     thicknesses, the Mac's rule in pixels (captured at Calibri 11, ``windows/text_style``
     group ``fonts``: single and double rows of 23 px; other sizes unverified).
     """
@@ -261,7 +261,7 @@ def ppem(size: float) -> int:
 
 
 def ppem_size(em: int) -> float:
-    """The smallest whole or half point size whose ppem is ``em`` (xlformat tables those)."""
+    """The smallest whole or half point size whose ppem is ``em``."""
     return math.ceil((em - 0.5) * 1.5) / 2
 
 
@@ -292,10 +292,8 @@ def _windows_script_parts(font: Font, platform: xlformat.Platform) -> tuple[floa
     the Mac's table read in pixels by ppem, carried on to ppem 53 (captured,
     ``windows/row_height_fitted`` groups ``styled`` and ``scripts``: Calibri at every whole and
     half size from 6 to 40, 207 of 207 rows by these rules, a Calibri subscript at ppem 15 from
-    the capture; sizes sharing a ppem share a row). A drawn ppem below xlformat's Windows tables
-    takes ``_windows_face``'s fallback (12 subscripts at 6 to 8.5 pt, a pixel or two taller than
-    Excel's). Other faces and sizes past the tables take the
-    raise plus the drawn size's ascent (unverified).
+    the capture; sizes sharing a ppem share a row). Other faces and sizes past the tables take
+    the raise plus the drawn size's ascent (unverified).
     """
     p = ppem(min(max(font.size, 1.0), 409.0))
     d, r, lower = math.floor(2 * p / 3 + 0.5), p // 2, p // 5

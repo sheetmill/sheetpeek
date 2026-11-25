@@ -732,9 +732,9 @@ and wrapped lines `H` apart with nothing added (three lines of Calibri 11 take 6
 `windows/text_style`, every row but four (§4.9), and its first lines' ink tops; and
 `windows/row_height_fitted`, every row of Calibri at 6 to 72 points and the half sizes to 40, and
 of Arial, Times New Roman, Courier New and Aptos Narrow at 6 to 40, plain or with an accounting
-underline. Sizes xlformat has no Windows rows for (below 6 points, above 40 but in Calibri to 72,
-and half sizes but in Calibri) take the Mac's height and bottom offset rounded to whole pixels,
-faces it has none for Calibri's (unverified, no capture in this repository yet). An accounting
+underline. xlformat's Windows rows cover every size from 1 to 72 points by ppem in those five
+faces; a size above 72 points takes the Mac's height and bottom offset rounded to whole pixels,
+and a face xlformat has none for Calibri's (unverified, no capture in this repository yet). An accounting
 underline adds three of its thicknesses (23 px rows at
 Calibri 11, captured). Superscript and subscript take the Mac's rules in pixels by ppem
 (§4.13).
@@ -784,8 +784,7 @@ under cell fonts to 12 points, larger for Calibri 14 (136 of 136 cells as sheetp
 a merge across rows fits no row, as on the Mac (§4.7). `windows/row_height_fitted` (groups
 `styled` and `scripts`) and `windows/wrap_rows`, by the job `fitted_rows`: rows fitted to a font
 at sizes from 6 to 72 points and to superscript and subscript, every row at a size in xlformat's
-Windows tables as sheetpeek's but 12 subscripts at 6 to 8.5 points, drawn at a ppem below those
-tables, which are the known deviations of the 483 rows (§4.7, §4.13). Wrapped, justified and
+Windows tables as sheetpeek's, 483 of 483 (§4.7, §4.13). Wrapped, justified and
 distributed text of one to six lines fits the rows of its lines, 20 px a line of Calibri 11,
 with the wrap flag or without it (96 of 96 rows as sheetpeek's): the alignment alone adds no
 line: `windows/text_style`'s distributed and justified rows a line taller hold a line in the band
@@ -1069,9 +1068,8 @@ ppem 53 (40 pt) from Windows' own rows; sizes that share a ppem share a row (11 
 Captured: `windows/row_height_fitted` (groups `styled` and `scripts`, Calibri at every whole and
 half size from 6 to 40: 207 of 207 rows by these rules, a subscript at ppem 15 taken from the
 capture: its part below is 6 px, where the rule gives 5, at Calibri 11 and 11.5 and in
-`windows/text_style`'s "subscript alone"). sheetpeek measures a drawn ppem through xlformat's
-Windows tables, which start at 6 pt: a subscript at 6 to 8.5 pt, drawn at 5 to 7 ppem, takes the
-Mac's metrics and fits a row 1 or 2 px taller than Excel's (12 rows, known deviations). Faces but
+`windows/text_style`'s "subscript alone"), each drawn ppem measured through xlformat's Windows
+tables (207 of 207 as sheetpeek's). Faces but
 Calibri and sizes past 40 pt are unverified (no capture in this repository yet); the drawn text's
 place on Windows keeps the Mac's rules in points.
 
@@ -2823,7 +2821,7 @@ are read.
    both platforms comes before a beta: every rule captured on the Mac is captured on Windows too,
    and where the two differ each platform gets its own. Still to model on both platforms: rows
    fitted by autofit's measure, a line taller than drawn (captured, `wrap_band`, §4.7). Still to capture on Windows: the rules labeled unverified there
-   (font sizes and faces outside xlformat's Windows tables), the screen suites not yet run there,
+   (font sizes above 72 points and faces outside xlformat's Windows tables), the screen suites not yet run there,
    and the zoom-dependent layout both platforms share.
 4. **After 1.0:** a PDF backend drawing from the `excel` mode geometry (§2.1), possibly as an
    optional extra.

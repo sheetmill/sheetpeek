@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- Requires xlformat 0.11 (`xlformat>=0.11,<1`), whose Windows rows cover every size from 1 to 72
+  points by pixels per em in Calibri, Arial, Times New Roman, Courier New and Aptos Narrow. With
+  `platform="windows"`, a Times New Roman 60 pt row is 102 pixels (76.5 pt) and a Calibri 41.5 pt
+  one 71 (53.25 pt), where 0.6.0 gave 99 and 72, the Mac's heights rounded to pixels; only sizes
+  above 72 points still take them (unverified).
 - Requires xlrecalc 0.12 (`xlrecalc>=0.12,<1`), which computes 3-D references and unions of
   references as Excel does. In a workbook openpyxl wrote (no cached values), `=SUM(Jan:Mar!A1)`
   shows the sum, `=Jan:Mar!A1+1` shows `#REF!` and `=SUM((Jan!A1,Jan!A1:A2))` the sum of its
@@ -18,8 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - With `platform="windows"`, superscript and subscript rows are fitted as Excel for Windows fits
   them, by the font's pixels per em (captured, `windows/row_height_fitted`): a Calibri 11
   superscript makes a 23-pixel row (17.25 pt) and a subscript a 24-pixel one (18 pt), and both at
-  24 pt a 48-pixel one (36 pt), where 0.6.0 gave 15.5, 16, 35.25 and 35 pt, not whole pixels. A
-  subscript at 6 to 8.5 pt still makes a row a pixel or two taller than Excel's.
+  24 pt a 48-pixel one (36 pt), where 0.6.0 gave 15.5, 16, 35.25 and 35 pt, not whole pixels.
 
 ## [0.6.0] - 2026-11-25
 

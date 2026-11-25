@@ -643,24 +643,8 @@ def test_windows_wrapped_rows_are_sheetpeeks():
     assert wrong == {}
 
 
-WINDOWS_FITTED_DEVIATIONS = 12
-"""Rows of ``windows/row_height_fitted`` sheetpeek fits otherwise, all of them a subscript at 6
-to 8.5 points (``_fitted_reason``); every other row, at every size and face captured, matches."""
-
-
-def _fitted_reason(record):
-    """Why a captured Windows row may differ from sheetpeek's, or ``None``."""
-    kind = record["name"].rsplit(" ", 1)[0]
-    if kind in ("subscript", "both") and float(record["size"]) < 9:
-        return (
-            "a subscript drawn at 5 to 7 ppem, below xlformat's Windows tables, takes the Mac's "
-            "metrics (§4.13)"
-        )
-    return None
-
-
 @pytest.mark.excel
-def test_windows_fitted_rows_are_sheetpeeks_but_small_subscripts():
+def test_windows_fitted_rows_are_sheetpeeks():
     pytest.importorskip("openpyxl")
     from capture import row_height_fitted
 
@@ -671,18 +655,13 @@ def test_windows_fitted_rows_are_sheetpeeks_but_small_subscripts():
             path = row_height_fitted.build_one(group, Path(tmp))
             rendered = sheetpeek.read(path, platform="windows").layout("excel")
             found[group] = {row.index: row.height_pt for row in rendered.rows}
-    unexplained, explained = {}, {}
+    wrong = {}
     for record in body:
         ours = found[record["group"]][int(record["row"])]
-        if ours == float(record["height"]):
-            continue
-        reason = _fitted_reason(record)
-        target = unexplained if reason is None else explained
-        target[(record["group"], record["name"])] = (float(record["height"]), ours, reason)
+        if ours != float(record["height"]):
+            wrong[(record["group"], record["name"])] = (float(record["height"]), ours)
     REPORT["fitted rows (Windows)"] = (
-        f"fitted rows, Excel for Windows: {len(body)} rows, {len(explained)} known deviations "
-        "(subscripts drawn below xlformat's Windows tables)"
+        f"fitted rows, Excel for Windows: {len(body)} rows, {len(wrong)} deviations"
     )
     assert len(body) == 483
-    assert unexplained == {}
-    assert len(explained) == WINDOWS_FITTED_DEVIATIONS
+    assert wrong == {}

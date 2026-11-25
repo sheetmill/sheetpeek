@@ -95,8 +95,8 @@ cached values. `ref="A1:H40"` keeps part of a sheet (the whole sheet is
 still read, for its used range), and `sheetpeek.open` reads several sheets with one load.
 `platform="windows"` shows a workbook as Excel for Windows at 96 dpi does (Excel for Mac by
 default): column widths, number formats, text and its insets, rows, baselines and underlines in
-whole pixels, superscript and subscript rows included. Rows at font sizes outside xlformat's
-Windows tables are unverified.
+whole pixels, superscript and subscript rows included. Rows at font sizes above 72 points are
+unverified.
 
 A file from someone you do not trust is checked before anything parses it, and `limits=` sets what
 a read may cost; the documentation's usage page has the details. `sheetpeek serve` has no

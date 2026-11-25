@@ -12,7 +12,7 @@ license-files = ["LICENSE"]
 authors = [{ name = "Ethan Post" }]
 requires-python = ">=3.11"
 dependencies = [
-  "xlformat>=0.10,<1",
+  "xlformat>=0.11,<1",
   "xlio==0.4.*",
   "xlrecalc>=0.12,<1",
 ]
