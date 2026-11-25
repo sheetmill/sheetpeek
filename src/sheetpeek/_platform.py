@@ -93,25 +93,15 @@ points: the size every one of them covers."""
 
 
 @lru_cache(maxsize=1024)
-def substitute(name: str, platform: xlformat.Platform) -> str:
-    """The face Excel on ``platform`` measures ``name`` in.
-
-    Its own, or the substitute xlformat names for a face the platform does not have (on the
-    Mac, MS Sans Serif as Times New Roman).
-    """
-    found = {k.lower(): v for k, v in xlformat.font_substitutes(platform=platform).items()}
-    return found.get(name.lower(), name)
-
-
-@lru_cache(maxsize=1024)
 def covers(function: str, name: str, platform: xlformat.Platform) -> bool:
     """Whether xlformat's ``function`` measures the family ``name`` on ``platform``.
 
-    Asked of xlformat, with the face's substitute, so a family it adds is measured without a
-    change here.
+    Asked of xlformat, so a family it adds is measured without a change here. A face the
+    platform does not have is measured in the face xlformat substitutes for it, in every
+    function (on the Mac, MS Sans Serif as Times New Roman).
     """
     try:
-        _PROBES[function](xlformat.Font(substitute(name, platform), 11.0), platform)
+        _PROBES[function](xlformat.Font(name, 11.0), platform)
     except LookupError:
         return False
     return True
@@ -123,4 +113,4 @@ def metrics_face(name: str, function: str, platform: xlformat.Platform) -> str:
     ``name``'s face where it measures it, else Calibri, at the same size, as the layout measures
     a face it lacks (§6.2).
     """
-    return substitute(name, platform) if covers(function, name, platform) else "Calibri"
+    return name if covers(function, name, platform) else "Calibri"

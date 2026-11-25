@@ -36,9 +36,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   model with Calibri at the same size, as the text is measured, where the model was left out
   for it: one wrapped line of Verdana 11 makes its row 16 points, Calibri 11's, where it made
   15 (unverified, no capture in this repository yet).
-- Requires xlformat 0.9 (`xlformat>=0.9,<1`), which measures text on the Mac by a rule per
-  glyph, captured from Excel for Mac. 0.5.0 already runs with xlformat 0.9 when it is installed,
-  so these changes reach 0.5.0 users through it as well:
+- Requires xlformat 0.10 (`xlformat>=0.10,<1`), which measures Excel for Windows' text and rows
+  for more faces and sizes, from captures of Excel for Windows. 0.5.0 runs with xlformat 0.10
+  when it is installed, so its users with it see these as well, but for the notice. With
+  `platform="windows"`:
+  - 25 families are measured, where Calibri, Aptos Narrow and Arial were and the others were
+    measured as Calibri: "Hello world" in Times New Roman 11 is 51 points wide, where it was 54.
+    A face whose insets xlformat has no Windows table for (Times New Roman among them) is
+    placed between Calibri's, reported as `font.no_metrics` with `"function": "text_insets"`.
+  - Rows fit fonts at more sizes as Excel for Windows fits them: Calibri at 6 to 72 points and
+    every half size to 40, and Arial, Times New Roman, Courier New and Aptos Narrow at 6 to 40, in
+    whole pixels (captured, `windows/row_height_fitted`): Calibri 11.5 makes a 15-point row,
+    where it made 15.75, and Arial 30 a 37.5-point row, where it made 36.75.
+- Requires xlformat 0.9 or later, which measures text on the Mac by a rule per glyph, captured
+  from Excel for Mac. 0.5.0 already runs with xlformat 0.9 or 0.10 when it is installed, so these
+  changes reach 0.5.0 users through it as well:
   - 24 more families are measured, 27 in all (Times New Roman, Courier New, Courier, Tahoma,
     Arial Narrow, Verdana and Impact among them), where they were measured as Calibri with a
     `font.no_metrics` notice: "Hello world" in Times New Roman 11 is 55 points wide, where it

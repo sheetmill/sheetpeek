@@ -104,9 +104,10 @@ def _windows_face(
     """``_face`` on Excel for Windows: xlformat's ``vertical_metrics``, in whole pixels.
 
     A face xlformat has no Windows tables for takes Calibri's at the size, as it is measured
-    (reported ``font.no_metrics``; unverified). A size xlformat has no Windows rows for takes
-    the Mac's height and bottom offset rounded to whole pixels, its line inset the bottom
-    offset, as at every tabled size (unverified). An accounting underline adds three of its
+    (reported ``font.no_metrics``; unverified). A size xlformat has no Windows rows for (below
+    6 points, above 40 but in Calibri to 72, half sizes but in Calibri) takes the Mac's height
+    and bottom offset rounded to whole pixels, its line inset the bottom offset, as at every
+    tabled size (unverified). An accounting underline adds three of its
     thicknesses, the Mac's rule in pixels (captured at Calibri 11, ``windows/text_style``
     group ``fonts``: single and double rows of 23 px; other sizes unverified).
     """

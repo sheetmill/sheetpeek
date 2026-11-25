@@ -26,7 +26,6 @@ from openpyxl.styles import Alignment, Font  # noqa: E402
 
 CACHED = (
     _platform.covers,
-    _platform.substitute,
     _rows._face,
     _excel._platform_row_model,
     _text_styles._platform_rules,

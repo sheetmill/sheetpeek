@@ -729,12 +729,12 @@ top-aligned baseline `H - D + 1` px below the row's top, the bottom-aligned one 
 its bottom, centered text `floor((R - H) / 2)` px below the top-aligned place in a row of `R` px,
 and wrapped lines `H` apart with nothing added (three lines of Calibri 11 take 60 px). Captured:
 `windows/text_style`, every row but eight (§4.9), and its first lines' ink tops; and
-`windows/row_height_fitted`, every row of Calibri, Arial, Times New Roman, Courier New and Aptos
-Narrow, plain or with an accounting underline, at the sizes xlformat's Windows tables hold. Sizes
-xlformat has no Windows rows for take the Mac's height and bottom offset rounded to whole pixels,
-faces it has none for Calibri's: a known deviation at about half of them, where Excel for
-Windows fits a row 0.75 to 1.5 pt from this (`windows/row_height_fitted`: Calibri 11.5 fits 15
-pt, sheetpeek 15.75). An accounting underline adds three of its thicknesses (23 px rows at
+`windows/row_height_fitted`, every row of Calibri at 6 to 72 points and the half sizes to 40, and
+of Arial, Times New Roman, Courier New and Aptos Narrow at 6 to 40, plain or with an accounting
+underline. Sizes xlformat has no Windows rows for (below 6 points, above 40 but in Calibri to 72,
+and half sizes but in Calibri) take the Mac's height and bottom offset rounded to whole pixels,
+faces it has none for Calibri's (unverified, no capture in this repository yet). An accounting
+underline adds three of its thicknesses (23 px rows at
 Calibri 11, captured). Superscript and subscript keep the Mac's rules on Windows' faces (a known
 deviation, §4.9: Excel for Windows fits a superscript of Calibri 11 in 23 px, sheetpeek 17 pt).
 
@@ -783,8 +783,8 @@ under cell fonts to 12 points, larger for Calibri 14 (136 of 136 cells as sheetp
 a merge across rows fits no row, as on the Mac (§4.7). `windows/row_height_fitted` (groups
 `styled` and `scripts`) and `windows/wrap_rows`, by the job `fitted_rows`: rows fitted to a font
 at sizes from 6 to 72 points and to superscript and subscript, every row at a size in xlformat's
-Windows tables as sheetpeek's but superscript and subscript; 310 of 483 rows are known
-deviations, off those tables or superscript and subscript (§4.7). Wrapped, justified and
+Windows tables as sheetpeek's but superscript and subscript, which hold the 172 known
+deviations of the 483 rows (§4.7). Wrapped, justified and
 distributed text of one to six lines fits the rows of its lines, 20 px a line of Calibri 11,
 with the wrap flag or without it (96 of 96 rows as sheetpeek's): the alignment alone adds no
 line, so what makes `windows/text_style`'s distributed and justified rows a line taller is not
@@ -2546,7 +2546,7 @@ attribute of `<dimension>`, `<mergeCell>` and `<autoFilter>` in the file format.
 
 - `xlio==0.4.*` (§5): the sheetmill project's reader, pinned to a minor.
 - `xlrecalc>=0.11,<1` (§5.7), imported normally: it is required.
-- `xlformat>=0.9,<1` (§6.4), imported normally: it is required.
+- `xlformat>=0.10,<1` (§6.4), imported normally: it is required.
 - openpyxl is a dev dependency only: the tests and the documentation's examples build workbooks
   with it, and the tests that need it are left out without it.
 - Extra `sheetpeek[rich]`: `rich>=13`.

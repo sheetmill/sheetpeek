@@ -550,11 +550,9 @@ def test_windows_cuts_at_1000_under_its_theme_body_font():
 
 
 KNOWN_CUT_ROWS = {
-    # Known deviations, one reason: faces without Windows tables in xlformat, which sheetpeek
-    # measures as Calibri at their size (reported font.no_metrics). A Times New Roman 16 Normal
-    # font makes 27 px rows in Excel, Calibri 16's 28 in sheetpeek; a Segoe UI 11 cell makes a
+    # Known deviations, one reason: a face without Windows tables in xlformat, which sheetpeek
+    # measures as Calibri at its size (reported font.no_metrics): a Segoe UI 11 cell makes a
     # 22 px row, Calibri 11's 20.
-    **{("theme_16", f"C{r}"): (20.25, 21.0) for r in range(8, 14)},
     ("faces_times", "C6"): (16.5, 15.0),
     ("faces_times", "E6"): (16.5, 15.0),
 }
@@ -646,30 +644,21 @@ def test_windows_wrapped_rows_are_sheetpeeks():
     assert wrong == {}
 
 
-WINDOWS_FITTED_DEVIATIONS = 310
-"""Rows of ``windows/row_height_fitted`` sheetpeek fits otherwise, each for one of two reasons
-(``_fitted_reason``); any other row must match."""
+WINDOWS_FITTED_DEVIATIONS = 172
+"""Rows of ``windows/row_height_fitted`` sheetpeek fits otherwise, all of them superscript or
+subscript (``_fitted_reason``); every other row, at every size and face captured, matches."""
 
 
 def _fitted_reason(record):
     """Why a captured Windows row may differ from sheetpeek's, or ``None``."""
-    import xlformat
-
     kind = record["name"].rsplit(" ", 1)[0]
     if kind in ("superscript", "subscript", "both"):
         return "superscript and subscript keep Excel for Mac's rules (§4.13)"
-    face = (
-        kind if kind in ("Arial", "Times New Roman", "Courier New", "Aptos Narrow") else "Calibri"
-    )
-    try:
-        xlformat.vertical_metrics(xlformat.Font(face, float(record["size"])), platform="windows")
-    except LookupError:
-        return "a size xlformat's Windows tables lack: the Mac's metrics in whole pixels (§4.7)"
     return None
 
 
 @pytest.mark.excel
-def test_windows_fitted_rows_are_sheetpeeks_but_for_two_reasons():
+def test_windows_fitted_rows_are_sheetpeeks_but_superscript_and_subscript():
     pytest.importorskip("openpyxl")
     from capture import row_height_fitted
 
@@ -690,7 +679,7 @@ def test_windows_fitted_rows_are_sheetpeeks_but_for_two_reasons():
         target[(record["group"], record["name"])] = (float(record["height"]), ours, reason)
     REPORT["fitted rows (Windows)"] = (
         f"fitted rows, Excel for Windows: {len(body)} rows, {len(explained)} known deviations "
-        "(sizes off xlformat's Windows tables; superscript and subscript)"
+        "(superscript and subscript)"
     )
     assert len(body) == 483
     assert unexplained == {}

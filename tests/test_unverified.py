@@ -29,7 +29,7 @@ LABELS: dict[str, tuple[str, ...]] = {
         '"Numbers no column, row or font can have", unverified; this suite asks them in the same '
         "way.",
     ),
-    "README.md": ("outside xlformat's Windows tables are unverified.",),
+    "README.md": ("sizes outside xlformat's Windows tables are unverified.",),
     "docs/html.md": ("angled text comes from Excel's print layout and is unverified on screen.",),
     "tests/test_suite_diagonals.py": (
         "quarter of it; provisional until the capture's spread is known. "
@@ -58,8 +58,9 @@ LABELS: dict[str, tuple[str, ...]] = {
         "``windows/font_faces``, ``windows/font_aptos``; Excel's own test is unverified, as the",
     ),
     "src/sheetpeek/_rows.py": (
-        "(reported ``font.no_metrics``; unverified). A size xlformat has no Windows rows for takes",
-        "offset, as at every tabled size (unverified). An accounting underline adds three of its",
+        "(reported ``font.no_metrics``; unverified). A size xlformat has no Windows rows for "
+        "(below",
+        "tabled size (unverified). An accounting underline adds three of its",
         "group ``fonts``: single and double rows of 23 px; other sizes unverified).",
         "On Windows the Mac's rules with Windows' faces (unverified).",
         '5.5 points): Calibri 11\'s 3 (unverified)."""',
