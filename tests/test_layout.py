@@ -594,3 +594,20 @@ def test_the_font_cache_still_warns_once_a_font_is_measured():
     fonts.get(font)
     assert [n.code for n in notes.notices()].count("font.no_metrics") == 1
     assert fonts.row_height(font) == fonts.row_height(Font("No Such Typeface", 11.0))
+
+
+def test_an_empty_cell_keeps_its_own_alignment(tmp_path):
+    # An empty cell's explicit alignment reaches its rendered cell in every mode, though the
+    # layout keeps no entry for a cell that shows nothing and is left-aligned.
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    fill = PatternFill("solid", fgColor="FFFF00")
+    for column, horizontal in (("A", "center"), ("B", "right"), ("C", None), ("D", "left")):
+        ws[f"{column}1"].fill = fill
+        if horizontal:
+            ws[f"{column}1"].alignment = Alignment(horizontal=horizontal)
+    ws["E1"] = "x"
+    sheet = sheetpeek.read(save(wb, tmp_path / "empty.xlsx"), ref="A1:E1")
+    for mode in ("excel", "characters", "none"):
+        (row,) = sheet.layout(mode).rows
+        assert [c.align for c in row.cells[:4]] == ["center", "right", "left", "left"], mode

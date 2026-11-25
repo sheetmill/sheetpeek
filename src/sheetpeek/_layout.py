@@ -316,6 +316,10 @@ class _Shown:
     format_color: str | None = None
 
 
+_BLANK = _Shown()
+"""What a cell with no entry in ``origins``' map shows; compared with, never changed."""
+
+
 class _Fonts:
     """xlformat's font for each sheetpeek font, built once.
 
@@ -621,8 +625,19 @@ class _Grid:
     # Origins ------------------------------------------------------------------------------
 
     def origins(self) -> tuple[list[_Origin], dict[tuple[int, int], _Shown]]:
-        """Every text source, and what each visible cell shows on its own."""
+        """Every text source, and what each visible cell shows on its own.
+
+        A cell that shows what ``_Shown()`` holds (no text, left-aligned), as most empty cells do,
+        has no entry: readers look cells up with ``shown.get(position, _Shown())``. An empty
+        cell's own alignment (an explicit ``center``, say) keeps its entry. A sheet of styled
+        empty cells would otherwise hold an entry and a key for each while the output is built.
+        """
         shown: dict[tuple[int, int], _Shown] = {}
+
+        def put(position: tuple[int, int], found: _Shown) -> None:
+            if found != _BLANK:
+                shown[position] = found
+
         origins: list[_Origin] = []
         done_merges: set[CellRange] = set()
         covered_runs: set[tuple[int, int]] = set()
@@ -635,7 +650,6 @@ class _Grid:
                 cell = self.cell(i, p)
                 if merge is not None:
                     if merge in done_merges:
-                        shown[position] = _Shown()
                         continue
                     done_merges.add(merge)
                     origin = self.merge_origin(merge)
@@ -643,10 +657,9 @@ class _Grid:
                         origins.append(origin)
                         anchor = (origin.cell.row, origin.cell.column)
                         shown[anchor] = origin.shown
-                    shown.setdefault(position, _Shown())
                     continue
                 if position in covered_runs:
-                    shown[position] = self.show(cell, [p])
+                    put(position, self.show(cell, [p]))
                     continue
                 cols = [p]
                 if cell.style.h_align == "center_across" and cell.kind != "empty":
@@ -659,7 +672,7 @@ class _Grid:
                         cols.append(cols[-1] + 1)
                         covered_runs.add((nxt.row, nxt.column))
                 result = self.show(cell, cols)
-                shown[position] = result
+                put(position, result)
                 if result.text:
                     # A center-across run spills like centered text; a merge does not
                     # (captured, layout rows 176 to 179).
