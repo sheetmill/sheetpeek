@@ -308,12 +308,10 @@ def test_windows_shrinks_each_length_to_the_pixel_level_sheetpeek_gives_it(steps
 # --- text_style: cell widths, fitted rows and line counts at zoom 100
 
 KNOWN_ROWS: dict[str, tuple[int, ...]] = {
-    # Known deviations, rows by group. Horizontally distributed and justified wrapped text:
-    # Excel for Windows fits a row a line taller than its lines (three lines of Calibri 11 in
-    # 80 px, nine in 200 px): a line lies between the width drawn whole and the width row
-    # fitting keeps whole (captured, wrap_band; §4.7), not modeled.
-    "align": (14, 16, 18),
-    "lone": (4,),
+    # Known deviations, rows by group: none. Horizontally distributed and justified wrapped text
+    # that Excel for Windows fits a line taller than its lines (align 14, 16, 18; lone 4, with
+    # indent 1) holds a line between the width drawn whole and the width row fitting keeps
+    # whole (captured, wrap_band; §4.7).
 }
 KNOWN_LINES: dict[str, tuple[str, ...]] = {
     # Known deviations: none. Vertical justify and distributed text keeps on one line what fits

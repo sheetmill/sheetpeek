@@ -20,6 +20,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   3-D reference" and "a union of ranges". A 3-D reference or a union given to a function no
   capture shows reading one keeps the file's value and is reported under a label naming the
   function as the file writes it (`a 3-D reference in _XLFN.RANK.EQ`).
+- A row fitted to wrapped text takes as many lines as Excel's row fitting gives it, which wraps
+  the text again by autofit's measure (xlformat's `autofit_width`: advances, padding and
+  long-text bonus) rather than by the lines drawn (captured, `wrap_band` on the Mac and on
+  Windows). A line that is drawn whole but leaves less than autofit's padding to the column is
+  fitted as two, on both platforms: on Windows "aaaa bbbb cccc dddd" distributed in a default
+  column makes a 60 pt row, as in Excel, where 0.6.0 gave 45, and on the Mac "awww awww" wrapped
+  in a 66 pt column a 32 pt row, where 0.6.0 gave 16. Rich text still fits the lines it draws.
 - With `platform="windows"`, superscript and subscript rows are fitted as Excel for Windows fits
   them, by the font's pixels per em (captured, `windows/row_height_fitted`): a Calibri 11
   superscript makes a 23-pixel row (17.25 pt) and a subscript a 24-pixel one (18 pt), and both at

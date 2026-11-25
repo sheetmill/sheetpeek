@@ -266,18 +266,19 @@ def _fitted(
         wraps = style.wrap or style.h_align in _SPREAD or style.v_align in _SPREAD
         if cell.kind == "text" and wraps and widths[p] and merge is None:
             left, right = fonts.insets(cell.font, base)
-            budget = widths[p] - left - right
+            normal = fonts.get(sheet.normal_font)
             # between the indents, as drawn
-            budget -= (
-                _indents(style.h_align) * style.indent * indent_points(fonts.get(sheet.normal_font))
-            )
-            if spans:
+            indents = _indents(style.h_align) * style.indent * indent_points(normal)
+            if spans:  # rich text fits the lines drawn (unverified: no capture of its fit)
+                budget = widths[p] - left - right - indents
                 text = Text.of_spans(spans, fonts.get, breaks=True)
                 height = max(height, fitted_height(text, wrap(text.text, budget, text.width)))
             else:
-                lines = _wrap(str(cell.value), budget, fonts.get(cell.font))
-                height = max(height, wrapped_height(len(lines), cell.font))
-                wrapped.append((cell.font, len(lines)))
+                count = _fit_lines(
+                    str(cell.value), widths[p] - indents, fonts.get(cell.font), normal
+                )
+                height = max(height, wrapped_height(count, cell.font))
+                wrapped.append((cell.font, count))
             continue
         cell_fonts += own
     for column in hidden:
@@ -1126,6 +1127,47 @@ def _shifted(run: TextRun, dx: float) -> TextRun:
         clip=(left - dx, top, right - dx, bottom),
         rules=tuple(replace(r, x0=r.x0 - dx, x1=r.x1 - dx) for r in run.rules),
     )
+
+
+def _fit_lines(text: str, budget: float, font: xlformat.Font, normal: xlformat.Font) -> int:
+    """How many lines Excel fits a row to for wrapped ``text`` in a column of ``budget`` points.
+
+    Row fitting wraps the text again, by autofit's measure rather than by the drawn lines (§4.7,
+    captured, ``wrap_band`` on both platforms): a line stays whole while its autofit width
+    (xlformat's ``autofit_width``: advances, padding and long-text bonus) is at most the
+    column less the indents, the bonus taken only strictly past a step, where autofit takes it
+    at the step; a word wider than that is broken. A line the drawing keeps whole may so be
+    fitted as two.
+    """
+    text = text.replace("\r", "").replace("\t", " ")
+    platform = _platform.current()
+    step = 4 if platform.name == "windows" else 5  # digit widths a bonus step takes
+    unit = 0.75 if platform.name == "windows" else 1.0
+    digit = xlformat.digit_width(normal, platform=platform)
+    period = round(digit / unit) * step
+    lean = xlformat.overhang(font, platform=platform)
+    # padding and twice the overhang: a space's autofit width less its advance (no bonus)
+    extra = xlformat.autofit_width(" ", font, normal_font=normal, platform=platform)
+    extra -= _platform.text_width(" ", font=font)
+    plain = text.isascii() and font.size < 286  # past it, autofit sums unrounded advances
+
+    def width(a: int, b: int) -> float:
+        # wrap only asks whether a line is wider than the budget: the advances are a lower
+        # bound of the autofit width and the advances, padding and largest bonus an upper one,
+        # so xlformat is asked only between them (an ASCII line's advances are autofit's)
+        line = text[a:b]
+        advances = _platform.text_width(line, font=font)
+        if plain and advances > budget:
+            return advances
+        if plain and advances + extra + (advances + lean) / (digit * step) * unit <= budget:
+            return advances
+        found = xlformat.autofit_width(line, font, normal_font=normal, platform=platform)
+        counted = round((advances + lean) / unit)
+        if counted >= 3 * period and counted % period == 0:  # exactly on a step
+            found -= unit
+        return found
+
+    return len(wrap(text, budget, width))
 
 
 def _wrap(text: str, budget: float, font: xlformat.Font) -> list[str]:

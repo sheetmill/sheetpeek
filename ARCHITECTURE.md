@@ -729,7 +729,7 @@ tables (`vertical_metrics`, `row_metrics`): a face's height `H` and descent `D` 
 top-aligned baseline `H - D + 1` px below the row's top, the bottom-aligned one `D - 1` px above
 its bottom, centered text `floor((R - H) / 2)` px below the top-aligned place in a row of `R` px,
 and wrapped lines `H` apart with nothing added (three lines of Calibri 11 take 60 px). Captured:
-`windows/text_style`, every row but four (§4.9), and its first lines' ink tops; and
+`windows/text_style`, every row (§4.9), and its first lines' ink tops; and
 `windows/row_height_fitted`, every row of Calibri at 6 to 72 points and the half sizes to 40, and
 of Arial, Times New Roman, Courier New and Aptos Narrow at 6 to 40, plain or with an accounting
 underline. xlformat's Windows rows cover every size from 1 to 72 points by ppem in those five
@@ -769,13 +769,13 @@ jobs (`capture/job.py`, `CAPTURING.md`): `windows/merge_width` and `windows/erro
 as sheetpeek shows it with `platform="windows"` (§3.2): merged widths, `#` runs and General in whole
 pixels. The lines and tiles of `windows/borders` and `windows/fills`: §4.12; the indents and shrink
 levels of `windows/text_steps`: §4.6, §4.13. `windows/text_style` (zoom 100): every cell's width and
-every line count as sheetpeek's, and every row but four: rows, baselines and rules on Windows come
+every line count as sheetpeek's, and every row: rows, baselines and rules on Windows come
 from xlformat's Windows `vertical_metrics` and `rule_metrics` in whole pixels (§4.7, §4.13), the
 first line's ink top and every underline's and strikethrough's offset and thickness (1 px at Calibri
-11) as captured, superscript and subscript rows included (§4.13). The four, known deviations: rows
+11) as captured, superscript and subscript rows included (§4.13). Rows
 of horizontally distributed or justified wrapped text, which Excel for Windows fits a line taller
-than its lines (three lines of Calibri 11 in 80 px, nine in 200 px): a line lies in the band
-`wrap_band` shows (§4.7), not modeled. Vertical justify and distributed text keeps "bbbb cccc", 59 px, on one line of a 64
+than its lines (three lines of Calibri 11 in 80 px, nine in 200 px) hold a line in the band
+`wrap_band` shows (§4.7), and sheetpeek fits them so. Vertical justify and distributed text keeps "bbbb cccc", 59 px, on one line of a 64
 px cell, between its font's insets of 3 and 2 px. `windows/line_budget`: Excel for Windows keeps a
 line of any of the four alignments the cell less its font's insets wide, 3 px left and 2 px right
 under cell fonts to 12 points, larger for Calibri 14 (136 of 136 cells as sheetpeek breaks them).
@@ -1220,9 +1220,14 @@ fitted as two: in a 64 px column on Windows, `W` of 58 and 59 px. The bonus is 0
 1 from 91 on the Mac, 0 up to 84 px and 1 from 85 on Windows, at least 2 at 120 px on Windows and
 3 at 151 on both. Alignment changes nothing (wrap, justify, distributed), and Arial 10 cells take the same
 budget. An indent narrows the budget by one indent (6 pt, 9 px) for left-aligned text and by two
-for distributed text (38 of 38 rows each, both platforms). sheetpeek fits a row to the lines it
-draws, a known deviation where a line lies in that band: 48 of the 628 rows on the Mac and 64 on
-Windows, each a line short.
+for distributed text (38 of 38 rows each, both platforms). sheetpeek fits a row so (628 of 628
+rows on each platform): a line stays whole while xlformat's `autofit_width` of it, less a unit
+where its advances and one overhang fall exactly on a bonus step, is at most the column less the
+indents. xlformat counts the bonus from a step on; the rows count it only past one, which
+`wrap_band` shows at the first step on each platform (W of 90 pt on the Mac, 84 px on Windows);
+that later steps behave alike is unverified, and so is any Normal font but Calibri 11, an italic
+cell, and a rich-text cell, which fits the lines it draws. xlformat's Mac autofit departs from
+Excel's at 1 to 5 and 383 to 409 points, and these rows with it (no capture of their own).
 
 **Indent** is three spaces of the Normal font a level (§4.6), 6 pt under Calibri 11, on the side
 the alignment resolves to, `general` included: under Calibri 11 right-aligned text and numbers end
@@ -2819,8 +2824,7 @@ are read.
 3. **Excel for Windows as the default.** `platform=` takes either Excel (§3.2); Excel for
    Windows becomes the default (most Excel users have it), with Excel for Mac kept. Parity on
    both platforms comes before a beta: every rule captured on the Mac is captured on Windows too,
-   and where the two differ each platform gets its own. Still to model on both platforms: rows
-   fitted by autofit's measure, a line taller than drawn (captured, `wrap_band`, §4.7). Still to capture on Windows: the rules labeled unverified there
+   and where the two differ each platform gets its own. Still to capture on Windows: the rules labeled unverified there
    (font sizes above 72 points and faces outside xlformat's Windows tables), the screen suites not yet run there,
    and the zoom-dependent layout both platforms share.
 4. **After 1.0:** a PDF backend drawing from the `excel` mode geometry (§2.1), possibly as an
