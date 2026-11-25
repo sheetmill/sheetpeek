@@ -394,8 +394,9 @@ Three producers, one for each stage:
    output can follow (§4.10); the sheet's other children, its drawing, VML, comments and
    threaded comments parts, and the workbook's sheet kinds and print names give the rest.
    Notices on cells a layout hides are dropped there (`_notices.visible`).
-2. **The layout** (`RenderedSheet.notices`) adds what every output approximates: fonts without
-   glyph tables, refused formats, unshowable values,
+2. **The layout** (`RenderedSheet.notices`) adds what every output approximates: fonts measured
+   as Calibri, wholly (no glyph tables) or by the functions that have no metrics for them (§6.2),
+   refused formats, unshowable values,
    hidden rows and columns kept by `show_hidden`, and outline groups whose summary the range cuts
    off (§4.11).
 3. **Each output**: the layout's census (`RenderedSheet.features`, `_census.py`) records the

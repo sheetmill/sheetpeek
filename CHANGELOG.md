@@ -17,7 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   context (`{"font": "Verdana", "function": "row_metrics"}`), where nothing was reported. The
   function's answer is Calibri's at the same size, as before for rows and lines. The notice
   for a face without glyph tables names `text_width` as its function (`{"font": "Segoe UI",
-  "function": "text_width"}`, where the context held the face alone).
+  "function": "text_width"}`, where the context held the face alone). The feature the code
+  reports is named "fonts measured as Calibri", where it was "fonts without glyph tables".
 
 ### Changed
 - Laying out a sheet of many styled empty cells takes much less memory: the layout no longer

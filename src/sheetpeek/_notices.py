@@ -220,7 +220,7 @@ for _code, _name, _level in (
 
 # What the layout approximates in every output.
 for _code, _name, _level in (
-    ("font.no_metrics", "fonts without glyph tables", "sheet"),
+    ("font.no_metrics", "fonts measured as Calibri", "sheet"),
     ("format.refused", "number formats Excel refuses", "cells"),
     ("value.unshowable", "values no format can show", "cells"),
     ("rows.hidden_shown", "hidden rows", "sheet"),
