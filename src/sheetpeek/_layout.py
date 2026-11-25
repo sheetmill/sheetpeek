@@ -628,9 +628,10 @@ class _Grid:
         """Every text source, and what each visible cell shows on its own.
 
         A cell that shows what ``_Shown()`` holds (no text, left-aligned), as most empty cells do,
-        has no entry: readers look cells up with ``shown.get(position, _Shown())``. An empty
-        cell's own alignment (an explicit ``center``, say) keeps its entry. A sheet of styled
-        empty cells would otherwise hold an entry and a key for each while the output is built.
+        has no entry: each reader takes a cell's entry out as it builds that cell
+        (``shown.pop(position, None)``), and a cell with none shows ``_Shown()``. An empty cell's
+        own alignment (an explicit ``center``, say) keeps its entry. A sheet of styled empty
+        cells would otherwise hold an entry and a key for each while the output is built.
         """
         shown: dict[tuple[int, int], _Shown] = {}
 

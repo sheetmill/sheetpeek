@@ -4,7 +4,7 @@ sheetpeek shows an Excel workbook the way Excel shows it: as HTML, Markdown, ter
 or plain text. It is pure Python, needs no office suite, and gives programs access to the
 rendered cells. Number formats are applied by
 [xlformat](https://github.com/sheetmill/xlformat), whose output is tested against text captured
-from Excel 16 for Mac.
+from Excel for Mac and Excel for Windows.
 
 Documentation: <https://sheetpeek.readthedocs.io>.
 

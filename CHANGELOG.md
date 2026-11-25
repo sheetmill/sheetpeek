@@ -201,7 +201,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   underline at Calibri 6 or 8 under Calibri 11 makes a row of 17 pt (was 15), at Calibri 10
   18 pt (was 17).
 - Laying out a sheet takes as long as in 0.3.0; on the largest public workbook, at 264,432 rows,
-  its peak memory is about 2 % higher (3.6 GiB, `ARCHITECTURE.md` §5.2).
+  its peak memory is about 2 % higher (3.6 GiB, [`ARCHITECTURE.md`
+  §5.2](https://github.com/sheetmill/sheetpeek/blob/v0.4.0/ARCHITECTURE.md) at that release).
 
 ### Fixed
 - An indent level is three spaces of the Normal font, as Excel draws it (captured, screen suite
@@ -422,7 +423,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   is recomputed. `value.no_cached_value` and its warning now count only the formulas without a
   value that xlrecalc does not compute. A formula is computed only when a range read holds it, and
   only the sheets its evaluation reaches are read for it. Reading every sheet (best of three,
-  measured together on a quiet machine; `ARCHITECTURE.md` §5.7 gives the run): the largest public
+  measured together on a quiet machine; [`ARCHITECTURE.md`
+  §5.7](https://github.com/sheetmill/sheetpeek/blob/v0.3.0/ARCHITECTURE.md) at that release gives
+  the run): the largest public
   workbook (15.2 million cells, 10 formulas, all recalculated on opening) in 40.3 s and 876 MiB at
   peak, against 38.0 s and 863 MiB for the same reader without recalculation and 38.6 s and 643
   MiB for 0.2.0 (whose openpyxl reader takes less memory); a workbook of 400,001 formulas openpyxl

@@ -19,9 +19,10 @@ cases. Two controls repeat what is captured: three wrapped lines in one cell (48
 merge over A:C (15 pt).
 
 ``PREDICTIONS`` gives each row's height under each candidate rule, written before the run:
-``sheetpeek``, what sheetpeek lays out (a merge's font counts in its first row, its wrapped
-lines in none); ``last_row`` and ``first_row``, the wrapped lines' height beyond the merged rows'
-added to its last or first row; ``font_every_row``, a merge's font counting in each of its rows.
+``sheetpeek``, what sheetpeek laid out before the run (a merge's font counted in its first row,
+its wrapped lines in none); ``last_row`` and ``first_row``, the wrapped lines' height beyond the
+merged rows' added to its last or first row; ``font_every_row``, a merge's font counting in each
+of its rows.
 
 ``run`` saves Excel's answer to ``capture/build/merge_rows/answer.tsv``; ``read`` writes
 ``tests/captures/merge_rows.tsv`` from it again, one record per row read. No screenshot, no

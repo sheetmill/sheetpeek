@@ -1834,11 +1834,13 @@ alternating, in fresh processes on a quiet machine (Python 3.11.18, Apple M4 Pro
 The layout keeps no entry of its own for a cell that shows nothing but the default (no text,
 left-aligned), so a sheet of styled empty cells no longer holds a second record of each while
 its output is built: traced (`tracemalloc`), that takes the layout's peak on the workbook's
-largest sheet at scale 0.25 from 700 MiB to 422 MiB. Each version's peak repeated within 2 MiB
-over its three runs and its time within about 2 %; an earlier, noisier comparison had 0.5.0's
-layout peak at 2,999 MiB on the same file, a difference not explained. Time grows with the rows, doubling from scale 0.25
-to 0.5 to 1, and so does memory, which a `Sheet` and its layout hold whole (1.86 and 1.94 times
-from scale to scale in an earlier comparison of the same two layouts before that change).
+largest sheet at scale 0.25 from 700 MiB to 422 MiB. The second column was measured at
+`731fc22`, under xlformat 0.9.0; the xlformat 0.10 that the release requires moves only where
+italic text and Windows text are placed and keeps no new layout data, so its figures stand for
+the release. Time grows with the rows, doubling from scale 0.25 to 0.5 to 1, and so does memory,
+which a `Sheet` and its layout hold whole. Each version's peak repeated within 2 MiB over the
+three runs and its time within about 2 %, though an earlier, noisier comparison of the same file
+had 0.5.0's layout peak at 2,999 MiB, a difference not explained.
 
 ### 5.3 Dates stay serials
 
@@ -2190,11 +2192,13 @@ underlines and strikethrough (§4.13) included.
 | from xlformat | used for |
 |---|---|
 | `format_cell(value, format, width= or column_width=, font=, normal_font=, date1904=)` → `FormattedCell` | every cell's text, overflow and section color in every mode (`_layout._Formatter`); `FormattedCell.align` is the default alignment (§4.3) |
-| `Font(name, size, bold, italic)` and `font_substitutes()` | the cell font and the Normal font passed to xlformat, built once per font; a family a function does not measure becomes Calibri for that function, with a notice (§6.2) |
+| `Font(name, size, bold, italic)` | the cell font and the Normal font passed to xlformat, built once per font; a family a function does not measure becomes Calibri for that function, with a notice (§6.2) |
 | `file_column_metrics(file_width, base_col_width=, default_col_width=, normal_font=)` → `ColumnMetrics` | column widths: characters from `width` (§2.2), points from `points` (§3.6); `left_inset`, `right_inset` and `digit_width` place text and indent it |
 | `column_metrics_from_points(points, normal_font=)` → `ColumnMetrics` | a merged cell's width: its `width` is the `column_width` of the merge's sum of points (§3.6) |
 | `text_width(text, font=)` | `excel` mode: spill, placement, wrapping, `distributed` spacing, `fill` copies and `TextRun.width` (§3.6) |
 | `row_metrics(normal_font, cell_fonts=, wrapped=)` → `RowMetrics` | row heights: a font's height at its face and size (`font_height`), what an accounting underline adds (`accounting_height`), and a fitted row's height with its cell fonts and wrapped lines (§4.7) |
+| `text_insets(font)` → `TextInsets` | where a cell's text starts and ends inside its boundaries, by the cell's font (§3.6) |
+| `vertical_metrics(font)` → `VerticalMetrics` | on Windows, a face's height, baselines and line inset in whole pixels (§4.7) |
 | `rule_metrics(font)` → `RuleMetrics` | where underlines and strikethrough sit below or above the baseline, their thickness and a double underline's gap, at zoom 100 (§4.13) |
 | `builtin_format(id)` | the code of a built-in number format id a cell names without defining it; an id xlformat does not list reads as General |
 | `glyph_widths(text, font=)` | where the glyphs of a `TextRun` sit, as the model documents it (§3.6); the layout itself measures whole texts |
@@ -2337,14 +2341,9 @@ points.
   drawn only with both headings. `buttons="none"` leaves the gutter out; `"static"`, the
   default, draws it, and leaves room for working buttons later. Its stylesheet is written only on
   a page that draws a gutter. Its colors are captured in the light appearance and the dark one.
-- **The CSS surface is public interface** (docs/html.md's tables list it for users), changed
-  only with a changelog entry: the custom
-  properties `--sheetpeek-paper`, `--sheetpeek-ink`, `--sheetpeek-grid`,
-  `--sheetpeek-heading-paper`, `--sheetpeek-heading-ink`, `--sheetpeek-heading-grid`,
-  `--sheetpeek-outline-paper`, `--sheetpeek-outline-ink`, `--sheetpeek-outline-button`,
-  `--sheetpeek-outline-button-paper`, `--sheetpeek-outline-stroke`, the classes `sheetpeek`, `sp-crossed`, `sp-clip`,
-  `sp-run`, `sp-center`, `sp-colhead`, `sp-rowhead`, `sp-corner`, `sp-nogrid`, `sp-ol`,
-  `sp-olbutton`, `sp-ollevel`, and the ids `sp-<cell>` of cells a link goes to. Explicit
+- **The CSS surface is public interface**, changed only with a changelog entry: the custom
+  properties, classes and ids that docs/html.md's tables list ("Restyling"), and the ids
+  `sp-<cell>` of cells a link goes to. Explicit
   colors from the file (fills, font and section
   colors) are inline styles, so restyled dark paper keeps a cell's explicit dark text (§9).
 - **Links** (§4.10): a linked cell's runs sit inside one `<a>`, so spilled text stays
@@ -2353,7 +2352,7 @@ points.
   `target="_blank"` with `new_tab=True`) or a cell on the page (`#sp-C2`, the id on the cell
   that draws it, a merge's first visible cell); `title` is the tooltip alone.
 - **Text styles** (§4.13): underlines and strikethrough are `<i class="sp-rule">` elements at
-  their thickness (1 px for a 1 pt rule, at any page scale), a double one `sp-double`; `sp-rule` and `sp-double` join the public classes.
+  their thickness (1 px for a 1 pt rule, at any page scale), a double one `sp-double`.
   Superscript, subscript and shrunk runs take their drawn size; a right-to-left run
   `direction: rtl`.
 - **Rich text** (§4.16): a nested span per run inside the positioned run, each with
@@ -2432,6 +2431,8 @@ src/sheetpeek/
   _pass_tables.py    the tables pass: the style each table cell is displayed in (§4.20)
   _dxf.py            a cell's own style stacked over differential formats (§4.20)
   _excel.py          excel mode: geometry in points, text runs, clips
+  _platform.py       the platform and regional settings a sheet is shown with, and which
+                     faces each xlformat function measures (§3.2, §6.2)
   _rows.py           row heights (§4.7) and baselines
   _text_styles.py    superscript, subscript, underlines, shrink to fit, direction (§4.13)
   _runs.py           rich-text runs in the layout: measured, broken and cut by run (§4.16)
@@ -2652,8 +2653,7 @@ spilled and merged text covers, as text covers Excel's gridlines.
 
 **Markdown header and alignment** (backend options). Default: the first row is the
 header, and each column's alignment comes from the first body row.
-- *Alternatives:* column letters as the header (`header="letters"`); alignment from the majority of
-  a column.
+- *Alternatives:* alignment from the majority of a column.
 - *Scope leaning:* document.
 
 **Column and row headings** (backend options). `column_headings` (letters) and `row_headings`
