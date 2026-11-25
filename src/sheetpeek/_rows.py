@@ -243,14 +243,33 @@ def script_parts(font: Font) -> tuple[float, float, float]:
     return _script_parts(font, current())
 
 
+# Excel for Windows: the part of a Calibri superscript's row above the shared baseline, in pixels,
+# by ppem past _SUPERSCRIPT_ABOVE's sizes (captured, windows/row_height_fitted groups styled and
+# scripts, 30.5 to 40 points), and a Calibri subscript's part below it at ppem 15 (Calibri 11 and
+# 11.5: windows/row_height_fitted, and windows/text_style's "subscript alone"), where the rule
+# gives 5 px.
+_WINDOWS_SUPERSCRIPT_ABOVE = {
+    41: 49, 42: 51, 43: 52, 44: 53, 45: 54, 46: 56, 47: 56, 48: 57, 49: 58, 50: 59, 51: 60,
+    52: 62, 53: 63,
+}  # fmt: skip
+_WINDOWS_SUBSCRIPT_BELOW = {15: 6}
+
+
+def ppem(size: float) -> int:
+    """The pixels an em of a ``size``-point font takes on Excel for Windows, at 96 dpi."""
+    return math.floor(size * 4 / 3 + 0.5)
+
+
+def ppem_size(em: int) -> float:
+    """The smallest whole or half point size whose ppem is ``em`` (xlformat tables those)."""
+    return math.ceil((em - 0.5) * 1.5) / 2
+
+
 @lru_cache(maxsize=256)
 def _script_parts(font: Font, platform: xlformat.Platform) -> tuple[float, float, float]:
-    """``script_parts`` on ``platform``.
-
-    On Windows the Mac's rules with Windows' faces: a known deviation, not modeled (captured,
-    ``windows/row_height_fitted``: Excel for Windows fits a superscript of Calibri 11 in 23 px,
-    these rules 17 pt; §4.9).
-    """
+    """``script_parts`` on ``platform``."""
+    if platform.name == "windows":
+        return _windows_script_parts(font, platform)
     s, d, r, lower = script_size(font)
     whole = replace(font, size=float(s), vert_align=None)
     _, ascent, bottom, extra, inset = _face(whole, platform)
@@ -261,4 +280,35 @@ def _script_parts(font: Font, platform: xlformat.Platform) -> tuple[float, float
         above = float(table.get(s, r + drawn[1]))
         return above, bottom + extra, inset
     below = lower + drawn[2]
+    return ascent + below - bottom, below + extra, inset
+
+
+def _windows_script_parts(font: Font, platform: xlformat.Platform) -> tuple[float, float, float]:
+    """``script_parts`` on Excel for Windows: the Mac's rules in pixels, by ppem.
+
+    Where the Mac takes a whole size ``s`` in points, Excel for Windows takes the font's ppem
+    ``p``: it draws at ``round(2p/3)``, raises ``floor(p/2)`` and lowers ``floor(p/5)`` pixels,
+    with Windows' faces at those ppems, and a Calibri superscript's part above the baseline is
+    the Mac's table read in pixels by ppem, carried on to ppem 53 (captured,
+    ``windows/row_height_fitted`` groups ``styled`` and ``scripts``: Calibri at every whole and
+    half size from 6 to 40, 207 of 207 rows by these rules, a Calibri subscript at ppem 15 from
+    the capture; sizes sharing a ppem share a row). A drawn ppem below xlformat's Windows tables
+    takes ``_windows_face``'s fallback (12 subscripts at 6 to 8.5 pt, a pixel or two taller than
+    Excel's). Other faces and sizes past the tables take the
+    raise plus the drawn size's ascent (unverified).
+    """
+    p = ppem(min(max(font.size, 1.0), 409.0))
+    d, r, lower = math.floor(2 * p / 3 + 0.5), p // 2, p // 5
+    whole = replace(font, size=ppem_size(p), vert_align=None)
+    _, ascent, bottom, extra, inset = _face(whole, platform)
+    drawn = _face(replace(font, size=ppem_size(d), vert_align=None, underline=None), platform)
+    calibri = font.name.lower() == "calibri"
+    if font.vert_align == "superscript":
+        table = {**_SUPERSCRIPT_ABOVE, **_WINDOWS_SUPERSCRIPT_ABOVE} if calibri else {}
+        above = 0.75 * table[p] if p in table else 0.75 * r + drawn[1]
+        return above, bottom + extra, inset
+    if calibri and p in _WINDOWS_SUBSCRIPT_BELOW:
+        below = 0.75 * _WINDOWS_SUBSCRIPT_BELOW[p]
+    else:
+        below = 0.75 * lower + drawn[2]
     return ascent + below - bottom, below + extra, inset

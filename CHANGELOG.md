@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- With `platform="windows"`, superscript and subscript rows are fitted as Excel for Windows fits
+  them, by the font's pixels per em (captured, `windows/row_height_fitted`): a Calibri 11
+  superscript makes a 23-pixel row (17.25 pt) and a subscript a 24-pixel one (18 pt), and both at
+  24 pt a 48-pixel one (36 pt), where 0.6.0 gave 15.5, 16, 35.25 and 35 pt, not whole pixels. A
+  subscript at 6 to 8.5 pt still makes a row a pixel or two taller than Excel's.
+
 ## [0.6.0] - 2026-11-25
 
 ### Added

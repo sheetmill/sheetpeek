@@ -29,7 +29,7 @@ LABELS: dict[str, tuple[str, ...]] = {
         '"Numbers no column, row or font can have", unverified; this suite asks them in the same '
         "way.",
     ),
-    "README.md": ("sizes outside xlformat's Windows tables are unverified.",),
+    "README.md": ("Windows tables are unverified.",),
     "docs/html.md": ("angled text comes from Excel's print layout and is unverified on screen.",),
     "tests/test_suite_diagonals.py": (
         "quarter of it; provisional until the capture's spread is known. "
@@ -64,6 +64,7 @@ LABELS: dict[str, tuple[str, ...]] = {
         "group ``fonts``: single and double rows of 23 px; other sizes unverified).",
         '5.5 points): Calibri 11\'s 3 (unverified)."""',
         "drawn size's ascent (unverified). A subscript's line grows by ``g = l + B(d) - B(s)`` on",
+        "raise plus the drawn size's ascent (unverified).",
         "if font.size > _LARGEST:  # 72's scaled with the size (unverified; 409 caps at "
         "TALLEST_ROW)",
         "measures it as Calibri. Past 72 points, 72's height scaled with the size (unverified), at",

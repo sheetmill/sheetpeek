@@ -308,13 +308,11 @@ def test_windows_shrinks_each_length_to_the_pixel_level_sheetpeek_gives_it(steps
 # --- text_style: cell widths, fitted rows and line counts at zoom 100
 
 KNOWN_ROWS: dict[str, tuple[int, ...]] = {
-    # Known deviations, rows by group, two reasons. Horizontally distributed and justified
-    # wrapped text: Excel for Windows fits a row a line taller than its lines (three lines of
-    # Calibri 11 in 80 px, nine in 200 px), not modeled. Superscript and subscript: sheetpeek
-    # fits them by Excel for Mac's rules, captured on Windows (windows/row_height_fitted) and
-    # not modeled.
+    # Known deviations, rows by group. Horizontally distributed and justified wrapped text:
+    # Excel for Windows fits a row a line taller than its lines (three lines of Calibri 11 in
+    # 80 px, nine in 200 px): a line lies between the width drawn whole and the width row
+    # fitting keeps whole (captured, wrap_band; §4.7), not modeled.
     "align": (14, 16, 18),
-    "fonts": (14, 16, 18, 20),
     "lone": (4,),
 }
 KNOWN_LINES: dict[str, tuple[str, ...]] = {
@@ -645,21 +643,24 @@ def test_windows_wrapped_rows_are_sheetpeeks():
     assert wrong == {}
 
 
-WINDOWS_FITTED_DEVIATIONS = 172
-"""Rows of ``windows/row_height_fitted`` sheetpeek fits otherwise, all of them superscript or
-subscript (``_fitted_reason``); every other row, at every size and face captured, matches."""
+WINDOWS_FITTED_DEVIATIONS = 12
+"""Rows of ``windows/row_height_fitted`` sheetpeek fits otherwise, all of them a subscript at 6
+to 8.5 points (``_fitted_reason``); every other row, at every size and face captured, matches."""
 
 
 def _fitted_reason(record):
     """Why a captured Windows row may differ from sheetpeek's, or ``None``."""
     kind = record["name"].rsplit(" ", 1)[0]
-    if kind in ("superscript", "subscript", "both"):
-        return "superscript and subscript keep Excel for Mac's rules (§4.13)"
+    if kind in ("subscript", "both") and float(record["size"]) < 9:
+        return (
+            "a subscript drawn at 5 to 7 ppem, below xlformat's Windows tables, takes the Mac's "
+            "metrics (§4.13)"
+        )
     return None
 
 
 @pytest.mark.excel
-def test_windows_fitted_rows_are_sheetpeeks_but_superscript_and_subscript():
+def test_windows_fitted_rows_are_sheetpeeks_but_small_subscripts():
     pytest.importorskip("openpyxl")
     from capture import row_height_fitted
 
@@ -680,7 +681,7 @@ def test_windows_fitted_rows_are_sheetpeeks_but_superscript_and_subscript():
         target[(record["group"], record["name"])] = (float(record["height"]), ours, reason)
     REPORT["fitted rows (Windows)"] = (
         f"fitted rows, Excel for Windows: {len(body)} rows, {len(explained)} known deviations "
-        "(superscript and subscript)"
+        "(subscripts drawn below xlformat's Windows tables)"
     )
     assert len(body) == 483
     assert unexplained == {}
