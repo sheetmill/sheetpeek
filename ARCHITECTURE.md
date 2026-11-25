@@ -788,8 +788,8 @@ Windows tables as sheetpeek's but superscript and subscript, which hold the 172 
 deviations of the 483 rows (§4.7). Wrapped, justified and
 distributed text of one to six lines fits the rows of its lines, 20 px a line of Calibri 11,
 with the wrap flag or without it (96 of 96 rows as sheetpeek's): the alignment alone adds no
-line, so what makes `windows/text_style`'s distributed and justified rows a line taller is not
-known.
+line: `windows/text_style`'s distributed and justified rows a line taller hold a line in the band
+`wrap_band` shows (above).
 
 ### 4.10 Hyperlinks
 
@@ -1197,6 +1197,20 @@ without it (`text_style_more`: six lines take 96 pt). On Excel for Mac the align
 the row: one to six lines, wrapped, justified and distributed with the wrap flag or without it,
 fit the rows wrapped text of as many lines fits, in Calibri 11, Calibri 16 and Arial 11 (captured,
 `wrap_rows`).
+
+**Row fitting wraps by autofit's measure, not by the drawn lines** (captured, `wrap_band` on the
+Mac and `windows/wrap_band`, Calibri 11 Normal, the same on both platforms in each one's unit:
+points on the Mac, pixels on Windows). Excel draws a wrapped line while it is at most the column
+less the font's insets, but fits the row to a second wrap, in which a line stays whole only while
+its whole-advance width `W` plus autofit's padding of 7 and its long-text bonus `b(W)` is at most
+the column, and a word wider than that is broken. A line between the two is drawn whole and
+fitted as two: in a 64 px column on Windows, `W` of 58 and 59 px. The bonus is 0 up to 90 pt and
+1 from 91 on the Mac, 0 up to 84 px and 1 from 85 on Windows, at least 2 at 120 px on Windows and
+3 at 151 on both. Alignment changes nothing (wrap, justify, distributed), and Arial 10 cells take the same
+budget. An indent narrows the budget by one indent (6 pt, 9 px) for left-aligned text and by two
+for distributed text (38 of 38 rows each, both platforms). sheetpeek fits a row to the lines it
+draws, a known deviation where a line lies in that band: 48 of the 628 rows on the Mac and 64 on
+Windows, each a line short.
 
 **Indent** is three spaces of the Normal font a level (§4.6), 6 pt under Calibri 11, on the side
 the alignment resolves to, `general` included: under Calibri 11 right-aligned text and numbers end

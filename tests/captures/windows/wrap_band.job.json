@@ -1,0 +1,661 @@
+{
+ "schema": 1,
+ "job_id": "sheetpeek-20261125-112034-wrap-band",
+ "package": "sheetpeek",
+ "purpose": "sheetpeek capture group wrap_band: the heights Excel fits to rows of wrapped two-word texts whose width steps by one unit across the column's last pixels or points, at several column widths, with each column's width and the applied font, read from Excel.",
+ "limits": {
+  "job_seconds": 1800,
+  "step_seconds": 600
+ },
+ "audit": false,
+ "workbooks": [
+  {
+   "file": "wrap_band_w064.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "heights",
+     "range": "A1:A160",
+     "props": [
+      "row_height",
+      "column_width",
+      "width"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "fonts",
+     "range": "A1:A160",
+     "props": [
+      "font.name",
+      "font.size"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "wrap_band_w087.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "heights",
+     "range": "A1:A14",
+     "props": [
+      "row_height",
+      "column_width",
+      "width"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "fonts",
+     "range": "A1:A14",
+     "props": [
+      "font.name",
+      "font.size"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "wrap_band_w088.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "heights",
+     "range": "A1:A14",
+     "props": [
+      "row_height",
+      "column_width",
+      "width"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "fonts",
+     "range": "A1:A14",
+     "props": [
+      "font.name",
+      "font.size"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "wrap_band_w089.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "heights",
+     "range": "A1:A14",
+     "props": [
+      "row_height",
+      "column_width",
+      "width"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "fonts",
+     "range": "A1:A14",
+     "props": [
+      "font.name",
+      "font.size"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "wrap_band_w090.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "heights",
+     "range": "A1:A14",
+     "props": [
+      "row_height",
+      "column_width",
+      "width"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "fonts",
+     "range": "A1:A14",
+     "props": [
+      "font.name",
+      "font.size"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "wrap_band_w091.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "heights",
+     "range": "A1:A14",
+     "props": [
+      "row_height",
+      "column_width",
+      "width"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "fonts",
+     "range": "A1:A14",
+     "props": [
+      "font.name",
+      "font.size"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "wrap_band_w092.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "heights",
+     "range": "A1:A14",
+     "props": [
+      "row_height",
+      "column_width",
+      "width"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "fonts",
+     "range": "A1:A14",
+     "props": [
+      "font.name",
+      "font.size"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "wrap_band_w093.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "heights",
+     "range": "A1:A14",
+     "props": [
+      "row_height",
+      "column_width",
+      "width"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "fonts",
+     "range": "A1:A14",
+     "props": [
+      "font.name",
+      "font.size"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "wrap_band_w094.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "heights",
+     "range": "A1:A14",
+     "props": [
+      "row_height",
+      "column_width",
+      "width"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "fonts",
+     "range": "A1:A14",
+     "props": [
+      "font.name",
+      "font.size"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "wrap_band_w095.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "heights",
+     "range": "A1:A14",
+     "props": [
+      "row_height",
+      "column_width",
+      "width"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "fonts",
+     "range": "A1:A14",
+     "props": [
+      "font.name",
+      "font.size"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "wrap_band_w096.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "heights",
+     "range": "A1:A14",
+     "props": [
+      "row_height",
+      "column_width",
+      "width"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "fonts",
+     "range": "A1:A14",
+     "props": [
+      "font.name",
+      "font.size"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "wrap_band_w100.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "heights",
+     "range": "A1:A14",
+     "props": [
+      "row_height",
+      "column_width",
+      "width"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "fonts",
+     "range": "A1:A14",
+     "props": [
+      "font.name",
+      "font.size"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "wrap_band_w128.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "heights",
+     "range": "A1:A14",
+     "props": [
+      "row_height",
+      "column_width",
+      "width"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "fonts",
+     "range": "A1:A14",
+     "props": [
+      "font.name",
+      "font.size"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "wrap_band_w160.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "heights",
+     "range": "A1:A14",
+     "props": [
+      "row_height",
+      "column_width",
+      "width"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "fonts",
+     "range": "A1:A14",
+     "props": [
+      "font.name",
+      "font.size"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "wrap_band_m054.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "heights",
+     "range": "A1:A14",
+     "props": [
+      "row_height",
+      "column_width",
+      "width"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "fonts",
+     "range": "A1:A14",
+     "props": [
+      "font.name",
+      "font.size"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "wrap_band_m066.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "heights",
+     "range": "A1:A160",
+     "props": [
+      "row_height",
+      "column_width",
+      "width"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "fonts",
+     "range": "A1:A160",
+     "props": [
+      "font.name",
+      "font.size"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "wrap_band_m096.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "heights",
+     "range": "A1:A14",
+     "props": [
+      "row_height",
+      "column_width",
+      "width"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "fonts",
+     "range": "A1:A14",
+     "props": [
+      "font.name",
+      "font.size"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "wrap_band_m097.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "heights",
+     "range": "A1:A14",
+     "props": [
+      "row_height",
+      "column_width",
+      "width"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "fonts",
+     "range": "A1:A14",
+     "props": [
+      "font.name",
+      "font.size"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "wrap_band_m098.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "heights",
+     "range": "A1:A14",
+     "props": [
+      "row_height",
+      "column_width",
+      "width"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "fonts",
+     "range": "A1:A14",
+     "props": [
+      "font.name",
+      "font.size"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "wrap_band_m099.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "heights",
+     "range": "A1:A14",
+     "props": [
+      "row_height",
+      "column_width",
+      "width"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "fonts",
+     "range": "A1:A14",
+     "props": [
+      "font.name",
+      "font.size"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "wrap_band_m100.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "heights",
+     "range": "A1:A14",
+     "props": [
+      "row_height",
+      "column_width",
+      "width"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "fonts",
+     "range": "A1:A14",
+     "props": [
+      "font.name",
+      "font.size"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "wrap_band_m102.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "heights",
+     "range": "A1:A14",
+     "props": [
+      "row_height",
+      "column_width",
+      "width"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "fonts",
+     "range": "A1:A14",
+     "props": [
+      "font.name",
+      "font.size"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "wrap_band_m126.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "heights",
+     "range": "A1:A14",
+     "props": [
+      "row_height",
+      "column_width",
+      "width"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "fonts",
+     "range": "A1:A14",
+     "props": [
+      "font.name",
+      "font.size"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "wrap_band_m160.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "heights",
+     "range": "A1:A14",
+     "props": [
+      "row_height",
+      "column_width",
+      "width"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "fonts",
+     "range": "A1:A14",
+     "props": [
+      "font.name",
+      "font.size"
+     ]
+    }
+   ]
+  }
+ ]
+}

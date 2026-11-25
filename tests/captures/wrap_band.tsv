@@ -1,0 +1,633 @@
+# suite: wrap_band (capture.wrap_band); Excel 16.115 (16.115.26110837, Microsoft 365, Current channel) for Mac, en_US
+# a workbook per column width, openpyxl's default styles (Normal Calibri 11, no customHeight); one case a row in column A, fitted by Excel on opening
+# captured: 2026-11-25; method: row height, column width and width (AppleScript)
+# name: the case (cases() in capture/wrap_band.py); target: the text's width in unit by xlformat's whole advances on the column's platform; applied: the font Excel applied to column A; column_width: column A's width in characters and width in points, as Excel laid it out; height: the row's height in points
+name	workbook	row	column	variant	target	unit	font	applied	column_width	width	height	text
+w064 wrap 48	wrap_band_w064.xlsx	1	w064	wrap	48	px	Calibri 11	Calibri 11	8.33	55	16	ww aee
+w064 wrap 49	wrap_band_w064.xlsx	2	w064	wrap	49	px	Calibri 11	Calibri 11	8.33	55	16	aee aee
+w064 wrap 50	wrap_band_w064.xlsx	3	w064	wrap	50	px	Calibri 11	Calibri 11	8.33	55	16	aee eee
+w064 wrap 51	wrap_band_w064.xlsx	4	w064	wrap	51	px	Calibri 11	Calibri 11	8.33	55	16	eee eee
+w064 wrap 52	wrap_band_w064.xlsx	5	w064	wrap	52	px	Calibri 11	Calibri 11	8.33	55	16	eee aaw
+w064 wrap 53	wrap_band_w064.xlsx	6	w064	wrap	53	px	Calibri 11	Calibri 11	8.33	55	16	aaw aaw
+w064 wrap 54	wrap_band_w064.xlsx	7	w064	wrap	54	px	Calibri 11	Calibri 11	8.33	55	16	aaw wwi
+w064 wrap 55	wrap_band_w064.xlsx	8	w064	wrap	55	px	Calibri 11	Calibri 11	8.33	55	16	wwi wwi
+w064 wrap 56	wrap_band_w064.xlsx	9	w064	wrap	56	px	Calibri 11	Calibri 11	8.33	55	16	wwi eew
+w064 wrap 57	wrap_band_w064.xlsx	10	w064	wrap	57	px	Calibri 11	Calibri 11	8.33	55	16	eew eew
+w064 wrap 58	wrap_band_w064.xlsx	11	w064	wrap	58	px	Calibri 11	Calibri 11	8.33	55	16	eew cww
+w064 wrap 59	wrap_band_w064.xlsx	12	w064	wrap	59	px	Calibri 11	Calibri 11	8.33	55	16	cww cww
+w064 wrap 60	wrap_band_w064.xlsx	13	w064	wrap	60	px	Calibri 11	Calibri 11	8.33	55	16	cww aww
+w064 wrap 61	wrap_band_w064.xlsx	14	w064	wrap	61	px	Calibri 11	Calibri 11	8.33	55	16	aww aww
+w064 justify 48	wrap_band_w064.xlsx	15	w064	justify	48	px	Calibri 11	Calibri 11	8.33	55	16	ww aee
+w064 justify 49	wrap_band_w064.xlsx	16	w064	justify	49	px	Calibri 11	Calibri 11	8.33	55	16	aee aee
+w064 justify 50	wrap_band_w064.xlsx	17	w064	justify	50	px	Calibri 11	Calibri 11	8.33	55	16	aee eee
+w064 justify 51	wrap_band_w064.xlsx	18	w064	justify	51	px	Calibri 11	Calibri 11	8.33	55	16	eee eee
+w064 justify 52	wrap_band_w064.xlsx	19	w064	justify	52	px	Calibri 11	Calibri 11	8.33	55	16	eee aaw
+w064 justify 53	wrap_band_w064.xlsx	20	w064	justify	53	px	Calibri 11	Calibri 11	8.33	55	16	aaw aaw
+w064 justify 54	wrap_band_w064.xlsx	21	w064	justify	54	px	Calibri 11	Calibri 11	8.33	55	16	aaw wwi
+w064 justify 55	wrap_band_w064.xlsx	22	w064	justify	55	px	Calibri 11	Calibri 11	8.33	55	16	wwi wwi
+w064 justify 56	wrap_band_w064.xlsx	23	w064	justify	56	px	Calibri 11	Calibri 11	8.33	55	16	wwi eew
+w064 justify 57	wrap_band_w064.xlsx	24	w064	justify	57	px	Calibri 11	Calibri 11	8.33	55	16	eew eew
+w064 justify 58	wrap_band_w064.xlsx	25	w064	justify	58	px	Calibri 11	Calibri 11	8.33	55	16	eew cww
+w064 justify 59	wrap_band_w064.xlsx	26	w064	justify	59	px	Calibri 11	Calibri 11	8.33	55	16	cww cww
+w064 justify 60	wrap_band_w064.xlsx	27	w064	justify	60	px	Calibri 11	Calibri 11	8.33	55	16	cww aww
+w064 justify 61	wrap_band_w064.xlsx	28	w064	justify	61	px	Calibri 11	Calibri 11	8.33	55	16	aww aww
+w064 distributed 48	wrap_band_w064.xlsx	29	w064	distributed	48	px	Calibri 11	Calibri 11	8.33	55	16	ww aee
+w064 distributed 49	wrap_band_w064.xlsx	30	w064	distributed	49	px	Calibri 11	Calibri 11	8.33	55	16	aee aee
+w064 distributed 50	wrap_band_w064.xlsx	31	w064	distributed	50	px	Calibri 11	Calibri 11	8.33	55	16	aee eee
+w064 distributed 51	wrap_band_w064.xlsx	32	w064	distributed	51	px	Calibri 11	Calibri 11	8.33	55	16	eee eee
+w064 distributed 52	wrap_band_w064.xlsx	33	w064	distributed	52	px	Calibri 11	Calibri 11	8.33	55	16	eee aaw
+w064 distributed 53	wrap_band_w064.xlsx	34	w064	distributed	53	px	Calibri 11	Calibri 11	8.33	55	16	aaw aaw
+w064 distributed 54	wrap_band_w064.xlsx	35	w064	distributed	54	px	Calibri 11	Calibri 11	8.33	55	16	aaw wwi
+w064 distributed 55	wrap_band_w064.xlsx	36	w064	distributed	55	px	Calibri 11	Calibri 11	8.33	55	16	wwi wwi
+w064 distributed 56	wrap_band_w064.xlsx	37	w064	distributed	56	px	Calibri 11	Calibri 11	8.33	55	16	wwi eew
+w064 distributed 57	wrap_band_w064.xlsx	38	w064	distributed	57	px	Calibri 11	Calibri 11	8.33	55	16	eew eew
+w064 distributed 58	wrap_band_w064.xlsx	39	w064	distributed	58	px	Calibri 11	Calibri 11	8.33	55	16	eew cww
+w064 distributed 59	wrap_band_w064.xlsx	40	w064	distributed	59	px	Calibri 11	Calibri 11	8.33	55	16	cww cww
+w064 distributed 60	wrap_band_w064.xlsx	41	w064	distributed	60	px	Calibri 11	Calibri 11	8.33	55	16	cww aww
+w064 distributed 61	wrap_band_w064.xlsx	42	w064	distributed	61	px	Calibri 11	Calibri 11	8.33	55	16	aww aww
+w064 indent wrap 24	wrap_band_w064.xlsx	43	w064	indent wrap	24	px	Calibri 11	Calibri 11	8.33	55	16	ci w
+w064 indent wrap 25	wrap_band_w064.xlsx	44	w064	indent wrap	25	px	Calibri 11	Calibri 11	8.33	55	16	w w
+w064 indent wrap 26	wrap_band_w064.xlsx	45	w064	indent wrap	26	px	Calibri 11	Calibri 11	8.33	55	16	w cc
+w064 indent wrap 27	wrap_band_w064.xlsx	46	w064	indent wrap	27	px	Calibri 11	Calibri 11	8.33	55	16	cc cc
+w064 indent wrap 28	wrap_band_w064.xlsx	47	w064	indent wrap	28	px	Calibri 11	Calibri 11	8.33	55	16	cc ac
+w064 indent wrap 29	wrap_band_w064.xlsx	48	w064	indent wrap	29	px	Calibri 11	Calibri 11	8.33	55	16	ac ac
+w064 indent wrap 30	wrap_band_w064.xlsx	49	w064	indent wrap	30	px	Calibri 11	Calibri 11	8.33	55	16	ac aa
+w064 indent wrap 31	wrap_band_w064.xlsx	50	w064	indent wrap	31	px	Calibri 11	Calibri 11	8.33	55	16	aa aa
+w064 indent wrap 32	wrap_band_w064.xlsx	51	w064	indent wrap	32	px	Calibri 11	Calibri 11	8.33	55	16	aa ae
+w064 indent wrap 33	wrap_band_w064.xlsx	52	w064	indent wrap	33	px	Calibri 11	Calibri 11	8.33	55	16	ae ae
+w064 indent wrap 34	wrap_band_w064.xlsx	53	w064	indent wrap	34	px	Calibri 11	Calibri 11	8.33	55	16	ae ee
+w064 indent wrap 35	wrap_band_w064.xlsx	54	w064	indent wrap	35	px	Calibri 11	Calibri 11	8.33	55	16	ee ee
+w064 indent wrap 36	wrap_band_w064.xlsx	55	w064	indent wrap	36	px	Calibri 11	Calibri 11	8.33	55	16	ee cw
+w064 indent wrap 37	wrap_band_w064.xlsx	56	w064	indent wrap	37	px	Calibri 11	Calibri 11	8.33	55	16	cw cw
+w064 indent wrap 38	wrap_band_w064.xlsx	57	w064	indent wrap	38	px	Calibri 11	Calibri 11	8.33	55	16	cw aw
+w064 indent wrap 39	wrap_band_w064.xlsx	58	w064	indent wrap	39	px	Calibri 11	Calibri 11	8.33	55	16	aw aw
+w064 indent wrap 40	wrap_band_w064.xlsx	59	w064	indent wrap	40	px	Calibri 11	Calibri 11	8.33	55	16	aw ew
+w064 indent wrap 41	wrap_band_w064.xlsx	60	w064	indent wrap	41	px	Calibri 11	Calibri 11	8.33	55	16	ew ew
+w064 indent wrap 42	wrap_band_w064.xlsx	61	w064	indent wrap	42	px	Calibri 11	Calibri 11	8.33	55	16	ew aac
+w064 indent wrap 43	wrap_band_w064.xlsx	62	w064	indent wrap	43	px	Calibri 11	Calibri 11	8.33	55	16	aac aac
+w064 indent wrap 44	wrap_band_w064.xlsx	63	w064	indent wrap	44	px	Calibri 11	Calibri 11	8.33	55	16	aac aaa
+w064 indent wrap 45	wrap_band_w064.xlsx	64	w064	indent wrap	45	px	Calibri 11	Calibri 11	8.33	55	16	aaa aaa
+w064 indent wrap 46	wrap_band_w064.xlsx	65	w064	indent wrap	46	px	Calibri 11	Calibri 11	8.33	55	16	aaa ww
+w064 indent wrap 47	wrap_band_w064.xlsx	66	w064	indent wrap	47	px	Calibri 11	Calibri 11	8.33	55	16	ww ww
+w064 indent wrap 48	wrap_band_w064.xlsx	67	w064	indent wrap	48	px	Calibri 11	Calibri 11	8.33	55	16	ww aee
+w064 indent wrap 49	wrap_band_w064.xlsx	68	w064	indent wrap	49	px	Calibri 11	Calibri 11	8.33	55	16	aee aee
+w064 indent wrap 50	wrap_band_w064.xlsx	69	w064	indent wrap	50	px	Calibri 11	Calibri 11	8.33	55	16	aee eee
+w064 indent wrap 51	wrap_band_w064.xlsx	70	w064	indent wrap	51	px	Calibri 11	Calibri 11	8.33	55	16	eee eee
+w064 indent wrap 52	wrap_band_w064.xlsx	71	w064	indent wrap	52	px	Calibri 11	Calibri 11	8.33	55	16	eee aaw
+w064 indent wrap 53	wrap_band_w064.xlsx	72	w064	indent wrap	53	px	Calibri 11	Calibri 11	8.33	55	16	aaw aaw
+w064 indent wrap 54	wrap_band_w064.xlsx	73	w064	indent wrap	54	px	Calibri 11	Calibri 11	8.33	55	16	aaw wwi
+w064 indent wrap 55	wrap_band_w064.xlsx	74	w064	indent wrap	55	px	Calibri 11	Calibri 11	8.33	55	16	wwi wwi
+w064 indent wrap 56	wrap_band_w064.xlsx	75	w064	indent wrap	56	px	Calibri 11	Calibri 11	8.33	55	16	wwi eew
+w064 indent wrap 57	wrap_band_w064.xlsx	76	w064	indent wrap	57	px	Calibri 11	Calibri 11	8.33	55	16	eew eew
+w064 indent wrap 58	wrap_band_w064.xlsx	77	w064	indent wrap	58	px	Calibri 11	Calibri 11	8.33	55	16	eew cww
+w064 indent wrap 59	wrap_band_w064.xlsx	78	w064	indent wrap	59	px	Calibri 11	Calibri 11	8.33	55	32	cww cww
+w064 indent wrap 60	wrap_band_w064.xlsx	79	w064	indent wrap	60	px	Calibri 11	Calibri 11	8.33	55	32	cww aww
+w064 indent wrap 61	wrap_band_w064.xlsx	80	w064	indent wrap	61	px	Calibri 11	Calibri 11	8.33	55	32	aww aww
+w064 indent distributed 24	wrap_band_w064.xlsx	81	w064	indent distributed	24	px	Calibri 11	Calibri 11	8.33	55	16	ci w
+w064 indent distributed 25	wrap_band_w064.xlsx	82	w064	indent distributed	25	px	Calibri 11	Calibri 11	8.33	55	16	w w
+w064 indent distributed 26	wrap_band_w064.xlsx	83	w064	indent distributed	26	px	Calibri 11	Calibri 11	8.33	55	16	w cc
+w064 indent distributed 27	wrap_band_w064.xlsx	84	w064	indent distributed	27	px	Calibri 11	Calibri 11	8.33	55	16	cc cc
+w064 indent distributed 28	wrap_band_w064.xlsx	85	w064	indent distributed	28	px	Calibri 11	Calibri 11	8.33	55	16	cc ac
+w064 indent distributed 29	wrap_band_w064.xlsx	86	w064	indent distributed	29	px	Calibri 11	Calibri 11	8.33	55	16	ac ac
+w064 indent distributed 30	wrap_band_w064.xlsx	87	w064	indent distributed	30	px	Calibri 11	Calibri 11	8.33	55	16	ac aa
+w064 indent distributed 31	wrap_band_w064.xlsx	88	w064	indent distributed	31	px	Calibri 11	Calibri 11	8.33	55	16	aa aa
+w064 indent distributed 32	wrap_band_w064.xlsx	89	w064	indent distributed	32	px	Calibri 11	Calibri 11	8.33	55	16	aa ae
+w064 indent distributed 33	wrap_band_w064.xlsx	90	w064	indent distributed	33	px	Calibri 11	Calibri 11	8.33	55	16	ae ae
+w064 indent distributed 34	wrap_band_w064.xlsx	91	w064	indent distributed	34	px	Calibri 11	Calibri 11	8.33	55	16	ae ee
+w064 indent distributed 35	wrap_band_w064.xlsx	92	w064	indent distributed	35	px	Calibri 11	Calibri 11	8.33	55	16	ee ee
+w064 indent distributed 36	wrap_band_w064.xlsx	93	w064	indent distributed	36	px	Calibri 11	Calibri 11	8.33	55	16	ee cw
+w064 indent distributed 37	wrap_band_w064.xlsx	94	w064	indent distributed	37	px	Calibri 11	Calibri 11	8.33	55	16	cw cw
+w064 indent distributed 38	wrap_band_w064.xlsx	95	w064	indent distributed	38	px	Calibri 11	Calibri 11	8.33	55	16	cw aw
+w064 indent distributed 39	wrap_band_w064.xlsx	96	w064	indent distributed	39	px	Calibri 11	Calibri 11	8.33	55	16	aw aw
+w064 indent distributed 40	wrap_band_w064.xlsx	97	w064	indent distributed	40	px	Calibri 11	Calibri 11	8.33	55	16	aw ew
+w064 indent distributed 41	wrap_band_w064.xlsx	98	w064	indent distributed	41	px	Calibri 11	Calibri 11	8.33	55	16	ew ew
+w064 indent distributed 42	wrap_band_w064.xlsx	99	w064	indent distributed	42	px	Calibri 11	Calibri 11	8.33	55	16	ew aac
+w064 indent distributed 43	wrap_band_w064.xlsx	100	w064	indent distributed	43	px	Calibri 11	Calibri 11	8.33	55	16	aac aac
+w064 indent distributed 44	wrap_band_w064.xlsx	101	w064	indent distributed	44	px	Calibri 11	Calibri 11	8.33	55	16	aac aaa
+w064 indent distributed 45	wrap_band_w064.xlsx	102	w064	indent distributed	45	px	Calibri 11	Calibri 11	8.33	55	16	aaa aaa
+w064 indent distributed 46	wrap_band_w064.xlsx	103	w064	indent distributed	46	px	Calibri 11	Calibri 11	8.33	55	16	aaa ww
+w064 indent distributed 47	wrap_band_w064.xlsx	104	w064	indent distributed	47	px	Calibri 11	Calibri 11	8.33	55	16	ww ww
+w064 indent distributed 48	wrap_band_w064.xlsx	105	w064	indent distributed	48	px	Calibri 11	Calibri 11	8.33	55	16	ww aee
+w064 indent distributed 49	wrap_band_w064.xlsx	106	w064	indent distributed	49	px	Calibri 11	Calibri 11	8.33	55	16	aee aee
+w064 indent distributed 50	wrap_band_w064.xlsx	107	w064	indent distributed	50	px	Calibri 11	Calibri 11	8.33	55	16	aee eee
+w064 indent distributed 51	wrap_band_w064.xlsx	108	w064	indent distributed	51	px	Calibri 11	Calibri 11	8.33	55	16	eee eee
+w064 indent distributed 52	wrap_band_w064.xlsx	109	w064	indent distributed	52	px	Calibri 11	Calibri 11	8.33	55	16	eee aaw
+w064 indent distributed 53	wrap_band_w064.xlsx	110	w064	indent distributed	53	px	Calibri 11	Calibri 11	8.33	55	32	aaw aaw
+w064 indent distributed 54	wrap_band_w064.xlsx	111	w064	indent distributed	54	px	Calibri 11	Calibri 11	8.33	55	32	aaw wwi
+w064 indent distributed 55	wrap_band_w064.xlsx	112	w064	indent distributed	55	px	Calibri 11	Calibri 11	8.33	55	32	wwi wwi
+w064 indent distributed 56	wrap_band_w064.xlsx	113	w064	indent distributed	56	px	Calibri 11	Calibri 11	8.33	55	32	wwi eew
+w064 indent distributed 57	wrap_band_w064.xlsx	114	w064	indent distributed	57	px	Calibri 11	Calibri 11	8.33	55	32	eew eew
+w064 indent distributed 58	wrap_band_w064.xlsx	115	w064	indent distributed	58	px	Calibri 11	Calibri 11	8.33	55	32	eew cww
+w064 indent distributed 59	wrap_band_w064.xlsx	116	w064	indent distributed	59	px	Calibri 11	Calibri 11	8.33	55	32	cww cww
+w064 indent distributed 60	wrap_band_w064.xlsx	117	w064	indent distributed	60	px	Calibri 11	Calibri 11	8.33	55	32	cww aww
+w064 indent distributed 61	wrap_band_w064.xlsx	118	w064	indent distributed	61	px	Calibri 11	Calibri 11	8.33	55	32	aww aww
+w064 word wrap 50	wrap_band_w064.xlsx	119	w064	word wrap	50	px	Calibri 11	Calibri 11	8.33	55	16	cwwww
+w064 word wrap 51	wrap_band_w064.xlsx	120	w064	word wrap	51	px	Calibri 11	Calibri 11	8.33	55	16	awwww
+w064 word wrap 52	wrap_band_w064.xlsx	121	w064	word wrap	52	px	Calibri 11	Calibri 11	8.33	55	16	ewwww
+w064 word wrap 53	wrap_band_w064.xlsx	122	w064	word wrap	53	px	Calibri 11	Calibri 11	8.33	55	16	aaaeeee
+w064 word wrap 54	wrap_band_w064.xlsx	123	w064	word wrap	54	px	Calibri 11	Calibri 11	8.33	55	16	aaawww
+w064 word wrap 55	wrap_band_w064.xlsx	124	w064	word wrap	55	px	Calibri 11	Calibri 11	8.33	55	16	wwwww
+w064 word wrap 56	wrap_band_w064.xlsx	125	w064	word wrap	56	px	Calibri 11	Calibri 11	8.33	55	16	ccwwww
+w064 word wrap 57	wrap_band_w064.xlsx	126	w064	word wrap	57	px	Calibri 11	Calibri 11	8.33	55	16	eeewww
+w064 word wrap 58	wrap_band_w064.xlsx	127	w064	word wrap	58	px	Calibri 11	Calibri 11	8.33	55	16	aawwww
+w064 word wrap 59	wrap_band_w064.xlsx	128	w064	word wrap	59	px	Calibri 11	Calibri 11	8.33	55	16	wwwwwi
+w064 word wrap 60	wrap_band_w064.xlsx	129	w064	word wrap	60	px	Calibri 11	Calibri 11	8.33	55	16	eewwww
+w064 word wrap 61	wrap_band_w064.xlsx	130	w064	word wrap	61	px	Calibri 11	Calibri 11	8.33	55	16	cwwwww
+w064 word wrap 62	wrap_band_w064.xlsx	131	w064	word wrap	62	px	Calibri 11	Calibri 11	8.33	55	16	awwwww
+w064 word wrap 63	wrap_band_w064.xlsx	132	w064	word wrap	63	px	Calibri 11	Calibri 11	8.33	55	16	ewwwww
+w064 word distributed 50	wrap_band_w064.xlsx	133	w064	word distributed	50	px	Calibri 11	Calibri 11	8.33	55	16	cwwww
+w064 word distributed 51	wrap_band_w064.xlsx	134	w064	word distributed	51	px	Calibri 11	Calibri 11	8.33	55	16	awwww
+w064 word distributed 52	wrap_band_w064.xlsx	135	w064	word distributed	52	px	Calibri 11	Calibri 11	8.33	55	16	ewwww
+w064 word distributed 53	wrap_band_w064.xlsx	136	w064	word distributed	53	px	Calibri 11	Calibri 11	8.33	55	16	aaaeeee
+w064 word distributed 54	wrap_band_w064.xlsx	137	w064	word distributed	54	px	Calibri 11	Calibri 11	8.33	55	16	aaawww
+w064 word distributed 55	wrap_band_w064.xlsx	138	w064	word distributed	55	px	Calibri 11	Calibri 11	8.33	55	16	wwwww
+w064 word distributed 56	wrap_band_w064.xlsx	139	w064	word distributed	56	px	Calibri 11	Calibri 11	8.33	55	16	ccwwww
+w064 word distributed 57	wrap_band_w064.xlsx	140	w064	word distributed	57	px	Calibri 11	Calibri 11	8.33	55	16	eeewww
+w064 word distributed 58	wrap_band_w064.xlsx	141	w064	word distributed	58	px	Calibri 11	Calibri 11	8.33	55	16	aawwww
+w064 word distributed 59	wrap_band_w064.xlsx	142	w064	word distributed	59	px	Calibri 11	Calibri 11	8.33	55	16	wwwwwi
+w064 word distributed 60	wrap_band_w064.xlsx	143	w064	word distributed	60	px	Calibri 11	Calibri 11	8.33	55	16	eewwww
+w064 word distributed 61	wrap_band_w064.xlsx	144	w064	word distributed	61	px	Calibri 11	Calibri 11	8.33	55	16	cwwwww
+w064 word distributed 62	wrap_band_w064.xlsx	145	w064	word distributed	62	px	Calibri 11	Calibri 11	8.33	55	16	awwwww
+w064 word distributed 63	wrap_band_w064.xlsx	146	w064	word distributed	63	px	Calibri 11	Calibri 11	8.33	55	16	ewwwww
+w064 arial wrap 48	wrap_band_w064.xlsx	147	w064	arial wrap	48	px	Arial 10	Arial 10	8.33	55	15	avvv avvv
+w064 arial wrap 49	wrap_band_w064.xlsx	148	w064	arial wrap	49	px	Arial 10	Arial 10	8.33	55	15	avvv aaw
+w064 arial wrap 50	wrap_band_w064.xlsx	149	w064	arial wrap	50	px	Arial 10	Arial 10	8.33	55	15	aaw aaw
+w064 arial wrap 51	wrap_band_w064.xlsx	150	w064	arial wrap	51	px	Arial 10	Arial 10	8.33	55	15	aaw aavv
+w064 arial wrap 52	wrap_band_w064.xlsx	151	w064	arial wrap	52	px	Arial 10	Arial 10	8.33	55	15	aavv aavv
+w064 arial wrap 53	wrap_band_w064.xlsx	152	w064	arial wrap	53	px	Arial 10	Arial 10	8.33	55	15	aavv aww
+w064 arial wrap 54	wrap_band_w064.xlsx	153	w064	arial wrap	54	px	Arial 10	Arial 10	8.33	55	15	aww aww
+w064 arial wrap 55	wrap_band_w064.xlsx	154	w064	arial wrap	55	px	Arial 10	Arial 10	8.33	55	15	aww aaav
+w064 arial wrap 56	wrap_band_w064.xlsx	155	w064	arial wrap	56	px	Arial 10	Arial 10	8.33	55	29	aaav aaav
+w064 arial wrap 57	wrap_band_w064.xlsx	156	w064	arial wrap	57	px	Arial 10	Arial 10	8.33	55	15	aaav www
+w064 arial wrap 58	wrap_band_w064.xlsx	157	w064	arial wrap	58	px	Arial 10	Arial 10	8.33	55	15	www www
+w064 arial wrap 59	wrap_band_w064.xlsx	158	w064	arial wrap	59	px	Arial 10	Arial 10	8.33	55	15	www aaaa
+w064 arial wrap 60	wrap_band_w064.xlsx	159	w064	arial wrap	60	px	Arial 10	Arial 10	8.33	55	29	aaaa aaaa
+w064 arial wrap 61	wrap_band_w064.xlsx	160	w064	arial wrap	61	px	Arial 10	Arial 10	8.33	55	29	aaaa aavvv
+w087 wrap 71	wrap_band_w087.xlsx	1	w087	wrap	71	px	Calibri 11	Calibri 11	11.67	75	16	ccww ccww
+w087 wrap 72	wrap_band_w087.xlsx	2	w087	wrap	72	px	Calibri 11	Calibri 11	11.67	75	16	ccww eeew
+w087 wrap 73	wrap_band_w087.xlsx	3	w087	wrap	73	px	Calibri 11	Calibri 11	11.67	75	16	eeew eeew
+w087 wrap 74	wrap_band_w087.xlsx	4	w087	wrap	74	px	Calibri 11	Calibri 11	11.67	75	16	eeew aaww
+w087 wrap 75	wrap_band_w087.xlsx	5	w087	wrap	75	px	Calibri 11	Calibri 11	11.67	75	16	aaww aaww
+w087 wrap 76	wrap_band_w087.xlsx	6	w087	wrap	76	px	Calibri 11	Calibri 11	11.67	75	16	aaww wwwi
+w087 wrap 77	wrap_band_w087.xlsx	7	w087	wrap	77	px	Calibri 11	Calibri 11	11.67	75	16	wwwi wwwi
+w087 wrap 78	wrap_band_w087.xlsx	8	w087	wrap	78	px	Calibri 11	Calibri 11	11.67	75	16	wwwi eeww
+w087 wrap 79	wrap_band_w087.xlsx	9	w087	wrap	79	px	Calibri 11	Calibri 11	11.67	75	16	eeww eeww
+w087 wrap 80	wrap_band_w087.xlsx	10	w087	wrap	80	px	Calibri 11	Calibri 11	11.67	75	16	eeww cwww
+w087 wrap 81	wrap_band_w087.xlsx	11	w087	wrap	81	px	Calibri 11	Calibri 11	11.67	75	16	cwww cwww
+w087 wrap 82	wrap_band_w087.xlsx	12	w087	wrap	82	px	Calibri 11	Calibri 11	11.67	75	16	cwww awww
+w087 wrap 83	wrap_band_w087.xlsx	13	w087	wrap	83	px	Calibri 11	Calibri 11	11.67	75	16	awww awww
+w087 wrap 84	wrap_band_w087.xlsx	14	w087	wrap	84	px	Calibri 11	Calibri 11	11.67	75	16	awww ewww
+w088 wrap 72	wrap_band_w088.xlsx	1	w088	wrap	72	px	Calibri 11	Calibri 11	11.67	75	16	ccww eeew
+w088 wrap 73	wrap_band_w088.xlsx	2	w088	wrap	73	px	Calibri 11	Calibri 11	11.67	75	16	eeew eeew
+w088 wrap 74	wrap_band_w088.xlsx	3	w088	wrap	74	px	Calibri 11	Calibri 11	11.67	75	16	eeew aaww
+w088 wrap 75	wrap_band_w088.xlsx	4	w088	wrap	75	px	Calibri 11	Calibri 11	11.67	75	16	aaww aaww
+w088 wrap 76	wrap_band_w088.xlsx	5	w088	wrap	76	px	Calibri 11	Calibri 11	11.67	75	16	aaww wwwi
+w088 wrap 77	wrap_band_w088.xlsx	6	w088	wrap	77	px	Calibri 11	Calibri 11	11.67	75	16	wwwi wwwi
+w088 wrap 78	wrap_band_w088.xlsx	7	w088	wrap	78	px	Calibri 11	Calibri 11	11.67	75	16	wwwi eeww
+w088 wrap 79	wrap_band_w088.xlsx	8	w088	wrap	79	px	Calibri 11	Calibri 11	11.67	75	16	eeww eeww
+w088 wrap 80	wrap_band_w088.xlsx	9	w088	wrap	80	px	Calibri 11	Calibri 11	11.67	75	16	eeww cwww
+w088 wrap 81	wrap_band_w088.xlsx	10	w088	wrap	81	px	Calibri 11	Calibri 11	11.67	75	16	cwww cwww
+w088 wrap 82	wrap_band_w088.xlsx	11	w088	wrap	82	px	Calibri 11	Calibri 11	11.67	75	16	cwww awww
+w088 wrap 83	wrap_band_w088.xlsx	12	w088	wrap	83	px	Calibri 11	Calibri 11	11.67	75	16	awww awww
+w088 wrap 84	wrap_band_w088.xlsx	13	w088	wrap	84	px	Calibri 11	Calibri 11	11.67	75	16	awww ewww
+w088 wrap 85	wrap_band_w088.xlsx	14	w088	wrap	85	px	Calibri 11	Calibri 11	11.67	75	16	ewww ewww
+w089 wrap 73	wrap_band_w089.xlsx	1	w089	wrap	73	px	Calibri 11	Calibri 11	11.83	76	16	eeew eeew
+w089 wrap 74	wrap_band_w089.xlsx	2	w089	wrap	74	px	Calibri 11	Calibri 11	11.83	76	16	eeew aaww
+w089 wrap 75	wrap_band_w089.xlsx	3	w089	wrap	75	px	Calibri 11	Calibri 11	11.83	76	16	aaww aaww
+w089 wrap 76	wrap_band_w089.xlsx	4	w089	wrap	76	px	Calibri 11	Calibri 11	11.83	76	16	aaww wwwi
+w089 wrap 77	wrap_band_w089.xlsx	5	w089	wrap	77	px	Calibri 11	Calibri 11	11.83	76	16	wwwi wwwi
+w089 wrap 78	wrap_band_w089.xlsx	6	w089	wrap	78	px	Calibri 11	Calibri 11	11.83	76	16	wwwi eeww
+w089 wrap 79	wrap_band_w089.xlsx	7	w089	wrap	79	px	Calibri 11	Calibri 11	11.83	76	16	eeww eeww
+w089 wrap 80	wrap_band_w089.xlsx	8	w089	wrap	80	px	Calibri 11	Calibri 11	11.83	76	16	eeww cwww
+w089 wrap 81	wrap_band_w089.xlsx	9	w089	wrap	81	px	Calibri 11	Calibri 11	11.83	76	16	cwww cwww
+w089 wrap 82	wrap_band_w089.xlsx	10	w089	wrap	82	px	Calibri 11	Calibri 11	11.83	76	16	cwww awww
+w089 wrap 83	wrap_band_w089.xlsx	11	w089	wrap	83	px	Calibri 11	Calibri 11	11.83	76	16	awww awww
+w089 wrap 84	wrap_band_w089.xlsx	12	w089	wrap	84	px	Calibri 11	Calibri 11	11.83	76	16	awww ewww
+w089 wrap 85	wrap_band_w089.xlsx	13	w089	wrap	85	px	Calibri 11	Calibri 11	11.83	76	16	ewww ewww
+w089 wrap 86	wrap_band_w089.xlsx	14	w089	wrap	86	px	Calibri 11	Calibri 11	11.83	76	16	ewww aaaaaa
+w090 wrap 74	wrap_band_w090.xlsx	1	w090	wrap	74	px	Calibri 11	Calibri 11	12	77	16	eeew aaww
+w090 wrap 75	wrap_band_w090.xlsx	2	w090	wrap	75	px	Calibri 11	Calibri 11	12	77	16	aaww aaww
+w090 wrap 76	wrap_band_w090.xlsx	3	w090	wrap	76	px	Calibri 11	Calibri 11	12	77	16	aaww wwwi
+w090 wrap 77	wrap_band_w090.xlsx	4	w090	wrap	77	px	Calibri 11	Calibri 11	12	77	16	wwwi wwwi
+w090 wrap 78	wrap_band_w090.xlsx	5	w090	wrap	78	px	Calibri 11	Calibri 11	12	77	16	wwwi eeww
+w090 wrap 79	wrap_band_w090.xlsx	6	w090	wrap	79	px	Calibri 11	Calibri 11	12	77	16	eeww eeww
+w090 wrap 80	wrap_band_w090.xlsx	7	w090	wrap	80	px	Calibri 11	Calibri 11	12	77	16	eeww cwww
+w090 wrap 81	wrap_band_w090.xlsx	8	w090	wrap	81	px	Calibri 11	Calibri 11	12	77	16	cwww cwww
+w090 wrap 82	wrap_band_w090.xlsx	9	w090	wrap	82	px	Calibri 11	Calibri 11	12	77	16	cwww awww
+w090 wrap 83	wrap_band_w090.xlsx	10	w090	wrap	83	px	Calibri 11	Calibri 11	12	77	16	awww awww
+w090 wrap 84	wrap_band_w090.xlsx	11	w090	wrap	84	px	Calibri 11	Calibri 11	12	77	16	awww ewww
+w090 wrap 85	wrap_band_w090.xlsx	12	w090	wrap	85	px	Calibri 11	Calibri 11	12	77	16	ewww ewww
+w090 wrap 86	wrap_band_w090.xlsx	13	w090	wrap	86	px	Calibri 11	Calibri 11	12	77	16	ewww aaaaaa
+w090 wrap 87	wrap_band_w090.xlsx	14	w090	wrap	87	px	Calibri 11	Calibri 11	12	77	16	aaaaaa aaaaaa
+w091 wrap 75	wrap_band_w091.xlsx	1	w091	wrap	75	px	Calibri 11	Calibri 11	12.17	78	16	aaww aaww
+w091 wrap 76	wrap_band_w091.xlsx	2	w091	wrap	76	px	Calibri 11	Calibri 11	12.17	78	16	aaww wwwi
+w091 wrap 77	wrap_band_w091.xlsx	3	w091	wrap	77	px	Calibri 11	Calibri 11	12.17	78	16	wwwi wwwi
+w091 wrap 78	wrap_band_w091.xlsx	4	w091	wrap	78	px	Calibri 11	Calibri 11	12.17	78	16	wwwi eeww
+w091 wrap 79	wrap_band_w091.xlsx	5	w091	wrap	79	px	Calibri 11	Calibri 11	12.17	78	16	eeww eeww
+w091 wrap 80	wrap_band_w091.xlsx	6	w091	wrap	80	px	Calibri 11	Calibri 11	12.17	78	16	eeww cwww
+w091 wrap 81	wrap_band_w091.xlsx	7	w091	wrap	81	px	Calibri 11	Calibri 11	12.17	78	16	cwww cwww
+w091 wrap 82	wrap_band_w091.xlsx	8	w091	wrap	82	px	Calibri 11	Calibri 11	12.17	78	16	cwww awww
+w091 wrap 83	wrap_band_w091.xlsx	9	w091	wrap	83	px	Calibri 11	Calibri 11	12.17	78	16	awww awww
+w091 wrap 84	wrap_band_w091.xlsx	10	w091	wrap	84	px	Calibri 11	Calibri 11	12.17	78	16	awww ewww
+w091 wrap 85	wrap_band_w091.xlsx	11	w091	wrap	85	px	Calibri 11	Calibri 11	12.17	78	16	ewww ewww
+w091 wrap 86	wrap_band_w091.xlsx	12	w091	wrap	86	px	Calibri 11	Calibri 11	12.17	78	16	ewww aaaaaa
+w091 wrap 87	wrap_band_w091.xlsx	13	w091	wrap	87	px	Calibri 11	Calibri 11	12.17	78	16	aaaaaa aaaaaa
+w091 wrap 88	wrap_band_w091.xlsx	14	w091	wrap	88	px	Calibri 11	Calibri 11	12.17	78	16	aaaaaa aaaww
+w092 wrap 76	wrap_band_w092.xlsx	1	w092	wrap	76	px	Calibri 11	Calibri 11	12.33	79	16	aaww wwwi
+w092 wrap 77	wrap_band_w092.xlsx	2	w092	wrap	77	px	Calibri 11	Calibri 11	12.33	79	16	wwwi wwwi
+w092 wrap 78	wrap_band_w092.xlsx	3	w092	wrap	78	px	Calibri 11	Calibri 11	12.33	79	16	wwwi eeww
+w092 wrap 79	wrap_band_w092.xlsx	4	w092	wrap	79	px	Calibri 11	Calibri 11	12.33	79	16	eeww eeww
+w092 wrap 80	wrap_band_w092.xlsx	5	w092	wrap	80	px	Calibri 11	Calibri 11	12.33	79	16	eeww cwww
+w092 wrap 81	wrap_band_w092.xlsx	6	w092	wrap	81	px	Calibri 11	Calibri 11	12.33	79	16	cwww cwww
+w092 wrap 82	wrap_band_w092.xlsx	7	w092	wrap	82	px	Calibri 11	Calibri 11	12.33	79	16	cwww awww
+w092 wrap 83	wrap_band_w092.xlsx	8	w092	wrap	83	px	Calibri 11	Calibri 11	12.33	79	16	awww awww
+w092 wrap 84	wrap_band_w092.xlsx	9	w092	wrap	84	px	Calibri 11	Calibri 11	12.33	79	16	awww ewww
+w092 wrap 85	wrap_band_w092.xlsx	10	w092	wrap	85	px	Calibri 11	Calibri 11	12.33	79	16	ewww ewww
+w092 wrap 86	wrap_band_w092.xlsx	11	w092	wrap	86	px	Calibri 11	Calibri 11	12.33	79	16	ewww aaaaaa
+w092 wrap 87	wrap_band_w092.xlsx	12	w092	wrap	87	px	Calibri 11	Calibri 11	12.33	79	16	aaaaaa aaaaaa
+w092 wrap 88	wrap_band_w092.xlsx	13	w092	wrap	88	px	Calibri 11	Calibri 11	12.33	79	16	aaaaaa aaaww
+w092 wrap 89	wrap_band_w092.xlsx	14	w092	wrap	89	px	Calibri 11	Calibri 11	12.33	79	16	aaaww aaaww
+w093 wrap 77	wrap_band_w093.xlsx	1	w093	wrap	77	px	Calibri 11	Calibri 11	12.5	80	16	wwwi wwwi
+w093 wrap 78	wrap_band_w093.xlsx	2	w093	wrap	78	px	Calibri 11	Calibri 11	12.5	80	16	wwwi eeww
+w093 wrap 79	wrap_band_w093.xlsx	3	w093	wrap	79	px	Calibri 11	Calibri 11	12.5	80	16	eeww eeww
+w093 wrap 80	wrap_band_w093.xlsx	4	w093	wrap	80	px	Calibri 11	Calibri 11	12.5	80	16	eeww cwww
+w093 wrap 81	wrap_band_w093.xlsx	5	w093	wrap	81	px	Calibri 11	Calibri 11	12.5	80	16	cwww cwww
+w093 wrap 82	wrap_band_w093.xlsx	6	w093	wrap	82	px	Calibri 11	Calibri 11	12.5	80	16	cwww awww
+w093 wrap 83	wrap_band_w093.xlsx	7	w093	wrap	83	px	Calibri 11	Calibri 11	12.5	80	16	awww awww
+w093 wrap 84	wrap_band_w093.xlsx	8	w093	wrap	84	px	Calibri 11	Calibri 11	12.5	80	16	awww ewww
+w093 wrap 85	wrap_band_w093.xlsx	9	w093	wrap	85	px	Calibri 11	Calibri 11	12.5	80	16	ewww ewww
+w093 wrap 86	wrap_band_w093.xlsx	10	w093	wrap	86	px	Calibri 11	Calibri 11	12.5	80	16	ewww aaaaaa
+w093 wrap 87	wrap_band_w093.xlsx	11	w093	wrap	87	px	Calibri 11	Calibri 11	12.5	80	16	aaaaaa aaaaaa
+w093 wrap 88	wrap_band_w093.xlsx	12	w093	wrap	88	px	Calibri 11	Calibri 11	12.5	80	16	aaaaaa aaaww
+w093 wrap 89	wrap_band_w093.xlsx	13	w093	wrap	89	px	Calibri 11	Calibri 11	12.5	80	16	aaaww aaaww
+w093 wrap 90	wrap_band_w093.xlsx	14	w093	wrap	90	px	Calibri 11	Calibri 11	12.5	80	16	aaaww wwww
+w094 wrap 78	wrap_band_w094.xlsx	1	w094	wrap	78	px	Calibri 11	Calibri 11	12.67	81	16	wwwi eeww
+w094 wrap 79	wrap_band_w094.xlsx	2	w094	wrap	79	px	Calibri 11	Calibri 11	12.67	81	16	eeww eeww
+w094 wrap 80	wrap_band_w094.xlsx	3	w094	wrap	80	px	Calibri 11	Calibri 11	12.67	81	16	eeww cwww
+w094 wrap 81	wrap_band_w094.xlsx	4	w094	wrap	81	px	Calibri 11	Calibri 11	12.67	81	16	cwww cwww
+w094 wrap 82	wrap_band_w094.xlsx	5	w094	wrap	82	px	Calibri 11	Calibri 11	12.67	81	16	cwww awww
+w094 wrap 83	wrap_band_w094.xlsx	6	w094	wrap	83	px	Calibri 11	Calibri 11	12.67	81	16	awww awww
+w094 wrap 84	wrap_band_w094.xlsx	7	w094	wrap	84	px	Calibri 11	Calibri 11	12.67	81	16	awww ewww
+w094 wrap 85	wrap_band_w094.xlsx	8	w094	wrap	85	px	Calibri 11	Calibri 11	12.67	81	16	ewww ewww
+w094 wrap 86	wrap_band_w094.xlsx	9	w094	wrap	86	px	Calibri 11	Calibri 11	12.67	81	16	ewww aaaaaa
+w094 wrap 87	wrap_band_w094.xlsx	10	w094	wrap	87	px	Calibri 11	Calibri 11	12.67	81	16	aaaaaa aaaaaa
+w094 wrap 88	wrap_band_w094.xlsx	11	w094	wrap	88	px	Calibri 11	Calibri 11	12.67	81	16	aaaaaa aaaww
+w094 wrap 89	wrap_band_w094.xlsx	12	w094	wrap	89	px	Calibri 11	Calibri 11	12.67	81	16	aaaww aaaww
+w094 wrap 90	wrap_band_w094.xlsx	13	w094	wrap	90	px	Calibri 11	Calibri 11	12.67	81	16	aaaww wwww
+w094 wrap 91	wrap_band_w094.xlsx	14	w094	wrap	91	px	Calibri 11	Calibri 11	12.67	81	16	wwww wwww
+w095 wrap 79	wrap_band_w095.xlsx	1	w095	wrap	79	px	Calibri 11	Calibri 11	12.67	81	16	eeww eeww
+w095 wrap 80	wrap_band_w095.xlsx	2	w095	wrap	80	px	Calibri 11	Calibri 11	12.67	81	16	eeww cwww
+w095 wrap 81	wrap_band_w095.xlsx	3	w095	wrap	81	px	Calibri 11	Calibri 11	12.67	81	16	cwww cwww
+w095 wrap 82	wrap_band_w095.xlsx	4	w095	wrap	82	px	Calibri 11	Calibri 11	12.67	81	16	cwww awww
+w095 wrap 83	wrap_band_w095.xlsx	5	w095	wrap	83	px	Calibri 11	Calibri 11	12.67	81	16	awww awww
+w095 wrap 84	wrap_band_w095.xlsx	6	w095	wrap	84	px	Calibri 11	Calibri 11	12.67	81	16	awww ewww
+w095 wrap 85	wrap_band_w095.xlsx	7	w095	wrap	85	px	Calibri 11	Calibri 11	12.67	81	16	ewww ewww
+w095 wrap 86	wrap_band_w095.xlsx	8	w095	wrap	86	px	Calibri 11	Calibri 11	12.67	81	16	ewww aaaaaa
+w095 wrap 87	wrap_band_w095.xlsx	9	w095	wrap	87	px	Calibri 11	Calibri 11	12.67	81	16	aaaaaa aaaaaa
+w095 wrap 88	wrap_band_w095.xlsx	10	w095	wrap	88	px	Calibri 11	Calibri 11	12.67	81	16	aaaaaa aaaww
+w095 wrap 89	wrap_band_w095.xlsx	11	w095	wrap	89	px	Calibri 11	Calibri 11	12.67	81	16	aaaww aaaww
+w095 wrap 90	wrap_band_w095.xlsx	12	w095	wrap	90	px	Calibri 11	Calibri 11	12.67	81	16	aaaww wwww
+w095 wrap 91	wrap_band_w095.xlsx	13	w095	wrap	91	px	Calibri 11	Calibri 11	12.67	81	16	wwww wwww
+w095 wrap 92	wrap_band_w095.xlsx	14	w095	wrap	92	px	Calibri 11	Calibri 11	12.67	81	16	wwww ccwww
+w096 wrap 80	wrap_band_w096.xlsx	1	w096	wrap	80	px	Calibri 11	Calibri 11	12.83	82	16	eeww cwww
+w096 wrap 81	wrap_band_w096.xlsx	2	w096	wrap	81	px	Calibri 11	Calibri 11	12.83	82	16	cwww cwww
+w096 wrap 82	wrap_band_w096.xlsx	3	w096	wrap	82	px	Calibri 11	Calibri 11	12.83	82	16	cwww awww
+w096 wrap 83	wrap_band_w096.xlsx	4	w096	wrap	83	px	Calibri 11	Calibri 11	12.83	82	16	awww awww
+w096 wrap 84	wrap_band_w096.xlsx	5	w096	wrap	84	px	Calibri 11	Calibri 11	12.83	82	16	awww ewww
+w096 wrap 85	wrap_band_w096.xlsx	6	w096	wrap	85	px	Calibri 11	Calibri 11	12.83	82	16	ewww ewww
+w096 wrap 86	wrap_band_w096.xlsx	7	w096	wrap	86	px	Calibri 11	Calibri 11	12.83	82	16	ewww aaaaaa
+w096 wrap 87	wrap_band_w096.xlsx	8	w096	wrap	87	px	Calibri 11	Calibri 11	12.83	82	16	aaaaaa aaaaaa
+w096 wrap 88	wrap_band_w096.xlsx	9	w096	wrap	88	px	Calibri 11	Calibri 11	12.83	82	16	aaaaaa aaaww
+w096 wrap 89	wrap_band_w096.xlsx	10	w096	wrap	89	px	Calibri 11	Calibri 11	12.83	82	16	aaaww aaaww
+w096 wrap 90	wrap_band_w096.xlsx	11	w096	wrap	90	px	Calibri 11	Calibri 11	12.83	82	16	aaaww wwww
+w096 wrap 91	wrap_band_w096.xlsx	12	w096	wrap	91	px	Calibri 11	Calibri 11	12.83	82	16	wwww wwww
+w096 wrap 92	wrap_band_w096.xlsx	13	w096	wrap	92	px	Calibri 11	Calibri 11	12.83	82	16	wwww ccwww
+w096 wrap 93	wrap_band_w096.xlsx	14	w096	wrap	93	px	Calibri 11	Calibri 11	12.83	82	16	ccwww ccwww
+w100 wrap 84	wrap_band_w100.xlsx	1	w100	wrap	84	px	Calibri 11	Calibri 11	13.5	86	16	awww ewww
+w100 wrap 85	wrap_band_w100.xlsx	2	w100	wrap	85	px	Calibri 11	Calibri 11	13.5	86	16	ewww ewww
+w100 wrap 86	wrap_band_w100.xlsx	3	w100	wrap	86	px	Calibri 11	Calibri 11	13.5	86	16	ewww aaaaaa
+w100 wrap 87	wrap_band_w100.xlsx	4	w100	wrap	87	px	Calibri 11	Calibri 11	13.5	86	16	aaaaaa aaaaaa
+w100 wrap 88	wrap_band_w100.xlsx	5	w100	wrap	88	px	Calibri 11	Calibri 11	13.5	86	16	aaaaaa aaaww
+w100 wrap 89	wrap_band_w100.xlsx	6	w100	wrap	89	px	Calibri 11	Calibri 11	13.5	86	16	aaaww aaaww
+w100 wrap 90	wrap_band_w100.xlsx	7	w100	wrap	90	px	Calibri 11	Calibri 11	13.5	86	16	aaaww wwww
+w100 wrap 91	wrap_band_w100.xlsx	8	w100	wrap	91	px	Calibri 11	Calibri 11	13.5	86	16	wwww wwww
+w100 wrap 92	wrap_band_w100.xlsx	9	w100	wrap	92	px	Calibri 11	Calibri 11	13.5	86	16	wwww ccwww
+w100 wrap 93	wrap_band_w100.xlsx	10	w100	wrap	93	px	Calibri 11	Calibri 11	13.5	86	16	ccwww ccwww
+w100 wrap 94	wrap_band_w100.xlsx	11	w100	wrap	94	px	Calibri 11	Calibri 11	13.5	86	16	ccwww eeeww
+w100 wrap 95	wrap_band_w100.xlsx	12	w100	wrap	95	px	Calibri 11	Calibri 11	13.5	86	16	eeeww eeeww
+w100 wrap 96	wrap_band_w100.xlsx	13	w100	wrap	96	px	Calibri 11	Calibri 11	13.5	86	16	eeeww aawww
+w100 wrap 97	wrap_band_w100.xlsx	14	w100	wrap	97	px	Calibri 11	Calibri 11	13.5	86	16	aawww aawww
+w128 wrap 112	wrap_band_w128.xlsx	1	w128	wrap	112	px	Calibri 11	Calibri 11	17.5	110	16	aaawww wwwww
+w128 wrap 113	wrap_band_w128.xlsx	2	w128	wrap	113	px	Calibri 11	Calibri 11	17.5	110	16	wwwww wwwww
+w128 wrap 114	wrap_band_w128.xlsx	3	w128	wrap	114	px	Calibri 11	Calibri 11	17.5	110	16	wwwww ccwwww
+w128 wrap 115	wrap_band_w128.xlsx	4	w128	wrap	115	px	Calibri 11	Calibri 11	17.5	110	16	ccwwww ccwwww
+w128 wrap 116	wrap_band_w128.xlsx	5	w128	wrap	116	px	Calibri 11	Calibri 11	17.5	110	16	ccwwww eeewww
+w128 wrap 117	wrap_band_w128.xlsx	6	w128	wrap	117	px	Calibri 11	Calibri 11	17.5	110	16	eeewww eeewww
+w128 wrap 118	wrap_band_w128.xlsx	7	w128	wrap	118	px	Calibri 11	Calibri 11	17.5	110	16	eeewww aawwww
+w128 wrap 119	wrap_band_w128.xlsx	8	w128	wrap	119	px	Calibri 11	Calibri 11	17.5	110	16	aawwww aawwww
+w128 wrap 120	wrap_band_w128.xlsx	9	w128	wrap	120	px	Calibri 11	Calibri 11	17.5	110	16	aawwww wwwwwi
+w128 wrap 121	wrap_band_w128.xlsx	10	w128	wrap	121	px	Calibri 11	Calibri 11	17.5	110	16	wwwwwi wwwwwi
+w128 wrap 122	wrap_band_w128.xlsx	11	w128	wrap	122	px	Calibri 11	Calibri 11	17.5	110	16	wwwwwi eewwww
+w128 wrap 123	wrap_band_w128.xlsx	12	w128	wrap	123	px	Calibri 11	Calibri 11	17.5	110	16	eewwww eewwww
+w128 wrap 124	wrap_band_w128.xlsx	13	w128	wrap	124	px	Calibri 11	Calibri 11	17.5	110	16	eewwww cwwwww
+w128 wrap 125	wrap_band_w128.xlsx	14	w128	wrap	125	px	Calibri 11	Calibri 11	17.5	110	16	cwwwww cwwwww
+w160 wrap 144	wrap_band_w160.xlsx	1	w160	wrap	144	px	Calibri 11	Calibri 11	22	137	16	wwwwwwi eewwwww
+w160 wrap 145	wrap_band_w160.xlsx	2	w160	wrap	145	px	Calibri 11	Calibri 11	22	137	16	eewwwww eewwwww
+w160 wrap 146	wrap_band_w160.xlsx	3	w160	wrap	146	px	Calibri 11	Calibri 11	22	137	16	eewwwww cwwwwww
+w160 wrap 147	wrap_band_w160.xlsx	4	w160	wrap	147	px	Calibri 11	Calibri 11	22	137	16	cwwwwww cwwwwww
+w160 wrap 148	wrap_band_w160.xlsx	5	w160	wrap	148	px	Calibri 11	Calibri 11	22	137	16	cwwwwww awwwwww
+w160 wrap 149	wrap_band_w160.xlsx	6	w160	wrap	149	px	Calibri 11	Calibri 11	22	137	16	awwwwww awwwwww
+w160 wrap 150	wrap_band_w160.xlsx	7	w160	wrap	150	px	Calibri 11	Calibri 11	22	137	16	awwwwww ewwwwww
+w160 wrap 151	wrap_band_w160.xlsx	8	w160	wrap	151	px	Calibri 11	Calibri 11	22	137	16	ewwwwww ewwwwww
+w160 wrap 152	wrap_band_w160.xlsx	9	w160	wrap	152	px	Calibri 11	Calibri 11	22	137	16	ewwwwww aaaaaawww
+w160 wrap 153	wrap_band_w160.xlsx	10	w160	wrap	153	px	Calibri 11	Calibri 11	22	137	16	aaaaaawww aaaaaawww
+w160 wrap 154	wrap_band_w160.xlsx	11	w160	wrap	154	px	Calibri 11	Calibri 11	22	137	16	aaaaaawww aaawwwww
+w160 wrap 155	wrap_band_w160.xlsx	12	w160	wrap	155	px	Calibri 11	Calibri 11	22	137	16	aaawwwww aaawwwww
+w160 wrap 156	wrap_band_w160.xlsx	13	w160	wrap	156	px	Calibri 11	Calibri 11	22	137	16	aaawwwww wwwwwww
+w160 wrap 157	wrap_band_w160.xlsx	14	w160	wrap	157	px	Calibri 11	Calibri 11	22	137	16	wwwwwww wwwwwww
+m054 wrap 38	wrap_band_m054.xlsx	1	m054	wrap	38	pt	Calibri 11	Calibri 11	8.17	54	16	aaw aaw
+m054 wrap 39	wrap_band_m054.xlsx	2	m054	wrap	39	pt	Calibri 11	Calibri 11	8.17	54	16	aaw wwi
+m054 wrap 40	wrap_band_m054.xlsx	3	m054	wrap	40	pt	Calibri 11	Calibri 11	8.17	54	16	wwi wwi
+m054 wrap 41	wrap_band_m054.xlsx	4	m054	wrap	41	pt	Calibri 11	Calibri 11	8.17	54	16	wwi oow
+m054 wrap 42	wrap_band_m054.xlsx	5	m054	wrap	42	pt	Calibri 11	Calibri 11	8.17	54	16	oow oow
+m054 wrap 43	wrap_band_m054.xlsx	6	m054	wrap	43	pt	Calibri 11	Calibri 11	8.17	54	16	oow aww
+m054 wrap 44	wrap_band_m054.xlsx	7	m054	wrap	44	pt	Calibri 11	Calibri 11	8.17	54	16	aww aww
+m054 wrap 45	wrap_band_m054.xlsx	8	m054	wrap	45	pt	Calibri 11	Calibri 11	8.17	54	16	aww oww
+m054 wrap 46	wrap_band_m054.xlsx	9	m054	wrap	46	pt	Calibri 11	Calibri 11	8.17	54	16	oww oww
+m054 wrap 47	wrap_band_m054.xlsx	10	m054	wrap	47	pt	Calibri 11	Calibri 11	8.17	54	16	oww aooo
+m054 wrap 48	wrap_band_m054.xlsx	11	m054	wrap	48	pt	Calibri 11	Calibri 11	8.17	54	32	aooo aooo
+m054 wrap 49	wrap_band_m054.xlsx	12	m054	wrap	49	pt	Calibri 11	Calibri 11	8.17	54	32	aooo www
+m054 wrap 50	wrap_band_m054.xlsx	13	m054	wrap	50	pt	Calibri 11	Calibri 11	8.17	54	32	www www
+m054 wrap 51	wrap_band_m054.xlsx	14	m054	wrap	51	pt	Calibri 11	Calibri 11	8.17	54	32	www aaaaa
+m066 wrap 50	wrap_band_m066.xlsx	1	m066	wrap	50	pt	Calibri 11	Calibri 11	10.17	66	16	www www
+m066 wrap 51	wrap_band_m066.xlsx	2	m066	wrap	51	pt	Calibri 11	Calibri 11	10.17	66	16	www aaaaa
+m066 wrap 52	wrap_band_m066.xlsx	3	m066	wrap	52	pt	Calibri 11	Calibri 11	10.17	66	16	aaaaa aaaaa
+m066 wrap 53	wrap_band_m066.xlsx	4	m066	wrap	53	pt	Calibri 11	Calibri 11	10.17	66	16	aaaaa aaww
+m066 wrap 54	wrap_band_m066.xlsx	5	m066	wrap	54	pt	Calibri 11	Calibri 11	10.17	66	16	aaww aaww
+m066 wrap 55	wrap_band_m066.xlsx	6	m066	wrap	55	pt	Calibri 11	Calibri 11	10.17	66	16	aaww wwwi
+m066 wrap 56	wrap_band_m066.xlsx	7	m066	wrap	56	pt	Calibri 11	Calibri 11	10.17	66	16	wwwi wwwi
+m066 wrap 57	wrap_band_m066.xlsx	8	m066	wrap	57	pt	Calibri 11	Calibri 11	10.17	66	16	wwwi ooww
+m066 wrap 58	wrap_band_m066.xlsx	9	m066	wrap	58	pt	Calibri 11	Calibri 11	10.17	66	16	ooww ooww
+m066 wrap 59	wrap_band_m066.xlsx	10	m066	wrap	59	pt	Calibri 11	Calibri 11	10.17	66	16	ooww awww
+m066 wrap 60	wrap_band_m066.xlsx	11	m066	wrap	60	pt	Calibri 11	Calibri 11	10.17	66	32	awww awww
+m066 wrap 61	wrap_band_m066.xlsx	12	m066	wrap	61	pt	Calibri 11	Calibri 11	10.17	66	32	awww owww
+m066 wrap 62	wrap_band_m066.xlsx	13	m066	wrap	62	pt	Calibri 11	Calibri 11	10.17	66	32	owww owww
+m066 wrap 63	wrap_band_m066.xlsx	14	m066	wrap	63	pt	Calibri 11	Calibri 11	10.17	66	32	owww aaaww
+m066 justify 50	wrap_band_m066.xlsx	15	m066	justify	50	pt	Calibri 11	Calibri 11	10.17	66	16	www www
+m066 justify 51	wrap_band_m066.xlsx	16	m066	justify	51	pt	Calibri 11	Calibri 11	10.17	66	16	www aaaaa
+m066 justify 52	wrap_band_m066.xlsx	17	m066	justify	52	pt	Calibri 11	Calibri 11	10.17	66	16	aaaaa aaaaa
+m066 justify 53	wrap_band_m066.xlsx	18	m066	justify	53	pt	Calibri 11	Calibri 11	10.17	66	16	aaaaa aaww
+m066 justify 54	wrap_band_m066.xlsx	19	m066	justify	54	pt	Calibri 11	Calibri 11	10.17	66	16	aaww aaww
+m066 justify 55	wrap_band_m066.xlsx	20	m066	justify	55	pt	Calibri 11	Calibri 11	10.17	66	16	aaww wwwi
+m066 justify 56	wrap_band_m066.xlsx	21	m066	justify	56	pt	Calibri 11	Calibri 11	10.17	66	16	wwwi wwwi
+m066 justify 57	wrap_band_m066.xlsx	22	m066	justify	57	pt	Calibri 11	Calibri 11	10.17	66	16	wwwi ooww
+m066 justify 58	wrap_band_m066.xlsx	23	m066	justify	58	pt	Calibri 11	Calibri 11	10.17	66	16	ooww ooww
+m066 justify 59	wrap_band_m066.xlsx	24	m066	justify	59	pt	Calibri 11	Calibri 11	10.17	66	16	ooww awww
+m066 justify 60	wrap_band_m066.xlsx	25	m066	justify	60	pt	Calibri 11	Calibri 11	10.17	66	32	awww awww
+m066 justify 61	wrap_band_m066.xlsx	26	m066	justify	61	pt	Calibri 11	Calibri 11	10.17	66	32	awww owww
+m066 justify 62	wrap_band_m066.xlsx	27	m066	justify	62	pt	Calibri 11	Calibri 11	10.17	66	32	owww owww
+m066 justify 63	wrap_band_m066.xlsx	28	m066	justify	63	pt	Calibri 11	Calibri 11	10.17	66	32	owww aaaww
+m066 distributed 50	wrap_band_m066.xlsx	29	m066	distributed	50	pt	Calibri 11	Calibri 11	10.17	66	16	www www
+m066 distributed 51	wrap_band_m066.xlsx	30	m066	distributed	51	pt	Calibri 11	Calibri 11	10.17	66	16	www aaaaa
+m066 distributed 52	wrap_band_m066.xlsx	31	m066	distributed	52	pt	Calibri 11	Calibri 11	10.17	66	16	aaaaa aaaaa
+m066 distributed 53	wrap_band_m066.xlsx	32	m066	distributed	53	pt	Calibri 11	Calibri 11	10.17	66	16	aaaaa aaww
+m066 distributed 54	wrap_band_m066.xlsx	33	m066	distributed	54	pt	Calibri 11	Calibri 11	10.17	66	16	aaww aaww
+m066 distributed 55	wrap_band_m066.xlsx	34	m066	distributed	55	pt	Calibri 11	Calibri 11	10.17	66	16	aaww wwwi
+m066 distributed 56	wrap_band_m066.xlsx	35	m066	distributed	56	pt	Calibri 11	Calibri 11	10.17	66	16	wwwi wwwi
+m066 distributed 57	wrap_band_m066.xlsx	36	m066	distributed	57	pt	Calibri 11	Calibri 11	10.17	66	16	wwwi ooww
+m066 distributed 58	wrap_band_m066.xlsx	37	m066	distributed	58	pt	Calibri 11	Calibri 11	10.17	66	16	ooww ooww
+m066 distributed 59	wrap_band_m066.xlsx	38	m066	distributed	59	pt	Calibri 11	Calibri 11	10.17	66	16	ooww awww
+m066 distributed 60	wrap_band_m066.xlsx	39	m066	distributed	60	pt	Calibri 11	Calibri 11	10.17	66	32	awww awww
+m066 distributed 61	wrap_band_m066.xlsx	40	m066	distributed	61	pt	Calibri 11	Calibri 11	10.17	66	32	awww owww
+m066 distributed 62	wrap_band_m066.xlsx	41	m066	distributed	62	pt	Calibri 11	Calibri 11	10.17	66	32	owww owww
+m066 distributed 63	wrap_band_m066.xlsx	42	m066	distributed	63	pt	Calibri 11	Calibri 11	10.17	66	32	owww aaaww
+m066 indent wrap 26	wrap_band_m066.xlsx	43	m066	indent wrap	26	pt	Calibri 11	Calibri 11	10.17	66	16	oo oo
+m066 indent wrap 27	wrap_band_m066.xlsx	44	m066	indent wrap	27	pt	Calibri 11	Calibri 11	10.17	66	16	oo aw
+m066 indent wrap 28	wrap_band_m066.xlsx	45	m066	indent wrap	28	pt	Calibri 11	Calibri 11	10.17	66	16	aw aw
+m066 indent wrap 29	wrap_band_m066.xlsx	46	m066	indent wrap	29	pt	Calibri 11	Calibri 11	10.17	66	16	aw ow
+m066 indent wrap 30	wrap_band_m066.xlsx	47	m066	indent wrap	30	pt	Calibri 11	Calibri 11	10.17	66	16	ow ow
+m066 indent wrap 31	wrap_band_m066.xlsx	48	m066	indent wrap	31	pt	Calibri 11	Calibri 11	10.17	66	16	ow aaa
+m066 indent wrap 32	wrap_band_m066.xlsx	49	m066	indent wrap	32	pt	Calibri 11	Calibri 11	10.17	66	16	aaa aaa
+m066 indent wrap 33	wrap_band_m066.xlsx	50	m066	indent wrap	33	pt	Calibri 11	Calibri 11	10.17	66	16	aaa ww
+m066 indent wrap 34	wrap_band_m066.xlsx	51	m066	indent wrap	34	pt	Calibri 11	Calibri 11	10.17	66	16	ww ww
+m066 indent wrap 35	wrap_band_m066.xlsx	52	m066	indent wrap	35	pt	Calibri 11	Calibri 11	10.17	66	16	ww aoo
+m066 indent wrap 36	wrap_band_m066.xlsx	53	m066	indent wrap	36	pt	Calibri 11	Calibri 11	10.17	66	16	aoo aoo
+m066 indent wrap 37	wrap_band_m066.xlsx	54	m066	indent wrap	37	pt	Calibri 11	Calibri 11	10.17	66	16	aoo aaw
+m066 indent wrap 38	wrap_band_m066.xlsx	55	m066	indent wrap	38	pt	Calibri 11	Calibri 11	10.17	66	16	aaw aaw
+m066 indent wrap 39	wrap_band_m066.xlsx	56	m066	indent wrap	39	pt	Calibri 11	Calibri 11	10.17	66	16	aaw wwi
+m066 indent wrap 40	wrap_band_m066.xlsx	57	m066	indent wrap	40	pt	Calibri 11	Calibri 11	10.17	66	16	wwi wwi
+m066 indent wrap 41	wrap_band_m066.xlsx	58	m066	indent wrap	41	pt	Calibri 11	Calibri 11	10.17	66	16	wwi oow
+m066 indent wrap 42	wrap_band_m066.xlsx	59	m066	indent wrap	42	pt	Calibri 11	Calibri 11	10.17	66	16	oow oow
+m066 indent wrap 43	wrap_band_m066.xlsx	60	m066	indent wrap	43	pt	Calibri 11	Calibri 11	10.17	66	16	oow aww
+m066 indent wrap 44	wrap_band_m066.xlsx	61	m066	indent wrap	44	pt	Calibri 11	Calibri 11	10.17	66	16	aww aww
+m066 indent wrap 45	wrap_band_m066.xlsx	62	m066	indent wrap	45	pt	Calibri 11	Calibri 11	10.17	66	16	aww oww
+m066 indent wrap 46	wrap_band_m066.xlsx	63	m066	indent wrap	46	pt	Calibri 11	Calibri 11	10.17	66	16	oww oww
+m066 indent wrap 47	wrap_band_m066.xlsx	64	m066	indent wrap	47	pt	Calibri 11	Calibri 11	10.17	66	16	oww aooo
+m066 indent wrap 48	wrap_band_m066.xlsx	65	m066	indent wrap	48	pt	Calibri 11	Calibri 11	10.17	66	16	aooo aooo
+m066 indent wrap 49	wrap_band_m066.xlsx	66	m066	indent wrap	49	pt	Calibri 11	Calibri 11	10.17	66	16	aooo www
+m066 indent wrap 50	wrap_band_m066.xlsx	67	m066	indent wrap	50	pt	Calibri 11	Calibri 11	10.17	66	16	www www
+m066 indent wrap 51	wrap_band_m066.xlsx	68	m066	indent wrap	51	pt	Calibri 11	Calibri 11	10.17	66	16	www aaaaa
+m066 indent wrap 52	wrap_band_m066.xlsx	69	m066	indent wrap	52	pt	Calibri 11	Calibri 11	10.17	66	16	aaaaa aaaaa
+m066 indent wrap 53	wrap_band_m066.xlsx	70	m066	indent wrap	53	pt	Calibri 11	Calibri 11	10.17	66	16	aaaaa aaww
+m066 indent wrap 54	wrap_band_m066.xlsx	71	m066	indent wrap	54	pt	Calibri 11	Calibri 11	10.17	66	32	aaww aaww
+m066 indent wrap 55	wrap_band_m066.xlsx	72	m066	indent wrap	55	pt	Calibri 11	Calibri 11	10.17	66	32	aaww wwwi
+m066 indent wrap 56	wrap_band_m066.xlsx	73	m066	indent wrap	56	pt	Calibri 11	Calibri 11	10.17	66	32	wwwi wwwi
+m066 indent wrap 57	wrap_band_m066.xlsx	74	m066	indent wrap	57	pt	Calibri 11	Calibri 11	10.17	66	32	wwwi ooww
+m066 indent wrap 58	wrap_band_m066.xlsx	75	m066	indent wrap	58	pt	Calibri 11	Calibri 11	10.17	66	32	ooww ooww
+m066 indent wrap 59	wrap_band_m066.xlsx	76	m066	indent wrap	59	pt	Calibri 11	Calibri 11	10.17	66	32	ooww awww
+m066 indent wrap 60	wrap_band_m066.xlsx	77	m066	indent wrap	60	pt	Calibri 11	Calibri 11	10.17	66	32	awww awww
+m066 indent wrap 61	wrap_band_m066.xlsx	78	m066	indent wrap	61	pt	Calibri 11	Calibri 11	10.17	66	32	awww owww
+m066 indent wrap 62	wrap_band_m066.xlsx	79	m066	indent wrap	62	pt	Calibri 11	Calibri 11	10.17	66	32	owww owww
+m066 indent wrap 63	wrap_band_m066.xlsx	80	m066	indent wrap	63	pt	Calibri 11	Calibri 11	10.17	66	32	owww aaaww
+m066 indent distributed 26	wrap_band_m066.xlsx	81	m066	indent distributed	26	pt	Calibri 11	Calibri 11	10.17	66	16	oo oo
+m066 indent distributed 27	wrap_band_m066.xlsx	82	m066	indent distributed	27	pt	Calibri 11	Calibri 11	10.17	66	16	oo aw
+m066 indent distributed 28	wrap_band_m066.xlsx	83	m066	indent distributed	28	pt	Calibri 11	Calibri 11	10.17	66	16	aw aw
+m066 indent distributed 29	wrap_band_m066.xlsx	84	m066	indent distributed	29	pt	Calibri 11	Calibri 11	10.17	66	16	aw ow
+m066 indent distributed 30	wrap_band_m066.xlsx	85	m066	indent distributed	30	pt	Calibri 11	Calibri 11	10.17	66	16	ow ow
+m066 indent distributed 31	wrap_band_m066.xlsx	86	m066	indent distributed	31	pt	Calibri 11	Calibri 11	10.17	66	16	ow aaa
+m066 indent distributed 32	wrap_band_m066.xlsx	87	m066	indent distributed	32	pt	Calibri 11	Calibri 11	10.17	66	16	aaa aaa
+m066 indent distributed 33	wrap_band_m066.xlsx	88	m066	indent distributed	33	pt	Calibri 11	Calibri 11	10.17	66	16	aaa ww
+m066 indent distributed 34	wrap_band_m066.xlsx	89	m066	indent distributed	34	pt	Calibri 11	Calibri 11	10.17	66	16	ww ww
+m066 indent distributed 35	wrap_band_m066.xlsx	90	m066	indent distributed	35	pt	Calibri 11	Calibri 11	10.17	66	16	ww aoo
+m066 indent distributed 36	wrap_band_m066.xlsx	91	m066	indent distributed	36	pt	Calibri 11	Calibri 11	10.17	66	16	aoo aoo
+m066 indent distributed 37	wrap_band_m066.xlsx	92	m066	indent distributed	37	pt	Calibri 11	Calibri 11	10.17	66	16	aoo aaw
+m066 indent distributed 38	wrap_band_m066.xlsx	93	m066	indent distributed	38	pt	Calibri 11	Calibri 11	10.17	66	16	aaw aaw
+m066 indent distributed 39	wrap_band_m066.xlsx	94	m066	indent distributed	39	pt	Calibri 11	Calibri 11	10.17	66	16	aaw wwi
+m066 indent distributed 40	wrap_band_m066.xlsx	95	m066	indent distributed	40	pt	Calibri 11	Calibri 11	10.17	66	16	wwi wwi
+m066 indent distributed 41	wrap_band_m066.xlsx	96	m066	indent distributed	41	pt	Calibri 11	Calibri 11	10.17	66	16	wwi oow
+m066 indent distributed 42	wrap_band_m066.xlsx	97	m066	indent distributed	42	pt	Calibri 11	Calibri 11	10.17	66	16	oow oow
+m066 indent distributed 43	wrap_band_m066.xlsx	98	m066	indent distributed	43	pt	Calibri 11	Calibri 11	10.17	66	16	oow aww
+m066 indent distributed 44	wrap_band_m066.xlsx	99	m066	indent distributed	44	pt	Calibri 11	Calibri 11	10.17	66	16	aww aww
+m066 indent distributed 45	wrap_band_m066.xlsx	100	m066	indent distributed	45	pt	Calibri 11	Calibri 11	10.17	66	16	aww oww
+m066 indent distributed 46	wrap_band_m066.xlsx	101	m066	indent distributed	46	pt	Calibri 11	Calibri 11	10.17	66	16	oww oww
+m066 indent distributed 47	wrap_band_m066.xlsx	102	m066	indent distributed	47	pt	Calibri 11	Calibri 11	10.17	66	16	oww aooo
+m066 indent distributed 48	wrap_band_m066.xlsx	103	m066	indent distributed	48	pt	Calibri 11	Calibri 11	10.17	66	32	aooo aooo
+m066 indent distributed 49	wrap_band_m066.xlsx	104	m066	indent distributed	49	pt	Calibri 11	Calibri 11	10.17	66	32	aooo www
+m066 indent distributed 50	wrap_band_m066.xlsx	105	m066	indent distributed	50	pt	Calibri 11	Calibri 11	10.17	66	32	www www
+m066 indent distributed 51	wrap_band_m066.xlsx	106	m066	indent distributed	51	pt	Calibri 11	Calibri 11	10.17	66	32	www aaaaa
+m066 indent distributed 52	wrap_band_m066.xlsx	107	m066	indent distributed	52	pt	Calibri 11	Calibri 11	10.17	66	32	aaaaa aaaaa
+m066 indent distributed 53	wrap_band_m066.xlsx	108	m066	indent distributed	53	pt	Calibri 11	Calibri 11	10.17	66	32	aaaaa aaww
+m066 indent distributed 54	wrap_band_m066.xlsx	109	m066	indent distributed	54	pt	Calibri 11	Calibri 11	10.17	66	32	aaww aaww
+m066 indent distributed 55	wrap_band_m066.xlsx	110	m066	indent distributed	55	pt	Calibri 11	Calibri 11	10.17	66	32	aaww wwwi
+m066 indent distributed 56	wrap_band_m066.xlsx	111	m066	indent distributed	56	pt	Calibri 11	Calibri 11	10.17	66	32	wwwi wwwi
+m066 indent distributed 57	wrap_band_m066.xlsx	112	m066	indent distributed	57	pt	Calibri 11	Calibri 11	10.17	66	32	wwwi ooww
+m066 indent distributed 58	wrap_band_m066.xlsx	113	m066	indent distributed	58	pt	Calibri 11	Calibri 11	10.17	66	32	ooww ooww
+m066 indent distributed 59	wrap_band_m066.xlsx	114	m066	indent distributed	59	pt	Calibri 11	Calibri 11	10.17	66	32	ooww awww
+m066 indent distributed 60	wrap_band_m066.xlsx	115	m066	indent distributed	60	pt	Calibri 11	Calibri 11	10.17	66	32	awww awww
+m066 indent distributed 61	wrap_band_m066.xlsx	116	m066	indent distributed	61	pt	Calibri 11	Calibri 11	10.17	66	32	awww owww
+m066 indent distributed 62	wrap_band_m066.xlsx	117	m066	indent distributed	62	pt	Calibri 11	Calibri 11	10.17	66	32	owww owww
+m066 indent distributed 63	wrap_band_m066.xlsx	118	m066	indent distributed	63	pt	Calibri 11	Calibri 11	10.17	66	32	owww aaaww
+m066 word wrap 52	wrap_band_m066.xlsx	119	m066	word wrap	52	pt	Calibri 11	Calibri 11	10.17	66	16	oowwwww
+m066 word wrap 53	wrap_band_m066.xlsx	120	m066	word wrap	53	pt	Calibri 11	Calibri 11	10.17	66	16	awwwwww
+m066 word wrap 54	wrap_band_m066.xlsx	121	m066	word wrap	54	pt	Calibri 11	Calibri 11	10.17	66	16	owwwwww
+m066 word wrap 55	wrap_band_m066.xlsx	122	m066	word wrap	55	pt	Calibri 11	Calibri 11	10.17	66	16	aaawwwww
+m066 word wrap 56	wrap_band_m066.xlsx	123	m066	word wrap	56	pt	Calibri 11	Calibri 11	10.17	66	16	wwwwwww
+m066 word wrap 57	wrap_band_m066.xlsx	124	m066	word wrap	57	pt	Calibri 11	Calibri 11	10.17	66	16	aaaaawwww
+m066 word wrap 58	wrap_band_m066.xlsx	125	m066	word wrap	58	pt	Calibri 11	Calibri 11	10.17	66	16	aawwwwww
+m066 word wrap 59	wrap_band_m066.xlsx	126	m066	word wrap	59	pt	Calibri 11	Calibri 11	10.17	66	16	wwwwwwwi
+m066 word wrap 60	wrap_band_m066.xlsx	127	m066	word wrap	60	pt	Calibri 11	Calibri 11	10.17	66	32	oowwwwww
+m066 word wrap 61	wrap_band_m066.xlsx	128	m066	word wrap	61	pt	Calibri 11	Calibri 11	10.17	66	32	awwwwwww
+m066 word wrap 62	wrap_band_m066.xlsx	129	m066	word wrap	62	pt	Calibri 11	Calibri 11	10.17	66	32	owwwwwww
+m066 word wrap 63	wrap_band_m066.xlsx	130	m066	word wrap	63	pt	Calibri 11	Calibri 11	10.17	66	32	aaawwwwww
+m066 word wrap 64	wrap_band_m066.xlsx	131	m066	word wrap	64	pt	Calibri 11	Calibri 11	10.17	66	32	wwwwwwww
+m066 word wrap 65	wrap_band_m066.xlsx	132	m066	word wrap	65	pt	Calibri 11	Calibri 11	10.17	66	32	aaaaawwwww
+m066 word distributed 52	wrap_band_m066.xlsx	133	m066	word distributed	52	pt	Calibri 11	Calibri 11	10.17	66	16	oowwwww
+m066 word distributed 53	wrap_band_m066.xlsx	134	m066	word distributed	53	pt	Calibri 11	Calibri 11	10.17	66	16	awwwwww
+m066 word distributed 54	wrap_band_m066.xlsx	135	m066	word distributed	54	pt	Calibri 11	Calibri 11	10.17	66	16	owwwwww
+m066 word distributed 55	wrap_band_m066.xlsx	136	m066	word distributed	55	pt	Calibri 11	Calibri 11	10.17	66	16	aaawwwww
+m066 word distributed 56	wrap_band_m066.xlsx	137	m066	word distributed	56	pt	Calibri 11	Calibri 11	10.17	66	16	wwwwwww
+m066 word distributed 57	wrap_band_m066.xlsx	138	m066	word distributed	57	pt	Calibri 11	Calibri 11	10.17	66	16	aaaaawwww
+m066 word distributed 58	wrap_band_m066.xlsx	139	m066	word distributed	58	pt	Calibri 11	Calibri 11	10.17	66	16	aawwwwww
+m066 word distributed 59	wrap_band_m066.xlsx	140	m066	word distributed	59	pt	Calibri 11	Calibri 11	10.17	66	16	wwwwwwwi
+m066 word distributed 60	wrap_band_m066.xlsx	141	m066	word distributed	60	pt	Calibri 11	Calibri 11	10.17	66	32	oowwwwww
+m066 word distributed 61	wrap_band_m066.xlsx	142	m066	word distributed	61	pt	Calibri 11	Calibri 11	10.17	66	32	awwwwwww
+m066 word distributed 62	wrap_band_m066.xlsx	143	m066	word distributed	62	pt	Calibri 11	Calibri 11	10.17	66	32	owwwwwww
+m066 word distributed 63	wrap_band_m066.xlsx	144	m066	word distributed	63	pt	Calibri 11	Calibri 11	10.17	66	32	aaawwwwww
+m066 word distributed 64	wrap_band_m066.xlsx	145	m066	word distributed	64	pt	Calibri 11	Calibri 11	10.17	66	32	wwwwwwww
+m066 word distributed 65	wrap_band_m066.xlsx	146	m066	word distributed	65	pt	Calibri 11	Calibri 11	10.17	66	32	aaaaawwwww
+m066 arial wrap 50	wrap_band_m066.xlsx	147	m066	arial wrap	50	pt	Arial 10	Arial 10	10.17	66	15	aaac aaaa
+m066 arial wrap 51	wrap_band_m066.xlsx	148	m066	arial wrap	51	pt	Arial 10	Arial 10	10.17	66	15	aaaa aaaa
+m066 arial wrap 52	wrap_band_m066.xlsx	149	m066	arial wrap	52	pt	Arial 10	Arial 10	10.17	66	15	aaaa aaaw
+m066 arial wrap 53	wrap_band_m066.xlsx	150	m066	arial wrap	53	pt	Arial 10	Arial 10	10.17	66	15	aaaw aaaw
+m066 arial wrap 54	wrap_band_m066.xlsx	151	m066	arial wrap	54	pt	Arial 10	Arial 10	10.17	66	15	aaaw aaww
+m066 arial wrap 55	wrap_band_m066.xlsx	152	m066	arial wrap	55	pt	Arial 10	Arial 10	10.17	66	15	aaww aaww
+m066 arial wrap 56	wrap_band_m066.xlsx	153	m066	arial wrap	56	pt	Arial 10	Arial 10	10.17	66	15	aaww awww
+m066 arial wrap 57	wrap_band_m066.xlsx	154	m066	arial wrap	57	pt	Arial 10	Arial 10	10.17	66	15	awww awww
+m066 arial wrap 58	wrap_band_m066.xlsx	155	m066	arial wrap	58	pt	Arial 10	Arial 10	10.17	66	15	awww wwww
+m066 arial wrap 59	wrap_band_m066.xlsx	156	m066	arial wrap	59	pt	Arial 10	Arial 10	10.17	66	15	wwww wwww
+m066 arial wrap 60	wrap_band_m066.xlsx	157	m066	arial wrap	60	pt	Arial 10	Arial 10	10.17	66	29	wwww aaaac
+m066 arial wrap 61	wrap_band_m066.xlsx	158	m066	arial wrap	61	pt	Arial 10	Arial 10	10.17	66	29	aaaac aaaac
+m066 arial wrap 62	wrap_band_m066.xlsx	159	m066	arial wrap	62	pt	Arial 10	Arial 10	10.17	66	29	aaaac aaaaa
+m066 arial wrap 63	wrap_band_m066.xlsx	160	m066	arial wrap	63	pt	Arial 10	Arial 10	10.17	66	29	aaaaa aaaaa
+m096 wrap 80	wrap_band_m096.xlsx	1	m096	wrap	80	pt	Calibri 11	Calibri 11	15.17	96	16	aaawww aaawww
+m096 wrap 81	wrap_band_m096.xlsx	2	m096	wrap	81	pt	Calibri 11	Calibri 11	15.17	96	16	aaawww wwwww
+m096 wrap 82	wrap_band_m096.xlsx	3	m096	wrap	82	pt	Calibri 11	Calibri 11	15.17	96	16	wwwww wwwww
+m096 wrap 83	wrap_band_m096.xlsx	4	m096	wrap	83	pt	Calibri 11	Calibri 11	15.17	96	16	wwwww aoooooo
+m096 wrap 84	wrap_band_m096.xlsx	5	m096	wrap	84	pt	Calibri 11	Calibri 11	15.17	96	16	aoooooo aoooooo
+m096 wrap 85	wrap_band_m096.xlsx	6	m096	wrap	85	pt	Calibri 11	Calibri 11	15.17	96	16	aoooooo aawwww
+m096 wrap 86	wrap_band_m096.xlsx	7	m096	wrap	86	pt	Calibri 11	Calibri 11	15.17	96	16	aawwww aawwww
+m096 wrap 87	wrap_band_m096.xlsx	8	m096	wrap	87	pt	Calibri 11	Calibri 11	15.17	96	16	aawwww wwwwwi
+m096 wrap 88	wrap_band_m096.xlsx	9	m096	wrap	88	pt	Calibri 11	Calibri 11	15.17	96	16	wwwwwi wwwwwi
+m096 wrap 89	wrap_band_m096.xlsx	10	m096	wrap	89	pt	Calibri 11	Calibri 11	15.17	96	16	wwwwwi oowwww
+m096 wrap 90	wrap_band_m096.xlsx	11	m096	wrap	90	pt	Calibri 11	Calibri 11	15.17	96	32	oowwww oowwww
+m096 wrap 91	wrap_band_m096.xlsx	12	m096	wrap	91	pt	Calibri 11	Calibri 11	15.17	96	32	oowwww awwwww
+m096 wrap 92	wrap_band_m096.xlsx	13	m096	wrap	92	pt	Calibri 11	Calibri 11	15.17	96	32	awwwww awwwww
+m096 wrap 93	wrap_band_m096.xlsx	14	m096	wrap	93	pt	Calibri 11	Calibri 11	15.17	96	32	awwwww owwwww
+m097 wrap 81	wrap_band_m097.xlsx	1	m097	wrap	81	pt	Calibri 11	Calibri 11	15.33	97	16	aaawww wwwww
+m097 wrap 82	wrap_band_m097.xlsx	2	m097	wrap	82	pt	Calibri 11	Calibri 11	15.33	97	16	wwwww wwwww
+m097 wrap 83	wrap_band_m097.xlsx	3	m097	wrap	83	pt	Calibri 11	Calibri 11	15.33	97	16	wwwww aoooooo
+m097 wrap 84	wrap_band_m097.xlsx	4	m097	wrap	84	pt	Calibri 11	Calibri 11	15.33	97	16	aoooooo aoooooo
+m097 wrap 85	wrap_band_m097.xlsx	5	m097	wrap	85	pt	Calibri 11	Calibri 11	15.33	97	16	aoooooo aawwww
+m097 wrap 86	wrap_band_m097.xlsx	6	m097	wrap	86	pt	Calibri 11	Calibri 11	15.33	97	16	aawwww aawwww
+m097 wrap 87	wrap_band_m097.xlsx	7	m097	wrap	87	pt	Calibri 11	Calibri 11	15.33	97	16	aawwww wwwwwi
+m097 wrap 88	wrap_band_m097.xlsx	8	m097	wrap	88	pt	Calibri 11	Calibri 11	15.33	97	16	wwwwwi wwwwwi
+m097 wrap 89	wrap_band_m097.xlsx	9	m097	wrap	89	pt	Calibri 11	Calibri 11	15.33	97	16	wwwwwi oowwww
+m097 wrap 90	wrap_band_m097.xlsx	10	m097	wrap	90	pt	Calibri 11	Calibri 11	15.33	97	16	oowwww oowwww
+m097 wrap 91	wrap_band_m097.xlsx	11	m097	wrap	91	pt	Calibri 11	Calibri 11	15.33	97	32	oowwww awwwww
+m097 wrap 92	wrap_band_m097.xlsx	12	m097	wrap	92	pt	Calibri 11	Calibri 11	15.33	97	32	awwwww awwwww
+m097 wrap 93	wrap_band_m097.xlsx	13	m097	wrap	93	pt	Calibri 11	Calibri 11	15.33	97	32	awwwww owwwww
+m097 wrap 94	wrap_band_m097.xlsx	14	m097	wrap	94	pt	Calibri 11	Calibri 11	15.33	97	32	owwwww owwwww
+m098 wrap 82	wrap_band_m098.xlsx	1	m098	wrap	82	pt	Calibri 11	Calibri 11	15.5	98	16	wwwww wwwww
+m098 wrap 83	wrap_band_m098.xlsx	2	m098	wrap	83	pt	Calibri 11	Calibri 11	15.5	98	16	wwwww aoooooo
+m098 wrap 84	wrap_band_m098.xlsx	3	m098	wrap	84	pt	Calibri 11	Calibri 11	15.5	98	16	aoooooo aoooooo
+m098 wrap 85	wrap_band_m098.xlsx	4	m098	wrap	85	pt	Calibri 11	Calibri 11	15.5	98	16	aoooooo aawwww
+m098 wrap 86	wrap_band_m098.xlsx	5	m098	wrap	86	pt	Calibri 11	Calibri 11	15.5	98	16	aawwww aawwww
+m098 wrap 87	wrap_band_m098.xlsx	6	m098	wrap	87	pt	Calibri 11	Calibri 11	15.5	98	16	aawwww wwwwwi
+m098 wrap 88	wrap_band_m098.xlsx	7	m098	wrap	88	pt	Calibri 11	Calibri 11	15.5	98	16	wwwwwi wwwwwi
+m098 wrap 89	wrap_band_m098.xlsx	8	m098	wrap	89	pt	Calibri 11	Calibri 11	15.5	98	16	wwwwwi oowwww
+m098 wrap 90	wrap_band_m098.xlsx	9	m098	wrap	90	pt	Calibri 11	Calibri 11	15.5	98	16	oowwww oowwww
+m098 wrap 91	wrap_band_m098.xlsx	10	m098	wrap	91	pt	Calibri 11	Calibri 11	15.5	98	32	oowwww awwwww
+m098 wrap 92	wrap_band_m098.xlsx	11	m098	wrap	92	pt	Calibri 11	Calibri 11	15.5	98	32	awwwww awwwww
+m098 wrap 93	wrap_band_m098.xlsx	12	m098	wrap	93	pt	Calibri 11	Calibri 11	15.5	98	32	awwwww owwwww
+m098 wrap 94	wrap_band_m098.xlsx	13	m098	wrap	94	pt	Calibri 11	Calibri 11	15.5	98	32	owwwww owwwww
+m098 wrap 95	wrap_band_m098.xlsx	14	m098	wrap	95	pt	Calibri 11	Calibri 11	15.5	98	32	owwwww aaawwww
+m099 wrap 83	wrap_band_m099.xlsx	1	m099	wrap	83	pt	Calibri 11	Calibri 11	15.67	99	16	wwwww aoooooo
+m099 wrap 84	wrap_band_m099.xlsx	2	m099	wrap	84	pt	Calibri 11	Calibri 11	15.67	99	16	aoooooo aoooooo
+m099 wrap 85	wrap_band_m099.xlsx	3	m099	wrap	85	pt	Calibri 11	Calibri 11	15.67	99	16	aoooooo aawwww
+m099 wrap 86	wrap_band_m099.xlsx	4	m099	wrap	86	pt	Calibri 11	Calibri 11	15.67	99	16	aawwww aawwww
+m099 wrap 87	wrap_band_m099.xlsx	5	m099	wrap	87	pt	Calibri 11	Calibri 11	15.67	99	16	aawwww wwwwwi
+m099 wrap 88	wrap_band_m099.xlsx	6	m099	wrap	88	pt	Calibri 11	Calibri 11	15.67	99	16	wwwwwi wwwwwi
+m099 wrap 89	wrap_band_m099.xlsx	7	m099	wrap	89	pt	Calibri 11	Calibri 11	15.67	99	16	wwwwwi oowwww
+m099 wrap 90	wrap_band_m099.xlsx	8	m099	wrap	90	pt	Calibri 11	Calibri 11	15.67	99	16	oowwww oowwww
+m099 wrap 91	wrap_band_m099.xlsx	9	m099	wrap	91	pt	Calibri 11	Calibri 11	15.67	99	16	oowwww awwwww
+m099 wrap 92	wrap_band_m099.xlsx	10	m099	wrap	92	pt	Calibri 11	Calibri 11	15.67	99	32	awwwww awwwww
+m099 wrap 93	wrap_band_m099.xlsx	11	m099	wrap	93	pt	Calibri 11	Calibri 11	15.67	99	32	awwwww owwwww
+m099 wrap 94	wrap_band_m099.xlsx	12	m099	wrap	94	pt	Calibri 11	Calibri 11	15.67	99	32	owwwww owwwww
+m099 wrap 95	wrap_band_m099.xlsx	13	m099	wrap	95	pt	Calibri 11	Calibri 11	15.67	99	32	owwwww aaawwww
+m099 wrap 96	wrap_band_m099.xlsx	14	m099	wrap	96	pt	Calibri 11	Calibri 11	15.67	99	32	aaawwww aaawwww
+m100 wrap 84	wrap_band_m100.xlsx	1	m100	wrap	84	pt	Calibri 11	Calibri 11	15.83	100	16	aoooooo aoooooo
+m100 wrap 85	wrap_band_m100.xlsx	2	m100	wrap	85	pt	Calibri 11	Calibri 11	15.83	100	16	aoooooo aawwww
+m100 wrap 86	wrap_band_m100.xlsx	3	m100	wrap	86	pt	Calibri 11	Calibri 11	15.83	100	16	aawwww aawwww
+m100 wrap 87	wrap_band_m100.xlsx	4	m100	wrap	87	pt	Calibri 11	Calibri 11	15.83	100	16	aawwww wwwwwi
+m100 wrap 88	wrap_band_m100.xlsx	5	m100	wrap	88	pt	Calibri 11	Calibri 11	15.83	100	16	wwwwwi wwwwwi
+m100 wrap 89	wrap_band_m100.xlsx	6	m100	wrap	89	pt	Calibri 11	Calibri 11	15.83	100	16	wwwwwi oowwww
+m100 wrap 90	wrap_band_m100.xlsx	7	m100	wrap	90	pt	Calibri 11	Calibri 11	15.83	100	16	oowwww oowwww
+m100 wrap 91	wrap_band_m100.xlsx	8	m100	wrap	91	pt	Calibri 11	Calibri 11	15.83	100	16	oowwww awwwww
+m100 wrap 92	wrap_band_m100.xlsx	9	m100	wrap	92	pt	Calibri 11	Calibri 11	15.83	100	16	awwwww awwwww
+m100 wrap 93	wrap_band_m100.xlsx	10	m100	wrap	93	pt	Calibri 11	Calibri 11	15.83	100	32	awwwww owwwww
+m100 wrap 94	wrap_band_m100.xlsx	11	m100	wrap	94	pt	Calibri 11	Calibri 11	15.83	100	32	owwwww owwwww
+m100 wrap 95	wrap_band_m100.xlsx	12	m100	wrap	95	pt	Calibri 11	Calibri 11	15.83	100	32	owwwww aaawwww
+m100 wrap 96	wrap_band_m100.xlsx	13	m100	wrap	96	pt	Calibri 11	Calibri 11	15.83	100	32	aaawwww aaawwww
+m100 wrap 97	wrap_band_m100.xlsx	14	m100	wrap	97	pt	Calibri 11	Calibri 11	15.83	100	32	aaawwww wwwwww
+m102 wrap 86	wrap_band_m102.xlsx	1	m102	wrap	86	pt	Calibri 11	Calibri 11	16.17	102	16	aawwww aawwww
+m102 wrap 87	wrap_band_m102.xlsx	2	m102	wrap	87	pt	Calibri 11	Calibri 11	16.17	102	16	aawwww wwwwwi
+m102 wrap 88	wrap_band_m102.xlsx	3	m102	wrap	88	pt	Calibri 11	Calibri 11	16.17	102	16	wwwwwi wwwwwi
+m102 wrap 89	wrap_band_m102.xlsx	4	m102	wrap	89	pt	Calibri 11	Calibri 11	16.17	102	16	wwwwwi oowwww
+m102 wrap 90	wrap_band_m102.xlsx	5	m102	wrap	90	pt	Calibri 11	Calibri 11	16.17	102	16	oowwww oowwww
+m102 wrap 91	wrap_band_m102.xlsx	6	m102	wrap	91	pt	Calibri 11	Calibri 11	16.17	102	16	oowwww awwwww
+m102 wrap 92	wrap_band_m102.xlsx	7	m102	wrap	92	pt	Calibri 11	Calibri 11	16.17	102	16	awwwww awwwww
+m102 wrap 93	wrap_band_m102.xlsx	8	m102	wrap	93	pt	Calibri 11	Calibri 11	16.17	102	16	awwwww owwwww
+m102 wrap 94	wrap_band_m102.xlsx	9	m102	wrap	94	pt	Calibri 11	Calibri 11	16.17	102	16	owwwww owwwww
+m102 wrap 95	wrap_band_m102.xlsx	10	m102	wrap	95	pt	Calibri 11	Calibri 11	16.17	102	32	owwwww aaawwww
+m102 wrap 96	wrap_band_m102.xlsx	11	m102	wrap	96	pt	Calibri 11	Calibri 11	16.17	102	32	aaawwww aaawwww
+m102 wrap 97	wrap_band_m102.xlsx	12	m102	wrap	97	pt	Calibri 11	Calibri 11	16.17	102	32	aaawwww wwwwww
+m102 wrap 98	wrap_band_m102.xlsx	13	m102	wrap	98	pt	Calibri 11	Calibri 11	16.17	102	32	wwwwww wwwwww
+m102 wrap 99	wrap_band_m102.xlsx	14	m102	wrap	99	pt	Calibri 11	Calibri 11	16.17	102	32	wwwwww aaaaawww
+m126 wrap 110	wrap_band_m126.xlsx	1	m126	wrap	110	pt	Calibri 11	Calibri 11	20.17	126	16	owwwwww owwwwww
+m126 wrap 111	wrap_band_m126.xlsx	2	m126	wrap	111	pt	Calibri 11	Calibri 11	20.17	126	16	owwwwww aaawwwww
+m126 wrap 112	wrap_band_m126.xlsx	3	m126	wrap	112	pt	Calibri 11	Calibri 11	20.17	126	16	aaawwwww aaawwwww
+m126 wrap 113	wrap_band_m126.xlsx	4	m126	wrap	113	pt	Calibri 11	Calibri 11	20.17	126	16	aaawwwww wwwwwww
+m126 wrap 114	wrap_band_m126.xlsx	5	m126	wrap	114	pt	Calibri 11	Calibri 11	20.17	126	16	wwwwwww wwwwwww
+m126 wrap 115	wrap_band_m126.xlsx	6	m126	wrap	115	pt	Calibri 11	Calibri 11	20.17	126	16	wwwwwww aaaaawwww
+m126 wrap 116	wrap_band_m126.xlsx	7	m126	wrap	116	pt	Calibri 11	Calibri 11	20.17	126	16	aaaaawwww aaaaawwww
+m126 wrap 117	wrap_band_m126.xlsx	8	m126	wrap	117	pt	Calibri 11	Calibri 11	20.17	126	16	aaaaawwww aawwwwww
+m126 wrap 118	wrap_band_m126.xlsx	9	m126	wrap	118	pt	Calibri 11	Calibri 11	20.17	126	16	aawwwwww aawwwwww
+m126 wrap 119	wrap_band_m126.xlsx	10	m126	wrap	119	pt	Calibri 11	Calibri 11	20.17	126	32	aawwwwww wwwwwwwi
+m126 wrap 120	wrap_band_m126.xlsx	11	m126	wrap	120	pt	Calibri 11	Calibri 11	20.17	126	32	wwwwwwwi wwwwwwwi
+m126 wrap 121	wrap_band_m126.xlsx	12	m126	wrap	121	pt	Calibri 11	Calibri 11	20.17	126	32	wwwwwwwi oowwwwww
+m126 wrap 122	wrap_band_m126.xlsx	13	m126	wrap	122	pt	Calibri 11	Calibri 11	20.17	126	32	oowwwwww oowwwwww
+m126 wrap 123	wrap_band_m126.xlsx	14	m126	wrap	123	pt	Calibri 11	Calibri 11	20.17	126	32	oowwwwww awwwwwww
+m160 wrap 144	wrap_band_m160.xlsx	1	m160	wrap	144	pt	Calibri 11	Calibri 11	25.83	160	16	aaawwwwwww aaawwwwwww
+m160 wrap 145	wrap_band_m160.xlsx	2	m160	wrap	145	pt	Calibri 11	Calibri 11	25.83	160	16	aaawwwwwww wwwwwwwww
+m160 wrap 146	wrap_band_m160.xlsx	3	m160	wrap	146	pt	Calibri 11	Calibri 11	25.83	160	16	wwwwwwwww wwwwwwwww
+m160 wrap 147	wrap_band_m160.xlsx	4	m160	wrap	147	pt	Calibri 11	Calibri 11	25.83	160	16	wwwwwwwww aaaaawwwwww
+m160 wrap 148	wrap_band_m160.xlsx	5	m160	wrap	148	pt	Calibri 11	Calibri 11	25.83	160	16	aaaaawwwwww aaaaawwwwww
+m160 wrap 149	wrap_band_m160.xlsx	6	m160	wrap	149	pt	Calibri 11	Calibri 11	25.83	160	16	aaaaawwwwww aawwwwwwww
+m160 wrap 150	wrap_band_m160.xlsx	7	m160	wrap	150	pt	Calibri 11	Calibri 11	25.83	160	16	aawwwwwwww aawwwwwwww
+m160 wrap 151	wrap_band_m160.xlsx	8	m160	wrap	151	pt	Calibri 11	Calibri 11	25.83	160	32	aawwwwwwww wwwwwwwwwi
+m160 wrap 152	wrap_band_m160.xlsx	9	m160	wrap	152	pt	Calibri 11	Calibri 11	25.83	160	32	wwwwwwwwwi wwwwwwwwwi
+m160 wrap 153	wrap_band_m160.xlsx	10	m160	wrap	153	pt	Calibri 11	Calibri 11	25.83	160	32	wwwwwwwwwi oowwwwwwww
+m160 wrap 154	wrap_band_m160.xlsx	11	m160	wrap	154	pt	Calibri 11	Calibri 11	25.83	160	32	oowwwwwwww oowwwwwwww
+m160 wrap 155	wrap_band_m160.xlsx	12	m160	wrap	155	pt	Calibri 11	Calibri 11	25.83	160	32	oowwwwwwww awwwwwwwww
+m160 wrap 156	wrap_band_m160.xlsx	13	m160	wrap	156	pt	Calibri 11	Calibri 11	25.83	160	32	awwwwwwwww awwwwwwwww
+m160 wrap 157	wrap_band_m160.xlsx	14	m160	wrap	157	pt	Calibri 11	Calibri 11	25.83	160	32	awwwwwwwww owwwwwwwww
