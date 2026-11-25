@@ -62,7 +62,6 @@ LABELS: dict[str, tuple[str, ...]] = {
         "(below",
         "tabled size (unverified). An accounting underline adds three of its",
         "group ``fonts``: single and double rows of 23 px; other sizes unverified).",
-        "On Windows the Mac's rules with Windows' faces (unverified).",
         '5.5 points): Calibri 11\'s 3 (unverified)."""',
         "drawn size's ascent (unverified). A subscript's line grows by ``g = l + B(d) - B(s)`` on",
         "if font.size > _LARGEST:  # 72's scaled with the size (unverified; 409 caps at "

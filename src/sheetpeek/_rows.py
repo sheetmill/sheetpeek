@@ -247,7 +247,9 @@ def script_parts(font: Font) -> tuple[float, float, float]:
 def _script_parts(font: Font, platform: xlformat.Platform) -> tuple[float, float, float]:
     """``script_parts`` on ``platform``.
 
-    On Windows the Mac's rules with Windows' faces (unverified).
+    On Windows the Mac's rules with Windows' faces: a known deviation, not modeled (captured,
+    ``windows/row_height_fitted``: Excel for Windows fits a superscript of Calibri 11 in 23 px,
+    these rules 17 pt; §4.9).
     """
     s, d, r, lower = script_size(font)
     whole = replace(font, size=float(s), vert_align=None)

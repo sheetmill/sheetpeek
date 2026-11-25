@@ -311,7 +311,8 @@ KNOWN_ROWS: dict[str, tuple[int, ...]] = {
     # Known deviations, rows by group, two reasons. Horizontally distributed and justified
     # wrapped text: Excel for Windows fits a row a line taller than its lines (three lines of
     # Calibri 11 in 80 px, nine in 200 px), not modeled. Superscript and subscript: sheetpeek
-    # fits them by Excel for Mac's rules, not captured on Windows.
+    # fits them by Excel for Mac's rules, captured on Windows (windows/row_height_fitted) and
+    # not modeled.
     "align": (14, 16, 18),
     "fonts": (14, 16, 18, 20),
     "lone": (4,),

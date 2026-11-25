@@ -2792,10 +2792,11 @@ are read.
 3. **Excel for Windows as the default.** `platform=` takes either Excel (§3.2); Excel for
    Windows becomes the default (most Excel users have it), with Excel for Mac kept. Parity on
    both platforms comes before a beta: every rule captured on the Mac is captured on Windows too,
-   and where the two differ each platform gets its own. Still to capture on Windows: the rules
-   labeled unverified there (superscript and subscript rows, font sizes and faces outside
-   xlformat's Windows tables), the screen suites not yet run there, and
-   the zoom-dependent layout both platforms share.
+   and where the two differ each platform gets its own. Still to model on Windows: superscript
+   and subscript rows (captured, a known deviation, §4.9) and distributed and justified rows a
+   line taller than their lines. Still to capture on Windows: the rules labeled unverified there
+   (font sizes and faces outside xlformat's Windows tables), the screen suites not yet run there,
+   and the zoom-dependent layout both platforms share.
 4. **After 1.0:** a PDF backend drawing from the `excel` mode geometry (§2.1), possibly as an
    optional extra.
 5. **Other viewers and refinements**, logged here until they are taken up:
