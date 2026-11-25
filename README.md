@@ -115,6 +115,11 @@ pip install "sheetpeek[rich]"   # with styled terminal output
 Python 3.11 or later. Depends on `xlio`, `xlformat` and `xlrecalc`. The examples here build their workbooks
 with openpyxl (`pip install openpyxl`), which sheetpeek itself does not need.
 
+## Security
+
+To report a security problem, see
+[SECURITY.md](https://github.com/sheetmill/sheetpeek/blob/main/SECURITY.md).
+
 ## Related packages
 
 sheetpeek is part of the [sheetmill](https://github.com/sheetmill) project, with

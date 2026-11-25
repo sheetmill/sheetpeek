@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- `SECURITY.md`, linked from the README: how to report a security problem privately, through
+  GitHub's private vulnerability reporting, and which releases receive fixes (the latest).
 - A face xlformat measures for widths but not for rows, lines or insets is reported: one
   `font.no_metrics` notice for each such function, naming the face and the function in its
   context (`{"font": "Verdana", "function": "row_metrics"}`), where nothing was reported. The

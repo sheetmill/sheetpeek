@@ -86,6 +86,7 @@ include = [
   "/ARCHITECTURE.md",
   "/CAPTURING.md",
   "/CONTRIBUTING.md",
+  "/SECURITY.md",
   "/LICENSE",
   "/pagefind.yml",
 ]
