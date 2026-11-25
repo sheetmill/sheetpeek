@@ -450,3 +450,77 @@ def test_the_fitted_rows_job_reads_into_the_macs_rows(tmp_path):
     assert rows[0].split("\t") == list(wrap_rows.COLUMNS)
     assert [r.split("\t")[7] for r in rows[1:]] == [str(15 * c.lines) for c in wrap_rows.CASES]
     assert (tmp_path / "windows" / "fitted_rows.job.json").exists()
+
+
+def test_the_wrap_band_job_reads_into_the_suites_rows(tmp_path):
+    # A synthetic result reads back into one record a case, through the reader the Mac's answer
+    # takes, with each workbook's column width and width.
+    from capture import wrap_band
+
+    first = job.write("wrap_band", "sheetpeek-test-wrap-band", tmp_path / "a")
+    again = job.write("wrap_band", "sheetpeek-test-wrap-band", tmp_path / "b")
+    names = [wrap_band.workbook_name(c) for c in wrap_band.COLUMN_KEYS]
+    for name in ("job.json", *(f"files/{n}" for n in names)):
+        assert _sha(first / name) == _sha(again / name), name
+    books = []
+    for column in wrap_band.COLUMN_KEYS:
+        cases = wrap_band.cases(column)
+        size = wrap_band.column_size(column)
+        result = {
+            "row_height": [[15.0 + 15 * (k % 2)] for k in range(len(cases))],
+            "column_width": [[wrap_band.file_width(column)]] * len(cases),
+            "width": [[size * 0.75 if column.startswith("w") else size]] * len(cases),
+        }
+        fonts = [[{"font.name": c.face[0], "font.size": c.face[1]}] for c in cases]
+        books.append(
+            {
+                "file": wrap_band.workbook_name(column),
+                "status": "ok",
+                "steps": [
+                    {"op": "open", "status": "ok"},
+                    {"op": "read", "id": "heights", "status": "ok", "result": result},
+                    {"op": "read_format", "id": "fonts", "status": "ok",
+                     "result": {"cells": fonts}},
+                ],
+            }
+        )  # fmt: skip
+    files = first / "files"
+    outcome = {
+        "status": "ok",
+        "started": "2026-11-25T00:00:00Z",
+        "header": {
+            "manifest_sha256": _sha(first / "job.json"),
+            "inputs": {n: {"sha256": _sha(files / n)} for n in names},
+            "environment": {"excel": {"build": "16.0.0.0"}},
+        },
+        "workbooks": books,
+    }
+    result_dir = tmp_path / "result"
+    result_dir.mkdir()
+    (result_dir / "result.json").write_text(json.dumps(outcome), encoding="utf-8")
+    (path,) = job.read("wrap_band", first, result_dir, tmp_path / "windows")
+    rows = [x.split("\t") for x in path.read_text(encoding="utf-8").splitlines()]
+    rows = [r for r in rows if not r[0].startswith("# ")]
+    assert rows[0] == list(wrap_band.COLUMNS)
+    records = [dict(zip(rows[0], r, strict=True)) for r in rows[1:]]
+    every = [c for column in wrap_band.COLUMN_KEYS for c in wrap_band.cases(column)]
+    assert [r["name"] for r in records] == [c.name for c in every]
+    assert records[0]["width"] == "48"
+    assert records[0]["column_width"] == repr(64 / 7)
+    assert {r["height"] for r in records} == {"15", "30"}
+    assert (tmp_path / "windows" / "wrap_band.job.json").exists()
+
+
+def test_each_wrap_band_text_is_its_target_wide_on_its_platform():
+    # The texts are measured by xlformat's whole advances in the column's unit; a word case is
+    # one word, the others two.
+    import xlformat
+    from capture import wrap_band
+
+    for column in wrap_band.COLUMN_KEYS:
+        for case in wrap_band.cases(column):
+            font = xlformat.Font(*case.face)
+            scale = 4 / 3 if case.platform == "windows" else 1
+            width = xlformat.text_width(case.text, font, platform=case.platform) * scale
+            assert round(width, 9) == case.target, case
+            assert ("word" in case.variant) == (" " not in case.text), case

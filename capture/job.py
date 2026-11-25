@@ -48,6 +48,9 @@ Groups:
   ``wrap_rows``, a workbook each, opened, and every case row's height and column A's font read
   (as ``merge_rows``), into ``tests/captures/windows/row_height_fitted.tsv`` (those groups'
   records, the Mac suite's columns) and ``tests/captures/windows/wrap_rows.tsv``.
+- ``wrap_band``: the suite ``wrap_band``, a workbook a column width, opened, and every case
+  row's height, column A's width (``column_width`` and ``width``) and column A's font read, into
+  ``tests/captures/windows/wrap_band.tsv`` (the suite's columns).
 - ``text_steps``: the suite ``text_steps``, a workbook a group (``text_steps_<group>.xlsx``, each
   under the group's Normal font), captured at zoom 100 as ``borders_fills``' windows are and
   measured with the suite's own code into one file; the gray is measured on D1 in each picture.
@@ -76,6 +79,7 @@ from capture import (
     row_height_fitted,
     text_steps,
     text_style,
+    wrap_band,
     wrap_rows,
 )
 
@@ -95,6 +99,7 @@ GROUPS = {
     "font_aptos": ("font_aptos",),
     "merge_rows": ("merge_rows",),
     "fitted_rows": ("row_height_fitted", "wrap_rows"),
+    "wrap_band": ("wrap_band",),
 }
 FITTED_GROUPS = ("styled", "scripts")
 """``row_height_fitted``'s groups in the job ``fitted_rows``."""
@@ -122,6 +127,10 @@ PURPOSES = {
     "fitted_rows": "sheetpeek capture group fitted_rows: the heights Excel fits to rows of "
     "superscript, subscript and accounting-underlined text and of wrapped, justified and "
     "distributed text of one to six lines, and the font it applies, read from Excel.",
+    "wrap_band": "sheetpeek capture group wrap_band: the heights Excel fits to rows of "
+    "wrapped two-word texts whose width steps by one unit across the column's last pixels or "
+    "points, at several column widths, with each column's width and the applied font, read "
+    "from Excel.",
     "line_budget": "sheetpeek capture group line_budget: window pictures of two-word texts as "
     "wide as the cell less a few pixels, wrapped, justified and distributed, at zoom 100 "
     "(text_style's group line_budget)",
@@ -377,6 +386,61 @@ def _fitted_rows_workbooks(files: Path) -> list[dict[str, Any]]:
     return books
 
 
+def _wrap_band_workbooks(files: Path) -> list[dict[str, Any]]:
+    books = []
+    with tempfile.TemporaryDirectory() as tmp:
+        for column in wrap_band.COLUMN_KEYS:
+            raw = wrap_band.build_one(column, Path(tmp))
+            fixed_copy(raw, files / raw.name)
+            last = len(wrap_band.cases(column))
+            books.append(
+                {
+                    "file": raw.name,
+                    "steps": [
+                        {"op": "open"},
+                        {"op": "read", "id": "heights", "range": f"A1:A{last}",
+                         "props": ["row_height", "column_width", "width"]},
+                        {"op": "read_format", "id": "fonts", "range": f"A1:A{last}",
+                         "props": ["font.name", "font.size"]},
+                    ],
+                }
+            )  # fmt: skip
+    return books
+
+
+def _read_wrap_band(
+    outcome: dict[str, Any], manifest_doc: dict[str, Any], folder: Path
+) -> list[Path]:
+    """``wrap_band.tsv`` in the Mac suite's columns, from the answer lines its AppleScript gives."""
+    by_file = {wb["file"]: wb for wb in outcome["workbooks"]}
+    answer = []
+    for column in wrap_band.COLUMN_KEYS:
+        name = wrap_band.workbook_name(column)
+        results = _results(by_file[name])
+        heights = results["heights"]
+        fonts = results["fonts"]["cells"]
+        for row in range(1, len(wrap_band.cases(column)) + 1):
+            font = fonts[row - 1][0]
+            answer.append(
+                "\t".join(
+                    (
+                        name,
+                        str(row),
+                        str(font["font.name"]),
+                        f"{float(font['font.size']):g}",
+                        f"{float(heights['row_height'][row - 1][0]):g}",
+                        repr(float(heights["column_width"][row - 1][0])),
+                        repr(float(heights["width"][row - 1][0])),
+                    )
+                )
+            )
+    _, found = wrap_band.records("\n".join(answer))
+    _, lines = _job_lines("wrap_band", outcome, manifest_doc, "read row_height (capture job)")
+    path = folder / "wrap_band.tsv"
+    wrap_band.write_records([*lines, "# suite: wrap_band"], found, path)
+    return [path]
+
+
 def _answer_lines(workbook: dict[str, Any], name: str, count: int) -> list[str]:
     """``name``'s rows 1 to ``count`` as the Mac's AppleScript answers them."""
     results = _results(workbook)
@@ -494,6 +558,8 @@ def write(group: str, job_id: str, out: Path) -> Path:
         books = [_merge_rows_workbook(files)]
     elif group == "fitted_rows":
         books = _fitted_rows_workbooks(files)
+    elif group == "wrap_band":
+        books = _wrap_band_workbooks(files)
     else:
         books = [_cells_workbook(files)]
     doc = manifest(group, job_id, books)
@@ -664,11 +730,13 @@ def read(group: str, job: Path, result: Path, folder: Path = WINDOWS) -> list[Pa
             raise ValueError(f"the result's input {name} is not this job's")
     manifest_doc = json.loads((job / "job.json").read_text(encoding="utf-8"))
     folder.mkdir(parents=True, exist_ok=True)
-    if group in WINDOWS_OF or group in ("merge_rows", "fitted_rows"):
+    if group in WINDOWS_OF or group in ("merge_rows", "fitted_rows", "wrap_band"):
         if group == "merge_rows":
             written = _read_merge_rows(outcome, manifest_doc, folder)
         elif group == "fitted_rows":
             written = _read_fitted_rows(outcome, manifest_doc, folder)
+        elif group == "wrap_band":
+            written = _read_wrap_band(outcome, manifest_doc, folder)
         else:
             written = _read_windows(group, outcome, manifest_doc, result, folder)
         shutil.copyfile(job / "job.json", folder / f"{group}.job.json")
