@@ -1818,22 +1818,26 @@ writes (33 MiB, 14.8 million cells over six sheets, every sheet read) the reader
 Laying out a workbook of that size is measured on one `bench/large_workbook.py` writes: six
 sheets, 264,408 rows and 14.8 million cells, nearly all of them styled and empty (two sheets 99
 columns wide), a sheet of 37,000 values, 76 cell formats and 675 strings; its scale multiplies
-the rows. `bench/layout.py`, every sheet in `excel` mode, read time apart, best of three, each
-version from its own source with the dependency versions it was published with, alternating
-(Python 3.11.18, Apple M4 Pro):
+the rows. `bench/layout.py` (every sheet in `excel` mode, read time apart) and `bench/read.py`
+(every sheet read, `recalc_on_load="excel"`), on the workbook at scale 1, best of three, each
+version from its own source with the dependency versions it was published with, the versions
+alternating, in fresh processes on a quiet machine (Python 3.11.18, Apple M4 Pro):
 
-| scale | rows | 0.5.0 (xlformat 0.8.0): read, layout, peak RSS | `40b622b` (xlformat 0.9.0) |
-|---|---|---|---|
-| 0.25 | 66,110 | 9.35 s, 13.89 s, 830 MiB | 9.43 s, 13.85 s, 816 MiB |
-| 0.5 | 132,210 | 18.99 s, 28.00 s, 1,543 MiB | 18.90 s, 27.80 s, 1,537 MiB |
-| 1 | 264,408 | 37.84 s, 56.90 s, 2,999 MiB | 37.69 s, 57.12 s, 2,999 MiB |
+| | 0.5.0 (xlformat 0.8.0, xlrecalc 0.10.1) | `731fc22` (xlformat 0.9.0, xlrecalc 0.11.0) |
+|---|---|---|
+| layout: time | 54.74 s | 50.70 s |
+| layout: peak RSS | 3,508 MiB | 1,977 MiB |
+| read: time | 37.95 s | 38.38 s |
+| read: peak RSS | 806 MiB | 811 MiB |
 
-Time grows with the rows (2.0 times from each scale to the next) and so does memory, which a
-`Sheet` and its layout hold whole (1.86 and 1.94 times; a line through the first two scales gave
-2,970 MiB for the third). The times vary about 2 % between runs; a version's peak varies up to
-180 MiB (3,179 MiB in one run of 0.5.0 at scale 1), so a difference of that size is read as where
-the allocator's peak falls rather than as data kept, an inference that no memory trace has
-tested.
+The layout keeps no entry of its own for a cell that shows nothing but the default (no text,
+left-aligned), so a sheet of styled empty cells no longer holds a second record of each while
+its output is built: traced (`tracemalloc`), that takes the layout's peak on the workbook's
+largest sheet at scale 0.25 from 700 MiB to 422 MiB. Each version's peak repeated within 2 MiB
+over its three runs and its time within about 2 %; an earlier, noisier comparison had 0.5.0's
+layout peak at 2,999 MiB on the same file, a difference not explained. Time grows with the rows, doubling from scale 0.25
+to 0.5 to 1, and so does memory, which a `Sheet` and its layout hold whole (1.86 and 1.94 times
+from scale to scale in an earlier comparison of the same two layouts before that change).
 
 ### 5.3 Dates stay serials
 

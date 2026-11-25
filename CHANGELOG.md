@@ -18,6 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   "function": "text_width"}`, where the context held the face alone).
 
 ### Changed
+- Laying out a sheet of many styled empty cells takes much less memory: the layout no longer
+  keeps a record of what each such cell shows while it builds the output. On a generated
+  workbook of 14.8 million cells, nearly all styled and empty (`bench/large_workbook.py`),
+  laying out every sheet in `excel` mode peaks at 1,977 MiB, where 0.5.0 peaked at 3,508 MiB,
+  and takes 50.7 s, where it took 54.7 s (best of three, measured together). The output is
+  unchanged.
 - Requires xlrecalc 0.11 (`xlrecalc>=0.11,<1`). A formula Excel computes on opening is computed
   as the sheet's `platform=` and `regional_settings=` say: with `platform="windows"`,
   `=CHAR(128)` shows "€" and `=CODE("€")` 128, as Excel for Windows gives them, where they
