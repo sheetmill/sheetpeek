@@ -737,7 +737,7 @@ class _Grid:
                 position = (row.index, column.index)
                 merge = self.merge_of.get(position)
                 anchor = (merge.min_row, merge.min_col) if merge else position
-                show = shown.get(position, _Shown())
+                show = shown.pop(position, None) or _Shown()
                 origin = source.get(position) if anchor == position else None
                 text = origin.shown.text if origin else ""
                 fill = self.anchor_fill(merge) if merge else cell.fill
@@ -940,7 +940,7 @@ class _Canvas:
                 cell = grid.cell(i, p)
                 position = (row.index, column.index)
                 merge = grid.merge_of.get(position)
-                show = shown.get(position, _Shown())
+                show = shown.pop(position, None) or _Shown()
                 start, width = grid.starts[p], grid.widths[p]
                 lines = tuple("".join(chars[start : start + width]) for chars in self.chars[i])
                 owner = self._owner(i, 2 * p)

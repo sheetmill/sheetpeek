@@ -551,7 +551,7 @@ class _Points:
                 cell = grid.cell(i, p)
                 position = (row.index, grid.columns[p].index)
                 merge = grid.merge_of.get(position)
-                show = shown.get(position, _Shown())
+                show = shown.pop(position, None) or _Shown()
                 cells.append(
                     RenderedCell(
                         cell=grid.file_cell(i, p),
