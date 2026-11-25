@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- Requires xlrecalc 0.12 (`xlrecalc>=0.12,<1`), which computes 3-D references and unions of
+  references as Excel does. In a workbook openpyxl wrote (no cached values), `=SUM(Jan:Mar!A1)`
+  shows the sum, `=Jan:Mar!A1+1` shows `#REF!` and `=SUM((Jan!A1,Jan!A1:A2))` the sum of its
+  areas, where 0.6.0 with xlrecalc 0.11 showed them empty and reported them under "external or
+  3-D reference" and "a union of ranges". A 3-D reference or a union given to a function no
+  capture shows reading one keeps the file's value and is reported under a label naming the
+  function as the file writes it (`a 3-D reference in _XLFN.RANK.EQ`).
 - With `platform="windows"`, superscript and subscript rows are fitted as Excel for Windows fits
   them, by the font's pixels per em (captured, `windows/row_height_fitted`): a Calibri 11
   superscript makes a 23-pixel row (17.25 pt) and a subscript a 24-pixel one (18 pt), and both at

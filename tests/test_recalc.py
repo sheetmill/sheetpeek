@@ -529,6 +529,8 @@ def test_a_failure_to_build_the_engine_keeps_every_cached_value(tmp_path, monkey
 
 
 def test_the_reason_names_an_external_reference_and_an_add_in_function(tmp_path):
+    # A 3-D reference used in an operator is computed: #REF!, as xlrecalc's capture three_d
+    # shows Excel giving it, and no longer reported.
     cells = [
         '<c r="A1"><f>[1]Other!A1*2</f><v>4</v></c>',
         '<c r="B1"><f>Sheet1:Sheet3!A1+1</f><v>5</v></c>',
@@ -536,10 +538,10 @@ def test_the_reason_names_an_external_reference_and_an_add_in_function(tmp_path)
         '<c r="D1"><f>A1+1</f><v>7</v></c>',
     ]
     sheet = sheetpeek.read(book(tmp_path, row(1, *cells), by_excel=False))
-    assert [c.value for c in sheet.cells[0]] == [4, 5, 6, 7]
+    assert [c.value for c in sheet.cells[0]] == [4, xlformat.ExcelError("#REF!"), 6, 7]
     found = {n.message.split(": ", 1)[-1]: [str(r) for r in n.cells] for n in notices(sheet)}
     assert found == {
-        "external or 3-D reference": ["A1:B1"],
+        "external or 3-D reference": ["A1"],
         "_XLL.HEAT": ["C1"],
         "depends on a formula xlrecalc does not compute": ["D1"],
     }
