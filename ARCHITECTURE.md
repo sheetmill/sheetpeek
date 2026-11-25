@@ -728,11 +728,15 @@ tables (`vertical_metrics`, `row_metrics`): a face's height `H` and descent `D` 
 top-aligned baseline `H - D + 1` px below the row's top, the bottom-aligned one `D - 1` px above
 its bottom, centered text `floor((R - H) / 2)` px below the top-aligned place in a row of `R` px,
 and wrapped lines `H` apart with nothing added (three lines of Calibri 11 take 60 px). Captured:
-`windows/text_style`, every row but eight (§4.9), and its first lines' ink tops. Sizes xlformat
-has no Windows rows for take the Mac's height and bottom offset rounded to whole pixels, faces it
-has none for Calibri's (unverified); an accounting underline adds three of its thicknesses (23 px
-rows at Calibri 11, captured; other sizes unverified); superscript and subscript keep the Mac's
-rules on Windows' faces (a known deviation, §4.9).
+`windows/text_style`, every row but eight (§4.9), and its first lines' ink tops; and
+`windows/row_height_fitted`, every row of Calibri, Arial, Times New Roman, Courier New and Aptos
+Narrow, plain or with an accounting underline, at the sizes xlformat's Windows tables hold. Sizes
+xlformat has no Windows rows for take the Mac's height and bottom offset rounded to whole pixels,
+faces it has none for Calibri's: a known deviation at about half of them, where Excel for
+Windows fits a row 0.75 to 1.5 pt from this (`windows/row_height_fitted`: Calibri 11.5 fits 15
+pt, sheetpeek 15.75). An accounting underline adds three of its thicknesses (23 px rows at
+Calibri 11, captured). Superscript and subscript keep the Mac's rules on Windows' faces (a known
+deviation, §4.9: Excel for Windows fits a superscript of Calibri 11 in 23 px, sheetpeek 17 pt).
 
 ### 4.8 How Excel saves formula results
 
@@ -776,7 +780,15 @@ line of any of the four alignments the cell less its font's insets wide, 3 px le
 under cell fonts to 12 points, larger for Calibri 14 (136 of 136 cells as sheetpeek breaks them).
 `windows/shrink_fonts`: the shrink levels on fonts of their own (§4.13); `windows/font_cut`,
 `windows/font_faces` and `windows/font_aptos`: the font table's cut (§4.13); `windows/merge_rows`:
-a merge across rows fits no row, as on the Mac (§4.7).
+a merge across rows fits no row, as on the Mac (§4.7). `windows/row_height_fitted` (groups
+`styled` and `scripts`) and `windows/wrap_rows`, by the job `fitted_rows`: rows fitted to a font
+at sizes from 6 to 72 points and to superscript and subscript, every row at a size in xlformat's
+Windows tables as sheetpeek's but superscript and subscript; 310 of 483 rows are known
+deviations, off those tables or superscript and subscript (§4.7). Wrapped, justified and
+distributed text of one to six lines fits the rows of its lines, 20 px a line of Calibri 11,
+with the wrap flag or without it (96 of 96 rows as sheetpeek's): the alignment alone adds no
+line, so what makes `windows/text_style`'s distributed and justified rows a line taller is not
+known.
 
 ### 4.10 Hyperlinks
 

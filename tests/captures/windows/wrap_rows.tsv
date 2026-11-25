@@ -1,0 +1,104 @@
+# platform: windows
+# excel_build: 16.0.20527.20196
+# job: fitted_rows.job.json
+# job_id: sheetpeek-20261124-162750-fitted-rows
+# captured: 2026-11-25; method: read row_height (capture job)
+# job_header: {"environment": {"audit": false, "checks": {"dde_server_launch_disabled": true, "dde_server_lookup_disabled": true, "vba_warnings": 4}, "display": {"screen_px": [2560, 1440], "system_dpi": 96}, "edition": {"found": "Microsoft 365", "source": "office products"}, "excel": {"build": "16.0.20527.20196", "build_number": 20527.0, "calculation_version": 191029, "decimal_separator": ".", "international": {"country": 1.0, "decimal": ".", "list": ","}, "operating_system": "Windows (64-bit ARM) NT 10.00", "process": {"native_machine": "0xaa64", "process_machine": "0x8664"}, "standard_font": "Aptos Narrow", "standard_font_size": 11.0, "thousands_separator": ",", "use_system_separators": true, "version": "16.0"}, "font_smoothing": {"expected": {"contrast": 1200, "directwrite": {}, "enabled": true, "orientation": "rgb", "type": "cleartype"}, "found": {"contrast": 1200, "directwrite": {}, "enabled": true, "orientation": "rgb", "type": "cleartype"}, "ok": true}, "fonts": [{"cloud": true, "family": "Aptos", "head_revision": 2.00999, "style": "Bold", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos", "head_revision": 2.00999, "style": "Bold Italic", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos", "head_revision": 2.00999, "style": "Italic", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos", "head_revision": 2.00999, "style": "Regular", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos Display", "head_revision": 2.00999, "style": "Bold", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos Display", "head_revision": 2.00999, "style": "Bold Italic", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos Display", "head_revision": 2.00999, "style": "Italic", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos Display", "head_revision": 2.00999, "style": "Regular", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos Narrow", "head_revision": 2.00999, "style": "Bold", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos Narrow", "head_revision": 2.00999, "style": "Bold Italic", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos Narrow", "head_revision": 2.00999, "style": "Italic", "version": "Version 2.01;O365"}, {"cloud": true, "family": "Aptos Narrow", "head_revision": 2.00999, "style": "Regular", "version": "Version 2.01;O365"}, {"cloud": false, "family": "Arial", "head_revision": 7.07001, "style": "Bold", "version": "Version 7.07"}, {"cloud": false, "family": "Arial", "head_revision": 7.07001, "style": "Bold Italic", "version": "Version 7.07"}, {"cloud": false, "family": "Arial", "head_revision": 7.07001, "style": "Italic", "version": "Version 7.07"}, {"cloud": false, "family": "Arial", "head_revision": 7.07001, "style": "Regular", "version": "Version 7.07"}, {"cloud": false, "family": "Calibri", "head_revision": 6.27, "style": "Bold", "version": "Version 6.27"}, {"cloud": false, "family": "Calibri", "head_revision": 6.27, "style": "Bold Italic", "version": "Version 6.27"}, {"cloud": false, "family": "Calibri", "head_revision": 6.27, "style": "Italic", "version": "Version 6.27"}, {"cloud": false, "family": "Calibri", "head_revision": 6.27, "style": "Regular", "version": "Version 6.27"}, {"cloud": false, "family": "Cambria", "head_revision": 6.98, "style": "Bold", "version": "Version 6.98"}, {"cloud": false, "family": "Cambria", "head_revision": 6.98, "style": "Bold Italic", "version": "Version 6.98"}, {"cloud": false, "family": "Cambria", "head_revision": 6.98, "style": "Italic", "version": "Version 6.98"}, {"cloud": false, "family": "Cambria", "head_revision": 6.99001, "style": "Regular", "version": "Version 6.99"}, {"cloud": false, "family": "Courier New", "head_revision": 6.95, "style": "Bold", "version": "Version 6.95"}, {"cloud": false, "family": "Courier New", "head_revision": 6.95, "style": "Bold Italic", "version": "Version 6.95"}, {"cloud": false, "family": "Courier New", "head_revision": 6.95, "style": "Italic", "version": "Version 6.95"}, {"cloud": false, "family": "Courier New", "head_revision": 6.95, "style": "Regular", "version": "Version 6.95"}, {"cloud": false, "family": "Segoe UI", "head_revision": 5.72, "style": "Bold", "version": "Version 5.72"}, {"cloud": false, "family": "Segoe UI", "head_revision": 5.72, "style": "Bold Italic", "version": "Version 5.72"}, {"cloud": false, "family": "Segoe UI", "head_revision": 5.72, "style": "Italic", "version": "Version 5.72"}, {"cloud": false, "family": "Segoe UI", "head_revision": 5.72, "style": "Regular", "version": "Version 5.72"}, {"cloud": false, "family": "Times New Roman", "head_revision": 7.13, "style": "Bold", "version": "Version 7.13"}, {"cloud": false, "family": "Times New Roman", "head_revision": 7.13, "style": "Bold Italic", "version": "Version 7.13"}, {"cloud": false, "family": "Times New Roman", "head_revision": 7.13, "style": "Italic", "version": "Version 7.13"}, {"cloud": false, "family": "Times New Roman", "head_revision": 7.13, "style": "Regular", "version": "Version 7.13"}], "fonts_missing": [], "geometry": {"expected": {"excel_window_px": [-8, -8, 2568, 1400], "screen_px": [2560, 1440], "system_dpi": 96}, "found": {"excel_window_px": "not shown", "screen_px": [2560, 1440], "system_dpi": 96}, "ok": true}, "locale": {"ansi_code_page": 1252, "decimal": ".", "list": ",", "long_date": "dddd, MMMM d, yyyy", "name": "en-US", "oem_code_page": 437, "short_date": "M/d/yyyy", "sort_locale": "en-US", "sort_version": {"custom": "01000000ee575c1e00b4d0000bb1e11e", "defined": 394498, "nls": 394498}, "time": "h:mm:ss tt", "two_digit_year_max": 2049, "two_digit_year_max_setting": null}, "office": {"channel": "Current Channel", "platform": "x64", "products": "O365HomePremRetail", "version": "16.0.20527.20196"}, "printer": {"orientation": "portrait", "paper": "A4", "paper_mm": [215.9, 279.4]}, "theme": {"office_ui_theme": 6, "windows_apps_light": 1, "windows_system_light": 1}, "windows": {"architecture": "ARM64", "build": "26300.9974", "display_version": "26H2", "edition": "Core"}}, "format": 1, "inputs": {"row_height_fitted_scripts.xlsx": {"bytes": 6259, "sha256": "d7ce44f32f4380b0308ca02e07b1a94d733db6718c5e5890902cced6a1c3754c"}, "row_height_fitted_styled.xlsx": {"bytes": 10576, "sha256": "2f9fbadd5ef478b25c0c0cb658738b21e92df6a2ecbb0ad1480ea8345690bcda"}, "wrap_rows.xlsx": {"bytes": 5706, "sha256": "91c06d2c4285a84e7d8cea94db536aff99052d2656916be7e3f0a2cba8ba8a07"}}, "job_id": "sheetpeek-20261124-162750-fitted-rows", "manifest_sha256": "9779954d3462e15870c91e04fefc6afd169968f9a093fe9d924061f241ff5009", "runner_version": "0.1.28"}
+# suite: wrap_rows
+name	row	alignment	form	lines	font	applied	height	text
+wrap words 1 Calibri 11	1	wrap	words	1	Calibri 11	Calibri 11	15	wrapped
+wrap words 2 Calibri 11	2	wrap	words	2	Calibri 11	Calibri 11	30	wrapped wrapped
+wrap words 3 Calibri 11	3	wrap	words	3	Calibri 11	Calibri 11	45	wrapped wrapped wrapped
+wrap words 4 Calibri 11	4	wrap	words	4	Calibri 11	Calibri 11	60	wrapped wrapped wrapped wrapped
+wrap words 5 Calibri 11	5	wrap	words	5	Calibri 11	Calibri 11	75	wrapped wrapped wrapped wrapped wrapped
+wrap words 6 Calibri 11	6	wrap	words	6	Calibri 11	Calibri 11	90	wrapped wrapped wrapped wrapped wrapped wrapped
+justify words 1 Calibri 11	7	justify	words	1	Calibri 11	Calibri 11	15	wrapped
+justify words 2 Calibri 11	8	justify	words	2	Calibri 11	Calibri 11	30	wrapped wrapped
+justify words 3 Calibri 11	9	justify	words	3	Calibri 11	Calibri 11	45	wrapped wrapped wrapped
+justify words 4 Calibri 11	10	justify	words	4	Calibri 11	Calibri 11	60	wrapped wrapped wrapped wrapped
+justify words 5 Calibri 11	11	justify	words	5	Calibri 11	Calibri 11	75	wrapped wrapped wrapped wrapped wrapped
+justify words 6 Calibri 11	12	justify	words	6	Calibri 11	Calibri 11	90	wrapped wrapped wrapped wrapped wrapped wrapped
+distributed words 1 Calibri 11	13	distributed	words	1	Calibri 11	Calibri 11	15	wrapped
+distributed words 2 Calibri 11	14	distributed	words	2	Calibri 11	Calibri 11	30	wrapped wrapped
+distributed words 3 Calibri 11	15	distributed	words	3	Calibri 11	Calibri 11	45	wrapped wrapped wrapped
+distributed words 4 Calibri 11	16	distributed	words	4	Calibri 11	Calibri 11	60	wrapped wrapped wrapped wrapped
+distributed words 5 Calibri 11	17	distributed	words	5	Calibri 11	Calibri 11	75	wrapped wrapped wrapped wrapped wrapped
+distributed words 6 Calibri 11	18	distributed	words	6	Calibri 11	Calibri 11	90	wrapped wrapped wrapped wrapped wrapped wrapped
+distributed unwrapped words 1 Calibri 11	19	distributed unwrapped	words	1	Calibri 11	Calibri 11	15	wrapped
+distributed unwrapped words 2 Calibri 11	20	distributed unwrapped	words	2	Calibri 11	Calibri 11	30	wrapped wrapped
+distributed unwrapped words 3 Calibri 11	21	distributed unwrapped	words	3	Calibri 11	Calibri 11	45	wrapped wrapped wrapped
+distributed unwrapped words 4 Calibri 11	22	distributed unwrapped	words	4	Calibri 11	Calibri 11	60	wrapped wrapped wrapped wrapped
+distributed unwrapped words 5 Calibri 11	23	distributed unwrapped	words	5	Calibri 11	Calibri 11	75	wrapped wrapped wrapped wrapped wrapped
+distributed unwrapped words 6 Calibri 11	24	distributed unwrapped	words	6	Calibri 11	Calibri 11	90	wrapped wrapped wrapped wrapped wrapped wrapped
+wrap breaks 1 Calibri 11	25	wrap	breaks	1	Calibri 11	Calibri 11	15	Hxg
+wrap breaks 2 Calibri 11	26	wrap	breaks	2	Calibri 11	Calibri 11	30	Hxg\nHxg
+wrap breaks 3 Calibri 11	27	wrap	breaks	3	Calibri 11	Calibri 11	45	Hxg\nHxg\nHxg
+wrap breaks 4 Calibri 11	28	wrap	breaks	4	Calibri 11	Calibri 11	60	Hxg\nHxg\nHxg\nHxg
+wrap breaks 5 Calibri 11	29	wrap	breaks	5	Calibri 11	Calibri 11	75	Hxg\nHxg\nHxg\nHxg\nHxg
+wrap breaks 6 Calibri 11	30	wrap	breaks	6	Calibri 11	Calibri 11	90	Hxg\nHxg\nHxg\nHxg\nHxg\nHxg
+justify breaks 1 Calibri 11	31	justify	breaks	1	Calibri 11	Calibri 11	15	Hxg
+justify breaks 2 Calibri 11	32	justify	breaks	2	Calibri 11	Calibri 11	30	Hxg\nHxg
+justify breaks 3 Calibri 11	33	justify	breaks	3	Calibri 11	Calibri 11	45	Hxg\nHxg\nHxg
+justify breaks 4 Calibri 11	34	justify	breaks	4	Calibri 11	Calibri 11	60	Hxg\nHxg\nHxg\nHxg
+justify breaks 5 Calibri 11	35	justify	breaks	5	Calibri 11	Calibri 11	75	Hxg\nHxg\nHxg\nHxg\nHxg
+justify breaks 6 Calibri 11	36	justify	breaks	6	Calibri 11	Calibri 11	90	Hxg\nHxg\nHxg\nHxg\nHxg\nHxg
+distributed breaks 1 Calibri 11	37	distributed	breaks	1	Calibri 11	Calibri 11	15	Hxg
+distributed breaks 2 Calibri 11	38	distributed	breaks	2	Calibri 11	Calibri 11	30	Hxg\nHxg
+distributed breaks 3 Calibri 11	39	distributed	breaks	3	Calibri 11	Calibri 11	45	Hxg\nHxg\nHxg
+distributed breaks 4 Calibri 11	40	distributed	breaks	4	Calibri 11	Calibri 11	60	Hxg\nHxg\nHxg\nHxg
+distributed breaks 5 Calibri 11	41	distributed	breaks	5	Calibri 11	Calibri 11	75	Hxg\nHxg\nHxg\nHxg\nHxg
+distributed breaks 6 Calibri 11	42	distributed	breaks	6	Calibri 11	Calibri 11	90	Hxg\nHxg\nHxg\nHxg\nHxg\nHxg
+distributed unwrapped breaks 1 Calibri 11	43	distributed unwrapped	breaks	1	Calibri 11	Calibri 11	15	Hxg
+distributed unwrapped breaks 2 Calibri 11	44	distributed unwrapped	breaks	2	Calibri 11	Calibri 11	30	Hxg\nHxg
+distributed unwrapped breaks 3 Calibri 11	45	distributed unwrapped	breaks	3	Calibri 11	Calibri 11	45	Hxg\nHxg\nHxg
+distributed unwrapped breaks 4 Calibri 11	46	distributed unwrapped	breaks	4	Calibri 11	Calibri 11	60	Hxg\nHxg\nHxg\nHxg
+distributed unwrapped breaks 5 Calibri 11	47	distributed unwrapped	breaks	5	Calibri 11	Calibri 11	75	Hxg\nHxg\nHxg\nHxg\nHxg
+distributed unwrapped breaks 6 Calibri 11	48	distributed unwrapped	breaks	6	Calibri 11	Calibri 11	90	Hxg\nHxg\nHxg\nHxg\nHxg\nHxg
+wrap words 1 Calibri 16	49	wrap	words	1	Calibri 16	Calibri 16	21	wrap
+wrap words 2 Calibri 16	50	wrap	words	2	Calibri 16	Calibri 16	42	wrap wrap
+wrap words 3 Calibri 16	51	wrap	words	3	Calibri 16	Calibri 16	63	wrap wrap wrap
+wrap words 4 Calibri 16	52	wrap	words	4	Calibri 16	Calibri 16	84	wrap wrap wrap wrap
+wrap words 5 Calibri 16	53	wrap	words	5	Calibri 16	Calibri 16	105	wrap wrap wrap wrap wrap
+wrap words 6 Calibri 16	54	wrap	words	6	Calibri 16	Calibri 16	126	wrap wrap wrap wrap wrap wrap
+justify words 1 Calibri 16	55	justify	words	1	Calibri 16	Calibri 16	21	wrap
+justify words 2 Calibri 16	56	justify	words	2	Calibri 16	Calibri 16	42	wrap wrap
+justify words 3 Calibri 16	57	justify	words	3	Calibri 16	Calibri 16	63	wrap wrap wrap
+justify words 4 Calibri 16	58	justify	words	4	Calibri 16	Calibri 16	84	wrap wrap wrap wrap
+justify words 5 Calibri 16	59	justify	words	5	Calibri 16	Calibri 16	105	wrap wrap wrap wrap wrap
+justify words 6 Calibri 16	60	justify	words	6	Calibri 16	Calibri 16	126	wrap wrap wrap wrap wrap wrap
+distributed words 1 Calibri 16	61	distributed	words	1	Calibri 16	Calibri 16	21	wrap
+distributed words 2 Calibri 16	62	distributed	words	2	Calibri 16	Calibri 16	42	wrap wrap
+distributed words 3 Calibri 16	63	distributed	words	3	Calibri 16	Calibri 16	63	wrap wrap wrap
+distributed words 4 Calibri 16	64	distributed	words	4	Calibri 16	Calibri 16	84	wrap wrap wrap wrap
+distributed words 5 Calibri 16	65	distributed	words	5	Calibri 16	Calibri 16	105	wrap wrap wrap wrap wrap
+distributed words 6 Calibri 16	66	distributed	words	6	Calibri 16	Calibri 16	126	wrap wrap wrap wrap wrap wrap
+distributed unwrapped words 1 Calibri 16	67	distributed unwrapped	words	1	Calibri 16	Calibri 16	21	wrap
+distributed unwrapped words 2 Calibri 16	68	distributed unwrapped	words	2	Calibri 16	Calibri 16	42	wrap wrap
+distributed unwrapped words 3 Calibri 16	69	distributed unwrapped	words	3	Calibri 16	Calibri 16	63	wrap wrap wrap
+distributed unwrapped words 4 Calibri 16	70	distributed unwrapped	words	4	Calibri 16	Calibri 16	84	wrap wrap wrap wrap
+distributed unwrapped words 5 Calibri 16	71	distributed unwrapped	words	5	Calibri 16	Calibri 16	105	wrap wrap wrap wrap wrap
+distributed unwrapped words 6 Calibri 16	72	distributed unwrapped	words	6	Calibri 16	Calibri 16	126	wrap wrap wrap wrap wrap wrap
+wrap words 1 Arial 11	73	wrap	words	1	Arial 11	Arial 11	15	wrapped
+wrap words 2 Arial 11	74	wrap	words	2	Arial 11	Arial 11	29.25	wrapped wrapped
+wrap words 3 Arial 11	75	wrap	words	3	Arial 11	Arial 11	43.5	wrapped wrapped wrapped
+wrap words 4 Arial 11	76	wrap	words	4	Arial 11	Arial 11	57.75	wrapped wrapped wrapped wrapped
+wrap words 5 Arial 11	77	wrap	words	5	Arial 11	Arial 11	72	wrapped wrapped wrapped wrapped wrapped
+wrap words 6 Arial 11	78	wrap	words	6	Arial 11	Arial 11	86.25	wrapped wrapped wrapped wrapped wrapped wrapped
+justify words 1 Arial 11	79	justify	words	1	Arial 11	Arial 11	15	wrapped
+justify words 2 Arial 11	80	justify	words	2	Arial 11	Arial 11	29.25	wrapped wrapped
+justify words 3 Arial 11	81	justify	words	3	Arial 11	Arial 11	43.5	wrapped wrapped wrapped
+justify words 4 Arial 11	82	justify	words	4	Arial 11	Arial 11	57.75	wrapped wrapped wrapped wrapped
+justify words 5 Arial 11	83	justify	words	5	Arial 11	Arial 11	72	wrapped wrapped wrapped wrapped wrapped
+justify words 6 Arial 11	84	justify	words	6	Arial 11	Arial 11	86.25	wrapped wrapped wrapped wrapped wrapped wrapped
+distributed words 1 Arial 11	85	distributed	words	1	Arial 11	Arial 11	15	wrapped
+distributed words 2 Arial 11	86	distributed	words	2	Arial 11	Arial 11	29.25	wrapped wrapped
+distributed words 3 Arial 11	87	distributed	words	3	Arial 11	Arial 11	43.5	wrapped wrapped wrapped
+distributed words 4 Arial 11	88	distributed	words	4	Arial 11	Arial 11	57.75	wrapped wrapped wrapped wrapped
+distributed words 5 Arial 11	89	distributed	words	5	Arial 11	Arial 11	72	wrapped wrapped wrapped wrapped wrapped
+distributed words 6 Arial 11	90	distributed	words	6	Arial 11	Arial 11	86.25	wrapped wrapped wrapped wrapped wrapped wrapped
+distributed unwrapped words 1 Arial 11	91	distributed unwrapped	words	1	Arial 11	Arial 11	15	wrapped
+distributed unwrapped words 2 Arial 11	92	distributed unwrapped	words	2	Arial 11	Arial 11	29.25	wrapped wrapped
+distributed unwrapped words 3 Arial 11	93	distributed unwrapped	words	3	Arial 11	Arial 11	43.5	wrapped wrapped wrapped
+distributed unwrapped words 4 Arial 11	94	distributed unwrapped	words	4	Arial 11	Arial 11	57.75	wrapped wrapped wrapped wrapped
+distributed unwrapped words 5 Arial 11	95	distributed unwrapped	words	5	Arial 11	Arial 11	72	wrapped wrapped wrapped wrapped wrapped
+distributed unwrapped words 6 Arial 11	96	distributed unwrapped	words	6	Arial 11	Arial 11	86.25	wrapped wrapped wrapped wrapped wrapped wrapped
