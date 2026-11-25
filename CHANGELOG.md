@@ -50,9 +50,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     every half size to 40, and Arial, Times New Roman, Courier New and Aptos Narrow at 6 to 40, in
     whole pixels (captured, `windows/row_height_fitted`): Calibri 11.5 makes a 15-point row,
     where it made 15.75, and Arial 30 a 37.5-point row, where it made 36.75.
+
+  On the Mac, italic text's overhang follows one rule per face, captured at every size from 6 to
+  192, where it was scaled from the nearest captured size and could be a point off: right-aligned
+  Arial italic 54 ends 17 points before the next gridline, where it ended 18 under xlformat 0.9.
 - Requires xlformat 0.9 or later, which measures text on the Mac by a rule per glyph, captured
   from Excel for Mac. 0.5.0 already runs with xlformat 0.9 or 0.10 when it is installed, so these
-  changes reach 0.5.0 users through it as well:
+  changes reach 0.5.0 users through it as well. On the Mac:
   - 24 more families are measured, 27 in all (Times New Roman, Courier New, Courier, Tahoma,
     Arial Narrow, Verdana and Impact among them), where they were measured as Calibri with a
     `font.no_metrics` notice: "Hello world" in Times New Roman 11 is 55 points wide, where it
