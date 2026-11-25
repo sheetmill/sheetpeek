@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-25
+
 ### Added
 - `SECURITY.md`, linked from the README: what sheetpeek's code covers (output that must be
   escaped, time and memory a workbook may take), how to report a security problem privately
@@ -712,7 +714,8 @@ First release.
 - Borders, conditional formatting, charts, images and comments are not shown; rich text within
   a cell takes the cell's font.
 
-[Unreleased]: https://github.com/sheetmill/sheetpeek/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/sheetmill/sheetpeek/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/sheetmill/sheetpeek/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/sheetmill/sheetpeek/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/sheetmill/sheetpeek/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/sheetmill/sheetpeek/compare/v0.2.0...v0.3.0
