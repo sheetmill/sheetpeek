@@ -691,6 +691,8 @@ def test_only_notices_are_issued_for_sheet_extensions(tmp_path):
     rewrite(path, SHEET1, replace_once("</worksheet>", extensions(*uris) + "</worksheet>"))
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
+        # garbage collection may emit an earlier test's unclosed file here
+        warnings.simplefilter("ignore", ResourceWarning)
         sheetpeek.render(path, "html")
     assert [w.category for w in caught] == [sheetpeek.NotShownWarning]
     assert {"cf", "sparkline", "slicer", "sheet.unknown_extension"} <= codes(

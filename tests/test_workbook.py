@@ -479,6 +479,8 @@ def test_cli_list_shows_state_and_kind(tabs, capsys):
 def test_render_still_warns_once(tabs):
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
+        # garbage collection may emit an earlier test's unclosed file here
+        warnings.simplefilter("ignore", ResourceWarning)
         sheetpeek.render(tabs, "html")
     assert len(caught) == 1
 
