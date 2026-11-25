@@ -18,6 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   "function": "text_width"}`, where the context held the face alone).
 
 ### Changed
+- Requires xlrecalc 0.11 (`xlrecalc>=0.11,<1`). A formula Excel computes on opening is computed
+  as the sheet's `platform=` and `regional_settings=` say: with `platform="windows"`,
+  `=CHAR(128)` shows "€" and `=CODE("€")` 128, as Excel for Windows gives them, where they
+  showed Excel for Mac's "Ä" and 219; and text is ordered and compared as Excel for Windows
+  orders it (sorting, lookups, comparisons).
 - On the Mac, MS Sans Serif is measured as Times New Roman, the face xlformat substitutes for
   it, as Excel measures it, where it was measured as Calibri with a `font.no_metrics` notice:
   "Hello world" in MS Sans Serif 10 is 48 points wide, where it was 44.

@@ -2063,7 +2063,9 @@ with `fullCalcOnLoad`, last calculated by an older Excel (`calcId`), not saved b
 calculation. `recalc_on_load` takes xlrecalc's three values with its meaning: `"excel"`, the
 default, that rule; `"always"`, every formula; `"never"`, none but the formulas without a cached
 value and the volatile ones. `open`, `read`, `Book`, `make_server` and the command line's
-`--recalc-on-load` take it.
+`--recalc-on-load` take it. The loader computes as the sheet's platform and regional settings
+say (§3.2): on Excel for Windows `CHAR` and `CODE` in Windows-1252 (`CHAR(128)` is "€") and text
+ordered and compared as Excel for Windows orders it, from xlrecalc's captures of Excel for Windows.
 
 **Work only where it is needed.** Each worksheet's cells pass through an `xlrecalc.Loader`
 (`_recalc.Recalc`) as `Book._stream` reads them, so the engine is built from the reader's own
@@ -2537,7 +2539,7 @@ attribute of `<dimension>`, `<mergeCell>` and `<autoFilter>` in the file format.
 ### 8.3 Dependencies
 
 - `xlio==0.4.*` (§5): the sheetmill project's reader, pinned to a minor.
-- `xlrecalc>=0.10.1,<1` (§5.7), imported normally: it is required.
+- `xlrecalc>=0.11,<1` (§5.7), imported normally: it is required.
 - `xlformat>=0.9,<1` (§6.4), imported normally: it is required.
 - openpyxl is a dev dependency only: the tests and the documentation's examples build workbooks
   with it, and the tests that need it are left out without it.

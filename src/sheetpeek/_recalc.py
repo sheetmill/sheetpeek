@@ -47,7 +47,13 @@ def recalc_mode(value: object) -> RecalcOnLoad:
 class Recalc:
     """Recalculation on opening for one book: the loader's answer, then the engine."""
 
-    def __init__(self, mode: RecalcOnLoad, book: xlio.Workbook) -> None:
+    def __init__(
+        self,
+        mode: RecalcOnLoad,
+        book: xlio.Workbook,
+        platform: xlformat.Platform,
+        regional_settings: xlformat.RegionalSettings,
+    ) -> None:
         self.mode = mode
         self._answer: Opening | None = None
         self._loader: xlrecalc.Loader | None = None
@@ -56,7 +62,12 @@ class Recalc:
         self.error: str | None = None
         """Why recalculation cannot be done for this book (xlrecalc refused it), else ``None``."""
         try:
-            self._loader = xlrecalc.Loader(book, recalc_on_load=mode)
+            self._loader = xlrecalc.Loader(
+                book,
+                recalc_on_load=mode,
+                platform=platform,
+                regional_settings=regional_settings,
+            )
         except Exception as error:  # xlrecalc refuses what xlio read: report, keep cached values
             self.error = _reason(error)
 

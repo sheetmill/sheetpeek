@@ -543,3 +543,40 @@ def test_the_reason_names_an_external_reference_and_an_add_in_function(tmp_path)
         "_XLL.HEAT": ["C1"],
         "depends on a formula xlrecalc does not compute": ["D1"],
     }
+
+
+def test_a_formula_computes_as_the_platform_excel_computes_it(tmp_path):
+    # xlrecalc's CHAR and CODE: Windows-1252 on Excel for Windows, Mac Roman on the Mac (its
+    # captures); sheetpeek passes the sheet's platform on.
+    cells = (
+        '<c r="A1" t="str"><f>CHAR(128)</f><v>?</v></c>',
+        '<c r="B1" t="str"><f>CODE("€")</f><v>0</v></c>',
+    )
+    path = book(tmp_path, row(1, *cells))
+    windows = sheetpeek.read(path, recalc_on_load="always", platform="windows")
+    mac = sheetpeek.read(path, recalc_on_load="always")
+    assert [windows.cell(1, 1).value, windows.cell(1, 2).value] == ["€", 128]
+    assert mac.cell(1, 1).value != "€"
+    assert mac.cell(1, 2).value != 128
+
+
+def test_the_loader_gets_the_platform_and_the_regional_settings(tmp_path, monkeypatch):
+    # xlrecalc 0.11 computes en-US settings only, so no value tells them apart yet: the loader is
+    # given what the sheet is read with.
+    given = []
+    original = xlrecalc.Loader
+
+    def loader(*args, **kwargs):
+        given.append((kwargs["platform"], kwargs["regional_settings"]))
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(xlrecalc, "Loader", loader)
+    path = book(tmp_path, row(1, A1, STALE))
+    sheetpeek.read(path, recalc_on_load="always", platform="windows")
+    sheetpeek.read(
+        path, recalc_on_load="always", regional_settings=xlformat.RegionalSettings.EN_US_WINDOWS
+    )
+    assert given == [
+        (xlformat.Platform.WINDOWS, xlformat.RegionalSettings.EN_US_WINDOWS),
+        (xlformat.Platform.MAC, xlformat.RegionalSettings.EN_US_WINDOWS),
+    ]

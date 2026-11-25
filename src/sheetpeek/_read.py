@@ -257,7 +257,7 @@ class Book:
         """Recalculation on opening, set up on the first sheet read."""
         if self._recalc_state is None:
             assert self._book is not None
-            self._recalc_state = Recalc(self._mode, self._book)
+            self._recalc_state = Recalc(self._mode, self._book, self._platform, self._regional)
         return self._recalc_state
 
     def _check_area(self, ref: CellRange) -> None:
