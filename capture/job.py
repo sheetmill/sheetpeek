@@ -44,6 +44,10 @@ Groups:
   and ``font.size``), into ``tests/captures/windows/merge_rows.tsv`` (the suite's columns).
 - ``line_budget``: ``text_style``'s group of that name alone, as ``text_style`` captures its
   groups, read into ``tests/captures/windows/line_budget.tsv`` (``text_style``'s columns).
+- ``fitted_rows``: ``row_height_fitted``'s groups ``styled`` and ``scripts`` and the suite
+  ``wrap_rows``, a workbook each, opened, and every case row's height and column A's font read
+  (as ``merge_rows``), into ``tests/captures/windows/row_height_fitted.tsv`` (those groups'
+  records, the Mac suite's columns) and ``tests/captures/windows/wrap_rows.tsv``.
 - ``text_steps``: the suite ``text_steps``, a workbook a group (``text_steps_<group>.xlsx``, each
   under the group's Normal font), captured at zoom 100 as ``borders_fills``' windows are and
   measured with the suite's own code into one file; the gray is measured on D1 in each picture.
@@ -63,7 +67,17 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from capture import borders, cell_text, fills, font_cut, merge_rows, text_steps, text_style
+from capture import (
+    borders,
+    cell_text,
+    fills,
+    font_cut,
+    merge_rows,
+    row_height_fitted,
+    text_steps,
+    text_style,
+    wrap_rows,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 WINDOWS = ROOT / "tests" / "captures" / "windows"
@@ -80,7 +94,10 @@ GROUPS = {
     "font_faces": ("font_faces",),
     "font_aptos": ("font_aptos",),
     "merge_rows": ("merge_rows",),
+    "fitted_rows": ("row_height_fitted", "wrap_rows"),
 }
+FITTED_GROUPS = ("styled", "scripts")
+"""``row_height_fitted``'s groups in the job ``fitted_rows``."""
 PURPOSES = {
     "cells": "sheetpeek capture group cells: the text Excel shows in merged cells and for "
     "error values at set column widths (suites merge_width and error_width)",
@@ -102,6 +119,9 @@ PURPOSES = {
     "100 (font_cut's group faces_aptos)",
     "merge_rows": "sheetpeek capture group merge_rows: the heights Excel fits to rows around "
     "merges across rows, and the font it applies in each merge, read from Excel.",
+    "fitted_rows": "sheetpeek capture group fitted_rows: the heights Excel fits to rows of "
+    "superscript, subscript and accounting-underlined text and of wrapped, justified and "
+    "distributed text of one to six lines, and the font it applies, read from Excel.",
     "line_budget": "sheetpeek capture group line_budget: window pictures of two-word texts as "
     "wide as the cell less a few pixels, wrapped, justified and distributed, at zoom 100 "
     "(text_style's group line_budget)",
@@ -331,6 +351,91 @@ def _merge_rows_workbook(files: Path) -> dict[str, Any]:
     }  # fmt: skip
 
 
+def _rows_workbook(name: str, last: int) -> dict[str, Any]:
+    """Open ``name`` and read rows 1 to ``last``: each row's height and column A's font."""
+    return {
+        "file": name,
+        "steps": [
+            {"op": "open"},
+            {"op": "read", "id": "heights", "range": f"A1:A{last}", "props": ["row_height"]},
+            {"op": "read_format", "id": "fonts", "range": f"A1:A{last}",
+             "props": ["font.name", "font.size"]},
+        ],
+    }  # fmt: skip
+
+
+def _fitted_rows_workbooks(files: Path) -> list[dict[str, Any]]:
+    books = []
+    with tempfile.TemporaryDirectory() as tmp:
+        for group in FITTED_GROUPS:
+            raw = row_height_fitted.build_one(group, Path(tmp))
+            fixed_copy(raw, files / raw.name)
+            books.append(_rows_workbook(raw.name, len(row_height_fitted.rows(group))))
+        raw = wrap_rows.build(Path(tmp))
+        fixed_copy(raw, files / wrap_rows.WORKBOOK)
+        books.append(_rows_workbook(wrap_rows.WORKBOOK, len(wrap_rows.CASES)))
+    return books
+
+
+def _answer_lines(workbook: dict[str, Any], name: str, count: int) -> list[str]:
+    """``name``'s rows 1 to ``count`` as the Mac's AppleScript answers them."""
+    results = _results(workbook)
+    heights = results["heights"]["row_height"]
+    fonts = results["fonts"]["cells"]
+    return [
+        "\t".join(
+            (
+                name,
+                str(row),
+                str(fonts[row - 1][0]["font.name"]),
+                f"{float(fonts[row - 1][0]['font.size']):g}",
+                f"{float(heights[row - 1][0]):g}",
+            )
+        )
+        for row in range(1, count + 1)
+    ]
+
+
+def _read_fitted_rows(
+    outcome: dict[str, Any], manifest_doc: dict[str, Any], folder: Path
+) -> list[Path]:
+    """``row_height_fitted.tsv`` (groups ``styled`` and ``scripts``) and ``wrap_rows.tsv``."""
+    by_file = {wb["file"]: wb for wb in outcome["workbooks"]}
+    _, lines = _job_lines("fitted_rows", outcome, manifest_doc, "read row_height (capture job)")
+    path = folder / "row_height_fitted.tsv"
+    columns = row_height_fitted.COLUMNS
+    with path.open("w", encoding="utf-8", newline="\n") as out:
+        out.write("\n".join(lines) + "\n")
+        out.write(f"# suite: row_height_fitted, groups {', '.join(FITTED_GROUPS)}\n")
+        out.write("\t".join(columns) + "\n")
+        for group in FITTED_GROUPS:
+            name = row_height_fitted.workbook_name(group)
+            cases = row_height_fitted.rows(group)
+            answers = _answer_lines(by_file[name], name, len(cases))
+            for (row, case), answer in zip(cases, answers, strict=True):
+                _, _, applied_name, applied_size, height = answer.split("\t")
+                record = {
+                    "group": group,
+                    "name": case.name,
+                    "row": str(row),
+                    "rotation": str(case.rotation),
+                    "size": f"{case.size:g}",
+                    "applied": f"{applied_name} {applied_size}",
+                    "height": height,
+                    "text": case.text,
+                }
+                out.write("\t".join(record[c] for c in columns) + "\n")
+    answer = _answer_lines(by_file[wrap_rows.WORKBOOK], wrap_rows.WORKBOOK, len(wrap_rows.CASES))
+    _, found = wrap_rows.records("\n".join(answer))
+    wrapped = folder / "wrap_rows.tsv"
+    with wrapped.open("w", encoding="utf-8", newline="\n") as out:
+        out.write("\n".join(lines) + "\n")
+        out.write("# suite: wrap_rows\n" + "\t".join(wrap_rows.COLUMNS) + "\n")
+        for record in found:
+            out.write("\t".join(record[c] for c in wrap_rows.COLUMNS) + "\n")
+    return [path, wrapped]
+
+
 def _read_merge_rows(
     outcome: dict[str, Any], manifest_doc: dict[str, Any], folder: Path
 ) -> list[Path]:
@@ -387,6 +492,8 @@ def write(group: str, job_id: str, out: Path) -> Path:
         books = [_window_workbook(w, files) for w in WINDOWS_OF[group]]
     elif group == "merge_rows":
         books = [_merge_rows_workbook(files)]
+    elif group == "fitted_rows":
+        books = _fitted_rows_workbooks(files)
     else:
         books = [_cells_workbook(files)]
     doc = manifest(group, job_id, books)
@@ -557,9 +664,11 @@ def read(group: str, job: Path, result: Path, folder: Path = WINDOWS) -> list[Pa
             raise ValueError(f"the result's input {name} is not this job's")
     manifest_doc = json.loads((job / "job.json").read_text(encoding="utf-8"))
     folder.mkdir(parents=True, exist_ok=True)
-    if group in WINDOWS_OF or group == "merge_rows":
+    if group in WINDOWS_OF or group in ("merge_rows", "fitted_rows"):
         if group == "merge_rows":
             written = _read_merge_rows(outcome, manifest_doc, folder)
+        elif group == "fitted_rows":
+            written = _read_fitted_rows(outcome, manifest_doc, folder)
         else:
             written = _read_windows(group, outcome, manifest_doc, result, folder)
         shutil.copyfile(job / "job.json", folder / f"{group}.job.json")

@@ -385,3 +385,68 @@ def test_the_merge_rows_job_reads_into_the_macs_rows(tmp_path):
     (path,) = job.read("merge_rows", job_folder, result, tmp_path / "windows")
     ours = [x for x in path.read_text(encoding="utf-8").splitlines() if not x.startswith("# ")]
     assert ours == body
+
+
+def test_the_fitted_rows_job_reads_into_the_macs_rows(tmp_path):
+    # A result made from the Mac's row_height_fitted capture (groups styled and scripts) reads
+    # back into those rows exactly; wrap_rows' rows from a synthetic answer, as its reader does.
+    from capture import row_height_fitted, wrap_rows
+
+    first = job.write("fitted_rows", "sheetpeek-test-fitted-rows", tmp_path / "a")
+    again = job.write("fitted_rows", "sheetpeek-test-fitted-rows", tmp_path / "b")
+    names = [*(row_height_fitted.workbook_name(g) for g in job.FITTED_GROUPS), "wrap_rows.xlsx"]
+    for name in ("job.json", *(f"files/{n}" for n in names)):
+        assert _sha(first / name) == _sha(again / name), name
+    mac = (CAPTURES / "row_height_fitted.tsv").read_text(encoding="utf-8").splitlines()
+    body = [line for line in mac if not line.startswith("# ")]
+    header = body[0].split("\t")
+    records = [dict(zip(header, line.split("\t"), strict=True)) for line in body[1:]]
+    wanted = [r for r in records if r["group"] in job.FITTED_GROUPS]
+
+    def steps(rows):
+        heights = [[float(r["height"])] for r in rows]
+        fonts = [
+            [{"font.name": r["applied"].rsplit(" ", 1)[0], "font.size": r["applied"].rsplit()[-1]}]
+            for r in rows
+        ]
+        return [
+            {"op": "open", "status": "ok"},
+            {"op": "read", "id": "heights", "status": "ok", "result": {"row_height": heights}},
+            {"op": "read_format", "id": "fonts", "status": "ok", "result": {"cells": fonts}},
+        ]
+
+    books = [
+        {
+            "file": row_height_fitted.workbook_name(g),
+            "status": "ok",
+            "steps": steps([r for r in wanted if r["group"] == g]),
+        }
+        for g in job.FITTED_GROUPS
+    ]
+    synthetic = [
+        {"height": str(15 * c.lines), "applied": f"{c.face} {c.size}"} for c in wrap_rows.CASES
+    ]
+    books.append({"file": "wrap_rows.xlsx", "status": "ok", "steps": steps(synthetic)})
+    files = first / "files"
+    outcome = {
+        "status": "ok",
+        "started": "2026-11-24T00:00:00Z",
+        "header": {
+            "manifest_sha256": _sha(first / "job.json"),
+            "inputs": {n: {"sha256": _sha(files / n)} for n in names},
+            "environment": {"excel": {"build": "16.0.0.0"}},
+        },
+        "workbooks": books,
+    }
+    result = tmp_path / "result"
+    result.mkdir()
+    (result / "result.json").write_text(json.dumps(outcome), encoding="utf-8")
+    fitted, wrapped = job.read("fitted_rows", first, result, tmp_path / "windows")
+    ours = [x for x in fitted.read_text(encoding="utf-8").splitlines() if not x.startswith("# ")]
+    assert ours == [body[0]] + [
+        line for line in body[1:] if line.split("\t")[0] in job.FITTED_GROUPS
+    ]
+    rows = [x for x in wrapped.read_text(encoding="utf-8").splitlines() if not x.startswith("# ")]
+    assert rows[0].split("\t") == list(wrap_rows.COLUMNS)
+    assert [r.split("\t")[7] for r in rows[1:]] == [str(15 * c.lines) for c in wrap_rows.CASES]
+    assert (tmp_path / "windows" / "fitted_rows.job.json").exists()
