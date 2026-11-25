@@ -1800,14 +1800,25 @@ grows with the range (`max_cells`, §5.5, bounds it). On the largest of the 15,9
 workbooks of §5.5 (42 MB, 15.2 million cells over its sheets, every sheet read) the reader takes
 38.0 s at 863 MiB peak RSS without recalculation (§5.7, which gives the run).
 
-Laying out every sheet of that workbook in `excel` mode (264,432 rows, `bench/layout.py`, read
-time apart) takes 63.8 s and peaks at 3,695 MiB RSS in 0.4.0, against 62.8 s and 3,625 to
-3,630 MiB in 0.3.0: measured together, best of three, each version from its own source with the
-dependency versions it was published with, alternating, on a quiet machine. The time is within
-the runs' variation of about 5 %. Each version's peak repeats within 5 MiB, while between commits
-that add no data of that size it moves about 60 MiB up and down (a 22-line change to the indent
-width alone moved it 56 MiB); a difference of that size is therefore read as where the
-allocator's peak falls rather than as data kept, an inference that no memory trace has tested.
+Laying out a workbook of that size is measured on one `bench/large_workbook.py` writes: six
+sheets, 264,408 rows and 14.8 million cells, nearly all of them styled and empty (two sheets 99
+columns wide), a sheet of 37,000 values, 76 cell formats and 675 strings; its scale multiplies
+the rows. `bench/layout.py`, every sheet in `excel` mode, read time apart, best of three, each
+version from its own source with the dependency versions it was published with, alternating
+(Python 3.11.18, Apple M4 Pro):
+
+| scale | rows | 0.5.0 (xlformat 0.8.0): read, layout, peak RSS | `40b622b` (xlformat 0.9.0) |
+|---|---|---|---|
+| 0.25 | 66,110 | 9.35 s, 13.89 s, 830 MiB | 9.43 s, 13.85 s, 816 MiB |
+| 0.5 | 132,210 | 18.99 s, 28.00 s, 1,543 MiB | 18.90 s, 27.80 s, 1,537 MiB |
+| 1 | 264,408 | 37.84 s, 56.90 s, 2,999 MiB | 37.69 s, 57.12 s, 2,999 MiB |
+
+Time grows with the rows (2.0 times from each scale to the next) and so does memory, which a
+`Sheet` and its layout hold whole (1.86 and 1.94 times; a line through the first two scales gave
+2,970 MiB for the third). The times vary about 2 % between runs; a version's peak varies up to
+180 MiB (3,179 MiB in one run of 0.5.0 at scale 1), so a difference of that size is read as where
+the allocator's peak falls rather than as data kept, an inference that no memory trace has
+tested.
 
 ### 5.3 Dates stay serials
 

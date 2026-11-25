@@ -5,7 +5,8 @@
 Each sheet is read, laid out in ``excel`` mode and dropped before the next, in one process; a
 sheet that cannot be read or laid out is skipped and named. Peak memory is the process's maximum
 resident size (bytes on macOS, kilobytes on Linux). ``ARCHITECTURE.md`` §5.2 gives the figures
-for the largest public workbook; run it in a fresh process for each measurement, best of three.
+for the workbook ``large_workbook.py`` writes; run it in a fresh process for each measurement,
+best of three.
 """
 
 from __future__ import annotations
