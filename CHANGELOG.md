@@ -32,7 +32,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     Arial Narrow, Verdana and Impact among them), where they were measured as Calibri with a
     `font.no_metrics` notice: "Hello world" in Times New Roman 11 is 55 points wide, where it
     was 53, and a theme whose minor font is Courier New gives Excel's 61-point default column,
-    where it gave 53 (captured, `theme_fonts_palette`).
+    where it gave 53 (captured, `theme_fonts_palette`). Their text sits between their own insets,
+    where it sat between Calibri's: Verdana 20 starts 5 points into its cell and ends 4 points
+    before the next gridline, where it started 4 and ended 3 (xlformat's captures).
   - Calibri, Aptos Narrow and Arial at sizes without a captured table are measured by the rule
     where they were scaled from the nearest table: a Normal font of Calibri 13 has a 7-point
     digit and a 61-point default column, where it had 6 and 53, and every row fitted to text
