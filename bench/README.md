@@ -10,6 +10,9 @@ one, never into the repository.
 - `large_workbook.py`: writes a workbook of 14.8 million cells over six sheets and 264,408 rows,
   most of them styled and empty, the shape of the largest workbooks met in practice (an export
   with a style applied to whole columns); a scale multiplies its rows.
+- `read.py`: time and peak memory of reading every sheet of a workbook in a `recalc_on_load`
+  mode, and with `--trace` the peak of Python's live allocations on a sheet (§5.2, §5.4, §5.7
+  give the figures for `large_workbook.py`'s workbook).
 - `layout.py`: time and peak memory of laying out every sheet of a workbook in `excel` mode,
   read time apart (§5.2 gives the figures for `large_workbook.py`'s workbook).
 - `date_fidelity.py`: how often a date's conversion through `datetime` (openpyxl's) changes what a

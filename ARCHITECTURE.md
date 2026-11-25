@@ -1811,9 +1811,9 @@ It is 18.8 MB on disk. Best of three, each in a fresh process (Python 3.11, Appl
 | openpyxl's normal mode, for comparison | 7.46 s | 928 MB |
 
 The stream holds one row at a time; a `Sheet` holds every cell of the range read, so its memory
-grows with the range (`max_cells`, §5.5, bounds it). On the largest of the 15,935 public
-workbooks of §5.5 (42 MB, 15.2 million cells over its sheets, every sheet read) the reader takes
-38.0 s at 863 MiB peak RSS without recalculation (§5.7, which gives the run).
+grows with the range (`max_cells`, §5.5, bounds it). On the workbook `bench/large_workbook.py`
+writes (33 MiB, 14.8 million cells over six sheets, every sheet read) the reader takes 39.8 s at
+793 MiB peak RSS with `recalc_on_load="never"` (§5.7, which gives the run).
 
 Laying out a workbook of that size is measured on one `bench/large_workbook.py` writes: six
 sheets, 264,408 rows and 14.8 million cells, nearly all of them styled and empty (two sheets 99
@@ -1874,9 +1874,9 @@ sheet's relationships, everything else as `Sheet.unparsed`. A test reads files w
 `<dimension>` is missing, too small and too large, and checks the used range and that no cell is
 dropped.
 
-Measured: the largest public workbook as in §5.7. On its largest sheet, Python's live allocations peak at the level of the reader before xlio (648 MiB);
-the rest of the RSS is the allocator's, the kept cells allocated between the stream's
-short-lived objects.
+Measured: the workbook of §5.2 as in §5.7, `bench/read.py --trace`. On its largest sheet
+(6.5 million cells, 65,523 rows of 99), Python's live allocations peak at 611 MiB; the rest of
+the RSS is the allocator's, the kept cells allocated between the stream's short-lived objects.
 
 ### 5.5 Untrusted files
 
@@ -2099,18 +2099,20 @@ file records for it: a dynamic array that would spill further is not grown. Comp
 the model's types as read ones do (§3): a whole number below 2**53 an `int`, an error an
 `xlformat.ExcelError`.
 
-**Measured** (every sheet of a book read, in the book's order, best of three, each in a fresh
-process, against the same reader without recalculation (`fc1e731`), measured together on a
-quiet machine; the highest peak of the three; the tree at `ddf2532` with the dependencies of its
-lock file, Python 3.11.18, Apple M4 Pro, macOS). This is the measurement of record: §5.2 and §5.4
-cite it. The largest public workbook (§5.2; 10 formulas, all `SUM`s over
-their own sheet, an older `calcId`, so Excel recalculates it all): 38.0 s and 863 MiB without,
-40.3 s and 876 MiB under `"excel"`, 40.4 s and 869 MiB under `"never"`. The difference is the
-loader recording each cell as it passes (about 2 s); the formulas read their own sheets only, so
-no sheet is read twice. A workbook openpyxl wrote, 100,000 rows of 4 formulas with no values:
-2.7 s and 178 MiB without, 7.7 s and 314 MiB, nearly all of it computing 400,001 formulas one
-read at a time. The same workbook with its values and marked as Excel saves it, where nothing
-is recalculated: 2.8 s and 170 MiB without, 3.7 s and 255 MiB, the loader's recording.
+**Measured.** The workbook `bench/large_workbook.py` writes (§5.2; nine `SUM`s over their own
+sheets and no `<fileVersion appName="xl">`, so Excel recalculates them all), every sheet read in
+the book's order by `bench/read.py`, best of three, each in a fresh process, the tree at
+`fb73515` with the dependencies of its lock file (Python 3.11.18, Apple M4 Pro, macOS, a load
+average of about 6): 40.3 s and 784 MiB under `"excel"`, 40.3 s and 795 MiB under `"always"`,
+39.8 s and 793 MiB under `"never"`. The modes differ by less than the runs vary (about 5 %): nine
+formulas over sheets the reader reads anyway cost nothing measurable, and no sheet is read twice.
+This is the measurement §5.2 and §5.4 cite. Formulas that are computed cost time: against the same
+reader without recalculation (`fc1e731`), measured together on a quiet machine, the highest peak
+of three, the tree at `ddf2532`, a workbook openpyxl wrote, 100,000 rows of 4 formulas with no
+values, took 2.7 s and 178 MiB without, 7.7 s and 314 MiB with, nearly all of it computing
+400,001 formulas one read at a time; the same workbook with its values and marked as Excel saves
+it, where nothing is recalculated, 2.8 s and 170 MiB without, 3.7 s and 255 MiB with, the
+loader's recording.
 
 ## 6. The xlformat seam
 
