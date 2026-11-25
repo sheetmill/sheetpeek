@@ -124,3 +124,15 @@ def test_no_retired_phrase():
         if phrase in text
     ]
     assert found == []
+
+
+def test_a_release_requires_each_package_once():
+    # One "Requires <package>" entry per package in a release's section of the changelog: two
+    # would state two minimums for one release.
+    import collections
+
+    text = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+    for section in re.split(r"^## ", text, flags=re.MULTILINE)[1:]:
+        title = section.splitlines()[0]
+        found = collections.Counter(re.findall(r"^- Requires (\w+)", section, flags=re.MULTILINE))
+        assert [name for name, n in found.items() if n > 1] == [], title
