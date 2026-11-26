@@ -309,3 +309,18 @@ scripts_11	superscript 40 probe	100	C10	64.0	1	46+7	53
 scripts_11	superscript 40 glyph	100	E10	64.0	1	15.5+17.5	33
 scripts_11	subscript 40 probe	100	C11	64.0	1	42+7	49
 scripts_11	subscript 40 glyph	100	E11	64.0	1	39.5+17.5	57
+labels	labels probe alone	100	C4	32.0	1	22+7	29
+labels	neighbor merged across columns	100	C5	32.0	1	19+7	26
+labels	empty styled neighbor at 45 degrees	100	C6	32.0	1	22+7	29
+labels	empty styled neighbor at 90 degrees	100	C7	32.0	1	22+7	29
+labels	90 degrees at 5 pt, fitted	100	C8	38.0			
+labels	90 degrees at 6 pt, fitted	100	C9	47.0			
+labels	90 degrees at 7 pt, fitted	100	C10	53.0			
+labels	90 degrees at 8 pt, fitted	100	C11	63.0			
+labels	90 degrees at 9 pt, fitted	100	C12	70.0			
+labels	90 degrees merged across columns, fitted	100	C13	15.0			
+labels	45 degrees merged across columns, fitted	100	C14	15.0			
+labels	45 degrees wrapped in a merge, fitted	100	C15	15.0			
+labels	90 degrees merged across rows, fitted	100	C16	15.0			
+labels	90 degrees unmerged, fitted	100	C18	85.0			
+labels	45 degrees unmerged, fitted	100	C19	69.0			

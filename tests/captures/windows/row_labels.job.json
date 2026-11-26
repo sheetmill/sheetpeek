@@ -1,0 +1,69 @@
+{
+ "schema": 1,
+ "job_id": "sheetpeek-20261125-174152-row-labels",
+ "package": "sheetpeek",
+ "purpose": "sheetpeek capture group row_labels: a window picture at zoom 100 of text beside a merge across columns and beside empty cells styled angled, in rows of a fixed height, and of turned text, merged or not, in fitted rows (row_bottoms' group labels)",
+ "limits": {
+  "job_seconds": 1800,
+  "step_seconds": 600
+ },
+ "audit": false,
+ "workbooks": [
+  {
+   "file": "row_bottoms_labels.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "view",
+     "sheet": "Sheet",
+     "select": "Sheet!AZ300",
+     "zoom": 100,
+     "scroll_row": 1,
+     "scroll_column": 1
+    },
+    {
+     "op": "read",
+     "id": "geometry",
+     "range": "Sheet!A1:G19",
+     "props": [
+      "left",
+      "top",
+      "width",
+      "height",
+      "text"
+     ]
+    },
+    {
+     "op": "read_format",
+     "id": "display",
+     "range": "Sheet!A1:G19",
+     "props": [
+      "interior.color",
+      "interior.pattern"
+     ],
+     "display": true
+    },
+    {
+     "op": "view",
+     "sheet": "Sheet",
+     "select": "Sheet!AZ300",
+     "id": "view_z100",
+     "zoom": 100,
+     "scroll_row": 1,
+     "scroll_column": 1
+    },
+    {
+     "op": "capture_window",
+     "id": "shot_z100",
+     "name": "row_bottoms_labels_z100.png"
+    },
+    {
+     "op": "close",
+     "save": false
+    }
+   ]
+  }
+ ]
+}

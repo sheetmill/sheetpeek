@@ -332,8 +332,9 @@ of its baseline, with its rules; its `clip` stays upright (§4.17).
   larger neighbor; top and centered text at 4/7 and 6/7 by the drawn size) and `runs` (C8, C10
   and C12), and `row_bottoms` (which cells count, text merged across rows and the vertical
   spreads beside a Calibri 24 cell in 32 and 70 pt rows; 21 cases, written as candidates before
-  the run). Unverified (no capture in this repository yet): a merge across columns (counted),
-  and an empty cell styled angled (counted). Known deviations: a Calibri 24 subscript puts the
+  the run), and its group `labels` with `windows/row_labels`: a merge across columns counts, an
+  empty cell styled turned 45 or 90 degrees does not (an empty stacked cell counts, unverified),
+  on both platforms. Known deviations: a Calibri 24 subscript puts the
   row's bottom line 8 pt above the bottom, where sheetpeek counts its 6; text shrunk to 2/7
   sits top and centered as about 6 pt would; small runs in a cell of a larger font sit higher
   in Excel (`runs` C14).
@@ -757,7 +758,7 @@ the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.1
 `theme_fonts_palette` and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions`
 (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts`, `gradients` and
 `diagonals` (§4.12), `text_style`, `text_style_more`, `text_steps` and `rules_below` (§4.6, §4.7,
-§4.13), `font_cut` (§4.13), `row_bottoms` (§3.6), `runs` (§4.16), `tab_strip` (§4.15), `outline`
+§4.13), `font_cut` (§4.13), `row_bottoms` (§3.6, §4.17), `runs` (§4.16), `tab_strip` (§4.15), `outline`
 (§4.11), `rotation`, `rotation_more` and `rotation_placement` (§4.17), `filters` and `filters_more`
 (§4.19) and `tables` (§4.20). All are Excel 16.115 (Microsoft 365). Every section here rests on one
 of them; what no capture covers is marked unverified where it is stated, as are the parts of §4.12,
@@ -1556,10 +1557,14 @@ boxes match a rigid rotation of the upright box (captured: 45°, 58.5 × 57.5 pt
   xlformat measures (9 to 12, 14, 16, 18, 20, 24), three texts and one-glyph runs of 1 to 40,
   every row at 90° and −90° matches exactly, where `W·|sin θ| + S·|cos θ| + 7` was short by up
   to 9 pt, and so does every row at the other sizes from 13 to 36, where xlformat measures `W` by
-  its per-glyph rule. The pad held at 7 below 9 pt is unverified (no capture in this repository
-  yet).
-  **Unverified:** a merge does not count, as for wrapped text in a merge (the merges the
-  `rotation_more` capture holds sit in rows of a stored height).
+  its per-glyph rule. Below 9 pt the pad is 5, as the formula gives (`row_bottoms` group
+  `labels`: 6 to 8 pt; at 5 pt Excel fits 38 where sheetpeek fits 41, xlformat's Mac widths
+  below 6 pt being unverified). Turned text in a merge does not count for a fitted row, merged
+  across columns or rows, wrapped or not (`labels` and `windows/row_labels`: the Normal font's
+  15 pt on both platforms). On Windows turned text fits its row by these rules in points, not
+  in pixels (`windows/row_labels`: 90-degree rows of 5 to 9 pt and both unmerged rows differ,
+  known deviations), and a row stored at 32 pt is laid out at 42 px, 31.5 pt, where sheetpeek
+  keeps 32 (one stored height captured).
 - **Wrapped angled text** (wrap, justify or distributed) wraps along the turned direction: a line
   holds what a fitted row of this height would, `W·|sin θ| + S·|cos θ| + 7 ≤ h`, with a word joining
   a line only if the space after it fits too (§4.7); the lines step one font line (15 pt at Calibri

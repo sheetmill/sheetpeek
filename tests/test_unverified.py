@@ -20,6 +20,7 @@ LEFT_OUT = {"ARCHITECTURE.md", "CHANGELOG.md", "tests/test_unverified.py"}
 DATA = (".tsv", ".tsv.gz", ".xlsx")
 
 LABELS: dict[str, tuple[str, ...]] = {
+    "tests/test_suite_row_bottoms.py": ('"pt are unverified",',),
     "capture/extensions.py": (
         "are matched ignoring case until captured (unverified), and ``_detect._URIS_ANY_CASE`` "
         "follows",
@@ -45,14 +46,13 @@ LABELS: dict[str, tuple[str, ...]] = {
         "settles",
     ),
     "src/sheetpeek/_excel.py": (
+        "# and 90 degrees; an empty stacked cell counts, unverified)",
         "if spans:  # rich text fits the lines drawn (unverified: no capture of its fit)",
         "# three rows leave them 15 pt; its superscript and subscript likewise, unverified).",
-        "degrees at the sizes xlformat measures; the 7 held below 9 pt is unverified).",
         "else:  # bottom; justify as bottom (unverified); a box taller than the row (captured)",
         "# An accounting underline runs under the text's width, turned with it (unverified).",
         "also leaves out other cells' runs (unverified).",
         "# a row with a style of its own taking it before the columns', unverified).",
-        "(unverified).",
     ),
     "src/sheetpeek/_layout.py": ("Normal font's (unverified, no capture in this repository yet).",),
     "src/sheetpeek/_read.py": (

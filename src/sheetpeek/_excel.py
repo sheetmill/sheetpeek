@@ -193,10 +193,11 @@ def _fitted(
     same fonts, which lifts wrapped text in a face with a smaller one by the difference
     (captured, ``text_style_more`` group ``faces``). A fixed row has a bottom too. Counted
     (captured, ``row_bottoms``): cells with values, empty styled cells, cells in ``hidden``
-    columns (column numbers the grid leaves out), superscript, subscript and accounting fonts
-    and other cells' rich-text runs; not counted: angled and stacked cells with values, at any
-    angle, and cells of a merge across rows, in any of its rows. A merge across columns counts
-    (unverified).
+    columns (column numbers the grid leaves out), superscript, subscript and accounting fonts,
+    other cells' rich-text runs and a merge across columns (captured, ``row_bottoms`` group
+    ``labels``); not counted: angled and stacked cells with values, at any angle, empty cells
+    styled turned (``labels``: 45 and 90 degrees), and cells of a merge across rows, in any of
+    its rows.
 
     The bottom is given twice: with the fonts of rich-text runs, and with each cell's own font
     alone. A rich-text cell's last line sits on its own line's bottom, not on a larger run's
@@ -225,7 +226,9 @@ def _fitted(
         spans = drawn_spans(cell, _UNDRAWN.sub("", str(cell.value))) if cell.runs else None
         angled = valued and bool(style.rotation or style.stacked)
         down = merge is not None and merge.max_row > merge.min_row
-        if not (angled or down):
+        # an empty cell styled turned does not count either (captured, row_bottoms labels: 45
+        # and 90 degrees; an empty stacked cell counts, unverified)
+        if not (angled or down or (style.rotation and not valued)):
             if cell.font is not last:
                 last = cell.font
                 b, n, _ = fonts.bottom(last)
@@ -425,12 +428,12 @@ def _upright_height(width: float, size: float) -> float:
 
     ``W + max(0, floor(W / 30) - 2) + 7 + 2·floor((S - 9) / 8)``, with ``W`` the width in whole
     advances and ``S`` the font size, at most ``TALLEST_ROW``: past 90 points of text the row
-    gains a point every 30. The pad is 7 to 16 pt, 9 at 17 to 24, 11 at 25 to 32 and so on
-    (captured, ``row_height_fitted`` group ``turned`` and ``rotation``: every row at 90 and -90
-    degrees at the sizes xlformat measures; the 7 held below 9 pt is unverified).
+    gains a point every 30. The pad is 5 below 9 pt, 7 to 16, 9 at 17 to 24, 11 at 25 to 32 and
+    so on (captured, ``row_height_fitted`` group ``turned`` and ``rotation``: every row at 90 and
+    -90 degrees at the sizes xlformat measures; ``row_bottoms`` group ``labels``: 6 to 8 pt).
     """
     whole = math.floor(width + 1e-9)
-    pad = ROTATED_EXTRA + 2 * max(0, math.floor((size - 9) / 8))
+    pad = ROTATED_EXTRA + 2 * math.floor((size - 9) / 8)
     return min(TALLEST_ROW, whole + max(0, whole // 30 - 2) + pad)
 
 

@@ -663,3 +663,57 @@ def test_windows_fitted_rows_are_sheetpeeks():
     )
     assert len(body) == 483
     assert wrong == {}
+
+
+# --- row_labels: row_bottoms' group labels on Windows
+
+LABEL_HEIGHTS_PINNED = {
+    "90 degrees at 5 pt, fitted": "turned text fits Windows rows by the Mac's rules in points",
+    "90 degrees at 6 pt, fitted": "turned text fits Windows rows by the Mac's rules in points",
+    "90 degrees at 7 pt, fitted": "turned text fits Windows rows by the Mac's rules in points",
+    "90 degrees at 8 pt, fitted": "turned text fits Windows rows by the Mac's rules in points",
+    "90 degrees at 9 pt, fitted": "turned text fits Windows rows by the Mac's rules in points",
+    "90 degrees unmerged, fitted": "turned text fits Windows rows by the Mac's rules in points",
+    "45 degrees unmerged, fitted": "turned text fits Windows rows by the Mac's rules in points",
+}
+"""Fitted rows of ``windows/row_labels`` sheetpeek fits otherwise, with the reason (§4.17)."""
+STORED_ROW = (32.0, 31.5)
+"""A row stored at 32 pt: sheetpeek keeps 32, Excel for Windows lays it out at 42 px (31.5 pt);
+one stored height is captured, so no rule is drawn from it."""
+
+
+@pytest.mark.excel
+def test_windows_row_labels_are_sheetpeeks():
+    # The row's bottom, measured up from the row's bottom edge: a merge across columns counts,
+    # an empty cell styled turned does not; a turned text in any merge leaves a fitted row at
+    # the Normal font's 15 pt.
+    pytest.importorskip("openpyxl")
+    from capture import row_bottoms
+    from openpyxl.utils.cell import column_index_from_string, coordinate_from_string
+
+    _, body = _table("row_labels.tsv")
+    with tempfile.TemporaryDirectory() as tmp:
+        paths = row_bottoms.build(Path(tmp))
+        rendered = sheetpeek.read(paths["labels"], platform="windows").layout("excel")
+    wrong = {}
+    for case in row_bottoms.cases("labels"):
+        (record,) = [r for r in body if r["name"] == case.name]
+        letters, index = coordinate_from_string(case.cell)
+        row = next(r for r in rendered.rows if r.index == index)
+        excel = float(record["row_height"])
+        if case.name in row_bottoms.FITTED_ONLY:
+            if case.name not in LABEL_HEIGHTS_PINNED and excel != row.height_pt:
+                wrong[case.name] = (excel, row.height_pt)
+            continue
+        assert (row.height_pt, excel) == STORED_ROW, case.name
+        source = (index, column_index_from_string(letters))
+        ours = row.height_pt - max(t.y - row.y_pt for t in row.runs if t.source == source)
+        theirs = excel - row_bottoms.baselines(record["line_tops"])[-1]
+        if abs(ours - theirs) > 0.375:  # half a device pixel
+            wrong[case.name] = (theirs, ours)
+    REPORT["row labels (Windows)"] = (
+        f"row labels, Excel for Windows: {len(body)} rows, {len(LABEL_HEIGHTS_PINNED)} known "
+        "deviations (turned text in pixels)"
+    )
+    assert len(body) == 15
+    assert wrong == {}

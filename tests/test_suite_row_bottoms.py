@@ -131,6 +131,10 @@ SMALL_SUBSCRIPT = (
     "l + B(d) gives 4 (the drawn size's small-size metrics)"
 )
 PINNED: dict[str, str] = {
+    "45 degrees unmerged, fitted": "Excel fits 69 pt, sheetpeek 70: the 45-degree rule is within "
+    "2 pt (§4.17)",
+    "90 degrees at 5 pt, fitted": "Excel fits 38 pt, sheetpeek 41: xlformat's Mac widths below 6 "
+    "pt are unverified",
     "superscript 6 glyph": "Excel raises a 6 pt superscript 4 pt, where floor(6/2) is 3",
     "subscript 6 probe": SMALL_SUBSCRIPT,
     "subscript 6.5 probe": SMALL_SUBSCRIPT,

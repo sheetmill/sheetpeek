@@ -579,7 +579,7 @@ def test_a_row_fits_angled_and_stacked_text_as_excel_does(tmp_path, name, height
         (278.0, 20.0, 294.0),  # 20 pt, long: 278 + 7 + 9 (captured, rotation)
         (90.0, 16.0, 98.0),  # 16 pt: pad 7, the 30-point term 1
         (90.0, 17.0, 100.0),  # 17 pt: pad 9 (not in rotation's sizes)
-        (90.0, 8.0, 98.0),  # under 9 pt the pad is held at 7
+        (90.0, 8.0, 96.0),  # under 9 pt the pad is 5 (captured, row_bottoms labels)
         (600.0, 11.0, 409.5),  # Excel's tallest row
     ],
 )

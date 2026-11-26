@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- An empty cell styled with turned text no longer counts for where its row's bottom-aligned text
+  sits: beside an empty cell styled Calibri 24 at 45 degrees, Calibri 11 text in a 32 pt row
+  sits 29 pt below the row's top, where 0.6.0 put it at 26 (captured, `row_bottoms`, on both
+  platforms).
+- A row fitted to text turned 90 degrees in a font below 9 points takes the pad of 5 points the
+  rule gives there, where it was held at 7: Calibri 7 "Rotated text here" fits 53 pt, where 0.6.0
+  gave 55 (captured, `row_bottoms`, 6 to 8 points, Excel for Mac).
 - The defaults follow Excel for Windows at 96 dpi, where they followed Excel for Mac: a caller
   who passes no `platform` to `read`, `open`, `render`, `notices` or the HTML workbook page, the
   `view` and `serve` commands without `--platform`, and `make_server` without `platform=` get
