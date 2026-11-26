@@ -1219,8 +1219,9 @@ def _rows(structure: Structure, ref: CellRange | None) -> tuple[Row, ...]:
         return ()
     result = []
     for index in range(ref.min_row, ref.max_row + 1):
-        height, hidden = structure.rows.get(index, (None, False))
-        result.append(Row(index, height, hidden, index in structure.listed_rows))
+        height, hidden, autofit = structure.rows.get(index, (None, False, False))
+        listed = index in structure.listed_rows
+        result.append(Row(index, height, hidden, listed, autofit=autofit))
     return tuple(result)
 
 

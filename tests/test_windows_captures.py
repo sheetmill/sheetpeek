@@ -718,20 +718,19 @@ def test_windows_row_labels_are_sheetpeeks():
 
 # --- stored_rows: row heights a file stores, on Windows
 
-PLAIN_PINNED = "Excel for Windows ignores a row's ht without customHeight; sheetpeek keeps it"
-
 
 @pytest.mark.excel
 def test_windows_stored_row_heights_are_whole_pixels():
     # Every stored height (a row's ht with customHeight, the sheet's defaultRowHeight with
     # customHeight) is laid out at floor(4s/3 + c) px, and each row's top is the sum of the
-    # whole-pixel rows above it. A row's ht without customHeight is a known deviation.
+    # whole-pixel rows above it. A row's ht without customHeight is ignored: the row is fitted
+    # (15 pt beside its Calibri 11 cell), and each row below it moves with it.
     pytest.importorskip("openpyxl")
     from capture import stored_rows
 
     _, body = _table("stored_rows.tsv")
     captured = {r["name"]: r for r in body}
-    wrong, pinned = {}, set()
+    wrong = {}
     with tempfile.TemporaryDirectory() as tmp:
         for form, stored in stored_rows.workbooks():
             path = stored_rows.build_one(form, stored, Path(tmp))
@@ -741,16 +740,8 @@ def test_windows_stored_row_heights_are_whole_pixels():
                 row = next(r for r in rendered.rows if r.index == case.row)
                 excel = captured[case.name]
                 ours = (row.height_pt, row.y_pt)
-                if ours == (float(excel["height"]), float(excel["top"])):
-                    continue
-                if form == "plain":
-                    pinned.add(case.name)
-                else:
+                if ours != (float(excel["height"]), float(excel["top"])):
                     wrong[case.name] = (excel["height"], excel["top"], ours)
-    REPORT["stored rows (Windows)"] = (
-        f"stored rows, Excel for Windows: {len(body)} rows, {len(pinned)} known deviations "
-        "(ht without customHeight)"
-    )
+    REPORT["stored rows (Windows)"] = f"stored rows, Excel for Windows: {len(body)} rows"
     assert len(body) == 100
     assert wrong == {}
-    assert len(pinned) == 13

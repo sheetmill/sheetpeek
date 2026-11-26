@@ -153,7 +153,7 @@ text styles into `Font` and `CellStyle` (§4.13). Rich-text runs inside one cell
 | `ref` | the requested range, or `used_range` |
 | `merges` | xlio: `<mergeCells>` |
 | `columns`: per column `width`, `hidden`, `outline_level`, `collapsed` | xlio: `<cols>` (each `<col>` covers `min` to `max`) |
-| `rows`: per row `height` in points, `hidden`, `outline_level`, `collapsed` | xlio: `ht`, `hidden`, `outlineLevel`, `collapsed` of `<row>` |
+| `rows`: per row `height` in points, `hidden`, `outline_level`, `collapsed`, `autofit` | xlio: `ht` with `customHeight`, `hidden`, `outlineLevel`, `collapsed` of `<row>`; an `ht` without `customHeight` is no height and `autofit` (§4.7) |
 | `outline` (`Outline`, or `None` when no row or column has a level) | xlio: `<outlinePr summaryBelow summaryRight>`, `showOutlineSymbols` of the first `<sheetView>` when it states one, else of `<outlinePr>`; the deepest row and column levels in the sheet; the levels of the rows and columns just outside `ref` (§4.11) |
 | `default_column_width`, `default_row_height` | xlio: `<sheetFormatPr>` (`defaultColWidth`, `baseColWidth`, `defaultRowHeight`) |
 | `show_gridlines` | xlio: `<sheetView showGridLines>` |
@@ -696,11 +696,13 @@ where with `customHeight` the row is hidden. Under a custom default height
 row with no `ht` takes the default, and under `zeroHeight` it is fitted as a row with no `ht` is
 (the same suites, groups `zero`, `customsheet` and `zerosheet`: 11 of 11 such rows on each platform,
 beside rows with `customHeight`, without `ht` and unlisted).
-sheetpeek keeps the stored height, so a row stored at 0 is laid out 0 high, a known deviation
-(`refit_rows`: 20 rows on the Mac, 22 on Windows; `windows/stored_rows`: 13).
+sheetpeek reads such a row as `Row.autofit` with no height and fits it in every sheet format,
+as Excel does (every row of `refit_rows` on both platforms, and the rows without `customHeight`
+in `windows/stored_rows`).
 
 **Rows are fitted to their cells** when Excel opens a file (captured, suite `row_height`): a row
-with a `<row>` element and no `ht`, in a sheet without `customHeight`, takes the largest of those
+with a `<row>` element and no `ht`, in a sheet without `customHeight`, or with an `ht` without
+`customHeight` (`Row.autofit`) in any sheet, takes the largest of those
 heights and of each cell font's height and of its wrapped text; in a horizontal merge the font
 counts and the wrapped lines do not (a merge over A1:C1), and a merge across rows counts in no
 row, neither its font nor its wrapped lines (`merge_rows`, and on Windows `windows/merge_rows`,

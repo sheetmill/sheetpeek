@@ -7,11 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `Row.autofit`: the row's stored height has no `customHeight`, which Excel ignores, fitting the
+  row to its cells when it opens the file. The reader gives such a row `height=None` and
+  `autofit=True`; it matters under a custom default height (`<sheetFormatPr customHeight="1">`),
+  where a row with no stored height keeps the default and an autofit row is fitted. A `Row` with
+  both a `height` and `autofit=True` raises `ValueError`.
+
 ### Changed
+- A row whose stored height (`ht`) has no `customHeight` is fitted to its cells, as Excel for Mac
+  and for Windows fit it when they open the file (captured, `refit_rows`), where 0.6.0 kept the
+  stored height: a row storing 30 pt beside a Calibri 11 cell is 15 pt, and one storing 12 pt
+  beside a Calibri 20 cell is 26 pt (26.25 with `platform="windows"`). A height of 0 without
+  `customHeight` (`ht="0"` or `ht=""`) no longer hides its row, and under a custom default
+  height such a row is fitted, where a row with no `ht` keeps the default.
 - With `platform="windows"`, a row height the file stores is laid out in whole pixels, as Excel
   for Windows lays it out (captured, `windows/stored_rows`): a row stored at 32 pt is 31.5 pt
-  (42 pixels) and each row below it moves up with it, where 0.6.0 kept 32. A row's height
-  without `customHeight` is still kept, where Excel for Windows ignores it.
+  (42 pixels) and each row below it moves up with it, where 0.6.0 kept 32.
 - A row fitted to text turned 90 degrees is autofit's width of the text (xlformat's
   `autofit_width`), the same rows as before on the Mac and whole pixels on Windows: Calibri 11
   "Rotated text here" fits 87.75 pt (117 pixels), as Excel for Windows, where 0.6.0 gave 88.

@@ -50,8 +50,8 @@ def test_matches_openpyxl_normal_mode(tmp_path):
     assert {(c.min, c.max, c.width, c.hidden) for c in found.columns} == {
         (d.min, d.max, d.width, d.hidden) for d in reference.column_dimensions.values()
     }
-    rows = {i: (d.height, bool(d.hidden)) for i, d in reference.row_dimensions.items()}
-    assert found.rows == {i: r for i, r in rows.items() if r != (None, False)}
+    rows = {i: (d.height, bool(d.hidden), False) for i, d in reference.row_dimensions.items()}
+    assert found.rows == {i: r for i, r in rows.items() if r != (None, False, False)}
     assert found.default_column_width == 12
     assert found.base_column_width == reference.sheet_format.baseColWidth
     assert found.default_row_height == reference.sheet_format.defaultRowHeight
@@ -69,7 +69,7 @@ def test_used_range_counts_every_cell_element(scan_xml):
     )
     # A cell element without a value counts; a row with only a height does not.
     assert found.used_range == CellRange.parse("B3:H7")
-    assert found.rows == {9: (30.0, False)}
+    assert found.rows == {9: (30.0, False, False)}
 
 
 def test_positions_without_references(scan_xml):

@@ -161,7 +161,12 @@ def row_height(row: Row, sheet: Sheet) -> float:
         return _stored(row.height)
     if sheet.zero_row_height and not row.listed:
         return 0.0
-    if sheet.custom_row_height and not sheet.zero_row_height and sheet.default_row_height:
+    if (
+        sheet.custom_row_height
+        and not sheet.zero_row_height
+        and sheet.default_row_height
+        and not row.autofit
+    ):
         return _stored(sheet.default_row_height)
     if not sheet.has_sheet_format and not row.listed:
         return NO_SHEET_FORMAT
@@ -178,9 +183,13 @@ def fits_cells(row: Row, sheet: Sheet) -> bool:
     largest cell font, or to its wrapped lines, and never below the Normal font's height; in a
     horizontal merge the font counts and the wrapped lines do not, and a merge across rows counts
     in no row (suites ``merge_rows`` and ``windows/merge_rows``, both platforms). A stored ``ht``
-    and ``customHeight`` defaults are kept.
+    with ``customHeight`` is kept, and so is a ``customHeight`` default, except for an
+    ``autofit`` row: an ``ht`` without ``customHeight``, fitted under any default (suites
+    ``refit_rows`` and ``windows/refit_rows``).
     """
-    return row.height is None and row.listed and not sheet.custom_row_height
+    if row.height is not None or not row.listed:
+        return False
+    return row.autofit or not sheet.custom_row_height
 
 
 def wrapped_height(lines: int, font: Font) -> float:

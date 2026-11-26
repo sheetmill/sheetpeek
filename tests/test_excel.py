@@ -266,3 +266,63 @@ def test_stored_row_height_wins(tmp_path):
     rendered = sheetpeek.read(path, platform="mac").layout("excel")
     assert rendered.rows[0].height_pt == 30
     assert rendered.rows[0].runs[0].y == 27
+
+
+def _rows_sheet(tmp_path, sheet_format, rows):
+    return raw_sheet(
+        tmp_path / "autofit.xlsx",
+        f"<sheetFormatPr {sheet_format}/><sheetData>{rows}</sheetData>",
+    )
+
+
+AUTOFIT_ROWS = (
+    "<row r='1' ht='30'><c r='A1'><v>1</v></c></row>"  # an ht without customHeight
+    "<row r='2' ht='30' customHeight='1'><c r='A2'><v>1</v></c></row>"
+    "<row r='3'><c r='A3'><v>1</v></c></row>"  # no ht
+    "<row r='4' ht='0'/>"
+    "<row r='5' ht=''/>"
+    "<row r='6' ht='0' customHeight='1'/>"
+)
+
+
+def test_a_height_without_custom_height_reads_as_autofit(tmp_path):
+    path = _rows_sheet(tmp_path, 'baseColWidth="8" defaultRowHeight="15"', AUTOFIT_ROWS)
+    rows = sheetpeek.read(path, ref="A1:A6", platform="mac").rows
+    assert [(r.height, r.autofit) for r in rows] == [
+        (None, True),
+        (30.0, False),
+        (None, False),
+        (None, True),  # a height of 0 without customHeight does not hide the row
+        (None, True),
+        (0.0, False),
+    ]
+
+
+@pytest.mark.parametrize("platform", ["mac", "windows"])
+def test_an_autofit_row_is_fitted_under_a_custom_default_height(tmp_path, platform):
+    # Captured (refit_rows, group customsheet): Excel fits a row whose ht has no customHeight,
+    # where a row with no ht takes the custom default of 20.
+    wb = openpyxl.Workbook()
+    for row in (1, 3):
+        wb.active.cell(row, 1, 1).font = Font(name="Calibri", sz=28, family=2)
+    wb.active.row_dimensions[1].height = 30
+    wb.active.row_dimensions[2].height = 30
+    path = save(wb, tmp_path / "custom_default.xlsx")
+    rewrite(
+        path,
+        SHEET1,
+        lambda x: replace_once(
+            '<sheetFormatPr baseColWidth="8" defaultRowHeight="15" />',
+            '<sheetFormatPr baseColWidth="8" defaultRowHeight="20" customHeight="1" />',
+        )(x).replace(' customHeight="1">', ">"),
+    )
+    rendered = sheetpeek.read(path, ref="A1:A3", platform=platform).layout("excel")
+    fit = 37.0 if platform == "mac" else 36.0
+    default = 20.0 if platform == "mac" else 19.5
+    assert [r.height_pt for r in rendered.rows] == [fit, 15.0, default]
+
+
+def test_an_autofit_row_has_no_height():
+    assert sheetpeek.Row(1, None, autofit=True).autofit
+    with pytest.raises(ValueError, match="autofit"):
+        sheetpeek.Row(1, 30.0, autofit=True)

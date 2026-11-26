@@ -295,6 +295,20 @@ class Row:
     """The row's outline level, 0 (not grouped) to 7."""
     collapsed: bool = False
     """The file marks it as the summary row of a collapsed group."""
+    autofit: bool = False
+    """Excel fits the row to its cells when it opens the file (AutoFit Row Height), even when the
+    sheet sets a custom default height: the file stores a height without ``customHeight``, which
+    Excel ignores, so ``height`` is ``None``. A row with no stored height is fitted anyway unless
+    the sheet sets a custom default height (``<sheetFormatPr customHeight="1">``), so this matters
+    only there (``ARCHITECTURE.md`` §4.7).
+
+    Raises:
+        ValueError: ``autofit`` with a ``height``.
+    """
+
+    def __post_init__(self) -> None:
+        if self.autofit and self.height is not None:
+            raise ValueError(f"an autofit row has no height: {self!r}")
 
 
 @dataclass(frozen=True, slots=True)
