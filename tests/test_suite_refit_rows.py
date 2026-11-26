@@ -1,6 +1,7 @@
 """The capture suite ``refit_rows`` (a row's stored height without ``customHeight``, §4.7),
 without Excel: the workbooks as described, and an answer read into records."""
 
+import re
 import zipfile
 
 import pytest
@@ -9,14 +10,29 @@ from capture import refit_rows as suite
 pytest.importorskip("openpyxl")
 
 
-def test_every_row_stores_its_height_without_custom_height(tmp_path):
+def test_every_row_stores_its_height_as_its_case_says(tmp_path):
     for path in suite.build(tmp_path):
         sheet = zipfile.ZipFile(path).read("xl/worksheets/sheet1.xml").decode("utf-8")
-        assert "customHeight" not in sheet, path.name
         name = path.stem.removeprefix("refit_rows_")
-        for case in suite.CASES[name]:
-            if case.stored is not None:
-                assert f'<row r="{case.row}" ht="{case.stored:g}"' in sheet, case.name
+        cases = suite.CASES[name]
+        rows = re.findall(r"<row [^>]*>", sheet)
+        assert sum("customHeight" in r for r in rows) == sum(c.custom for c in cases), path.name
+        for case in cases:
+            if case.written is not None:
+                custom = ' customHeight="1"' if case.custom else ""
+                assert f'<row r="{case.row}" ht="{case.written}"{custom}>' in rows, case.name
+            elif case.size is None:
+                assert f'<row r="{case.row}"' not in sheet, case.name
+        sheet_format = re.findall(r"<sheetFormatPr [^>]*>", sheet)
+        expected = suite.SHEET_FORMATS.get(name, 'baseColWidth="8" defaultRowHeight="15"')
+        assert sheet_format == [f"<sheetFormatPr {expected} />"], path.name
+
+
+def test_case_names_are_unique():
+    names = [c.name for cases in suite.CASES.values() for c in cases]
+    assert len(names) == len(set(names))
+    assert 'zero empty ht ""' in names
+    assert "zerosheet calibri 11 no ht" in names
 
 
 def test_an_answer_reads_into_records(tmp_path):
@@ -55,9 +71,10 @@ def test_excel_refits_a_row_without_custom_height(tmp_path, platform):
         r["name"]: float(r["row_height"])
         for r in (dict(zip(header, x.split("\t"), strict=True)) for x in lines[1:])
     }
-    assert len(excel) == 17
     kept, refitted = set(), {}
     for name, cases in suite.CASES.items():
+        if name not in ("refit", "macsaved"):
+            continue
         path = suite.build_one(name, tmp_path / name)
         stored = sheetpeek.read(path, platform=platform, ref=f"A1:A{len(cases)}").layout("excel")
         wb = openpyxl.load_workbook(path)

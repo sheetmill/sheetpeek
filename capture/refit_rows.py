@@ -15,6 +15,15 @@ Windows by the job group ``refit_rows`` (``capture/job.py``).
 - ``macsaved``: rows as Excel for Mac writes a sheet it fitted: Calibri 11, 20 and 28 cells with
   the heights the Mac fits them (15, 26, 37), no ``customHeight``, an unlisted row between, and
   an empty row element at 15.
+- ``zero``: a height of 0 without ``customHeight``, as ``ht="0"`` and as ``ht=""`` (which Excel
+  reads as 0), on an empty row and beside a Calibri 20 cell; then the same two with
+  ``customHeight="1"``, which Excel shows hidden (xlio's capture ``live_reads``).
+- ``customsheet``: ``<sheetFormatPr defaultRowHeight="20" customHeight="1">``, where Excel fits no
+  row: an ``ht`` without ``customHeight`` beside Calibri 11 and 28 cells and on an empty row, and an
+  unlisted row (the default, 20).
+- ``zerosheet``: ``<sheetFormatPr defaultRowHeight="15" zeroHeight="1">``, where unlisted rows are
+  hidden: an ``ht`` without ``customHeight`` beside Calibri 11 and 20 cells and on an empty row, a
+  Calibri 11 row without ``ht``, and an unlisted row (hidden).
 
 ``run`` saves Excel's answer to ``capture/build/refit_rows/answer.tsv`` and writes
 ``tests/captures/refit_rows.tsv``.
@@ -23,15 +32,17 @@ Windows by the job group ``refit_rows`` (``capture/job.py``).
 from __future__ import annotations
 
 import datetime as dt
+import re
 import subprocess
 import sys
+import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 
 import openpyxl
 from openpyxl.styles import Font
 
-from capture import stored_rows, wrap_band
+from capture import stored_rows, wrap_band, xmlform
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "tests" / "captures" / "refit_rows.tsv"
@@ -43,19 +54,38 @@ COLUMNS = ("workbook", "name", "row", "cell", "stored", "row_height", "height", 
 
 @dataclass(frozen=True)
 class Case:
-    """One row: its cell (``None``, empty; else the Calibri size) and stored ``ht`` (``None``,
-    no row element)."""
+    """One row: its cell (``None``, empty; else the Calibri size), stored ``ht`` (``None``, no
+    ``ht``; with no cell either, no row element), the ``ht`` as written when it is not the
+    number's own text, and whether the row keeps ``customHeight="1"``."""
 
     workbook: str
     row: int
     size: int | None
     stored: float | None
+    text: str | None = None
+    custom: bool = False
+
+    @property
+    def written(self) -> str | None:
+        """The ``ht`` attribute's text, or ``None`` for no ``ht``."""
+        if self.text is not None:
+            return self.text
+        return None if self.stored is None else f"{self.stored:g}"
 
     @property
     def name(self) -> str:
         cell = "empty" if self.size is None else f"calibri {self.size}"
-        stored = "unlisted" if self.stored is None else f"ht {self.stored:g}"
-        return f"{self.workbook} {cell} {stored}"
+        written = self.written
+        if written is None:
+            stored = (
+                "no ht" if self.size is not None and self.workbook in SHEET_FORMATS else "unlisted"
+            )
+        elif written == "":
+            stored = 'ht ""'
+        else:
+            stored = f"ht {written}"
+        custom = " custom" if self.custom else ""
+        return f"{self.workbook} {cell} {stored}{custom}"
 
 
 _REFIT = (
@@ -65,9 +95,25 @@ _REFIT = (
     (None, 10.0), (None, 15.0), (None, 30.0),
 )  # fmt: skip
 _MACSAVED = ((11, 15.0), (20, 26.0), (None, None), (28, 37.0), (None, 15.0))
+_ZERO = (
+    (None, "0", False), (20, "0", False), (None, "", False), (20, "", False),
+    (None, "0", True), (20, "", True),
+)  # fmt: skip
+_CUSTOMSHEET = ((11, 30.0), (28, 30.0), (None, 30.0), (11, 10.0), (None, None))
+_ZEROSHEET = ((11, 30.0), (20, 10.0), (None, 30.0), (11, None), (None, None))
+SHEET_FORMATS = {
+    "customsheet": 'baseColWidth="8" defaultRowHeight="20" customHeight="1"',
+    "zerosheet": 'baseColWidth="8" defaultRowHeight="15" zeroHeight="1"',
+}
+"""The ``<sheetFormatPr>`` attributes of a workbook that does not keep openpyxl's."""
 CASES = {
     "refit": [Case("refit", k, size, h) for k, (size, h) in enumerate(_REFIT, 1)],
     "macsaved": [Case("macsaved", k, size, h) for k, (size, h) in enumerate(_MACSAVED, 1)],
+    "zero": [
+        Case("zero", k, size, 0.0, text, custom) for k, (size, text, custom) in enumerate(_ZERO, 1)
+    ],
+    "customsheet": [Case("customsheet", k, size, h) for k, (size, h) in enumerate(_CUSTOMSHEET, 1)],
+    "zerosheet": [Case("zerosheet", k, size, h) for k, (size, h) in enumerate(_ZEROSHEET, 1)],
 }
 
 
@@ -83,12 +129,45 @@ def build_one(name: str, folder: Path) -> Path:
         if case.size is not None:
             ws.cell(case.row, 1, "x").font = Font(name="Calibri", sz=case.size, family=2)
         if case.stored is not None:
-            ws.row_dimensions[case.row].height = case.stored
+            # openpyxl leaves out a height of 0; _rewrite writes every ``ht`` as the case does
+            ws.row_dimensions[case.row].height = case.stored or 1.0
     path = folder / workbook_name(name)
     path.parent.mkdir(parents=True, exist_ok=True)
     wb.save(path)
     path.write_bytes(stored_rows._without_custom_height(path.read_bytes()))
+    if name not in ("refit", "macsaved"):
+        _rewrite(path, CASES[name], SHEET_FORMATS.get(name))
     return path
+
+
+def _rewrite(path: Path, cases: list[Case], sheet_format: str | None) -> None:
+    """Write each case's ``ht`` as its text, with ``customHeight="1"`` where it keeps it, and
+    the sheet's ``<sheetFormatPr>``; the XML in the standard library's form."""
+    with zipfile.ZipFile(path) as archive:
+        items = [(info, archive.read(info.filename)) for info in archive.infolist()]
+    with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as archive:
+        for info, data in items:
+            if info.filename == "xl/worksheets/sheet1.xml":
+                text = xmlform.standard_form(data.decode("utf-8"))
+                for case in cases:
+                    if case.written is None:
+                        continue
+                    custom = ' customHeight="1"' if case.custom else ""
+                    text, count = re.subn(
+                        rf'<row r="{case.row}" ht="[^"]*"',
+                        f'<row r="{case.row}" ht="{case.written}"{custom}',
+                        text,
+                    )
+                    if count != 1:
+                        sys.exit(f"{path.name}: expected one row {case.row} with ht, found {count}")
+                if sheet_format is not None:
+                    text, count = re.subn(
+                        r"<sheetFormatPr\b[^>]*/>", f"<sheetFormatPr {sheet_format} />", text
+                    )
+                    if count != 1:
+                        sys.exit(f"{path.name}: expected one <sheetFormatPr />, found {count}")
+                data = text.encode("utf-8")
+            archive.writestr(info, data)
 
 
 def build(folder: Path = CONTAINER_DIR) -> list[Path]:
@@ -143,7 +222,7 @@ def record(case: Case, row_height: str, height: str, top: str) -> dict[str, str]
         "name": case.name,
         "row": str(case.row),
         "cell": "" if case.size is None else f"Calibri {case.size}",
-        "stored": "" if case.stored is None else f"{case.stored:g}",
+        "stored": "" if case.written is None else case.written or '""',
         "row_height": wrap_band._number(row_height),
         "height": height,
         "top": top,

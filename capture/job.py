@@ -153,7 +153,8 @@ PURPOSES = {
     "width and the applied font, read from Excel.",
     "refit_rows": "sheetpeek capture group refit_rows: the heights Excel lays out for rows "
     "storing a height without customHeight, below, at and above the height their cell fits, "
-    "and for a sheet as Excel for Mac saves it, read from Excel.",
+    'for a sheet as Excel for Mac saves it, for heights of 0 written as ht="0" and ht="", '
+    "and in sheets with a custom default height or zeroHeight, read from Excel.",
     "stored_rows": "sheetpeek capture group stored_rows: the heights and tops Excel lays out for "
     "rows whose height a file stores in points, across the fractions of a pixel, as a row's ht "
     "with customHeight and without and as the sheet's defaultRowHeight, read from Excel.",
