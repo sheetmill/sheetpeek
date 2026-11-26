@@ -283,7 +283,11 @@ class Column:
 
 @dataclass(frozen=True, slots=True)
 class Row:
-    """A row's height in points, or ``None`` for the sheet's default, and whether it is hidden."""
+    """A row's height in points, or ``None`` for the sheet's default, and whether it is hidden.
+
+    Raises:
+        ValueError: ``autofit`` with a ``height``.
+    """
 
     index: int
     height: float | None = None
@@ -298,13 +302,9 @@ class Row:
     autofit: bool = False
     """Excel fits the row to its cells when it opens the file (AutoFit Row Height), even when the
     sheet sets a custom default height: the file stores a height without ``customHeight``, which
-    Excel ignores, so ``height`` is ``None``. A row with no stored height is fitted anyway unless
-    the sheet sets a custom default height (``<sheetFormatPr customHeight="1">``), so this matters
-    only there (``ARCHITECTURE.md`` §4.7).
-
-    Raises:
-        ValueError: ``autofit`` with a ``height``.
-    """
+    Excel ignores, so ``height`` is ``None``. A ``listed`` row with no stored height is fitted
+    anyway unless the sheet sets a custom default height (``<sheetFormatPr customHeight="1">``),
+    so this matters only there (``ARCHITECTURE.md`` §4.7)."""
 
     def __post_init__(self) -> None:
         if self.autofit and self.height is not None:
