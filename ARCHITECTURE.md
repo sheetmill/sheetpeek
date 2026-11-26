@@ -689,9 +689,15 @@ and up to 409: every row and every row's top; sheetpeek takes `c` = 1/8, the exa
 unverified). A row's `ht` without `customHeight` Excel ignores, on both platforms, and fits the row
 (captured, `refit_rows` and `windows/refit_rows`: rows storing heights below, at and above the
 fit of a Calibri 11, 20 or 28 cell or of no cell, and a sheet as Excel for Mac saves it, opened
-on Windows: every row at the height it fits, 17 of 17 on each platform). sheetpeek keeps the
-stored height, a known deviation (`refit_rows`: 9 rows on the Mac, 11 on Windows;
-`windows/stored_rows`: 13).
+on Windows: every row at the height it fits, 17 of 17 on each platform). A height of 0 without
+`customHeight` (`ht="0"`, or `ht=""`, which reads as 0) does not hide the row: it is fitted too,
+where with `customHeight` the row is hidden. Under a custom default height
+(`<sheetFormatPr defaultRowHeight="20" customHeight="1">`) such a row is fitted as well, where a
+row with no `ht` takes the default, and under `zeroHeight` it is fitted as a row with no `ht` is
+(the same suites, groups `zero`, `customsheet` and `zerosheet`: 11 of 11 such rows on each platform,
+beside rows with `customHeight`, without `ht` and unlisted).
+sheetpeek keeps the stored height, so a row stored at 0 is laid out 0 high, a known deviation
+(`refit_rows`: 20 rows on the Mac, 22 on Windows; `windows/stored_rows`: 13).
 
 **Rows are fitted to their cells** when Excel opens a file (captured, suite `row_height`): a row
 with a `<row>` element and no `ht`, in a sheet without `customHeight`, takes the largest of those

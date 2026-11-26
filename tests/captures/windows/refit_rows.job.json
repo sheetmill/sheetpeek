@@ -1,8 +1,8 @@
 {
  "schema": 1,
- "job_id": "sheetpeek-20261125-191458-refit-rows",
+ "job_id": "sheetpeek-20261125-231401-refit-rows",
  "package": "sheetpeek",
- "purpose": "sheetpeek capture group refit_rows: the heights Excel lays out for rows storing a height without customHeight, below, at and above the height their cell fits, and for a sheet as Excel for Mac saves it, read from Excel.",
+ "purpose": "sheetpeek capture group refit_rows: the heights Excel lays out for rows storing a height without customHeight, below, at and above the height their cell fits, for a sheet as Excel for Mac saves it, for heights of 0 written as ht=\"0\" and ht=\"\", and in sheets with a custom default height or zeroHeight, read from Excel.",
  "limits": {
   "job_seconds": 1800,
   "step_seconds": 600
@@ -29,6 +29,60 @@
   },
   {
    "file": "refit_rows_macsaved.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "rows",
+     "range": "A1:A5",
+     "props": [
+      "row_height",
+      "height",
+      "top"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "refit_rows_zero.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "rows",
+     "range": "A1:A6",
+     "props": [
+      "row_height",
+      "height",
+      "top"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "refit_rows_customsheet.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "rows",
+     "range": "A1:A5",
+     "props": [
+      "row_height",
+      "height",
+      "top"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "refit_rows_zerosheet.xlsx",
    "steps": [
     {
      "op": "open"

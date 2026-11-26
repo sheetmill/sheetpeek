@@ -19,3 +19,19 @@ macsaved	macsaved calibri 20 ht 26	2	Calibri 20	26	26
 macsaved	macsaved empty unlisted	3			15		
 macsaved	macsaved calibri 28 ht 37	4	Calibri 28	37	37		
 macsaved	macsaved empty ht 15	5		15	15		
+zero	zero empty ht 0	1		0	15		
+zero	zero calibri 20 ht 0	2	Calibri 20	0	26		
+zero	zero empty ht ""	3		""	15		
+zero	zero calibri 20 ht ""	4	Calibri 20	""	26		
+zero	zero empty ht 0 custom	5		0	0		
+zero	zero calibri 20 ht "" custom	6	Calibri 20	""	0		
+customsheet	customsheet calibri 11 ht 30	1	Calibri 11	30	15		
+customsheet	customsheet calibri 28 ht 30	2	Calibri 28	30	37		
+customsheet	customsheet empty ht 30	3		30	15		
+customsheet	customsheet calibri 11 ht 10	4	Calibri 11	10	15		
+customsheet	customsheet empty unlisted	5			20		
+zerosheet	zerosheet calibri 11 ht 30	1	Calibri 11	30	15		
+zerosheet	zerosheet calibri 20 ht 10	2	Calibri 20	10	26		
+zerosheet	zerosheet empty ht 30	3		30	15		
+zerosheet	zerosheet calibri 11 no ht	4	Calibri 11		15		
+zerosheet	zerosheet empty unlisted	5			0		

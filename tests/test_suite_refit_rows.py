@@ -88,5 +88,57 @@ def test_excel_refits_a_row_without_custom_height(tmp_path, platform):
             refitted[case.name] = fit.height_pt if fit else 15.0
             if ours != excel[case.name]:
                 kept.add(case.name)
-    assert refitted == excel  # the rule: Excel's row is the fitted one
+    assert refitted == {n: excel[n] for n in refitted}  # the rule: Excel's row is the fitted one
+    assert len(refitted) == 17
     assert len(kept) == (9 if platform == "mac" else 11), REFIT
+
+
+ZERO_AND_SHEETS = {
+    "zero": "a height of 0 without customHeight: Excel fits the row, sheetpeek lays it out 0 high",
+    "customsheet": "an ht without customHeight under a custom default: Excel fits the row, "
+    "sheetpeek keeps the stored height",
+    "zerosheet": "an ht without customHeight under zeroHeight: Excel fits the row, sheetpeek "
+    "keeps the stored height",
+}
+"""Why sheetpeek's row differs in the later groups, by group, until the rule is modeled."""
+
+
+@pytest.mark.excel
+@pytest.mark.parametrize("platform", ["mac", "windows"])
+def test_excel_fits_a_row_without_custom_height_in_every_sheet_format(tmp_path, platform):
+    # Excel fits every row whose ht has no customHeight: a height of 0 does not hide it
+    # (ht="0" and ht=""; with customHeight it does), and under a custom default height of 20 or
+    # zeroHeight the row takes its fit (15 beside Calibri 11 or empty, Calibri 20 26 on the Mac
+    # and 26.25 on Windows, Calibri 28 37 and 36), where a row with no ht there takes 20 or is
+    # hidden. The Windows rows compare by the height Excel lays out (``height``).
+    import sheetpeek
+
+    capture = (
+        suite.OUTPUT if platform == "mac" else suite.ROOT / "tests/captures/windows/refit_rows.tsv"
+    )
+    lines = [x for x in capture.read_text(encoding="utf-8").splitlines() if not x.startswith("# ")]
+    header = lines[0].split("\t")
+    excel = {
+        r["name"]: float(r["height"] or r["row_height"])
+        for r in (dict(zip(header, x.split("\t"), strict=True)) for x in lines[1:])
+    }
+    assert len(excel) == 33
+    fits = {"empty": 15.0, "calibri 11": 15.0}
+    fits |= {"calibri 20": 26.0, "calibri 28": 37.0} if platform == "mac" else {}
+    fits |= {"calibri 20": 26.25, "calibri 28": 36.0} if platform == "windows" else {}
+    differ: dict[str, set[str]] = {}
+    for name, why in ZERO_AND_SHEETS.items():
+        cases = suite.CASES[name]
+        path = suite.build_one(name, tmp_path / name)
+        layout = sheetpeek.read(path, platform=platform, ref=f"A1:A{len(cases)}").layout("excel")
+        ours = {r.index: r.height_pt for r in layout.rows}
+        for case in cases:
+            cell = "empty" if case.size is None else f"calibri {case.size}"
+            if case.written is not None and not case.custom:
+                assert excel[case.name] == fits[cell], case.name  # fitted, whatever it stores
+            if ours.get(case.row, 0.0) != excel[case.name]:
+                differ.setdefault(name, set()).add(case.name)
+        assert len(differ[name]) == {"zero": 4, "customsheet": 4, "zerosheet": 3}[name], why
+    assert excel["zero empty ht 0 custom"] == excel['zero calibri 20 ht "" custom'] == 0.0
+    assert excel["customsheet empty unlisted"] == (20.0 if platform == "mac" else 19.5)
+    assert excel["zerosheet empty unlisted"] == 0.0
