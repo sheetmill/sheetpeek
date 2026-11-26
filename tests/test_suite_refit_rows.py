@@ -17,15 +17,34 @@ def test_every_row_stores_its_height_as_its_case_says(tmp_path):
         cases = suite.CASES[name]
         rows = re.findall(r"<row [^>]*>", sheet)
         assert sum("customHeight" in r for r in rows) == sum(c.custom for c in cases), path.name
+        excel = name == "excelform"
         for case in cases:
             if case.written is not None:
                 custom = ' customHeight="1"' if case.custom else ""
-                assert f'<row r="{case.row}" ht="{case.written}"{custom}>' in rows, case.name
+                descent = suite.EXCELFORM_DESCENT.get(case.size or 10, "0.2")
+                element = (
+                    f'<row r="{case.row}" spans="1:1" ht="{case.written}" '
+                    f'x14ac:dyDescent="{descent}">'
+                    if excel
+                    else f'<row r="{case.row}" ht="{case.written}"{custom}>'
+                )
+                assert element in rows, case.name
             elif case.size is None:
                 assert f'<row r="{case.row}"' not in sheet, case.name
         sheet_format = re.findall(r"<sheetFormatPr [^>]*>", sheet)
         expected = suite.SHEET_FORMATS.get(name, 'baseColWidth="8" defaultRowHeight="15"')
+        if excel:
+            expected = 'defaultRowHeight="12.75" x14ac:dyDescent="0.2"'
         assert sheet_format == [f"<sheetFormatPr {expected} />"], path.name
+
+
+def test_the_excel_form_carries_its_attributes_and_arial_10(tmp_path):
+    archive = zipfile.ZipFile(suite.build_one("excelform", tmp_path))
+    assert "<AppVersion>15.0300</AppVersion>" in archive.read("docProps/app.xml").decode()
+    assert 'rupBuild="14420"' in archive.read("xl/workbook.xml").decode()
+    fonts = archive.read("xl/styles.xml").decode()
+    assert '<font><name val="Arial" /><family val="2" /><color theme="1" /><sz val="10" />' in fonts
+    assert 'mc:Ignorable="x14ac"' in archive.read("xl/worksheets/sheet1.xml").decode()
 
 
 def test_case_names_are_unique():

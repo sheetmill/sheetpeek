@@ -24,6 +24,11 @@ Windows by the job group ``refit_rows`` (``capture/job.py``).
 - ``zerosheet``: ``<sheetFormatPr defaultRowHeight="15" zeroHeight="1">``, where unlisted rows are
   hidden: an ``ht`` without ``customHeight`` beside Calibri 11 and 20 cells and on an empty row, a
   Calibri 11 row without ``ht``, and an unlisted row (hidden).
+- ``excelform``: rows with these attributes (``spans``, ``x14ac:dyDescent``, the
+  sheet's ``defaultRowHeight="12.75"`` and ``x14ac:dyDescent``, the workbook's ``fileVersion`` and
+  ``AppVersion`` 15.0300) under an Arial 10 Normal font, storing heights other than Excel for
+  Windows' fit at 96 dpi: 13.5, 12.75 and 30 beside Arial 10 cells, 13.5 on an empty row and beside
+  an Arial 12 cell.
 
 ``run`` saves Excel's answer to ``capture/build/refit_rows/answer.tsv`` and writes
 ``tests/captures/refit_rows.tsv``.
@@ -64,6 +69,7 @@ class Case:
     stored: float | None
     text: str | None = None
     custom: bool = False
+    font: str = "Calibri"
 
     @property
     def written(self) -> str | None:
@@ -74,7 +80,7 @@ class Case:
 
     @property
     def name(self) -> str:
-        cell = "empty" if self.size is None else f"calibri {self.size}"
+        cell = "empty" if self.size is None else f"{self.font.lower()} {self.size}"
         written = self.written
         if written is None:
             stored = (
@@ -101,6 +107,9 @@ _ZERO = (
 )  # fmt: skip
 _CUSTOMSHEET = ((11, 30.0), (28, 30.0), (None, 30.0), (11, 10.0), (None, None))
 _ZEROSHEET = ((11, 30.0), (20, 10.0), (None, 30.0), (11, None), (None, None))
+_EXCELFORM = ((10, 13.5), (10, 12.75), (None, 13.5), (12, 13.5), (10, 30.0))
+EXCELFORM_DESCENT = {12: "0.25"}
+"""Excel's ``x14ac:dyDescent`` of a row by its cell's size, else ``0.2`` (Arial 10's)."""
 SHEET_FORMATS = {
     "customsheet": 'baseColWidth="8" defaultRowHeight="20" customHeight="1"',
     "zerosheet": 'baseColWidth="8" defaultRowHeight="15" zeroHeight="1"',
@@ -114,6 +123,9 @@ CASES = {
     ],
     "customsheet": [Case("customsheet", k, size, h) for k, (size, h) in enumerate(_CUSTOMSHEET, 1)],
     "zerosheet": [Case("zerosheet", k, size, h) for k, (size, h) in enumerate(_ZEROSHEET, 1)],
+    "excelform": [
+        Case("excelform", k, size, h, font="Arial") for k, (size, h) in enumerate(_EXCELFORM, 1)
+    ],
 }
 
 
@@ -127,7 +139,7 @@ def build_one(name: str, folder: Path) -> Path:
     ws = wb.active
     for case in CASES[name]:
         if case.size is not None:
-            ws.cell(case.row, 1, "x").font = Font(name="Calibri", sz=case.size, family=2)
+            ws.cell(case.row, 1, "x").font = Font(name=case.font, sz=case.size, family=2)
         if case.stored is not None:
             # openpyxl leaves out a height of 0; _rewrite writes every ``ht`` as the case does
             ws.row_dimensions[case.row].height = case.stored or 1.0
@@ -135,9 +147,82 @@ def build_one(name: str, folder: Path) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     wb.save(path)
     path.write_bytes(stored_rows._without_custom_height(path.read_bytes()))
-    if name not in ("refit", "macsaved"):
+    if name == "excelform":
+        _excel_form(path, CASES[name])
+    elif name not in ("refit", "macsaved"):
         _rewrite(path, CASES[name], SHEET_FORMATS.get(name))
     return path
+
+
+_MAIN = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
+_X14AC = "http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac"
+_MC = "http://schemas.openxmlformats.org/markup-compatibility/2006"
+
+
+def _excel_form(path: Path, cases: list[Case]) -> None:
+    """The workbook with these attributes: rows with ``spans`` and ``x14ac:dyDescent``, the
+    sheet's default of 12.75, Arial 10 as the Normal font, Excel's ``fileVersion`` and
+    ``AppVersion``; the XML in the standard library's form."""
+    edits = {
+        "xl/worksheets/sheet1.xml": lambda text: _excel_rows(text, cases),
+        "xl/styles.xml": lambda text: _replace_once(
+            _replace_once(
+                _replace_once(text, '<name val="Calibri" />', '<name val="Arial" />'),
+                '<sz val="11" />',
+                '<sz val="10" />',
+            ),
+            '<scheme val="minor" />',
+            "",
+        ),
+        "xl/workbook.xml": lambda text: _replace_once(
+            text,
+            "<workbookPr />",
+            '<fileVersion appName="xl" lastEdited="6" lowestEdited="6" rupBuild="14420" />'
+            '<workbookPr defaultThemeVersion="153222" />',
+        ),
+        "docProps/app.xml": lambda text: re.sub(
+            r"<Application>[^<]*</Application><AppVersion>[^<]*</AppVersion>",
+            "<Application>Microsoft Excel</Application><AppVersion>15.0300</AppVersion>",
+            text,
+        ),
+    }
+    with zipfile.ZipFile(path) as archive:
+        items = [(info, archive.read(info.filename)) for info in archive.infolist()]
+    with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as archive:
+        for info, data in items:
+            if info.filename in edits:
+                text = xmlform.standard_form(data.decode("utf-8"))
+                data = edits[info.filename](text).encode("utf-8")
+            archive.writestr(info, data)
+
+
+def _replace_once(text: str, old: str, new: str) -> str:
+    if text.count(old) != 1:
+        sys.exit(f"expected one {old!r}, found {text.count(old)}")
+    return text.replace(old, new)
+
+
+def _excel_rows(text: str, cases: list[Case]) -> str:
+    text = _replace_once(
+        text,
+        f'<worksheet xmlns="{_MAIN}">',
+        f'<worksheet xmlns="{_MAIN}" xmlns:mc="{_MC}" mc:Ignorable="x14ac" xmlns:x14ac="{_X14AC}">',
+    )
+    text = _replace_once(
+        text,
+        '<sheetFormatPr baseColWidth="8" defaultRowHeight="15" />',
+        '<sheetFormatPr defaultRowHeight="12.75" x14ac:dyDescent="0.2" />',
+    )
+    for case in cases:
+        descent = EXCELFORM_DESCENT.get(case.size or 10, "0.2")
+        text, count = re.subn(
+            rf'<row r="{case.row}" ht="[^"]*"',
+            f'<row r="{case.row}" spans="1:1" ht="{case.written}" x14ac:dyDescent="{descent}"',
+            text,
+        )
+        if count != 1:
+            sys.exit(f"expected one row {case.row} with ht, found {count}")
+    return text
 
 
 def _rewrite(path: Path, cases: list[Case], sheet_format: str | None) -> None:
@@ -221,7 +306,7 @@ def record(case: Case, row_height: str, height: str, top: str) -> dict[str, str]
         "workbook": case.workbook,
         "name": case.name,
         "row": str(case.row),
-        "cell": "" if case.size is None else f"Calibri {case.size}",
+        "cell": "" if case.size is None else f"{case.font} {case.size}",
         "stored": "" if case.written is None else case.written or '""',
         "row_height": wrap_band._number(row_height),
         "height": height,
