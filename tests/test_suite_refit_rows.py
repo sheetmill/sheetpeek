@@ -2,7 +2,9 @@
 without Excel: the workbooks as described, and an answer read into records."""
 
 import re
+import tempfile
 import zipfile
+from pathlib import Path
 
 import pytest
 from capture import refit_rows as suite
@@ -128,7 +130,7 @@ def test_excel_fits_a_row_without_custom_height_in_every_sheet_format(tmp_path, 
         r["name"]: float(r["height"] or r["row_height"])
         for r in (dict(zip(header, x.split("\t"), strict=True)) for x in lines[1:])
     }
-    assert len(excel) == 33
+    assert len(excel) == (38 if platform == "mac" else 33)
     fits = {"empty": 15.0, "calibri 11": 15.0}
     fits |= {"calibri 20": 26.0, "calibri 28": 37.0} if platform == "mac" else {}
     fits |= {"calibri 20": 26.25, "calibri 28": 36.0} if platform == "windows" else {}
@@ -148,3 +150,26 @@ def test_excel_fits_a_row_without_custom_height_in_every_sheet_format(tmp_path, 
     assert excel["zero empty ht 0 custom"] == excel['zero calibri 20 ht "" custom'] == 0.0
     assert excel["customsheet empty unlisted"] == (20.0 if platform == "mac" else 19.5)
     assert excel["zerosheet empty unlisted"] == 0.0
+
+
+@pytest.mark.excel
+def test_excel_refits_rows_with_spans_and_dydescent():
+    # Excel for Mac fits rows with spans and x14ac:dyDescent (AppVersion 15.0300) under an Arial 10
+    # Normal font whatever they store (13.5, 12.75, 30): 13 pt, and 16 beside Arial 12, as
+    # sheetpeek fits them.
+    import sheetpeek
+
+    lines = suite.OUTPUT.read_text(encoding="utf-8").splitlines()
+    lines = [x for x in lines if not x.startswith("# ")]
+    header = lines[0].split("\t")
+    excel = {
+        r["name"]: float(r["row_height"])
+        for r in (dict(zip(header, x.split("\t"), strict=True)) for x in lines[1:])
+        if r["workbook"] == "excelform"
+    }
+    assert list(excel.values()) == [13.0, 13.0, 13.0, 16.0, 13.0]
+    with tempfile.TemporaryDirectory() as tmp:
+        path = suite.build_one("excelform", Path(tmp))
+        layout = sheetpeek.read(path, platform="mac", ref="A1:A5").layout("excel")
+    cases = suite.CASES["excelform"]
+    assert [r.height_pt for r in layout.rows] == [excel[c.name] for c in cases]

@@ -1,5 +1,5 @@
 # excel: Excel 16.115 (16.115.26110837, Microsoft 365, Current channel) for Mac, en_US
-# captured: 2026-11-25
+# captured: 2026-11-26
 # suite: refit_rows (capture.refit_rows); method: row height (AppleScript)
 workbook	name	row	cell	stored	row_height	height	top
 refit	refit calibri 11 ht 10	1	Calibri 11	10	15		
@@ -35,3 +35,8 @@ zerosheet	zerosheet calibri 20 ht 10	2	Calibri 20	10	26
 zerosheet	zerosheet empty ht 30	3		30	15		
 zerosheet	zerosheet calibri 11 no ht	4	Calibri 11		15		
 zerosheet	zerosheet empty unlisted	5			0		
+excelform	excelform arial 10 ht 13.5	1	Arial 10	13.5	13		
+excelform	excelform arial 10 ht 12.75	2	Arial 10	12.75	13		
+excelform	excelform empty ht 13.5	3		13.5	13		
+excelform	excelform arial 12 ht 13.5	4	Arial 12	13.5	16		
+excelform	excelform arial 10 ht 30	5	Arial 10	30	13		

@@ -695,7 +695,10 @@ where with `customHeight` the row is hidden. Under a custom default height
 (`<sheetFormatPr defaultRowHeight="20" customHeight="1">`) such a row is fitted as well, where a
 row with no `ht` takes the default, and under `zeroHeight` it is fitted as a row with no `ht` is
 (the same suites, groups `zero`, `customsheet` and `zerosheet`: 11 of 11 such rows on each platform,
-beside rows with `customHeight`, without `ht` and unlisted).
+beside rows with `customHeight`, without `ht` and unlisted). Rows with `spans` and
+`x14ac:dyDescent`, in a workbook whose `AppVersion` is 15.0300, under an Arial 10 Normal font, are
+refitted alike on the
+Mac (group `excelform`, 5 of 5: stored 13.5, 12.75 and 30, fitted 13, and 16 beside Arial 12).
 sheetpeek reads such a row as `Row.autofit` with no height and fits it in every sheet format,
 as Excel does (every row of `refit_rows` on both platforms, and the rows without `customHeight`
 in `windows/stored_rows`).
