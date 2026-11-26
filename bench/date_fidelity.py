@@ -28,8 +28,10 @@ def main() -> None:
         example = None
         for _ in range(count):
             serial = rng.uniform(61, 80000)
-            exact = xlformat.format_value(serial, fmt)
-            converted = xlformat.format_value(from_excel(serial, timedelta=elapsed), fmt)
+            exact = xlformat.format_value(serial, fmt, platform="mac")
+            converted = xlformat.format_value(
+                from_excel(serial, timedelta=elapsed), fmt, platform="mac"
+            )
             if exact != converted:
                 differ += 1
                 example = example or (serial, exact, converted)
@@ -38,8 +40,8 @@ def main() -> None:
         value = from_excel(serial)
         print(
             f"  serial {serial}: openpyxl {value!r}, Excel "
-            f"{xlformat.format_value(serial, 'yyyy-mm-dd')}, "
-            f"from the datetime {xlformat.format_value(value, 'yyyy-mm-dd')}"
+            f"{xlformat.format_value(serial, 'yyyy-mm-dd', platform='mac')}, "
+            f"from the datetime {xlformat.format_value(value, 'yyyy-mm-dd', platform='mac')}"
         )
 
 

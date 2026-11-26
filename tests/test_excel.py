@@ -51,7 +51,7 @@ def test_spill_both_ways_and_competing(tmp_path):
         ws["C3"].alignment = Alignment(horizontal="right")
 
     rendered = lay_out(tmp_path, build, ref="A1:D3")
-    width = xlformat.text_width(LONG, font=xlformat.Font("Calibri", 11))
+    width = xlformat.text_width(LONG, font=xlformat.Font("Calibri", 11), platform="mac")
     assert rendered.cell(1, 1).spill[1] >= 2
     assert rendered.rows[0].crossed[:2] == (True, True)
     (run,) = rendered.rows[1].runs

@@ -176,7 +176,7 @@ def test_recalc_on_load_answers_as_the_separate_check_did(tmp_path, case, mode):
                     check.add(cell.formula.text, cached=cell.type != "none", ca=ca)
         expected = check.finish()
     with xlio.open(path) as opened:
-        assert xlrecalc.Loader(opened, recalc_on_load=mode).opening == expected
+        assert xlrecalc.Loader(opened, recalc_on_load=mode, platform="mac").opening == expected
     sheet = sheetpeek.read(path, "S", recalc_on_load=mode, platform="mac")
     assert [c.value for c in sheet.cells[0][1:]] == shown_values[mode]
 

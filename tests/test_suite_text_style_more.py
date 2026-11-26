@@ -73,8 +73,9 @@ def _advance(font):
     """The unshrunk "H" advance of a font in points; an unmeasured face is measured as Calibri."""
     import xlformat
 
-    name = font.name if font.name in xlformat.measured_fonts() else "Calibri"
-    return xlformat.text_width("H", font=xlformat.Font(name, font.size, font.bold, font.italic))
+    name = font.name if font.name in xlformat.measured_fonts(platform="mac") else "Calibri"
+    face = xlformat.Font(name, font.size, font.bold, font.italic)
+    return xlformat.text_width("H", font=face, platform="mac")
 
 
 FIELDS = {
@@ -124,7 +125,7 @@ def test_the_cases_are_what_their_names_say(built):
     font = xlformat.Font("Calibri", 11)
     for table in (suite.INDENT_NARROW, suite.INDENT_WIDE):
         for width, text in table.items():
-            assert xlformat.text_width(text, font=font) == width
+            assert xlformat.text_width(text, font=font, platform="mac") == width
     sheet = sheetpeek.read(path, "Rules", platform="mac")
     for row, size in zip((4, 6, 8, 10), suite.RULE_SIZES, strict=True):
         assert sheet.cell(row, 3).font.size == size

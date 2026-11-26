@@ -14,7 +14,7 @@ import pytest
 from openpyxl.styles import Alignment, Font
 
 import sheetpeek
-from sheetpeek import TextSpan
+from sheetpeek import TextSpan, _platform
 from sheetpeek._model import Font as ModelFont
 from sheetpeek._runs import Text, wrap
 from sheetpeek.backends.html import HTMLBackend
@@ -446,6 +446,7 @@ def test_text_measures_each_piece_in_its_font():
     assert text.fonts(1, 3) == [CALIBRI, big]
     assert text.fonts(0, 0) == [CALIBRI]  # an empty line takes the font where it is
     assert text.fonts(4, 4) == [big]
-    assert text.width(0, 4) == xlformat.text_width("ab", font=xlformat.Font("Calibri", 11)) + (
-        xlformat.text_width("cd", font=xlformat.Font("Calibri", 20))
-    )
+    platform = _platform.current()  # what Text measures with
+    assert text.width(0, 4) == xlformat.text_width(
+        "ab", font=xlformat.Font("Calibri", 11), platform=platform
+    ) + (xlformat.text_width("cd", font=xlformat.Font("Calibri", 20), platform=platform))

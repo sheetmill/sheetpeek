@@ -1,4 +1,5 @@
-"""Every call sheetpeek makes into xlformat, xlrecalc or xlio that takes a ``platform`` passes one.
+"""Every call sheetpeek, its tests and its benchmarks make into xlformat, xlrecalc or xlio that
+takes a ``platform`` passes one.
 
 The providers' defaults follow their own default platform; sheetpeek shows a sheet as the platform
 it was read with, so a call that left the platform out would follow the provider's default
@@ -11,7 +12,16 @@ import importlib
 import inspect
 from pathlib import Path
 
-SOURCE = Path(__file__).resolve().parents[1] / "src" / "sheetpeek"
+ROOT = Path(__file__).resolve().parents[1]
+SOURCES = (
+    ROOT / "src" / "sheetpeek",
+    ROOT / "tests",
+    ROOT / "bench",
+    ROOT / "capture",
+    ROOT / "tools",
+)
+"""The code that measures: a test or a benchmark that left the platform out would measure on
+the provider's default, not the platform it compares with."""
 PROVIDERS = ("xlformat", "xlrecalc", "xlio")
 
 
@@ -23,7 +33,7 @@ def _target(dotted):
     return found
 
 
-def calls_without_platform(source=SOURCE):
+def calls_without_platform(source):
     """``(file:line, function)`` of each call into a provider that takes no ``platform`` given."""
     missing = []
     for path in sorted(source.rglob("*.py")):
@@ -62,7 +72,8 @@ def calls_without_platform(source=SOURCE):
 
 
 def test_every_provider_call_that_takes_a_platform_passes_one():
-    assert calls_without_platform() == []
+    for source in SOURCES:
+        assert calls_without_platform(source) == [], source.name
 
 
 def test_the_scan_finds_a_call_without_one(tmp_path):

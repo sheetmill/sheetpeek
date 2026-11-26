@@ -571,7 +571,9 @@ def package_rows():
 
 
 def _points(width, font):
-    return xlformat.column_metrics(float(width), font).points if float(width) else 0.0
+    return (
+        xlformat.column_metrics(float(width), font, platform="mac").points if float(width) else 0.0
+    )
 
 
 def compare_packages():

@@ -134,7 +134,7 @@ def test_each_wrap_text_measures_the_width_it_is_listed_under():
 
     for table in (text_style.NARROW, text_style.WIDE, text_style.WORDS):
         for width, text in table.items():
-            assert xlformat.text_width(text, font=None) == width, text
+            assert xlformat.text_width(text, font=None, platform="mac") == width, text
 
 
 def test_the_second_rotation_set_leaves_the_captured_windows_as_they_were():
