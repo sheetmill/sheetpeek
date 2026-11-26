@@ -29,7 +29,7 @@ def workbook(tmp_path):
 
 
 def test_a_name_or_an_object_resolves_to_xlformats_platform():
-    assert _platform.resolve(None) is xlformat.Platform.MAC
+    assert _platform.resolve(None) is xlformat.Platform.WINDOWS  # the default
     assert _platform.resolve("mac") is xlformat.Platform.MAC
     assert _platform.resolve("windows") is xlformat.Platform.WINDOWS
     own = xlformat.Platform("windows", dpi=96)
@@ -51,7 +51,7 @@ def test_regional_settings_follow_the_platform_unless_given():
 
 
 def test_the_default_is_excel_for_mac(workbook):
-    sheet = sheetpeek.read(workbook)
+    sheet = sheetpeek.read(workbook, platform="mac")
     assert sheet.platform is xlformat.Platform.MAC
     assert sheet.regional_settings is xlformat.RegionalSettings.EN_US_MAC
     assert sheet.cell(1, 1).number_format == "m/d/yy"
@@ -65,11 +65,11 @@ def test_a_sheet_read_for_windows_is_laid_out_as_windows_shows_it(workbook):
     assert sheet.cell(1, 1).number_format == "m/d/yyyy"  # the regional short date
     rendered = sheet.layout("excel")
     assert [c.width_pt for c in rendered.columns[:2]] == [48.0, 48.0]  # 64 px at 96 dpi
-    mac = sheetpeek.read(workbook).layout("excel")
+    mac = sheetpeek.read(workbook, platform="mac").layout("excel")
     width = {r.text: r.width for r in rendered.rows[0].runs}["Hello world"]
     assert width != {r.text: r.width for r in mac.rows[0].runs}["Hello world"]
     assert width * 4 / 3 == round(width * 4 / 3)  # whole pixels
-    assert _platform.current() is xlformat.Platform.MAC  # the layout's platform ends with it
+    assert _platform.current() is _platform.DEFAULT_PLATFORM  # the layout's platform ends
 
 
 def test_open_takes_the_platform_for_every_sheet(workbook):
@@ -78,9 +78,10 @@ def test_open_takes_the_platform_for_every_sheet(workbook):
 
 
 def test_render_and_notices_read_with_the_platform(workbook):
-    mac = sheetpeek.render(workbook, "text", on_notice="ignore")
-    windows = sheetpeek.render(workbook, "text", platform="windows", on_notice="ignore")
+    mac = sheetpeek.render(workbook, "text", platform="mac", on_notice="ignore")
+    windows = sheetpeek.render(workbook, "text", on_notice="ignore")  # the default
     assert mac != windows
+    assert windows == sheetpeek.render(workbook, "text", platform="windows", on_notice="ignore")
     assert sheetpeek.notices(workbook, "text", platform="windows") is not None
 
 
@@ -95,7 +96,7 @@ def test_a_sheet_keeps_the_platform_it_was_read_with(workbook):
 
 
 def test_an_open_book_keeps_the_platform_it_was_opened_with(workbook):
-    with sheetpeek.open(workbook) as book:
+    with sheetpeek.open(workbook, platform="mac") as book:
         with pytest.raises(ValueError, match="opened with"):
             sheetpeek.render_workbook(book, platform="windows")
         assert sheetpeek.render_workbook(book, platform="mac", on_notice="ignore")

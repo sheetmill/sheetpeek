@@ -33,7 +33,7 @@ def sheetpeek_takes(names=None):
         if names is not None and name not in names:
             continue
         try:
-            sheet = sheetpeek.read(io.BytesIO(case(data)), ref="A1:B2")
+            sheet = sheetpeek.read(io.BytesIO(case(data)), ref="A1:B2", platform="mac")
         except sheetpeek.PackageError:
             found[name] = None
             continue
@@ -56,7 +56,7 @@ def normal_fonts():
     found = {}
     for name, case in suite.CASES:
         try:
-            font = sheetpeek.read(io.BytesIO(case(data)), ref="A1:B2").normal_font
+            font = sheetpeek.read(io.BytesIO(case(data)), ref="A1:B2", platform="mac").normal_font
         except sheetpeek.PackageError:
             continue
         found[name] = (font.name, font.size)

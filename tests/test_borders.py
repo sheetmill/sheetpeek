@@ -41,7 +41,7 @@ def bordered(tmp_path, cells, *, merges=(), hidden=(), name="borders.xlsx"):
 
 
 def resolved(path):
-    found = rendered_borders(sheetpeek.read(path).layout("excel"))
+    found = rendered_borders(sheetpeek.read(path, platform="mac").layout("excel"))
     assert found is not None
     return found
 
@@ -53,7 +53,7 @@ def test_sides_are_read_with_their_styles_and_colors(tmp_path):
     path = bordered(
         tmp_path, {"A1": ("x", Border(left=Side("thin", color=RED), bottom=Side("double")))}
     )
-    borders = sheetpeek.read(path).cell(1, 1).style.borders
+    borders = sheetpeek.read(path, platform="mac").cell(1, 1).style.borders
     assert borders.left == Line("thin", "FF0000")
     assert borders.bottom == Line("double", None)
     assert borders.bottom.drawn_color == "000000"  # automatic is black (captured, auto_colors)
@@ -62,7 +62,7 @@ def test_sides_are_read_with_their_styles_and_colors(tmp_path):
 
 def test_start_and_end_are_read_as_left_and_right(tmp_path):
     path = bordered(tmp_path, {"A1": ("x", Border(start=Side("thick"), end=Side("thin")))})
-    borders = sheetpeek.read(path).cell(1, 1).style.borders
+    borders = sheetpeek.read(path, platform="mac").cell(1, 1).style.borders
     assert (borders.left, borders.right) == (Line("thick"), Line("thin"))
 
 
@@ -75,7 +75,7 @@ def test_a_diagonal_needs_a_style_and_a_direction(tmp_path):
             "A3": ("x", Border(diagonal=Side("thin"), diagonalDown=True)),
         },
     )
-    sheet = sheetpeek.read(path)
+    sheet = sheetpeek.read(path, platform="mac")
     assert sheet.cell(1, 1).style.borders is None
     assert sheet.cell(2, 1).style.borders is None
     borders = sheet.cell(3, 1).style.borders
@@ -242,10 +242,10 @@ def test_a_hidden_column_s_sides_do_not_compete(tmp_path):
 
 def test_only_excel_mode_resolves_borders(tmp_path):
     path = bordered(tmp_path, {"A1": ("x", Border(left=Side("thin")))})
-    sheet = sheetpeek.read(path)
+    sheet = sheetpeek.read(path, platform="mac")
     assert rendered_borders(sheet.layout("characters")) is None
     plain = bordered(tmp_path, {"A1": ("x", None)}, name="plain.xlsx")
-    assert sheetpeek.read(plain).layout("excel").borders is None
+    assert sheetpeek.read(plain, platform="mac").layout("excel").borders is None
 
 
 # --- the outputs
@@ -256,14 +256,14 @@ def test_borders_are_shown_in_html_and_reported_elsewhere(tmp_path):
         tmp_path,
         {"A1": ("x", Border(left=Side("thin"), diagonal=Side("thin"), diagonalUp=True))},
     )
-    assert sheetpeek.notices(path, "html") == ()
+    assert sheetpeek.notices(path, "html", platform="mac") == ()
     for name, reason in (
         ("rich", "not_implemented"),
         ("text", "not_implemented"),
         ("markdown", "not_representable"),
         ("csv", "not_representable"),
     ):
-        found = {n.code: n for n in sheetpeek.notices(path, name)}
+        found = {n.code: n for n in sheetpeek.notices(path, name, platform="mac")}
         for code in ("border", "border.diagonal"):
             assert (found[code].outcome, found[code].reason) == ("omitted", reason), (name, code)
 
@@ -276,9 +276,9 @@ def test_slant_dash_dot_is_drawn_as_medium_dash_dot_and_reported(tmp_path):
             "C1": ("x", Border(bottom=Side("mediumDashDot"))),
         },
     )
-    (notice,) = sheetpeek.notices(path, "html")
+    (notice,) = sheetpeek.notices(path, "html", platform="mac")
     assert (notice.code, notice.outcome) == ("border.slant_dash_dot", "approximated")
-    page = sheetpeek.render(path, "html", on_notice="ignore")
+    page = sheetpeek.render(path, "html", on_notice="ignore", platform="mac")
     assert len(rules(page)) == 1  # one class for both
 
 
@@ -336,7 +336,7 @@ def geometry(style):
 )
 def test_each_style_sits_on_its_gridline_in_css_px(tmp_path, style, top, height):
     path = bordered(tmp_path, {"A1": ("x", Border(bottom=Side(style)))})
-    ((_, geometry_style),) = lines(sheetpeek.render(path, "html"))
+    ((_, geometry_style),) = lines(sheetpeek.render(path, "html", platform="mac"))
     # Across A, 71 px, and over the far gridline.
     assert geometry(geometry_style) == (0, top, 72, height)
 
@@ -346,7 +346,7 @@ def test_a_vertical_line_runs_down_its_rows_as_one_box(tmp_path):
         tmp_path,
         {f"B{row}": ("x", Border(left=Side("thin", color=RED))) for row in (1, 2, 3)},
     )
-    ((_, style),) = lines(sheetpeek.render(path, "html"))
+    ((_, style),) = lines(sheetpeek.render(path, "html", platform="mac"))
     assert geometry(style) == (0, 0, 1, 61)  # the range starts at B
 
 
@@ -356,7 +356,9 @@ def test_corners_are_square(tmp_path):
         tmp_path,
         {"A1": ("", None), "B2": ("x", Border(left=thick, right=thick, top=thick, bottom=thick))},
     )
-    found = sorted(geometry(style) for _, style in lines(sheetpeek.render(path, "html")))
+    found = sorted(
+        geometry(style) for _, style in lines(sheetpeek.render(path, "html", platform="mac"))
+    )
     # Each line reaches over the bands of the lines across its ends.
     assert found == [
         (70, 19, 3, 23),  # left of B2: y 20 to 40, from 1 above to 2 below
@@ -374,7 +376,7 @@ def test_dashes_are_tiles_with_white_gaps(tmp_path):
             "C1": ("x", Border(left=Side("dotted"))),
         },
     )
-    page = sheetpeek.render(path, "html")
+    page = sheetpeek.render(path, "html", platform="mac")
     bodies = list(rules(page).values())
     dashed = next(b for b in bodies if "FF0000" in b)
     assert dashed.startswith("background:#FFFFFF url(")
@@ -392,7 +394,7 @@ def test_a_diagonal_is_a_line_from_corner_to_corner(tmp_path):
         tmp_path,
         {"A1": ("x", Border(diagonal=Side("hair", color=RED), diagonalDown=True))},
     )
-    page = sheetpeek.render(path, "html")
+    page = sheetpeek.render(path, "html", platform="mac")
     ((name, style),) = lines(page)
     assert geometry(style) == (0, 0, 72, 21)
     body = rules(page)[name]
@@ -401,7 +403,7 @@ def test_a_diagonal_is_a_line_from_corner_to_corner(tmp_path):
 
 
 def test_no_border_layer_without_borders(tmp_path):
-    page = sheetpeek.render(bordered(tmp_path, {"A1": ("x", None)}), "html")
+    page = sheetpeek.render(bordered(tmp_path, {"A1": ("x", None)}), "html", platform="mac")
     assert "sp-borders" not in page
     assert "sp-fills" not in page
 

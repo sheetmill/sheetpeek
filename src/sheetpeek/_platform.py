@@ -3,7 +3,8 @@
 ``platform=`` takes ``"mac"``, ``"windows"`` or an :class:`xlformat.Platform`, as xlformat takes
 it; ``regional_settings=`` an :class:`xlformat.RegionalSettings`, by default the platform's en-US
 settings. Both come from xlformat, and sheetpeek has no settings object of its own: what it
-draws differently follows from the platform. The default is Excel for Mac.
+draws differently follows from the platform. The default is Excel for Windows
+(``DEFAULT_PLATFORM``).
 
 Text is measured where the layout measures it, deep in helpers that do not hold the sheet:
 ``measuring`` sets the platform for the length of a layout, and ``text_width`` measures with it.
@@ -22,18 +23,23 @@ import xlformat
 PlatformLike: TypeAlias = str | xlformat.Platform | None
 
 _NAMES = {"mac": xlformat.Platform.MAC, "windows": xlformat.Platform.WINDOWS}
-_MEASURING: ContextVar[xlformat.Platform] = ContextVar("measuring", default=xlformat.Platform.MAC)
+DEFAULT_PLATFORM = xlformat.Platform.WINDOWS
+"""The Excel a caller who names none gets: Excel for Windows at 96 dpi. Every default in sheetpeek
+(the API, the CLI, ``serve``, the model's fields) is this one."""
+DEFAULT_PLATFORM_NAME = "windows"
+"""``DEFAULT_PLATFORM``'s name, for the defaults that take a name."""
+_MEASURING: ContextVar[xlformat.Platform] = ContextVar("measuring", default=DEFAULT_PLATFORM)
 
 
 def resolve(platform: PlatformLike) -> xlformat.Platform:
-    """The platform a name or an object gives; ``None`` is Excel for Mac.
+    """The platform a name or an object gives; ``None`` is ``DEFAULT_PLATFORM``, Excel for Windows.
 
     Raises:
         ValueError: A name other than ``"mac"`` and ``"windows"``.
         TypeError: Neither a name nor an :class:`xlformat.Platform`.
     """
     if platform is None:
-        return xlformat.Platform.MAC
+        return DEFAULT_PLATFORM
     if isinstance(platform, xlformat.Platform):
         return platform
     if isinstance(platform, str):
@@ -61,6 +67,10 @@ def regional(
     raise TypeError(f"regional_settings must be an xlformat.RegionalSettings, not {settings!r}")
 
 
+DEFAULT_REGIONAL_SETTINGS = regional(None, DEFAULT_PLATFORM)
+"""The regional settings of a caller who names none: ``DEFAULT_PLATFORM``'s en-US settings."""
+
+
 @contextmanager
 def measuring(platform: xlformat.Platform) -> Iterator[None]:
     """Measure text as ``platform`` draws it until the block ends."""
@@ -72,7 +82,7 @@ def measuring(platform: xlformat.Platform) -> Iterator[None]:
 
 
 def current() -> xlformat.Platform:
-    """The platform text is measured as: the layout's, or Excel for Mac outside one."""
+    """The platform text is measured as: the layout's, or ``DEFAULT_PLATFORM`` outside one."""
     return _MEASURING.get()
 
 

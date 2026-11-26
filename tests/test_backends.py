@@ -88,7 +88,9 @@ def build_showcase(path: Path) -> Path:
 
 @pytest.fixture(scope="module")
 def showcase(tmp_path_factory):
-    return sheetpeek.read(build_showcase(tmp_path_factory.mktemp("golden") / "showcase.xlsx"))
+    return sheetpeek.read(
+        build_showcase(tmp_path_factory.mktemp("golden") / "showcase.xlsx"), platform="mac"
+    )
 
 
 def check(name: str, text: str) -> None:
@@ -177,7 +179,7 @@ def test_registry(showcase):
 
 
 def test_empty_sheet(tmp_path):
-    sheet = sheetpeek.read(save(openpyxl.Workbook(), tmp_path / "empty.xlsx"))
+    sheet = sheetpeek.read(save(openpyxl.Workbook(), tmp_path / "empty.xlsx"), platform="mac")
     for name in ("text", "markdown", "csv"):
         assert sheetpeek.render(sheet, name) == ""
 

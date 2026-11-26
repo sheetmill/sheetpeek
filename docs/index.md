@@ -2,7 +2,8 @@
 
 sheetpeek shows an Excel workbook the way Excel shows it: as HTML, Markdown, terminal output
 or plain text. It is pure Python, needs no office suite, and gives programs access to the
-rendered cells. Number formats are applied by `xlformat`.
+rendered cells. Number formats are applied by `xlformat`. The defaults follow Excel for Windows
+at 96 dpi with en-US regional settings; `platform="mac"` shows a workbook as Excel for Mac does.
 
 ```bash
 pip install sheetpeek

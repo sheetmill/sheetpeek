@@ -369,7 +369,7 @@ def sheetpeek_drawn(path: Path) -> dict[tuple[str, str], str]:
     """What sheetpeek draws on each edge and diagonal of :data:`EDGES` and :data:`DIAGONALS`."""
     import sheetpeek
 
-    rendered = sheetpeek.read(path).layout("excel")
+    rendered = sheetpeek.read(path, platform="mac").layout("excel")
     borders = rendered.borders
     assert borders is not None
     rows = {r.index: i for i, r in enumerate(rendered.rows)}

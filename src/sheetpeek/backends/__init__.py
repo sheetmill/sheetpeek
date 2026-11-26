@@ -111,8 +111,8 @@ def render(
         out: A text stream to write to. Without one, the output is returned as a string.
         limits: What reading may cost, when ``source`` is a workbook. By default,
             ``ReadLimits()``.
-        platform: Which Excel to show it as, when ``source`` is a workbook: ``"mac"`` (the
-            default), ``"windows"`` or an ``xlformat.Platform``, imported from xlformat, as
+        platform: Which Excel to show it as, when ``source`` is a workbook: ``"windows"`` (the
+            default), ``"mac"`` or an ``xlformat.Platform``, imported from xlformat, as
             :func:`~sheetpeek.read` takes it. A sheet is shown as the platform it was read with.
         regional_settings: The viewer's regional settings, when ``source`` is a workbook, as
             :func:`~sheetpeek.read` takes them.

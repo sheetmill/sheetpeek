@@ -84,7 +84,9 @@ def scaled(font: xlformat.Font, scale: float) -> xlformat.Font:
     return xlformat.Font(font.name, font.size * scale, font.bold, font.italic)
 
 
-def shrink_levels(advance: float, platform: str = "mac") -> tuple[float, ...]:
+def shrink_levels(
+    advance: float, platform: str = _platform.DEFAULT_PLATFORM_NAME
+) -> tuple[float, ...]:
     """The "H" advances, in points, shrink to fit may draw a text at, largest first.
 
     Excel for Mac draws every whole point below the unshrunk ``advance`` down to 1; Excel for
@@ -101,7 +103,11 @@ def shrink_levels(advance: float, platform: str = "mac") -> tuple[float, ...]:
 
 
 def shrink_scale(
-    width: float, advance: float, cell: float, budget: float, platform: str = "mac"
+    width: float,
+    advance: float,
+    cell: float,
+    budget: float,
+    platform: str = _platform.DEFAULT_PLATFORM_NAME,
 ) -> float:
     """The scale shrink to fit draws a text at: 1 when it fits, else a level's ``a / advance``.
 

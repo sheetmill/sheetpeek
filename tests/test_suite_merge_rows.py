@@ -21,11 +21,14 @@ def built(tmp_path_factory):
 
 
 def _heights(path):
-    return {row.index: row.height_pt for row in sheetpeek.read(path).layout("excel").rows}
+    return {
+        row.index: row.height_pt
+        for row in sheetpeek.read(path, platform="mac").layout("excel").rows
+    }
 
 
 def test_each_case_is_built_and_merged_as_described(built):
-    sheet = sheetpeek.read(built)
+    sheet = sheetpeek.read(built, platform="mac")
     merges = {str(m) for m in sheet.merges}
     for block in suite.BLOCKS:
         first = next(c.row for c in suite.CASES if c.block is block)

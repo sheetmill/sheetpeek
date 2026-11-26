@@ -314,7 +314,7 @@ def codes(notices):
 
 
 def test_every_reader_code_is_reported(every):
-    with sheetpeek.open(every) as book:
+    with sheetpeek.open(every, platform="mac") as book:
         found = codes(book.notices)
         for name in ("All", "Macro"):
             found |= codes(book.sheet(name).notices)
@@ -323,12 +323,12 @@ def test_every_reader_code_is_reported(every):
 
 
 def test_every_layout_code_is_reported(every):
-    sheet = sheetpeek.read(every, "All")
+    sheet = sheetpeek.read(every, "All", platform="mac")
     found = codes(sheet.layout("excel").notices) | codes(
         sheet.layout("characters", show_hidden=True).notices
     )
     hidden = _with_hidden(every.parent / "hidden.xlsx")
-    found |= codes(sheetpeek.read(hidden).layout("none", show_hidden=True).notices)
+    found |= codes(sheetpeek.read(hidden, platform="mac").layout("none", show_hidden=True).notices)
     expected = {c for c, f in FEATURES.items() if f.source == "layout"} - set(ELSEWHERE)
     assert expected - found == set()
 
@@ -342,7 +342,7 @@ def _with_hidden(path):
 
 
 def test_every_census_code_is_present(every):
-    found = set(sheetpeek.read(every, "All").layout("excel").features)
+    found = set(sheetpeek.read(every, "All", platform="mac").layout("excel").features)
     expected = {c for c, f in FEATURES.items() if f.source == "census"} - set(ELSEWHERE)
     assert expected - found == set()
 
@@ -356,7 +356,7 @@ def test_every_census_code_is_declared(name):
 @pytest.mark.parametrize("name", backend_names())
 def test_every_feature_is_shown_or_reported(every, name):
     backend = get_backend(name)
-    rendered = sheetpeek.read(every, "All").layout(backend.mode)
+    rendered = sheetpeek.read(every, "All", platform="mac").layout(backend.mode)
     reported = {n.code for n in sheetpeek.notices(rendered, backend) if n.output == backend.name}
     for code in rendered.features:
         support = backend.support[code]
@@ -373,7 +373,7 @@ def test_an_undeclared_feature_is_reported(every):
         def render(self, sheet, out):
             out.write("")
 
-    rendered = sheetpeek.read(every, "All").layout("none")
+    rendered = sheetpeek.read(every, "All", platform="mac").layout("none")
     found = [n for n in sheetpeek.notices(rendered, Bare()) if n.output == "bare"]
     assert codes(found) == set(rendered.features)
     assert all(n.context.get("undeclared") == 1 and n.outcome == "omitted" for n in found)
@@ -432,7 +432,7 @@ def test_workbooks_saved_by_excel_give_no_reader_notice(name):
     files = sorted(FILES.glob("*.xlsx"))
     assert files
     for path in files:
-        with sheetpeek.open(path) as book:
+        with sheetpeek.open(path, platform="mac") as book:
             assert book.notices == ()
             for sheet_name in book.sheet_names:
                 found = sheetpeek.notices(book.sheet(sheet_name), name)
@@ -459,7 +459,7 @@ def test_boilerplate_is_not_reported(tmp_path):
             '<tableParts count="0" /></worksheet>',
         ),
     )
-    assert sheetpeek.read(path).notices == ()
+    assert sheetpeek.read(path, platform="mac").notices == ()
 
 
 def test_extension_uris_are_compared_as_excel_compares_them(tmp_path):
@@ -468,7 +468,7 @@ def test_extension_uris_are_compared_as_excel_compares_them(tmp_path):
         wb.active["A1"] = 1
         path = save(wb, tmp_path / f"ext{len(list(tmp_path.iterdir()))}.xlsx")
         rewrite(path, SHEET1, replace_once("</worksheet>", extensions(*uris) + "</worksheet>"))
-        return codes(sheetpeek.read(path).notices)
+        return codes(sheetpeek.read(path, platform="mac").notices)
 
     assert sheet_with(CF_URI) == {"cf"}
     # Excel ignores the upper-case form that [MS-XLSX] prints (captured): nothing is drawn.
@@ -480,7 +480,11 @@ def test_extension_uris_are_compared_as_excel_compares_them(tmp_path):
 
 
 def test_a_linked_picture_is_refused_as_unsafe(every):
-    found = [n for n in sheetpeek.read(every, "All").notices if n.code == "drawing.picture_linked"]
+    found = [
+        n
+        for n in sheetpeek.read(every, "All", platform="mac").notices
+        if n.code == "drawing.picture_linked"
+    ]
     assert [(n.outcome, n.reason) for n in found] == [("omitted", "unsafe")]
     assert "never fetches" in found[0].message
 
@@ -493,13 +497,13 @@ def test_objects_hidden_by_the_workbook_are_not_reported(every, tmp_path):
         "xl/workbook.xml",
         lambda t: re.sub(r"<workbookPr\b", '<workbookPr showObjects="none"', t, count=1),
     )
-    found = codes(sheetpeek.read(path, "All").notices)
+    found = codes(sheetpeek.read(path, "All", platform="mac").notices)
     assert not {c for c in found if c.startswith("drawing") or c == "control"}
 
 
 def test_a_dialog_sheet_is_reported_not_shown_blank(every):
     # openpyxl loads a dialog sheet as an empty worksheet; it is not drawn as a blank sheet.
-    with sheetpeek.open(every) as book:
+    with sheetpeek.open(every, platform="mac") as book:
         found = [n for n in book.notices if n.code == "sheet.dialogsheet"]
         assert [(n.outcome, n.context["sheet"], n.level) for n in found] == [
             ("omitted", "Dialog", "workbook")
@@ -509,7 +513,7 @@ def test_a_dialog_sheet_is_reported_not_shown_blank(every):
 
 
 def test_chartsheets_and_dialog_sheets_are_listed_as_not_shown(every, capsys):
-    with sheetpeek.open(every) as book:
+    with sheetpeek.open(every, platform="mac") as book:
         assert [(n.code, n.context["sheet"]) for n in book.notices] == [
             ("sheet.dialogsheet", "Dialog"),
             ("sheet.chartsheet", "Chart"),
@@ -530,7 +534,7 @@ def test_cells_hidden_from_view_are_not_reported(tmp_path):
         ws.cell(row, 1, "x").comment = Comment("a note", "author")
     ws.row_dimensions[2].hidden = True
     path = save(wb, tmp_path / "hidden_note.xlsx")
-    sheet = sheetpeek.read(path)
+    sheet = sheetpeek.read(path, platform="mac")
     (whole,) = [n for n in sheet.notices if n.code == "comment"]
     assert whole.count == 3
     (shown,) = [n for n in sheet.layout("excel").notices if n.code == "comment"]
@@ -621,7 +625,7 @@ def test_visible_splits_ranges_around_hidden_rows_and_columns():
 
 
 def test_the_warnings_view_keeps_only_the_old_warnings(every):
-    sheet = sheetpeek.read(every, "All")
+    sheet = sheetpeek.read(every, "All", platform="mac")
     assert len(sheet.notices) > 20
     assert [w[:9] for w in sheet.warnings] == ["1 formula"]
 
@@ -696,7 +700,7 @@ def test_only_notices_are_issued_for_sheet_extensions(tmp_path):
         sheetpeek.render(path, "html")
     assert [w.category for w in caught] == [sheetpeek.NotShownWarning]
     assert {"cf", "sparkline", "slicer", "sheet.unknown_extension"} <= codes(
-        sheetpeek.read(path).notices
+        sheetpeek.read(path, platform="mac").notices
     )
 
 
@@ -714,7 +718,9 @@ def _row_column_notice(tmp_path, style_row=None, style_column=None, edit=None):
     path = save(workbook, tmp_path / "rows.xlsx")
     if edit is not None:
         rewrite(path, "xl/styles.xml", edit)
-    found = [n for n in sheetpeek.read(path).notices if n.code == "style.row_column"]
+    found = [
+        n for n in sheetpeek.read(path, platform="mac").notices if n.code == "style.row_column"
+    ]
     return found[0].context if found else None
 
 

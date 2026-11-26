@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- The defaults follow Excel for Windows at 96 dpi, where they followed Excel for Mac: a caller
+  who passes no `platform` to `read`, `open`, `render`, `notices` or the HTML workbook page, the
+  `view` and `serve` commands without `--platform`, and `make_server` without `platform=` get
+  Excel for Windows' column widths, number formats, text, rows and borders, in whole pixels,
+  and its en-US regional settings (`xlformat.RegionalSettings.EN_US_WINDOWS`). A default column
+  is 48 pt (64 px) wide, where it was 53, and `1,234,567.89` in it shows `########`, where it
+  showed `#########`. `Sheet`'s `platform` and `regional_settings` fields default to the same.
+  To keep Excel for Mac, pass `platform="mac"` (`--platform mac` on the command line).
 - Requires xlformat 0.11 (`xlformat>=0.11,<1`), whose Windows rows cover every size from 1 to 72
   points by pixels per em in Calibri, Arial, Times New Roman, Courier New and Aptos Narrow. With
   `platform="windows"`, a Times New Roman 60 pt row is 102 pixels (76.5 pt) and a Calibri 41.5 pt

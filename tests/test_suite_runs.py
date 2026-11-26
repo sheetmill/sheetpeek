@@ -35,7 +35,7 @@ def label(font):
 def drawn(path):
     """What sheetpeek draws for each case of the workbook at ``path``, as ``EXPECTED`` holds it."""
     group = path.stem.removeprefix("runs_")
-    rendered = sheetpeek.read(path).layout("excel")
+    rendered = sheetpeek.read(path, platform="mac").layout("excel")
     columns = {c.index: c for c in rendered.columns}
     found = {}
     for case in runs.cases(group):
@@ -76,7 +76,7 @@ def test_the_runs_workbooks_read_back_as_built(tmp_path):
     assert found == runs.CASES
     for group in runs.GROUPS:
         path = tmp_path / f"runs_{group}.xlsx"
-        sheet = sheetpeek.read(path)
+        sheet = sheetpeek.read(path, platform="mac")
         for case in runs.cases(group):
             letters, row = coordinate_from_string(case.cell)
             cell = sheet.cell(row, column_index_from_string(letters))

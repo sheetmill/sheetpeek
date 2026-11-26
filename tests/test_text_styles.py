@@ -9,10 +9,11 @@ import io
 
 import openpyxl
 import pytest
+import xlformat
 from openpyxl.styles import Alignment, Font
 
 import sheetpeek
-from sheetpeek import TextRule
+from sheetpeek import TextRule, _platform
 from sheetpeek._model import Font as ModelFont
 from sheetpeek._rows import script_parts, script_size
 from sheetpeek._text_styles import shrink_scale
@@ -29,7 +30,7 @@ def book(tmp_path, build):
 
 
 def lay_out(tmp_path, build, mode="excel"):
-    return sheetpeek.read(book(tmp_path, build)).layout(mode)
+    return sheetpeek.read(book(tmp_path, build), platform="mac").layout(mode)
 
 
 def runs_of(rendered, row, column=None):
@@ -58,7 +59,7 @@ def test_the_styles_are_read(tmp_path):
         ws["A3"] = "x"
         ws["A3"].font = Font(vertAlign="baseline")
 
-    sheet = sheetpeek.read(book(tmp_path, build))
+    sheet = sheetpeek.read(book(tmp_path, build), platform="mac")
     one = sheet.cell(1, 1).style
     assert (one.font.vert_align, one.shrink, one.reading_order, one.justify_last_line) == (
         "superscript",
@@ -82,7 +83,7 @@ def test_a_reading_order_no_interface_writes_reads_as_context(tmp_path, value):
     rewrite(
         path, "xl/styles.xml", lambda t: t.replace('readingOrder="1"', f'readingOrder="{value}"')
     )
-    sheet = sheetpeek.read(path)
+    sheet = sheetpeek.read(path, platform="mac")
     assert sheet.cell(1, 1).style.reading_order == 0
     rendered = sheet.layout("excel")
     assert "text.reading_order" not in rendered.features
@@ -142,8 +143,9 @@ def test_a_subscript_lowers_the_rows_shared_bottom(tmp_path):
     # Captured (row_bottoms, "subscript 24 probe"): beside a Calibri 24 subscript, plain 11 pt
     # text in a 64 pt row sits on l + B(d) = 4 + 4 = 8 above the bottom; beside a superscript,
     # on the 24 pt font's own B, 6.
-    assert script_parts(ModelFont("Calibri", 24.0, vert_align="subscript"))[1] == 8
-    assert script_parts(ModelFont("Calibri", 24.0, vert_align="superscript"))[1] == 6
+    with _platform.measuring(xlformat.Platform.MAC):  # the Mac's rows
+        assert script_parts(ModelFont("Calibri", 24.0, vert_align="subscript"))[1] == 8
+        assert script_parts(ModelFont("Calibri", 24.0, vert_align="superscript"))[1] == 6
 
     def build(ws):
         ws.row_dimensions[1].height = 64
@@ -332,19 +334,21 @@ def test_shrink_to_fit_takes_the_captured_levels(tmp_path):
 
 def test_shrink_scale_takes_the_largest_level_that_fits():
     # Calibri 11 in a 53 pt cell (budget 48), "H" 7 pt: 7 Hs (49) take level 6, 6 Hs fit.
-    assert shrink_scale(49, 7, 53, 48) == 6 / 7
-    assert shrink_scale(42, 7, 53, 48) == 1.0
+    assert shrink_scale(49, 7, 53, 48, "mac") == 6 / 7
+    assert shrink_scale(42, 7, 53, 48, "mac") == 1.0
     # Calibri 16 in 69 pt, "H" 10 pt: 11 Hs are refused at 6 ((11 + 0.375)·6 > 68), take 5;
     # 22 Hs take 3, the same 66 pt of advances that a single budget could not tell apart.
-    assert shrink_scale(110, 10, 69, 64) == 5 / 10
-    assert shrink_scale(220, 10, 69, 64) == 3 / 10
+    assert shrink_scale(110, 10, 69, 64, "mac") == 5 / 10
+    assert shrink_scale(220, 10, 69, 64, "mac") == 3 / 10
 
 
 def test_shrink_scale_is_bounded():
-    assert shrink_scale(7000, 7, 53, 48) == 1 / 7  # nothing fits: the smallest level, clipped
-    assert shrink_scale(7, 7, -5, -10) == 1 / 7
-    assert shrink_scale(100, 1, 53, 48) == 1.0  # no level below a 1 pt advance
-    assert shrink_scale(100, 0, 53, 48) == 1.0
+    assert (
+        shrink_scale(7000, 7, 53, 48, "mac") == 1 / 7
+    )  # nothing fits: the smallest level, clipped
+    assert shrink_scale(7, 7, -5, -10, "mac") == 1 / 7
+    assert shrink_scale(100, 1, 53, 48, "mac") == 1.0  # no level below a 1 pt advance
+    assert shrink_scale(100, 0, 53, 48, "mac") == 1.0
 
 
 def test_windows_shrinks_by_whole_pixels_never_6_down_to_2():
@@ -624,7 +628,7 @@ def test_a_row_fits_the_lines_of_distributed_text(tmp_path):
     wb.active.row_dimensions[1]  # listed, so Excel fits it
     path = tmp_path / "distributed.xlsx"
     wb.save(path)
-    rendered = sheetpeek.read(path).layout("excel")
+    rendered = sheetpeek.read(path, platform="mac").layout("excel")
     lines = {round(run.y) for run in rendered.rows[0].runs}
     assert rendered.rows[0].height_pt == 16.0 * len(lines)
     assert len(lines) > 1

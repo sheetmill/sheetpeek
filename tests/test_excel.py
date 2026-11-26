@@ -6,6 +6,7 @@ import xlformat
 from openpyxl.styles import Alignment, Font
 
 import sheetpeek
+from sheetpeek import _platform
 from sheetpeek._rows import row_height
 from tests.workbooks import SHEET1, raw_sheet, replace_once, rewrite, save
 
@@ -15,7 +16,9 @@ LONG = "a long text value that spills"
 def lay_out(tmp_path, build, ref=None, **options):
     wb = openpyxl.Workbook()
     build(wb.active)
-    return sheetpeek.read(save(wb, tmp_path / "book.xlsx"), ref=ref).layout("excel", **options)
+    return sheetpeek.read(save(wb, tmp_path / "book.xlsx"), ref=ref, platform="mac").layout(
+        "excel", **options
+    )
 
 
 def test_geometry_in_points(tmp_path):
@@ -157,7 +160,9 @@ def test_unmeasured_cell_font_warns_in_excel_mode(tmp_path):
 
 
 def test_empty_sheet(tmp_path):
-    rendered = sheetpeek.read(save(openpyxl.Workbook(), tmp_path / "e.xlsx")).layout("excel")
+    rendered = sheetpeek.read(
+        save(openpyxl.Workbook(), tmp_path / "e.xlsx"), platform="mac"
+    ).layout("excel")
     assert rendered.rows == ()
 
 
@@ -182,7 +187,7 @@ def sheet_with(tmp_path, sheet_format, font_size=11):
             "xl/styles.xml",
             lambda x: x.replace('<sz val="11" />', f'<sz val="{font_size}" />'),
         )
-    return sheetpeek.read(path, ref="A1:A4")
+    return sheetpeek.read(path, ref="A1:A4", platform="mac")
 
 
 @pytest.mark.parametrize(
@@ -207,7 +212,8 @@ def sheet_with(tmp_path, sheet_format, font_size=11):
 )
 def test_row_heights(tmp_path, sheet_format, size, heights):
     sheet = sheet_with(tmp_path, sheet_format, size)
-    assert [row_height(row, sheet) for row in sheet.rows] == heights
+    with _platform.measuring(sheet.platform):
+        assert [row_height(row, sheet) for row in sheet.rows] == heights
     assert [r.listed for r in sheet.rows] == [True, False, True, False]
 
 
@@ -239,8 +245,9 @@ def test_row_heights_of_larger_normal_fonts(tmp_path, family, size, height):
             .replace('<scheme val="minor" />', "", 1)
         ),  # else the theme's minor font names it
     )
-    sheet = sheetpeek.read(path, ref="A1:A2")
-    assert [row_height(row, sheet) for row in sheet.rows] == [height, height]
+    sheet = sheetpeek.read(path, ref="A1:A2", platform="mac")
+    with _platform.measuring(sheet.platform):
+        assert [row_height(row, sheet) for row in sheet.rows] == [height, height]
 
 
 def test_zero_height_rows_are_hidden(tmp_path):
@@ -256,6 +263,6 @@ def test_stored_row_height_wins(tmp_path):
         '<sheetFormatPr defaultRowHeight="15"/>'
         "<sheetData><row r='1' ht='30' customHeight='1'><c r='A1'><v>1</v></c></row></sheetData>",
     )
-    rendered = sheetpeek.read(path).layout("excel")
+    rendered = sheetpeek.read(path, platform="mac").layout("excel")
     assert rendered.rows[0].height_pt == 30
     assert rendered.rows[0].runs[0].y == 27

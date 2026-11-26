@@ -39,19 +39,19 @@ cached value but those of formulas without one and of volatile ones (`NOW()`, `R
 formula xlrecalc does not compute keeps the value the file holds and is reported
 (`value.not_computed`).
 
-`platform` says which Excel to show the workbook as: `"mac"`, Excel for Mac, by default, or
-`"windows"`, Excel for Windows at 96 dpi, or an `xlformat.Platform` (imported from xlformat).
+`platform` says which Excel to show the workbook as: `"windows"`, Excel for Windows at 96 dpi,
+by default, or `"mac"`, Excel for Mac, or an `xlformat.Platform` (imported from xlformat).
 Column widths, built-in number formats and text measure as that Excel's, and the sheet keeps the
 platform it was read with for its layout and every output. `regional_settings` takes an
 `xlformat.RegionalSettings`, by default the platform's en-US settings. On Windows, row heights,
 where text sits and its underlines are in whole pixels, as Excel for Windows draws them.
 
 ```python
->>> windows = sheetpeek.read(path, platform="windows")
->>> windows.platform.name
-'windows'
->>> windows.layout("excel").columns[0].width_pt
-48.0
+>>> mac = sheetpeek.read(path, platform="mac")
+>>> mac.platform.name
+'mac'
+>>> mac.layout("excel").columns[0].width_pt
+53.0
 ```
 
 ## Showing it
@@ -122,21 +122,21 @@ from.
 ## Excel's geometry
 
 In `excel` mode the layout is in points, as Excel lays the sheet out on the sheet's platform
-(Excel for Mac unless read with `platform="windows"`): each column's x and width, each row's y
+(Excel for Windows at 96 dpi unless read with `platform="mac"`): each column's x and width, each row's y
 and height, and each text as a {class}`sheetpeek.TextRun` with its start, baseline, width and
 clip window. A number shows as many `#` as Excel shows.
 
 ```python
 >>> excel = sheet.layout("excel")
 >>> [(c.letter, c.x_pt, c.width_pt) for c in excel.columns]
-[('A', 0.0, 53.0), ('B', 53.0, 53.0), ('C', 106.0, 53.0)]
+[('A', 0.0, 48.0), ('B', 48.0, 48.0), ('C', 96.0, 48.0)]
 >>> run = excel.rows[2].runs[0]
 >>> run.text, run.x, run.y, run.clip
-('A note long enough to spill', 3.0, 42.0, (1.0, 31.0, 159.0, 45.0))
+('A note long enough to spill', 2.25, 42.0, (1.0, 31.0, 144.0, 45.0))
 >>> excel.rows[2].crossed
 (True, True)
 >>> excel.cell(2, 2).text
-'#########'
+'########'
 ```
 
 Column C was added for the spill: it lies past the last used column, where the sheet is empty.

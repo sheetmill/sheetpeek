@@ -66,7 +66,7 @@ def test_runs_are_read_with_their_fonts(tmp_path):
         ws["A1"].font = Font(name="Calibri", size=16, color="FFFF0000")
 
     path = book(tmp_path, build, {"A1": run("plain ") + run("bold", "<b/>") + run("!", calibri())})
-    cell = sheetpeek.read(path).cell(1, 1)
+    cell = sheetpeek.read(path, platform="mac").cell(1, 1)
     assert cell.value == "plain bold!"
     red = ModelFont("Calibri", 16.0, color="FF0000")
     # Captured (runs): a run without properties takes the cell's 16 pt red; a run whose
@@ -89,7 +89,7 @@ def test_runs_in_the_cells_font_are_no_runs(tmp_path):
             "A3": run("only"),
         },
     )
-    sheet = sheetpeek.read(path)
+    sheet = sheetpeek.read(path, platform="mac")
     assert [(c.value, c.runs) for c in (sheet.cell(r, 1) for r in (1, 2, 3))] == [
         ("one font", None),
         ("a b", None),
@@ -100,13 +100,13 @@ def test_runs_in_the_cells_font_are_no_runs(tmp_path):
 
 def test_adjacent_runs_in_one_font_are_joined_and_empty_ones_dropped(tmp_path):
     strings = {"A1": run("a", "<b/>") + run("", "<i/>") + run("b", "<b/>") + run("c")}
-    cell = sheetpeek.read(book(tmp_path, nothing, strings)).cell(1, 1)
+    cell = sheetpeek.read(book(tmp_path, nothing, strings), platform="mac").cell(1, 1)
     assert [span.text for span in cell.runs] == ["ab", "c"]
 
 
 def test_escapes_are_decoded_in_each_run(tmp_path):
     cell = sheetpeek.read(
-        book(tmp_path, nothing, {"A1": run("_x0041_", "<b/>") + run("_x0042_")})
+        book(tmp_path, nothing, {"A1": run("_x0041_", "<b/>") + run("_x0042_")}), platform="mac"
     ).cell(1, 1)
     assert cell.value == "AB"
     assert [span.text for span in cell.runs] == ["A", "B"]
@@ -120,7 +120,7 @@ def test_one_string_shared_by_cells_of_different_fonts(tmp_path):
     path = book(tmp_path, build, {"A1": run("x") + run("y", "<b/>")})
     # Both cells share the first string.
     path = shared_strings_again(path)
-    sheet = sheetpeek.read(path)
+    sheet = sheetpeek.read(path, platform="mac")
     assert sheet.cell(1, 1).runs[0].font.size == 11
     assert sheet.cell(2, 1).runs[0].font.size == 20
     assert sheet.cell(1, 1).runs[1] == sheet.cell(2, 1).runs[1]
@@ -140,7 +140,9 @@ def shared_strings_again(path):
 def test_text_before_runs_is_a_run_in_the_cell_font(tmp_path):
     # The schema allows a <t> before runs, which Excel does not write. Excel keeps it as a run in
     # the cell's font, first, and the runs with their own properties (captured, runs).
-    cell = sheetpeek.read(book(tmp_path, nothing, {"A1": "<t>top</t>" + run("runs", "<b/>")}))
+    cell = sheetpeek.read(
+        book(tmp_path, nothing, {"A1": "<t>top</t>" + run("runs", "<b/>")}), platform="mac"
+    )
     found = cell.cell(1, 1)
     assert found.value == "topruns"
     assert found.runs is not None
@@ -150,7 +152,7 @@ def test_text_before_runs_is_a_run_in_the_cell_font(tmp_path):
 def test_text_after_runs_is_refused_as_excel_refuses_it(tmp_path):
     path = book(tmp_path, nothing, {"A1": run("runs", "<b/>") + "<t>end</t>"})
     with pytest.raises(sheetpeek.PackageError, match="text after its runs"):
-        sheetpeek.read(path)
+        sheetpeek.read(path, platform="mac")
 
 
 def test_runs_of_inline_strings_are_drawn(tmp_path):
@@ -159,7 +161,7 @@ def test_runs_of_inline_strings_are_drawn(tmp_path):
 
     wb = openpyxl.Workbook()
     wb.active["B2"] = CellRichText([TextBlock(InlineFont(b=True), "rich"), " text"])
-    sheet = sheetpeek.read(save(wb, tmp_path / "inline.xlsx"))
+    sheet = sheetpeek.read(save(wb, tmp_path / "inline.xlsx"), platform="mac")
     cell = sheet.cell(2, 2)
     assert cell.value == "rich text"
     assert [(span.text, span.font.bold) for span in cell.runs] == [("rich", True), (" text", False)]
@@ -188,7 +190,7 @@ def runs_sheet(tmp_path):
         + run("2", calibri(11, '<vertAlign val="subscript"/>'))
         + run("O", calibri()),
     }
-    return sheetpeek.read(book(tmp_path, build, strings)).layout("excel")
+    return sheetpeek.read(book(tmp_path, build, strings), platform="mac").layout("excel")
 
 
 @pytest.fixture
@@ -254,9 +256,9 @@ def test_a_text_section_draws_in_the_cells_font(tmp_path):
     def build(ws):
         ws["A1"].number_format = '@" more"'
 
-    rendered = sheetpeek.read(book(tmp_path, build, {"A1": run("bold", "<b/>") + run("x")})).layout(
-        "excel"
-    )
+    rendered = sheetpeek.read(
+        book(tmp_path, build, {"A1": run("bold", "<b/>") + run("x")}), platform="mac"
+    ).layout("excel")
     (line,) = runs_of(rendered, 1)
     assert (line.text, line.spans) == ("boldx more", ())
 
@@ -266,7 +268,7 @@ def test_shrink_measures_the_runs(tmp_path):
         ws["A1"].alignment = Alignment(shrink_to_fit=True)
 
     big = run("HHHHH", calibri(20)) + run("HHHHH", calibri())
-    rendered = sheetpeek.read(book(tmp_path, build, {"A1": big})).layout("excel")
+    rendered = sheetpeek.read(book(tmp_path, build, {"A1": big}), platform="mac").layout("excel")
     (line,) = runs_of(rendered, 1)
     assert line.scale < 1
     assert [s.scale for s in line.spans] == [line.scale, line.scale]
@@ -277,9 +279,9 @@ def test_fill_repeats_the_runs(tmp_path):
     def build(ws):
         ws["A1"].alignment = Alignment(horizontal="fill")
 
-    rendered = sheetpeek.read(book(tmp_path, build, {"A1": run("a", "<b/>") + run("b")})).layout(
-        "excel"
-    )
+    rendered = sheetpeek.read(
+        book(tmp_path, build, {"A1": run("a", "<b/>") + run("b")}), platform="mac"
+    ).layout("excel")
     (line,) = runs_of(rendered, 1)
     assert line.text == "ab" * (len(line.text) // 2)
     assert [s.text for s in line.spans] == ["a", "b"] * (len(line.text) // 2)
@@ -291,7 +293,7 @@ def test_distributed_words_keep_their_runs(tmp_path):
         ws.column_dimensions["A"].width = 30
 
     rendered = sheetpeek.read(
-        book(tmp_path, build, {"A1": run("one tw", "<b/>") + run("o three")})
+        book(tmp_path, build, {"A1": run("one tw", "<b/>") + run("o three")}), platform="mac"
     ).layout("excel")
     words = runs_of(rendered, 1)
     assert [w.text for w in words] == ["one", "two", "three"]
@@ -302,7 +304,7 @@ def test_distributed_words_keep_their_runs(tmp_path):
 
 def test_underlines_and_strikethrough_follow_their_runs(tmp_path):
     strings = {"A1": run("under", '<u/><color rgb="FF0000FF"/>') + run(" struck", "<strike/>")}
-    rendered = sheetpeek.read(book(tmp_path, nothing, strings)).layout("excel")
+    rendered = sheetpeek.read(book(tmp_path, nothing, strings), platform="mac").layout("excel")
     (line,) = runs_of(rendered, 1)
     under, struck = line.rules
     first, _ = line.spans
@@ -320,7 +322,9 @@ def test_a_section_color_replaces_each_runs_color(tmp_path):
         ws["A1"].number_format = "[Blue]@"
 
     strings = {"A1": run("red", '<color rgb="FFFF0000"/>') + run("bold", "<b/>")}
-    (line,) = runs_of(sheetpeek.read(book(tmp_path, build, strings)).layout("excel"), 1)
+    (line,) = runs_of(
+        sheetpeek.read(book(tmp_path, build, strings), platform="mac").layout("excel"), 1
+    )
     assert {s.font.color for s in line.spans} == {"0000FF"}
 
 
@@ -355,7 +359,7 @@ def test_html_raises_a_superscript_run_by_offset(excel):
 
 def test_html_escapes_each_run(tmp_path):
     rendered = sheetpeek.read(
-        book(tmp_path, nothing, {"A1": run("&lt;b&gt;", "<b/>") + run("&amp;")})
+        book(tmp_path, nothing, {"A1": run("&lt;b&gt;", "<b/>") + run("&amp;")}), platform="mac"
     ).layout("excel")
     page = sheetpeek.render(rendered, HTMLBackend(fragment=True))
     assert ">&lt;b&gt;</span><span" in page
@@ -370,7 +374,7 @@ def test_markdown_marks_bold_and_italic_runs_with_emphasis(tmp_path):
         "A1": run("plain ") + run("bold ", "<b/>") + run("both", "<b/><i/>") + run(" it", "<i/>"),
         "A2": run("a*b", "<b/>") + run(" c"),
     }
-    sheet = sheetpeek.read(book(tmp_path, nothing, strings))
+    sheet = sheetpeek.read(book(tmp_path, nothing, strings), platform="mac")
     rendered = sheetpeek.render(
         sheet, MarkdownBackend("letters", emphasis=True), on_notice="ignore"
     )

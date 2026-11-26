@@ -24,7 +24,7 @@ def built(tmp_path_factory):
 
 
 def test_each_case_is_built_as_described(built):
-    sheet = sheetpeek.read(built)
+    sheet = sheetpeek.read(built, platform="mac")
     assert len(suite.CASES) == 96
     for row, case in enumerate(suite.CASES, 1):
         cell = sheet.cell(row, 1)
@@ -74,7 +74,9 @@ def test_sheetpeek_fits_the_rows_excel_fits(built):
         if r and not r.startswith("#")
     ]
     captured = {r[0]: float(r[7]) for r in rows[1:]}
-    heights = {r.index: r.height_pt for r in sheetpeek.read(built).layout("excel").rows}
+    heights = {
+        r.index: r.height_pt for r in sheetpeek.read(built, platform="mac").layout("excel").rows
+    }
     ours = {case.name: heights[row] for row, case in enumerate(suite.CASES, 1)}
     differ = sorted(name for name in captured if ours[name] != captured[name])
     REPORT["wrap_rows"] = (

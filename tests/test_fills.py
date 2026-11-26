@@ -52,7 +52,7 @@ def filled(tmp_path, *fills, name="fills.xlsx"):
 
 
 def spec(tmp_path, fill):
-    sheet = sheetpeek.read(filled(tmp_path, fill))
+    sheet = sheetpeek.read(filled(tmp_path, fill), platform="mac")
     style = sheet.cell(1, 2).style
     return style.fill_spec, style.fill
 
@@ -183,7 +183,7 @@ def test_stops_are_taken_in_order_of_position(tmp_path):
             .replace('position="T"', 'position="1"')
         ),
     )
-    assert sheetpeek.read(path).cell(1, 2).style.fill_spec.stops == (
+    assert sheetpeek.read(path, platform="mac").cell(1, 2).style.fill_spec.stops == (
         (0.0, "0000FF"),
         (1.0, "FFFFFF"),
     )
@@ -199,7 +199,7 @@ def test_duplicate_stop_positions_are_read_in_order(tmp_path):
     # decides what Excel draws (Gradient.drawn_stops, captured).
     path = filled(tmp_path, GradientFill(stop=("FFFFFFFF", "FF0000FF")))
     rewrite(path, STYLES, lambda t: t.replace('<stop position="1"', '<stop position="0"', 1))
-    stops = sheetpeek.read(path).cell(1, 2).style.fill_spec.stops
+    stops = sheetpeek.read(path, platform="mac").cell(1, 2).style.fill_spec.stops
     # In the file's order, white then blue, not sorted by color.
     assert stops == ((0.0, "FFFFFF"), (0.0, "0000FF"))
 
@@ -208,7 +208,7 @@ def test_duplicate_stop_positions_are_read_in_order(tmp_path):
 def test_an_odd_degree_is_read_as_0(tmp_path, value):
     path = filled(tmp_path, GradientFill(degree=45, stop=("FFFFFFFF", "FF0000FF")))
     rewrite(path, STYLES, lambda t: t.replace('degree="45"', f'degree="{value}"'))
-    sheet = sheetpeek.read(path)
+    sheet = sheetpeek.read(path, platform="mac")
     assert sheet.cell(1, 2).style.fill_spec.degree == 0
     page = sheetpeek.render(sheet, "html")
     assert "nan" not in page.lower().replace("nanum", "")
@@ -233,7 +233,7 @@ def test_the_census_tells_solid_pattern_and_gradient_fills_apart(tmp_path):
         PatternFill("gray125", fgColor="FF000000"),
         GradientFill(stop=("FFFFFFFF", "FF0000FF")),
     )
-    features = sheetpeek.read(path).layout("excel").features
+    features = sheetpeek.read(path, platform="mac").layout("excel").features
     assert {code: [str(r) for r in p.cells] for code, p in features.items()} == {
         "fill": ["B1"],
         "fill.pattern": ["B2"],
@@ -243,15 +243,15 @@ def test_the_census_tells_solid_pattern_and_gradient_fills_apart(tmp_path):
 
 def test_rich_shows_a_pattern_as_its_blend_and_reports_it(tmp_path):
     path = filled(tmp_path, PatternFill("gray0625", fgColor="FF000000"))
-    rendered = sheetpeek.read(path).layout("characters")
+    rendered = sheetpeek.read(path, platform="mac").layout("characters")
     assert rendered.cell(1, 2).fill == "EFEFEF"
     found = {n.code: n for n in sheetpeek.notices(rendered, "rich")}
     assert found["fill.pattern"].outcome == "approximated"
-    assert "fill.pattern" not in {n.code for n in sheetpeek.notices(path, "html")}
+    assert "fill.pattern" not in {n.code for n in sheetpeek.notices(path, "html", platform="mac")}
     for name in ("text", "markdown", "csv", "tsv"):
-        assert {n.code: n.outcome for n in sheetpeek.notices(path, name)}["fill.pattern"] == (
-            "omitted"
-        ), name
+        assert {n.code: n.outcome for n in sheetpeek.notices(path, name, platform="mac")}[
+            "fill.pattern"
+        ] == ("omitted"), name
 
 
 def boxes(page):
@@ -264,7 +264,7 @@ def rule(page, name):
 
 def test_a_pattern_is_drawn_from_its_tile_anchored_at_the_sheet(tmp_path):
     path = filled(tmp_path, PatternFill("gray0625", fgColor="FF0000FF", bgColor="FFFFFF00"))
-    page = sheetpeek.render(path, "html")
+    page = sheetpeek.render(path, "html", platform="mac")
     ((name, style),) = boxes(page)
     # B1: x 71 px (53 pt), 71 px wide to C's gridline plus the far gridline; 20 px plus one.
     assert style == "left:71px;top:0px;width:71px;height:21px;background-position:1px 0px"
@@ -285,7 +285,7 @@ def test_a_fill_covers_its_far_gridlines_unless_the_neighbor_is_filled(tmp_path)
     ws["A2"].fill = PatternFill("gray125", fgColor="FF000000")
     ws["B2"].fill = PatternFill("solid", fgColor="FFFF0000")
     ws["A3"].fill = PatternFill("solid", fgColor="FF00FF00")
-    page = sheetpeek.render(save(wb, tmp_path / "far.xlsx"), "html")
+    page = sheetpeek.render(save(wb, tmp_path / "far.xlsx"), "html", platform="mac")
     first, second = (style for _, style in boxes(page))
     # A1: the cell below is filled, so it paints the gridline between them.
     assert first == "left:0px;top:0px;width:72px;height:20px"
@@ -299,7 +299,7 @@ def test_a_merge_is_one_box(tmp_path):
     ws["B2"].fill = PatternFill("darkGrid", fgColor="FF000000")
     ws["C3"].fill = PatternFill("solid", fgColor="FFFF0000")  # covered: ignored
     ws.merge_cells("B2:C3")
-    page = sheetpeek.render(save(wb, tmp_path / "merged.xlsx"), "html")
+    page = sheetpeek.render(save(wb, tmp_path / "merged.xlsx"), "html", platform="mac")
     ((_, style),) = boxes(page)
     # The range starts at B2; B and C are 71 and 70 px, plus the far gridlines.
     assert style.startswith("left:0px;top:0px;width:142px;height:41px")
@@ -326,7 +326,7 @@ def test_a_path_gradient_is_four_bands(tmp_path):
     fill = GradientFill(
         "path", left=0.2, right=0.8, top=0.2, bottom=0.8, stop=("FFFF0000", "FF0000FF")
     )
-    page = sheetpeek.render(filled(tmp_path, fill), "html")
+    page = sheetpeek.render(filled(tmp_path, fill), "html", platform="mac")
     ((name, _),) = boxes(page)
     body = rule(page, name)
     assert body.count("%3Cpolygon") == 4

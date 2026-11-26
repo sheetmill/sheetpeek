@@ -47,7 +47,7 @@ def dated(tmp_path):
 
 
 def test_dates_stay_serials(dated):
-    sheet = sheetpeek.read(dated)
+    sheet = sheetpeek.read(dated, platform="mac")
     assert [sheet.cell(r, 1).value for r in range(1, 5)] == [60, CLOCK_SERIAL, 1.5, 60]
     assert {sheet.cell(r, 1).kind for r in range(1, 5)} == {"number"}
     assert sheet.warnings == ()
@@ -66,7 +66,7 @@ def test_built_in_date_format_14_is_excels(tmp_path):
     wb.active["A1"].number_format = "mm-dd-yy"  # openpyxl writes it as numFmtId 14
     path = save(wb, tmp_path / "date14.xlsx")
     assert 'numFmtId="14"' in zip_text(path, "xl/styles.xml")
-    sheet = sheetpeek.read(path)
+    sheet = sheetpeek.read(path, platform="mac")
     assert sheet.cell(1, 1).style.number_format == "m/d/yy"
     assert sheetpeek.render(sheet, "text").strip() == "1/2/24"
 
@@ -96,7 +96,7 @@ def test_built_in_format_ids(tmp_path, number_format_id, code):
             re.sub(r"<numFmts.*?</numFmts>", "", t),
         ),
     )
-    assert sheetpeek.read(path).cell(1, 1).style.number_format == code
+    assert sheetpeek.read(path, platform="mac").cell(1, 1).style.number_format == code
 
 
 def test_value_kinds(tmp_path):
@@ -115,7 +115,7 @@ def test_value_kinds(tmp_path):
         "<c r='J1' t='str'><f>\"\"</f><v></v></c>"
         "</row></sheetData>",
     )
-    cells = sheetpeek.read(path).cells[0]
+    cells = sheetpeek.read(path, platform="mac").cells[0]
     assert [(c.value, c.kind) for c in cells] == [
         (42, "number"),
         (0.5, "number"),
@@ -141,7 +141,7 @@ def test_error_values(tmp_path):
         "<c r='B1' t='e'><v>#BUSY!</v></c>"
         "</row></sheetData>",
     )
-    cells = sheetpeek.read(path).cells[0]
+    cells = sheetpeek.read(path, platform="mac").cells[0]
     assert [(c.value, c.kind) for c in cells] == [("#N/A", "error"), ("#BUSY!", "error")]
     assert all(isinstance(c.value, xlformat.ExcelError) for c in cells)
 
@@ -155,7 +155,7 @@ def test_an_error_excel_does_not_read_as_text_refuses_the_file(tmp_path, text):
         f"<sheetData><row r='1'><c r='A1' t='e'><v>{text}</v></c></row></sheetData>",
     )
     with pytest.raises(sheetpeek.PackageError, match="an error Excel refuses"):
-        sheetpeek.read(path)
+        sheetpeek.read(path, platform="mac")
 
 
 @pytest.mark.parametrize(
@@ -174,7 +174,7 @@ def test_used_range_ignores_dimension(tmp_path, dimension, label):
         "<row r='5'><c r='D5'><v>2</v></c></row>"
         "</sheetData>",
     )
-    sheet = sheetpeek.read(path)
+    sheet = sheetpeek.read(path, platform="mac")
     assert sheet.used_range == sheet.ref == CellRange.parse("B2:D5")
     assert len(sheet.cells) == 4
     assert {len(row) for row in sheet.cells} == {3}
@@ -185,7 +185,7 @@ def test_used_range_ignores_dimension(tmp_path, dimension, label):
 def test_ref_beyond_the_data(tmp_path):
     wb = openpyxl.Workbook()
     wb.active["B2"] = "x"
-    sheet = sheetpeek.read(save(wb, tmp_path / "s.xlsx"), ref="A1:D6")
+    sheet = sheetpeek.read(save(wb, tmp_path / "s.xlsx"), ref="A1:D6", platform="mac")
     assert (len(sheet.cells), len(sheet.cells[0])) == (6, 4)
     assert sheet.cell(2, 2).value == "x"
     assert sheet.cell(6, 4).kind == "empty"
@@ -195,7 +195,7 @@ def test_ref_beyond_the_data(tmp_path):
 
 
 def test_empty_sheet(tmp_path):
-    sheet = sheetpeek.read(save(openpyxl.Workbook(), tmp_path / "empty.xlsx"))
+    sheet = sheetpeek.read(save(openpyxl.Workbook(), tmp_path / "empty.xlsx"), platform="mac")
     assert sheet.ref is None
     assert sheet.used_range is None
     assert sheet.cells == ()
@@ -214,7 +214,7 @@ def test_geometry(tmp_path):
     ws.column_dimensions["D"].hidden = True
     ws.row_dimensions[3].height = 30
     ws.row_dimensions[5].hidden = True
-    sheet = sheetpeek.read(save(wb, tmp_path / "g.xlsx"), ref="A1:E6")
+    sheet = sheetpeek.read(save(wb, tmp_path / "g.xlsx"), ref="A1:E6", platform="mac")
     assert sheet.merges == (CellRange.parse("A2:C3"),)
     assert [(c.letter, c.width, c.hidden) for c in sheet.columns] == [
         ("A", None, False),
@@ -251,7 +251,7 @@ def test_styles(tmp_path):
     ws["D1"] = "plain"
     ws["E1"] = 1234.5
     ws["E1"].number_format = "#,##0.00"
-    sheet = sheetpeek.read(save(wb, tmp_path / "styles.xlsx"))
+    sheet = sheetpeek.read(save(wb, tmp_path / "styles.xlsx"), platform="mac")
     a1, b1, c1, d1, e1 = sheet.cells[0]
     assert a1.font == sheetpeek.Font("Arial", 14.0, True, True, "double", True, "00FF00")
     assert a1.fill == "FFFF00"
@@ -277,7 +277,7 @@ def test_styles_are_shared(tmp_path):
     wb = openpyxl.Workbook()
     for row in range(1, 4):
         wb.active.cell(row, 1, row).font = Font(bold=True)
-    sheet = sheetpeek.read(save(wb, tmp_path / "shared.xlsx"))
+    sheet = sheetpeek.read(save(wb, tmp_path / "shared.xlsx"), platform="mac")
     assert len({id(row[0].style) for row in sheet.cells}) == 1
 
 
@@ -289,7 +289,7 @@ def test_normal_font_from_the_workbook(tmp_path):
     rewrite(path, "xl/styles.xml", replace_once('<sz val="11"', '<sz val="10"'))
     # Without its scheme: a theme font would be drawn in the theme's typeface (§4.14).
     rewrite(path, "xl/styles.xml", replace_once('<scheme val="minor" />', ""))
-    sheet = sheetpeek.read(path)
+    sheet = sheetpeek.read(path, platform="mac")
     assert sheet.normal_font == sheetpeek.Font("Arial", 10.0, color="000000", theme_color=1)
     assert sheet.cell(1, 1).font.name == "Arial"
 
@@ -300,7 +300,7 @@ def test_hyperlinks_reach_cells(tmp_path):
     ws["A1"] = "site"
     ws["A1"].hyperlink = "https://example.com/"
     ws["B1"] = "plain"
-    sheet = sheetpeek.read(save(wb, tmp_path / "links.xlsx"))
+    sheet = sheetpeek.read(save(wb, tmp_path / "links.xlsx"), platform="mac")
     assert sheet.cell(1, 1).hyperlink == sheetpeek.Hyperlink("https://example.com/")
     assert sheet.cell(1, 2).hyperlink is None
 
@@ -311,7 +311,7 @@ def test_uncached_formulas_are_computed(tmp_path):
     wb.active["A1"] = "=1+1"
     path = save(wb, tmp_path / "formula.xlsx")
     for mode in ("excel", "always", "never"):
-        sheet = sheetpeek.read(path, recalc_on_load=mode)
+        sheet = sheetpeek.read(path, recalc_on_load=mode, platform="mac")
         assert (sheet.cell(1, 1).value, sheet.cell(1, 1).kind) == (2, "number")
         assert sheet.notices == ()
 
@@ -323,7 +323,7 @@ def test_uncached_formulas_warn_when_xlrecalc_cannot_load(tmp_path, monkeypatch)
     monkeypatch.setattr(xlrecalc, "Loader", refuse)
     wb = openpyxl.Workbook()
     wb.active["A1"] = "=1+1"
-    sheet = sheetpeek.read(save(wb, tmp_path / "formula.xlsx"))
+    sheet = sheetpeek.read(save(wb, tmp_path / "formula.xlsx"), platform="mac")
     assert sheet.cell(1, 1).kind == "empty"
     assert len(sheet.warnings) == 1
     assert "1 formula cell(s) have no cached value" in sheet.warnings[0]
@@ -340,7 +340,7 @@ def test_sheet_selection(tmp_path):
     wb.create_sheet("Shown")["A1"] = "here"
     wb.create_sheet("Secret").sheet_state = "veryHidden"
     path = save(wb, tmp_path / "sheets.xlsx")
-    with sheetpeek.open(path) as book:
+    with sheetpeek.open(path, platform="mac") as book:
         assert book.sheet_names == ["Hidden", "Shown", "Secret"]
         assert book.sheet().name == "Shown"  # the active sheet is hidden
         assert book.sheet("Hidden").state == "hidden"
@@ -350,7 +350,7 @@ def test_sheet_selection(tmp_path):
         # Without case, as Excel compares sheet names; the sheet keeps the file's spelling.
         assert book.sheet("shown").name == "Shown"
         assert book.sheet("SECRET").state == "very_hidden"
-    assert sheetpeek.read(path, "hIDDEN").name == "Hidden"
+    assert sheetpeek.read(path, "hIDDEN", platform="mac").name == "Hidden"
 
 
 def test_file_object_and_1904(tmp_path):
@@ -360,7 +360,7 @@ def test_file_object_and_1904(tmp_path):
     wb.active["A1"].number_format = "yyyy-mm-dd"
     path = save(wb, tmp_path / "mac.xlsx")
     with path.open("rb") as handle:
-        sheet = sheetpeek.read(handle)
+        sheet = sheetpeek.read(handle, platform="mac")
     assert sheet.date1904 is True
     assert sheet.cell(1, 1).value == 0
 
@@ -374,14 +374,14 @@ def test_sheet_data_replacement_helper(tmp_path):
         SHEET1,
         replace_sheet_data("<sheetData><row r='3'><c r='C3'><v>7</v></c></row></sheetData>"),
     )
-    assert sheetpeek.read(path).cell(3, 3).value == 7
+    assert sheetpeek.read(path, platform="mac").cell(3, 3).value == 7
 
 
 def test_a_workbook_saved_by_excel():
     # Saved by Excel 16.114 for Mac from formulas (capture/excel_saved.py), so every value is
     # Excel's own cached result and the XML is Excel's own.
     path = Path(__file__).with_name("files") / "excel_formulas.xlsx"
-    sheet = sheetpeek.read(path)
+    sheet = sheetpeek.read(path, platform="mac")
     column = [(c.value, c.kind) for c in (row[0] for row in sheet.cells)]
     assert column == [
         ("", "text"),  # ="" is written <c t="str"><f>""</f><v/></c>
@@ -416,7 +416,7 @@ def test_inline_text_is_decoded(tmp_path, text, value):
     path = save(openpyxl.Workbook(), tmp_path / "text.xlsx")
     cell = f'<c r="A1" t="inlineStr"><is><t>{text}</t></is></c>'
     rewrite(path, SHEET1, replace_sheet_data(f'<sheetData><row r="1">{cell}</row></sheetData>'))
-    assert sheetpeek.read(path).cell(1, 1).value == value
+    assert sheetpeek.read(path, platform="mac").cell(1, 1).value == value
 
 
 def test_a_cached_text_result_is_decoded(tmp_path):
@@ -424,7 +424,7 @@ def test_a_cached_text_result_is_decoded(tmp_path):
     cell = '<c r="A1" t="str"><f>1</f><v>a_x000D_b</v></c>'
     rewrite(path, SHEET1, replace_sheet_data(f'<sheetData><row r="1">{cell}</row></sheetData>'))
     # A cached value Excel keeps (recalc_on_load="never"; under "excel" this file recalculates).
-    assert sheetpeek.read(path, recalc_on_load="never").cell(1, 1).value == "a\rb"
+    assert sheetpeek.read(path, recalc_on_load="never", platform="mac").cell(1, 1).value == "a\rb"
 
 
 def test_a_shared_string_is_decoded(tmp_path):
@@ -437,7 +437,7 @@ def test_a_shared_string_is_decoded(tmp_path):
     )
     cell = '<c r="A1" t="s"><v>0</v></c>'
     rewrite(path, SHEET1, replace_sheet_data(f'<sheetData><row r="1">{cell}</row></sheetData>'))
-    assert sheetpeek.read(path).cell(1, 1).value == "a\rb"
+    assert sheetpeek.read(path, platform="mac").cell(1, 1).value == "a\rb"
 
 
 @pytest.mark.parametrize("to", ["text", "rich", "html", "markdown", "csv", "tsv"])
@@ -447,7 +447,7 @@ def test_control_characters_reach_no_output(tmp_path, to):
     path = save(openpyxl.Workbook(), tmp_path / "text.xlsx")
     cell = '<c r="A1" t="inlineStr"><is><t>a_x001B_[31m_xD800__x0007__x009B_b</t></is></c>'
     rewrite(path, SHEET1, replace_sheet_data(f'<sheetData><row r="1">{cell}</row></sheetData>'))
-    sheet = sheetpeek.read(path)
+    sheet = sheetpeek.read(path, platform="mac")
     assert "\x1b" in sheet.cell(1, 1).value  # the model keeps what the file says
     output = sheetpeek.render(sheet, to)
     assert "[31m" in output

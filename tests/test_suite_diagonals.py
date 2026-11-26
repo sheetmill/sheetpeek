@@ -64,9 +64,9 @@ def parse(declarations, width, height):
 def drawn(path):
     """What sheetpeek's HTML draws for each case of the workbook at ``path``, as ``EXPECTED``."""
     group = path.stem.removeprefix("diagonals_")
-    page = sheetpeek.render(path, "html", on_notice=lambda notice: None)
+    page = sheetpeek.render(path, "html", on_notice=lambda notice: None, platform="mac")
     boxes = re.findall(r'<i class="(sp-b-[a-z]+)" style="([^"]*)"></i>', page)
-    sheet = sheetpeek.read(path)
+    sheet = sheetpeek.read(path, platform="mac")
     ordered = sorted(suite.cases(group), key=lambda c: _rc(c.cell))
     with_lines = []
     for case in ordered:
@@ -97,7 +97,7 @@ def test_the_diagonal_workbooks_read_back_as_built(built):
     assert len(suite.CASES) == 2 * 13 * 3 + 9
     for group in suite.GROUPS:
         path = built / f"diagonals_{group}.xlsx"
-        sheet = sheetpeek.read(path)
+        sheet = sheetpeek.read(path, platform="mac")
         for case in suite.cases(group):
             borders = sheet.cell(*_rc(case.cell)).style.borders
             if case.style is None or not (case.up or case.down):

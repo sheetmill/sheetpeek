@@ -150,7 +150,7 @@ def sheetpeek_reads(data: bytes) -> tuple[int, bool, str, str]:
     """What sheetpeek reads from a case: A1's rotation and stacked flag, B1's format and text."""
     import sheetpeek
 
-    sheet = sheetpeek.read(io.BytesIO(data), ref="A1:B1")
+    sheet = sheetpeek.read(io.BytesIO(data), ref="A1:B1", platform="mac")
     a1, b1 = sheet.cell(1, 1), sheet.cell(1, 2)
     shown = sheet.layout("excel").cell(1, 2)
     text = shown.text if shown is not None else ""

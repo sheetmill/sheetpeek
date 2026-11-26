@@ -68,7 +68,7 @@ def notices(sheet, code="value.not_computed"):
 )
 def test_each_mode_follows_xlrecalc(tmp_path, by_excel, mode, shown_value):
     path = book(tmp_path, row(1, A1, STALE), by_excel=by_excel)
-    sheet = sheetpeek.read(path, recalc_on_load=mode)
+    sheet = sheetpeek.read(path, recalc_on_load=mode, platform="mac")
     assert sheet.cell(1, 2).value == shown_value
     assert sheet.notices == ()
 
@@ -76,15 +76,15 @@ def test_each_mode_follows_xlrecalc(tmp_path, by_excel, mode, shown_value):
 def test_excel_recalculates_the_cells_it_marked(tmp_path):
     marked = '<c r="B1"><f ca="1">A1*3</f><v>99</v></c>'
     unmarked = '<c r="C1"><f>A1*4</f><v>98</v></c>'
-    sheet = sheetpeek.read(book(tmp_path, row(1, A1, marked, unmarked)))
+    sheet = sheetpeek.read(book(tmp_path, row(1, A1, marked, unmarked)), platform="mac")
     assert [sheet.cell(1, 2).value, sheet.cell(1, 3).value] == [6, 98]
 
 
 def test_an_unmarked_volatile_function_on_another_sheet_recalculates_every_formula(tmp_path):
     # Another program's file that looks like Excel's: the other sheet decides the answer.
     path = book(tmp_path, row(1, A1, STALE), other=row(1, '<c r="A1"><f>NOW()</f><v>1</v></c>'))
-    assert sheetpeek.read(path, "S").cell(1, 2).value == 6
-    assert sheetpeek.read(path, "S", recalc_on_load="never").cell(1, 2).value == 99
+    assert sheetpeek.read(path, "S", platform="mac").cell(1, 2).value == 6
+    assert sheetpeek.read(path, "S", recalc_on_load="never", platform="mac").cell(1, 2).value == 99
 
 
 def counted_reads(monkeypatch):
@@ -108,7 +108,9 @@ def test_the_other_sheets_answer_from_their_formulas_alone(tmp_path, monkeypatch
     # are read for it, not its values, and with every cached value standing, never its cells.
     reads = counted_reads(monkeypatch)
     later = "".join(f'<c r="{c}1"><f>A1+1</f><v>2</v></c>' for c in "BCD")
-    sheet = sheetpeek.read(book(tmp_path, row(1, A1, STALE), other=row(1, A1, later)), "S")
+    sheet = sheetpeek.read(
+        book(tmp_path, row(1, A1, STALE), other=row(1, A1, later)), "S", platform="mac"
+    )
     assert sheet.cell(1, 2).value == 99
     assert reads == [("cells", "S"), ("formulas", "T")]
 
@@ -125,7 +127,7 @@ def test_a_sheet_without_formulas_asks_nothing(tmp_path, monkeypatch):
     monkeypatch.setattr(xlrecalc.Loader, "finish", lambda self: loads.append(self))
     reads = counted_reads(monkeypatch)
     path = book(tmp_path, row(1, A1), other=row(1, '<c r="A1"><f>NOW()</f></c>'))
-    assert sheetpeek.read(path, "S").notices == ()
+    assert sheetpeek.read(path, "S", platform="mac").notices == ()
     assert (asked, loads, reads) == ([], [], [("cells", "S")])
 
 
@@ -175,14 +177,14 @@ def test_recalc_on_load_answers_as_the_separate_check_did(tmp_path, case, mode):
         expected = check.finish()
     with xlio.open(path) as opened:
         assert xlrecalc.Loader(opened, recalc_on_load=mode).opening == expected
-    sheet = sheetpeek.read(path, "S", recalc_on_load=mode)
+    sheet = sheetpeek.read(path, "S", recalc_on_load=mode, platform="mac")
     assert [c.value for c in sheet.cells[0][1:]] == shown_values[mode]
 
 
 def test_no_engine_when_every_cached_value_stands(tmp_path, monkeypatch):
     loads = []
     monkeypatch.setattr(xlrecalc.Loader, "finish", lambda self: loads.append(self))
-    sheet = sheetpeek.read(book(tmp_path, row(1, A1, STALE)))
+    sheet = sheetpeek.read(book(tmp_path, row(1, A1, STALE)), platform="mac")
     assert (sheet.cell(1, 2).value, loads) == (99, [])
 
 
@@ -196,7 +198,7 @@ def test_values_of_every_kind(tmp_path):
         '<c r="F1"><f>""</f></c>',
         '<c r="G1"><f>A1*1E+300</f></c>',
     ]
-    sheet = sheetpeek.read(book(tmp_path, row(1, *cells), by_excel=False))
+    sheet = sheetpeek.read(book(tmp_path, row(1, *cells), by_excel=False), platform="mac")
     assert values(sheet) == [
         [
             (2, "number"),
@@ -215,7 +217,7 @@ def test_shared_formulas_are_computed(tmp_path):
         row(1, A1, '<c r="B1"><f t="shared" ref="B1:B2" si="0">A1*2</f></c>'),
         row(2, '<c r="A2"><v>5</v></c>', '<c r="B2"><f t="shared" si="0"/></c>'),
     ]
-    sheet = sheetpeek.read(book(tmp_path, *rows))
+    sheet = sheetpeek.read(book(tmp_path, *rows), platform="mac")
     assert [sheet.cell(1, 2).value, sheet.cell(2, 2).value] == [4, 10]
 
 
@@ -227,10 +229,10 @@ def test_an_array_formula_fills_its_range(tmp_path):
         row(3, '<c r="A3"><v>3</v></c>', '<c r="C3"><v>0</v></c>'),
     ]
     path = book(tmp_path, *rows)
-    sheet = sheetpeek.read(path)
+    sheet = sheetpeek.read(path, platform="mac")
     assert [sheet.cell(r, 3).value for r in (1, 2, 3)] == [10, 20, 30]
     # Its first cell outside the range read.
-    part = sheetpeek.read(path, ref="C2:C3")
+    part = sheetpeek.read(path, ref="C2:C3", platform="mac")
     assert [part.cell(r, 3).value for r in (2, 3)] == [20, 30]
 
 
@@ -240,13 +242,13 @@ def test_an_array_xlrecalc_does_not_compute_keeps_its_values(tmp_path):
         row(2, '<c r="C2"><v>6</v></c>'),
     ]
     path = book(tmp_path, *rows, by_excel=False)
-    assert [sheetpeek.read(path).cell(r, 3).value for r in (1, 2)] == [5, 6]
-    assert sheetpeek.read(path, ref="C2").cell(2, 3).value == 6
+    assert [sheetpeek.read(path, platform="mac").cell(r, 3).value for r in (1, 2)] == [5, 6]
+    assert sheetpeek.read(path, ref="C2", platform="mac").cell(2, 3).value == 6
 
 
 def test_a_malformed_array_range_is_ignored(tmp_path):
     cell = '<c r="B1"><f t="array" ref="nonsense">A1*3</f></c>'
-    sheet = sheetpeek.read(book(tmp_path, row(1, A1, cell)))
+    sheet = sheetpeek.read(book(tmp_path, row(1, A1, cell)), platform="mac")
     assert sheet.cell(1, 2).value in (6, None)
 
 
@@ -256,7 +258,7 @@ def test_a_function_xlrecalc_does_not_compute_keeps_its_value(tmp_path):
         '<c r="B1" t="str"><f>A1&amp;"!"</f><v>kept!</v></c>',
         '<c r="C1"><f>CUBEVALUE("y")</f></c>',
     ]
-    sheet = sheetpeek.read(book(tmp_path, row(1, *cells), by_excel=False))
+    sheet = sheetpeek.read(book(tmp_path, row(1, *cells), by_excel=False), platform="mac")
     assert values(sheet) == [[("kept", "text"), ("kept!", "text"), (None, "empty")]]
     found = {n.message.split(": ", 1)[-1]: [str(r) for r in n.cells] for n in notices(sheet)}
     assert found == {
@@ -273,7 +275,7 @@ def test_a_failure_inside_xlrecalc_keeps_the_value(tmp_path, monkeypatch):
         raise RuntimeError("inside")
 
     monkeypatch.setattr(xlrecalc.Workbook, "value", fail)
-    sheet = sheetpeek.read(book(tmp_path, row(1, A1, STALE), by_excel=False))
+    sheet = sheetpeek.read(book(tmp_path, row(1, A1, STALE), by_excel=False), platform="mac")
     assert sheet.cell(1, 2).value == 99
     (notice,) = notices(sheet)
     assert "an error inside xlrecalc (RuntimeError)" in notice.message
@@ -281,7 +283,7 @@ def test_a_failure_inside_xlrecalc_keeps_the_value(tmp_path, monkeypatch):
 
 def test_a_value_sheetpeek_does_not_show_keeps_the_cached_one(tmp_path, monkeypatch):
     monkeypatch.setattr(xlrecalc.Workbook, "value", lambda self, ref: [[1]])
-    sheet = sheetpeek.read(book(tmp_path, row(1, A1, STALE), by_excel=False))
+    sheet = sheetpeek.read(book(tmp_path, row(1, A1, STALE), by_excel=False), platform="mac")
     assert sheet.cell(1, 2).value == 99
     (notice,) = notices(sheet)
     assert "a value sheetpeek does not show" in notice.message
@@ -317,7 +319,9 @@ def test_a_workbook_xlrecalc_refuses_keeps_every_cached_value(tmp_path, monkeypa
     else:
         monkeypatch.setattr(xlrecalc.Loader, "opening", property(refuse))
     uncached = '<c r="C1"><f>A1*4</f></c>'
-    sheet = sheetpeek.read(book(tmp_path, row(1, A1, STALE, uncached), by_excel=False))
+    sheet = sheetpeek.read(
+        book(tmp_path, row(1, A1, STALE, uncached), by_excel=False), platform="mac"
+    )
     assert values(sheet) == [[(2, "number"), (99, "number"), (None, "empty")]]
     (notice,) = notices(sheet)
     assert "xlrecalc could not read the workbook: no" in notice.message
@@ -332,7 +336,7 @@ def test_another_sheet_that_cannot_be_read_is_reported(tmp_path, monkeypatch):
         raise RuntimeError("a broken part")
 
     monkeypatch.setattr(xlio.Sheet, "formulas", unreadable)
-    sheet = sheetpeek.read(book(tmp_path, row(1, A1, STALE)))
+    sheet = sheetpeek.read(book(tmp_path, row(1, A1, STALE)), platform="mac")
     assert sheet.cell(1, 2).value == 99
     (notice,) = notices(sheet)
     assert "xlrecalc could not read the workbook" in notice.message
@@ -360,7 +364,7 @@ def test_a_macro_sheet_keeps_its_cached_values(tmp_path):
             'Target="/xl/worksheets/sheet2.xml"',
         ),
     )
-    assert sheetpeek.read(path, "T").cell(1, 2).value == 99
+    assert sheetpeek.read(path, "T", platform="mac").cell(1, 2).value == 99
 
 
 def test_one_engine_serves_every_sheet_of_a_book(tmp_path, monkeypatch):
@@ -373,7 +377,7 @@ def test_one_engine_serves_every_sheet_of_a_book(tmp_path, monkeypatch):
 
     monkeypatch.setattr(xlrecalc.Loader, "workbook", counted)
     path = book(tmp_path, row(1, A1, STALE), other=row(1, A1, STALE), by_excel=False)
-    with sheetpeek.open(path) as opened:
+    with sheetpeek.open(path, platform="mac") as opened:
         assert opened.sheet("S").cell(1, 2).value == 6
         assert opened.sheet("T").cell(1, 2).value == 6
         assert opened.sheet("S").cell(1, 1).value == 2  # the book's own reads are unmoved
@@ -397,7 +401,7 @@ def test_a_sheet_no_value_reaches_is_not_read(tmp_path, monkeypatch, by_excel):
     monkeypatch.setattr(xlio.Sheet, "cells", counted)
     volatile = '<c r="C1"><f>NOW()</f><v>1</v></c>'  # Excel's file: the check reads T for it
     path = book(tmp_path, row(1, A1, STALE), other=row(1, A1, volatile), by_excel=by_excel)
-    assert sheetpeek.read(path, "S").cell(1, 2).value == 6
+    assert sheetpeek.read(path, "S", platform="mac").cell(1, 2).value == 6
     assert reads == ["S"]
 
 
@@ -416,7 +420,7 @@ def test_a_sheet_a_value_reaches_is_read_by_the_engine(tmp_path, monkeypatch):
     path = book(
         tmp_path, row(1, A1, across), other=row(1, '<c r="A1"><v>5</v></c>'), by_excel=False
     )
-    with sheetpeek.open(path) as opened:
+    with sheetpeek.open(path, platform="mac") as opened:
         assert opened.sheet("S").cell(1, 2).value == 15
         assert opened.sheet("T").cell(1, 1).value == 5  # read again, from the file
     assert reads == ["S", "T", "T"]
@@ -431,7 +435,9 @@ def test_a_failure_while_recording_keeps_cached_values_and_reads_on(tmp_path, mo
 
     monkeypatch.setattr(xlrecalc.Loader, "cells", failing)
     uncached = '<c r="C1"><f>A1*4</f></c>'
-    sheet = sheetpeek.read(book(tmp_path, row(1, A1, STALE, uncached), by_excel=False))
+    sheet = sheetpeek.read(
+        book(tmp_path, row(1, A1, STALE, uncached), by_excel=False), platform="mac"
+    )
     assert values(sheet) == [[(2, "number"), (99, "number"), (None, "empty")]]
     (notice,) = notices(sheet)
     assert "xlrecalc could not read the workbook: recording failed" in notice.message
@@ -446,21 +452,21 @@ def test_an_error_of_the_files_own_is_raised_through_the_loader(tmp_path, monkey
 
     monkeypatch.setattr(xlrecalc.Loader, "cells", broken)
     with pytest.raises(sheetpeek.PackageError, match="a broken sheet"):
-        sheetpeek.read(book(tmp_path, row(1, A1, STALE), by_excel=False))
+        sheetpeek.read(book(tmp_path, row(1, A1, STALE), by_excel=False), platform="mac")
 
 
 def test_a_file_object_is_computed_too(tmp_path):
     data = book(tmp_path, row(1, A1, STALE), by_excel=False).read_bytes()
-    assert sheetpeek.read(io.BytesIO(data)).cell(1, 2).value == 6
+    assert sheetpeek.read(io.BytesIO(data), platform="mac").cell(1, 2).value == 6
 
 
 @pytest.mark.parametrize("mode", ["sometimes", None, "EXCEL", 1])
 def test_an_unknown_mode_is_refused(tmp_path, mode):
     path = book(tmp_path, row(1, A1))
     with pytest.raises(ValueError, match="recalc_on_load must be one of"):
-        sheetpeek.read(path, recalc_on_load=mode)
+        sheetpeek.read(path, recalc_on_load=mode, platform="mac")
     with pytest.raises(ValueError, match="recalc_on_load must be one of"):
-        sheetpeek.open(path, recalc_on_load=mode)
+        sheetpeek.open(path, recalc_on_load=mode, platform="mac")
     with pytest.raises(ValueError, match="recalc_on_load must be one of"):
         make_server(tmp_path, port=0, recalc_on_load=mode)
 
@@ -491,7 +497,7 @@ def test_the_engine_computes_cell_by_cell_without_a_whole_recalculation(tmp_path
     cells = [A1, '<c r="B1"><f>CUBEVALUE("x")</f><v>1</v></c>']
     cells += [f'<c r="{c}1"><f>B1+A1</f><v>0</v></c>' for c in "CDEFG"]
     cells += [f'<c r="{c}1"><f>A1*2</f><v>0</v></c>' for c in "HIJKL"]
-    sheet = sheetpeek.read(book(tmp_path, row(1, *cells), by_excel=False))
+    sheet = sheetpeek.read(book(tmp_path, row(1, *cells), by_excel=False), platform="mac")
     # Resting on B1, which xlrecalc keeps: their cached values; the others computed.
     assert [sheet.cell(1, c).value for c in range(3, 13)] == [0] * 5 + [4] * 5
     assert runs == []
@@ -513,7 +519,7 @@ def test_every_value_is_read_before_any_status(tmp_path, monkeypatch):
     monkeypatch.setattr(xlrecalc.Workbook, "value", counted_value)
     monkeypatch.setattr(xlrecalc.Workbook, "status", counted_status)
     cells = [A1, *(f'<c r="{c}1"><f>A1*2</f><v>0</v></c>' for c in "BCD")]
-    sheetpeek.read(book(tmp_path, row(1, *cells), by_excel=False))
+    sheetpeek.read(book(tmp_path, row(1, *cells), by_excel=False), platform="mac")
     assert calls == ["value"] * 3 + ["status"] * 3
 
 
@@ -522,7 +528,7 @@ def test_a_failure_to_build_the_engine_keeps_every_cached_value(tmp_path, monkey
         raise RuntimeError("inside")
 
     monkeypatch.setattr(xlrecalc.Loader, "workbook", fail)
-    sheet = sheetpeek.read(book(tmp_path, row(1, A1, STALE), by_excel=False))
+    sheet = sheetpeek.read(book(tmp_path, row(1, A1, STALE), by_excel=False), platform="mac")
     assert sheet.cell(1, 2).value == 99
     (notice,) = notices(sheet)
     assert "xlrecalc could not read the workbook: inside" in notice.message
@@ -537,7 +543,7 @@ def test_the_reason_names_an_external_reference_and_an_add_in_function(tmp_path)
         '<c r="C1"><f>_xll.HEAT(1)</f><v>6</v></c>',
         '<c r="D1"><f>A1+1</f><v>7</v></c>',
     ]
-    sheet = sheetpeek.read(book(tmp_path, row(1, *cells), by_excel=False))
+    sheet = sheetpeek.read(book(tmp_path, row(1, *cells), by_excel=False), platform="mac")
     assert [c.value for c in sheet.cells[0]] == [4, xlformat.ExcelError("#REF!"), 6, 7]
     found = {n.message.split(": ", 1)[-1]: [str(r) for r in n.cells] for n in notices(sheet)}
     assert found == {
@@ -556,7 +562,7 @@ def test_a_formula_computes_as_the_platform_excel_computes_it(tmp_path):
     )
     path = book(tmp_path, row(1, *cells))
     windows = sheetpeek.read(path, recalc_on_load="always", platform="windows")
-    mac = sheetpeek.read(path, recalc_on_load="always")
+    mac = sheetpeek.read(path, recalc_on_load="always", platform="mac")
     assert [windows.cell(1, 1).value, windows.cell(1, 2).value] == ["€", 128]
     assert mac.cell(1, 1).value != "€"
     assert mac.cell(1, 2).value != 128
@@ -576,7 +582,10 @@ def test_the_loader_gets_the_platform_and_the_regional_settings(tmp_path, monkey
     path = book(tmp_path, row(1, A1, STALE))
     sheetpeek.read(path, recalc_on_load="always", platform="windows")
     sheetpeek.read(
-        path, recalc_on_load="always", regional_settings=xlformat.RegionalSettings.EN_US_WINDOWS
+        path,
+        recalc_on_load="always",
+        regional_settings=xlformat.RegionalSettings.EN_US_WINDOWS,
+        platform="mac",
     )
     assert given == [
         (xlformat.Platform.WINDOWS, xlformat.RegionalSettings.EN_US_WINDOWS),

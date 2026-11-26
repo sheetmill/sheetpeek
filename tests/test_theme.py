@@ -75,7 +75,7 @@ def test_a_scheme_font_is_drawn_in_the_theme_typeface(tmp_path):
             "A4": ("x", {"font": Font(name="Calibri")}),
         },
     )
-    sheet = sheetpeek.read(themed(path))
+    sheet = sheetpeek.read(themed(path), platform="mac")
     a1, a2, a3, a4 = (sheet.cell(r, 1).font for r in range(1, 5))
     assert (a1.name, a1.scheme, a1.stored_name) == ("Courier New", "minor", "Calibri")
     assert (a2.name, a2.scheme, a2.stored_name) == ("Courier New", "minor", "Times New Roman")
@@ -89,7 +89,7 @@ def test_the_normal_font_follows_the_theme(tmp_path):
     # column takes the theme font's digits (61 pt for Courier New, theme_fonts_palette), measured
     # by xlformat, so nothing is reported.
     path = themed(build(tmp_path, {"A1": (1, {})}))
-    sheet = sheetpeek.read(path)
+    sheet = sheetpeek.read(path, platform="mac")
     assert sheet.normal_font == ModelFont(
         "Courier New", 11.0, color="000000", scheme="minor", stored_name="Calibri", theme_color=1
     )
@@ -97,13 +97,15 @@ def test_the_normal_font_follows_the_theme(tmp_path):
     rendered = sheet.layout("excel")
     assert [n.context for n in rendered.notices if n.code == "font.no_metrics"] == []
     assert rendered.columns[0].width_pt == 61
-    plain = sheetpeek.read(build(tmp_path, {"A1": (1, {})}, "plain.xlsx")).layout("excel")
+    plain = sheetpeek.read(build(tmp_path, {"A1": (1, {})}, "plain.xlsx"), platform="mac").layout(
+        "excel"
+    )
     assert plain.columns[0].width_pt == 53  # Calibri's
 
 
 def test_a_theme_font_with_glyph_tables_sets_the_widths(tmp_path):
     path = themed(build(tmp_path, {"A1": (1, {})}), minor="Aptos Narrow")
-    rendered = sheetpeek.read(path).layout("excel")
+    rendered = sheetpeek.read(path, platform="mac").layout("excel")
     assert rendered.sheet.normal_font.name == "Aptos Narrow"
     assert not [n for n in rendered.notices if n.code == "font.no_metrics"]
 
@@ -111,13 +113,13 @@ def test_a_theme_font_with_glyph_tables_sets_the_widths(tmp_path):
 def test_without_a_theme_font_the_stored_name_is_drawn(tmp_path):
     path = build(tmp_path, {"A1": ("x", {"font": Font(name="Arial", scheme="minor")})})
     rewrite(path, THEME, lambda t: re.sub(r"<a:minorFont>.*?</a:minorFont>", "", t, flags=re.S))
-    font = sheetpeek.read(path).cell(1, 1).font
+    font = sheetpeek.read(path, platform="mac").cell(1, 1).font
     assert (font.name, font.scheme, font.stored_name) == ("Arial", "minor", None)
 
 
 def test_an_empty_theme_typeface_keeps_the_stored_name(tmp_path):
     path = build(tmp_path, {"A1": ("x", {"font": Font(name="Arial", scheme="minor")})})
-    assert sheetpeek.read(themed(path, minor="")).cell(1, 1).font.name == "Arial"
+    assert sheetpeek.read(themed(path, minor=""), platform="mac").cell(1, 1).font.name == "Arial"
 
 
 # --- the palette
@@ -141,7 +143,7 @@ def test_indexed_colors_follow_the_workbook_palette(tmp_path):
         },
         palette=custom_palette(),
     )
-    sheet = sheetpeek.read(path)
+    sheet = sheetpeek.read(path, platform="mac")
     cells = [sheet.cell(r, 1) for r in range(1, 8)]
     assert cells[0].fill == TEAL
     assert cells[1].font.color == TEAL
@@ -179,7 +181,7 @@ def test_a_colors_element_without_indexed_colors_keeps_the_default_palette(tmp_p
             flags=re.S,
         ),
     )
-    assert sheetpeek.read(path).cell(1, 1).font.color == "FF0000"
+    assert sheetpeek.read(path, platform="mac").cell(1, 1).font.color == "FF0000"
 
 
 # --- number-format colors
@@ -198,7 +200,7 @@ def test_a_section_color_follows_the_workbook_palette(tmp_path):
         },
         palette=custom_palette(),
     )
-    sheet = sheetpeek.read(path)
+    sheet = sheetpeek.read(path, platform="mac")
     assert sheet.palette is not None
     assert len(sheet.palette) == 64
     assert (sheet.palette[10], sheet.palette[17]) == (TEAL, BROWN)
@@ -220,7 +222,7 @@ def test_the_palette_is_the_one_indexed_colors_take(tmp_path):
         {"A1": (1, {"number_format": "[Color10]0", "fill": fill})},
         palette=custom_palette(),
     )
-    sheet = sheetpeek.read(path)
+    sheet = sheetpeek.read(path, platform="mac")
     cell = sheet.layout("excel").cell(1, 1)
     assert sheet.cell(1, 1).style.fill == cell.format_color == BROWN
 
@@ -229,7 +231,7 @@ def test_without_its_own_palette_a_sheet_has_none(tmp_path):
     # openpyxl always writes the default palette; Excel writes <colors> only for its own.
     path = build(tmp_path, {"A1": (1, {"number_format": "[Color10]0"})})
     rewrite(path, "xl/styles.xml", lambda t: re.sub(r"<colors>.*?</colors>", "", t, flags=re.S))
-    sheet = sheetpeek.read(path)
+    sheet = sheetpeek.read(path, platform="mac")
     assert sheet.palette is None
     assert sheet.layout("excel").cell(1, 1).format_color == "008000"  # the default's index 17
 
@@ -250,8 +252,11 @@ def grid_book(tmp_path, color_id="10", palette=None, default="0", gridlines=True
 
 def test_the_grid_color_is_the_workbook_palette_entry(tmp_path):
     # colorId 10 with index 10 teal draws teal gridlines (captured, headings_grid).
-    assert sheetpeek.read(grid_book(tmp_path, palette=custom_palette())).grid_color == TEAL
-    assert sheetpeek.read(grid_book(tmp_path, color_id="12")).grid_color == "0000FF"
+    assert (
+        sheetpeek.read(grid_book(tmp_path, palette=custom_palette()), platform="mac").grid_color
+        == TEAL
+    )
+    assert sheetpeek.read(grid_book(tmp_path, color_id="12"), platform="mac").grid_color == "0000FF"
 
 
 @pytest.mark.parametrize(
@@ -260,7 +265,10 @@ def test_the_grid_color_is_the_workbook_palette_entry(tmp_path):
 def test_an_automatic_grid_color_is_none(tmp_path, color_id, default):
     # 64 is the automatic gray (captured); Excel refuses 65 and 99999, which sheetpeek reads
     # as automatic (headings_grid).
-    assert sheetpeek.read(grid_book(tmp_path, color_id, default=default)).grid_color is None
+    assert (
+        sheetpeek.read(grid_book(tmp_path, color_id, default=default), platform="mac").grid_color
+        is None
+    )
 
 
 @pytest.mark.parametrize("color_id", ["9" * 5000, "x", "-1", "1.5", "\u0661", ""])
@@ -284,7 +292,9 @@ def test_grid_color_bounds():
 
 
 def test_html_draws_the_grid_color_one_device_pixel_wide(tmp_path):
-    text = sheetpeek.render(sheetpeek.read(grid_book(tmp_path, palette=custom_palette())), "html")
+    text = sheetpeek.render(
+        sheetpeek.read(grid_book(tmp_path, palette=custom_palette()), platform="mac"), "html"
+    )
     assert f'<div class="sheetpeek sp-g-{TEAL}"' in text
     assert f".sheetpeek.sp-g-{TEAL} {{ --sheetpeek-grid: #{TEAL}; }}" in text
     widths = "border-left-width: 0.5px; border-top-width: 0.5px;"
@@ -293,12 +303,12 @@ def test_html_draws_the_grid_color_one_device_pixel_wide(tmp_path):
 
 def test_a_fill_covers_a_colored_gridline(tmp_path):
     # Captured (headings_grid): a white fill hides the colored gridline, as the gray one.
-    text = sheetpeek.render(sheetpeek.read(grid_book(tmp_path, fill=True)), "html")
+    text = sheetpeek.render(sheetpeek.read(grid_book(tmp_path, fill=True), platform="mac"), "html")
     assert '<td style="background:#FFFFFF;border-color:#FFFFFF">' in text
 
 
 def test_hidden_gridlines_draw_no_grid_color(tmp_path):
-    sheet = sheetpeek.read(grid_book(tmp_path, gridlines=False))
+    sheet = sheetpeek.read(grid_book(tmp_path, gridlines=False), platform="mac")
     assert sheet.grid_color == "FF0000"
     text = sheetpeek.render(sheet, "html")
     assert "sp-g-" not in text
@@ -318,7 +328,7 @@ def test_hidden_gridlines_draw_no_grid_color(tmp_path):
     ],
 )
 def test_each_output_declares_the_grid_color(tmp_path, name, outcome):
-    sheet = sheetpeek.read(grid_book(tmp_path))
+    sheet = sheetpeek.read(grid_book(tmp_path), platform="mac")
     assert not [n for n in sheet.notices if n.code == "grid.color"]  # no reader notice
     found = [n for n in sheetpeek.notices(sheet, name) if n.code == "grid.color"]
     assert [n.outcome for n in found] == ([outcome] if outcome else [])
@@ -328,16 +338,18 @@ def test_rich_draws_the_separators_in_the_grid_color(tmp_path):
     pytest.importorskip("rich")
     from sheetpeek.backends import RichBackend
 
-    sheet = sheetpeek.read(grid_book(tmp_path, palette=custom_palette()))
+    sheet = sheetpeek.read(grid_book(tmp_path, palette=custom_palette()), platform="mac")
     backend = RichBackend("|", color_system="truecolor", force_terminal=True)
     text = sheetpeek.render(sheet, backend)
     assert "\x1b[38;2;0;128;128m|" in text
-    plain = sheetpeek.render(sheetpeek.read(grid_book(tmp_path, color_id="64")), backend)
+    plain = sheetpeek.render(
+        sheetpeek.read(grid_book(tmp_path, color_id="64"), platform="mac"), backend
+    )
     assert "38;2" not in plain
 
 
 def test_text_draws_no_grid_color(tmp_path):
-    sheet = sheetpeek.read(grid_book(tmp_path))
+    sheet = sheetpeek.read(grid_book(tmp_path), platform="mac")
     assert "\x1b" not in sheetpeek.render(sheet, TextBackend("|"))
 
 
@@ -367,7 +379,7 @@ def test_heading_bands_grow_with_the_normal_font():
 def test_html_headings_take_the_expected_sizes(tmp_path):
     path = build(tmp_path, {"A1": (1, {}), "A10": (10, {})})
     text = sheetpeek.render(
-        sheetpeek.read(path), HTMLBackend(column_headings=True, row_headings=True)
+        sheetpeek.read(path, platform="mac"), HTMLBackend(column_headings=True, row_headings=True)
     )
     # 22 pt (2 digits) and 21 pt, in whole CSS px at 4/3.
     assert '<col style="width:29px">' in text
@@ -382,7 +394,9 @@ def test_html_headings_take_the_expected_sizes(tmp_path):
     ],
 )
 def test_heading_colors(tmp_path, scheme, colors):
-    text = sheetpeek.render(sheetpeek.read(build(tmp_path, {"A1": (1, {})})), "html")
+    text = sheetpeek.render(
+        sheetpeek.read(build(tmp_path, {"A1": (1, {})}), platform="mac"), "html"
+    )
     selector = ".sheetpeek {" if scheme == "light" else '.sheetpeek[data-color-scheme="dark"] {'
     block = text[text.index(selector) :].split("}")[0]
     for name, color in zip(("paper", "ink", "grid"), colors, strict=True):
@@ -406,7 +420,7 @@ def test_theme_color_1_is_the_themes_dark_1_and_automatic_stays_automatic(tmp_pa
     path = tmp_path / "dark.xlsx"
     wb.save(path)
     tables.second_theme(path)
-    sheet = sheetpeek.read(path)
+    sheet = sheetpeek.read(path, platform="mac")
     fonts = [sheet.cell(r, 1).font for r in (1, 2, 3)]
     assert [(f.color, f.theme_color) for f in fonts] == [
         ("1F3864", 1),

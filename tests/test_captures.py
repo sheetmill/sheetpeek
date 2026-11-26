@@ -90,7 +90,7 @@ def sheet(tmp_path_factory):
             '<c r="N136" s="6" t="e"><f>1/0</f><v>#DIV/0!</v></c>',
         ),
     )
-    return sheetpeek.read(path)
+    return sheetpeek.read(path, platform="mac")
 
 
 @pytest.fixture(scope="module")
@@ -427,7 +427,7 @@ def test_theme_colors_match_excel(tmp_path):
     # reporting its theme index (Excel's Font.ThemeColor).
     from capture.theme_colors import build
 
-    sheet = sheetpeek.read(build(tmp_path / "theme_colors.xlsx"))
+    sheet = sheetpeek.read(build(tmp_path / "theme_colors.xlsx"), platform="mac")
     lines = THEME_CAPTURE.read_text(encoding="utf-8").splitlines()
     records = [line.split("\t") for line in lines if line and not line.startswith("#")][1:]
     deviations = {}
@@ -458,7 +458,7 @@ def test_merge_width_matches_excel(tmp_path):
     # back to dialog units), hidden columns left out: what Excel shows, read with string value.
     from capture.cell_text import build
 
-    book = sheetpeek.open(build(tmp_path / "cell_text.xlsx"))
+    book = sheetpeek.open(build(tmp_path / "cell_text.xlsx"), platform="mac")
     rows: dict[tuple[str, bool], list[str]] = {}
     for width, merge, _value, _fmt, shown in suite("merge_width.tsv"):
         rows.setdefault((width, merge == "A:C, B hidden"), []).append(shown)
@@ -480,7 +480,11 @@ def test_merge_width_matches_excel(tmp_path):
 def test_error_width_matches_excel(tmp_path):
     from capture.cell_text import ERROR_WIDTHS, ERRORS, build
 
-    rendered = sheetpeek.open(build(tmp_path / "cell_text.xlsx")).sheet("errors").layout("excel")
+    rendered = (
+        sheetpeek.open(build(tmp_path / "cell_text.xlsx"), platform="mac")
+        .sheet("errors")
+        .layout("excel")
+    )
     records = suite("error_width.tsv")
     deviations = {}
     for error, width, shown in records:
@@ -510,7 +514,7 @@ def shared_string(tmp_path, xml):
         SHEET1,
         replace_sheet_data('<sheetData><row r="1"><c r="A1" t="s"><v>0</v></c></row></sheetData>'),
     )
-    return sheetpeek.read(path).cell(1, 1).value
+    return sheetpeek.read(path, platform="mac").cell(1, 1).value
 
 
 @pytest.mark.excel
@@ -576,7 +580,7 @@ def compare_packages():
     for name, outcome, sizes in package_rows():
         data = io.BytesIO(dict(package_probe.CASES)[name](package_probe.base()))
         try:
-            sheet = sheetpeek.read(data, ref="A1:B2")
+            sheet = sheetpeek.read(data, ref="A1:B2", platform="mac")
         except sheetpeek.PackageError as error:
             if outcome != "refused":
                 deviations[name] = f"refused, where Excel opens it: {error}"

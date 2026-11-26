@@ -12,6 +12,7 @@ from typing import TextIO
 from sheetpeek._model import one_line
 from sheetpeek._notices import Notice
 from sheetpeek._package import SERVE_LIMITS, PackageError, ReadLimits
+from sheetpeek._platform import DEFAULT_PLATFORM_NAME
 from sheetpeek._read import Book
 from sheetpeek._read import open as open_book
 from sheetpeek._recalc import RECALC_ON_LOAD
@@ -168,9 +169,9 @@ def _add_platform(command: argparse.ArgumentParser) -> None:
     command.add_argument(
         "--platform",
         choices=("mac", "windows"),
-        default="mac",
-        help="which Excel to show the workbook as: Excel for Mac (mac, the default) or Excel "
-        "for Windows at 96 dpi (windows)",
+        default=DEFAULT_PLATFORM_NAME,
+        help="which Excel to show the workbook as: Excel for Windows at 96 dpi (windows, the "
+        "default) or Excel for Mac (mac)",
     )
 
 

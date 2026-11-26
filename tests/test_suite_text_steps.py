@@ -30,7 +30,7 @@ def built(tmp_path_factory):
 
 def test_each_workbook_reads_back_with_its_normal_font(built):
     for group, path in built.items():
-        sheet = sheetpeek.read(path)
+        sheet = sheetpeek.read(path, platform="mac")
         name, size = suite.FACES[group]
         assert (sheet.normal_font.name, sheet.normal_font.size) == (name, size), group
         for case in suite.cases(group):
@@ -38,14 +38,14 @@ def test_each_workbook_reads_back_with_its_normal_font(built):
 
 
 def test_the_cases_are_what_their_names_say(built):
-    sheet = sheetpeek.read(built["indent_calibri11"])
+    sheet = sheetpeek.read(built["indent_calibri11"], platform="mac")
     for case in suite.cases("indent_calibri11"):
         face, size, align, _, level = case.name.rsplit(" ", 4)
         style = sheet.cell(*_at(case.cell)).style
         assert (style.h_align, style.indent) == (align, int(level)), case.name
         font = sheet.cell(*_at(case.cell)).font
         assert (font.name, font.size) == (face, float(size)), case.name
-    sheet = sheetpeek.read(built["shrink"])
+    sheet = sheetpeek.read(built["shrink"], platform="mac")
     for case in suite.cases("shrink"):
         cell = sheet.cell(*_at(case.cell))
         if case.name.startswith("shrunk"):
@@ -111,7 +111,7 @@ def _captured():
 
 def _drawn(path, group):
     """sheetpeek's runs for each case: the first run's left and the last run's right, points."""
-    rendered = sheetpeek.read(path).layout("excel")
+    rendered = sheetpeek.read(path, platform="mac").layout("excel")
     columns = {c.index: c for c in rendered.columns}
     found = {}
     for case in suite.cases(group):

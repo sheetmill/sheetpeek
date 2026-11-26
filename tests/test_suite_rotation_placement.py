@@ -26,7 +26,7 @@ def laid_out(tmp_path_factory):
     """Each case's runs (x, baseline, width and angle from its cell's left and top) and width."""
     path = tmp_path_factory.mktemp("rotation_placement") / "rotation_placement.xlsx"
     rm.build(path, suite.CASES)
-    book = sheetpeek.open(path)
+    book = sheetpeek.open(path, platform="mac")
     found = {}
     for name, cell, case in rm.placements(suite.CASES):
         rendered = book.sheet(name).layout("excel")
@@ -48,7 +48,7 @@ def test_the_workbook_reads_back_as_built(tmp_path):
     placed = rm.build(path, suite.CASES)
     assert [case for _, _, case in placed] == suite.CASES
     assert len({c.name for c in suite.CASES}) == len(suite.CASES)
-    book = sheetpeek.open(path)
+    book = sheetpeek.open(path, platform="mac")
     for name, cell, case in placed:
         style = book.sheet(name).cell(int(cell[1:]), 5).style
         stored = case.cell.rotation

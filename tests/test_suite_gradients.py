@@ -73,9 +73,9 @@ def parse(declarations, width, height):
 def drawn(path):
     """What sheetpeek's HTML draws for each case of the workbook at ``path``, as ``EXPECTED``."""
     group = path.stem.removeprefix("gradients_")
-    page = sheetpeek.render(path, "html")
+    page = sheetpeek.render(path, "html", platform="mac")
     boxes = re.findall(r'<i class="(sp-f-[a-z]+)" style="([^"]*)"></i>', page)
-    sheet = sheetpeek.read(path)
+    sheet = sheetpeek.read(path, platform="mac")
     found = {}
     ordered = sorted(suite.cases(group), key=lambda c: _rc(c.cell))
     # a gradient is a box of the fill layer; a solid fill (no stops: black) is the cell's own
@@ -148,7 +148,7 @@ def built(tmp_path_factory):
 def test_the_gradient_workbooks_read_back_as_built(built):
     for group in suite.GROUPS:
         path = built / f"gradients_{group}.xlsx"
-        sheet = sheetpeek.read(path)
+        sheet = sheetpeek.read(path, platform="mac")
         for case in suite.cases(group):
             spec = sheet.cell(*_rc(case.cell)).style.fill_spec
             if not case.stops:
@@ -222,7 +222,7 @@ def test_paint_follows_sheetpeeks_gradient_along_the_axis(built):
     # pixel more, so on the 57 px box of a 42 pt row the colors move by up to 255 / 57 levels
     # where one stretch spans the box, and by that over the stretch's share where it is shorter
     # (black at 0 to a first stop at 0.25: 4 times as many).
-    sheet = sheetpeek.read(built / "gradients_main.xlsx")
+    sheet = sheetpeek.read(built / "gradients_main.xlsx", platform="mac")
     for case in suite.cases("main"):
         if case.kind != "linear" or case.degree not in (None, "90"):
             continue
@@ -436,7 +436,7 @@ def _compare(rows, specs, label, which=("grid", "profile_x", "profile_y")):
 def specs(built):
     found = {}
     for group in suite.GROUPS:
-        sheet = sheetpeek.read(built / f"gradients_{group}.xlsx")
+        sheet = sheetpeek.read(built / f"gradients_{group}.xlsx", platform="mac")
         found[group] = {
             c.cell: sheet.cell(*_rc(c.cell)).style.fill_spec for c in suite.cases(group)
         }

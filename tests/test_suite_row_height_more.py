@@ -22,7 +22,7 @@ def built(tmp_path_factory):
 
 def _layout(folder, number):
     rows = max(c.row for c in suite.CASES if c.workbook == number)
-    sheet = sheetpeek.read(folder / suite.workbook_name(number), ref=f"A1:A{rows}")
+    sheet = sheetpeek.read(folder / suite.workbook_name(number), ref=f"A1:A{rows}", platform="mac")
     return sheet, {row.index: row for row in sheet.layout("excel").rows}
 
 

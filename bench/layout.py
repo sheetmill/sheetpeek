@@ -21,7 +21,7 @@ import sheetpeek
 def main(path: str, label: str) -> None:
     rows = sheets = 0
     read_s = layout_s = 0.0
-    with sheetpeek.open(path) as book:
+    with sheetpeek.open(path, platform="mac") as book:
         for name in book.sheet_names:
             start = time.perf_counter()
             try:

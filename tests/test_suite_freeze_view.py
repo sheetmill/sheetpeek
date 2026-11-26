@@ -33,7 +33,7 @@ def folder(tmp_path_factory):
 
 
 def _sheet(folder, name):
-    return sheetpeek.read(folder / f"freeze_view_{name}.xlsx")
+    return sheetpeek.read(folder / f"freeze_view_{name}.xlsx", platform="mac")
 
 
 def _at(cell):

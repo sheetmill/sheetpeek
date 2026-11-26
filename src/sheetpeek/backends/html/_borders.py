@@ -27,6 +27,7 @@ from typing import TYPE_CHECKING, TextIO
 
 from sheetpeek._fill_border_model import BorderStyle, Diagonal, Side, SlantedBorders
 from sheetpeek._pass_borders import rendered_borders
+from sheetpeek._platform import DEFAULT_PLATFORM_NAME
 from sheetpeek.backends.html._patterns import Classes, inside, svg_uri, tile_svg
 
 if TYPE_CHECKING:
@@ -96,7 +97,7 @@ _DIAGONAL: dict[str, tuple[float, str]] = {
 }
 
 
-def style_tile(style: BorderStyle, platform: str = "mac") -> tuple[str, ...] | None:
+def style_tile(style: BorderStyle, platform: str = DEFAULT_PLATFORM_NAME) -> tuple[str, ...] | None:
     """A style's tile on ``platform`` (``"mac"`` or ``"windows"``), ``None`` for a solid band."""
     if platform == "windows" and style in _WINDOWS_TILES:
         return _WINDOWS_TILES[style]

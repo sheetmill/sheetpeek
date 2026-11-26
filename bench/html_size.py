@@ -204,7 +204,7 @@ def main() -> None:
     if not path.exists():
         (build if case == "plain" else build_features)(path, rows, columns)
     start = time.perf_counter()
-    sheet = sheetpeek.read(path)
+    sheet = sheetpeek.read(path, platform="mac")
     if frozen:
         pane = sheetpeek.SheetView(frozen_rows=1, frozen_columns=1, pane_state="frozen")
         sheet = dataclasses.replace(sheet, view=pane)

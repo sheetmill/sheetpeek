@@ -205,7 +205,7 @@ def snap(listing: str, out: str, start: int = 0, stop: int | None = None) -> Non
             except Exception:
                 volatile = {}
             try:
-                with sheetpeek.open(path, limits=limits) as book:
+                with sheetpeek.open(path, limits=limits, platform="mac") as book:
                     infos = [(i.name, i.kind, i.state, i.tab_color) for i in book.sheets]
                     head = {
                         "file": path,

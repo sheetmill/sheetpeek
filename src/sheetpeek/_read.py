@@ -1104,8 +1104,8 @@ def open(  # noqa: A001 - the module-level open() of gzip, tarfile, shelve
             saved; in a file Excel saved, those it marked, its volatile cells and their
             dependents); ``"always"``, every formula; ``"never"``, none but those without a
             cached value and the volatile ones.
-        platform: Which Excel the sheets are shown as: ``"mac"`` (the default, Excel for Mac),
-            ``"windows"`` (Excel for Windows at 96 dpi) or an ``xlformat.Platform``, imported
+        platform: Which Excel the sheets are shown as: ``"windows"`` (the default, Excel for
+            Windows at 96 dpi), ``"mac"`` (Excel for Mac) or an ``xlformat.Platform``, imported
             from xlformat. Column widths, built-in formats and text measure as that Excel's.
         regional_settings: The viewer's regional settings, an ``xlformat.RegionalSettings``
             imported from xlformat; by default the platform's en-US settings.
@@ -1148,8 +1148,8 @@ def read(
         limits: What reading may cost. By default, ``ReadLimits()``; lower them for files from
             people you do not trust.
         recalc_on_load: Which formulas show a computed value, as :func:`open` takes it.
-        platform: Which Excel the sheet is shown as, as :func:`open` takes it (``"mac"`` by
-            default, ``"windows"``, or an ``xlformat.Platform`` imported from xlformat).
+        platform: Which Excel the sheet is shown as, as :func:`open` takes it (``"windows"`` by
+            default, ``"mac"``, or an ``xlformat.Platform`` imported from xlformat).
         regional_settings: The viewer's regional settings, as :func:`open` takes them.
 
     Raises:

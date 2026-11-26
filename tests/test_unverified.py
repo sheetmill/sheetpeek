@@ -29,7 +29,7 @@ LABELS: dict[str, tuple[str, ...]] = {
         '"Numbers no column, row or font can have", unverified; this suite asks them in the same '
         "way.",
     ),
-    "README.md": ("unverified.",),
+    "README.md": ("Rows at font sizes above 72 points are unverified.",),
     "docs/html.md": ("angled text comes from Excel's print layout and is unverified on screen.",),
     "tests/test_suite_diagonals.py": (
         "quarter of it; provisional until the capture's spread is known. "

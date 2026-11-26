@@ -29,6 +29,7 @@ from urllib.parse import parse_qs, quote, unquote, urlsplit
 
 from sheetpeek._model import CellRange, one_line
 from sheetpeek._package import SERVE_LIMITS, PackageError, ReadLimits
+from sheetpeek._platform import DEFAULT_PLATFORM_NAME
 from sheetpeek._platform import resolve as resolve_platform
 from sheetpeek._read import open as open_book
 from sheetpeek._recalc import RecalcOnLoad, recalc_mode
@@ -251,7 +252,7 @@ def make_server(
     *,
     limits: ReadLimits = SERVE_LIMITS,
     recalc_on_load: RecalcOnLoad = "excel",
-    platform: str = "mac",
+    platform: str = DEFAULT_PLATFORM_NAME,
 ) -> ThreadingHTTPServer:
     """A server for the workbooks under ``root``; call ``serve_forever()`` on it.
 

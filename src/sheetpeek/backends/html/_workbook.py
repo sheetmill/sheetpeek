@@ -101,8 +101,8 @@ def render_workbook(
         out: A text stream to write to. Without one, the page is returned as a string.
         limits: What reading may cost. ``max_cells`` bounds the whole page's cells, every
             sheet's together. By default, ``ReadLimits()``.
-        platform: Which Excel to show it as, when ``source`` is a workbook: ``"mac"`` (the
-            default), ``"windows"`` or an ``xlformat.Platform``, imported from xlformat. An open
+        platform: Which Excel to show it as, when ``source`` is a workbook: ``"windows"`` (the
+            default), ``"mac"`` or an ``xlformat.Platform``, imported from xlformat. An open
             book is shown as the platform it was opened with.
         regional_settings: The viewer's regional settings, when ``source`` is a workbook.
         on_notice: Called with each notice, ``"ignore"``, or ``None`` for one

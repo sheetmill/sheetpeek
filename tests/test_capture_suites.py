@@ -22,7 +22,7 @@ from tests.screen_canvas import SCALE, Canvas
 
 def test_the_border_workbook_reads_back_as_built(tmp_path):
     placed = borders.build(tmp_path / "borders.xlsx")
-    sheet = sheetpeek.read(tmp_path / "borders.xlsx")
+    sheet = sheetpeek.read(tmp_path / "borders.xlsx", platform="mac")
     assert len(placed) == 14
     for coordinate, style in placed:
         letters, row = coordinate_from_string(coordinate)
@@ -57,7 +57,7 @@ def test_a_dashed_bottom_reads_as_its_runs_in_points():
 
 def test_the_fill_workbook_reads_back_as_built(tmp_path):
     placed = fills.build(tmp_path / "fills.xlsx")
-    sheet = sheetpeek.read(tmp_path / "fills.xlsx")
+    sheet = sheetpeek.read(tmp_path / "fills.xlsx", platform="mac")
     assert len(placed) == 2 * 19 + 3
     for pattern, colors, coordinate in placed:
         letters, row = coordinate_from_string(coordinate)
@@ -93,16 +93,16 @@ def test_a_tile_drawn_in_whole_points_reads_one_character_a_point():
 def test_the_text_style_workbook_reads_back_as_built(tmp_path):
     found = text_style.build(tmp_path / "text_style.xlsx")
     assert len(found) == len(text_style.cases())
-    shrink = sheetpeek.read(tmp_path / "text_style.xlsx", "Shrink")
+    shrink = sheetpeek.read(tmp_path / "text_style.xlsx", "Shrink", platform="mac")
     assert shrink.cell(4, 3).style.shrink
     assert not shrink.cell(4, 7).style.shrink
     assert [str(m) for m in shrink.merges] == ["E14:F14"]
-    fonts = sheetpeek.read(tmp_path / "text_style.xlsx", "Fonts")
+    fonts = sheetpeek.read(tmp_path / "text_style.xlsx", "Fonts", platform="mac")
     for row, underline in text_style.UNDERLINES.items():
         assert fonts.cell(row, 3).style.font.underline == underline
     assert fonts.cell(14, 5).style.font.vert_align == "superscript"
     assert fonts.cell(18, 7).style.font.strike
-    align = sheetpeek.read(tmp_path / "text_style.xlsx", "Align")
+    align = sheetpeek.read(tmp_path / "text_style.xlsx", "Align", platform="mac")
     assert align.cell(16, 7).style.justify_last_line
     assert align.cell(26, 5).style.reading_order == 2
     assert align.cell(10, 3).style.v_align == "distributed"
@@ -113,7 +113,7 @@ def test_the_filter_workbook_reads_back_as_built(tmp_path):
     # capture then checks against Excel.
     path = tmp_path / "filters.xlsx"
     assert len(filters.build(path)) == len(filters.CASES)
-    rendered = sheetpeek.read(path).layout("excel")
+    rendered = sheetpeek.read(path, platform="mac").layout("excel")
     found = {
         f"{get_column_letter(c.column)}{c.row}": c.button
         for row in rendered.rows
@@ -190,7 +190,9 @@ def _text_style_cases(group):
 def _drawn_lines(tmp_path, group):
     """sheetpeek's lines of each cell of a text_style group: (start, end) from the cell's left."""
     text_style.build(tmp_path / "text_style.xlsx")
-    rendered = sheetpeek.read(tmp_path / "text_style.xlsx", group.capitalize()).layout("excel")
+    rendered = sheetpeek.read(
+        tmp_path / "text_style.xlsx", group.capitalize(), platform="mac"
+    ).layout("excel")
     x0 = {c.index: c.x_pt for c in rendered.columns}
     found: dict[str, dict[float, list[float]]] = {}
     for row in rendered.rows:
@@ -240,7 +242,7 @@ def test_lines_sit_at_the_baselines_excel_draws(tmp_path):
     }
     assert len(captured) == 15
     _drawn_lines(tmp_path, "align")
-    rendered = sheetpeek.read(tmp_path / "text_style.xlsx", "Align").layout("excel")
+    rendered = sheetpeek.read(tmp_path / "text_style.xlsx", "Align", platform="mac").layout("excel")
     ours: dict[str, set[float]] = {}
     for row in rendered.rows:
         for run in row.runs:

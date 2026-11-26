@@ -32,7 +32,7 @@ def laid_out(paths):
     """sheetpeek's row height and last baseline, from the row's (a merge's) top, by case."""
     found = {}
     for group, path in paths.items():
-        rendered = sheetpeek.read(path).layout("excel")
+        rendered = sheetpeek.read(path, platform="mac").layout("excel")
         for case in suite.cases(group):
             r, c = _at(case.cell)
             row = next(x for x in rendered.rows if x.index == r)
@@ -42,7 +42,7 @@ def laid_out(paths):
 
 
 def test_every_case_is_built_as_described(built):
-    sheet = sheetpeek.read(built["cells"])
+    sheet = sheetpeek.read(built["cells"], platform="mac")
     for case in suite.cases("cells"):
         assert sheet.cell(*_at(case.cell)).value == suite.PROBE or "\n" in str(
             sheet.cell(*_at(case.cell)).value

@@ -27,7 +27,7 @@ def drawn(path):
     its top below the baseline; the slanted box's shift (``None``: drawn upright); for the
     ``neighbor`` case, the style drawn upright on each shared edge.
     """
-    book = sheetpeek.open(path)
+    book = sheetpeek.open(path, platform="mac")
     found = {}
     for name, cell, case in rotation_more.placements():
         rendered = book.sheet(name).layout("excel")
@@ -85,7 +85,7 @@ def test_the_workbook_reads_back_as_built(tmp_path):
     assert placed == rotation_more.placements()
     assert [case for _, _, case in placed] == rotation_more.CASES
     assert len({case.name for case in rotation_more.CASES}) == len(rotation_more.CASES) == 43
-    book = sheetpeek.open(path)
+    book = sheetpeek.open(path, platform="mac")
     letters = {"l": "left", "r": "right", "t": "top", "b": "bottom"}
     for name, cell, case in placed:
         sheet = book.sheet(name)
@@ -291,7 +291,7 @@ def widths(tmp_path_factory):
     """Each case's cell (or merge) width in points, as sheetpeek lays it out."""
     path = tmp_path_factory.mktemp("rotation_more") / "rotation_more.xlsx"
     rotation_more.build(path)
-    book = sheetpeek.open(path)
+    book = sheetpeek.open(path, platform="mac")
     found = {}
     for name, _, case in rotation_more.placements():
         columns = {c.index: c for c in book.sheet(name).layout("excel").columns}

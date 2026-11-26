@@ -381,7 +381,7 @@ def sheetpeek_view(path: Path, group: str) -> dict[str, str | float | None]:
 
     import sheetpeek
 
-    sheet = sheetpeek.read(path)
+    sheet = sheetpeek.read(path, platform="mac")
     laid = sheet.layout("excel")
     found: dict[str, str | float | None] = {}
     for case in cases(group):

@@ -23,7 +23,7 @@ BLACK = (0, 0, 0)
 def drawn(path):
     """What sheetpeek draws for each case of the workbook at ``path``, as ``EXPECTED`` holds it."""
     group = path.stem.removeprefix("spill_neighbors_")
-    rendered = sheetpeek.read(path).layout("excel")
+    rendered = sheetpeek.read(path, platform="mac").layout("excel")
     columns = {c.index: c for c in rendered.columns}
     found = {}
     for case in spill_neighbors.cases(group):
@@ -71,7 +71,7 @@ def test_the_workbooks_read_back_as_built(tmp_path):
     assert found == spill_neighbors.CASES
     for group in spill_neighbors.GROUPS:
         path = tmp_path / f"spill_neighbors_{group}.xlsx"
-        sheet = sheetpeek.read(path)
+        sheet = sheetpeek.read(path, platform="mac")
         assert sheet.notices == (), group
         assert sheet.view.show_zeros is (group != "zeros")
         for case in spill_neighbors.cases(group):

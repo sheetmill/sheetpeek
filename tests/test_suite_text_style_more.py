@@ -33,7 +33,7 @@ def drawn(path, group):
     baseline, top from the row's top, start from the cell's left, end from the right,
     thickness).
     """
-    rendered = sheetpeek.read(path, group.capitalize()).layout("excel")
+    rendered = sheetpeek.read(path, group.capitalize(), platform="mac").layout("excel")
     columns = {c.index: c for c in rendered.columns}
     found = {}
     for case in suite.cases(group):
@@ -102,7 +102,7 @@ def test_the_workbook_reads_back_as_built(built):
     path, found = built
     assert found == suite.cases()
     for group in suite.GROUPS:
-        sheet = sheetpeek.read(path, group.capitalize())
+        sheet = sheetpeek.read(path, group.capitalize(), platform="mac")
         for case in suite.cases(group):
             assert sheet.cell(*_at(case.cell)).value is not None, case.name
         assert drawn(path, group) == suite.EXPECTED[group], group
@@ -125,7 +125,7 @@ def test_the_cases_are_what_their_names_say(built):
     for table in (suite.INDENT_NARROW, suite.INDENT_WIDE):
         for width, text in table.items():
             assert xlformat.text_width(text, font=font) == width
-    sheet = sheetpeek.read(path, "Rules")
+    sheet = sheetpeek.read(path, "Rules", platform="mac")
     for row, size in zip((4, 6, 8, 10), suite.RULE_SIZES, strict=True):
         assert sheet.cell(row, 3).font.size == size
 

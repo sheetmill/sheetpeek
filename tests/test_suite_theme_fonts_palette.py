@@ -67,7 +67,7 @@ def test_every_group_builds_and_reads_back_as_built(tmp_path):
 
 
 def test_the_fonts_theme_is_as_the_cases_say(tmp_path):
-    sheet = sheetpeek.read(_built(tmp_path, "fonts"))
+    sheet = sheetpeek.read(_built(tmp_path, "fonts"), platform="mac")
     b4, b5, b6, b8 = (sheet.cell(r, 2).font for r in (4, 5, 6, 8))
     assert (b4.stored_name, b4.scheme) == ("Calibri", "minor")
     assert (b5.stored_name, b5.scheme) == ("Times New Roman", "minor")

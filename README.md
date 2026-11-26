@@ -93,10 +93,10 @@ the cached value, or where Excel recalculates (a file another program wrote, for
 [xlrecalc](https://github.com/sheetmill/xlrecalc) computes; `recalc_on_load="never"` keeps the
 cached values. `ref="A1:H40"` keeps part of a sheet (the whole sheet is
 still read, for its used range), and `sheetpeek.open` reads several sheets with one load.
-`platform="windows"` shows a workbook as Excel for Windows at 96 dpi does (Excel for Mac by
-default): column widths, number formats, text and its insets, rows, baselines and underlines in
-whole pixels, superscript and subscript rows included. Rows at font sizes above 72 points are
-unverified.
+The defaults follow Excel for Windows at 96 dpi: column widths, number formats, text and its
+insets, rows, baselines and underlines in whole pixels, superscript and subscript rows included,
+and en-US regional settings. `platform="mac"` shows a workbook as Excel for Mac does instead.
+Rows at font sizes above 72 points are unverified.
 
 A file from someone you do not trust is checked before anything parses it, and `limits=` sets what
 a read may cost; the documentation's usage page has the details. `sheetpeek serve` has no

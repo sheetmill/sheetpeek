@@ -17,7 +17,7 @@ def page(tmp_path, build, ref=None, **options):
     wb = openpyxl.Workbook()
     wb.active.title = "S & P"
     build(wb.active)
-    sheet = sheetpeek.read(save(wb, tmp_path / "book.xlsx"), ref=ref)
+    sheet = sheetpeek.read(save(wb, tmp_path / "book.xlsx"), ref=ref, platform="mac")
     return sheetpeek.render(sheet, HTMLBackend(**options))
 
 
@@ -150,7 +150,7 @@ def test_hidden_gridlines(tmp_path):
 
 
 def test_needs_excel_mode(tmp_path):
-    sheet = sheetpeek.read(save(openpyxl.Workbook(), tmp_path / "e.xlsx"))
+    sheet = sheetpeek.read(save(openpyxl.Workbook(), tmp_path / "e.xlsx"), platform="mac")
     with pytest.raises(ValueError, match="excel mode"):
         HTMLBackend().render(sheet.layout("characters"), __import__("io").StringIO())
     assert sheetpeek.render(sheet.layout("characters"), "html").startswith("<!doctype html>")

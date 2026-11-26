@@ -18,6 +18,7 @@ from xlformat import ExcelError
 from sheetpeek._fill_border_model import Borders, Fill
 from sheetpeek._hyperlink import Hyperlink
 from sheetpeek._outline_model import Outline
+from sheetpeek._platform import DEFAULT_PLATFORM, DEFAULT_REGIONAL_SETTINGS
 from sheetpeek._view_model import SheetView
 
 if TYPE_CHECKING:
@@ -371,10 +372,10 @@ class Sheet:
     through the workbook's theme (§4.20)."""
     notices: tuple[Notice, ...] = field(default=())
     """What the file uses that sheetpeek does not read yet (:class:`~sheetpeek.Notice`)."""
-    platform: xlformat.Platform = xlformat.Platform.MAC
+    platform: xlformat.Platform = DEFAULT_PLATFORM
     """The Excel the sheet is shown as, read with it (``platform=`` of :func:`~sheetpeek.read`):
     an :class:`xlformat.Platform`, imported from xlformat. Its layout and every output follow it."""
-    regional_settings: xlformat.RegionalSettings = xlformat.RegionalSettings.EN_US_MAC
+    regional_settings: xlformat.RegionalSettings = DEFAULT_REGIONAL_SETTINGS
     """The viewer's regional settings, as an :class:`xlformat.RegionalSettings` (imported from
     xlformat): the platform's en-US settings unless given."""
     max_cells: int | None = field(default=None, repr=False, compare=False)

@@ -25,7 +25,7 @@ def main(path: str, mode: str, trace: bool) -> None:
     cells = sheets = 0
     largest, traced = "", 0
     start = time.perf_counter()
-    with sheetpeek.open(path, recalc_on_load=mode) as book:
+    with sheetpeek.open(path, recalc_on_load=mode, platform="mac") as book:
         for name in book.sheet_names:
             if trace:
                 tracemalloc.start()

@@ -28,7 +28,7 @@ CLI views a file and serves a folder of workbooks as HTML.
   The exception is a package refused as unsafe or a request over a limit (§5.5): those raise
   `PackageError` or `LimitError`, since nothing can be shown of a file that may not be read.
 - **Excel is the reference.** Correct means what Excel (Microsoft 365) shows on the chosen
-  platform, Excel for Mac by default or Excel for Windows (`platform=`); each capture records
+  platform, Excel for Windows by default or Excel for Mac (`platform=`); each capture records
   its platform, build and update channel. ECMA-376 is secondary; LibreOffice is a
   lower-trust secondary reference.
 - **Scope grows by feature groups.** Each group is read, drawn in Excel-mode HTML, and given a
@@ -164,7 +164,7 @@ text styles into `Font` and `CellStyle` (§4.13). Rich-text runs inside one cell
 | `palette` | xlio: `<indexedColors>` as the indexed colors take it (64 entries, the default's for an entry missing or not a color), `None` without it (§4.14) |
 | `normal_font` | the font of xlio's `Normal` cell style, else the workbook's first font |
 | `date1904` | xlio: `<workbookPr date1904>` |
-| `platform`, `regional_settings` | the reader's `platform=` and `regional_settings=`, resolved to xlformat's `Platform` and `RegionalSettings` (`_platform.py`); the reader's built-in formats and the Normal font's digit, the layout's column widths, formats, text measurement and insets, rows, vertical placement and rules follow them |
+| `platform`, `regional_settings` | the reader's `platform=` and `regional_settings=`, resolved to xlformat's `Platform` and `RegionalSettings` (`_platform.py`), Excel for Windows and its en-US settings unless given (`_platform.DEFAULT_PLATFORM`, the one default every entry point takes); the reader's built-in formats and the Normal font's digit, the layout's column widths, formats, text measurement and insets, rows, vertical placement and rules follow them |
 | `notices` | what the file uses that sheetpeek does not read yet, as `Notice`s (§3.7) |
 | `cells` | a dense row-major grid over `ref` |
 
@@ -2828,9 +2828,8 @@ are read.
    tables. Their parts come from xlio; those it does not read yet (pivot tables) are on its list.
 2. **Conditional formats driven by formulas**, evaluated through xlrecalc as Excel evaluates
    them. Charts, possibly as a package of their own. Planned options (§9) as they are asked for.
-3. **Excel for Windows as the default.** `platform=` takes either Excel (§3.2); Excel for
-   Windows becomes the default (most Excel users have it), with Excel for Mac kept. Parity on
-   both platforms comes before a beta: every rule captured on the Mac is captured on Windows too,
+3. **Parity on both platforms.** `platform=` takes either Excel (§3.2), Excel for Windows by
+   default (most Excel users have it), with Excel for Mac kept. Parity comes before a beta: every rule captured on the Mac is captured on Windows too,
    and where the two differ each platform gets its own. Still to capture on Windows: the rules labeled unverified there
    (font sizes above 72 points and faces outside xlformat's Windows tables), the screen suites not yet run there,
    and the zoom-dependent layout both platforms share.

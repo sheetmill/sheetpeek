@@ -89,7 +89,9 @@ def captured(tmp_path_factory):
         cells.append(
             (f"C{row * 2}", TEXT, Alignment(textRotation=rotation, horizontal=horizontal), {})
         )
-    return sheetpeek.read(_book(tmp_path_factory.mktemp("rotation"), cells)).layout("excel")
+    return sheetpeek.read(_book(tmp_path_factory.mktemp("rotation"), cells), platform="mac").layout(
+        "excel"
+    )
 
 
 @pytest.mark.parametrize(
@@ -99,7 +101,7 @@ def captured(tmp_path_factory):
 )  # fmt: skip
 def test_text_rotation_is_read_as_an_angle(tmp_path, stored, rotation, stacked):
     path = _book(tmp_path, [("A1", "x", Alignment(textRotation=stored), {})])
-    style = sheetpeek.read(path).cell(1, 1).style
+    style = sheetpeek.read(path, platform="mac").cell(1, 1).style
     assert (style.rotation, style.stacked) == (rotation, stacked)
 
 
@@ -138,7 +140,7 @@ def test_a_neighbor_with_a_value_stops_the_spill(tmp_path):
         tmp_path,
         [("B2", TEXT, Alignment(textRotation=45), {}), ("C2", "x", Alignment(), {})],
     )
-    rendered = sheetpeek.read(path).layout("excel")
+    rendered = sheetpeek.read(path, platform="mac").layout("excel")
     run = next(r for r in _row(rendered, 2).runs if r.source == (2, 2))
     assert rendered.cell(2, 2).spill == (0, 0)
     column = next(c for c in rendered.columns if c.index == 2)
@@ -150,7 +152,7 @@ def test_angled_fill_does_not_spill(tmp_path, angle):
     # Captured (rotation_more, 15 and -45 fill): Excel's line stops at the cell's edge.
     alignment = Alignment(horizontal="fill", textRotation=angle)
     path = _book(tmp_path, [("C2", TEXT, alignment, {})])
-    rendered = sheetpeek.read(path).layout("excel")
+    rendered = sheetpeek.read(path, platform="mac").layout("excel")
     run = next(r for r in _row(rendered, 2).runs if r.source == (2, 3))
     assert rendered.cell(2, 3).spill == (0, 0)
     column = next(c for c in rendered.columns if c.index == 3)
@@ -163,7 +165,7 @@ def test_a_custom_height_row_clips_at_the_row_and_keeps_the_text_at_the_bottom(t
     wb.active["B2"] = TEXT
     wb.active["B2"].alignment = Alignment(textRotation=90)
     wb.active.row_dimensions[2].height = 15
-    rendered = sheetpeek.read(save(wb, tmp_path / "custom.xlsx")).layout("excel")
+    rendered = sheetpeek.read(save(wb, tmp_path / "custom.xlsx"), platform="mac").layout("excel")
     row = _row(rendered, 2)
     (run,) = row.runs
     assert row.height_pt == 15
@@ -174,7 +176,7 @@ def test_a_custom_height_row_clips_at_the_row_and_keeps_the_text_at_the_bottom(t
 
 def test_stacked_text_draws_a_character_a_line(tmp_path):
     path = _book(tmp_path, [("C2", "Stack", Alignment(textRotation=255), {})])
-    rendered = sheetpeek.read(path).layout("excel")
+    rendered = sheetpeek.read(path, platform="mac").layout("excel")
     row = _row(rendered, 2)
     assert row.height_pt == 77  # five lines of 15 pt and 2 (captured)
     assert [r.text for r in row.runs] == list("Stack")
@@ -194,7 +196,7 @@ def test_wrapped_angled_text_breaks_at_line_feeds_and_stacked_text_is_reported(t
         ws[coordinate] = "two\nlines"
         ws[coordinate].alignment = Alignment(textRotation=rotation, wrap_text=True)
     ws.row_dimensions[2].height = 60
-    rendered = sheetpeek.read(save(wb, tmp_path / "wrapped.xlsx")).layout("excel")
+    rendered = sheetpeek.read(save(wb, tmp_path / "wrapped.xlsx"), platform="mac").layout("excel")
     assert [run.text for run in _row(rendered, 2).runs] == ["two", "lines"]
     # Wrapped angled text leaves its row as it is (captured): in 15 pt a line holds one character.
     assert _row(rendered, 6).height_pt == 15
@@ -218,7 +220,7 @@ def test_only_merged_angled_cells_with_borders_are_reported(tmp_path):
         if coordinate != "B8":
             ws[coordinate].border = boxed
     ws.merge_cells("B10:C10")
-    rendered = sheetpeek.read(save(wb, tmp_path / "boxed.xlsx")).layout("excel")
+    rendered = sheetpeek.read(save(wb, tmp_path / "boxed.xlsx"), platform="mac").layout("excel")
     found = sheetpeek.notices(rendered, "html")
     (slanted,) = [n for n in found if n.code == "border.slanted"]
     assert (slanted.count, slanted.outcome) == (1, "approximated")
@@ -234,7 +236,7 @@ def test_other_outputs_report_angled_and_stacked_text(tmp_path):
             ("B4", "b", Alignment(textRotation=255), {}),
         ],
     )
-    sheet = sheetpeek.read(path)
+    sheet = sheetpeek.read(path, platform="mac")
     found = {n.code: n.outcome for n in sheetpeek.notices(sheet.layout("characters"), "text")}
     assert found["text.rotation"] == found["text.stacked"] == "approximated"
     found = {n.code: n.outcome for n in sheetpeek.notices(sheet.layout("none"), "markdown")}
@@ -266,7 +268,7 @@ def test_angled_rich_text_keeps_its_runs(tmp_path):
             f'<r><rPr>{calibri}</rPr><t xml:space="preserve"> plain</t></r>'
         },
     )
-    rendered = sheetpeek.read(path).layout("excel")
+    rendered = sheetpeek.read(path, platform="mac").layout("excel")
     (run,) = _row(rendered, 2).runs
     assert [s.text for s in run.spans] == ["bold", " plain"]
     assert run.angle == 60
@@ -278,7 +280,7 @@ def test_the_capture_workbook_reads_back_as_built(tmp_path):
     from capture.rotation import build
 
     placed = build(tmp_path / "rotation.xlsx")
-    book = sheetpeek.open(tmp_path / "rotation.xlsx")
+    book = sheetpeek.open(tmp_path / "rotation.xlsx", platform="mac")
     sheets = {name: book.sheet(name) for name in dict.fromkeys(name for name, _, _ in placed)}
     assert len(placed) > 150
     for name, coordinate, case in placed:
@@ -296,7 +298,7 @@ def test_an_angled_number_shows_in_full_never_hashes(tmp_path, rotation):
     # Captured (rotation suite, "number 45" and "number 90"): Excel shows 12345678901 in a
     # default column, where upright it would show #.
     path = _book(tmp_path, [("B2", 12345678901, Alignment(textRotation=rotation), {})])
-    rendered = sheetpeek.read(path).layout("excel")
+    rendered = sheetpeek.read(path, platform="mac").layout("excel")
     (run,) = _row(rendered, 2).runs
     assert run.text == "12345678901"
     assert rendered.cell(2, 2).text == "12345678901"
@@ -346,7 +348,7 @@ def test_slanted_sides_lie_where_excel_draws_them(tmp_path, name, angle, height,
     ws["E4"].alignment = Alignment(textRotation=_stored(angle))
     ws["E4"].border = Border(**sides)
     ws.row_dimensions[4].height = height  # fitted heights are tested on their own
-    rendered = sheetpeek.read(save(wb, tmp_path / "slant.xlsx")).layout("excel")
+    rendered = sheetpeek.read(save(wb, tmp_path / "slant.xlsx"), platform="mac").layout("excel")
     borders = rendered.borders
     if angle == 90:
         assert borders.slanted == ()
@@ -377,7 +379,7 @@ def test_slanted_sides_leave_the_upright_grid_but_a_neighbors_side_stays(tmp_pat
             ("C2", None, Alignment(), {"border": Border(left=medium)}),
         ],
     )
-    rendered = sheetpeek.read(path).layout("excel")
+    rendered = sheetpeek.read(path, platform="mac").layout("excel")
     borders = rendered.borders
     (slant,) = borders.slanted
     assert slant.left is not None
@@ -399,7 +401,7 @@ def test_borders_stay_upright_at_90_stacked_and_in_a_merge(tmp_path):
         ws[coordinate].alignment = Alignment(textRotation=rotation)
         ws[coordinate].border = boxed["border"]
     ws.merge_cells("B6:C6")
-    rendered = sheetpeek.read(save(wb, tmp_path / "upright.xlsx")).layout("excel")
+    rendered = sheetpeek.read(save(wb, tmp_path / "upright.xlsx"), platform="mac").layout("excel")
     assert rendered.borders.slanted == ()
 
 
@@ -412,7 +414,7 @@ def test_a_slanted_box_keeps_the_columns_it_reaches(tmp_path):
             [("C3", "Rotated text here", Alignment(textRotation=rotation), boxed)],
             f"{rotation}.xlsx",
         )
-        rendered = sheetpeek.read(path).layout("excel")
+        rendered = sheetpeek.read(path, platform="mac").layout("excel")
         assert "".join(c.letter for c in rendered.columns) == letters, rotation
 
 
@@ -422,7 +424,7 @@ def test_html_draws_the_slanted_box_as_four_lines(tmp_path):
     thin = Side("thin", color="FF0000C0")
     boxed = {"border": Border(left=thin, right=thin, top=thin, bottom=thin)}
     path = _book(tmp_path, [("C3", "Rotated text here", Alignment(textRotation=45), boxed)])
-    rendered = sheetpeek.read(path).layout("excel")
+    rendered = sheetpeek.read(path, platform="mac").layout("excel")
     markup = unquote(sheetpeek.render(rendered, to="html", on_notice="ignore"))
     lines = re.findall(
         r"<line x1='([\d.]+)' y1='([\d.]+)' x2='([\d.]+)' y2='([\d.]+)' stroke='#0000C0'", markup
@@ -476,7 +478,7 @@ def test_text_between_slanted_sides_sits_where_excel_draws_it(tmp_path, name, he
     ws = wb.active
     rotation.fill(ws, [case])
     ws.row_dimensions[4].height = height  # fitted heights are tested on their own
-    rendered = sheetpeek.read(save(wb, tmp_path / "slant.xlsx")).layout("excel")
+    rendered = sheetpeek.read(save(wb, tmp_path / "slant.xlsx"), platform="mac").layout("excel")
     column = next(c for c in rendered.columns if c.letter == "E")
     (run,) = [r for r in _row(rendered, 4).runs if r.source == (4, 5)]
     lo, hi = _glyph_ink(run, column)
@@ -528,7 +530,7 @@ def test_wrapped_angled_text_sits_where_excel_draws_it(tmp_path, name, height, l
     (case,) = [c for c in rotation.cases() + rotation.more_cases() if c.name == name]
     wb = openpyxl.Workbook()
     rotation.fill(wb.active, [case])
-    rendered = sheetpeek.read(save(wb, tmp_path / "turned.xlsx")).layout("excel")
+    rendered = sheetpeek.read(save(wb, tmp_path / "turned.xlsx"), platform="mac").layout("excel")
     column = next(c for c in rendered.columns if c.letter == "E")
     row = _row(rendered, 4)
     assert row.height_pt == height
@@ -562,7 +564,7 @@ def test_a_row_fits_angled_and_stacked_text_as_excel_does(tmp_path, name, height
     (case,) = [c for c in rotation.cases() + rotation.more_cases() if c.name == name]
     wb = openpyxl.Workbook()
     rotation.fill(wb.active, [case])
-    rendered = sheetpeek.read(save(wb, tmp_path / "fitted.xlsx")).layout("excel")
+    rendered = sheetpeek.read(save(wb, tmp_path / "fitted.xlsx"), platform="mac").layout("excel")
     gap = _row(rendered, 4).height_pt - height
     if case.rotation in (90, -90):
         assert gap == 0, (name, gap)  # §4.17: the 90-degree rule is exact

@@ -32,7 +32,9 @@ def laid_out(built):
     found = {}
     for group in suite.GROUPS:
         cases = suite.rows(group)
-        sheet = sheetpeek.read(folder / suite.workbook_name(group), ref=f"A1:B{len(cases)}")
+        sheet = sheetpeek.read(
+            folder / suite.workbook_name(group), ref=f"A1:B{len(cases)}", platform="mac"
+        )
         heights = {row.index: row.height_pt for row in sheet.layout("excel").rows}
         for row, case in cases:
             found[case.name] = heights[row]
@@ -44,7 +46,7 @@ def test_every_case_is_built_as_described(built):
     assert [p.name for p in paths] == [suite.workbook_name(g) for g in suite.GROUPS]
     assert len({c.name for c in suite.CASES}) == len(suite.CASES)
     for group in suite.GROUPS:
-        sheet = sheetpeek.read(folder / suite.workbook_name(group))
+        sheet = sheetpeek.read(folder / suite.workbook_name(group), platform="mac")
         assert (sheet.normal_font.name, sheet.normal_font.size) == ("Calibri", 11.0)
         assert all(row.height is None for row in sheet.rows), group
         for row, case in suite.rows(group):
