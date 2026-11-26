@@ -576,3 +576,47 @@ def test_the_wrap_steps_job_reads_into_the_suites_rows(tmp_path):
     every = [c for column in wrap_steps.COLUMN_LIST for c in wrap_steps.cases(column)]
     assert [r[0] for r in rows[1:]] == [c.name for c in every]
     assert rows[-1][wrap_steps.COLUMNS.index("normal")] == "Courier 10"
+
+
+def test_the_stored_rows_job_reads_one_record_a_row(tmp_path):
+    from capture import stored_rows
+
+    first = job.write("stored_rows", "sheetpeek-test-stored-rows", tmp_path / "a")
+    again = job.write("stored_rows", "sheetpeek-test-stored-rows", tmp_path / "b")
+    names = [stored_rows.workbook_name(f, s) for f, s in stored_rows.workbooks()]
+    for name in ("job.json", *(f"files/{n}" for n in names)):
+        assert _sha(first / name) == _sha(again / name), name
+    books = []
+    for form, stored in stored_rows.workbooks():
+        count = len(stored_rows.cases(form, stored))
+        result = {key: [[15.0]] * count for key in ("row_height", "height", "top")}
+        books.append(
+            {
+                "file": stored_rows.workbook_name(form, stored),
+                "status": "ok",
+                "steps": [
+                    {"op": "open", "status": "ok"},
+                    {"op": "read", "id": "rows", "status": "ok", "result": result},
+                ],
+            }
+        )
+    files = first / "files"
+    outcome = {
+        "status": "ok",
+        "started": "2026-11-25T00:00:00Z",
+        "header": {
+            "manifest_sha256": _sha(first / "job.json"),
+            "inputs": {n: {"sha256": _sha(files / n)} for n in names},
+            "environment": {"excel": {"build": "16.0.0.0"}},
+        },
+        "workbooks": books,
+    }
+    result_dir = tmp_path / "result"
+    result_dir.mkdir()
+    (result_dir / "result.json").write_text(json.dumps(outcome), encoding="utf-8")
+    (path,) = job.read("stored_rows", first, result_dir, tmp_path / "windows")
+    rows = [r.split("\t") for r in path.read_text(encoding="utf-8").splitlines()]
+    rows = [r for r in rows if not r[0].startswith("# ")]
+    assert rows[0] == list(stored_rows.COLUMNS)
+    every = [c for f, s in stored_rows.workbooks() for c in stored_rows.cases(f, s)]
+    assert [r[1] for r in rows[1:]] == [c.name for c in every]
