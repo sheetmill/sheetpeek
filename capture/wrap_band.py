@@ -16,9 +16,10 @@ with the width Excel laid out, not the one the file asks for.
 One workbook per column width (``COLUMNS``), under openpyxl's Calibri 11 Normal font and no
 ``customHeight``, one case a row in column A from row 1. A ``w`` column is a whole number of
 pixels on Excel for Windows (file width ``px / 7``: the file's width includes the column's
-padding), an ``m`` column a whole number of points on Excel for Mac (file width ``pt / 6``); its cases measure their text in that unit, by
-xlformat's whole advances on that platform (``unit_widths``), and both platforms read every
-workbook. A case (``Case``) is a ``variant`` at a ``target`` width:
+padding), an ``m`` column a whole number of points on Excel for Mac (file width ``pt / 6``);
+its cases measure their text in that unit, by xlformat's whole advances on that platform
+(``unit_widths``), and both platforms read every workbook. A case (``Case``) is a ``variant``
+at a ``target`` width:
 
 - ``wrap``, ``justify``, ``distributed``: two words, together ``target`` wide with the space,
   wrapped, justified or distributed, ``target`` from the column less 16 to the column less 3;
@@ -150,10 +151,17 @@ def _word(target: int, widths: dict[str, int]) -> str:
     for n in range(1, 40):
         for base in LETTERS:
             for extra in LETTERS:
-                for k in range(n):
-                    word = base * (n - k) + extra * k
-                    if sum(widths[c] for c in word) == target:
-                        return word
+                # the first k in 0..n-1 with (n - k) * base + k * extra == target
+                step = widths[extra] - widths[base]
+                rest = target - n * widths[base]
+                if step == 0:
+                    k = 0 if rest == 0 else -1
+                elif rest % step == 0:
+                    k = rest // step
+                else:
+                    continue
+                if 0 <= k < n:
+                    return base * (n - k) + extra * k
     raise ValueError(f"no word {target} units wide")
 
 

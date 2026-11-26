@@ -51,6 +51,8 @@ Groups:
 - ``wrap_band``: the suite ``wrap_band``, a workbook a column width, opened, and every case
   row's height, column A's width (``column_width`` and ``width``) and column A's font read, into
   ``tests/captures/windows/wrap_band.tsv`` (the suite's columns).
+- ``wrap_steps``: the suite ``wrap_steps`` as ``wrap_band``, into
+  ``tests/captures/windows/wrap_steps.tsv``.
 - ``text_steps``: the suite ``text_steps``, a workbook a group (``text_steps_<group>.xlsx``, each
   under the group's Normal font), captured at zoom 100 as ``borders_fills``' windows are and
   measured with the suite's own code into one file; the gray is measured on D1 in each picture.
@@ -81,6 +83,7 @@ from capture import (
     text_style,
     wrap_band,
     wrap_rows,
+    wrap_steps,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -100,6 +103,7 @@ GROUPS = {
     "merge_rows": ("merge_rows",),
     "fitted_rows": ("row_height_fitted", "wrap_rows"),
     "wrap_band": ("wrap_band",),
+    "wrap_steps": ("wrap_steps",),
 }
 FITTED_GROUPS = ("styled", "scripts")
 """``row_height_fitted``'s groups in the job ``fitted_rows``."""
@@ -131,6 +135,10 @@ PURPOSES = {
     "wrapped two-word texts whose width steps by one unit across the column's last pixels or "
     "points, at several column widths, with each column's width and the applied font, read "
     "from Excel.",
+    "wrap_steps": "sheetpeek capture group wrap_steps: the heights Excel fits to rows of "
+    "wrapped two-word texts across a column's last pixels or points, at columns placing "
+    "autofit's later long-text steps and under a Courier 10 Normal font, with each column's "
+    "width and the applied font, read from Excel.",
     "line_budget": "sheetpeek capture group line_budget: window pictures of two-word texts as "
     "wide as the cell less a few pixels, wrapped, justified and distributed, at zoom 100 "
     "(text_style's group line_budget)",
@@ -408,6 +416,67 @@ def _wrap_band_workbooks(files: Path) -> list[dict[str, Any]]:
     return books
 
 
+def _rows_widths_workbook(name: str, last: int) -> dict[str, Any]:
+    """Open ``name`` and read rows 1 to ``last``: height, column A's width and font."""
+    return {
+        "file": name,
+        "steps": [
+            {"op": "open"},
+            {"op": "read", "id": "heights", "range": f"A1:A{last}",
+             "props": ["row_height", "column_width", "width"]},
+            {"op": "read_format", "id": "fonts", "range": f"A1:A{last}",
+             "props": ["font.name", "font.size"]},
+        ],
+    }  # fmt: skip
+
+
+def _wrap_steps_workbooks(files: Path) -> list[dict[str, Any]]:
+    books = []
+    with tempfile.TemporaryDirectory() as tmp:
+        for column in wrap_steps.COLUMN_LIST:
+            raw = wrap_steps.build_one(column, Path(tmp))
+            fixed_copy(raw, files / raw.name)
+            books.append(_rows_widths_workbook(raw.name, len(wrap_steps.cases(column))))
+    return books
+
+
+def _width_answer(workbook: dict[str, Any], name: str, count: int) -> list[str]:
+    """``name``'s rows 1 to ``count`` as the suites' AppleScript answers them, widths included."""
+    results = _results(workbook)
+    heights = results["heights"]
+    fonts = results["fonts"]["cells"]
+    return [
+        "\t".join(
+            (
+                name,
+                str(row),
+                str(fonts[row - 1][0]["font.name"]),
+                f"{float(fonts[row - 1][0]['font.size']):g}",
+                f"{float(heights['row_height'][row - 1][0]):g}",
+                repr(float(heights["column_width"][row - 1][0])),
+                repr(float(heights["width"][row - 1][0])),
+            )
+        )
+        for row in range(1, count + 1)
+    ]
+
+
+def _read_wrap_steps(
+    outcome: dict[str, Any], manifest_doc: dict[str, Any], folder: Path
+) -> list[Path]:
+    """``wrap_steps.tsv`` in the Mac suite's columns."""
+    by_file = {wb["file"]: wb for wb in outcome["workbooks"]}
+    answer = []
+    for column in wrap_steps.COLUMN_LIST:
+        name = column.workbook
+        answer += _width_answer(by_file[name], name, len(wrap_steps.cases(column)))
+    _, found = wrap_steps.records("\n".join(answer))
+    _, lines = _job_lines("wrap_steps", outcome, manifest_doc, "read row_height (capture job)")
+    path = folder / "wrap_steps.tsv"
+    wrap_steps.write_records([*lines, "# suite: wrap_steps"], found, path)
+    return [path]
+
+
 def _read_wrap_band(
     outcome: dict[str, Any], manifest_doc: dict[str, Any], folder: Path
 ) -> list[Path]:
@@ -560,6 +629,8 @@ def write(group: str, job_id: str, out: Path) -> Path:
         books = _fitted_rows_workbooks(files)
     elif group == "wrap_band":
         books = _wrap_band_workbooks(files)
+    elif group == "wrap_steps":
+        books = _wrap_steps_workbooks(files)
     else:
         books = [_cells_workbook(files)]
     doc = manifest(group, job_id, books)
@@ -730,13 +801,15 @@ def read(group: str, job: Path, result: Path, folder: Path = WINDOWS) -> list[Pa
             raise ValueError(f"the result's input {name} is not this job's")
     manifest_doc = json.loads((job / "job.json").read_text(encoding="utf-8"))
     folder.mkdir(parents=True, exist_ok=True)
-    if group in WINDOWS_OF or group in ("merge_rows", "fitted_rows", "wrap_band"):
+    if group in WINDOWS_OF or group in ("merge_rows", "fitted_rows", "wrap_band", "wrap_steps"):
         if group == "merge_rows":
             written = _read_merge_rows(outcome, manifest_doc, folder)
         elif group == "fitted_rows":
             written = _read_fitted_rows(outcome, manifest_doc, folder)
         elif group == "wrap_band":
             written = _read_wrap_band(outcome, manifest_doc, folder)
+        elif group == "wrap_steps":
+            written = _read_wrap_steps(outcome, manifest_doc, folder)
         else:
             written = _read_windows(group, outcome, manifest_doc, result, folder)
         shutil.copyfile(job / "job.json", folder / f"{group}.job.json")
