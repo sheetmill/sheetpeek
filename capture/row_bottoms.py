@@ -33,6 +33,13 @@ is its own workbook and window at zoom 100, in the dark appearance as the other 
   the size taken whole (its ceiling) or as it is; raise ``floor(S/2)`` and lowering
   ``floor(S/5)``; a superscript's bottom its own ``B``, a subscript's ``l + B(d)``, ``d`` the
   drawn size ``round(2S/3)``; and sheetpeek's layout before the run.
+- ``labels``. Rows 4 to 7 fixed at 32 pt: the probe alone, beside the neighbor merged across
+  columns (E5:F5), and beside an empty cell styled Calibri 24 turned 45 and 90 degrees (E6, E7):
+  whether they count for the row's bottom. Rows 8 on are fitted (no height): "Rotated text here"
+  at 90 degrees in Calibri 5 to 9 points (C8 to C12: the pad of a 90-degree row below 9 points),
+  Calibri 11 text at 90 and 45 degrees merged across columns (C13:D13, C14:D14), longer text at
+  45 degrees wrapped in a merge (C15:D15), at 90 degrees merged across rows (C16:C17), and the
+  same 90 and 45 degree text unmerged (C18, C19): whether text in a merge counts for a fitted row.
 - ``column_style``. Column E styled Calibri 24 (``<col style>``), no cell in it. Row 4, fixed at
   32 pt, and row 5, fitted (no height): the probe. Whether a column's style counts in a row's
   bottom, and in a fitted row's height (31 pt if it counts, 15 if not).
@@ -70,9 +77,10 @@ SCRIPT_GROUP_ROWS = 13
 """Rows of 64 pt a window holds at zoom 100."""
 SCRIPT_ROW = 64
 SCRIPT_GROUPS = tuple(f"scripts_{k + 1}" for k in range(-(-len(SCRIPT_ROWS) // SCRIPT_GROUP_ROWS)))
-GROUPS = ("cells", "column_style", *SCRIPT_GROUPS)
+GROUPS = ("cells", "column_style", *SCRIPT_GROUPS, "labels")
 MARKERS = {
     "cells": ("B2", "I3"),
+    "labels": ("B2", "G3"),
     "column_style": ("B2", "G3"),
     **dict.fromkeys(SCRIPT_GROUPS, ("B2", "G3")),
 }
@@ -395,6 +403,10 @@ PREDICTIONS: dict[str, dict[str, float]] = {
     "superscript 40 glyph": {"whole": 33, "own": 33, "before": 34},
     "subscript 40 probe": {"whole": 49, "own": 49, "before": 53},
     "subscript 40 glyph": {"whole": 57, "own": 57, "before": 60},
+    "labels probe alone": {"own": 29},
+    "neighbor merged across columns": {"counted": 26, "not counted": 29},
+    "empty styled neighbor at 45 degrees": {"counted": 26, "not counted": 29},
+    "empty styled neighbor at 90 degrees": {"counted": 26, "not counted": 29},
 }  # fmt: skip
 """Each case's last baseline under each candidate (for ``scripts_<k>``: ``whole``, the size
 taken whole; ``own``, as it is; ``before``, sheetpeek's layout before the run). For the fitted
@@ -402,6 +414,24 @@ row of ``column_style``, a counted column style makes the row Calibri 24's 31 pt
 probe on 31 - 6."""
 FITTED_HEIGHTS = {"column style, fitted row": {"counted": 31, "not counted": 15}}
 """The fitted row's height under each candidate."""
+FITTED_ONLY: dict[str, dict[str, float]] = {
+    "90 degrees at 5 pt, fitted": {"held at 7": 43, "scaled": 41},
+    "90 degrees at 6 pt, fitted": {"held at 7": 49, "scaled": 47},
+    "90 degrees at 7 pt, fitted": {"held at 7": 55, "scaled": 53},
+    "90 degrees at 8 pt, fitted": {"held at 7": 65, "scaled": 63},
+    "90 degrees at 9 pt, fitted": {"held at 7": 70},
+    "90 degrees merged across columns, fitted": {"not counted": 15, "counted": 85},
+    "45 degrees merged across columns, fitted": {"not counted": 15, "counted": 70},
+    "45 degrees wrapped in a merge, fitted": {"not counted": 15},
+    "90 degrees merged across rows, fitted": {"not counted": 15},
+    "90 degrees unmerged, fitted": {"counted": 85},
+    "45 degrees unmerged, fitted": {"counted": 70},
+}  # fmt: skip
+"""``labels``' turned text: its fitted row's height on the Mac, in points, under each candidate.
+Below 9 points the 90-degree pad held at 7 (``held at 7``) or following ``2·floor((S - 9)/8)``
+down (``scaled``, 2 less); text in a merge not counted (the Normal font's 15) or counted as the
+same text unmerged. A merge across rows, or wrapped text in a merge, counts with a height no
+rule gives, so only ``not counted`` is written."""
 SHEETPEEK: dict[str, str] = {
     "probe alone": "own",
     "neighbor with a value": "counted",
@@ -700,6 +730,21 @@ SHEETPEEK: dict[str, str] = {
     "superscript 40 glyph": "whole",
     "subscript 40 probe": "whole",
     "subscript 40 glyph": "whole",
+    "labels probe alone": "own",
+    "neighbor merged across columns": "counted",
+    "empty styled neighbor at 45 degrees": "counted",
+    "empty styled neighbor at 90 degrees": "counted",
+    "90 degrees at 5 pt, fitted": "held at 7",
+    "90 degrees at 6 pt, fitted": "held at 7",
+    "90 degrees at 7 pt, fitted": "held at 7",
+    "90 degrees at 8 pt, fitted": "held at 7",
+    "90 degrees at 9 pt, fitted": "held at 7",
+    "90 degrees merged across columns, fitted": "not counted",
+    "45 degrees merged across columns, fitted": "not counted",
+    "45 degrees wrapped in a merge, fitted": "not counted",
+    "90 degrees merged across rows, fitted": "not counted",
+    "90 degrees unmerged, fitted": "counted",
+    "45 degrees unmerged, fitted": "counted",
 }
 """The candidate sheetpeek's layout takes for each case (before each capture, the commit of its
 predictions records them)."""
@@ -817,10 +862,65 @@ def _scripts(ws: Any, group: str) -> list[Case]:
     return found
 
 
+TURNED = "Rotated text here"
+"""The text of ``labels``' fitted rows."""
+
+
+def _labels(ws: Any) -> list[Case]:
+    found: list[Case] = []
+
+    def case(name: str, cell: str, last: str | None = None, measure: str = "lines") -> None:
+        found.append(Case("labels", name, cell, (measure,), last))
+
+    for row in range(4, 8):
+        ws.row_dimensions[row].height = ROW
+    _probe(ws, "C4")
+    case("labels probe alone", "C4")
+    _probe(ws, "C5")
+    _neighbor(ws, "E5")
+    ws.merge_cells("E5:F5")
+    case("neighbor merged across columns", "C5")
+    for row, angle in ((6, 45), (7, 90)):
+        _probe(ws, f"C{row}")
+        ws[f"E{row}"].font = NEIGHBOR
+        ws[f"E{row}"].alignment = Alignment(text_rotation=angle)
+        case(f"empty styled neighbor at {angle} degrees", f"C{row}")
+    for row, size in zip(range(8, 13), (5, 6, 7, 8, 9), strict=True):
+        ws[f"C{row}"] = TURNED
+        ws[f"C{row}"].font = Font(name="Calibri", size=size)
+        ws[f"C{row}"].alignment = Alignment(text_rotation=90)
+        case(f"90 degrees at {size} pt, fitted", f"C{row}", measure="ink")
+    turned = (
+        (13, "C13:D13", 90, TURNED, False, "90 degrees merged across columns, fitted"),
+        (14, "C14:D14", 45, TURNED, False, "45 degrees merged across columns, fitted"),
+        (
+            15,
+            "C15:D15",
+            45,
+            TURNED + ", and more of it",
+            True,
+            "45 degrees wrapped in a merge, fitted",
+        ),
+        (16, "C16:C17", 90, TURNED, False, "90 degrees merged across rows, fitted"),
+        (18, None, 90, TURNED, False, "90 degrees unmerged, fitted"),
+        (19, None, 45, TURNED, False, "45 degrees unmerged, fitted"),
+    )
+    for row, merge, angle, text, wrap, name in turned:
+        ws[f"C{row}"] = text
+        ws[f"C{row}"].font = Font(name="Calibri", size=11)
+        ws[f"C{row}"].alignment = Alignment(text_rotation=angle, wrap_text=wrap)
+        if merge:
+            ws.merge_cells(merge)
+        case(name, f"C{row}", merge.split(":")[1] if merge else None, measure="ink")
+    return found
+
+
 def fill(ws: Any, group: str) -> list[Case]:
     """Lay one group out on the first worksheet of its own workbook; its cases."""
     if group in SCRIPT_GROUPS:
         return _scripts(ws, group)
+    if group == "labels":
+        return _labels(ws)
     return _cells(ws) if group == "cells" else _column_style(ws)
 
 
@@ -907,6 +1007,28 @@ def measure(cap: Any, case: Case) -> dict[str, str] | None:
     return found
 
 
+def group_records(cap: Any, group: str) -> list[dict[str, str]]:
+    """Every case of ``group`` measured in one capture of its window, in ``COLUMNS``' keys; a
+    case outside the window is left out."""
+    records = []
+    for case in fill(openpyxl.Workbook().active, group):
+        measured = measure(cap, case)
+        if measured is None:
+            continue
+        row = coordinate_from_string(case.cell)[1]
+        records.append(
+            {
+                "group": case.group,
+                "name": case.name,
+                "zoom": str(cap.zoom),
+                "cell": case.cell,
+                "row_height": cap.value(f"A{row}", "geometry.height") or "",
+                **measured,
+            }
+        )
+    return records
+
+
 def write() -> None:
     """Measure the saved captures again (no Excel) and write ``row_bottoms.tsv``."""
     from capture.screen.run import header, load
@@ -919,23 +1041,8 @@ def write() -> None:
             print(f"{group}: not captured yet, left out", file=sys.stderr)
             continue
         first = first or header(out)
-        found = fill(openpyxl.Workbook().active, group)
         for cap in load(out):
-            for case in found:
-                measured = measure(cap, case)
-                if measured is None:
-                    continue
-                row = coordinate_from_string(case.cell)[1]
-                records.append(
-                    {
-                        "group": case.group,
-                        "name": case.name,
-                        "zoom": str(cap.zoom),
-                        "cell": case.cell,
-                        "row_height": cap.value(f"A{row}", "geometry.height") or "",
-                        **measured,
-                    }
-                )
+            records += group_records(cap, group)
     with open(OUTPUT, "w", encoding="utf-8") as out:
         for key, value in first.items():
             if key not in ("markers", "suite", "workbooks_open_after", "zooms"):

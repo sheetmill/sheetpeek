@@ -59,14 +59,18 @@ def test_every_case_is_built_as_described(built):
 def test_every_case_has_its_candidates_written_before_the_capture():
     names = [case.name for case in suite.cases()]
     assert len(names) == len(set(names))
-    assert set(suite.PREDICTIONS) == set(names) == set(suite.SHEETPEEK)
-    for name, candidates in suite.PREDICTIONS.items():
+    assert set(suite.PREDICTIONS) | set(suite.FITTED_ONLY) == set(names) == set(suite.SHEETPEEK)
+    assert not set(suite.PREDICTIONS) & set(suite.FITTED_ONLY)
+    for name, candidates in (suite.PREDICTIONS | suite.FITTED_ONLY).items():
         assert suite.SHEETPEEK[name] in candidates, name
 
 
 def test_sheetpeek_takes_the_candidate_it_names(built):
     found = laid_out(built)
     for name, (height, last) in found.items():
+        if name in suite.FITTED_ONLY:
+            assert height == suite.FITTED_ONLY[name][suite.SHEETPEEK[name]], name
+            continue
         assert last == suite.PREDICTIONS[name][suite.SHEETPEEK[name]], name
         if name in suite.FITTED_HEIGHTS:
             assert height == suite.FITTED_HEIGHTS[name][suite.SHEETPEEK[name]], name
@@ -142,10 +146,10 @@ PINNED: dict[str, str] = {
 
 
 def _uncaptured(captured):
-    """The scripts groups' cases a capture made before those groups existed lacks."""
+    """The cases of groups added after a capture (the scripts groups, ``labels``) it lacks."""
     return {
         case.name
-        for group in suite.SCRIPT_GROUPS
+        for group in (*suite.SCRIPT_GROUPS, "labels")
         for case in suite.cases(group)
         if case.name not in captured
     }
@@ -194,7 +198,9 @@ def test_sheetpeek_places_each_probe_where_excel_does(built):
         for name, (height, last) in found.items()
         if name not in missing
         and (
-            abs(suite.baselines(captured[name]["line_tops"])[-1] - last) > 0.5
+            float(captured[name]["row_height"]) != height
+            if name in suite.FITTED_ONLY
+            else abs(suite.baselines(captured[name]["line_tops"])[-1] - last) > 0.5
             or (name in suite.FITTED_HEIGHTS and float(captured[name]["row_height"]) != height)
         )
     }

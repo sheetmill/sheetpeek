@@ -51,6 +51,8 @@ Groups:
 - ``wrap_band``: the suite ``wrap_band``, a workbook a column width, opened, and every case
   row's height, column A's width (``column_width`` and ``width``) and column A's font read, into
   ``tests/captures/windows/wrap_band.tsv`` (the suite's columns).
+- ``row_labels``: ``row_bottoms``' group ``labels``, as the Mac's run captures it, read into
+  ``tests/captures/windows/row_labels.tsv`` (``row_bottoms``' columns).
 - ``wrap_steps``: the suite ``wrap_steps`` as ``wrap_band``, into
   ``tests/captures/windows/wrap_steps.tsv``.
 - ``text_steps``: the suite ``text_steps``, a workbook a group (``text_steps_<group>.xlsx``, each
@@ -78,6 +80,7 @@ from capture import (
     fills,
     font_cut,
     merge_rows,
+    row_bottoms,
     row_height_fitted,
     text_steps,
     text_style,
@@ -97,6 +100,7 @@ GROUPS = {
     "text_style": ("text_style",),
     "shrink_fonts": ("shrink_fonts",),
     "line_budget": ("line_budget",),
+    "row_labels": ("row_labels",),
     "font_cut": ("font_cut",),
     "font_faces": ("font_faces",),
     "font_aptos": ("font_aptos",),
@@ -139,6 +143,9 @@ PURPOSES = {
     "wrapped two-word texts across a column's last pixels or points, at columns placing "
     "autofit's later long-text steps and under a Courier 10 Normal font, with each column's "
     "width and the applied font, read from Excel.",
+    "row_labels": "sheetpeek capture group row_labels: a window picture at zoom 100 of text "
+    "beside a merge across columns and beside empty cells styled angled, in rows of a fixed "
+    "height, and of turned text, merged or not, in fitted rows (row_bottoms' group labels)",
     "line_budget": "sheetpeek capture group line_budget: window pictures of two-word texts as "
     "wide as the cell less a few pixels, wrapped, justified and distributed, at zoom 100 "
     "(text_style's group line_budget)",
@@ -254,6 +261,19 @@ WINDOWS_OF = {
         _text_style_window(group) for group in text_style.GROUPS if group != "line_budget"
     ),
     "line_budget": (_text_style_window("line_budget", "line_budget"),),
+    "row_labels": (
+        Window(
+            "row_labels",
+            lambda ws: row_bottoms.fill(ws, "labels"),
+            tuple(row_bottoms.references("labels")),
+            row_bottoms.MARKERS["labels"],
+            (100,),
+            lambda cap: row_bottoms.group_records(cap, "labels"),
+            row_bottoms.COLUMNS,
+            "D1",
+            "row_bottoms_labels",
+        ),
+    ),
     "font_cut": tuple(
         _font_cut_window(group) for group in font_cut.GROUPS if group not in font_cut.FACES
     ),
