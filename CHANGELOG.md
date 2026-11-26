@@ -19,8 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and for Windows fit it when they open the file (captured, `refit_rows`), where 0.6.0 kept the
   stored height: a row storing 30 pt beside a Calibri 11 cell is 15 pt, and one storing 12 pt
   beside a Calibri 20 cell is 26 pt (26.25 with `platform="windows"`). A height of 0 without
-  `customHeight` (`ht="0"` or `ht=""`) no longer hides its row, and under a custom default
-  height such a row is fitted, where a row with no `ht` keeps the default.
+  `customHeight` (`ht="0"` or `ht=""`) no longer hides its row, and under a custom default height
+  such a row is fitted, where a row with no `ht` keeps the default. Excel stores every row it
+  fitted this way, so a file Excel saved now shows sheetpeek's fit of each such row where it
+  differs from the height stored. In the workbooks `capture/refit_rows.py` generates, a row with
+  `spans` and `x14ac:dyDescent`, in a workbook of `AppVersion` 15.0300, storing 13.5 pt beside an
+  Arial 10 cell shows at 12.75, and at 13 with `platform="mac"`, as Excel for Mac shows it
+  (captured, `refit_rows` group `excelform`; Excel for Windows unverified).
 - With `platform="windows"`, a row height the file stores is laid out in whole pixels, as Excel
   for Windows lays it out (captured, `windows/stored_rows`): a row stored at 32 pt is 31.5 pt
   (42 pixels) and each row below it moves up with it, where 0.6.0 kept 32.
