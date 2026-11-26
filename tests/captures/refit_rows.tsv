@@ -1,0 +1,21 @@
+# excel: Excel 16.115 (16.115.26110837, Microsoft 365, Current channel) for Mac, en_US
+# captured: 2026-11-25
+# suite: refit_rows (capture.refit_rows); method: row height (AppleScript)
+workbook	name	row	cell	stored	row_height	height	top
+refit	refit calibri 11 ht 10	1	Calibri 11	10	15		
+refit	refit calibri 11 ht 15	2	Calibri 11	15	15		
+refit	refit calibri 11 ht 30	3	Calibri 11	30	15		
+refit	refit calibri 20 ht 12	4	Calibri 20	12	26		
+refit	refit calibri 20 ht 26	5	Calibri 20	26	26		
+refit	refit calibri 20 ht 26.25	6	Calibri 20	26.25	26		
+refit	refit calibri 20 ht 40	7	Calibri 20	40	26		
+refit	refit calibri 28 ht 20	8	Calibri 28	20	37		
+refit	refit calibri 28 ht 60	9	Calibri 28	60	37		
+refit	refit empty ht 10	10		10	15		
+refit	refit empty ht 15	11		15	15		
+refit	refit empty ht 30	12		30	15		
+macsaved	macsaved calibri 11 ht 15	1	Calibri 11	15	15		
+macsaved	macsaved calibri 20 ht 26	2	Calibri 20	26	26		
+macsaved	macsaved empty unlisted	3			15		
+macsaved	macsaved calibri 28 ht 37	4	Calibri 28	37	37		
+macsaved	macsaved empty ht 15	5		15	15		

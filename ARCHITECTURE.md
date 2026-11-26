@@ -686,9 +686,12 @@ at, in order:
 `s` points, `c` between 1/15 and 1/5 of a pixel (captured, `windows/stored_rows`, a row's `ht`
 with `customHeight` and the sheet's `defaultRowHeight` with `customHeight`, 15 to 16 pt by tenths
 and up to 409: every row and every row's top; sheetpeek takes `c` = 1/8, the exact threshold
-unverified). A row's `ht` without `customHeight` Excel for Windows ignores: such rows beside a
-Calibri 11 cell are 15 pt whatever is stored; sheetpeek keeps the stored height (13 rows, a
-known deviation).
+unverified). A row's `ht` without `customHeight` Excel ignores, on both platforms, and fits the row
+(captured, `refit_rows` and `windows/refit_rows`: rows storing heights below, at and above the
+fit of a Calibri 11, 20 or 28 cell or of no cell, and a sheet as Excel for Mac saves it, opened
+on Windows: every row at the height it fits, 17 of 17 on each platform). sheetpeek keeps the
+stored height, a known deviation (`refit_rows`: 9 rows on the Mac, 11 on Windows;
+`windows/stored_rows`: 13).
 
 **Rows are fitted to their cells** when Excel opens a file (captured, suite `row_height`): a row
 with a `<row>` element and no `ht`, in a sheet without `customHeight`, takes the largest of those
@@ -766,7 +769,8 @@ the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.1
 `theme_fonts_palette` and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions`
 (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts`, `gradients` and
 `diagonals` (§4.12), `text_style`, `text_style_more`, `text_steps` and `rules_below` (§4.6, §4.7,
-§4.13), `font_cut` (§4.13), `row_bottoms` (§3.6, §4.17), `windows/stored_rows` (§4.7), `runs` (§4.16), `tab_strip` (§4.15), `outline`
+§4.13), `font_cut` (§4.13), `row_bottoms` (§3.6, §4.17), `windows/stored_rows` and `refit_rows`
+(§4.7), `runs` (§4.16), `tab_strip` (§4.15), `outline`
 (§4.11), `rotation`, `rotation_more` and `rotation_placement` (§4.17), `filters` and `filters_more`
 (§4.19) and `tables` (§4.20). All are Excel 16.115 (Microsoft 365). Every section here rests on one
 of them; what no capture covers is marked unverified where it is stated, as are the parts of §4.12,

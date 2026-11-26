@@ -1,0 +1,49 @@
+{
+ "schema": 1,
+ "job_id": "sheetpeek-20261125-191458-refit-rows",
+ "package": "sheetpeek",
+ "purpose": "sheetpeek capture group refit_rows: the heights Excel lays out for rows storing a height without customHeight, below, at and above the height their cell fits, and for a sheet as Excel for Mac saves it, read from Excel.",
+ "limits": {
+  "job_seconds": 1800,
+  "step_seconds": 600
+ },
+ "audit": false,
+ "workbooks": [
+  {
+   "file": "refit_rows_refit.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "rows",
+     "range": "A1:A12",
+     "props": [
+      "row_height",
+      "height",
+      "top"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "refit_rows_macsaved.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "rows",
+     "range": "A1:A5",
+     "props": [
+      "row_height",
+      "height",
+      "top"
+     ]
+    }
+   ]
+  }
+ ]
+}
