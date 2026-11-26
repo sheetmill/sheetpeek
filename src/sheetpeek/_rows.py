@@ -83,7 +83,7 @@ def _face(font: Font, platform: xlformat.Platform) -> tuple[float, float, float,
     """``face_metrics`` and ``line_inset`` of ``font`` on ``platform``."""
     if platform.name == "windows":
         return _windows_face(font, platform)
-    plain = xlformat.row_metrics(_row_font(font, platform)).font_height
+    plain = xlformat.row_metrics(_row_font(font, platform), platform=platform).font_height
     ascent = float(math.ceil(min(max(font.size, 1.0), _LARGEST))) + 1.0
     if font.size > _LARGEST:  # 72's scaled with the size (unverified; 409 caps at TALLEST_ROW)
         scale = math.ceil(font.size) / _LARGEST
@@ -92,7 +92,7 @@ def _face(font: Font, platform: xlformat.Platform) -> tuple[float, float, float,
     if font.underline in ("singleAccounting", "doubleAccounting"):
         try:
             spec = _row_font(font, platform, font.underline)
-            extra = xlformat.row_metrics(spec).accounting_height
+            extra = xlformat.row_metrics(spec, platform=platform).accounting_height
         except LookupError:  # Courier New below 5.5 points
             extra = ACCOUNTING_FALLBACK
     return plain, ascent, plain - ascent, extra, plain - ascent - 2.0
