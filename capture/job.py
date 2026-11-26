@@ -53,6 +53,8 @@ Groups:
   ``tests/captures/windows/wrap_band.tsv`` (the suite's columns).
 - ``row_labels``: ``row_bottoms``' group ``labels``, as the Mac's run captures it, read into
   ``tests/captures/windows/row_labels.tsv`` (``row_bottoms``' columns).
+- ``refit_rows``: the suite ``refit_rows``, as ``stored_rows``, into
+  ``tests/captures/windows/refit_rows.tsv``.
 - ``stored_rows``: the suite ``stored_rows``, a workbook each, every case row's ``row_height``,
   ``height`` and ``top`` read, into ``tests/captures/windows/stored_rows.tsv``.
 - ``wrap_steps``: the suite ``wrap_steps`` as ``wrap_band``, into
@@ -82,6 +84,7 @@ from capture import (
     fills,
     font_cut,
     merge_rows,
+    refit_rows,
     row_bottoms,
     row_height_fitted,
     stored_rows,
@@ -105,6 +108,7 @@ GROUPS = {
     "line_budget": ("line_budget",),
     "row_labels": ("row_labels",),
     "stored_rows": ("stored_rows",),
+    "refit_rows": ("refit_rows",),
     "font_cut": ("font_cut",),
     "font_faces": ("font_faces",),
     "font_aptos": ("font_aptos",),
@@ -147,6 +151,9 @@ PURPOSES = {
     "wrapped two-word texts across a column's last pixels or points, at columns placing "
     "autofit's later long-text steps and under a Courier 10 Normal font, with each column's "
     "width and the applied font, read from Excel.",
+    "refit_rows": "sheetpeek capture group refit_rows: the heights Excel lays out for rows "
+    "storing a height without customHeight, below, at and above the height their cell fits, "
+    "and for a sheet as Excel for Mac saves it, read from Excel.",
     "stored_rows": "sheetpeek capture group stored_rows: the heights and tops Excel lays out for "
     "rows whose height a file stores in points, across the fractions of a pixel, as a row's ht "
     "with customHeight and without and as the sheet's defaultRowHeight, read from Excel.",
@@ -508,6 +515,41 @@ def _stored_rows_workbooks(files: Path) -> list[dict[str, Any]]:
     return books
 
 
+def _refit_rows_workbooks(files: Path) -> list[dict[str, Any]]:
+    books = []
+    with tempfile.TemporaryDirectory() as tmp:
+        for name, cases in refit_rows.CASES.items():
+            raw = refit_rows.build_one(name, Path(tmp))
+            fixed_copy(raw, files / raw.name)
+            books.append(
+                {
+                    "file": raw.name,
+                    "steps": [
+                        {"op": "open"},
+                        {"op": "read", "id": "rows", "range": f"A1:A{len(cases)}",
+                         "props": ["row_height", "height", "top"]},
+                    ],
+                }
+            )  # fmt: skip
+    return books
+
+
+def _read_refit_rows(
+    outcome: dict[str, Any], manifest_doc: dict[str, Any], folder: Path
+) -> list[Path]:
+    by_file = {wb["file"]: wb for wb in outcome["workbooks"]}
+    _, lines = _job_lines("refit_rows", outcome, manifest_doc, "read row_height (capture job)")
+    found = []
+    for name, cases in refit_rows.CASES.items():
+        rows = _results(by_file[refit_rows.workbook_name(name)])["rows"]
+        for k, case in enumerate(cases):
+            values = [repr(float(rows[key][k][0])) for key in ("row_height", "height", "top")]
+            found.append(refit_rows.record(case, *values))
+    path = folder / "refit_rows.tsv"
+    refit_rows.write_records([*lines, "# suite: refit_rows"], found, path)
+    return [path]
+
+
 def _read_stored_rows(
     outcome: dict[str, Any], manifest_doc: dict[str, Any], folder: Path
 ) -> list[Path]:
@@ -699,6 +741,8 @@ def write(group: str, job_id: str, out: Path) -> Path:
         books = _wrap_steps_workbooks(files)
     elif group == "stored_rows":
         books = _stored_rows_workbooks(files)
+    elif group == "refit_rows":
+        books = _refit_rows_workbooks(files)
     else:
         books = [_cells_workbook(files)]
     doc = manifest(group, job_id, books)
@@ -875,6 +919,7 @@ def read(group: str, job: Path, result: Path, folder: Path = WINDOWS) -> list[Pa
         "wrap_band",
         "wrap_steps",
         "stored_rows",
+        "refit_rows",
     ):
         if group == "merge_rows":
             written = _read_merge_rows(outcome, manifest_doc, folder)
@@ -886,6 +931,8 @@ def read(group: str, job: Path, result: Path, folder: Path = WINDOWS) -> list[Pa
             written = _read_wrap_steps(outcome, manifest_doc, folder)
         elif group == "stored_rows":
             written = _read_stored_rows(outcome, manifest_doc, folder)
+        elif group == "refit_rows":
+            written = _read_refit_rows(outcome, manifest_doc, folder)
         else:
             written = _read_windows(group, outcome, manifest_doc, result, folder)
         shutil.copyfile(job / "job.json", folder / f"{group}.job.json")
