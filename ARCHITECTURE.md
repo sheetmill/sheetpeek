@@ -751,8 +751,8 @@ a cached value (as openpyxl writes it) has no `t`. The same file confirms Excel 
 
 Captured so far, in `tests/captures/`: by print (route B) `layout` (§3.6, §4.1 to §4.7); read from
 Excel `theme_colors` and `theme_colors_more` (§3.3), `merge_width` and `error_width` (§4.2, §4.4, no
-deviation), `row_height`, `row_height_more`, `row_height_fitted`, `merge_rows` and `wrap_rows`
-(§4.7, §4.16, §4.17), `color_kinds` (§3.3), `package` and `package_more` (§5.5) and `odd_values` (§4.17, §5); on
+deviation), `row_height`, `row_height_more`, `row_height_fitted`, `merge_rows`, `wrap_rows`,
+`wrap_band` and `wrap_steps` (§4.7, §4.16, §4.17), `color_kinds` (§3.3), `package` and `package_more` (§5.5) and `odd_values` (§4.17, §5); on
 the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14),
 `theme_fonts_palette` and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions`
 (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts`, `gradients` and
@@ -788,7 +788,9 @@ Windows tables as sheetpeek's, 483 of 483 (§4.7, §4.13). Wrapped, justified an
 distributed text of one to six lines fits the rows of its lines, 20 px a line of Calibri 11,
 with the wrap flag or without it (96 of 96 rows as sheetpeek's): the alignment alone adds no
 line: `windows/text_style`'s distributed and justified rows a line taller hold a line in the band
-`wrap_band` shows (above).
+`wrap_band` shows (above). `windows/wrap_band` and `windows/wrap_steps`: rows fitted by autofit's
+measure, as on the Mac (§4.7), but under a Courier 10 Normal font, which xlformat does not
+measure on Windows.
 
 ### 4.10 Hyperlinks
 
@@ -1224,9 +1226,14 @@ for distributed text (38 of 38 rows each, both platforms). sheetpeek fits a row 
 rows on each platform): a line stays whole while xlformat's `autofit_width` of it, less a unit
 where its advances and one overhang fall exactly on a bonus step, is at most the column less the
 indents. xlformat counts the bonus from a step on; the rows count it only past one, which
-`wrap_band` shows at the first step on each platform (W of 90 pt on the Mac, 84 px on Windows);
-that later steps behave alike is unverified, and so is any Normal font but Calibri 11, an italic
-cell, and a rich-text cell, which fits the lines it draws. xlformat's Mac autofit departs from
+`wrap_band` shows at the first step on each platform (W of 90 pt on the Mac, 84 px on Windows)
+and `wrap_steps` at the second and third (Mac 120 and 150 pt, Windows 112 and 140 px: 168 of 168
+rows on each platform). Under a Courier 10 Normal font with Arial 10 cells the rule holds too
+(`wrap_steps`: 220 of 220 rows on the Mac as sheetpeek's); on Windows, where xlformat does not
+measure Courier, sheetpeek lays the column out by Calibri's digit, 7 px where Excel takes
+Courier's 8, and fits 114 of those rows a line too many (known deviations; with Excel's widths
+and an 8 px digit the rule gives all 220). An italic cell and a rich-text cell, which fits the
+lines it draws, are unverified. xlformat's Mac autofit departs from
 Excel's at 1 to 5 and 383 to 409 points, and these rows with it (no capture of their own).
 
 **Indent** is three spaces of the Normal font a level (§4.6), 6 pt under Calibri 11, on the side
