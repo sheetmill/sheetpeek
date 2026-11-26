@@ -667,19 +667,16 @@ def test_windows_fitted_rows_are_sheetpeeks():
 
 # --- row_labels: row_bottoms' group labels on Windows
 
+SMALL_PPEM = "xlformat's Windows widths below 11 ppem (8 pt) are unverified"
 LABEL_HEIGHTS_PINNED = {
-    "90 degrees at 5 pt, fitted": "turned text fits Windows rows by the Mac's rules in points",
-    "90 degrees at 6 pt, fitted": "turned text fits Windows rows by the Mac's rules in points",
-    "90 degrees at 7 pt, fitted": "turned text fits Windows rows by the Mac's rules in points",
-    "90 degrees at 8 pt, fitted": "turned text fits Windows rows by the Mac's rules in points",
-    "90 degrees at 9 pt, fitted": "turned text fits Windows rows by the Mac's rules in points",
-    "90 degrees unmerged, fitted": "turned text fits Windows rows by the Mac's rules in points",
-    "45 degrees unmerged, fitted": "turned text fits Windows rows by the Mac's rules in points",
+    "90 degrees at 5 pt, fitted": SMALL_PPEM,
+    "90 degrees at 6 pt, fitted": SMALL_PPEM,
+    "90 degrees at 7 pt, fitted": SMALL_PPEM,
+    "45 degrees unmerged, fitted": "angled text fits Windows rows by the Mac's rule in points",
 }
 """Fitted rows of ``windows/row_labels`` sheetpeek fits otherwise, with the reason (§4.17)."""
-STORED_ROW = (32.0, 31.5)
-"""A row stored at 32 pt: sheetpeek keeps 32, Excel for Windows lays it out at 42 px (31.5 pt);
-one stored height is captured, so no rule is drawn from it."""
+STORED_ROW = (31.5, 31.5)
+"""A row stored at 32 pt: Excel for Windows lays it out at 42 px, 31.5 pt (``stored_rows``)."""
 
 
 @pytest.mark.excel
@@ -713,7 +710,47 @@ def test_windows_row_labels_are_sheetpeeks():
             wrong[case.name] = (theirs, ours)
     REPORT["row labels (Windows)"] = (
         f"row labels, Excel for Windows: {len(body)} rows, {len(LABEL_HEIGHTS_PINNED)} known "
-        "deviations (turned text in pixels)"
+        "deviations (small sizes, 45 degrees)"
     )
     assert len(body) == 15
     assert wrong == {}
+
+
+# --- stored_rows: row heights a file stores, on Windows
+
+PLAIN_PINNED = "Excel for Windows ignores a row's ht without customHeight; sheetpeek keeps it"
+
+
+@pytest.mark.excel
+def test_windows_stored_row_heights_are_whole_pixels():
+    # Every stored height (a row's ht with customHeight, the sheet's defaultRowHeight with
+    # customHeight) is laid out at floor(4s/3 + c) px, and each row's top is the sum of the
+    # whole-pixel rows above it. A row's ht without customHeight is a known deviation.
+    pytest.importorskip("openpyxl")
+    from capture import stored_rows
+
+    _, body = _table("stored_rows.tsv")
+    captured = {r["name"]: r for r in body}
+    wrong, pinned = {}, set()
+    with tempfile.TemporaryDirectory() as tmp:
+        for form, stored in stored_rows.workbooks():
+            path = stored_rows.build_one(form, stored, Path(tmp))
+            last = len(stored_rows.cases(form, stored))
+            rendered = sheetpeek.read(path, platform="windows", ref=f"A1:A{last}").layout("excel")
+            for case in stored_rows.cases(form, stored):
+                row = next(r for r in rendered.rows if r.index == case.row)
+                excel = captured[case.name]
+                ours = (row.height_pt, row.y_pt)
+                if ours == (float(excel["height"]), float(excel["top"])):
+                    continue
+                if form == "plain":
+                    pinned.add(case.name)
+                else:
+                    wrong[case.name] = (excel["height"], excel["top"], ours)
+    REPORT["stored rows (Windows)"] = (
+        f"stored rows, Excel for Windows: {len(body)} rows, {len(pinned)} known deviations "
+        "(ht without customHeight)"
+    )
+    assert len(body) == 100
+    assert wrong == {}
+    assert len(pinned) == 13

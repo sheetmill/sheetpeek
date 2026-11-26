@@ -20,6 +20,9 @@ LEFT_OUT = {"ARCHITECTURE.md", "CHANGELOG.md", "tests/test_unverified.py"}
 DATA = (".tsv", ".tsv.gz", ".xlsx")
 
 LABELS: dict[str, tuple[str, ...]] = {
+    "tests/test_windows_captures.py": (
+        'SMALL_PPEM = "xlformat\'s Windows widths below 11 ppem (8 pt) are unverified"',
+    ),
     "tests/test_suite_row_bottoms.py": ('"pt are unverified",',),
     "capture/extensions.py": (
         "are matched ignoring case until captured (unverified), and ``_detect._URIS_ANY_CASE`` "
@@ -46,6 +49,7 @@ LABELS: dict[str, tuple[str, ...]] = {
         "settles",
     ),
     "src/sheetpeek/_excel.py": (
+        "in whole pixels at 8, 9 and 11 pt); rich text by :func:`_upright_height` (unverified).",
         "# and 90 degrees; an empty stacked cell counts, unverified)",
         "if spans:  # rich text fits the lines drawn (unverified: no capture of its fit)",
         "# three rows leave them 15 pt; its superscript and subscript likewise, unverified).",
@@ -59,6 +63,8 @@ LABELS: dict[str, tuple[str, ...]] = {
         "``windows/font_faces``, ``windows/font_aptos``; Excel's own test is unverified, as the",
     ),
     "src/sheetpeek/_rows.py": (
+        "20 px and 15.7 pt, 20.93 px, is 21; 32 pt is 42 px). The exact ``c`` is unverified, "
+        "bounded by",
         "(reported ``font.no_metrics``; unverified). A size past xlformat's Windows rows, which",
         "pixels, its line inset the bottom offset, as at every tabled size (unverified above 72",
         "group ``fonts``: single and double rows of 23 px; other sizes unverified).",

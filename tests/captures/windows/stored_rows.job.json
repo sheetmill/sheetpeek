@@ -1,0 +1,409 @@
+{
+ "schema": 1,
+ "job_id": "sheetpeek-20261125-180925-stored-rows",
+ "package": "sheetpeek",
+ "purpose": "sheetpeek capture group stored_rows: the heights and tops Excel lays out for rows whose height a file stores in points, across the fractions of a pixel, as a row's ht with customHeight and without and as the sheet's defaultRowHeight, read from Excel.",
+ "limits": {
+  "job_seconds": 1800,
+  "step_seconds": 600
+ },
+ "audit": false,
+ "workbooks": [
+  {
+   "file": "stored_rows_custom.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "rows",
+     "range": "A1:A20",
+     "props": [
+      "row_height",
+      "height",
+      "top"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "stored_rows_plain.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "rows",
+     "range": "A1:A20",
+     "props": [
+      "row_height",
+      "height",
+      "top"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "stored_rows_default_15_0.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "rows",
+     "range": "A1:A3",
+     "props": [
+      "row_height",
+      "height",
+      "top"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "stored_rows_default_15_1.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "rows",
+     "range": "A1:A3",
+     "props": [
+      "row_height",
+      "height",
+      "top"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "stored_rows_default_15_2.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "rows",
+     "range": "A1:A3",
+     "props": [
+      "row_height",
+      "height",
+      "top"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "stored_rows_default_15_3.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "rows",
+     "range": "A1:A3",
+     "props": [
+      "row_height",
+      "height",
+      "top"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "stored_rows_default_15_4.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "rows",
+     "range": "A1:A3",
+     "props": [
+      "row_height",
+      "height",
+      "top"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "stored_rows_default_15_5.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "rows",
+     "range": "A1:A3",
+     "props": [
+      "row_height",
+      "height",
+      "top"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "stored_rows_default_15_6.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "rows",
+     "range": "A1:A3",
+     "props": [
+      "row_height",
+      "height",
+      "top"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "stored_rows_default_15_7.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "rows",
+     "range": "A1:A3",
+     "props": [
+      "row_height",
+      "height",
+      "top"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "stored_rows_default_15_8.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "rows",
+     "range": "A1:A3",
+     "props": [
+      "row_height",
+      "height",
+      "top"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "stored_rows_default_15_9.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "rows",
+     "range": "A1:A3",
+     "props": [
+      "row_height",
+      "height",
+      "top"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "stored_rows_default_16_0.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "rows",
+     "range": "A1:A3",
+     "props": [
+      "row_height",
+      "height",
+      "top"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "stored_rows_default_15_375.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "rows",
+     "range": "A1:A3",
+     "props": [
+      "row_height",
+      "height",
+      "top"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "stored_rows_default_16_33.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "rows",
+     "range": "A1:A3",
+     "props": [
+      "row_height",
+      "height",
+      "top"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "stored_rows_default_21_33.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "rows",
+     "range": "A1:A3",
+     "props": [
+      "row_height",
+      "height",
+      "top"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "stored_rows_default_31_875.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "rows",
+     "range": "A1:A3",
+     "props": [
+      "row_height",
+      "height",
+      "top"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "stored_rows_default_32_0.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "rows",
+     "range": "A1:A3",
+     "props": [
+      "row_height",
+      "height",
+      "top"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "stored_rows_default_32_25.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "rows",
+     "range": "A1:A3",
+     "props": [
+      "row_height",
+      "height",
+      "top"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "stored_rows_default_32_5.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "rows",
+     "range": "A1:A3",
+     "props": [
+      "row_height",
+      "height",
+      "top"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "stored_rows_default_100_1.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "rows",
+     "range": "A1:A3",
+     "props": [
+      "row_height",
+      "height",
+      "top"
+     ]
+    }
+   ]
+  },
+  {
+   "file": "stored_rows_default_409_0.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "read",
+     "id": "rows",
+     "range": "A1:A3",
+     "props": [
+      "row_height",
+      "height",
+      "top"
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -141,14 +141,28 @@ def font_row_height(font: Font) -> float:
     return min(face_metrics(font)[0], TALLEST_ROW)
 
 
+STORED_PIXEL_ROUNDING = 1 / 8
+"""Excel for Windows lays out a stored row height of ``s`` points at ``floor(4s/3 + c)`` pixels,
+``c`` between 1/15 and 1/5 of a pixel (captured, ``windows/stored_rows``: 15.6 pt, 20.8 px, is
+20 px and 15.7 pt, 20.93 px, is 21; 32 pt is 42 px). The exact ``c`` is unverified, bounded by
+those rows; this is a value inside the bound."""
+
+
+def _stored(height: float) -> float:
+    """A stored row height as the platform lays it out: whole pixels on Windows (§4.7)."""
+    if current().name != "windows" or height <= 0:
+        return height
+    return 0.75 * math.floor(height * 4 / 3 + STORED_PIXEL_ROUNDING)
+
+
 def row_height(row: Row, sheet: Sheet) -> float:
     """The height of a row in points; 0 for a row Excel hides by its sheet format."""
     if row.height is not None:
-        return row.height
+        return _stored(row.height)
     if sheet.zero_row_height and not row.listed:
         return 0.0
     if sheet.custom_row_height and not sheet.zero_row_height and sheet.default_row_height:
-        return sheet.default_row_height
+        return _stored(sheet.default_row_height)
     if not sheet.has_sheet_format and not row.listed:
         return NO_SHEET_FORMAT
     height = font_row_height(sheet.normal_font)

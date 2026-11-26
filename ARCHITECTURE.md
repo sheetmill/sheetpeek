@@ -682,6 +682,14 @@ at, in order:
    (`package_more`: a 409 pt Normal font). Plus 1 pt each for `thickTop` and `thickBottom` when
    the row has no `<row>` element.
 
+**Stored heights on Windows** are laid out in whole pixels, `floor(4s/3 + c)` for a height of
+`s` points, `c` between 1/15 and 1/5 of a pixel (captured, `windows/stored_rows`, a row's `ht`
+with `customHeight` and the sheet's `defaultRowHeight` with `customHeight`, 15 to 16 pt by tenths
+and up to 409: every row and every row's top; sheetpeek takes `c` = 1/8, the exact threshold
+unverified). A row's `ht` without `customHeight` Excel for Windows ignores: such rows beside a
+Calibri 11 cell are 15 pt whatever is stored; sheetpeek keeps the stored height (13 rows, a
+known deviation).
+
 **Rows are fitted to their cells** when Excel opens a file (captured, suite `row_height`): a row
 with a `<row>` element and no `ht`, in a sheet without `customHeight`, takes the largest of those
 heights and of each cell font's height and of its wrapped text; in a horizontal merge the font
@@ -758,7 +766,7 @@ the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.1
 `theme_fonts_palette` and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions`
 (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts`, `gradients` and
 `diagonals` (§4.12), `text_style`, `text_style_more`, `text_steps` and `rules_below` (§4.6, §4.7,
-§4.13), `font_cut` (§4.13), `row_bottoms` (§3.6, §4.17), `runs` (§4.16), `tab_strip` (§4.15), `outline`
+§4.13), `font_cut` (§4.13), `row_bottoms` (§3.6, §4.17), `windows/stored_rows` (§4.7), `runs` (§4.16), `tab_strip` (§4.15), `outline`
 (§4.11), `rotation`, `rotation_more` and `rotation_placement` (§4.17), `filters` and `filters_more`
 (§4.19) and `tables` (§4.20). All are Excel 16.115 (Microsoft 365). Every section here rests on one
 of them; what no capture covers is marked unverified where it is stated, as are the parts of §4.12,
@@ -1561,10 +1569,12 @@ boxes match a rigid rotation of the upright box (captured: 45°, 58.5 × 57.5 pt
   `labels`: 6 to 8 pt; at 5 pt Excel fits 38 where sheetpeek fits 41, xlformat's Mac widths
   below 6 pt being unverified). Turned text in a merge does not count for a fitted row, merged
   across columns or rows, wrapped or not (`labels` and `windows/row_labels`: the Normal font's
-  15 pt on both platforms). On Windows turned text fits its row by these rules in points, not
-  in pixels (`windows/row_labels`: 90-degree rows of 5 to 9 pt and both unmerged rows differ,
-  known deviations), and a row stored at 32 pt is laid out at 42 px, 31.5 pt, where sheetpeek
-  keeps 32 (one stored height captured).
+  15 pt on both platforms). The 90-degree row is autofit's width of the text, xlformat's
+  `autofit_width` under the Normal font, on both platforms: on the Mac it equals the formula
+  above (`row_height_fitted` group `turned`, 527 of 527 rows), on Windows it is in whole pixels
+  (`windows/row_labels`: 8, 9 and 11 pt exactly; 5 to 7 pt, below the 11 ppem where xlformat
+  measures Windows widths, and the 45-degree row, whose rule runs in points, are known
+  deviations).
 - **Wrapped angled text** (wrap, justify or distributed) wraps along the turned direction: a line
   holds what a fitted row of this height would, `W·|sin θ| + S·|cos θ| + 7 ≤ h`, with a word joining
   a line only if the space after it fits too (§4.7); the lines step one font line (15 pt at Calibri

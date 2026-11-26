@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- With `platform="windows"`, a row height the file stores is laid out in whole pixels, as Excel
+  for Windows lays it out (captured, `windows/stored_rows`): a row stored at 32 pt is 31.5 pt
+  (42 pixels) and each row below it moves up with it, where 0.6.0 kept 32. A row's height
+  without `customHeight` is still kept, where Excel for Windows ignores it.
+- A row fitted to text turned 90 degrees is autofit's width of the text (xlformat's
+  `autofit_width`), the same rows as before on the Mac and whole pixels on Windows: Calibri 11
+  "Rotated text here" fits 87.75 pt (117 pixels), as Excel for Windows, where 0.6.0 gave 88.
 - An empty cell styled with turned text no longer counts for where its row's bottom-aligned text
   sits: beside an empty cell styled Calibri 24 at 45 degrees, Calibri 11 text in a 32 pt row
   sits 29 pt below the row's top, where 0.6.0 put it at 26 (captured, `row_bottoms`, on both
