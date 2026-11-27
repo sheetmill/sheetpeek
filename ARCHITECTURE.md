@@ -705,15 +705,18 @@ fit is Excel's in each but the rows in Tahoma and Book Antiqua, faces xlformat h
 for.
 
 **An autofit row whose fit needs a face xlformat does not measure keeps its stored height.** Where
-sheetpeek cannot compute the fit Excel shows, it lays out the height the file stores, which is
-Excel's own fit when the file was saved, and reports the face (`font.no_metrics`): a choice where
+sheetpeek cannot compute the fit Excel shows, it lays out the height the file stores, which in a
+file Excel saved is Excel's own fit when the file was saved (captured, `saved_rows`: Excel for Mac
+writes the height it fits each row to as its `ht` without `customHeight`, none for a row at the
+default height, and keeps a custom row's), and reports the face (`font.no_metrics`): a choice where
 the fit is unknown, not a rule of Excel's. The fit needs a face when it reads the row metrics of
 any font in that face: the Normal font, the font and rich-text runs of each cell the fit counts
 (values and empty styled cells; not a hidden column's, text turned 90 degrees, which fits by its
 width, or a merge across rows), and the row's or the columns' style for the positions without a
 `<c>`. Excel for Windows fits the Tahoma rows of `excel10` to the heights they store (4 of 4), so
-they match; its Book Antiqua rows it fits otherwise (3 rows on Windows,
-and on the Mac, whose fits differ from Windows', those and 2 Tahoma rows: known deviations).
+they match; its Book Antiqua rows it fits otherwise (3 rows on Windows, and on the Mac, whose fits
+differ from Windows', those and 2 Tahoma rows: known deviations). A face name matches without
+regard to case: Excel for Mac fits `arial` as Arial (`saved_rows`), and xlformat folds the case.
 sheetpeek reads such a row as `Row.autofit` with no height and fits it in every sheet format,
 as Excel does (every row of `refit_rows` on both platforms, and the rows without `customHeight`
 in `windows/stored_rows`).
@@ -800,8 +803,8 @@ the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.1
 `theme_fonts_palette` and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions`
 (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts`, `gradients` and
 `diagonals` (§4.12), `text_style`, `text_style_more`, `text_steps` and `rules_below` (§4.6, §4.7,
-§4.13), `font_cut` (§4.13), `row_bottoms` (§3.6, §4.17), `windows/stored_rows` and `refit_rows`
-(§4.7), `runs` (§4.16), `tab_strip` (§4.15), `outline`
+§4.13), `font_cut` (§4.13), `row_bottoms` (§3.6, §4.17), `windows/stored_rows`, `refit_rows` and
+`saved_rows` (§4.7), `runs` (§4.16), `tab_strip` (§4.15), `outline`
 (§4.11), `rotation`, `rotation_more` and `rotation_placement` (§4.17), `filters` and `filters_more`
 (§4.19) and `tables` (§4.20). All are Excel 16.115 (Microsoft 365). Every section here rests on one
 of them; what no capture covers is marked unverified where it is stated, as are the parts of §4.12,

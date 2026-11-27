@@ -1,0 +1,11 @@
+# excel: Excel 16.115 (16.115.26110837, Microsoft 365, Current channel) for Mac, en_US
+# captured: 2026-11-27
+# suite: saved_rows (capture.saved_rows); method: the rows of a copy Excel saved
+row	name	face	size	bold	stored	custom	saved_ht	saved_custom
+1	calibri 11	Calibri	11	0		0		
+2	calibri 20	Calibri	20	0		0	26	
+3	calibri 28 ht 60	Calibri	28	0	60	0	37	
+4	arial 20	Arial	20	0		0	25	
+5	arial 20 lower case	arial	20	0		0	25	
+6	tahoma 12 bold ht 15	Tahoma	12	1	15	0	16	
+7	calibri 11 ht 30 custom	Calibri	11	0	30	1	30	1
