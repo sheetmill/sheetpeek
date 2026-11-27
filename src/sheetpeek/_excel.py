@@ -293,8 +293,9 @@ def _fitted(
         below, inset = max(below, b), max(inset, n)
         plain_below, plain_inset = max(plain_below, b), max(plain_inset, n)
     # The positions without a <c> take the row's own style, else their column's: those fonts
-    # count in the height and the bottom (captured, row_bottoms: a row's and a column's style;
-    # a row with a style of its own taking it before the columns', unverified).
+    # count in the height and the bottom (captured, row_bottoms: a row's and a column's style).
+    # A row with a style of its own takes it before the columns', style 0 when customFormat
+    # has no s (captured, refit_rows group excel8: Arial 8 rows under an Arial 10 column style).
     own_style = sheet._row_fonts.get(row.index)
     for font in (own_style,) if own_style is not None else sheet._column_fonts:
         b, n, a = fonts.bottom(font)

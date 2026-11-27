@@ -71,7 +71,8 @@ class Structure:
     phonetic: CellSet = field(default_factory=CellSet)
     """Cells that show a phonetic guide their string has."""
     row_styles: tuple[tuple[int, int], ...] = ()
-    """(row, style index) of rows with a format of their own (``customFormat``)."""
+    """(row, style index) of rows with a format of their own (``customFormat``); without ``s``,
+    style 0."""
     column_styles: tuple[tuple[int, int, int], ...] = ()
     """(first, last, style index) of ``<col>`` elements with a style."""
     extra: dict[str, Any] = field(default_factory=dict)
@@ -125,8 +126,10 @@ def fill(found: Structure, sheet: xlio.Sheet) -> Structure:
         show_gridlines=view.show_grid_lines if view else True,
         show_headings=view.show_row_col_headers if view else True,
         grid_color_id=view.color_id if view and not view.default_grid_color else None,
+        # a row with customFormat and no s takes style 0 before its columns' (captured,
+        # refit_rows group excel8, on both platforms)
         row_styles=tuple(
-            (index, row.style) for index, row in rows.items() if row.custom_format and row.style
+            (index, row.style or 0) for index, row in rows.items() if row.custom_format
         ),
         column_styles=tuple(
             (column.min, column.max, column.style) for column in sheet.columns if column.style

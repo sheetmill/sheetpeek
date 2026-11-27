@@ -696,12 +696,21 @@ where with `customHeight` the row is hidden. Under a custom default height
 row with no `ht` takes the default, and under `zeroHeight` it is fitted as a row with no `ht` is
 (the same suites, groups `zero`, `customsheet` and `zerosheet`: 11 of 11 such rows on each platform,
 beside rows with `customHeight`, without `ht` and unlisted). Rows with `spans` and
-`x14ac:dyDescent`, in a workbook whose `AppVersion` is 15.0300, under an Arial 10 Normal font, are
-refitted alike on the
-Mac (group `excelform`, 5 of 5: stored 13.5, 12.75 and 30, fitted 13, and 16 beside Arial 12).
+`x14ac:dyDescent`, in a workbook whose `AppVersion` is 15.0300, are refitted alike on both
+platforms, whatever they store
+(groups `excelform`, `excel10`, `excel11` and `excel8`, under Arial 10, 11 and 8 Normal fonts, 25
+rows of one to three cells with values or empty and styled): an Arial 10 row stored at 13.5 is 13
+on the Mac and 12.75 on Windows, an Arial 11 bold one stored at 15.75 is 15 on Windows. sheetpeek's
+fit is Excel's in each but the rows in Tahoma and Book Antiqua, faces xlformat has no row heights
+for (5 rows on the Mac, 7 on Windows, a pixel or two off).
 sheetpeek reads such a row as `Row.autofit` with no height and fits it in every sheet format,
 as Excel does (every row of `refit_rows` on both platforms, and the rows without `customHeight`
 in `windows/stored_rows`).
+
+A row's positions without a `<c>` take the row's own style when it has `customFormat`, before
+their columns' style, and style 0 when it has no `s` (captured, `refit_rows` group `excel8`, both
+platforms: Arial 8 rows under an Arial 10 column style fit 11 on the Mac and 11.25 on Windows with
+`customFormat` and no `s`, and 13 and 12.75 without `customFormat`).
 
 **Rows are fitted to their cells** when Excel opens a file (captured, suite `row_height`): a row
 with a `<row>` element and no `ht`, in a sheet without `customHeight`, or with an `ht` without

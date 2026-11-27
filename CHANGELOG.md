@@ -24,8 +24,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   fitted this way, so a file Excel saved now shows sheetpeek's fit of each such row where it
   differs from the height stored. In the workbooks `capture/refit_rows.py` generates, a row with
   `spans` and `x14ac:dyDescent`, in a workbook of `AppVersion` 15.0300, storing 13.5 pt beside an
-  Arial 10 cell shows at 12.75, and at 13 with `platform="mac"`, as Excel for Mac shows it
-  (captured, `refit_rows` group `excelform`; Excel for Windows unverified).
+  Arial 10 cell shows at 12.75, and at 13 with `platform="mac"`, as Excel for Windows and for Mac
+  show it (captured, `refit_rows` groups `excelform`, `excel10`, `excel11` and `excel8`).
+- A row with `customFormat` and no `s` takes style 0 for its positions without a cell, before
+  its columns' style, as Excel does (captured, `refit_rows` group `excel8`): a fitted row of
+  Arial 8 cells under an Arial 8 Normal font and an Arial 10 column style is 11.25 pt, and 11
+  with `platform="mac"`, where 0.6.0 gave 12.75 and 13.
 - With `platform="windows"`, a row height the file stores is laid out in whole pixels, as Excel
   for Windows lays it out (captured, `windows/stored_rows`): a row stored at 32 pt is 31.5 pt
   (42 pixels) and each row below it moves up with it, where 0.6.0 kept 32.

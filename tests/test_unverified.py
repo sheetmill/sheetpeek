@@ -56,7 +56,6 @@ LABELS: dict[str, tuple[str, ...]] = {
         "else:  # bottom; justify as bottom (unverified); a box taller than the row (captured)",
         "# An accounting underline runs under the text's width, turned with it (unverified).",
         "also leaves out other cells' runs (unverified).",
-        "# a row with a style of its own taking it before the columns', unverified).",
     ),
     "src/sheetpeek/_layout.py": ("Normal font's (unverified, no capture in this repository yet).",),
     "src/sheetpeek/_read.py": (
