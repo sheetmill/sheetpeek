@@ -5,10 +5,12 @@
 
 Excel opens a workbook of one cell a row (``ROWS``), each row without ``customHeight``, with or
 without an ``ht``, and one with ``customHeight``, and saves a copy (``save_copy.applescript``);
-the copy's ``<row>`` elements give, for each row, the ``ht`` Excel wrote and whether it wrote
+Excel for Windows does the same by the job group ``saved_rows`` (``capture/job.py``). The copy's
+``<row>`` elements give, for each row, the ``ht`` Excel wrote and whether it wrote
 ``customHeight``. It shows what a file Excel saved stores for a row it fitted, and, by a row in
 ``arial`` beside one in ``Arial``, whether Excel matches a face name without regard to case
-(the same fit, or another face's). ``run`` writes ``tests/captures/saved_rows.tsv``.
+(the same fit, or another face's). ``run`` writes ``tests/captures/saved_rows.tsv``; the job,
+``tests/captures/windows/saved_rows.tsv``.
 """
 
 from __future__ import annotations
@@ -83,14 +85,16 @@ def saved(path: Path) -> dict[int, tuple[str, str]]:
     return found
 
 
-def write(copy: Path, output: Path = OUTPUT) -> None:
-    from capture.edition import excel_description
+def write(copy: Path, output: Path = OUTPUT, head: list[str] | None = None) -> None:
+    """The TSV of ``copy``'s rows, under ``head`` (else this Mac's Excel and today)."""
+    if head is None:
+        from capture.edition import excel_description
 
+        head = [f"# excel: {excel_description()}, en_US", f"# captured: {dt.date.today()}"]
     rows = saved(copy)
     output.parent.mkdir(parents=True, exist_ok=True)
     with output.open("w", encoding="utf-8", newline="\n") as out:
-        out.write(f"# excel: {excel_description()}, en_US\n")
-        out.write(f"# captured: {dt.date.today().isoformat()}\n")
+        out.write("".join(f"{line}\n" for line in head))
         out.write(
             "# suite: saved_rows (capture.saved_rows); method: the rows of a copy Excel saved\n"
         )

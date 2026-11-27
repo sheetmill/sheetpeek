@@ -620,3 +620,53 @@ def test_the_stored_rows_job_reads_one_record_a_row(tmp_path):
     assert rows[0] == list(stored_rows.COLUMNS)
     every = [c for f, s in stored_rows.workbooks() for c in stored_rows.cases(f, s)]
     assert [r[1] for r in rows[1:]] == [c.name for c in every]
+
+
+def test_the_saved_rows_job_reads_the_rows_of_the_copy_excel_saved(tmp_path):
+    import zipfile
+
+    from capture import saved_rows
+
+    first = job.write("saved_rows", "sheetpeek-test-saved-rows", tmp_path / "a")
+    again = job.write("saved_rows", "sheetpeek-test-saved-rows", tmp_path / "b")
+    name = "saved_rows_source.xlsx"
+    for part in ("job.json", f"files/{name}"):
+        assert _sha(first / part) == _sha(again / part), part
+    steps = json.loads((first / "job.json").read_text())["workbooks"][0]["steps"]
+    assert steps == [{"op": "open"}, {"op": "save_as", "name": job.SAVED_COPY, "format": "xlsx"}]
+    # a copy as Excel would save it: row 2 fitted to 26 pt, without customHeight
+    result_dir = tmp_path / "result"
+    (result_dir / "artifacts").mkdir(parents=True)
+    with (
+        zipfile.ZipFile(first / "files" / name) as zin,
+        zipfile.ZipFile(result_dir / "artifacts" / job.SAVED_COPY, "w") as zout,
+    ):
+        for info in zin.infolist():
+            data = zin.read(info.filename)
+            if info.filename == "xl/worksheets/sheet1.xml":
+                data = data.replace(b'<row r="2">', b'<row r="2" ht="26">')
+            zout.writestr(info, data)
+    outcome = {
+        "status": "ok",
+        "started": "2026-11-27T00:00:00Z",
+        "header": {
+            "manifest_sha256": _sha(first / "job.json"),
+            "inputs": {name: {"sha256": _sha(first / "files" / name)}},
+            "environment": {"excel": {"build": "16.0.0.0"}},
+        },
+        "workbooks": [
+            {
+                "file": name,
+                "status": "ok",
+                "steps": [{"op": "open", "status": "ok"}, {"op": "save_as", "status": "ok"}],
+            }
+        ],
+    }
+    (result_dir / "result.json").write_text(json.dumps(outcome), encoding="utf-8")
+    (path,) = job.read("saved_rows", first, result_dir, tmp_path / "windows")
+    rows = [r.split("\t") for r in path.read_text(encoding="utf-8").splitlines()]
+    assert rows[0][0] == "# platform: windows"
+    rows = [r for r in rows if not r[0].startswith("# ")]
+    assert rows[0] == list(saved_rows.COLUMNS)
+    assert [r[1] for r in rows[1:]] == [row[0] for row in saved_rows.ROWS]
+    assert rows[2][-2:] == ["26", ""]
