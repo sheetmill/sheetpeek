@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-27
+
 ### Added
 - `Row.autofit`: the row's stored height has no `customHeight`, which Excel ignores, fitting the
   row to its cells when it opens the file. The reader gives such a row `height=None` and
@@ -802,7 +804,8 @@ First release.
 - Borders, conditional formatting, charts, images and comments are not shown; rich text within
   a cell takes the cell's font.
 
-[Unreleased]: https://github.com/sheetmill/sheetpeek/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/sheetmill/sheetpeek/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/sheetmill/sheetpeek/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/sheetmill/sheetpeek/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/sheetmill/sheetpeek/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/sheetmill/sheetpeek/compare/v0.3.0...v0.4.0
