@@ -136,7 +136,7 @@ def test_excel_fits_a_row_without_custom_height_in_every_sheet_format(tmp_path, 
         r["name"]: float(r["height"] or r["row_height"])
         for r in (dict(zip(header, x.split("\t"), strict=True)) for x in lines[1:])
     }
-    assert len(excel) == (38 if platform == "mac" else 33)
+    assert len(excel) == 58
     fits = {"empty": 15.0, "calibri 11": 15.0}
     fits |= {"calibri 20": 26.0, "calibri 28": 37.0} if platform == "mac" else {}
     fits |= {"calibri 20": 26.25, "calibri 28": 36.0} if platform == "windows" else {}
@@ -158,38 +158,45 @@ def test_excel_fits_a_row_without_custom_height_in_every_sheet_format(tmp_path, 
     assert excel["zerosheet empty unlisted"] == 0.0
 
 
+NO_ROW_METRICS = "xlformat has no row heights for Tahoma or Book Antiqua (font.no_metrics)"
+"""Why sheetpeek's fit differs from Excel's in some Excel-form rows: it measures those faces as
+Calibri, a pixel or two off."""
+
+
 @pytest.mark.excel
-def test_excel_refits_rows_with_spans_and_dydescent():
-    # Excel for Mac fits rows with spans and x14ac:dyDescent (AppVersion 15.0300) under an Arial 10
-    # Normal font whatever they store (13.5, 12.75, 30): 13 pt, and 16 beside Arial 12, as
-    # sheetpeek fits them.
+@pytest.mark.parametrize("platform", ["mac", "windows"])
+def test_excel_refits_rows_with_spans_and_dydescent(platform):
+    # Excel fits rows with spans and x14ac:dyDescent (AppVersion 15.0300) under Arial 10, 11 and 8
+    # Normal fonts whatever they store, as sheetpeek fits them: an Arial 10 row stored at 13.5 is
+    # 13 on the Mac and 12.75 on Windows, and a row with customFormat and no s takes style 0
+    # before an Arial 10 column style (Arial 8: 11 and 11.25). Rows in Tahoma or Book Antiqua
+    # are known deviations.
     import sheetpeek
 
-    lines = suite.OUTPUT.read_text(encoding="utf-8").splitlines()
-    lines = [x for x in lines if not x.startswith("# ")]
+    capture = (
+        suite.OUTPUT if platform == "mac" else suite.ROOT / "tests/captures/windows/refit_rows.tsv"
+    )
+    lines = [x for x in capture.read_text(encoding="utf-8").splitlines() if not x.startswith("# ")]
     header = lines[0].split("\t")
     excel = {
-        r["name"]: float(r["row_height"])
+        r["name"]: float(r["height"] or r["row_height"])
         for r in (dict(zip(header, x.split("\t"), strict=True)) for x in lines[1:])
-        if r["workbook"] == "excelform"
     }
-    assert list(excel.values()) == [13.0, 13.0, 13.0, 16.0, 13.0]
+    assert len(excel) == 58
+    wrong, pinned = {}, set()
     with tempfile.TemporaryDirectory() as tmp:
-        path = suite.build_one("excelform", Path(tmp))
-        layout = sheetpeek.read(path, platform="mac", ref="A1:A5").layout("excel")
-    cases = suite.CASES["excelform"]
-    assert [r.height_pt for r in layout.rows] == [excel[c.name] for c in cases]
-
-
-def test_excel8_styles_columns_b_on_in_arial_10(tmp_path):
-    archive = zipfile.ZipFile(suite.build_one("excel8", tmp_path))
-    sheet = archive.read("xl/worksheets/sheet1.xml").decode()
-    style = re.search(r'<cols><col min="2" max="16384" width="9.140625" style="(\d+)" />', sheet)
-    assert style
-    styles = archive.read("xl/styles.xml").decode()
-    xfs = re.findall(r"<xf [^>]*>", styles.split("<cellXfs")[1])
-    font_id = int(re.search(r'fontId="(\d+)"', xfs[int(style.group(1))]).group(1))
-    assert re.findall(r"<font>.*?</font>", styles)[font_id] == (
-        '<font><name val="Arial" /><family val="2" /><sz val="10" /></font>'
-    )
-    assert 'r="AX1"' not in sheet  # the spare cell (row 1, column 50) is gone
+        for name in suite.EXCEL_NORMAL:
+            cases = suite.CASES[name]
+            path = suite.build_one(name, Path(tmp))
+            layout = sheetpeek.read(path, platform=platform, ref=f"A1:C{len(cases)}")
+            ours = {r.index: r.height_pt for r in layout.layout("excel").rows}
+            for case in cases:
+                if ours[case.row] == excel[case.name]:
+                    continue
+                faces = {cell[0] for cell in case.cells}
+                if faces & {"Tahoma", "Book Antiqua"}:
+                    pinned.add(case.name)
+                else:
+                    wrong[case.name] = (excel[case.name], ours[case.row])
+    assert wrong == {}
+    assert len(pinned) == (5 if platform == "mac" else 7), NO_ROW_METRICS

@@ -1,5 +1,5 @@
 # excel: Excel 16.115 (16.115.26110837, Microsoft 365, Current channel) for Mac, en_US
-# captured: 2026-11-26
+# captured: 2026-11-27
 # suite: refit_rows (capture.refit_rows); method: row height (AppleScript)
 workbook	name	row	cell	stored	row_height	height	top
 refit	refit calibri 11 ht 10	1	Calibri 11	10	15		
@@ -40,3 +40,23 @@ excelform	excelform arial 10 ht 12.75	2	Arial 10	12.75	13
 excelform	excelform empty ht 13.5	3		13.5	13		
 excelform	excelform arial 12 ht 13.5	4	Arial 12	13.5	16		
 excelform	excelform arial 10 ht 30	5	Arial 10	30	13		
+excel10	excel10 arial 9 beside empty arial 10	1	Arial 9	12	13		
+excel10	excel10 arial 8 and 8 bold beside empty arial 10	2	Arial 8	12	13		
+excel10	excel10 empty book antiqua 8, 9, 9 bold	3	Book Antiqua 8	15	14		
+excel10	excel10 book antiqua 9 beside empty book antiqua 10	4	Book Antiqua 9	15	14		
+excel10	excel10 empty tahoma 10 and 12 bold	5	Tahoma 10	15	15		
+excel10	excel10 tahoma 20 bold beside empty tahoma 10	6	Tahoma 20	25.5	25		
+excel10	excel10 empty tahoma 10 and 11 bold	7	Tahoma 10	14.25	14		
+excel10	excel10 book antiqua 10	8	Book Antiqua 10	15	14		
+excel10	excel10 tahoma 12 bold	9	Tahoma 12	15	15		
+excel11	excel11 arial 10, 10 bold, 11 bold	1	Arial 10	15.75	14		
+excel11	excel11 arial 11 bold	2	Arial 11	15.75	14		
+excel11	excel11 arial 10 bold	3	Arial 10	15	14		
+excel11	excel11 arial 12 bold	4	Arial 12	16.5	16		
+excel11	excel11 empty arial 10 and 10 bold	5	Arial 10	15	14		
+excel11	excel11 arial 11	6	Arial 11	15	14		
+excel8	excel8 custom format no s	1	Arial 8	11.25	11		
+excel8	excel8 no custom format	2	Arial 8	11.25	13		
+excel8	excel8 custom format s	3	Arial 8	11.25	11		
+excel8	excel8 empty arial 8	4	Arial 8	12	11		
+excel8	excel8 arial 8 at 12.75	5	Arial 8	12.75	11		
