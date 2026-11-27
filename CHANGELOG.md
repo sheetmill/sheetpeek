@@ -15,28 +15,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   both a `height` and `autofit=True` raises `ValueError`.
 
 ### Changed
+- The defaults follow Excel for Windows at 96 dpi, where they followed Excel for Mac: a caller
+  who passes no `platform` to `read`, `open`, `render`, `notices` or the HTML workbook page, the
+  `view` and `serve` commands without `--platform`, and `make_server` without `platform=` get
+  Excel for Windows' column widths, number formats, text, rows and borders, in whole pixels,
+  and its en-US regional settings (`xlformat.RegionalSettings.EN_US_WINDOWS`). A default column
+  is 48 pt (64 px) wide, where it was 53, and `1,234,567.89` in it shows `########`, where it
+  showed `#########`. `Sheet`'s `platform` and `regional_settings` fields default to the same.
+  To keep Excel for Mac, pass `platform="mac"` (`--platform mac` on the command line).
 - A row whose stored height (`ht`) has no `customHeight` is fitted to its cells, as Excel for Mac
   and for Windows fit it when they open the file (captured, `refit_rows`), where 0.6.0 kept the
   stored height: a row storing 30 pt beside a Calibri 11 cell is 15 pt, and one storing 12 pt
   beside a Calibri 20 cell is 26 pt (26.25 with `platform="windows"`). A height of 0 without
   `customHeight` (`ht="0"` or `ht=""`) no longer hides its row, and under a custom default height
-  such a row is fitted, where a row with no `ht` keeps the default. Excel stores every row it
-  fitted this way, so a file Excel saved now shows sheetpeek's fit of each such row where it
-  differs from the height stored. In the workbooks `capture/refit_rows.py` generates, a row with
-  `spans` and `x14ac:dyDescent`, in a workbook of `AppVersion` 15.0300, storing 13.5 pt beside an
-  Arial 10 cell shows at 12.75, and at 13 with `platform="mac"`, as Excel for Windows and for Mac
-  show it (captured, `refit_rows` groups `excelform`, `excel10`, `excel11` and `excel8`). Where
-  the fit needs a face xlformat has no row metrics for (any font the fit counts, the Normal font
-  and empty styled cells included), sheetpeek cannot compute what Excel shows and keeps the stored
-  height, Excel's own fit when the file was saved, with the `font.no_metrics` notice: a Tahoma row
-  storing 15 pt stays 15, as Excel for Windows shows it.
+  such a row is fitted, where a row with no `ht` keeps the default. Excel writes the height it
+  fits each row to this way when it saves (captured, `saved_rows`), so a file Excel saved now
+  shows sheetpeek's fit of each such row where it differs from the height stored. In the workbooks
+  `capture/refit_rows.py` generates, a row with `spans` and `x14ac:dyDescent`, in a workbook of
+  `AppVersion` 15.0300, storing 13.5 pt beside an Arial 10 cell shows at 12.75, and at 13 with
+  `platform="mac"`, as Excel for Windows and for Mac show it (captured, `refit_rows` groups
+  `excelform`, `excel10`, `excel11` and `excel8`).
+- Where an autofit row's fit needs a face xlformat has no row metrics for (any font the fit
+  counts, the Normal font and empty styled cells included), sheetpeek cannot compute what Excel
+  shows, and keeps the height the file stores, Excel's own fit when it saved the file (`saved_rows`), with the
+  `font.no_metrics` notice: our choice where the fit is unknown, not a rule of Excel's. A Tahoma
+  row storing 15 pt stays 15, as Excel for Windows shows it.
 - A row with `customFormat` and no `s` takes style 0 for its positions without a cell, before
   its columns' style, as Excel does (captured, `refit_rows` group `excel8`): a fitted row of
   Arial 8 cells under an Arial 8 Normal font and an Arial 10 column style is 11.25 pt, and 11
   with `platform="mac"`, where 0.6.0 gave 12.75 and 13.
-- With `platform="windows"`, a row height the file stores is laid out in whole pixels, as Excel
-  for Windows lays it out (captured, `windows/stored_rows`): a row stored at 32 pt is 31.5 pt
-  (42 pixels) and each row below it moves up with it, where 0.6.0 kept 32.
+- A row fitted to wrapped text takes as many lines as Excel's row fitting gives it, which wraps
+  the text again by autofit's measure (xlformat's `autofit_width`: advances, padding and
+  long-text bonus) rather than by the lines drawn (captured, `wrap_band` on the Mac and on
+  Windows). A line that is drawn whole but leaves less than autofit's padding to the column is
+  fitted as two, on both platforms: on Windows "aaaa bbbb cccc dddd" distributed in a default
+  column makes a 60 pt row, as in Excel, where 0.6.0 gave 45, and on the Mac "awww awww" wrapped
+  in a 66 pt column a 32 pt row, where 0.6.0 gave 16. Rich text still fits the lines it draws.
 - A row fitted to text turned 90 degrees is autofit's width of the text (xlformat's
   `autofit_width`), the same rows as before on the Mac and whole pixels on Windows: Calibri 11
   "Rotated text here" fits 87.75 pt (117 pixels), as Excel for Windows, where 0.6.0 gave 88.
@@ -47,37 +61,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A row fitted to text turned 90 degrees in a font below 9 points takes the pad of 5 points the
   rule gives there, where it was held at 7: Calibri 7 "Rotated text here" fits 53 pt, where 0.6.0
   gave 55 (captured, `row_bottoms`, 6 to 8 points, Excel for Mac).
-- The defaults follow Excel for Windows at 96 dpi, where they followed Excel for Mac: a caller
-  who passes no `platform` to `read`, `open`, `render`, `notices` or the HTML workbook page, the
-  `view` and `serve` commands without `--platform`, and `make_server` without `platform=` get
-  Excel for Windows' column widths, number formats, text, rows and borders, in whole pixels,
-  and its en-US regional settings (`xlformat.RegionalSettings.EN_US_WINDOWS`). A default column
-  is 48 pt (64 px) wide, where it was 53, and `1,234,567.89` in it shows `########`, where it
-  showed `#########`. `Sheet`'s `platform` and `regional_settings` fields default to the same.
-  To keep Excel for Mac, pass `platform="mac"` (`--platform mac` on the command line).
+- With `platform="windows"`, a row height the file stores is laid out in whole pixels, as Excel
+  for Windows lays it out (captured, `windows/stored_rows`): a row stored at 32 pt is 31.5 pt
+  (42 pixels) and each row below it moves up with it, where 0.6.0 kept 32.
+- With `platform="windows"`, superscript and subscript rows are fitted as Excel for Windows fits
+  them, by the font's pixels per em (captured, `windows/row_height_fitted`): a Calibri 11
+  superscript makes a 23-pixel row (17.25 pt) and a subscript a 24-pixel one (18 pt), and both at
+  24 pt a 48-pixel one (36 pt), where 0.6.0 gave 15.5, 16, 35.25 and 35 pt, not whole pixels.
 - Requires xlformat 0.11 (`xlformat>=0.11,<1`), whose Windows rows cover every size from 1 to 72
   points by pixels per em in Calibri, Arial, Times New Roman, Courier New and Aptos Narrow. With
   `platform="windows"`, a Times New Roman 60 pt row is 102 pixels (76.5 pt) and a Calibri 41.5 pt
-  one 71 (53.25 pt), where 0.6.0 gave 99 and 72, the Mac's heights rounded to pixels; only sizes
-  above 72 points still take them (unverified).
-- Requires xlrecalc 0.12 (`xlrecalc>=0.12,<1`), which computes 3-D references and unions of
-  references as Excel does. In a workbook openpyxl wrote (no cached values), `=SUM(Jan:Mar!A1)`
+  one 71 (53.25 pt), where 0.6.0 with xlformat 0.10 gave 99 and 72, the Mac's heights rounded to
+  pixels (0.6.0 with xlformat 0.11 gives the same as now); only sizes above 72 points still take
+  them (unverified).
+- Requires xlrecalc 0.13 (`xlrecalc>=0.13,<1`), which computes 3-D references and unions of
+  references as Excel does, and `LINEST` over several x columns. In a workbook openpyxl wrote (no cached values), `=SUM(Jan:Mar!A1)`
   shows the sum, `=Jan:Mar!A1+1` shows `#REF!` and `=SUM((Jan!A1,Jan!A1:A2))` the sum of its
   areas, where 0.6.0 with xlrecalc 0.11 showed them empty and reported them under "external or
   3-D reference" and "a union of ranges". A 3-D reference or a union given to a function no
   capture shows reading one keeps the file's value and is reported under a label naming the
   function as the file writes it (`a 3-D reference in _XLFN.RANK.EQ`).
-- A row fitted to wrapped text takes as many lines as Excel's row fitting gives it, which wraps
-  the text again by autofit's measure (xlformat's `autofit_width`: advances, padding and
-  long-text bonus) rather than by the lines drawn (captured, `wrap_band` on the Mac and on
-  Windows). A line that is drawn whole but leaves less than autofit's padding to the column is
-  fitted as two, on both platforms: on Windows "aaaa bbbb cccc dddd" distributed in a default
-  column makes a 60 pt row, as in Excel, where 0.6.0 gave 45, and on the Mac "awww awww" wrapped
-  in a 66 pt column a 32 pt row, where 0.6.0 gave 16. Rich text still fits the lines it draws.
-- With `platform="windows"`, superscript and subscript rows are fitted as Excel for Windows fits
-  them, by the font's pixels per em (captured, `windows/row_height_fitted`): a Calibri 11
-  superscript makes a 23-pixel row (17.25 pt) and a subscript a 24-pixel one (18 pt), and both at
-  24 pt a 48-pixel one (36 pt), where 0.6.0 gave 15.5, 16, 35.25 and 35 pt, not whole pixels.
+  `=INDEX(LINEST(A1:A5,B1:C5),1,3)` over two x columns shows the fit's intercept, where 0.6.0
+  showed it empty and reported it under "not computed".
+- Requires xlio 0.5 (`xlio==0.5.*`), whose readings change where Excel shows a value other than
+  the one it saves (xlio's changelog lists them): a cell font's size is cut to twentieths of a
+  point, so a font of 12.34 pt reads 12.3, where 0.6.0 read 12.34, and a row with a custom height
+  of 0 reads `Row.hidden` (it was already laid out 0 high, and still is).
 
 ### Fixed
 - A face the file names in two cases (`Tahoma` and `tahoma`) gives one `font.no_metrics`

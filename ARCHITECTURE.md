@@ -1862,7 +1862,7 @@ are `filter.buttons` (§4.19).
 
 ## 5. Reading
 
-sheetpeek reads a workbook through xlio (`xlio==0.4.*`), the sheetmill project's xlsx reader, after a check
+sheetpeek reads a workbook through xlio (`xlio==0.5.*`), the sheetmill project's xlsx reader, after a check
 of its own (§5.5). openpyxl is not imported at run time; the tests and the documentation's
 examples build workbooks with it.
 
@@ -2637,9 +2637,9 @@ attribute of `<dimension>`, `<mergeCell>` and `<autoFilter>` in the file format.
 
 ### 8.3 Dependencies
 
-- `xlio==0.4.*` (§5): the sheetmill project's reader, pinned to a minor.
-- `xlrecalc>=0.11,<1` (§5.7), imported normally: it is required.
-- `xlformat>=0.10,<1` (§6.4), imported normally: it is required.
+- `xlio==0.5.*` (§5): the sheetmill project's reader, pinned to a minor.
+- `xlrecalc>=0.13,<1` (§5.7), imported normally: it is required.
+- `xlformat>=0.11,<1` (§6.4), imported normally: it is required.
 - openpyxl is a dev dependency only: the tests and the documentation's examples build workbooks
   with it, and the tests that need it are left out without it.
 - Extra `sheetpeek[rich]`: `rich>=13`.
