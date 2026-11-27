@@ -29,6 +29,12 @@ Windows by the job group ``refit_rows`` (``capture/job.py``).
   ``AppVersion`` 15.0300) under an Arial 10 Normal font, storing heights other than Excel for
   Windows' fit at 96 dpi: 13.5, 12.75 and 30 beside Arial 10 cells, 13.5 on an empty row and beside
   an Arial 12 cell.
+- ``excel10``, ``excel11``, ``excel8``: the same form under an Arial 10, 11 and 8 Normal font, each
+  row a few cells in its own fonts (``EXCEL_ROWS``), with values or empty and styled, storing a
+  height other than sheetpeek's fit: smaller fonts
+  than the Normal font's, Arial bold, Book Antiqua and Tahoma, empty styled cells only; and in
+  ``excel8`` a column style in Arial 10 from column B on, beside rows with ``customFormat="1"``
+  and no ``s``, with ``customFormat`` and A's style, and with neither.
 
 ``run`` saves Excel's answer to ``capture/build/refit_rows/answer.tsv`` and writes
 ``tests/captures/refit_rows.tsv``.
@@ -70,6 +76,12 @@ class Case:
     text: str | None = None
     custom: bool = False
     font: str = "Calibri"
+    label: str | None = None
+    cells: tuple[tuple[str, int, bool, bool], ...] = ()
+    """For ``EXCEL_ROWS``: the cells from A, each (face, size, bold, has a value)."""
+    row_format: str = ""
+    """For ``EXCEL_ROWS``: ``<row>`` attributes before ``ht``, such as ``customFormat="1"``; the
+    text ``{s}`` stands for A's style index."""
 
     @property
     def written(self) -> str | None:
@@ -80,6 +92,8 @@ class Case:
 
     @property
     def name(self) -> str:
+        if self.label is not None:
+            return f"{self.workbook} {self.label}"
         cell = "empty" if self.size is None else f"{self.font.lower()} {self.size}"
         written = self.written
         if written is None:
@@ -109,6 +123,84 @@ _CUSTOMSHEET = ((11, 30.0), (28, 30.0), (None, 30.0), (11, 10.0), (None, None))
 _ZEROSHEET = ((11, 30.0), (20, 10.0), (None, 30.0), (11, None), (None, None))
 _EXCELFORM = ((10, 13.5), (10, 12.75), (None, 13.5), (12, 13.5), (10, 30.0))
 EXCELFORM_DESCENT = {12: "0.25"}
+EXCEL_NORMAL = {
+    "excelform": ("Arial", 10, "12.75"),
+    "excel10": ("Arial", 10, "12.75"),
+    "excel11": ("Arial", 11, "14.25"),
+    "excel8": ("Arial", 8, "11.25"),
+}
+"""Each Excel-form workbook's Normal font and its sheet's ``defaultRowHeight``."""
+_A10, _A10B, _A11B = ("Arial", 10, False), ("Arial", 10, True), ("Arial", 11, True)
+EXCEL_ROWS: dict[str, list[tuple[str, float, tuple[tuple[str, int, bool, bool], ...], str]]] = {
+    # (label, stored ht, cells from A: face, size, bold, has a value; row attributes)
+    "excel10": [
+        ("arial 9 beside empty arial 10", 12.0, (("Arial", 9, False, True), (*_A10, False)), ""),
+        (
+            "arial 8 and 8 bold beside empty arial 10",
+            12.0,
+            (("Arial", 8, False, True), ("Arial", 8, True, True), (*_A10, False)),
+            "",
+        ),
+        (
+            "empty book antiqua 8, 9, 9 bold",
+            15.0,
+            (
+                ("Book Antiqua", 8, False, False),
+                ("Book Antiqua", 9, False, False),
+                ("Book Antiqua", 9, True, False),
+            ),
+            "",
+        ),
+        (
+            "book antiqua 9 beside empty book antiqua 10",
+            15.0,
+            (("Book Antiqua", 9, False, True), ("Book Antiqua", 10, False, False)),
+            "",
+        ),
+        (
+            "empty tahoma 10 and 12 bold",
+            15.0,
+            (("Tahoma", 10, False, False), ("Tahoma", 12, True, False)),
+            "",
+        ),
+        (
+            "tahoma 20 bold beside empty tahoma 10",
+            25.5,
+            (("Tahoma", 20, True, True), ("Tahoma", 10, False, False)),
+            "",
+        ),
+        (
+            "empty tahoma 10 and 11 bold",
+            14.25,
+            (("Tahoma", 10, False, False), ("Tahoma", 11, True, False)),
+            "",
+        ),
+        ("book antiqua 10", 15.0, (("Book Antiqua", 10, False, True),), ""),
+        ("tahoma 12 bold", 15.0, (("Tahoma", 12, True, True),), ""),
+    ],
+    "excel11": [
+        (
+            "arial 10, 10 bold, 11 bold",
+            15.75,
+            ((*_A10, True), (*_A10B, True), (*_A11B, True)),
+            "",
+        ),
+        ("arial 11 bold", 15.75, ((*_A11B, True),), ""),
+        ("arial 10 bold", 15.0, ((*_A10B, True),), ""),
+        ("arial 12 bold", 16.5, (("Arial", 12, True, True),), ""),
+        ("empty arial 10 and 10 bold", 15.0, ((*_A10, False), (*_A10B, False)), ""),
+        ("arial 11", 15.0, (("Arial", 11, False, True),), ""),
+    ],
+    "excel8": [
+        ("custom format no s", 11.25, (("Arial", 8, False, True),), 'customFormat="1"'),
+        ("no custom format", 11.25, (("Arial", 8, False, True),), ""),
+        ("custom format s", 11.25, (("Arial", 8, False, True),), 's="{s}" customFormat="1"'),
+        ("empty arial 8", 12.0, (("Arial", 8, False, False),), 'customFormat="1"'),
+        ("arial 8 at 12.75", 12.75, (("Arial", 8, False, True),), 'customFormat="1"'),
+    ],
+}
+EXCEL_COLUMN_STYLE = {"excel8": ("Arial", 10)}
+"""The font of a style given to columns B to XFD."""
 """Excel's ``x14ac:dyDescent`` of a row by its cell's size, else ``0.2`` (Arial 10's)."""
 SHEET_FORMATS = {
     "customsheet": 'baseColWidth="8" defaultRowHeight="20" customHeight="1"',
@@ -126,6 +218,13 @@ CASES = {
     "excelform": [
         Case("excelform", k, size, h, font="Arial") for k, (size, h) in enumerate(_EXCELFORM, 1)
     ],
+    **{
+        name: [
+            Case(name, k, cells[0][1], h, font=cells[0][0], label=label, cells=cells, row_format=f)
+            for k, (label, h, cells, f) in enumerate(rows, 1)
+        ]
+        for name, rows in EXCEL_ROWS.items()
+    },
 }
 
 
@@ -138,17 +237,28 @@ def build_one(name: str, folder: Path) -> Path:
     wb = openpyxl.Workbook()
     ws = wb.active
     for case in CASES[name]:
-        if case.size is not None:
+        if case.cells:
+            for column, (face, size, bold, valued) in enumerate(case.cells, 1):
+                cell = ws.cell(case.row, column, "x" if valued else None)
+                cell.font = Font(name=face, sz=size, b=bold, family=2)
+        elif case.size is not None:
             ws.cell(case.row, 1, "x").font = Font(name=case.font, sz=case.size, family=2)
         if case.stored is not None:
             # openpyxl leaves out a height of 0; _rewrite writes every ``ht`` as the case does
             ws.row_dimensions[case.row].height = case.stored or 1.0
+    column_style = None
+    if name in EXCEL_COLUMN_STYLE:
+        face, size = EXCEL_COLUMN_STYLE[name]
+        spare = ws.cell(1, 50)  # gives the style an index, then goes
+        spare.font = Font(name=face, sz=size, family=2)
+        column_style = spare.style_id
+        del ws._cells[(1, 50)]
     path = folder / workbook_name(name)
     path.parent.mkdir(parents=True, exist_ok=True)
     wb.save(path)
     path.write_bytes(stored_rows._without_custom_height(path.read_bytes()))
-    if name == "excelform":
-        _excel_form(path, CASES[name])
+    if name in EXCEL_NORMAL:
+        _excel_form(path, CASES[name], EXCEL_NORMAL[name], column_style)
     elif name not in ("refit", "macsaved"):
         _rewrite(path, CASES[name], SHEET_FORMATS.get(name))
     return path
@@ -159,20 +269,21 @@ _X14AC = "http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac"
 _MC = "http://schemas.openxmlformats.org/markup-compatibility/2006"
 
 
-def _excel_form(path: Path, cases: list[Case]) -> None:
+def _excel_form(
+    path: Path, cases: list[Case], normal: tuple[str, int, str], column_style: int | None
+) -> None:
     """The workbook with these attributes: rows with ``spans`` and ``x14ac:dyDescent``, the
-    sheet's default of 12.75, Arial 10 as the Normal font, Excel's ``fileVersion`` and
-    ``AppVersion``; the XML in the standard library's form."""
+    sheet's default height, ``normal``'s face and size as the Normal font, a style for columns B
+    to XFD, Excel's ``fileVersion`` and ``AppVersion``; the XML in the standard library's form."""
+    face, size, default = normal
     edits = {
-        "xl/worksheets/sheet1.xml": lambda text: _excel_rows(text, cases),
+        "xl/worksheets/sheet1.xml": lambda text: _excel_rows(text, cases, default, column_style),
         "xl/styles.xml": lambda text: _replace_once(
-            _replace_once(
-                _replace_once(text, '<name val="Calibri" />', '<name val="Arial" />'),
-                '<sz val="11" />',
-                '<sz val="10" />',
-            ),
-            '<scheme val="minor" />',
-            "",
+            text,
+            '<font><name val="Calibri" /><family val="2" /><color theme="1" /><sz val="11" />'
+            '<scheme val="minor" /></font>',
+            f'<font><name val="{face}" /><family val="2" /><color theme="1" /><sz val="{size}" />'
+            "</font>",
         ),
         "xl/workbook.xml": lambda text: _replace_once(
             text,
@@ -202,7 +313,7 @@ def _replace_once(text: str, old: str, new: str) -> str:
     return text.replace(old, new)
 
 
-def _excel_rows(text: str, cases: list[Case]) -> str:
+def _excel_rows(text: str, cases: list[Case], default: str, column_style: int | None) -> str:
     text = _replace_once(
         text,
         f'<worksheet xmlns="{_MAIN}">',
@@ -211,13 +322,26 @@ def _excel_rows(text: str, cases: list[Case]) -> str:
     text = _replace_once(
         text,
         '<sheetFormatPr baseColWidth="8" defaultRowHeight="15" />',
-        '<sheetFormatPr defaultRowHeight="12.75" x14ac:dyDescent="0.2" />',
+        f'<sheetFormatPr defaultRowHeight="{default}" x14ac:dyDescent="0.2" />',
     )
+    if column_style is not None:
+        text = _replace_once(
+            text,
+            "<sheetData>",
+            f'<cols><col min="2" max="16384" width="9.140625" style="{column_style}" /></cols>'
+            "<sheetData>",
+        )
     for case in cases:
         descent = EXCELFORM_DESCENT.get(case.size or 10, "0.2")
+        spans = f"1:{max(1, len(case.cells))}"
+        before = ""
+        if case.row_format:
+            style = re.search(rf'<c r="A{case.row}" s="(\d+)"', text)
+            before = " " + case.row_format.replace("{s}", style.group(1) if style else "0")
         text, count = re.subn(
             rf'<row r="{case.row}" ht="[^"]*"',
-            f'<row r="{case.row}" spans="1:1" ht="{case.written}" x14ac:dyDescent="{descent}"',
+            f'<row r="{case.row}" spans="{spans}"{before} ht="{case.written}" '
+            f'x14ac:dyDescent="{descent}"',
             text,
         )
         if count != 1:

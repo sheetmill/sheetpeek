@@ -19,13 +19,19 @@ def test_every_row_stores_its_height_as_its_case_says(tmp_path):
         cases = suite.CASES[name]
         rows = re.findall(r"<row [^>]*>", sheet)
         assert sum("customHeight" in r for r in rows) == sum(c.custom for c in cases), path.name
-        excel = name == "excelform"
+        excel = name in suite.EXCEL_NORMAL
         for case in cases:
             if case.written is not None:
                 custom = ' customHeight="1"' if case.custom else ""
                 descent = suite.EXCELFORM_DESCENT.get(case.size or 10, "0.2")
+                spans = max(1, len(case.cells))
+                before = f" {case.row_format}" if case.row_format else ""
+                if "{s}" in before:
+                    style = re.search(rf'<c r="A{case.row}" s="(\d+)"', sheet)
+                    assert style, case.name
+                    before = before.replace("{s}", style.group(1))
                 element = (
-                    f'<row r="{case.row}" spans="1:1" ht="{case.written}" '
+                    f'<row r="{case.row}" spans="1:{spans}"{before} ht="{case.written}" '
                     f'x14ac:dyDescent="{descent}">'
                     if excel
                     else f'<row r="{case.row}" ht="{case.written}"{custom}>'
@@ -36,7 +42,7 @@ def test_every_row_stores_its_height_as_its_case_says(tmp_path):
         sheet_format = re.findall(r"<sheetFormatPr [^>]*>", sheet)
         expected = suite.SHEET_FORMATS.get(name, 'baseColWidth="8" defaultRowHeight="15"')
         if excel:
-            expected = 'defaultRowHeight="12.75" x14ac:dyDescent="0.2"'
+            expected = f'defaultRowHeight="{suite.EXCEL_NORMAL[name][2]}" x14ac:dyDescent="0.2"'
         assert sheet_format == [f"<sheetFormatPr {expected} />"], path.name
 
 
@@ -173,3 +179,17 @@ def test_excel_refits_rows_with_spans_and_dydescent():
         layout = sheetpeek.read(path, platform="mac", ref="A1:A5").layout("excel")
     cases = suite.CASES["excelform"]
     assert [r.height_pt for r in layout.rows] == [excel[c.name] for c in cases]
+
+
+def test_excel8_styles_columns_b_on_in_arial_10(tmp_path):
+    archive = zipfile.ZipFile(suite.build_one("excel8", tmp_path))
+    sheet = archive.read("xl/worksheets/sheet1.xml").decode()
+    style = re.search(r'<cols><col min="2" max="16384" width="9.140625" style="(\d+)" />', sheet)
+    assert style
+    styles = archive.read("xl/styles.xml").decode()
+    xfs = re.findall(r"<xf [^>]*>", styles.split("<cellXfs")[1])
+    font_id = int(re.search(r'fontId="(\d+)"', xfs[int(style.group(1))]).group(1))
+    assert re.findall(r"<font>.*?</font>", styles)[font_id] == (
+        '<font><name val="Arial" /><family val="2" /><sz val="10" /></font>'
+    )
+    assert 'r="AX1"' not in sheet  # the spare cell (row 1, column 50) is gone
