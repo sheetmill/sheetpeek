@@ -169,12 +169,12 @@ so it lays out the stored height, which this Excel's fit differs from."""
 @pytest.mark.excel
 @pytest.mark.parametrize("platform", ["mac", "windows"])
 def test_excel_refits_rows_with_spans_and_dydescent(platform):
-    # Excel fits rows with spans and x14ac:dyDescent (AppVersion 15.0300) under Arial 10, 11 and 8
-    # Normal fonts whatever they store, as sheetpeek fits them: an Arial 10 row stored at 13.5 is
-    # 13 on the Mac and 12.75 on Windows, and a row with customFormat and no s takes style 0
-    # before an Arial 10 column style (Arial 8: 11 and 11.25). A row in Tahoma or Book Antiqua
-    # keeps its stored height (which Excel for Windows fits the Tahoma rows to): a
-    # known deviation where the capture's Excel fits otherwise.
+    # Excel fits rows with spans and x14ac:dyDescent, AppVersion 15.0300, under Arial 10,
+    # 11 and 8 Normal fonts whatever they store, as sheetpeek fits them: an Arial 10 row stored at
+    # 13.5 is 13 on the Mac and 12.75 on Windows, and a row with customFormat and no s takes style 0
+    # before an Arial 10 column style (Arial 8: 11 and 11.25). A row in Tahoma or Book Antiqua keeps
+    # its stored height (which Excel for Windows fits the Tahoma rows to): a known deviation where
+    # the capture's Excel fits otherwise.
     import sheetpeek
 
     capture = (

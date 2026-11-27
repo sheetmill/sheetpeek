@@ -154,8 +154,9 @@ PURPOSES = {
     "refit_rows": "sheetpeek capture group refit_rows: the heights Excel lays out for rows "
     "storing a height without customHeight, below, at and above the height their cell fits, "
     'for a sheet as Excel for Mac saves it, for heights of 0 written as ht="0" and ht="", '
-    "in sheets with a custom default height or zeroHeight, and for rows with spans and dyDescent "
-    "under Arial 10, 11 and 8 Normal fonts, read from Excel.",
+    "in sheets with a custom default height or zeroHeight, and for rows with spans and "
+    "x14ac:dyDescent in a workbook of AppVersion 15.0300 under Arial 10, 11 and 8 Normal "
+    "fonts, read from Excel.",
     "stored_rows": "sheetpeek capture group stored_rows: the heights and tops Excel lays out for "
     "rows whose height a file stores in points, across the fractions of a pixel, as a row's ht "
     "with customHeight and without and as the sheet's defaultRowHeight, read from Excel.",

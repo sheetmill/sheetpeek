@@ -24,17 +24,17 @@ Windows by the job group ``refit_rows`` (``capture/job.py``).
 - ``zerosheet``: ``<sheetFormatPr defaultRowHeight="15" zeroHeight="1">``, where unlisted rows are
   hidden: an ``ht`` without ``customHeight`` beside Calibri 11 and 20 cells and on an empty row, a
   Calibri 11 row without ``ht``, and an unlisted row (hidden).
-- ``excelform``: rows with these attributes (``spans``, ``x14ac:dyDescent``, the
-  sheet's ``defaultRowHeight="12.75"`` and ``x14ac:dyDescent``, the workbook's ``fileVersion`` and
-  ``AppVersion`` 15.0300) under an Arial 10 Normal font, storing heights other than Excel for
-  Windows' fit at 96 dpi: 13.5, 12.75 and 30 beside Arial 10 cells, 13.5 on an empty row and beside
-  an Arial 12 cell.
+- ``excelform``: rows with these attributes (``spans``,
+  ``x14ac:dyDescent``, the sheet's ``defaultRowHeight="12.75"`` and ``x14ac:dyDescent``, the
+  workbook's ``fileVersion`` and ``AppVersion`` 15.0300) under an Arial 10 Normal font, storing
+  heights other than Excel for Windows' fit at 96 dpi: 13.5, 12.75 and 30 beside Arial 10 cells,
+  13.5 on an empty row and beside an Arial 12 cell.
 - ``excel10``, ``excel11``, ``excel8``: the same form under an Arial 10, 11 and 8 Normal font, each
   row a few cells in its own fonts (``EXCEL_ROWS``), with values or empty and styled, storing a
-  height other than sheetpeek's fit: smaller fonts
-  than the Normal font's, Arial bold, Book Antiqua and Tahoma, empty styled cells only; and in
-  ``excel8`` a column style in Arial 10 from column B on, beside rows with ``customFormat="1"``
-  and no ``s``, with ``customFormat`` and A's style, and with neither.
+  height other than sheetpeek's fit: smaller fonts than the Normal font's, Arial bold, Book Antiqua
+  and Tahoma, empty styled cells only; and in
+  ``excel8`` a column style in Arial 10 from column B on, beside rows with ``customFormat="1"`` and
+  no ``s``, with ``customFormat`` and A's style, and with neither.
 
 ``run`` saves Excel's answer to ``capture/build/refit_rows/answer.tsv`` and writes
 ``tests/captures/refit_rows.tsv``.
@@ -272,9 +272,10 @@ _MC = "http://schemas.openxmlformats.org/markup-compatibility/2006"
 def _excel_form(
     path: Path, cases: list[Case], normal: tuple[str, int, str], column_style: int | None
 ) -> None:
-    """The workbook with these attributes: rows with ``spans`` and ``x14ac:dyDescent``, the
-    sheet's default height, ``normal``'s face and size as the Normal font, a style for columns B
-    to XFD, Excel's ``fileVersion`` and ``AppVersion``; the XML in the standard library's form."""
+    """The workbook with these attributes: rows with ``spans`` and
+    ``x14ac:dyDescent``, the sheet's default height, ``normal``'s face and size as the Normal font,
+    a style for columns B to XFD, Excel's ``fileVersion`` and ``AppVersion``; the XML in the
+    standard library's form."""
     face, size, default = normal
     edits = {
         "xl/worksheets/sheet1.xml": lambda text: _excel_rows(text, cases, default, column_style),
