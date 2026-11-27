@@ -8,13 +8,15 @@ from pathlib import Path
 
 import pytest
 from capture import refit_rows as suite
+from capture.xmlform import standard_form
 
 pytest.importorskip("openpyxl")
 
 
 def test_every_row_stores_its_height_as_its_case_says(tmp_path):
     for path in suite.build(tmp_path):
-        sheet = zipfile.ZipFile(path).read("xl/worksheets/sheet1.xml").decode("utf-8")
+        # in the standard library's form, as with lxml installed openpyxl writes <x/>
+        sheet = standard_form(zipfile.ZipFile(path).read("xl/worksheets/sheet1.xml").decode())
         name = path.stem.removeprefix("refit_rows_")
         cases = suite.CASES[name]
         rows = re.findall(r"<row [^>]*>", sheet)
