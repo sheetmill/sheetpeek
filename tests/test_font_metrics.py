@@ -225,3 +225,21 @@ def every_size(platform: str) -> tuple[int, list[str]]:
 @pytest.mark.parametrize("platform", ["mac", "windows"])
 def test_every_face_and_size_lays_out(platform):
     assert in_child(every_size, platform) == (len(FACES) * len(SIZES), [])
+
+
+@pytest.mark.parametrize("platform", ["mac", "windows"])
+def test_a_face_spelled_in_two_cases_gives_one_notice_a_function(tmp_path, platform):
+    openpyxl = pytest.importorskip("openpyxl")
+    from openpyxl.styles import Font
+
+    wb = openpyxl.Workbook()
+    wb.active["A1"] = "x"
+    wb.active["A1"].font = Font(name="Tahoma", sz=11)
+    wb.active["A2"] = "x"
+    wb.active["A2"].font = Font(name="tahoma", sz=11)
+    wb.save(tmp_path / "faces.xlsx")
+    rendered = sheetpeek.read(tmp_path / "faces.xlsx", platform=platform).layout("excel")
+    found = no_metrics(rendered)
+    assert found
+    assert len(found) == len({n["function"] for n in found})
+    assert {n["font"] for n in found} == {"Tahoma"}  # the spelling met first

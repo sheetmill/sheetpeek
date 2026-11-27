@@ -376,9 +376,11 @@ class _Fonts:
             self._warn(font.name, "rule_metrics", "has no line metrics in xlformat; its lines as")
 
     def _warn(self, name: str, function: str, what: str) -> None:
-        if (name, function) in self._warned:
+        # one notice a face, however the file spells it: xlformat matches names in any case
+        key = (name.casefold(), function)
+        if key in self._warned:
             return
-        self._warned.add((name, function))
+        self._warned.add(key)
         self._notes.add(
             "font.no_metrics",
             "approximated",

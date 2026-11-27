@@ -79,6 +79,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   superscript makes a 23-pixel row (17.25 pt) and a subscript a 24-pixel one (18 pt), and both at
   24 pt a 48-pixel one (36 pt), where 0.6.0 gave 15.5, 16, 35.25 and 35 pt, not whole pixels.
 
+### Fixed
+- A face the file names in two cases (`Tahoma` and `tahoma`) gives one `font.no_metrics`
+  notice for each function, under the spelling met first, where 0.6.0 gave one for each
+  spelling.
+
 ## [0.6.0] - 2026-11-25
 
 ### Added
