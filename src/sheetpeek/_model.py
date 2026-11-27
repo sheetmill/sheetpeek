@@ -304,7 +304,11 @@ class Row:
     sheet sets a custom default height: the file stores a height without ``customHeight``, which
     Excel ignores, so ``height`` is ``None``. A ``listed`` row with no stored height is fitted
     anyway unless the sheet sets a custom default height (``<sheetFormatPr customHeight="1">``),
-    so this matters only there (``ARCHITECTURE.md`` §4.7)."""
+    so this matters only there (``ARCHITECTURE.md`` §4.7).
+
+    Where the fit needs a face xlformat has no row metrics for, sheetpeek cannot compute what
+    Excel shows, and lays the row out at the height the file stores, Excel's own fit when it
+    was saved (the layout's ``font.no_metrics`` notice says so)."""
 
     def __post_init__(self) -> None:
         if self.autofit and self.height is not None:
@@ -404,6 +408,9 @@ class Sheet:
     _column_fonts: tuple[Font, ...] = field(default=(), repr=False, compare=False)
     """The fonts of the sheet's column styles, every column's, once each: they count in the
     height and bottom baseline of every row without a style of its own (§3.6)."""
+    _autofit_heights: Mapping[int, float] = field(default_factory=dict, repr=False, compare=False)
+    """The height each ``Row.autofit`` row of ``ref`` stores, by row number: laid out where the
+    row's fit needs a face xlformat has no row metrics for (§4.7)."""
 
     @property
     def warnings(self) -> tuple[str, ...]:

@@ -505,6 +505,13 @@ class Book:
             notices=notes.notices(),
             max_cells=self._limits.max_cells,
             _normal_color=MappingProxyType(dict(self._normal_color)) if tables else {},
+            _autofit_heights=MappingProxyType(
+                {
+                    row: height
+                    for row, height in structure.autofit_heights.items()
+                    if ref and ref.min_row <= row <= ref.max_row
+                }
+            ),
             _row_fonts=MappingProxyType(
                 {
                     row: font

@@ -158,9 +158,12 @@ def test_excel_fits_a_row_without_custom_height_in_every_sheet_format(tmp_path, 
     assert excel["zerosheet empty unlisted"] == 0.0
 
 
-NO_ROW_METRICS = "xlformat has no row heights for Tahoma or Book Antiqua (font.no_metrics)"
-"""Why sheetpeek's fit differs from Excel's in some Excel-form rows: it measures those faces as
-Calibri, a pixel or two off."""
+NO_ROW_METRICS = (
+    "xlformat has no row heights for Tahoma or Book Antiqua (font.no_metrics): sheetpeek keeps "
+    "the height the row stores, where this Excel's own fit differs"
+)
+"""Why sheetpeek's row differs from Excel's in some Excel-form rows: it cannot compute the fit,
+so it lays out the stored height, which this Excel's fit differs from."""
 
 
 @pytest.mark.excel
@@ -169,8 +172,9 @@ def test_excel_refits_rows_with_spans_and_dydescent(platform):
     # Excel fits rows with spans and x14ac:dyDescent (AppVersion 15.0300) under Arial 10, 11 and 8
     # Normal fonts whatever they store, as sheetpeek fits them: an Arial 10 row stored at 13.5 is
     # 13 on the Mac and 12.75 on Windows, and a row with customFormat and no s takes style 0
-    # before an Arial 10 column style (Arial 8: 11 and 11.25). Rows in Tahoma or Book Antiqua
-    # are known deviations.
+    # before an Arial 10 column style (Arial 8: 11 and 11.25). A row in Tahoma or Book Antiqua
+    # keeps its stored height (which Excel for Windows fits the Tahoma rows to): a
+    # known deviation where the capture's Excel fits otherwise.
     import sheetpeek
 
     capture = (
@@ -194,9 +198,9 @@ def test_excel_refits_rows_with_spans_and_dydescent(platform):
                 if ours[case.row] == excel[case.name]:
                     continue
                 faces = {cell[0] for cell in case.cells}
-                if faces & {"Tahoma", "Book Antiqua"}:
+                if faces & {"Tahoma", "Book Antiqua"} and ours[case.row] == case.stored:
                     pinned.add(case.name)
                 else:
                     wrong[case.name] = (excel[case.name], ours[case.row])
     assert wrong == {}
-    assert len(pinned) == (5 if platform == "mac" else 7), NO_ROW_METRICS
+    assert len(pinned) == (5 if platform == "mac" else 3), NO_ROW_METRICS

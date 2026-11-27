@@ -322,6 +322,71 @@ def test_an_autofit_row_is_fitted_under_a_custom_default_height(tmp_path, platfo
     assert [r.height_pt for r in rendered.rows] == [fit, 15.0, default]
 
 
+def _autofit_sheet(tmp_path, platform, cells, **options):
+    """Row 1 storing 30 pt without customHeight, its cells from A as (value, font face, size)."""
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    for column, (value, face, size) in enumerate(cells, 1):
+        ws.cell(1, column, value).font = Font(name=face, sz=size, family=2)
+    ws.row_dimensions[1].height = 30
+    if options.get("hidden"):
+        ws.column_dimensions["B"].hidden = True
+    if options.get("turned"):
+        ws["B1"].alignment = Alignment(textRotation=90)
+    if options.get("merged_down"):
+        ws.merge_cells("B1:B2")
+    if options.get("rich"):
+        from openpyxl.cell.rich_text import CellRichText, TextBlock
+        from openpyxl.cell.text import InlineFont
+
+        ws["A1"] = CellRichText("x", TextBlock(InlineFont(rFont="Tahoma", sz=11), "y"))
+    if options.get("column_style"):
+        ws.column_dimensions["E"].font = Font(name="Tahoma", sz=11, family=2)
+    path = save(wb, tmp_path / "autofit.xlsx")
+    rewrite(
+        path,
+        SHEET1,
+        lambda x: x.replace('<row r="1" ht="30" customHeight="1"', '<row r="1" ht="30"'),
+    )
+    if options.get("normal"):
+        rewrite(
+            path,
+            "xl/styles.xml",
+            replace_once(
+                '<font><name val="Calibri" /><family val="2" /><color theme="1" /><sz val="11" />'
+                '<scheme val="minor" /></font>',
+                f'<font><name val="{options["normal"]}" /><family val="2" /><sz val="11" /></font>',
+            ),
+        )
+    sheet = sheetpeek.read(path, platform=platform, ref=options.get("ref", "A1:C1"))
+    assert sheet.rows[0].autofit
+    return sheet.layout("excel").rows[0].height_pt
+
+
+@pytest.mark.parametrize("platform", ["mac", "windows"])
+@pytest.mark.parametrize(
+    ("cells", "options", "stored"),
+    [
+        # a counted font in a face without row metrics: the stored height (§4.7)
+        ([("x", "Calibri", 11), ("x", "Tahoma", 11)], {}, True),
+        ([("x", "Calibri", 11), (None, "Tahoma", 11)], {}, True),  # an empty styled cell
+        ([("x", "Calibri", 11)], {"normal": "Tahoma", "ref": "A1"}, True),  # the Normal font
+        ([("x", "Calibri", 11)], {"rich": True, "ref": "A1"}, True),  # a rich-text run
+        ([("x", "Calibri", 11)], {"column_style": True}, True),  # positions without a <c>
+        # every counted font measured, or the unmeasured one not counted: fitted
+        ([("x", "Calibri", 11), ("x", "Arial", 11)], {}, False),
+        ([("x", "Calibri", 11), ("x", "Tahoma", 11)], {"hidden": True}, False),
+        ([("x", "Calibri", 11), ("x", "Tahoma", 11)], {"turned": True}, False),
+        ([("x", "Calibri", 11), ("x", "Tahoma", 11)], {"merged_down": True}, False),
+    ],
+)
+def test_an_autofit_row_needing_an_unmeasured_face_keeps_its_stored_height(
+    tmp_path, platform, cells, options, stored
+):
+    height = _autofit_sheet(tmp_path, platform, cells, **options)
+    assert (height == 30.0) is stored
+
+
 def test_an_autofit_row_has_no_height():
     assert sheetpeek.Row(1, None, autofit=True).autofit
     with pytest.raises(ValueError, match="autofit"):

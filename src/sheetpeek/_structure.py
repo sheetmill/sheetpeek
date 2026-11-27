@@ -43,6 +43,8 @@ class Structure:
     first_uncached_formula: str | None
     merges: tuple[CellRange, ...] = ()
     columns: tuple[ColumnSpec, ...] = ()
+    autofit_heights: dict[int, float] = field(default_factory=dict)
+    """Row index → the height an autofit row stores (``Sheet._autofit_heights``)."""
     rows: dict[int, tuple[float | None, bool, bool]] = field(default_factory=dict)
     """Row index → (height in points or ``None``, hidden, autofit), for rows that set any: a
     height without ``customHeight`` is no height and autofit (``Row.autofit``)."""
@@ -114,6 +116,11 @@ def fill(found: Structure, sheet: xlio.Sheet) -> Structure:
             )
             for index, row in rows.items()
             if row.height is not None or row.hidden
+        },
+        autofit_heights={
+            index: row.height
+            for index, row in rows.items()
+            if row.height is not None and not row.custom_height
         },
         default_column_width=form.default_col_width,
         base_column_width=form.base_col_width,

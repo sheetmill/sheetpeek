@@ -702,7 +702,18 @@ platforms, whatever they store
 rows of one to three cells with values or empty and styled): an Arial 10 row stored at 13.5 is 13
 on the Mac and 12.75 on Windows, an Arial 11 bold one stored at 15.75 is 15 on Windows. sheetpeek's
 fit is Excel's in each but the rows in Tahoma and Book Antiqua, faces xlformat has no row heights
-for (5 rows on the Mac, 7 on Windows, a pixel or two off).
+for.
+
+**An autofit row whose fit needs a face xlformat does not measure keeps its stored height.** Where
+sheetpeek cannot compute the fit Excel shows, it lays out the height the file stores, which is
+Excel's own fit when the file was saved, and reports the face (`font.no_metrics`): a choice where
+the fit is unknown, not a rule of Excel's. The fit needs a face when it reads the row metrics of
+any font in that face: the Normal font, the font and rich-text runs of each cell the fit counts
+(values and empty styled cells; not a hidden column's, text turned 90 degrees, which fits by its
+width, or a merge across rows), and the row's or the columns' style for the positions without a
+`<c>`. Excel for Windows fits the Tahoma rows of `excel10` to the heights they store (4 of 4), so
+they match; its Book Antiqua rows it fits otherwise (3 rows on Windows,
+and on the Mac, whose fits differ from Windows', those and 2 Tahoma rows: known deviations).
 sheetpeek reads such a row as `Row.autofit` with no height and fits it in every sheet format,
 as Excel does (every row of `refit_rows` on both platforms, and the rows without `customHeight`
 in `windows/stored_rows`).

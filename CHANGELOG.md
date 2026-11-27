@@ -25,7 +25,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   differs from the height stored. In the workbooks `capture/refit_rows.py` generates, a row with
   `spans` and `x14ac:dyDescent`, in a workbook of `AppVersion` 15.0300, storing 13.5 pt beside an
   Arial 10 cell shows at 12.75, and at 13 with `platform="mac"`, as Excel for Windows and for Mac
-  show it (captured, `refit_rows` groups `excelform`, `excel10`, `excel11` and `excel8`).
+  show it (captured, `refit_rows` groups `excelform`, `excel10`, `excel11` and `excel8`). Where
+  the fit needs a face xlformat has no row metrics for (any font the fit counts, the Normal font
+  and empty styled cells included), sheetpeek cannot compute what Excel shows and keeps the stored
+  height, Excel's own fit when the file was saved, with the `font.no_metrics` notice: a Tahoma row
+  storing 15 pt stays 15, as Excel for Windows shows it.
 - A row with `customFormat` and no `s` takes style 0 for its positions without a cell, before
   its columns' style, as Excel does (captured, `refit_rows` group `excel8`): a fitted row of
   Arial 8 cells under an Arial 8 Normal font and an Arial 10 column style is 11.25 pt, and 11

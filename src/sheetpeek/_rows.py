@@ -8,13 +8,14 @@ is set, and gives the row the Normal font's height from xlformat's row model.
 from __future__ import annotations
 
 import math
+from collections.abc import Iterable
 from dataclasses import replace
 from functools import lru_cache
 
 import xlformat
 
 from sheetpeek._model import Font, Row, Sheet
-from sheetpeek._platform import current, metrics_face
+from sheetpeek._platform import covers, current, metrics_face
 
 _LARGEST = 72.0
 """The largest size xlformat's row model covers."""
@@ -148,7 +149,14 @@ STORED_PIXEL_ROUNDING = 1 / 8
 those rows; this is a value inside the bound."""
 
 
-def _stored(height: float) -> float:
+def rows_measured(fonts: Iterable[Font]) -> bool:
+    """Whether xlformat has row metrics for every face of ``fonts`` on the current platform."""
+    platform = current()
+    function = "vertical_metrics" if platform.name == "windows" else "row_metrics"
+    return all(covers(function, font.name, platform) for font in fonts)
+
+
+def stored_height(height: float) -> float:
     """A stored row height as the platform lays it out: whole pixels on Windows (§4.7)."""
     if current().name != "windows" or height <= 0:
         return height
@@ -158,7 +166,7 @@ def _stored(height: float) -> float:
 def row_height(row: Row, sheet: Sheet) -> float:
     """The height of a row in points; 0 for a row Excel hides by its sheet format."""
     if row.height is not None:
-        return _stored(row.height)
+        return stored_height(row.height)
     if sheet.zero_row_height and not row.listed:
         return 0.0
     if (
@@ -167,7 +175,7 @@ def row_height(row: Row, sheet: Sheet) -> float:
         and sheet.default_row_height
         and not row.autofit
     ):
-        return _stored(sheet.default_row_height)
+        return stored_height(sheet.default_row_height)
     if not sheet.has_sheet_format and not row.listed:
         return NO_SHEET_FORMAT
     height = font_row_height(sheet.normal_font)

@@ -41,6 +41,8 @@ from sheetpeek._rows import (
     font_row_height,
     print_baseline_offsets,
     row_height,
+    rows_measured,
+    stored_height,
     unit,
     wrapped_height,
 )
@@ -209,6 +211,12 @@ def _fitted(
     fit_below, fit_ascent = below, ascent  # what fits the row's height
     fits = fits_cells(row, sheet)
     height = row_height(row, sheet)
+    # An autofit row whose fit reads the row metrics of a face xlformat does not measure keeps
+    # the height it stores, Excel's own fit when the file was saved: the fonts it counts are
+    # the Normal font, each counted cell's font and runs (empty styled cells included) and the
+    # positions' row or column style (§4.7).
+    stored = sheet._autofit_heights.get(row.index) if row.autofit and fits else None
+    counted: set[Font] | None = {sheet.normal_font} if stored is not None else None
     styled = []
     cell_fonts: list[Font] = []  # fonts of the row's cells that do not wrap
     wrapped: list[tuple[Font, int]] = []  # each plain wrapped cell's font and lines
@@ -256,6 +264,9 @@ def _fitted(
                 last_fit = cell.font
                 b, _, a = fonts.bottom(last_fit)
                 fit_below, fit_ascent = max(fit_below, b), max(fit_ascent, a)
+            if counted is not None:
+                counted.add(cell.font)
+                counted.update(span.font for span in spans or ())
             for span in spans or ():
                 b, _, a = fonts.bottom(span.font)
                 fit_below, fit_ascent = max(fit_below, b), max(fit_ascent, a)
@@ -298,6 +309,8 @@ def _fitted(
     # has no s (captured, refit_rows group excel8: Arial 8 rows under an Arial 10 column style).
     own_style = sheet._row_fonts.get(row.index)
     for font in (own_style,) if own_style is not None else sheet._column_fonts:
+        if counted is not None:
+            counted.add(font)
         b, n, a = fonts.bottom(font)
         below, inset = max(below, b), max(inset, n)
         plain_below, plain_inset = max(plain_below, b), max(plain_inset, n)
@@ -313,6 +326,8 @@ def _fitted(
     # unshrunk size of shrunk text, so shrink adds nothing.
     if wrapped:
         height = max(height, _row_model(sheet.normal_font, frozenset(cell_fonts), tuple(wrapped)))
+    if stored is not None and counted is not None and not rows_measured(counted):
+        return stored_height(stored), bottoms
     return min(height, TALLEST_ROW), bottoms
 
 
