@@ -141,7 +141,7 @@ pt high in the file prints 14 pt apart). `capture/screen/` captures Excel's wind
   for a suite's first run and after an update of Excel or macOS. The shots compared are of the
   window less 16 pt at its right and 72 pt at its bottom (`screencapture -R`): macOS's overlay
   scroll bars, which a view's scroll shows and which fade about a second later, lie there
-  (measured in the macOS VM: the window's only change after settling, a 14 px strip down its
+  (measured in a macOS virtual machine: the window's only change after settling, a 14 px strip down its
   right edge and one above the sheet tabs). That keeps the headings and nearly every cell; the
   window is then captured whole.
 - **The window's geometry:** where a dash or a tile starts follows Excel's window on the screen
