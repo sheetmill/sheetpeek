@@ -106,6 +106,8 @@ RETIRED = (
     "as excel for mac lays",
     "captured from excel for mac by",
     "captured from excel 16 for mac, never",
+    "excel 2013",
+    "excel_2013",
 )
 """Phrases for rules that have changed: an indent is three spaces of the Normal font, rows come from
 xlformat's row model, the theme is read through xlio, and Excel for Windows is a platform
@@ -122,6 +124,23 @@ def test_no_retired_phrase():
         for text in [" ".join(path.read_text(encoding="utf-8").lower().split())]
         for phrase in RETIRED
         if phrase in text
+    ]
+    assert found == []
+
+
+def test_no_retired_phrase_in_a_test_name():
+    # A test's name is words joined by underscores, read here as words: an underscore is a space.
+    import ast
+
+    found = [
+        f"{path.relative_to(ROOT)}: {node.name}"
+        for path in tracked()
+        if path.suffix == ".py" and path.parts[-2] == "tests" and path != Path(__file__)
+        for node in ast.walk(ast.parse(path.read_text(encoding="utf-8")))
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+        for name in [node.name.lower().replace("_", " ")]
+        for phrase in RETIRED
+        if phrase.replace("_", " ") in name
     ]
     assert found == []
 
