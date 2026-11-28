@@ -457,8 +457,9 @@ status 3) control it. `HTMLBackend(notices=True)` lists them in a collapsed
 
 ## 4. Excel layout rules the model reproduces
 
-Four sources of evidence, all Excel 16 for Mac with Calibri 11 (openpyxl's default workbook);
-`CAPTURING.md` describes the methods:
+The evidence comes from Excel for Mac and, through capture jobs, Excel for Windows; §4.9 lists
+every capture with the build it comes from, and `CAPTURING.md` describes the methods and lists
+every suite. The sources:
 
 - **Route A** (`capture/html_probe.py`, 2026-10-27): Excel's "save as web page" export plus
   `string value` of the cells. The export records the cell structure: merges and right spill as
@@ -472,10 +473,13 @@ Four sources of evidence, all Excel 16 for Mac with Calibri 11 (openpyxl's defau
   boundaries its text spans; the text runs give where the glyphs sit and their color. Clipping
   is done with clip paths that the text runs do not show, so clipped text was checked on the
   rendered page.
-- **Route C** (`capture/screen/`, suites `borders`, `fills`, `text_style`, `rotation`, `filters`,
-  `tables`): a screenshot of Excel's window, measured against cells whose positions Excel
-  reports, at zoom 100 (and 200 for `borders`, `fills` and `filters`). It is the screen itself,
-  so it settles what print cannot: line dashes, pattern tiles, ink positions, slanted borders.
+- **Route C** (`capture/screen/`, the screen suites of `CAPTURING.md`): a screenshot of Excel's
+  window, measured against cells whose positions Excel reports, at zoom 100 (and 200 where a
+  suite says so). It is the screen itself, so it settles what print cannot: line dashes, pattern
+  tiles, ink positions, slanted borders.
+- **Reads from Excel** (AppleScript on the Mac): what Excel reports of a cell, row or column, such
+  as its displayed text, a row's height or a color, and the rows of a copy Excel saves.
+- **Capture jobs** (`capture/job.py`): the same reads and window pictures from Excel for Windows.
 
 Route A's export and the checks by eye are not kept in this repository, so a rule resting on them
 alone is marked unverified; the rules below cite the committed suite that covers them.
@@ -801,15 +805,15 @@ a cached value (as openpyxl writes it) has no `t`. The same file confirms Excel 
 Captured so far, in `tests/captures/`: by print (route B) `layout` (§3.6, §4.1 to §4.7); read from
 Excel `theme_colors` and `theme_colors_more` (§3.3), `merge_width` and `error_width` (§4.2, §4.4, no
 deviation), `row_height`, `row_height_more`, `row_height_fitted`, `merge_rows`, `wrap_rows`,
-`wrap_band` and `wrap_steps` (§4.7, §4.16, §4.17), `color_kinds` (§3.3), `package` and `package_more` (§5.5) and `odd_values` (§4.17, §5); on
-the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14),
+`wrap_band`, `wrap_steps` and `refit_rows` (§4.7, §4.16, §4.17), `color_kinds` (§3.3), `package`
+and `package_more` (§5.5) and `odd_values` (§4.17, §5); from a copy Excel saves `saved_rows`
+(§4.7); on the screen (route C) `borders` and `fills` (§4.12), `auto_colors` (§3.3, §4.12, §4.14),
 `theme_fonts_palette` and `headings_grid` (§4.14), `spill_neighbors` (§4.1, §4.2), `extensions`
 (§3.7), `freeze_view` (§4.18), `links` (§4.10), `merges_spill`, `border_conflicts`, `gradients` and
 `diagonals` (§4.12), `text_style`, `text_style_more`, `text_steps` and `rules_below` (§4.6, §4.7,
-§4.13), `font_cut` (§4.13), `row_bottoms` (§3.6, §4.17), `windows/stored_rows`, `refit_rows` and
-`saved_rows` (§4.7), `runs` (§4.16), `tab_strip` (§4.15), `outline`
+§4.13), `font_cut` (§4.13), `row_bottoms` (§3.6, §4.17), `runs` (§4.16), `tab_strip` (§4.15), `outline`
 (§4.11), `rotation`, `rotation_more` and `rotation_placement` (§4.17), `filters` and `filters_more`
-(§4.19) and `tables` (§4.20). All are Excel 16.115 (Microsoft 365). Every section here rests on one
+(§4.19) and `tables` (§4.20). All of these are Excel for Mac 16.115 (Microsoft 365). Every section here rests on one
 of them; what no capture covers is marked unverified where it is stated, as are the parts of §4.12,
 §4.14 and §4.18 that say so. What still waits for the screen: the baselines of angled text, which
 come from print, and the 15 pt rows that print 14 pt apart.
@@ -840,7 +844,10 @@ with the wrap flag or without it (96 of 96 rows as sheetpeek's): the alignment a
 line: `windows/text_style`'s distributed and justified rows a line taller hold a line in the band
 `wrap_band` shows (above). `windows/wrap_band` and `windows/wrap_steps`: rows fitted by autofit's
 measure, as on the Mac (§4.7), but under a Courier 10 Normal font, which xlformat does not
-measure on Windows.
+measure on Windows. `windows/row_labels`: the bottoms of rows beside labels, as `row_bottoms`
+(§4.17). `windows/stored_rows`: stored heights in whole pixels; `windows/refit_rows`: rows whose
+`ht` has no `customHeight` refitted; `windows/saved_rows`: the rows of a copy Excel for Windows
+saves (§4.7).
 
 ### 4.10 Hyperlinks
 
