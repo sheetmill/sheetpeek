@@ -236,7 +236,7 @@ widths. Every text is anchored where Excel anchors it, by its start, its end or 
 different font changes only the far end of a text, and the clip windows cut where Excel cuts.
 The spacing has been measured in a browser for `platform="mac"` only.
 
-### Where the measurements come from
+## Where the measurements come from
 
 The outline gutter's colors and sizes, the headings' sizes and colors and the grid color come
 from Excel's screen, in the light appearance and the dark one. The heading bands are in points, so they
