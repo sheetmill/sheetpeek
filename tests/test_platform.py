@@ -50,7 +50,7 @@ def test_regional_settings_follow_the_platform_unless_given():
         _platform.regional("en-US", windows)  # type: ignore[arg-type]
 
 
-def test_the_default_is_excel_for_mac(workbook):
+def test_platform_mac_reads_as_excel_for_mac(workbook):
     sheet = sheetpeek.read(workbook, platform="mac")
     assert sheet.platform is xlformat.Platform.MAC
     assert sheet.regional_settings is xlformat.RegionalSettings.EN_US_MAC
