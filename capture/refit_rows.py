@@ -24,9 +24,9 @@ Windows by the job group ``refit_rows`` (``capture/job.py``).
 - ``zerosheet``: ``<sheetFormatPr defaultRowHeight="15" zeroHeight="1">``, where unlisted rows are
   hidden: an ``ht`` without ``customHeight`` beside Calibri 11 and 20 cells and on an empty row, a
   Calibri 11 row without ``ht``, and an unlisted row (hidden).
-- ``excelform``: rows with these attributes (``spans``, ``x14ac:dyDescent``, the sheet's
-  ``defaultRowHeight="12.75"`` and ``x14ac:dyDescent``, the workbook's ``fileVersion`` and
-  ``AppVersion`` 15.0300) under an Arial 10 Normal font, storing heights other than Excel for
+- ``excelform``: rows with ``spans`` and ``x14ac:dyDescent``, in a sheet with
+  ``defaultRowHeight="12.75"`` and ``x14ac:dyDescent`` and a workbook with a ``fileVersion`` and
+  ``AppVersion`` 15.0300, under an Arial 10 Normal font, storing heights other than Excel for
   Windows' fit at 96 dpi: 13.5, 12.75 and 30 beside Arial 10 cells, 13.5 on an empty row and beside
   an Arial 12 cell.
 - ``excel10``, ``excel11``, ``excel8``: the same form under an Arial 10, 11 and 8 Normal font, each
@@ -123,6 +123,7 @@ _CUSTOMSHEET = ((11, 30.0), (28, 30.0), (None, 30.0), (11, 10.0), (None, None))
 _ZEROSHEET = ((11, 30.0), (20, 10.0), (None, 30.0), (11, None), (None, None))
 _EXCELFORM = ((10, 13.5), (10, 12.75), (None, 13.5), (12, 13.5), (10, 30.0))
 EXCELFORM_DESCENT = {12: "0.25"}
+"""Excel's ``x14ac:dyDescent`` of a row by its cell's size, else ``0.2`` (Arial 10's)."""
 EXCEL_NORMAL = {
     "excelform": ("Arial", 10, "12.75"),
     "excel10": ("Arial", 10, "12.75"),
@@ -201,7 +202,6 @@ EXCEL_ROWS: dict[str, list[tuple[str, float, tuple[tuple[str, int, bool, bool], 
 }
 EXCEL_COLUMN_STYLE = {"excel8": ("Arial", 10)}
 """The font of a style given to columns B to XFD."""
-"""Excel's ``x14ac:dyDescent`` of a row by its cell's size, else ``0.2`` (Arial 10's)."""
 SHEET_FORMATS = {
     "customsheet": 'baseColWidth="8" defaultRowHeight="20" customHeight="1"',
     "zerosheet": 'baseColWidth="8" defaultRowHeight="15" zeroHeight="1"',
