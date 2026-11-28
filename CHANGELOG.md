@@ -29,17 +29,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   beside a Calibri 20 cell is 26 pt (26.25 with `platform="windows"`). A height of 0 without
   `customHeight` (`ht="0"` or `ht=""`) no longer hides its row, and under a custom default height
   such a row is fitted, where a row with no `ht` keeps the default. Excel writes the height it
-  fits each row to this way when it saves (captured, `saved_rows`), so a file Excel saved now
-  shows sheetpeek's fit of each such row where it differs from the height stored. In the workbooks
-  `capture/refit_rows.py` generates, a row with `spans` and `x14ac:dyDescent`, in a workbook of
-  `AppVersion` 15.0300, storing 13.5 pt beside an Arial 10 cell shows at 12.75, and at 13 with
-  `platform="mac"`, as Excel for Windows and for Mac show it (captured, `refit_rows` groups
-  `excelform`, `excel10`, `excel11` and `excel8`).
+  fits each row to this way when it saves, on both platforms (captured, `saved_rows` and
+  `windows/saved_rows`), so a file Excel saved now shows sheetpeek's fit of each such row where it
+  differs from the height stored. In the workbooks `capture/refit_rows.py` generates, a row with
+  `spans` and `x14ac:dyDescent`, in a workbook of `AppVersion` 15.0300, storing 13.5 pt beside an
+  Arial 10 cell shows at 12.75, and at 13 with `platform="mac"`, as Excel for Windows and for Mac
+  show it (captured, `refit_rows` groups `excelform`, `excel10`, `excel11` and `excel8`).
 - Where an autofit row's fit needs a face xlformat has no row metrics for (any font the fit
   counts, the Normal font and empty styled cells included), sheetpeek cannot compute what Excel
-  shows, and keeps the height the file stores, Excel's own fit when it saved the file (`saved_rows`), with the
-  `font.no_metrics` notice: our choice where the fit is unknown, not a rule of Excel's. A Tahoma
-  row storing 15 pt stays 15, as Excel for Windows shows it.
+  shows, and keeps the height the file stores, Excel's own fit when it saved the file
+  (`saved_rows`), with the `font.no_metrics` notice: our choice where the fit is unknown, not a
+  rule of Excel's. A Tahoma 12 bold row storing 15 pt stays 15: Excel for Windows shows 15 under
+  an Arial 10 Normal font (`refit_rows` group `excel10`) and fits 15.75 under Calibri 11
+  (`windows/saved_rows`).
 - A row with `customFormat` and no `s` takes style 0 for its positions without a cell, before
   its columns' style, as Excel does (captured, `refit_rows` group `excel8`): a fitted row of
   Arial 8 cells under an Arial 8 Normal font and an Arial 10 column style is 11.25 pt, and 11

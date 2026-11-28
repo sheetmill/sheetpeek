@@ -1,0 +1,26 @@
+{
+ "schema": 1,
+ "job_id": "sheetpeek-20261127-155808-saved-rows",
+ "package": "sheetpeek",
+ "purpose": "sheetpeek capture group saved_rows: a copy Excel saves of a workbook of one cell a row, rows without customHeight with and without a height and one with it, and a cell in a lower-case face name, kept with the results for the rows Excel writes.",
+ "limits": {
+  "job_seconds": 1800,
+  "step_seconds": 600
+ },
+ "audit": false,
+ "workbooks": [
+  {
+   "file": "saved_rows_source.xlsx",
+   "steps": [
+    {
+     "op": "open"
+    },
+    {
+     "op": "save_as",
+     "name": "saved_rows_copy.xlsx",
+     "format": "xlsx"
+    }
+   ]
+  }
+ ]
+}

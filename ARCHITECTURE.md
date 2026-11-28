@@ -706,17 +706,20 @@ for.
 
 **An autofit row whose fit needs a face xlformat does not measure keeps its stored height.** Where
 sheetpeek cannot compute the fit Excel shows, it lays out the height the file stores, which in a
-file Excel saved is Excel's own fit when the file was saved (captured, `saved_rows`: Excel for Mac
-writes the height it fits each row to as its `ht` without `customHeight`, none for a row at the
-default height, and keeps a custom row's), and reports the face (`font.no_metrics`): a choice where
+file Excel saved is Excel's own fit when the file was saved (captured, `saved_rows` and
+`windows/saved_rows`: Excel for Mac and for Windows write the height they fit each row to as its
+`ht` without `customHeight`, none for a row at the default height, and keep a custom row's), and reports the face (`font.no_metrics`): a choice where
 the fit is unknown, not a rule of Excel's. The fit needs a face when it reads the row metrics of
 any font in that face: the Normal font, the font and rich-text runs of each cell the fit counts
 (values and empty styled cells; not a hidden column's, text turned 90 degrees, which fits by its
 width, or a merge across rows), and the row's or the columns' style for the positions without a
 `<c>`. Excel for Windows fits the Tahoma rows of `excel10` to the heights they store (4 of 4), so
 they match; its Book Antiqua rows it fits otherwise (3 rows on Windows, and on the Mac, whose fits
-differ from Windows', those and 2 Tahoma rows: known deviations). A face name matches without
-regard to case: Excel for Mac fits `arial` as Arial (`saved_rows`), and xlformat folds the case.
+differ from Windows', those and 2 Tahoma rows: known deviations). Under a Calibri 11 Normal font
+Excel fits a Tahoma 12 bold row stored at 15 to 16 on the Mac and 15.75 on Windows (`saved_rows`),
+where sheetpeek keeps the 15, a known deviation on both. A face name matches without
+regard to case: Excel fits `arial` as Arial on both platforms (`saved_rows`), and xlformat folds
+the case.
 sheetpeek reads such a row as `Row.autofit` with no height and fits it in every sheet format,
 as Excel does (every row of `refit_rows` on both platforms, and the rows without `customHeight`
 in `windows/stored_rows`).
