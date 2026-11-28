@@ -152,9 +152,10 @@ def _turn(angle: float, x: float, y: float) -> str:
 def _spacing(font: Font, text: str, width: float, scale: float) -> float:
     """Points of letter-spacing that make Calibri text as wide as Excel draws it.
 
-    Excel for Mac sets glyphs on whole points; a browser draws Calibri's own advances, which
-    Carlito shares. Only Calibri text of printable ASCII is corrected. ``width`` is Excel's
-    width of ``text`` drawn at ``scale`` times the font's size.
+    Excel sets glyphs on whole units, hinted whole pixels on Windows and whole points on the
+    Mac; a browser draws Calibri's own advances, which Carlito shares. Only Calibri text of
+    printable ASCII is corrected. ``width`` is Excel's width of ``text`` on the sheet's platform
+    (xlformat's ``text_width``), drawn at ``scale`` times the font's size.
     """
     if font.name.lower() != "calibri" or not text:
         return 0.0

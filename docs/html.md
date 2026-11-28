@@ -44,9 +44,10 @@ True
 - `fragment=True` writes the stylesheet and a `<div class="sheetpeek">` to place in a page of
   your own, instead of a whole document.
 - `column_headings=True` and `row_headings=True` add Excel's column letters and row numbers.
-- `color_scheme="light"` (the default) or `"dark"` colors the headings. Excel for Mac keeps its
-  cells white in dark mode and changes only the headings, so the cells stay white either way.
-  The scheme is never read from the viewer's system.
+- `color_scheme="light"` (the default) or `"dark"` colors the headings; the cells stay white
+  either way. Excel for Mac keeps its cells white in dark mode and changes only the headings;
+  Excel for Windows in a dark theme is not captured, and its pages are drawn the same way. The
+  scheme is never read from the viewer's system.
 - `new_tab=True` opens links to web pages and e-mail addresses in a new tab
   (`target="_blank"`). It is off by default.
 - `local_links=True` also links local targets (`file:` URLs, relative, UNC and drive-letter
@@ -224,13 +225,16 @@ outputs have no workbook page.
 
 ## Fonts
 
-Excel for Mac draws each glyph on whole points, so its text is wider than a browser draws the
-same font. Text in Calibri is spaced to Excel's widths with a table of Carlito's advance widths
+Excel draws each glyph on a whole unit, whole pixels with widths hinted for the screen on
+Windows (the default) and whole points with `platform="mac"`, so its text is wider or narrower
+than a browser draws the same font (wider on the Mac). Text in Calibri is spaced to Excel's widths on the chosen platform
+with a table of Carlito's advance widths
 (Carlito is metric-compatible with Calibri, under the SIL Open Font License); the package holds
 the numbers only, no font. That text uses a font face whose only sources are a Calibri or
 Carlito installed on the viewer's system, then a local Arial or Helvetica scaled to Calibri's
 widths. Every text is anchored where Excel anchors it, by its start, its end or its center, so a
 different font changes only the far end of a text, and the clip windows cut where Excel cuts.
+The spacing has been measured in a browser for `platform="mac"` only.
 
 ### Where the measurements come from
 
