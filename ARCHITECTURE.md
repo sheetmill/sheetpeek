@@ -2237,6 +2237,9 @@ xlformat.format_cell(value, number_format, font=cell_font,
                      normal_font=normal_font, date1904=...)             # none mode
 ```
 
+Each call also passes the sheet's `platform=`, `regional_settings=` and `show_zeros=`, left out
+above.
+
 - `value` is the raw serial for dates (§5.3), never a `datetime`.
 - `w` is the column width in dialog units, from the file width through xlformat's conversion
   (§6.4).
@@ -2288,7 +2291,8 @@ text. sheetpeek does not re-export `ExcelError`.
 ### 6.4 What sheetpeek takes from xlformat
 
 xlformat provides the measurements and formatting below, row heights (§4.7) and the positions of
-underlines and strikethrough (§4.13) included.
+underlines and strikethrough (§4.13) included. Every call that takes a `platform` passes the
+sheet's (`tests/test_provider_calls.py` checks it); the table leaves the platform arguments out.
 
 | from xlformat | used for |
 |---|---|
