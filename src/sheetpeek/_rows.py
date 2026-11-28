@@ -1,8 +1,10 @@
 """Row heights in points, as Excel lays them out on the platform measured (§4.7).
 
-A row's own ``ht`` wins. Otherwise ``<sheetFormatPr>`` decides, together with whether the file
-has a ``<row>`` element for the row: Excel ignores ``defaultRowHeight`` unless ``customHeight``
-is set, and gives the row the Normal font's height from xlformat's row model.
+A row's own ``ht`` with ``customHeight`` wins; an ``ht`` without it reads as no height
+(``Row.autofit``: the row is fitted to its cells, whatever the sheet's default). Otherwise
+``<sheetFormatPr>`` decides, together with whether the file has a ``<row>`` element for the row:
+Excel ignores ``defaultRowHeight`` unless ``customHeight`` is set, and gives the row the Normal
+font's height from xlformat's row model.
 """
 
 from __future__ import annotations

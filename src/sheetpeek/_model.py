@@ -285,6 +285,8 @@ class Column:
 class Row:
     """A row's height in points, or ``None`` for the sheet's default, and whether it is hidden.
 
+    An ``autofit`` row has no ``height`` and is fitted to its cells even under a custom default.
+
     Raises:
         ValueError: ``autofit`` with a ``height``.
     """
@@ -343,7 +345,8 @@ class Sheet:
     has_sheet_format: bool = True
     """Whether the file has ``<sheetFormatPr>``; without it an unlisted row is 16 pt."""
     custom_row_height: bool = False
-    """``<sheetFormatPr customHeight>``: rows without a height take ``default_row_height``."""
+    """``<sheetFormatPr customHeight>``: rows without a height take ``default_row_height``,
+    except ``Row.autofit`` rows, which are fitted to their cells."""
     zero_row_height: bool = False
     """``<sheetFormatPr zeroHeight>``: rows without a ``<row>`` element are hidden."""
     thick_top: bool = False
