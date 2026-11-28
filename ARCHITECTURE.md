@@ -2896,7 +2896,7 @@ are read.
 
 ## 11. Roadmap
 
-1. **The middle tier** (filter and sort buttons and table styles are drawn, §4.19, §4.20):
+1. **The next feature groups** (§1; filter and sort buttons and table styles are drawn, §4.19, §4.20):
    conditional formatting, pictures and their placement, notes and comments, the print
    settings not yet drawn (titles, headers and footers); then pivot
    tables. Their parts come from xlio; those it does not read yet (pivot tables) are on its list.
