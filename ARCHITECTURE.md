@@ -1935,10 +1935,10 @@ alternating, in fresh processes on a quiet machine (Python 3.11.18, Apple M4 Pro
 The layout keeps no entry of its own for a cell that shows nothing but the default (no text,
 left-aligned), so a sheet of styled empty cells no longer holds a second record of each while
 its output is built: traced (`tracemalloc`), that takes the layout's peak on the workbook's
-largest sheet at scale 0.25 from 700 MiB to 422 MiB. The second column was measured at
-`731fc22`, under xlformat 0.9.0; the xlformat 0.10 that the release requires moves only where
-italic text and Windows text are placed and keeps no new layout data, so its figures stand for
-the release. Time grows with the rows, doubling from scale 0.25 to 0.5 to 1, and so does memory,
+largest sheet at scale 0.25 from 700 MiB to 422 MiB. The second column stands for 0.6.0: it was
+measured at `731fc22`, nine commits before 0.6.0, under xlformat 0.9.0; the xlformat 0.10 that
+0.6.0 requires moves only where italic text and Windows text are placed and keeps no new layout
+data, so its figures stand for 0.6.0. Time grows with the rows, doubling from scale 0.25 to 0.5 to 1, and so does memory,
 which a `Sheet` and its layout hold whole. Each version's peak repeated within 2 MiB over the
 three runs and its time within about 2 %, though an earlier, noisier comparison of the same file
 had 0.5.0's layout peak at 2,999 MiB, a difference not explained.
